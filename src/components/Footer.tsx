@@ -35,7 +35,7 @@ const accountLinks = [
   { label: "Returns & Exchanges", path: "/contact" },
 ];
 
-const socialLinks = ["Instagram", "Facebook", "Pinterest", "TikTok"] as const;
+const socialLinks = ["Instagram", "Facebook", "Pinterest"] as const;
 
 const legalLinks = [
   { label: "Privacy Policy", href: "#" },

@@ -1,6 +1,6 @@
 # AGENTS.md — KHEM Engineering System & Operational Handbook
 
-> **Single Source of Truth** for Claude Code, GitHub Copilot, Cursor, and all human / AI software engineers operating on **KHEM** (`https://khem-fragrances.com`).
+> **Single Source of Truth** for Claude Code, GitHub Copilot, Cursor, and all human / AI software engineers operating on **KHEM** (`https://khemperfumes.com`).
 > **Brand Mission:** KHEM is a digital flagship boutique for a luxury Egyptian fragrance house ("Essence of Heritage").
 > **Engineering Paradigm:** Production-grade Next.js App Router, Strict TypeScript, Tailwind CSS v4, Motion, Prisma, Supabase, Clerk, Stripe, Vercel AI SDK.
 
@@ -17,6 +17,25 @@ As an AI coding agent operating on KHEM, you are acting as a **Principal Softwar
 5. **Preserve Architectural Boundaries**: Strictly isolate Server Components (`'use server'`), Client Components (`'use client'`), Route Handlers (`app/api/...`), and Server Actions (`actions/...`). Never cross boundaries improperly.
 6. **Luxury UI/UX Supremacy**: Every interface element MUST strictly align with KHEM’s luxury design philosophy (Obsidian, Black Marble, Gold, Champagne, Cinzel typography, motion with zero bounce). Never output generic Bootstrap, Material UI, or plain SaaS aesthetic code.
 7. **Production Verification Protocol**: Before concluding a task, ensure code compiles without TypeScript errors, passes ESLint rules, conforms to Zod schemas, and handles empty/error/loading states gracefully.
+
+---
+
+# 2. Workflow
+
+For every implementation request:
+
+1. Read `AGENTS.md`.
+2. Read the skills explicitly mentioned by the user.
+3. Read clearly needed supporting skills from the approved skill list.
+4. Inspect relevant code.
+5. Ask a focused question only if the task has meaningful ambiguity.
+6. Create a detailed prompt file in `prompts/`.
+7. Ask: `I prepared the implementation prompt at prompts/<file-name>.md. Is this good to execute?`
+8. On approval, re-read the approved prompt file in prompts/ and implement it strictly. Implement only after user approval.
+9. Run available checks.
+10. Share exact steps to test or run the completed feature.
+
+Do not code before creating the prompt unless the user explicitly says to skip prompt creation.
 
 ---
 
@@ -113,18 +132,37 @@ For Cheerio, Zod, Tailwind, and shadcn/ui, use existing project patterns, packag
 Prompt files live in the `prompts/` directory. Use names like:
 
 - `prompts/ai-analysis.md`
-- `prompts/news-details-page-ui.md`
+- `prompts/perfumes-details-page-ui.md`
+
+Each prompt must include:
+
+- goal
+- skills read
+- existing code inspected
+- decisions or assumptions
+- files likely to change
+- implementation requirements
+- security requirements
+- acceptance criteria
+- checks to run
+- exact manual test steps expected after implementation
+
+For UI tasks, also include visual interpretation, layout, typography, spacing, colors, responsiveness, and pixel-perfect expectations.
 ---
 
 ## 6. ARCHITECTURE & TECH STACK
+
+Keep these layers separate:
 
 | Layer | Technology | Usage Standard |
 | :--- | :--- | :--- |
 | **Framework** | Next.js 16+ (App Router) | React Server Components by default, explicit `'use client'` |
 | **Language** | TypeScript 5+ | Strict Mode, zero `any`, strict type inferences |
+| **Website** | pages, cards, details UI, auth UI
 | **Styling** | Tailwind CSS v4, PostCSS | CSS Variables, `@theme` directives, low specificity |
 | **Component Primitives**| shadcn/ui + Radix UI | Dark custom tokens applied, accessible base primitives |
 | **Animations** | Motion (Framer Motion) | High-end ease curves, parallax scroll, stagger fades |
+| **API** | thin route handlers only
 | **Auth** | Clerk | App Router middleware, JWT claims, role metadata (Admin/Customer) |
 | **Database & ORM** | PostgreSQL + Prisma ORM | Multi-file schema setup, strict relations, explicit transactions |
 | **Database Hosting** | Supabase | Postgres instance, Realtime subscriptions for stock/order state |
@@ -135,7 +173,10 @@ Prompt files live in the `prompts/` directory. Use names like:
 | **Forms & Rules** | React Hook Form + Zod | Schema validation on Client & Server Actions |
 | **Icons** | Lucide React | Minimal weight stroke icons (`strokeWidth={1.25}`) |
 | **Hosting** | Vercel | Edge Middleware, ISR caching, Dynamic Server Functions |
+| **Vector** | pgvector similarity queries and article embedding storage
 
+
+UI must display stored data only.
 ---
 
 ## 7. REPOSITORY DIRECTORY STRUCTURE
