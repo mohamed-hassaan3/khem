@@ -83,7 +83,7 @@ export const metadata: Metadata = {
 
     images: [
       {
-        url: "/opengraph-image.jpg",
+        url: "/opengraph-image.png",
         width: 1200,
         height: 630,
         alt: "KHEM Perfumes",
@@ -97,7 +97,7 @@ export const metadata: Metadata = {
     description:
       "Luxury Egyptian fragrances inspired by heritage and crafted for the modern world.",
 
-    images: ["/opengraph-image.jpg"],
+    images: ["/opengraph-image.png"],
   },
 
   icons: {
