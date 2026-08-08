@@ -26,9 +26,9 @@ import {
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "KHEM Perfumes | Luxury Egyptian Perfumes | Essence of Heritage",
+  title: "KHEM Perfumes | Luxury Egyptian Perfumes",
   description:
-        "Discover KHEM Perfumes, a luxury Egyptian fragrance house inspired by Ancient Egypt. Explore premium Eau de Parfum collections crafted with timeless elegance and exceptional artistry.",
+        "Discover KHEM Perfumes, a luxury Egyptian fragrance house inspired by Ancient Egypt. Explore premium Eau de Parfum collections crafted with timeless elegance.",
   alternates: { canonical: "/" },
 };
 

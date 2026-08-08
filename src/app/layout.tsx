@@ -6,7 +6,7 @@ import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://khemperfumes.com"),
+  metadataBase: new URL("https://khemperfumes.vercel.app"),
 
   applicationName: "KHEM Perfumes",
 
@@ -33,6 +33,7 @@ export const metadata: Metadata = {
     "Premium Perfume",
     "Exclusive Perfume",
     "Eau de Parfum",
+    "extrait de parfum",
     "Unisex Perfume",
     "Arabic Perfume",
     "Luxury Oud",
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
   authors: [
     {
       name: "KHEM Perfumes",
-      url: "https://khemperfumes.com",
+      url: "https://khemperfumes.vercel.app/",
     },
   ],
 
@@ -74,7 +75,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://khemperfumes.com",
+    url: "https://khemperfumes.vercel.app",
     siteName: "KHEM Perfumes",
     title: "KHEM Perfumes | Essence of Heritage",
     description:
@@ -82,7 +83,7 @@ export const metadata: Metadata = {
 
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/opengraph-image.webp",
         width: 1200,
         height: 630,
         alt: "KHEM Perfumes",
@@ -96,7 +97,7 @@ export const metadata: Metadata = {
     description:
       "Luxury Egyptian fragrances inspired by heritage and crafted for the modern world.",
 
-    images: ["/og-image.jpg"],
+    images: ["/opengraph-image.webp"],
   },
 
   icons: {
