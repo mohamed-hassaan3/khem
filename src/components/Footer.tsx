@@ -32,15 +32,16 @@ const accountLinks = [
   { label: "My Orders", path: "/account" },
   { label: "Wishlist", path: "/wishlist" },
   { label: "Track Order", path: "/account" },
-  { label: "Returns & Exchanges", path: "/contact" },
+  { label: "Returns & Exchanges", path: "/return-exchange" },
 ];
 
 const socialLinks = ["Instagram", "Facebook", "Pinterest"] as const;
 
 const legalLinks = [
-  { label: "Privacy Policy", href: "#" },
-  { label: "Terms of Service", href: "#" },
-  { label: "Cookie Policy", href: "#" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms & Conditions", href: "/terms-conditions" },
+  { label: "Returns & Exchanges", href: "/return-exchange" },
+  { label: "Cookie Policy", href: "/cookie-policy" },
 ] as const;
 
 export default function Footer() {
@@ -136,9 +137,9 @@ export default function Footer() {
         </p>
         <div className="flex flex-wrap gap-7">
           {legalLinks.map((item) => (
-            <a key={item.label} href={item.href} className={legalLinkClass}>
+            <Link key={item.label} href={item.href} className={legalLinkClass}>
               {item.label}
-            </a>
+            </Link>
           ))}
         </div>
         <p className="text-[11px] tracking-[0.08em] text-ivory/20">

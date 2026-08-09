@@ -247,7 +247,7 @@ All routes must follow strict dynamic parameters, metadata definitions, and layo
 | Route Path | Type | Caching | Purpose & UX Requirements |
 | :--- | :--- | :--- | :--- |
 | `/` | SSR / ISR (1h) | Revalidate | Home: Cinematic Video Hero, Fragrance Wheel, Bestsellers, Editorial Callouts |
-| `/collections` | Static | ISR | Overview of Fragrance Collections (Signature, Noir, Royal Heritage) |
+| `/collections` | Static | ISR | Overview of Fragrance Collections (Signature, Egyptica, Gemstone, Noir, Royal Heritage) |
 | `/collection/[slug]` | Dynamic | ISR (10m) | Targeted Collection Page with luxury filtering and video backgrounds |
 | `/perfumes` | Dynamic | Dynamic | Full Catalog with facet filters (Scent Notes, Accord, Concentration, Season) |
 | `/perfume/[slug]` | Dynamic | ISR (5m) | Product Detail Page (PDP): 360 viewer, pyramid accords, reviews, add-to-cart |
