@@ -1,9 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 
+import LocaleLink from "@/src/components/i18n/LocaleLink";
+import { interpolate } from "@/src/lib/i18n/interpolate";
+import { ltrIsland } from "@/src/lib/i18n/rtl";
+import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type { Ingredient } from "@/src/types/content";
 
 /**
@@ -25,14 +28,11 @@ export interface IngredientExplorerProps {
 }
 
 /** `$$$$` — the tier as a glyph run, with the numeric value exposed to AT. */
-function PriceTier({ tier }: { tier: number }) {
+function PriceTier({ tier, label }: { tier: number; label: string }) {
   const clamped = Math.min(Math.max(tier, 1), MAX_PRICE_TIER);
 
   return (
-    <span
-      className="text-[10px] tracking-wider text-gold"
-      aria-label={`Price tier ${clamped} of ${MAX_PRICE_TIER}`}
-    >
+    <span className="text-[10px] tracking-wider text-gold" aria-label={label}>
       {"$".repeat(clamped)}
     </span>
   );
@@ -42,6 +42,9 @@ export default function IngredientExplorer({
   ingredients,
   families,
 }: IngredientExplorerProps) {
+  const dict = useDictionary();
+  const locale = useLocale();
+  const island = ltrIsland(locale);
   const [activeFamily, setActiveFamily] = useState(families[0] ?? "All");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -74,7 +77,7 @@ export default function IngredientExplorer({
       <div className="sticky top-20 z-40 border-b border-border bg-surface/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-350 items-center gap-8 overflow-x-auto px-6 md:px-20">
           <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-ivory/30">
-            Filter by Family
+            {dict.ingredientsExplorer.filterByFamily}
           </span>
           {families.map((family) => (
             <button
@@ -107,7 +110,7 @@ export default function IngredientExplorer({
                 aria-expanded={isSelected}
                 aria-controls={DETAIL_PANEL_ID}
                 onClick={() => setSelectedId(isSelected ? null : ingredient.id)}
-                className={`img-zoom block overflow-hidden border text-left transition-colors duration-500 ease-out ${
+                className={`img-zoom block overflow-hidden border text-start transition-colors duration-500 ease-out ${
                   isSelected
                     ? "border-gold/35 bg-gold/5"
                     : "border-transparent bg-surface hover:border-gold/20"
@@ -123,18 +126,29 @@ export default function IngredientExplorer({
                   />
                 </div>
 
-                <div className="px-6 pb-7 pt-6">
+                <div className="px-6 pb-7 pt-6" {...island}>
                   <div className="mb-2 flex items-start justify-between gap-3">
                     <h3 className="font-heading text-base font-normal tracking-wide text-ivory">
                       {ingredient.name}
                     </h3>
-                    <PriceTier tier={ingredient.priceTier} />
+                    <PriceTier
+                      tier={ingredient.priceTier}
+                      label={interpolate(dict.ingredientsExplorer.priceTier, {
+                        tier: Math.min(
+                          Math.max(ingredient.priceTier, 1),
+                          MAX_PRICE_TIER,
+                        ),
+                        max: MAX_PRICE_TIER,
+                      })}
+                    />
                   </div>
                   <p className="mb-2 text-[10px] italic tracking-[0.12em] text-gold/50">
                     {ingredient.latinName}
                   </p>
                   <p className="mb-3 text-[11px] tracking-wide text-ivory/35">
-                    From {ingredient.origin}
+                    {interpolate(dict.home.ingredients.from, {
+                      origin: ingredient.origin,
+                    })}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {ingredient.families.map((family) => (
@@ -201,12 +215,12 @@ export default function IngredientExplorer({
               <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                 <div>
                   <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/50">
-                    Found in
+                    {dict.ingredientsExplorer.foundIn}
                   </p>
                   <ul className="flex flex-col gap-2">
                     {selected.usedIn.map((perfume) => (
                       <li key={perfume.slug}>
-                        <Link
+                        <LocaleLink
                           href={`/perfume/${perfume.slug}`}
                           className="flex items-center gap-2 text-xs text-ivory/60 no-underline transition-colors duration-300 hover:text-gold"
                         >
@@ -215,7 +229,7 @@ export default function IngredientExplorer({
                             aria-hidden="true"
                           />
                           {perfume.name}
-                        </Link>
+                        </LocaleLink>
                       </li>
                     ))}
                   </ul>
@@ -223,7 +237,7 @@ export default function IngredientExplorer({
 
                 <div>
                   <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/50">
-                    Rare Facts
+                    {dict.ingredientsExplorer.rareFacts}
                   </p>
                   <ul className="flex flex-col gap-2">
                     {selected.facts.map((fact) => (

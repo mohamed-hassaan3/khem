@@ -1,10 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 
+import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { formatArticleDate } from "@/src/lib/format";
+import { interpolate } from "@/src/lib/i18n/interpolate";
+import { ltrIsland, readingArrow } from "@/src/lib/i18n/rtl";
+import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type { JournalArticle } from "@/src/types/content";
 
 /**
@@ -23,6 +26,9 @@ export interface JournalGridProps {
 }
 
 export default function JournalGrid({ articles, categories }: JournalGridProps) {
+  const dict = useDictionary();
+  const locale = useLocale();
+  const island = ltrIsland(locale);
   const allLabel = categories[0] ?? "All";
   const [activeCategory, setActiveCategory] = useState(allLabel);
 
@@ -59,7 +65,7 @@ export default function JournalGrid({ articles, categories }: JournalGridProps) 
         {visible.length > 0 ? (
           <div className="mx-auto grid max-w-350 grid-cols-1 gap-0.5 bg-border sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((article) => (
-              <Link
+              <LocaleLink
                 key={article.id}
                 href={`/journal/${article.slug}`}
                 className="img-zoom group block bg-surface no-underline"
@@ -74,13 +80,15 @@ export default function JournalGrid({ articles, categories }: JournalGridProps) 
                   />
                 </div>
 
-                <div className="px-7 pb-9 pt-7">
+                <div className="px-7 pb-9 pt-7" {...island}>
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <span className="eyebrow text-[9px]">
                       {article.category}
                     </span>
                     <span className="text-[10px] tracking-wide text-ivory/25">
-                      {article.readTimeMinutes} min read
+                      {interpolate(dict.common.minRead, {
+                        minutes: article.readTimeMinutes,
+                      })}
                     </span>
                   </div>
 
@@ -92,8 +100,8 @@ export default function JournalGrid({ articles, categories }: JournalGridProps) 
                   </p>
 
                   <div className="flex items-center justify-between gap-3">
-                    <span className="font-heading text-[10px] tracking-[0.15em] text-gold transition-transform duration-300 ease-out group-hover:translate-x-1">
-                      Read →
+                    <span className="font-heading text-[10px] tracking-[0.15em] text-gold transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
+                      {dict.journal.read} {readingArrow(locale)}
                     </span>
                     <time
                       dateTime={article.publishedAt}
@@ -103,12 +111,12 @@ export default function JournalGrid({ articles, categories }: JournalGridProps) 
                     </time>
                   </div>
                 </div>
-              </Link>
+              </LocaleLink>
             ))}
           </div>
         ) : (
           <p className="py-16 text-center text-sm text-ivory/40">
-            No essays in this category yet. Please return shortly.
+            {dict.journal.empty}
           </p>
         )}
       </section>

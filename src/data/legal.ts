@@ -40,7 +40,7 @@ const LAST_UPDATED = "2026-08-09";
  * Banner query string, matching the hero treatment in `app/about/page.tsx`.
  * Every photo ID below is already in use elsewhere in `src/`, so none can 404.
  */
-const BANNER_PARAMS = "?w=1800&h=800&fit=crop&auto=format";
+const BANNER_PARAMS = "https://res.cloudinary.com/co1xzkhf/image/upload/";
 
 export const LEGAL_DOCUMENTS: Record<LegalDocumentSlug, LegalDocument> = {
   // ── PRIVACY POLICY ─────────────────────────────
@@ -51,7 +51,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentSlug, LegalDocument> = {
     lede: "What we collect, why we collect it, and the control you keep over it. Written to be read, not to be scrolled past.",
     updatedAt: LAST_UPDATED,
     banner: {
-      url: `https://images.unsplash.com/photo-1613549026666-73c9c9083c62${BANNER_PARAMS}`,
+      url: `${BANNER_PARAMS}legal-logo.png`,
       alt: "",
     },
     contactEmail: PRIVACY_EMAIL,
@@ -221,7 +221,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentSlug, LegalDocument> = {
     lede: "The agreement between you and KHEM when you place an order — what we owe you, and what we ask in return.",
     updatedAt: LAST_UPDATED,
     banner: {
-      url: `https://images.unsplash.com/photo-1615885108069-7d5bef9a7e22${BANNER_PARAMS}`,
+      url: `${BANNER_PARAMS}legal-logo.png`,
       alt: "",
     },
     contactEmail: LEGAL_EMAIL,
@@ -379,7 +379,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentSlug, LegalDocument> = {
     lede: "If a fragrance is not right, or a parcel arrives in a state it should not have, here is exactly what happens next.",
     updatedAt: LAST_UPDATED,
     banner: {
-      url: `https://images.unsplash.com/photo-1607506740211-ff3d6b933dda${BANNER_PARAMS}`,
+      url: `${BANNER_PARAMS}legal-logo.png`,
       alt: "",
     },
     contactEmail: CARE_EMAIL,
@@ -508,7 +508,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentSlug, LegalDocument> = {
     lede: "A short page, because we use few cookies. Here is every one of them and what it does.",
     updatedAt: LAST_UPDATED,
     banner: {
-      url: `https://images.unsplash.com/photo-1631189944771-466264f05965${BANNER_PARAMS}`,
+      url: `${BANNER_PARAMS}legal-logo.png`,
       alt: "",
     },
     contactEmail: PRIVACY_EMAIL,

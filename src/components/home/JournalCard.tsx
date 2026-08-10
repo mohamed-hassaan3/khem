@@ -1,18 +1,27 @@
 import Image from "next/image";
-import Link from "next/link";
 
+import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { formatArticleDate } from "@/src/lib/format";
+import type { Locale } from "@/src/lib/i18n/config";
+import { getDictionary } from "@/src/lib/i18n/get-dictionary";
+import { ltrIsland, readingArrow } from "@/src/lib/i18n/rtl";
 import type { JournalArticle } from "@/src/types/content";
 
 /** Journal article card — Server Component. */
 
 export interface JournalCardProps {
   article: JournalArticle;
+  locale: Locale;
 }
 
-export default function JournalCard({ article }: JournalCardProps) {
+export default async function JournalCard({
+  article,
+  locale,
+}: JournalCardProps) {
+  const dict = await getDictionary(locale);
+
   return (
-    <Link
+    <LocaleLink
       href={`/journal/${article.slug}`}
       className="img-zoom group block bg-background no-underline"
     >
@@ -26,24 +35,27 @@ export default function JournalCard({ article }: JournalCardProps) {
         />
       </div>
       <div className="p-8">
-        <div className="mb-4 flex items-center justify-between">
-          <span className="text-[9px] uppercase tracking-[0.2em] text-gold">
-            {article.category}
-          </span>
-          <time
-            dateTime={article.publishedAt}
-            className="text-[10px] tracking-wider text-ivory/30"
-          >
-            {formatArticleDate(article.publishedAt)}
-          </time>
+        {/* Article metadata and title come from `src/data` — English only. */}
+        <div {...ltrIsland(locale)}>
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-[9px] uppercase tracking-[0.2em] text-gold">
+              {article.category}
+            </span>
+            <time
+              dateTime={article.publishedAt}
+              className="text-[10px] tracking-wider text-ivory/30"
+            >
+              {formatArticleDate(article.publishedAt)}
+            </time>
+          </div>
+          <h3 className="mb-5 font-heading text-base font-normal leading-snug tracking-wide text-ivory">
+            {article.title}
+          </h3>
         </div>
-        <h3 className="mb-5 font-heading text-base font-normal leading-snug tracking-wide text-ivory">
-          {article.title}
-        </h3>
-        <span className="inline-block font-heading text-[10px] uppercase tracking-[0.15em] text-gold transition-transform duration-300 ease-out group-hover:translate-x-1">
-          Read More →
+        <span className="inline-block font-heading text-[10px] uppercase tracking-[0.15em] text-gold transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
+          {dict.common.readMore} {readingArrow(locale)}
         </span>
       </div>
-    </Link>
+    </LocaleLink>
   );
 }

@@ -3,6 +3,8 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useState, type FormEvent } from "react";
 
+import { useDictionary } from "@/src/providers/i18n-provider";
+
 /**
  * Inner Circle signup.
  *
@@ -16,6 +18,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const EASE_LUXURY: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export default function NewsletterForm() {
+  const dict = useDictionary();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -27,7 +30,7 @@ export default function NewsletterForm() {
     const trimmed = email.trim();
 
     if (!EMAIL_PATTERN.test(trimmed)) {
-      setError("Please enter a valid email address.");
+      setError(dict.forms.invalidEmail);
       return;
     }
 
@@ -49,10 +52,10 @@ export default function NewsletterForm() {
         role="status"
       >
         <p className="font-heading text-sm uppercase tracking-wider text-gold">
-          Welcome to the Circle
+          {dict.newsletter.successHeading}
         </p>
         <p className="mt-2 text-xs text-ivory/40">
-          You will receive a confirmation shortly.
+          {dict.newsletter.successBody}
         </p>
       </motion.div>
     );
@@ -64,9 +67,9 @@ export default function NewsletterForm() {
       noValidate
       className="flex flex-col gap-3 sm:flex-row"
     >
-      <div className="flex-1 text-left">
+      <div className="flex-1 text-start">
         <label htmlFor="newsletter-email" className="sr-only">
-          Email address
+          {dict.forms.email}
         </label>
         <input
           id="newsletter-email"
@@ -79,7 +82,7 @@ export default function NewsletterForm() {
             setEmail(event.target.value);
             if (error) setError(null);
           }}
-          placeholder="Enter your email address"
+          placeholder={dict.forms.newsletterPlaceholder}
           aria-invalid={error !== null}
           aria-describedby={error ? "newsletter-email-error" : undefined}
           className="w-full border border-gold/30 bg-black/40 px-4 py-3 text-xs text-ivory transition-colors placeholder:text-ivory/30 focus:border-gold focus:outline-none"
@@ -98,7 +101,7 @@ export default function NewsletterForm() {
         type="submit"
         className="h-fit cursor-pointer bg-gold px-8 py-3 font-heading text-xs font-medium uppercase tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-champagne"
       >
-        Subscribe
+        {dict.forms.subscribe}
       </button>
     </form>
   );

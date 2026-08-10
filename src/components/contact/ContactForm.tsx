@@ -2,6 +2,8 @@
 
 import { useRef, useState, type FormEvent } from "react";
 
+import { useDictionary } from "@/src/providers/i18n-provider";
+
 /**
  * Contact enquiry form.
  *
@@ -34,6 +36,7 @@ export interface ContactFormProps {
 }
 
 export default function ContactForm({ subjects }: ContactFormProps) {
+  const dict = useDictionary();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState(subjects[0] ?? "");
@@ -60,13 +63,13 @@ export default function ContactForm({ subjects }: ContactFormProps) {
     const nextErrors: Partial<Record<Field, string>> = {};
 
     if (name.trim().length === 0) {
-      nextErrors.name = "Please enter your name.";
+      nextErrors.name = dict.contactForm.nameRequired;
     }
     if (!EMAIL_PATTERN.test(email.trim())) {
-      nextErrors.email = "Please enter a valid email address.";
+      nextErrors.email = dict.contactForm.emailInvalid;
     }
     if (message.trim().length === 0) {
-      nextErrors.message = "Please enter a message.";
+      nextErrors.message = dict.contactForm.messageRequired;
     }
 
     setErrors(nextErrors);
@@ -112,10 +115,10 @@ export default function ContactForm({ subjects }: ContactFormProps) {
           </svg>
         </div>
         <p className="mb-2.5 font-heading text-base tracking-widest text-gold">
-          Message Received
+          {dict.contactForm.successHeading}
         </p>
         <p className="text-[13px] leading-loose text-ivory/45">
-          We will respond within 24 hours. Thank you for your enquiry.
+          {dict.contactForm.successBody}
         </p>
       </div>
     );
@@ -126,7 +129,7 @@ export default function ContactForm({ subjects }: ContactFormProps) {
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="contact-name" className={LABEL_CLASS}>
-            Your Name
+            {dict.contactForm.yourName}
           </label>
           <input
             id="contact-name"
@@ -151,7 +154,7 @@ export default function ContactForm({ subjects }: ContactFormProps) {
 
         <div>
           <label htmlFor="contact-email" className={LABEL_CLASS}>
-            Email Address
+            {dict.contactForm.emailAddress}
           </label>
           <input
             id="contact-email"
@@ -178,7 +181,7 @@ export default function ContactForm({ subjects }: ContactFormProps) {
 
       <div>
         <label htmlFor="contact-subject" className={LABEL_CLASS}>
-          Subject
+          {dict.forms.subject}
         </label>
         <select
           id="contact-subject"
@@ -197,7 +200,7 @@ export default function ContactForm({ subjects }: ContactFormProps) {
 
       <div>
         <label htmlFor="contact-message" className={LABEL_CLASS}>
-          Message
+          {dict.forms.message}
         </label>
         <textarea
           id="contact-message"
@@ -224,7 +227,7 @@ export default function ContactForm({ subjects }: ContactFormProps) {
         type="submit"
         className="btn-luxury btn-luxury-fill min-w-50 justify-center self-start"
       >
-        Send Message
+        {dict.forms.send}
       </button>
     </form>
   );

@@ -209,8 +209,7 @@
   .mega-menu {
     position: fixed;
     top: 80px;
-    left: 0;
-    right: 0;
+    inset-inline: 0;
     background: color-mix(in srgb, var(--color-background) 97%, transparent);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--color-border);
@@ -250,7 +249,7 @@
     content: "";
     position: absolute;
     bottom: -4px;
-    left: 0;
+    inset-inline-start: 0;
     width: 0;
     height: 1px;
     background: var(--color-gold);
@@ -306,6 +305,78 @@
   .page-enter {
     animation: pageIn 0.6s var(--ease-luxury-bezier) forwards;
   }
+}
+
+/*
+ * Arabic script joins its letters. Any positive `letter-spacing` — the
+ * `tracking-[0.2em]` that gives the Latin type its editorial register — breaks
+ * those joins and renders a word as disconnected letterforms. This is a
+ * legibility failure, not a stylistic difference, so tracking is neutralised
+ * across the RTL tree.
+ *
+ * Deliberately unlayered so it outranks Tailwind's `@layer utilities`, and
+ * scoped to skip explicitly-LTR islands (the English editorial and legal copy
+ * embedded in Arabic pages) which keep their original tracking.
+ */
+[dir="rtl"] body *:not([dir="ltr"]):not([dir="ltr"] *) {
+  letter-spacing: normal;
+}
+
+/*
+ * Arabic optical size compensation.
+ *
+ * Two effects compound at label sizes. Amiri and IBM Plex Sans Arabic carry a
+ * markedly smaller apparent size than Cinzel and Inter at the same `px` — the
+ * faces are swapped 1:1 under the same CSS variables, with no optical
+ * adjustment. And the rule above strips the 0.2–0.3em tracking that gave those
+ * 9–13px uppercase Latin labels their compensating width. The result is Arabic
+ * chrome that is both smaller and narrower than the English it replaces.
+ *
+ * Keyed to `[lang]` rather than `[dir]` deliberately. Tracking is a direction
+ * problem; size is a font problem. The two attributes select identically today,
+ * but keeping each rule on the attribute that explains it means a future RTL
+ * language sharing the Latin faces — or an LTR one with a small-x-height face —
+ * lands in the right bucket instead of inheriting the wrong compensation.
+ *
+ * Unlayered so it outranks Tailwind's `@layer utilities`, and scoped to skip
+ * `[dir="ltr"]` islands so embedded English copy keeps its original scale.
+ * Only sizes <= 15px are touched: display headings are already large enough
+ * that Amiri reads correctly, and rescaling them would break the composition.
+ */
+[lang="ar"] .eyebrow {
+  font-size: 12px;
+}
+
+[lang="ar"] .nav-link {
+  font-size: 13px;
+}
+
+[lang="ar"] .btn-luxury {
+  font-size: 12px;
+}
+
+[lang="ar"] .text-\[9px\]:not([dir="ltr"]):not([dir="ltr"] *) {
+  font-size: 11px;
+}
+
+[lang="ar"] .text-\[10px\]:not([dir="ltr"]):not([dir="ltr"] *) {
+  font-size: 12px;
+}
+
+[lang="ar"] .text-\[11px\]:not([dir="ltr"]):not([dir="ltr"] *) {
+  font-size: 13px;
+}
+
+[lang="ar"] .text-\[13px\]:not([dir="ltr"]):not([dir="ltr"] *) {
+  font-size: 15px;
+}
+
+[lang="ar"] .text-\[15px\]:not([dir="ltr"]):not([dir="ltr"] *) {
+  font-size: 17px;
+}
+
+[lang="ar"] .text-xs:not([dir="ltr"]):not([dir="ltr"] *) {
+  font-size: 13px;
 }
 
 @keyframes pageIn {

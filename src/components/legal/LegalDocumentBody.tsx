@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import LocaleLink from "@/src/components/i18n/LocaleLink";
 import Reveal from "@/src/components/animation/Reveal";
 import type { LegalBlock, LegalDocument } from "@/src/types/legal";
 
@@ -55,12 +54,12 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
       return (
         <p className="mb-5 text-sm leading-loose text-ivory/50">
           {block.text}{" "}
-          <Link
+          <LocaleLink
             href={block.href}
             className="text-gold underline decoration-gold/30 underline-offset-4 transition-colors duration-300 hover:decoration-gold"
           >
             {block.label}
-          </Link>
+          </LocaleLink>
         </p>
       );
 

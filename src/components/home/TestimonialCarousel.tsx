@@ -3,6 +3,8 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 
+import { interpolate } from "@/src/lib/i18n/interpolate";
+import { useDictionary } from "@/src/providers/i18n-provider";
 import type { Testimonial } from "@/src/types/content";
 
 /**
@@ -22,6 +24,7 @@ export interface TestimonialCarouselProps {
 export default function TestimonialCarousel({
   testimonials,
 }: TestimonialCarouselProps) {
+  const dict = useDictionary();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -91,7 +94,9 @@ export default function TestimonialCarousel({
           <button
             key={testimonial.id}
             type="button"
-            aria-label={`Show testimonial from ${testimonial.author}`}
+            aria-label={interpolate(dict.testimonials.showFrom, {
+              author: testimonial.author,
+            })}
             aria-current={index === activeIndex}
             onClick={() => setActiveIndex(index)}
             className={`h-0.5 cursor-pointer transition-all duration-500 ease-out ${

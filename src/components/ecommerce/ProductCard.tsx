@@ -1,7 +1,11 @@
 import Image from "next/image";
-import Link from "next/link";
 
+import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { formatPrice, formatVolume } from "@/src/lib/format";
+import type { Locale } from "@/src/lib/i18n/config";
+import { getDictionary } from "@/src/lib/i18n/get-dictionary";
+import { interpolate } from "@/src/lib/i18n/interpolate";
+import { ltrIsland } from "@/src/lib/i18n/rtl";
 import type { ProductCardData } from "@/src/types/catalog";
 
 /**
@@ -13,6 +17,7 @@ import type { ProductCardData } from "@/src/types/catalog";
 
 export interface ProductCardProps {
   product: ProductCardData;
+  locale: Locale;
   /** Drives the `sizes` hint; the grid is 1 → 2 → 4 columns. */
   sizes?: string;
 }
@@ -20,10 +25,13 @@ export interface ProductCardProps {
 const DEFAULT_SIZES =
   "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw";
 
-export default function ProductCard({
+export default async function ProductCard({
   product,
+  locale,
   sizes = DEFAULT_SIZES,
 }: ProductCardProps) {
+  const dict = await getDictionary(locale);
+
   // Display order is top → heart → base, matching the pyramid.
   const notes = [
     ...product.topNotes,
@@ -32,7 +40,7 @@ export default function ProductCard({
   ];
 
   return (
-    <Link
+    <LocaleLink
       href={`/perfume/${product.slug}`}
       className="img-zoom group relative block overflow-hidden bg-surface no-underline"
     >
@@ -48,26 +56,31 @@ export default function ProductCard({
 
       <div className="p-6">
         <p className="mb-2 text-[9px] uppercase tracking-[0.2em] text-gold/60">
-          {product.collectionName} Collection
+          {interpolate(dict.product.collectionLabel, {
+            name: product.collectionName,
+          })}
         </p>
-        <h3 className="mb-1 font-heading text-base font-normal tracking-wider text-ivory">
-          {product.name}
-        </h3>
-        {product.subtitle ? (
-          <p className="mb-4 text-xs tracking-wide text-ivory/40">
-            {product.subtitle}
-          </p>
-        ) : null}
+        {/* Product name, subtitle, and notes come from `src/data` — English only. */}
+        <div {...ltrIsland(locale)}>
+          <h3 className="mb-1 font-heading text-base font-normal tracking-wider text-ivory">
+            {product.name}
+          </h3>
+          {product.subtitle ? (
+            <p className="mb-4 text-xs tracking-wide text-ivory/40">
+              {product.subtitle}
+            </p>
+          ) : null}
 
-        <div className="mb-4 flex flex-wrap gap-1.5">
-          {notes.map((note) => (
-            <span
-              key={note}
-              className="border border-gold/20 bg-gold/5 px-2 py-0.5 text-[9px] tracking-widest text-gold/70"
-            >
-              {note}
-            </span>
-          ))}
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            {notes.map((note) => (
+              <span
+                key={note}
+                className="border border-gold/20 bg-gold/5 px-2 py-0.5 text-[9px] tracking-widest text-gold/70"
+              >
+                {note}
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className="flex items-center justify-between border-t border-border pt-2">
@@ -79,6 +92,6 @@ export default function ProductCard({
           </span>
         </div>
       </div>
-    </Link>
+    </LocaleLink>
   );
 }

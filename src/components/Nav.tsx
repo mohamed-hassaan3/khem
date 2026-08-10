@@ -1,34 +1,32 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { world, collections } from "../constants/navigation-pages";
-import { Heart, Search, UserRound } from "lucide-react";
+import { Heart, Search, UserRound, X } from "lucide-react";
+
+import LanguageSwitcher from "./i18n/LanguageSwitcher";
+import LocaleLink from "./i18n/LocaleLink";
+import { useDictionary } from "@/src/providers/i18n-provider";
 
 /** Breakpoint (px) where the drawer gives way to the desktop mega menus. */
 const DESKTOP_BREAKPOINT = 1024;
 
 function SearchIcon() {
-  return (
-    <Search width={17} height={17} />
-  );
+  return <Search width={17} height={17} />;
 }
 
 function WishlistIcon() {
-  return (
-    <Heart width={17} height={17} />
-  );
+  return <Heart width={17} height={17} />;
 }
 
 function AccountIcon() {
-  return (
-    <UserRound width={17} height={17} />
-  );
+  return <UserRound width={17} height={17} />;
 }
 
 export default function Nav() {
+  const dict = useDictionary();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [menuPath, setMenuPath] = useState<string | null>(null);
@@ -121,23 +119,23 @@ export default function Nav() {
         <div className="flex flex-1 items-center gap-9">
           <button
             type="button"
-            aria-label={drawerOpen ? "Close menu" : "Open menu"}
+            aria-label={drawerOpen ? dict.nav.closeMenu : dict.nav.openMenu}
             aria-expanded={drawerOpen}
             aria-controls="mobile-nav-drawer"
             onClick={handleDrawerToggle}
-            className="-ml-2.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center text-ivory/70 transition-colors duration-300 hover:text-ivory lg:hidden"
+            className="-ms-2.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center text-ivory/70 transition-colors duration-300 hover:text-ivory lg:hidden"
           >
             <span className="relative block h-3 w-5" aria-hidden="true">
               <span
                 className={[
-                  "absolute left-0 block h-px w-full bg-current transition-all duration-400",
+                  "absolute start-0 block h-px w-full bg-current transition-all duration-400",
                   "ease-luxury-bezier",
                   drawerOpen ? "top-1.5 rotate-45" : "top-0 rotate-0",
                 ].join(" ")}
               />
               <span
                 className={[
-                  "absolute left-0 block h-px w-full bg-current transition-all duration-400",
+                  "absolute start-0 block h-px w-full bg-current transition-all duration-400",
                   "ease-luxury-bezier",
                   drawerOpen ? "top-1.5 -rotate-45" : "top-3 rotate-0",
                 ].join(" ")}
@@ -151,22 +149,22 @@ export default function Nav() {
               className={`nav-link ${activeMenu === "collections" ? "active" : ""}`}
               onClick={() => handleMenuToggle("collections")}
             >
-              Collections
+              {dict.nav.collections}
             </button>
             <button
               type="button"
               className={`nav-link ${activeMenu === "world" ? "active" : ""}`}
               onClick={() => handleMenuToggle("world")}
             >
-              The World of KHEM
+              {dict.nav.worldOfKhem}
             </button>
-            <Link href="/stockists" className="nav-link">
-              Stockists
-            </Link>
+            <LocaleLink href="/stockists" className="nav-link">
+              {dict.nav.stockists}
+            </LocaleLink>
           </div>
         </div>
 
-        <Link
+        <LocaleLink
           href="/"
           className="flex shrink-0 items-center no-underline"
           onClick={() => {
@@ -182,26 +180,33 @@ export default function Nav() {
             priority
             className="h-10 w-auto sm:h-12 lg:h-14"
           />
-        </Link>
+        </LocaleLink>
 
         <div className="flex flex-1 items-center justify-end gap-5 sm:gap-7">
+          <div className="hidden sm:block">
+            <LanguageSwitcher />
+          </div>
           <button
             type="button"
             className="nav-link hidden sm:inline-flex"
-            aria-label="Search"
+            aria-label={dict.nav.search}
           >
             <SearchIcon />
           </button>
-          <Link
+          <LocaleLink
             href="/wishlist"
             className="nav-link hidden sm:inline-flex"
-            aria-label="Wishlist"
+            aria-label={dict.nav.wishlist}
           >
             <WishlistIcon />
-          </Link>
-          <Link href="/account" className="nav-link" aria-label="Account">
+          </LocaleLink>
+          <LocaleLink
+            href="/account"
+            className="nav-link"
+            aria-label={dict.nav.account}
+          >
             <AccountIcon />
-          </Link>
+          </LocaleLink>
         </div>
       </nav>
 
@@ -211,53 +216,45 @@ export default function Nav() {
         aria-hidden={!drawerOpen}
         inert={!drawerOpen}
         className={[
-          "fixed inset-y-0 left-0 z-1001 flex w-[85%] max-w-sm flex-col overflow-y-auto",
-          "border-r border-border bg-[color-mix(in_srgb,var(--color-background)_97%,transparent)] backdrop-blur-xl",
+          "fixed inset-y-0 start-0 z-1001 flex w-[85%] max-w-sm flex-col overflow-y-auto",
+          "border-e border-border bg-[color-mix(in_srgb,var(--color-background)_97%,transparent)] backdrop-blur-xl",
           "transition-transform duration-500 ease-luxury-bezier lg:hidden",
-          drawerOpen ? "translate-x-0" : "-translate-x-full",
+          // Transforms are not mirrored by `dir`, so the RTL offset is explicit.
+          drawerOpen
+            ? "translate-x-0"
+            : "-translate-x-full rtl:translate-x-full",
         ].join(" ")}
       >
         <div className="flex h-20 shrink-0 items-center justify-between px-6">
-          <p className="eyebrow">Menu</p>
+          <p className="eyebrow">{dict.nav.menu}</p>
           <button
             type="button"
-            aria-label="Close menu"
+            aria-label={dict.nav.closeMenu}
             onClick={closeDrawer}
-            className="-mr-2.5 flex h-11 w-11 cursor-pointer items-center justify-center text-ivory/70 transition-colors duration-300 hover:text-gold"
+            className="-me-2.5 flex h-11 w-11 cursor-pointer items-center justify-center text-ivory/70 transition-colors duration-300 hover:text-gold"
           >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 15 15"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.2"
-              aria-hidden="true"
-            >
-              <line x1="1" y1="1" x2="14" y2="14" />
-              <line x1="14" y1="1" x2="1" y2="14" />
-            </svg>
+            <X />
           </button>
         </div>
 
         <div className="flex flex-col gap-10 px-6 pb-14">
           <section>
-            <p className="eyebrow mb-6">Our Collections</p>
+            <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
             <div className="flex flex-col gap-5">
               {collections.map((c) => (
-                <Link
+                <LocaleLink
                   key={c.path}
                   href={c.path}
                   onClick={closeDrawer}
                   className="group block no-underline"
                 >
                   <p className="mb-1 font-heading text-sm tracking-widest text-ivory transition-colors duration-300 group-hover:text-gold">
-                    {c.label}
+                    {dict.nav.collectionItems[c.key].label}
                   </p>
                   <p className="text-[11px] tracking-wider text-ivory/40">
-                    {c.desc}
+                    {dict.nav.collectionItems[c.key].desc}
                   </p>
-                </Link>
+                </LocaleLink>
               ))}
             </div>
           </section>
@@ -265,17 +262,17 @@ export default function Nav() {
           <div className="gold-line" />
 
           <section>
-            <p className="eyebrow mb-6">Discover</p>
+            <p className="eyebrow mb-6">{dict.nav.discover}</p>
             <div className="flex flex-col gap-5">
               {world.map((w) => (
-                <Link
+                <LocaleLink
                   key={w.path}
                   href={w.path}
                   onClick={closeDrawer}
                   className="font-heading text-sm tracking-widest text-ivory no-underline transition-colors duration-300 hover:text-gold"
                 >
-                  {w.label}
-                </Link>
+                  {dict.nav.worldItems[w.key].label}
+                </LocaleLink>
               ))}
             </div>
           </section>
@@ -283,26 +280,33 @@ export default function Nav() {
           <div className="gold-line" />
 
           <section>
-            <p className="eyebrow mb-6">Boutique</p>
+            <p className="eyebrow mb-6">{dict.nav.boutique}</p>
             <div className="flex flex-col gap-3.5">
               {(
                 [
-                  ["Stockists", "/stockists"],
-                  ["Wishlist", "/wishlist"],
-                  ["Account", "/account"],
+                  [dict.nav.stockists, "/stockists"],
+                  [dict.nav.wishlist, "/wishlist"],
+                  [dict.nav.account, "/account"],
                 ] as const
               ).map(([label, path]) => (
-                <Link
-                  key={label}
+                <LocaleLink
+                  key={path}
                   href={path}
                   onClick={closeDrawer}
                   className="group flex items-center gap-3 text-xs tracking-widest text-ivory/50 no-underline transition-colors duration-300 hover:text-gold"
                 >
                   <span className="inline-block h-px w-5 bg-current" />
                   {label}
-                </Link>
+                </LocaleLink>
               ))}
             </div>
+          </section>
+
+          <div className="gold-line" />
+
+          <section>
+            <p className="eyebrow mb-6">{dict.languageSwitcher.label}</p>
+            <LanguageSwitcher variant="full" />
           </section>
         </div>
       </div>
@@ -310,7 +314,7 @@ export default function Nav() {
       {drawerOpen && (
         <button
           type="button"
-          aria-label="Close menu"
+          aria-label={dict.nav.closeMenu}
           className="fixed inset-0 z-1000 cursor-default bg-black/60 lg:hidden"
           onClick={closeDrawer}
         />
@@ -322,62 +326,67 @@ export default function Nav() {
       >
         <div className="mx-auto grid max-w-300 grid-cols-3 gap-12">
           <div>
-            <p className="eyebrow mb-6">Our Collections</p>
+            <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
             <div className="flex flex-col gap-5">
               {collections.map((c) => (
-                <Link
+                <LocaleLink
                   key={c.path}
                   href={c.path}
                   className="group block no-underline"
                 >
                   <p className="mb-1 font-heading text-[13px] tracking-widest text-ivory transition-colors duration-300 group-hover:text-gold">
-                    {c.label}
+                    {dict.nav.collectionItems[c.key].label}
                   </p>
                   <p className="text-[11px] tracking-wider text-ivory/40">
-                    {c.desc}
+                    {dict.nav.collectionItems[c.key].desc}
                   </p>
-                </Link>
+                </LocaleLink>
               ))}
             </div>
           </div>
           <div>
-            <p className="eyebrow mb-6">Featured</p>
-            <Link
+            <p className="eyebrow mb-6">{dict.nav.featured}</p>
+            <LocaleLink
               href="/collections/signature"
               className="relative block overflow-hidden rounded-sm no-underline"
             >
               <Image
                 src="https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=400&h=240&fit=crop&auto=format"
-                alt="Signature Collection"
+                alt={dict.nav.featuredCollectionAlt}
                 width={400}
                 height={200}
                 className="block h-50 w-full object-cover brightness-[0.7]"
               />
-              <div className="absolute bottom-4 left-4">
-                <p className="eyebrow">New Arrival</p>
-                <p className="mt-1 font-heading text-sm text-ivory">Kyphi Noir</p>
+              <div className="absolute bottom-4 start-4">
+                <p className="eyebrow">{dict.nav.newArrival}</p>
+                <p className="mt-1 font-heading text-sm text-ivory">
+                  {dict.nav.featuredProduct}
+                </p>
               </div>
-            </Link>
+            </LocaleLink>
           </div>
           <div>
-            <p className="eyebrow mb-6">Quick Access</p>
+            <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
             <div className="flex flex-col gap-3.5">
               {(
                 [
-                  ["New Arrivals", "/collections"],
-                  ["Best Sellers", "/collections"],
-                  ["Gift Sets", "/discovery"],
-                  ["Limited Editions", "/collections/noir"],
+                  [dict.nav.quickAccessItems.newArrivals, "/collections"],
+                  [dict.nav.quickAccessItems.bestSellers, "/collections"],
+                  [dict.nav.quickAccessItems.giftSets, "/discovery"],
+                  [
+                    dict.nav.quickAccessItems.limitedEditions,
+                    "/collections/noir",
+                  ],
                 ] as const
               ).map(([label, path]) => (
-                <Link
+                <LocaleLink
                   key={label}
                   href={path}
                   className="group flex items-center gap-3 text-xs tracking-widest text-ivory/50 no-underline transition-colors duration-300 hover:text-gold"
                 >
                   <span className="inline-block h-px w-5 bg-current" />
                   {label}
-                </Link>
+                </LocaleLink>
               ))}
             </div>
           </div>
@@ -390,37 +399,41 @@ export default function Nav() {
       >
         <div className="mx-auto grid max-w-300 grid-cols-3 gap-12">
           <div>
-            <p className="eyebrow mb-6">Discover</p>
+            <p className="eyebrow mb-6">{dict.nav.discover}</p>
             <div className="flex flex-col gap-5">
               {world.map((w) => (
-                <Link key={w.path} href={w.path} className="group no-underline">
+                <LocaleLink
+                  key={w.path}
+                  href={w.path}
+                  className="group no-underline"
+                >
                   <p className="font-heading text-[13px] tracking-widest text-ivory transition-colors duration-300 group-hover:text-gold">
-                    {w.label}
+                    {dict.nav.worldItems[w.key].label}
                   </p>
-                </Link>
+                </LocaleLink>
               ))}
             </div>
           </div>
           <div className="col-span-2">
-            <p className="eyebrow mb-6">From the Journal</p>
-            <Link
+            <p className="eyebrow mb-6">{dict.nav.fromTheJournal}</p>
+            <LocaleLink
               href="/journal"
               className="relative block overflow-hidden rounded-sm no-underline"
             >
               <Image
                 src="https://images.unsplash.com/photo-1678287714479-adaa0cfbe6c6?w=700&h=220&fit=crop&auto=format"
-                alt="Heritage"
+                alt={dict.nav.featuredArticleAlt}
                 width={700}
                 height={180}
                 className="block h-45 w-full object-cover brightness-[0.55]"
               />
               <div className="absolute inset-0 flex flex-col justify-end px-6 py-5">
-                <p className="eyebrow">Journal</p>
+                <p className="eyebrow">{dict.nav.journalLabel}</p>
                 <p className="mt-1.5 font-heading text-base text-ivory">
-                  The Alchemy of Ancient Egyptian Perfumery
+                  {dict.nav.featuredArticleTitle}
                 </p>
               </div>
-            </Link>
+            </LocaleLink>
           </div>
         </div>
       </div>
@@ -428,7 +441,7 @@ export default function Nav() {
       {activeMenu && (
         <button
           type="button"
-          aria-label="Close menu"
+          aria-label={dict.nav.closeMenu}
           className="fixed inset-0 z-998 hidden bg-black/50 lg:block"
           onClick={closeMenu}
         />
