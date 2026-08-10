@@ -103,7 +103,7 @@ export default async function Heritage({
         <div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/70 to-background/30 rtl:bg-linear-to-l" />
 
         <div className="relative z-10 max-w-2xl px-6 md:px-20 lg:px-30">
-          <p className="eyebrow mb-5">{dict.heritage.hero.eyebrow}</p>
+          <p className="eyebrow mb-7">{dict.heritage.hero.eyebrow}</p>
           <h1 className="mb-8 font-heading text-5xl font-normal leading-none text-ivory sm:text-6xl md:text-7xl lg:text-8xl">
             {dict.heritage.hero.headingLine1}
             <br />

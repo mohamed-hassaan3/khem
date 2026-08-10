@@ -434,12 +434,7 @@ export const ar: Dictionary = {
     errorMessage: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
   },
 
-  notFound: {
-    heading: "الصفحة غير موجودة",
-    body: "الصفحة التي تبحث عنها انسلّت من بين أيدينا — كعطر يتلاشى في هواء دافئ.",
-    primary: "العودة للرئيسية",
-    secondary: "استكشف المجموعات",
-  },
+  notFound: undefined!,
 
   languageSwitcher: {
     label: "تغيير اللغة",

@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState } from "react";
 import { world, collections } from "../constants/navigation-pages";
 import { Heart, Search, UserRound, X } from "lucide-react";
 
+import nameLogo from "@/public/logo/name-logo-transparent.svg";
+
 import LanguageSwitcher from "./i18n/LanguageSwitcher";
 import LocaleLink from "./i18n/LocaleLink";
 import { useDictionary } from "@/src/providers/i18n-provider";
@@ -172,11 +174,18 @@ export default function Nav() {
             closeDrawer();
           }}
         >
+          {/*
+           * Static import, not a string path — see the matching note in
+           * `Footer.tsx`. A relative `src` resolves against the *directory* of
+           * the current URL, so `"logo/…"` became `/logo/…` on `/ar` (which
+           * sits at the root and worked by accident) but `/ar/logo/…` on every
+           * deeper prefixed route — a 404 the catch-all answered with a full
+           * page render, on a `priority` image preloaded on every page.
+           * Importing the asset makes a relative path unrepresentable.
+           */}
           <Image
-            src="logo/name-logo-transparent.svg"
+            src={nameLogo}
             alt="KHEM Perfumes"
-            width={1273}
-            height={540}
             priority
             className="h-10 w-auto sm:h-12 lg:h-14"
           />

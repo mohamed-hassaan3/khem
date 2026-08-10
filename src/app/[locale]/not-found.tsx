@@ -2,36 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 
 import logo from "@/public/logo/logo-transparent.svg";
-import { en } from "@/src/lib/i18n/dictionaries/en";
-import { ar } from "@/src/lib/i18n/dictionaries/ar";
 
 /**
- * 404 page — bilingual by necessity.
+ * 404 page.
  *
- * `not-found.tsx` cannot export `metadata`; the title comes from the root
+ * `not-found.tsx` cannot export `metadata` — the title comes from the root
  * layout's template.
  *
- * This is the root `not-found`, since the root layout lives at
- * `app/[locale]/layout.tsx`. Unmatched paths reach it through the catch-all in
- * `app/[locale]/[...rest]/page.tsx`.
- *
- * Three constraints, each verified against a production build, force the shape
- * of this file:
- *
- * 1. **It must be a Server Component.** Next renders the not-found boundary
- *    inside its own error shell, where Client Components are not
- *    server-rendered — a `"use client"` version silently fell through to
- *    Next's built-in 404. So the locale cannot come from `I18nProvider`.
- * 2. **It receives no route params**, so the locale cannot come from
- *    `params.locale` either.
- * 3. **It must not read `headers()`.** Next includes `not-found` in every
- *    route's render tree, so a request-time API here opts the *entire* site
- *    out of static generation — all 24 prerendered pages became `ƒ`.
- *
- * With no way to resolve one locale, the page addresses both: each language
- * gets its own correctly-directioned block, and both home links are offered.
- * That is honest for a two-locale site and costs a visitor nothing, whereas
- * guessing English would strand Arabic visitors on a page they cannot read.
+ * The height is `100vh` minus the 5rem Nav rather than `100vh` plus 5rem of
+ * padding, so the page fills the viewport instead of overflowing it.
  */
 export default function NotFound() {
   return (
@@ -59,42 +38,23 @@ export default function NotFound() {
           404
         </p>
 
-        <div lang="en" dir="ltr">
-          <h1 className="mb-5 font-heading text-2xl font-normal tracking-widest text-ivory sm:text-3xl md:text-4xl">
-            {en.notFound.heading}
-          </h1>
-          <p className="mx-auto max-w-100 text-sm leading-loose text-ivory/40">
-            {en.notFound.body}
-          </p>
-        </div>
+        <h1 className="mb-5 font-heading text-2xl font-normal tracking-widest text-ivory sm:text-3xl md:text-4xl">
+          Page Not Found
+        </h1>
 
-        <div className="gold-line mx-auto my-8" />
+        <div className="gold-line mx-auto mb-7" />
 
-        <div lang="ar" dir="rtl">
-          <p className="mb-4 font-heading text-xl font-normal text-ivory sm:text-2xl">
-            {ar.notFound.heading}
-          </p>
-          <p className="mx-auto max-w-100 text-sm leading-loose text-ivory/40">
-            {ar.notFound.body}
-          </p>
-        </div>
+        <p className="mx-auto mb-12 max-w-100 text-sm leading-loose text-ivory/40">
+          The page you are seeking has slipped beyond our grasp — like perfume
+          dispersing into warm air.
+        </p>
 
-        <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
-          {/*
-            Plain `next/link` with explicit prefixes, not `<LocaleLink>`: that
-            reads the locale from client context, which is not available when
-            this renders. One home link per locale instead.
-          */}
-          <Link href="/" className="btn-luxury btn-luxury-fill" hrefLang="en">
-            {en.notFound.primary}
+        <div className="flex flex-col justify-center gap-4 sm:flex-row">
+          <Link href="/" className="btn-luxury btn-luxury-fill">
+            Return Home
           </Link>
-          <Link
-            href="/ar"
-            className="btn-luxury tracking-normal"
-            hrefLang="ar"
-            lang="ar"
-          >
-            {ar.notFound.primary}
+          <Link href="/collections" className="btn-luxury">
+            Explore Collections
           </Link>
         </div>
       </div>
