@@ -15,7 +15,9 @@ import {
   localizePath,
 } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
+import { CartProvider } from "@/src/providers/cart-provider";
 import { I18nProvider } from "@/src/providers/i18n-provider";
+import { WishlistProvider } from "@/src/providers/wishlist-provider";
 
 const SITE_URL = "https://khemperfumes.vercel.app";
 
@@ -235,10 +237,23 @@ export default async function RootLayout({
       <body
         className={`${getFontVariables(locale)} bg-background font-body text-ivory antialiased`}
       >
+        {/*
+         * Cart and wishlist wrap the whole tree, not just the two pages that
+         * list them: the Nav badge, the PDP buy block, and the collection grid
+         * hearts all read the same state, and they live on every route.
+         *
+         * Both are client providers holding `localStorage`-backed state, so
+         * neither turns `children` into client components — a Server Component
+         * passed through as `children` stays server-rendered.
+         */}
         <I18nProvider locale={locale} dictionary={dictionary}>
-          <Nav />
-          {children}
-          <Footer locale={locale} />
+          <CartProvider>
+            <WishlistProvider>
+              <Nav />
+              {children}
+              <Footer locale={locale} />
+            </WishlistProvider>
+          </CartProvider>
         </I18nProvider>
       </body>
     </html>

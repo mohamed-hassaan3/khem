@@ -43,6 +43,9 @@ export const ar: Dictionary = {
     ourCollections: "مجموعاتنا",
     search: "بحث",
     wishlist: "المفضّلة",
+    cart: "حقيبة التسوّق",
+    cartCount: "حقيبة التسوّق، {count} عناصر",
+    cartCountOne: "حقيبة التسوّق، عنصر واحد",
     account: "الحساب",
     openMenu: "فتح القائمة",
     closeMenu: "إغلاق القائمة",
@@ -488,6 +491,99 @@ export const ar: Dictionary = {
 
   product: {
     collectionLabel: "مجموعة {name}",
+    home: "الرئيسية",
+    collections: "المجموعات",
+    quantity: "الكمية",
+    decreaseQuantity: "إنقاص الكمية",
+    increaseQuantity: "زيادة الكمية",
+    addToCart: "أضف إلى السلة",
+    added: "أُضيف إلى السلة",
+    soldOut: "نفدت الكمية",
+    inStock: "متوفر — يُشحن خلال ٤٨ ساعة",
+    lowStock: "لم يتبقَّ سوى {count}",
+    wishlistAdd: "أضف {name} إلى المفضلة",
+    wishlistRemove: "احذف {name} من المفضلة",
+    storyHeading: "الحكاية",
+    pyramidHeading: "هرم العطر",
+    topNotes: "النفحات العليا",
+    heartNotes: "نفحات القلب",
+    baseNotes: "النفحات القاعدية",
+    ingredientsHeading: "المكوّنات الأساسية",
+    ingredientOrigin: "من {origin}",
+    gallery: {
+      thumbnail: "عرض الصورة {index} من {total}",
+    },
+    concentrations: {
+      PARFUM: "بارفان",
+      EXTRAIT_DE_PARFUM: "إكستريه دو بارفان",
+      EAU_DE_PARFUM: "أو دو بارفان",
+      ATTAR_OIL: "عطر زيتي",
+    },
+    trust: {
+      delivery: {
+        title: "شحن مجاني",
+        desc: "لجميع الطلبات التي تتجاوز ٢٠٠ دولار",
+      },
+      packaging: {
+        title: "تغليف فاخر",
+        desc: "جاهز للإهداء",
+      },
+      returns: {
+        title: "إرجاع خلال ٣٠ يومًا",
+        desc: "للمنتجات المغلقة وغير المستخدمة",
+      },
+    },
+    related: {
+      eyebrow: "قد يعجبك أيضًا",
+      heading: "اكتشف المجموعة",
+    },
+  },
+
+  cart: {
+    meta: {
+      title: "حقيبة التسوّق",
+      description:
+        "راجع العطور في حقيبتك قبل إتمام الطلب — شحن مجاني للطلبات التي تتجاوز ٢٠٠ دولار.",
+    },
+    eyebrow: "اختيارك",
+    heading: "الحقيبة",
+    itemCountOne: "عنصر واحد",
+    itemCount: "{count} عناصر",
+    summary: "ملخّص الطلب",
+    subtotal: "المجموع الفرعي",
+    shipping: "الشحن",
+    complimentary: "مجاني",
+    freeShippingNudge: "أضف {amount} للحصول على شحن مجاني.",
+    total: "الإجمالي",
+    taxNote: "تُحتسب الضرائب عند إتمام الطلب",
+    checkout: "إتمام الطلب",
+    checkoutSoon: "سيتاح إتمام الطلب الآمن قريبًا.",
+    continueShopping: "متابعة التسوّق",
+    removeLabel: "حذف",
+    remove: "احذف {name} من الحقيبة",
+    updated: "تم تحديث الحقيبة. {count} عناصر، {total}.",
+    empty: {
+      heading: "حقيبتك فارغة",
+      body: "اكتشف مجموعتنا من العطور الفاخرة وابدأ رحلتك مع كيم.",
+      cta: "استكشف المجموعات",
+    },
+  },
+
+  wishlist: {
+    meta: {
+      title: "المفضّلة",
+      description: "العطور التي حفظتها من كيم، بانتظارك متى شئت.",
+    },
+    eyebrow: "عطور محفوظة",
+    heading: "المفضّلة",
+    itemCountOne: "عطر واحد محفوظ",
+    itemCount: "{count} عطور محفوظة",
+    remove: "احذف {name} من المفضلة",
+    empty: {
+      heading: "قائمة المفضلة فارغة",
+      body: "احفظ العطور التي تحبها لتعود إليها لاحقًا.",
+      cta: "استكشف المجموعات",
+    },
   },
 
   testimonials: {

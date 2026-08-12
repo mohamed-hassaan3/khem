@@ -366,7 +366,7 @@ model Product {
   subtitle        String?
   description     String
   story           String?       // Editorial background story
-  concentration   Concentration @default(EXTRAIT_DE_PARFUM)
+  concentration   Concentration @default(EAU_DE_PARFUM)
   topNotes        String[]
   heartNotes      String[]
   baseNotes       String[]

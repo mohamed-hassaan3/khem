@@ -5,6 +5,7 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useDictionary } from "@/src/providers/i18n-provider";
+import { useWishlist } from "@/src/providers/wishlist-provider";
 
 /**
  * Sort control + product grid.
@@ -52,12 +53,13 @@ export default function CollectionGrid({
   const [sort, setSort] = useState<SortKey>("featured");
 
   /**
-   * Wishlist membership is in-memory and per-session — the same behaviour the
-   * page had before. There is no `Wishlist` service and no Clerk session yet;
-   * when both land, this becomes a Server Action call and the button below is
-   * unchanged.
+   * Wishlist membership comes from the shared store, so a heart filled here is
+   * the same heart filled on the product page and the same entry listed on
+   * `/wishlist`. State is persisted to `localStorage`; there is no `Wishlist`
+   * table and no Clerk session yet, and when both land this becomes a Server
+   * Action call with the button below unchanged.
    */
-  const [wishlist, setWishlist] = useState<ReadonlySet<string>>(new Set());
+  const wishlist = useWishlist();
 
   const sorted = useMemo(() => {
     // A copy: the prop array belongs to the caller.
@@ -71,14 +73,6 @@ export default function CollectionGrid({
 
     return next;
   }, [items, sort]);
-
-  const toggleWishlist = (id: string) => {
-    setWishlist((previous) => {
-      const next = new Set(previous);
-      if (!next.delete(id)) next.add(id);
-      return next;
-    });
-  };
 
   return (
     <>
@@ -132,7 +126,9 @@ export default function CollectionGrid({
         {sorted.length > 0 ? (
           <div className="mx-auto grid max-w-350 grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
             {sorted.map((item) => {
-              const isSaved = wishlist.has(item.id);
+              // Gated on hydration: the server render cannot know what is
+              // saved, so the heart stays unfilled until the store is read.
+              const isSaved = wishlist.isHydrated && wishlist.has(item.id);
 
               return (
                 <div key={item.id} className="relative">
@@ -149,7 +145,7 @@ export default function CollectionGrid({
                         : dict.collections.wishlistAdd,
                       { name: item.name },
                     )}
-                    onClick={() => toggleWishlist(item.id)}
+                    onClick={() => wishlist.toggle(item.id)}
                     className="absolute end-5 top-5 z-2 grid size-9 place-items-center border border-white/10 bg-background/70 backdrop-blur-sm transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none"
                   >
                     <Heart

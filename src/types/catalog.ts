@@ -82,6 +82,16 @@ export type ProductCardData = Pick<
   | "volumeMl"
   | "priceInCents"
   | "collectionSlug"
+  /*
+   * The last two are not read by `<ProductCard>` — they are here for the cart
+   * and wishlist, which resolve stored product ids against this same
+   * projection. The cart needs `inventory` to cap its quantity stepper and
+   * `concentration` to print the format line beside the price, and neither
+   * surface can afford a second round trip for two columns a list query
+   * already has in hand.
+   */
+  | "inventory"
+  | "concentration"
 > & {
   /** Resolved display name of the parent collection (a join in SQL terms). */
   collectionName: string;

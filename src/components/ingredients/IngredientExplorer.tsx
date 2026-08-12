@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -200,9 +201,9 @@ export default function IngredientExplorer({
                   type="button"
                   aria-label="Close ingredient details"
                   onClick={() => setSelectedId(null)}
-                  className="flex h-9 w-9 flex-none items-center justify-center border border-ivory/12 text-sm text-ivory/40 transition-colors duration-300 hover:border-gold hover:text-gold"
+                  className="flex h-9 w-9 flex-none items-center justify-center border border-ivory/12 text-ivory/40 transition-colors duration-300 hover:border-gold hover:text-gold"
                 >
-                  ✕
+                  <X size={14} strokeWidth={1.25} aria-hidden="true" />
                 </button>
               </div>
 

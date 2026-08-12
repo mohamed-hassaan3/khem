@@ -4,12 +4,14 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { world, collections } from "../constants/navigation-pages";
-import { Heart, Search, UserRound, X } from "lucide-react";
+import { Heart, Search, ShoppingBag, UserRound, X } from "lucide-react";
 
 import nameLogo from "@/public/logo/name-logo-transparent.svg";
 
 import LanguageSwitcher from "./i18n/LanguageSwitcher";
 import LocaleLink from "./i18n/LocaleLink";
+import { interpolate } from "@/src/lib/i18n/interpolate";
+import { useCart } from "@/src/providers/cart-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 
 /** Breakpoint (px) where the drawer gives way to the desktop mega menus. */
@@ -25,6 +27,51 @@ function WishlistIcon() {
 
 function AccountIcon() {
   return <UserRound width={17} height={17} />;
+}
+
+/**
+ * Bag link with a live count.
+ *
+ * The badge is rendered only once the cart store has read `localStorage` — the
+ * server HTML cannot know the count, so painting one before hydration would
+ * mismatch. The count is carried in the link's accessible name rather than
+ * announced from the badge, which stays decorative.
+ */
+function CartLink({
+  label,
+  labelWithCount,
+  labelWithOne,
+}: {
+  label: string;
+  labelWithCount: string;
+  labelWithOne: string;
+}) {
+  const { count, isHydrated } = useCart();
+  const showCount = isHydrated && count > 0;
+
+  return (
+    <LocaleLink
+      href="/cart"
+      className="nav-link relative"
+      aria-label={
+        showCount
+          ? count === 1
+            ? labelWithOne
+            : interpolate(labelWithCount, { count })
+          : label
+      }
+    >
+      <ShoppingBag width={17} height={17} />
+      {showCount ? (
+        <span
+          aria-hidden="true"
+          className="absolute -end-1.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-gold px-1 font-body text-[9px] leading-4 text-background"
+        >
+          {count}
+        </span>
+      ) : null}
+    </LocaleLink>
+  );
 }
 
 export default function Nav() {
@@ -209,6 +256,11 @@ export default function Nav() {
           >
             <WishlistIcon />
           </LocaleLink>
+          <CartLink
+            label={dict.nav.cart}
+            labelWithCount={dict.nav.cartCount}
+            labelWithOne={dict.nav.cartCountOne}
+          />
           <LocaleLink
             href="/account"
             className="nav-link"
@@ -295,6 +347,7 @@ export default function Nav() {
                 [
                   [dict.nav.stockists, "/stockists"],
                   [dict.nav.wishlist, "/wishlist"],
+                  [dict.nav.cart, "/cart"],
                   [dict.nav.account, "/account"],
                 ] as const
               ).map(([label, path]) => (

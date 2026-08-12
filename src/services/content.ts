@@ -65,6 +65,31 @@ export async function getIngredientDetails(): Promise<Ingredient[]> {
 }
 
 /**
+ * The materials a given fragrance is built on, for the PDP's "Key Ingredients"
+ * section.
+ *
+ * The link already exists in the data: every ingredient lists the perfumes it
+ * appears in (`usedIn[].slug`). Nothing is derived from the note pyramid, which
+ * names accords rather than sourced materials.
+ *
+ * Returns an empty array for a fragrance with no catalogued material, so the
+ * page can omit the section rather than render an empty heading.
+ *
+ * → supabase
+ *     .from('Ingredient')
+ *     .select('*, usedIn:IngredientUsage!inner(slug)')
+ *     .eq('usedIn.slug', productSlug)
+ *     .order('name')
+ */
+export async function getIngredientsForProduct(
+  productSlug: string,
+): Promise<Ingredient[]> {
+  return INGREDIENTS.filter((ingredient) =>
+    ingredient.usedIn.some((usage) => usage.slug === productSlug),
+  );
+}
+
+/**
  * The olfactive filter options for `/ingredients`, in taxonomy order.
  *
  * Read from the canonical `INGREDIENT_FAMILIES` list rather than derived from

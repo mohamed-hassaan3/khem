@@ -11,6 +11,8 @@
  * they stay English for both locales until that content layer moves to a CMS.
  */
 
+import type { Concentration } from "@/src/types/catalog";
+
 export const en = {
   common: {
     readMore: "Read More",
@@ -39,6 +41,10 @@ export const en = {
     ourCollections: "Our Collections",
     search: "Search",
     wishlist: "Wishlist",
+    cart: "Shopping bag",
+    /** Accessible label for the bag link once it holds something. */
+    cartCount: "Shopping bag, {count} items",
+    cartCountOne: "Shopping bag, 1 item",
     account: "Account",
     openMenu: "Open menu",
     closeMenu: "Close menu",
@@ -497,6 +503,112 @@ export const en = {
 
   product: {
     collectionLabel: "{name} Collection",
+    home: "Home",
+    collections: "Collections",
+    quantity: "Quantity",
+    decreaseQuantity: "Decrease quantity",
+    increaseQuantity: "Increase quantity",
+    addToCart: "Add to Cart",
+    added: "Added to Cart",
+    soldOut: "Sold Out",
+    inStock: "In stock — ships within 48 hours",
+    lowStock: "Only {count} remaining",
+    wishlistAdd: "Add {name} to wishlist",
+    wishlistRemove: "Remove {name} from wishlist",
+    storyHeading: "The Story",
+    pyramidHeading: "Fragrance Pyramid",
+    topNotes: "Top Notes",
+    heartNotes: "Heart Notes",
+    baseNotes: "Base Notes",
+    ingredientsHeading: "Key Ingredients",
+    ingredientOrigin: "From {origin}",
+    gallery: {
+      thumbnail: "View image {index} of {total}",
+    },
+    /*
+     * Keyed by the `Concentration` union so a new enum member is a compile
+     * error here rather than a raw SCREAMING_SNAKE string in the UI.
+     */
+    concentrations: {
+      PARFUM: "Parfum",
+      EXTRAIT_DE_PARFUM: "Extrait de Parfum",
+      EAU_DE_PARFUM: "Eau de Parfum",
+      ATTAR_OIL: "Attar Oil",
+    } satisfies Record<Concentration, string>,
+    trust: {
+      delivery: {
+        title: "Complimentary Delivery",
+        desc: "On all orders over $200",
+      },
+      packaging: {
+        title: "Luxury Packaging",
+        desc: "Gift-ready presentation",
+      },
+      returns: {
+        title: "30-Day Returns",
+        desc: "Unworn, sealed items",
+      },
+    },
+    related: {
+      eyebrow: "You May Also Love",
+      heading: "Explore the Collection",
+    },
+  },
+
+  cart: {
+    meta: {
+      title: "Shopping Bag",
+      description:
+        "Review the fragrances in your KHEM bag before checkout — complimentary delivery on orders over $200.",
+    },
+    eyebrow: "Your Selection",
+    heading: "The Cart",
+    /*
+     * Two forms rather than `Intl.PluralRules`: the counts on this page are
+     * small, and neither locale needs the full category set to read correctly
+     * at those sizes. Revisit alongside the note in `interpolate.ts` if a
+     * quantity ever reaches the teens.
+     */
+    itemCountOne: "1 item",
+    itemCount: "{count} items",
+    summary: "Order Summary",
+    subtotal: "Subtotal",
+    shipping: "Shipping",
+    complimentary: "Complimentary",
+    freeShippingNudge: "Add {amount} more for complimentary delivery.",
+    total: "Total",
+    taxNote: "Taxes calculated at checkout",
+    checkout: "Proceed to Checkout",
+    checkoutSoon: "Secure checkout opens shortly.",
+    continueShopping: "Continue Shopping",
+    /** Visible label on the button; `remove` is its accessible name. */
+    removeLabel: "Remove",
+    remove: "Remove {name} from your bag",
+    /** Announced when a quantity or total changes. */
+    updated: "Bag updated. {count} items, {total}.",
+    empty: {
+      heading: "Your Cart is Empty",
+      body: "Discover our collection of luxury fragrances and begin your journey with KHEM.",
+      cta: "Explore Collections",
+    },
+  },
+
+  wishlist: {
+    meta: {
+      title: "Wishlist",
+      description:
+        "The KHEM fragrances you have saved, kept for whenever you are ready.",
+    },
+    eyebrow: "Saved Fragrances",
+    heading: "Wishlist",
+    itemCountOne: "1 fragrance saved",
+    itemCount: "{count} fragrances saved",
+    remove: "Remove {name} from your wishlist",
+    empty: {
+      heading: "Your Wishlist is Empty",
+      body: "Save fragrances you love to revisit them later.",
+      cta: "Explore Collections",
+    },
   },
 
   testimonials: {

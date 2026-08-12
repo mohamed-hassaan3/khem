@@ -32,12 +32,16 @@ export default async function ProductCard({
 }: ProductCardProps) {
   const dict = await getDictionary(locale);
 
-  // Display order is top → heart → base, matching the pyramid.
+  /*
+   * One note per tier, top → heart → base. Pyramids are three deep in the data;
+   * printing all nine would bury the card's name and price under pills. The
+   * full pyramid is the product detail page's job.
+   */
   const notes = [
-    ...product.topNotes,
-    ...product.heartNotes,
-    ...product.baseNotes,
-  ];
+    product.topNotes[0],
+    product.heartNotes[0],
+    product.baseNotes[0],
+  ].filter(Boolean);
 
   return (
     <LocaleLink

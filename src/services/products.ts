@@ -47,6 +47,8 @@ function toCardData(product: Product, collectionName: string): ProductCardData {
     volumeMl: product.volumeMl,
     priceInCents: product.priceInCents,
     collectionSlug: product.collectionSlug,
+    inventory: product.inventory,
+    concentration: product.concentration,
     collectionName,
     primaryImage: resolvePrimaryImage(product),
   };
@@ -88,7 +90,7 @@ export async function getCollectionBySlug(
  *
  * → supabase
  *     .from('Product')
- *     .select('id,name,slug,subtitle,topNotes,heartNotes,baseNotes,volumeMl,priceInCents,collection:Collection(name,slug),images:ProductImage(url,alt,isPrimary,sortOrder)')
+ *     .select('id,name,slug,subtitle,topNotes,heartNotes,baseNotes,volumeMl,priceInCents,inventory,concentration,collection:Collection(name,slug),images:ProductImage(url,alt,isPrimary,sortOrder)')
  *     .eq('isArchived', false).is('deletedAt', null)
  *     [+ .eq('collectionSlug', collectionSlug) when given]
  */
@@ -116,7 +118,7 @@ export async function getProductCardsByCollection(
  *
  * → supabase
  *     .from('Product')
- *     .select('id,name,slug,subtitle,topNotes,heartNotes,baseNotes,volumeMl,priceInCents,collection:Collection(name,slug),images:ProductImage(url,alt,isPrimary,sortOrder)')
+ *     .select('id,name,slug,subtitle,topNotes,heartNotes,baseNotes,volumeMl,priceInCents,inventory,concentration,collection:Collection(name,slug),images:ProductImage(url,alt,isPrimary,sortOrder)')
  *     .eq('isBestseller', true).eq('isArchived', false).is('deletedAt', null)
  *     .limit(limit)
  */
@@ -152,4 +154,57 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
  */
 export async function getFeaturedProduct(): Promise<Product | null> {
   return getProductBySlug(FEATURED_PRODUCT_SLUG);
+}
+
+/**
+ * Every sellable product slug, for `/perfume/[slug]`'s `generateStaticParams`.
+ *
+ * → supabase.from('Product').select('slug').eq('isArchived', false).is('deletedAt', null)
+ */
+export async function getProductSlugs(): Promise<string[]> {
+  return PRODUCTS.map((product) => product.slug);
+}
+
+/**
+ * "You may also love" cards for a product detail page.
+ *
+ * Prefers the product's own collection and tops the list up from the rest of
+ * the catalog when that collection is too small to fill it — Noir and Gemstone
+ * both hold only three fragrances, so without the top-up a visitor would see
+ * two suggestions on one page and three on another.
+ *
+ * → supabase
+ *     .from('Product')
+ *     .select(<the column list used by getProductCardsByCollection>)
+ *     .eq('isArchived', false).is('deletedAt', null).neq('slug', slug)
+ *     .order('collectionSlug', { ascending: collectionSlug })  // own collection first
+ *     .limit(limit)
+ */
+export async function getRelatedProductCards(
+  slug: string,
+  limit = 3,
+): Promise<ProductCardData[]> {
+  const collectionNameBySlug = new Map(
+    COLLECTIONS.map((collection) => [collection.slug, collection.name]),
+  );
+
+  const product = PRODUCTS.find((entry) => entry.slug === slug);
+  if (!product) return [];
+
+  const candidates = PRODUCTS.filter((entry) => entry.slug !== slug);
+  const sameCollection = candidates.filter(
+    (entry) => entry.collectionSlug === product.collectionSlug,
+  );
+  const others = candidates.filter(
+    (entry) => entry.collectionSlug !== product.collectionSlug,
+  );
+
+  return [...sameCollection, ...others]
+    .slice(0, limit)
+    .map((entry) =>
+      toCardData(
+        entry,
+        collectionNameBySlug.get(entry.collectionSlug) ?? "KHEM",
+      ),
+    );
 }
