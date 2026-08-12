@@ -62,6 +62,56 @@ export async function getFeaturedCollections(): Promise<Collection[]> {
 }
 
 /**
+ * Every collection, for the `/collections` tab bar and overview.
+ *
+ * → supabase.from('Collection').select('*').order('name')
+ */
+export async function getCollections(): Promise<Collection[]> {
+  return COLLECTIONS;
+}
+
+/**
+ * A single collection by slug. Returns `null` when absent so the route can call
+ * `notFound()` rather than throwing (AGENTS.md §1.7).
+ *
+ * → supabase.from('Collection').select('*').eq('slug', slug).maybeSingle()
+ */
+export async function getCollectionBySlug(
+  slug: string,
+): Promise<Collection | null> {
+  return COLLECTIONS.find((collection) => collection.slug === slug) ?? null;
+}
+
+/**
+ * Card projections for a collection listing. Omitting `collectionSlug` returns
+ * the whole catalog, which is what `/collections` renders.
+ *
+ * → supabase
+ *     .from('Product')
+ *     .select('id,name,slug,subtitle,topNotes,heartNotes,baseNotes,volumeMl,priceInCents,collection:Collection(name,slug),images:ProductImage(url,alt,isPrimary,sortOrder)')
+ *     .eq('isArchived', false).is('deletedAt', null)
+ *     [+ .eq('collectionSlug', collectionSlug) when given]
+ */
+export async function getProductCardsByCollection(
+  collectionSlug?: string,
+): Promise<ProductCardData[]> {
+  const collectionNameBySlug = new Map(
+    COLLECTIONS.map((collection) => [collection.slug, collection.name]),
+  );
+
+  return PRODUCTS.filter(
+    (product) =>
+      collectionSlug === undefined ||
+      product.collectionSlug === collectionSlug,
+  ).map((product) =>
+    toCardData(
+      product,
+      collectionNameBySlug.get(product.collectionSlug) ?? "KHEM",
+    ),
+  );
+}
+
+/**
  * Bestsellers for the "Signature Fragrances" grid.
  *
  * → supabase

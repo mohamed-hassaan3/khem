@@ -19,6 +19,7 @@ export const collections: ReadonlyArray<{
 }> = [
   { key: "signature", path: "/collections/signature" },
   { key: "noir", path: "/collections/noir" },
+  { key: "gemstone", path: "/collections/gemstone" },
   { key: "discovery", path: "/discovery" },
   { key: "bodyCare", path: "/body-care" },
   { key: "roomFragrance", path: "/room-fragrance" },

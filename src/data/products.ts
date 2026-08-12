@@ -38,6 +38,23 @@ export const COLLECTIONS: Collection[] = [
     bannerAlt: "A black glass perfume bottle half-consumed by shadow",
     isFeatured: true,
   },
+  {
+    id: "gemstone",
+    name: "Gemstone",
+    slug: "gemstone",
+    description:
+      "Mineral light made wearable. Three fragrances cut from the stones the Egyptians buried with their kings — lapis, carnelian, turquoise.",
+    bannerUrl:
+      "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=900&h=1200&fit=crop&auto=format",
+    bannerAlt: "A faceted flacon throwing coloured light across dark stone",
+    /*
+     * Deliberately not featured. The home preview grid is two columns under the
+     * heading "Two Worlds of Scent" — a third card there would leave a ragged
+     * row and contradict its own copy. Gemstone surfaces on `/collections`, in
+     * the collection tab bar, and in the Nav mega-menu instead.
+     */
+    isFeatured: false,
+  },
 ];
 
 export const PRODUCTS: Product[] = [
@@ -151,6 +168,196 @@ export const PRODUCTS: Product[] = [
       {
         url: "https://images.unsplash.com/photo-1643797517714-a273548abc3c?w=600&h=800&fit=crop&auto=format",
         alt: "Obsidian Elixir flacon cut from black volcanic glass",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "isis-rose",
+    name: "Isis Rose",
+    slug: "isis-rose",
+    subtitle: "The eternal feminine",
+    description:
+      "The eternal feminine — soft, powerful, divine. Rose absolute over neroli and sandalwood.",
+    story: null,
+    concentration: "EXTRAIT_DE_PARFUM",
+    topNotes: ["Rose Absolute"],
+    heartNotes: ["Neroli"],
+    baseNotes: ["Sandalwood"],
+    volumeMl: 100,
+    priceInCents: 31000,
+    sku: "KHEM-SIG-ISR-100",
+    inventory: 21,
+    isBestseller: false,
+    collectionSlug: "signature",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1608721279136-cd41b752fa41?w=600&h=800&fit=crop&auto=format",
+        alt: "Isis Rose flacon beside scattered rose petals",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "anubis-ombre",
+    name: "Anubis Ombre",
+    slug: "anubis-ombre",
+    subtitle: "Guardian of the threshold",
+    description:
+      "Guardian of the threshold between worlds, drawn in dark oud, labdanum, and smoke.",
+    story: null,
+    concentration: "EXTRAIT_DE_PARFUM",
+    topNotes: ["Dark Oud"],
+    heartNotes: ["Labdanum"],
+    baseNotes: ["Smoke"],
+    volumeMl: 100,
+    priceInCents: 46000,
+    sku: "KHEM-NOI-ANU-100",
+    inventory: 6,
+    isBestseller: false,
+    collectionSlug: "noir",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1533603208986-24fd819e718a?w=600&h=800&fit=crop&auto=format",
+        alt: "Anubis Ombre flacon standing in near-total darkness",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "lotus-blanc",
+    name: "Lotus Blanc",
+    slug: "lotus-blanc",
+    subtitle: "Sacred purity from dark waters",
+    description:
+      "Sacred purity emerging from dark waters: white lotus, aquatic musk, and cedar.",
+    story: null,
+    concentration: "EXTRAIT_DE_PARFUM",
+    topNotes: ["White Lotus"],
+    heartNotes: ["Aquatic Musk"],
+    baseNotes: ["Cedar"],
+    volumeMl: 100,
+    priceInCents: 27500,
+    sku: "KHEM-SIG-LOT-100",
+    inventory: 30,
+    isBestseller: false,
+    collectionSlug: "signature",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=600&h=800&fit=crop&auto=format",
+        alt: "Lotus Blanc flacon reflected in still dark water",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "horus-gold",
+    name: "Horus Gold",
+    slug: "horus-gold",
+    subtitle: "Forged of sunlight and kingship",
+    description:
+      "A fragrance forged of sunlight and kingship — saffron, a gold accord, and amber resin.",
+    story: null,
+    concentration: "EXTRAIT_DE_PARFUM",
+    topNotes: ["Saffron"],
+    heartNotes: ["Gold Accord"],
+    baseNotes: ["Amber Resin"],
+    volumeMl: 100,
+    priceInCents: 34500,
+    sku: "KHEM-SIG-HOR-100",
+    inventory: 15,
+    isBestseller: false,
+    collectionSlug: "signature",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1640975972263-1f73398e943b?w=600&h=800&fit=crop&auto=format",
+        alt: "Horus Gold flacon gilded in raking afternoon light",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "lapis-eternel",
+    name: "Lapis Éternel",
+    slug: "lapis-eternel",
+    subtitle: "The blue of the burial mask",
+    description:
+      "The blue of the burial mask, rendered in cold iris, violet leaf, and ambergris.",
+    story:
+      "Lapis lazuli travelled two thousand miles from the mountains of Badakhshan before it reached the workshops of Thebes, where it was ground into the blue of Tutankhamun's mask. Lapis Éternel follows that route in reverse — a cold mineral iris that warms, slowly, into ambergris held against the skin.",
+    concentration: "EXTRAIT_DE_PARFUM",
+    topNotes: ["Blue Iris"],
+    heartNotes: ["Violet Leaf"],
+    baseNotes: ["Ambergris"],
+    volumeMl: 100,
+    priceInCents: 39000,
+    sku: "KHEM-GEM-LAP-100",
+    inventory: 10,
+    isBestseller: false,
+    collectionSlug: "gemstone",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?w=600&h=800&fit=crop&auto=format",
+        alt: "Lapis Éternel flacon lit from behind in deep blue shadow",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "carnelian-ember",
+    name: "Carnelian Ember",
+    slug: "carnelian-ember",
+    subtitle: "Warm stone, warmer skin",
+    description:
+      "Warm stone against warmer skin — pink pepper, red amber, and dry cedarwood.",
+    story: null,
+    concentration: "EXTRAIT_DE_PARFUM",
+    topNotes: ["Pink Pepper"],
+    heartNotes: ["Red Amber"],
+    baseNotes: ["Cedarwood"],
+    volumeMl: 100,
+    priceInCents: 36000,
+    sku: "KHEM-GEM-CAR-100",
+    inventory: 14,
+    isBestseller: false,
+    collectionSlug: "gemstone",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1747696766706-5485b39bf358?w=600&h=800&fit=crop&auto=format",
+        alt: "Carnelian Ember flacon glowing amber against dark stone",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "turquoise-nefer",
+    name: "Turquoise Néfer",
+    slug: "turquoise-nefer",
+    subtitle: "Mined from the Sinai",
+    description:
+      "Mined from the Sinai and worn against the sea: neroli, sea salt, and white musk.",
+    story: null,
+    concentration: "EXTRAIT_DE_PARFUM",
+    topNotes: ["Neroli"],
+    heartNotes: ["Sea Salt"],
+    baseNotes: ["White Musk"],
+    volumeMl: 100,
+    priceInCents: 34000,
+    sku: "KHEM-GEM-TUR-100",
+    inventory: 16,
+    isBestseller: false,
+    collectionSlug: "gemstone",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=600&h=800&fit=crop&auto=format",
+        alt: "Turquoise Néfer flacon against pale mineral green light",
         isPrimary: true,
         sortOrder: 0,
       },

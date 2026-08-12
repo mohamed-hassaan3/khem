@@ -57,6 +57,10 @@ export const en = {
         label: "Noir Collection",
         desc: "A darker, more exclusive chapter",
       },
+      gemstone: {
+        label: "Gemstone Collection",
+        desc: "Mineral light made wearable",
+      },
       discovery: {
         label: "Discovery Set",
         desc: "Begin your journey with KHEM",
@@ -173,6 +177,34 @@ export const en = {
       heading: "Join the Inner Circle",
       lede: "Receive exclusive previews of new fragrances, early access to limited editions, and intimate stories from the KHEM atelier.",
     },
+  },
+
+  collections: {
+    meta: {
+      title: "Collections",
+      description:
+        "The complete KHEM library — the Signature, Noir, and Gemstone collections. Extrait de parfum built on oud, frankincense, saffron, and rare mineral accords.",
+      ogTitle: "Collections | The Complete KHEM Library",
+      ogDescription:
+        "Browse every KHEM fragrance across three collections — Signature, Noir, and Gemstone.",
+    },
+    all: {
+      name: "All Fragrances",
+      description:
+        "The complete KHEM library. Every fragrance is a chapter in an ancient story.",
+    },
+    home: "Home",
+    countLabel: "{count} Fragrances",
+    sortBy: "Sort By",
+    sortOptions: {
+      featured: "Featured",
+      priceAsc: "Price: Low to High",
+      priceDesc: "Price: High to Low",
+    },
+    tabAll: "All",
+    wishlistAdd: "Add {name} to wishlist",
+    wishlistRemove: "Remove {name} from wishlist",
+    empty: "New fragrances are being prepared. Please return shortly.",
   },
 
   about: {
@@ -349,6 +381,66 @@ export const en = {
     readArticle: "Read Article",
     read: "Read",
     empty: "No essays in this category yet. Please return shortly.",
+  },
+
+  stockists: {
+    meta: {
+      title: "Stockists",
+      description:
+        "Find KHEM in person. Our flagship boutique and retail partners, with addresses, opening hours, and directions.",
+      ogTitle: "Stockists | Find KHEM",
+      ogDescription:
+        "Where to experience KHEM in person — the flagship boutique in Cairo and every retail partner that carries the house.",
+    },
+    hero: {
+      eyebrow: "Find KHEM",
+      heading: "Our Stockists",
+    },
+    filterLabel: "Filter by region",
+    regionAll: "All Regions",
+    regions: {
+      middleEast: "Middle East",
+      europe: "Europe",
+      americas: "Americas",
+      asiaPacific: "Asia Pacific",
+    },
+    types: {
+      flagship: "Flagship",
+      boutique: "Boutique",
+      retailPartner: "Retail Partner",
+      departmentStore: "Department Store",
+    },
+    /*
+     * Two keys rather than an ICU plural: `interpolate()` is deliberately not
+     * a message formatter (see its doc comment), and Arabic's plural system is
+     * not solved by a `{count}` placeholder. When a third form is needed, this
+     * becomes `Intl.PluralRules`.
+     */
+    countOne: "{count} Location Worldwide",
+    countOther: "{count} Locations Worldwide",
+    address: "Address",
+    telephone: "Telephone",
+    hours: "Hours",
+    directions: "Get Directions",
+    directionsFor: "Get directions to {name}",
+    /*
+     * Not `common.comingSoon` ("Coming Soon..."): the ellipsis and the tense
+     * are wrong for a location badge, which states a fact about a boutique
+     * rather than teasing unfinished copy.
+     */
+    comingSoon: "Opening Soon",
+    empty:
+      "No stockists in this region yet. New boutiques are announced here first.",
+    partners: {
+      eyebrow: "Our Partners",
+      heading: "World-Class Retail Partners",
+    },
+    wholesale: {
+      eyebrow: "Carry KHEM",
+      heading: "Wholesale & Partnership Enquiries",
+      lede: "We partner selectively with retailers who share our commitment to luxury, authenticity, and the highest standards of customer experience.",
+      cta: "Contact Our Trade Team",
+    },
   },
 
   ingredientsExplorer: {

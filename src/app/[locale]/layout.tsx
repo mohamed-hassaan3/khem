@@ -214,7 +214,24 @@ export default async function RootLayout({
   const dictionary = await getDictionary(locale);
 
   return (
-    <html lang={LOCALE_HTML_TAG[locale]} dir={LOCALE_DIRECTION[locale]}>
+    /*
+     * `data-scroll-behavior="smooth"` is required, not decorative.
+     *
+     * `globals.css` sets `html { scroll-behavior: smooth }`. As of Next 16 the
+     * router only neutralises that during a route transition when this
+     * attribute is present; without it, the scroll-to-top it performs after a
+     * navigation is handed to the CSS smooth-scroll animation, which the
+     * incoming page's layout change then cancels. The visible symptom was
+     * landing on the 404 page still pinned to the footer after clicking a dead
+     * link from the bottom of a long page — the scroll was issued, then lost.
+     *
+     * Next warns about exactly this in development.
+     */
+    <html
+      lang={LOCALE_HTML_TAG[locale]}
+      dir={LOCALE_DIRECTION[locale]}
+      data-scroll-behavior="smooth"
+    >
       <body
         className={`${getFontVariables(locale)} bg-background font-body text-ivory antialiased`}
       >
