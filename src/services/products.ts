@@ -17,6 +17,7 @@
 import { COLLECTIONS, FEATURED_PRODUCT_SLUG, PRODUCTS } from "@/src/data/products";
 import type {
   Collection,
+  CollectionKind,
   Product,
   ProductCardData,
   ProductImage,
@@ -35,12 +36,16 @@ function resolvePrimaryImage(product: Product): ProductImage {
   return sorted.find((image) => image.isPrimary) ?? sorted[0] ?? PLACEHOLDER_IMAGE;
 }
 
-function toCardData(product: Product, collectionName: string): ProductCardData {
+/** The two columns a card projection needs from the joined collection row. */
+type CollectionRef = Pick<Collection, "name" | "kind">;
+
+function toCardData(product: Product, collection: CollectionRef): ProductCardData {
   return {
     id: product.id,
     name: product.name,
     slug: product.slug,
     subtitle: product.subtitle,
+    description: product.description,
     topNotes: product.topNotes,
     heartNotes: product.heartNotes,
     baseNotes: product.baseNotes,
@@ -49,9 +54,47 @@ function toCardData(product: Product, collectionName: string): ProductCardData {
     collectionSlug: product.collectionSlug,
     inventory: product.inventory,
     concentration: product.concentration,
-    collectionName,
+    format: product.format,
+    includes: product.includes,
+    badge: product.badge,
+    isBestseller: product.isBestseller,
+    tags: product.tags,
+    collectionName: collection.name,
+    collectionKind: collection.kind,
     primaryImage: resolvePrimaryImage(product),
   };
+}
+
+/**
+ * Placeholder parent for a product whose collection is missing — a foreign key
+ * this seed data cannot violate, but a join in Postgres eventually can.
+ */
+const ORPHAN_COLLECTION: CollectionRef = { name: "KHEM", kind: "FRAGRANCE" };
+
+/** Index of the collections, built once per call and shared by the mappers. */
+function collectionsBySlug(): Map<string, Collection> {
+  return new Map(COLLECTIONS.map((collection) => [collection.slug, collection]));
+}
+
+/**
+ * Map products to card projections, resolving each one's parent collection —
+ * the join every list query performs.
+ */
+function toCardList(products: readonly Product[]): ProductCardData[] {
+  const bySlug = collectionsBySlug();
+
+  return products.map((product) =>
+    toCardData(product, bySlug.get(product.collectionSlug) ?? ORPHAN_COLLECTION),
+  );
+}
+
+/** Products whose collection sells fragrances. */
+function fragranceProducts(): Product[] {
+  const bySlug = collectionsBySlug();
+
+  return PRODUCTS.filter(
+    (product) => bySlug.get(product.collectionSlug)?.kind === "FRAGRANCE",
+  );
 }
 
 /**
@@ -64,12 +107,26 @@ export async function getFeaturedCollections(): Promise<Collection[]> {
 }
 
 /**
- * Every collection, for the `/collections` tab bar and overview.
+ * Every collection, of every kind. Used where the caller genuinely means all
+ * of them — resolving a stored cart line, for instance.
  *
  * → supabase.from('Collection').select('*').order('name')
  */
 export async function getCollections(): Promise<Collection[]> {
   return COLLECTIONS;
+}
+
+/**
+ * Fragrance collections only — the `/collections` overview and its tab bar.
+ *
+ * Body care, home fragrance, and discovery sets are collections too, but they
+ * are not chapters of the perfume library and each has its own route; listing
+ * them beside Signature and Noir would offer two URLs for the same goods.
+ *
+ * → supabase.from('Collection').select('*').eq('kind', 'FRAGRANCE').order('name')
+ */
+export async function getFragranceCollections(): Promise<Collection[]> {
+  return COLLECTIONS.filter((collection) => collection.kind === "FRAGRANCE");
 }
 
 /**
@@ -85,6 +142,21 @@ export async function getCollectionBySlug(
 }
 
 /**
+ * A single fragrance collection by slug, for `/collections/[slug]`.
+ *
+ * Scoped to `FRAGRANCE` so `/collections/body-care` 404s rather than rendering
+ * a second, tab-less copy of `/body-care`.
+ *
+ * → …select('*').eq('slug', slug).eq('kind', 'FRAGRANCE').maybeSingle()
+ */
+export async function getFragranceCollectionBySlug(
+  slug: string,
+): Promise<Collection | null> {
+  const collection = await getCollectionBySlug(slug);
+  return collection?.kind === "FRAGRANCE" ? collection : null;
+}
+
+/**
  * Card projections for a collection listing. Omitting `collectionSlug` returns
  * the whole catalog, which is what `/collections` renders.
  *
@@ -97,54 +169,122 @@ export async function getCollectionBySlug(
 export async function getProductCardsByCollection(
   collectionSlug?: string,
 ): Promise<ProductCardData[]> {
-  const collectionNameBySlug = new Map(
-    COLLECTIONS.map((collection) => [collection.slug, collection.name]),
-  );
-
-  return PRODUCTS.filter(
-    (product) =>
-      collectionSlug === undefined ||
-      product.collectionSlug === collectionSlug,
-  ).map((product) =>
-    toCardData(
-      product,
-      collectionNameBySlug.get(product.collectionSlug) ?? "KHEM",
+  /*
+   * Omitting the slug deliberately returns EVERY kind, not just fragrances:
+   * `/cart` and `/wishlist` resolve persisted ids against this projection, and
+   * a body-care line whose id is missing from it would silently vanish from
+   * the visitor's bag.
+   */
+  return toCardList(
+    PRODUCTS.filter(
+      (product) =>
+        collectionSlug === undefined ||
+        product.collectionSlug === collectionSlug,
     ),
   );
 }
 
 /**
- * Bestsellers for the "Signature Fragrances" grid.
+ * Card projections for one category — `/body-care`, `/room-fragrance`, and
+ * `/discovery` each render exactly one kind.
  *
  * → supabase
  *     .from('Product')
- *     .select('id,name,slug,subtitle,topNotes,heartNotes,baseNotes,volumeMl,priceInCents,inventory,concentration,collection:Collection(name,slug),images:ProductImage(url,alt,isPrimary,sortOrder)')
+ *     .select('<the column list above>, collection:Collection!inner(name,slug,kind)')
+ *     .eq('collection.kind', kind)
+ *     .eq('isArchived', false).is('deletedAt', null)
+ */
+export async function getProductCardsByKind(
+  kind: CollectionKind,
+): Promise<ProductCardData[]> {
+  const bySlug = new Map(
+    COLLECTIONS.map((collection) => [collection.slug, collection]),
+  );
+
+  return toCardList(
+    PRODUCTS.filter(
+      (product) => bySlug.get(product.collectionSlug)?.kind === kind,
+    ),
+  );
+}
+
+/**
+ * The entire catalog as cards — every kind — for the `/collections` overview.
+ *
+ * That page is the one screen a visitor can reach every product from, so it
+ * deliberately crosses the fragrance boundary the rest of the fragrance
+ * surfaces hold: body care, home fragrance, discovery sets, and gift sets all
+ * appear, reachable through the facet chips. Their dedicated routes stay the
+ * canonical place to buy them — a card here links back to its category page via
+ * `productHref()` — so no second checkout URL is created.
+ *
+ * → supabase
+ *     .from('Product')
+ *     .select('<the column list above>, collection:Collection(name,slug,kind)')
+ *     .eq('isArchived', false).is('deletedAt', null)
+ */
+export async function getCatalogProductCards(): Promise<ProductCardData[]> {
+  return toCardList(PRODUCTS);
+}
+
+/**
+ * The fragrances flagged as new, for the `/new-arrival` showroom.
+ *
+ * Returns full `Product` rows rather than card projections: each arrival gets
+ * an editorial panel carrying its story and its complete note pyramid, which is
+ * exactly what the narrow card projection omits.
+ *
+ * Fragrances only — the panel links to a detail page, and body care, home
+ * fragrance, and sets have none.
+ *
+ * → supabase
+ *     .from('Product')
+ *     .select('*, images:ProductImage(*), collection:Collection!inner(kind)')
+ *     .eq('collection.kind', 'FRAGRANCE')
+ *     .contains('tags', ['NEW_ARRIVAL'])
+ *     .eq('isArchived', false).is('deletedAt', null)
+ */
+export async function getNewArrivals(): Promise<Product[]> {
+  return fragranceProducts().filter((product) =>
+    product.tags.includes("NEW_ARRIVAL"),
+  );
+}
+
+/**
+ * Bestsellers for the "Signature Fragrances" grid — fragrances only, whatever
+ * a merchandiser flags on a candle.
+ *
+ * → supabase
+ *     .from('Product')
+ *     .select('<the column list above>, collection:Collection!inner(name,slug,kind)')
+ *     .eq('collection.kind', 'FRAGRANCE')
  *     .eq('isBestseller', true).eq('isArchived', false).is('deletedAt', null)
  *     .limit(limit)
  */
 export async function getFeaturedProducts(limit = 4): Promise<ProductCardData[]> {
-  const collectionNameBySlug = new Map(
-    COLLECTIONS.map((collection) => [collection.slug, collection.name]),
+  return toCardList(
+    fragranceProducts()
+      .filter((product) => product.isBestseller)
+      .slice(0, limit),
   );
-
-  return PRODUCTS.filter((product) => product.isBestseller)
-    .slice(0, limit)
-    .map((product) =>
-      toCardData(
-        product,
-        collectionNameBySlug.get(product.collectionSlug) ?? "KHEM",
-      ),
-    );
 }
 
 /**
- * A single product by slug. Returns `null` when absent so callers can render an
- * empty state rather than throwing (AGENTS.md §1.7).
+ * A single **fragrance** by slug — the detail page's query. Returns `null` when
+ * absent so the route can call `notFound()` rather than throwing
+ * (AGENTS.md §1.7).
  *
- * → supabase.from('Product').select('*, images:ProductImage(*)').eq('slug', slug).maybeSingle()
+ * Scoped to `FRAGRANCE` for the same reason `getProductSlugs()` is: body care,
+ * home fragrance, and discovery sets have no detail page, so
+ * `/perfume/noir-room-spray` must 404 rather than render a PDP with an empty
+ * pyramid — a URL no link on the site ever produces.
+ *
+ * → supabase.from('Product')
+ *     .select('*, images:ProductImage(*), collection:Collection!inner(kind)')
+ *     .eq('slug', slug).eq('collection.kind', 'FRAGRANCE').maybeSingle()
  */
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  return PRODUCTS.find((product) => product.slug === slug) ?? null;
+  return fragranceProducts().find((product) => product.slug === slug) ?? null;
 }
 
 /**
@@ -157,12 +297,18 @@ export async function getFeaturedProduct(): Promise<Product | null> {
 }
 
 /**
- * Every sellable product slug, for `/perfume/[slug]`'s `generateStaticParams`.
+ * Every slug with a detail page, for `/perfume/[slug]`'s `generateStaticParams`.
  *
- * → supabase.from('Product').select('slug').eq('isArchived', false).is('deletedAt', null)
+ * Fragrances only: body care, home fragrance, and discovery sets are sold from
+ * their category grid and have no PDP, so prerendering `/perfume/<their slug>`
+ * would publish a URL nothing links to and `productHref()` never emits.
+ *
+ * → supabase.from('Product').select('slug, collection:Collection!inner(kind)')
+ *     .eq('collection.kind', 'FRAGRANCE')
+ *     .eq('isArchived', false).is('deletedAt', null)
  */
 export async function getProductSlugs(): Promise<string[]> {
-  return PRODUCTS.map((product) => product.slug);
+  return fragranceProducts().map((product) => product.slug);
 }
 
 /**
@@ -173,9 +319,13 @@ export async function getProductSlugs(): Promise<string[]> {
  * both hold only three fragrances, so without the top-up a visitor would see
  * two suggestions on one page and three on another.
  *
+ * Fragrances only — the rail sits on a fragrance detail page under "Explore the
+ * Collection", and a body mist is not an alternative to a perfume.
+ *
  * → supabase
  *     .from('Product')
- *     .select(<the column list used by getProductCardsByCollection>)
+ *     .select('<the column list above>, collection:Collection!inner(name,slug,kind)')
+ *     .eq('collection.kind', 'FRAGRANCE')
  *     .eq('isArchived', false).is('deletedAt', null).neq('slug', slug)
  *     .order('collectionSlug', { ascending: collectionSlug })  // own collection first
  *     .limit(limit)
@@ -184,14 +334,12 @@ export async function getRelatedProductCards(
   slug: string,
   limit = 3,
 ): Promise<ProductCardData[]> {
-  const collectionNameBySlug = new Map(
-    COLLECTIONS.map((collection) => [collection.slug, collection.name]),
-  );
-
   const product = PRODUCTS.find((entry) => entry.slug === slug);
   if (!product) return [];
 
-  const candidates = PRODUCTS.filter((entry) => entry.slug !== slug);
+  const candidates = fragranceProducts().filter(
+    (entry) => entry.slug !== slug,
+  );
   const sameCollection = candidates.filter(
     (entry) => entry.collectionSlug === product.collectionSlug,
   );
@@ -199,12 +347,5 @@ export async function getRelatedProductCards(
     (entry) => entry.collectionSlug !== product.collectionSlug,
   );
 
-  return [...sameCollection, ...others]
-    .slice(0, limit)
-    .map((entry) =>
-      toCardData(
-        entry,
-        collectionNameBySlug.get(entry.collectionSlug) ?? "KHEM",
-      ),
-    );
+  return toCardList([...sameCollection, ...others].slice(0, limit));
 }

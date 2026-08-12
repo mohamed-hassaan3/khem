@@ -3,6 +3,7 @@ import Image from "next/image";
 import nameLogo from "@/public/logo/name-logo-transparent.svg";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { collections, world } from "@/src/constants/navigation-pages";
+import { facetHref } from "@/src/lib/facets";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
@@ -28,8 +29,16 @@ export default async function Footer({ locale }: { locale: Locale }) {
       label: dict.nav.collectionItems[c.key].label,
       path: c.path,
     })),
-    { label: dict.footer.links.newArrivals, path: "/collections" },
-    { label: dict.footer.links.bestSellers, path: "/collections" },
+    /*
+     * The three destinations that are not collections. `collections` above
+     * lists the collections themselves — the Nav's mega-menu shows the same
+     * list — so these are named here rather than smuggled into that constant.
+     * Best sellers is a merchandising cut with no route of its own, so it
+     * addresses the `/collections` facet filter.
+     */
+    { label: dict.footer.links.newArrivals, path: "/new-arrival" },
+    { label: dict.footer.links.giftSets, path: "/gift-set" },
+    { label: dict.footer.links.bestSellers, path: facetHref("best-sellers") },
   ];
 
   const worldLinks = [

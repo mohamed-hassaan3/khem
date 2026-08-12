@@ -5,7 +5,11 @@ import { useEffect, useRef, useState } from "react";
 
 import QuantityStepper from "@/src/components/ecommerce/QuantityStepper";
 import { quantityCeiling } from "@/src/lib/cart";
-import { formatPrice, formatVolume } from "@/src/lib/format";
+import {
+  formatPrice,
+  formatProductType,
+  formatVolume,
+} from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
@@ -36,6 +40,7 @@ export type PurchasableProduct = Pick<
   | "name"
   | "subtitle"
   | "concentration"
+  | "format"
   | "volumeMl"
   | "priceInCents"
   | "inventory"
@@ -125,7 +130,7 @@ export default function ProductPurchase({
         </span>
         <span className="text-xs tracking-[0.1em] text-ivory/35">
           {formatVolume(product.volumeMl)} ·{" "}
-          {dict.product.concentrations[product.concentration]}
+          {formatProductType(product, dict.product.concentrations)}
         </span>
       </div>
 

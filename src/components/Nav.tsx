@@ -10,6 +10,7 @@ import nameLogo from "@/public/logo/name-logo-transparent.svg";
 
 import LanguageSwitcher from "./i18n/LanguageSwitcher";
 import LocaleLink from "./i18n/LocaleLink";
+import { facetHref } from "@/src/lib/facets";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
@@ -76,6 +77,29 @@ function CartLink({
 
 export default function Nav() {
   const dict = useDictionary();
+
+  /**
+   * The merchandising shortcuts, shared by the desktop mega-menu column and the
+   * mobile drawer.
+   *
+   * New Arrivals and Gift Sets are deliberately *not* in the "Our Collections"
+   * list beside them: that list is the collections themselves, and printing the
+   * same two destinations twice in one menu reads as a mistake. The drawer has
+   * no second column to put them in, so it renders this list as its own
+   * section — otherwise removing them from the collections list would strand
+   * both pages on mobile.
+   *
+   * Best Sellers and Limited Editions are cuts across every collection rather
+   * than chapters of one, so they address the `/collections` facet filter
+   * rather than a route of their own. See `src/lib/facets.ts`.
+   */
+  const quickAccess = [
+    [dict.nav.quickAccessItems.newArrivals, "/new-arrival"],
+    [dict.nav.quickAccessItems.bestSellers, facetHref("best-sellers")],
+    [dict.nav.quickAccessItems.giftSets, "/gift-set"],
+    [dict.nav.quickAccessItems.limitedEditions, facetHref("limited")],
+  ] as const;
+
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [menuPath, setMenuPath] = useState<string | null>(null);
@@ -323,6 +347,25 @@ export default function Nav() {
           <div className="gold-line" />
 
           <section>
+            <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
+            <div className="flex flex-col gap-3.5">
+              {quickAccess.map(([label, path]) => (
+                <LocaleLink
+                  key={label}
+                  href={path}
+                  onClick={closeDrawer}
+                  className="group flex items-center gap-3 text-xs tracking-widest text-ivory/50 no-underline transition-colors duration-300 hover:text-gold"
+                >
+                  <span className="inline-block h-px w-5 bg-current" />
+                  {label}
+                </LocaleLink>
+              ))}
+            </div>
+          </section>
+
+          <div className="gold-line" />
+
+          <section>
             <p className="eyebrow mb-6">{dict.nav.discover}</p>
             <div className="flex flex-col gap-5">
               {world.map((w) => (
@@ -408,12 +451,14 @@ export default function Nav() {
           </div>
           <div>
             <p className="eyebrow mb-6">{dict.nav.featured}</p>
+            {/* The tile is captioned "New Arrival", so it points at the
+                showroom and names the fragrance actually flagged as new. */}
             <LocaleLink
-              href="/collections/signature"
+              href="/new-arrival"
               className="relative block overflow-hidden rounded-sm no-underline"
             >
               <Image
-                src="https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=400&h=240&fit=crop&auto=format"
+                src="https://images.unsplash.com/photo-1709662217788-6a8a1b31562a?w=400&h=240&fit=crop&auto=format"
                 alt={dict.nav.featuredCollectionAlt}
                 width={400}
                 height={200}
@@ -430,17 +475,7 @@ export default function Nav() {
           <div>
             <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
             <div className="flex flex-col gap-3.5">
-              {(
-                [
-                  [dict.nav.quickAccessItems.newArrivals, "/collections"],
-                  [dict.nav.quickAccessItems.bestSellers, "/collections"],
-                  [dict.nav.quickAccessItems.giftSets, "/discovery"],
-                  [
-                    dict.nav.quickAccessItems.limitedEditions,
-                    "/collections/noir",
-                  ],
-                ] as const
-              ).map(([label, path]) => (
+              {quickAccess.map(([label, path]) => (
                 <LocaleLink
                   key={label}
                   href={path}

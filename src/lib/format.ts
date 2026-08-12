@@ -6,6 +6,8 @@
  * nowhere else, so a currency or locale change is a one-file edit.
  */
 
+import type { Concentration, Product } from "@/src/types/catalog";
+
 const CURRENCY = "USD";
 const LOCALE = "en-US";
 
@@ -62,4 +64,26 @@ export function formatLegalDate(isoDate: string): string {
 /** Volume label for a product, e.g. 100 → "100 ML". */
 export function formatVolume(volumeMl: number): string {
   return `${volumeMl} ML`;
+}
+
+/**
+ * The format token printed beside a product's price.
+ *
+ * A fragrance states its concentration, in *translated* dictionary copy. Body
+ * care, home fragrance, and discovery sets have no concentration, so they carry
+ * a stored `format` string ("Room Spray", "6 × 3 ML Vials") instead — English
+ * in both trees, like every other catalog record.
+ *
+ * One function so the two never drift apart across the card, the cart line, and
+ * the buy block.
+ */
+export function formatProductType(
+  product: Pick<Product, "concentration" | "format">,
+  concentrationLabels: Record<Concentration, string>,
+): string {
+  if (product.format !== null) return product.format;
+  if (product.concentration !== null) {
+    return concentrationLabels[product.concentration];
+  }
+  return "";
 }

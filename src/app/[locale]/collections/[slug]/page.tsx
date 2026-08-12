@@ -6,8 +6,8 @@ import { LOCALES, isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import {
-  getCollectionBySlug,
-  getCollections,
+  getFragranceCollectionBySlug,
+  getFragranceCollections,
   getProductCardsByCollection,
 } from "@/src/services/products";
 
@@ -19,7 +19,7 @@ export const revalidate = 600;
  * would force the route into dynamic rendering.
  */
 export async function generateStaticParams() {
-  const collections = await getCollections();
+  const collections = await getFragranceCollections();
 
   return LOCALES.flatMap((locale) =>
     collections.map((collection) => ({ locale, slug: collection.slug })),
@@ -38,7 +38,7 @@ export async function generateMetadata({
 
   const [dict, collection] = await Promise.all([
     getDictionary(activeLocale),
-    getCollectionBySlug(slug),
+    getFragranceCollectionBySlug(slug),
   ]);
 
   // An unknown slug renders the 404 below; its metadata falls back to the
@@ -73,8 +73,8 @@ export default async function CollectionPage({
   // The segment is untrusted input: it is only ever matched against seeded
   // slugs, and an unknown value 404s rather than reaching the page.
   const [collection, collections] = await Promise.all([
-    getCollectionBySlug(slug),
-    getCollections(),
+    getFragranceCollectionBySlug(slug),
+    getFragranceCollections(),
   ]);
 
   if (!collection) notFound();

@@ -1,23 +1,39 @@
 "use client";
 
 import { ChevronDown, Heart } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
+import {
+  FACET_PARAM,
+  parseFacet,
+  type ProductFacet,
+} from "@/src/lib/facets";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import { useWishlist } from "@/src/providers/wishlist-provider";
 
 /**
- * Sort control + product grid.
+ * Facet filter + sort control + product grid.
  *
- * Sorting is client-side on purpose: driving it from `?sort=` would opt the
- * route out of ISR (AGENTS.md §8 lists the collection pages as static/ISR).
+ * Both controls are client-side on purpose: driving them from the server would
+ * opt the route out of ISR (AGENTS.md §8 lists the collection pages as
+ * static/ISR).
  *
  * The cards themselves are rendered on the *server* and handed over as
  * `ReactNode`s — `<ProductCard>` is an async Server Component, so re-authoring
  * its markup here would fork the card design and drag the catalog projection
- * across the client boundary. This component only reorders the nodes it is
- * given and overlays the wishlist control.
+ * across the client boundary. This component only filters and reorders the
+ * nodes it is given and overlays the wishlist control.
+ *
+ * WHY THE FACET IS READ FROM `window`, NOT FROM `useSearchParams`:
+ * the filter has to be linkable — the Nav and the Footer point at
+ * `/collections?facet=best-sellers` — but `useSearchParams` forces the subtree
+ * under it to bail out to client rendering, which would strip the entire
+ * product grid out of the prerendered HTML that this listing page depends on
+ * for SEO. Reading the parameter after mount instead keeps the full catalog in
+ * the static HTML and narrows it on hydration. Writes go through
+ * `history.replaceState`, which updates the URL without a router round trip for
+ * what is purely a client-side view change.
  */
 
 export type SortKey = "featured" | "price-asc" | "price-desc";
@@ -28,12 +44,25 @@ export interface CollectionGridItem {
   name: string;
   /** The sort key. Smallest currency unit, per AGENTS.md §9. */
   priceInCents: number;
+  /** Every facet this product belongs to — see `productFacets()`. */
+  facets: readonly ProductFacet[];
   /** The server-rendered `<ProductCard>`. */
   card: ReactNode;
 }
 
+/** One filter chip: a facet and its already-translated label. */
+export interface FacetOption {
+  key: ProductFacet;
+  label: string;
+}
+
 export interface CollectionGridProps {
   items: CollectionGridItem[];
+  /**
+   * The filter chips. Omitted on a single-collection page, which has nothing to
+   * widen — the facets only make sense over the whole catalog.
+   */
+  facets?: readonly FacetOption[];
   /**
    * The collection description, server-rendered. It shares a bar with the sort
    * control, and the sort control's state lives here — so the bar is assembled
@@ -46,11 +75,13 @@ export interface CollectionGridProps {
 
 export default function CollectionGrid({
   items,
+  facets,
   description,
   tabs,
 }: CollectionGridProps) {
   const dict = useDictionary();
   const [sort, setSort] = useState<SortKey>("featured");
+  const [facet, setFacet] = useState<ProductFacet | null>(null);
 
   /**
    * Wishlist membership comes from the shared store, so a heart filled here is
@@ -61,9 +92,58 @@ export default function CollectionGrid({
    */
   const wishlist = useWishlist();
 
+  /*
+   * Adopt `?facet=` on mount, and again whenever the visitor uses the Back
+   * button — `history.replaceState` below does not fire `popstate` itself, but
+   * arriving here from a Nav link that carried a facet does. An unrecognised
+   * value parses to `null`, so a mistyped URL shows the whole catalog rather
+   * than an empty grid.
+   */
+  useEffect(() => {
+    const read = () =>
+      setFacet(
+        parseFacet(new URLSearchParams(window.location.search).get(FACET_PARAM)),
+      );
+
+    read();
+    window.addEventListener("popstate", read);
+    return () => window.removeEventListener("popstate", read);
+  }, []);
+
+  const selectFacet = (next: ProductFacet | null) => {
+    setFacet(next);
+
+    const url = new URL(window.location.href);
+    if (next === null) {
+      url.searchParams.delete(FACET_PARAM);
+    } else {
+      url.searchParams.set(FACET_PARAM, next);
+    }
+    window.history.replaceState(null, "", url);
+  };
+
+  /**
+   * Only facets with something in them are offered — the `<MerchGrid>` rule: a
+   * chip that filters to nothing is a dead affordance, and an emptied category
+   * should take its chip with it rather than wait for a code change.
+   */
+  const available = useMemo(() => {
+    if (!facets) return [];
+    const present = new Set(items.flatMap((item) => item.facets));
+    return facets.filter((option) => present.has(option.key));
+  }, [facets, items]);
+
+  const filtered = useMemo(
+    () =>
+      facet === null
+        ? items
+        : items.filter((item) => item.facets.includes(facet)),
+    [items, facet],
+  );
+
   const sorted = useMemo(() => {
     // A copy: the prop array belongs to the caller.
-    const next = [...items];
+    const next = [...filtered];
 
     if (sort === "price-asc") {
       next.sort((a, b) => a.priceInCents - b.priceInCents);
@@ -72,7 +152,7 @@ export default function CollectionGrid({
     }
 
     return next;
-  }, [items, sort]);
+  }, [filtered, sort]);
 
   return (
     <>
@@ -120,6 +200,31 @@ export default function CollectionGrid({
 
       {/* ── COLLECTION TABS ─────────────────────────── */}
       {tabs}
+
+      {/* ── FACET CHIPS ─────────────────────────────── */}
+      {available.length > 0 ? (
+        <nav
+          aria-label={dict.collections.filterLabel}
+          className="border-b border-border bg-surface"
+        >
+          <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-x-auto px-6 py-4 md:px-20">
+            <FacetChip
+              label={dict.collections.facetAll}
+              isActive={facet === null}
+              onSelect={() => selectFacet(null)}
+            />
+
+            {available.map((option) => (
+              <FacetChip
+                key={option.key}
+                label={option.label}
+                isActive={facet === option.key}
+                onSelect={() => selectFacet(option.key)}
+              />
+            ))}
+          </div>
+        </nav>
+      ) : null}
 
       {/* ── PRODUCT GRID ────────────────────────────── */}
       <section className="bg-background px-6 pb-24 pt-16 md:px-20 md:pb-36">
@@ -170,5 +275,37 @@ export default function CollectionGrid({
         )}
       </section>
     </>
+  );
+}
+
+/**
+ * One filter chip.
+ *
+ * A bordered pill rather than the underlined tab used above it: the two rows
+ * sit adjacent, and giving them the same treatment would read as one bar with
+ * two active items.
+ */
+function FacetChip({
+  label,
+  isActive,
+  onSelect,
+}: {
+  label: string;
+  isActive: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={isActive}
+      className={`shrink-0 cursor-pointer whitespace-nowrap border px-4 py-2 font-heading text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 ease-out focus-visible:border-gold focus-visible:outline-none ${
+        isActive
+          ? "border-gold/70 bg-gold/10 text-gold"
+          : "border-white/10 text-ivory/40 hover:border-gold/40 hover:text-ivory/70"
+      }`}
+    >
+      {label}
+    </button>
   );
 }

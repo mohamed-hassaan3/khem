@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { formatPrice, formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
+import { productHref } from "@/src/lib/routes";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { useCart } from "@/src/providers/cart-provider";
@@ -80,7 +81,7 @@ export default function WishlistCard({
       </button>
 
       <LocaleLink
-        href={`/perfume/${product.slug}`}
+        href={productHref(product)}
         className="img-zoom block no-underline"
       >
         <div className="relative aspect-3/4 overflow-hidden bg-card">
@@ -105,7 +106,7 @@ export default function WishlistCard({
         <div {...island}>
           <h2 className="mb-2 font-heading text-lg font-normal text-ivory">
             <LocaleLink
-              href={`/perfume/${product.slug}`}
+              href={productHref(product)}
               className="transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
             >
               {product.name}
@@ -132,8 +133,10 @@ export default function WishlistCard({
           <span className="font-heading text-lg text-gold">
             {formatPrice(product.priceInCents)}
           </span>
+          {/* A set's total volume ("18 ML") says nothing useful, so anything
+              carrying a stored format states that instead. */}
           <span className="text-[10px] uppercase tracking-[0.15em] text-ivory/30">
-            {formatVolume(product.volumeMl)}
+            {product.format ?? formatVolume(product.volumeMl)}
           </span>
         </div>
 

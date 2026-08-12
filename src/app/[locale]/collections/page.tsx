@@ -5,8 +5,8 @@ import { isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import {
-  getCollections,
-  getProductCardsByCollection,
+  getCatalogProductCards,
+  getFragranceCollections,
 } from "@/src/services/products";
 
 /**
@@ -38,7 +38,18 @@ export async function generateMetadata({
   });
 }
 
-/** The complete catalog, across every collection. */
+/**
+ * The complete catalogue — every product the house makes.
+ *
+ * This page holds *everything*: the three fragrance collections plus body care,
+ * home fragrance, discovery sets, and gift sets, reachable through the facet
+ * chips. Those categories keep their own routes as the place to buy them — a
+ * card here links back to its category page via `productHref()` — so widening
+ * the listing does not create a second checkout URL for the same goods.
+ *
+ * The collection tab bar stays fragrance-only: it addresses `/collections/[slug]`,
+ * which is a chapter of the perfume library and nothing else.
+ */
 export default async function Collections({
   params,
 }: {
@@ -46,8 +57,8 @@ export default async function Collections({
 }) {
   const [{ locale }, collections, products] = await Promise.all([
     params,
-    getCollections(),
-    getProductCardsByCollection(),
+    getFragranceCollections(),
+    getCatalogProductCards(),
   ]);
 
   // The layout has already rejected any segment that is not a real locale.

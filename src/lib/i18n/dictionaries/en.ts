@@ -48,7 +48,7 @@ export const en = {
     account: "Account",
     openMenu: "Open menu",
     closeMenu: "Close menu",
-    featuredProduct: "Kyphi Noir",
+    featuredProduct: "Sekhem Ambré",
     featuredCollectionAlt: "Signature Collection",
     fromTheJournal: "From the Journal",
     journalLabel: "Journal",
@@ -67,6 +67,11 @@ export const en = {
         label: "Gemstone Collection",
         desc: "Mineral light made wearable",
       },
+      /*
+       * Collections only. New Arrivals and Gift Sets are destinations, not
+       * collections, and they already appear in the Quick Access column of the
+       * same menu — listing them here printed both twice.
+       */
       discovery: {
         label: "Discovery Set",
         desc: "Begin your journey with KHEM",
@@ -108,6 +113,7 @@ export const en = {
     logoAlt: "KHEM Perfumes — Essence of Heritage",
     links: {
       newArrivals: "New Arrivals",
+      giftSets: "Gift Sets",
       bestSellers: "Best Sellers",
       theJournal: "The Journal",
       stockists: "Stockists",
@@ -189,18 +195,36 @@ export const en = {
     meta: {
       title: "Collections",
       description:
-        "The complete KHEM library — the Signature, Noir, and Gemstone collections. Extrait de parfum built on oud, frankincense, saffron, and rare mineral accords.",
+        "The complete KHEM catalogue — the Signature, Noir, and Gemstone fragrances alongside body care, home fragrance, discovery and gift sets. Filter by new arrivals, best sellers, and limited editions.",
       ogTitle: "Collections | The Complete KHEM Library",
       ogDescription:
-        "Browse every KHEM fragrance across three collections — Signature, Noir, and Gemstone.",
+        "Browse everything KHEM makes in one place — three fragrance collections, body care, home fragrance, and sets.",
     },
     all: {
-      name: "All Fragrances",
+      name: "The Complete Library",
       description:
-        "The complete KHEM library. Every fragrance is a chapter in an ancient story.",
+        "Every piece the house makes, in one place — fragrance, body care, home, and the sets composed for giving.",
     },
     home: "Home",
     countLabel: "{count} Fragrances",
+    /** The overview lists more than fragrances, so it counts neutrally. */
+    countLabelAll: "{count} Pieces",
+    filterLabel: "Filter the catalogue",
+    facetAll: "Everything",
+    /*
+     * Keyed by `ProductFacet` (`src/lib/facets.ts`) — kebab-case because the
+     * key is also the `?facet=` value, and one spelling for both is one fewer
+     * mapping to keep in step.
+     */
+    facets: {
+      "new-arrivals": "New Arrivals",
+      "best-sellers": "Best Sellers",
+      limited: "Limited Editions",
+      "gift-sets": "Gift Sets",
+      "discovery-sets": "Discovery Sets",
+      "body-care": "Body Care",
+      "home-fragrance": "Home Fragrance",
+    },
     sortBy: "Sort By",
     sortOptions: {
       featured: "Featured",
@@ -552,6 +576,175 @@ export const en = {
     related: {
       eyebrow: "You May Also Love",
       heading: "Explore the Collection",
+    },
+  },
+
+  bodyCare: {
+    meta: {
+      title: "Body Care",
+      description:
+        "Dry oils and rituals for the skin, carrying the KHEM fragrance signature beyond the flacon.",
+      ogTitle: "Body Care | KHEM",
+      ogDescription:
+        "Ancient Egyptians understood that beauty was ritual. Layer scent into the very fabric of the skin.",
+    },
+    eyebrow: "The Ritual",
+    titleLead: "Body",
+    titleAccent: "Care",
+    description:
+      "Ancient Egyptians understood that beauty was ritual. Our body care range extends the KHEM fragrance experience beyond the flacon — layering scent into the very fabric of the skin.",
+    ritual: {
+      layering: {
+        title: "Fragrance Layering",
+        body: "Apply body products before your fragrance to amplify and extend the scent throughout the day.",
+      },
+      natural: {
+        title: "Natural Formulas",
+        body: "No silicones, no sulfates, no synthetic fillers. Only ingredients worthy of the skin.",
+      },
+      practice: {
+        title: "Ritual Practice",
+        body: "Each product is designed to transform a routine into a ceremony of self-care.",
+      },
+    },
+    empty: "New rituals are being prepared. Please return shortly.",
+  },
+
+  roomFragrance: {
+    meta: {
+      title: "Home Fragrance",
+      description:
+        "Room sprays and home scents that turn an interior into a temple of olfactory experience.",
+      ogTitle: "Home Fragrance | KHEM",
+      ogDescription:
+        "In Ancient Egypt, a scented space was a sacred space. Bring the KHEM world into your interiors.",
+    },
+    eyebrow: "Scent Your Sanctuary",
+    titleLead: "Home",
+    titleAccent: "Fragrance",
+    description:
+      "In Ancient Egypt, a scented space was a sacred space. Our home fragrance range extends the KHEM world into your interiors — transforming rooms into temples of olfactory experience.",
+    filterLabel: "Filter by type",
+    filterAll: "All",
+    empty: "New home fragrances are being prepared. Please return shortly.",
+  },
+
+  newArrival: {
+    meta: {
+      title: "New Arrivals",
+      description:
+        "The newest KHEM compositions — presented in full, with their stories, their pyramids, and the run they were released in.",
+      ogTitle: "New Arrivals | KHEM",
+      ogDescription:
+        "Two new extraits from the Cairo atelier. Seen first, here.",
+    },
+    eyebrow: "Just Arrived",
+    titleLead: "The New",
+    titleAccent: "Compositions",
+    description:
+      "Twice a year the atelier releases what it has been working on. These are the newest additions to the house — each one presented in full, as it deserves to be.",
+    heroImageAlt: "Dark marble veined with pale mineral light",
+    /** Small counter under the hero — "Two new compositions". */
+    count: "{count} new compositions",
+    countOne: "One new composition",
+    indexLabel: "Release",
+    notes: {
+      top: "Top",
+      heart: "Heart",
+      base: "Base",
+    },
+    cta: "Discover the Fragrance",
+    closing: {
+      eyebrow: "The Full Library",
+      heading: "Everything else the house makes",
+      body: "Three fragrance collections, body care, home fragrance, and the sets composed for giving — all in one place.",
+      cta: "Browse the Collection",
+    },
+    empty: "The next release is being prepared. Please return shortly.",
+  },
+
+  giftSet: {
+    meta: {
+      title: "Gift Sets",
+      description:
+        "Full-size flacons, ritual objects, and hand-finished presentation — composed for the moment a fragrance is given.",
+      ogTitle: "Gift Sets | KHEM",
+      ogDescription:
+        "The house presented as an offering. Lacquered boxes, wax seals, and cards written by hand.",
+    },
+    eyebrow: "Composed for Giving",
+    titleLead: "Gift",
+    titleAccent: "Sets",
+    description:
+      "A gift of fragrance is a gift of memory. Each set pairs full-size flacons and ritual objects with presentation finished by hand at the atelier — the box, the seal, and the card are part of the composition.",
+    note: "Complimentary wrapping and a hand-written card with every set.",
+    ritual: {
+      presentation: {
+        title: "Lacquered Presentation",
+        body: "Every set arrives in a hand-lacquered box, wrapped in heavy paper and closed with a black wax seal.",
+      },
+      message: {
+        title: "Written by Hand",
+        body: "Your message is written onto a gold-embossed card at the atelier — never printed, never machine-lettered.",
+      },
+      delivery: {
+        title: "Discreet Delivery",
+        body: "Sets ship without pricing enclosed, and can be scheduled to arrive on the day you choose.",
+      },
+    },
+    empty: "New gift sets are being prepared. Please return shortly.",
+  },
+
+  discovery: {
+    meta: {
+      title: "Discovery Sets",
+      description:
+        "Curated sample sets — explore the full KHEM olfactory world before committing to a full-size flacon.",
+      ogTitle: "Discovery Sets | KHEM",
+      ogDescription:
+        "Every journey into KHEM should begin with discovery. Each purchase may be applied to a full-size order.",
+    },
+    eyebrow: "Begin Here",
+    titleLead: "Discovery",
+    titleAccent: "Sets",
+    description:
+      "Every journey into KHEM should begin with discovery. Our curated sets allow you to explore the full range of our olfactory world before committing to a full-size flacon.",
+    note: "Each discovery purchase may be applied to full-size orders.",
+    includes: "Includes",
+    empty: "New discovery sets are being prepared. Please return shortly.",
+    promise: {
+      eyebrow: "The KHEM Promise",
+      heading: "Discovery to Full Size",
+      steps: {
+        choose: {
+          title: "Choose Your Set",
+          body: "Select the discovery set that aligns with your curiosity — whether you are drawn to warmth and heritage, darkness and mystery, or wish to explore the complete KHEM world.",
+        },
+        discover: {
+          title: "Discover Your Signature",
+          body: "Wear each vial across different days and occasions. KHEM fragrances evolve dramatically on skin — give each one the time it deserves before deciding.",
+        },
+        unlock: {
+          title: "Unlock Your Credit",
+          body: "When you purchase a full-size flacon of any fragrance you discovered, your discovery set purchase price is applied as a credit toward the full bottle.",
+        },
+      },
+    },
+    compare: {
+      eyebrow: "Compare",
+      heading: "Which Set Is Right for You?",
+      caption:
+        "Discovery sets compared by contents, volume, presentation, and price.",
+      rows: {
+        vials: "Vials Included",
+        volume: "Total Volume",
+        box: "Collector's Box",
+        booklet: "Story Booklet",
+        credit: "Applies to Full Size",
+        price: "Price",
+      },
+      yes: "Included",
+      no: "Not included",
     },
   },
 

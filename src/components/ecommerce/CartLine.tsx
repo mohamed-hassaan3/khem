@@ -6,7 +6,12 @@ import Image from "next/image";
 import QuantityStepper from "@/src/components/ecommerce/QuantityStepper";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { lineTotalInCents, quantityCeiling } from "@/src/lib/cart";
-import { formatPrice, formatVolume } from "@/src/lib/format";
+import {
+  formatPrice,
+  formatProductType,
+  formatVolume,
+} from "@/src/lib/format";
+import { productHref } from "@/src/lib/routes";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
@@ -44,7 +49,7 @@ export default function CartLine({
   return (
     <article className="grid grid-cols-[88px_1fr] items-start gap-5 border-b border-border py-7 sm:grid-cols-[120px_1fr] sm:gap-7">
       <LocaleLink
-        href={`/perfume/${product.slug}`}
+        href={productHref(product)}
         className="img-zoom relative block aspect-3/4 overflow-hidden bg-surface"
         tabIndex={-1}
         aria-hidden="true"
@@ -69,7 +74,7 @@ export default function CartLine({
             {/* Catalog records are English in both trees. */}
             <h2 className="font-heading text-base font-normal tracking-wide text-ivory sm:text-lg" {...island}>
               <LocaleLink
-                href={`/perfume/${product.slug}`}
+                href={productHref(product)}
                 className="transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
               >
                 {product.name}
@@ -85,7 +90,7 @@ export default function CartLine({
         {/* Translated in both trees — no LTR island; the bidi algorithm places
             the Latin volume token correctly inside the Arabic run. */}
         <p className="mb-5 text-[11px] tracking-[0.1em] text-ivory/35">
-          {dict.product.concentrations[product.concentration]} ·{" "}
+          {formatProductType(product, dict.product.concentrations)} ·{" "}
           {formatVolume(product.volumeMl)}
         </p>
 

@@ -3,9 +3,11 @@ import Image from "next/image";
 
 import CollectionGrid, {
   type CollectionGridItem,
+  type FacetOption,
 } from "@/src/components/ecommerce/CollectionGrid";
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
+import { FACET_ORDER, productFacets } from "@/src/lib/facets";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
@@ -67,10 +69,22 @@ export default async function CollectionView({
     id: product.id,
     name: product.name,
     priceInCents: product.priceInCents,
+    facets: productFacets(product),
     card: (
       <ProductCard product={product} locale={locale} sizes={CARD_SIZES} />
     ),
   }));
+
+  /*
+   * Facets belong to the overview alone. A single collection is already a
+   * filtered view, and every facet but one would empty it — `<CollectionGrid>`
+   * drops the chips it cannot fill, so passing them there would leave a bar
+   * that flickers into existence for Noir and nowhere else.
+   */
+  const facets: FacetOption[] | undefined =
+    collection === null
+      ? FACET_ORDER.map((key) => ({ key, label: dict.collections.facets[key] }))
+      : undefined;
 
   return (
     <div className="min-h-screen bg-background text-ivory">
@@ -123,9 +137,17 @@ export default async function CollectionView({
             </nav>
 
             <p className="eyebrow mb-4">
-              {interpolate(dict.collections.countLabel, {
-                count: products.length,
-              })}
+              {interpolate(
+                /*
+                 * The overview counts "pieces": it lists body oils and gift
+                 * sets too, and calling those fragrances would be wrong in
+                 * both languages.
+                 */
+                collection === null
+                  ? dict.collections.countLabelAll
+                  : dict.collections.countLabel,
+                { count: products.length },
+              )}
             </p>
 
             <h1
@@ -141,6 +163,7 @@ export default async function CollectionView({
       {/* ── DESCRIPTION + SORT · TABS · GRID ────────── */}
       <CollectionGrid
         items={items}
+        facets={facets}
         description={
           /* A collection's own description comes from `src/data` — English only. */
           <p
