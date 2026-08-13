@@ -1,19 +1,24 @@
 "use client";
 
+import { UserButton, useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { world, collections } from "../constants/navigation-pages";
 import { Heart, Search, ShoppingBag, UserRound, X } from "lucide-react";
 
 import nameLogo from "@/public/logo/name-logo-transparent.svg";
 
+import SignOutButton from "./account/SignOutButton";
 import LanguageSwitcher from "./i18n/LanguageSwitcher";
 import LocaleLink from "./i18n/LocaleLink";
+import SearchOverlay from "./search/SearchOverlay";
 import { facetHref } from "@/src/lib/facets";
+import { localizePath } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
+import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { useCart } from "@/src/providers/cart-provider";
-import { useDictionary } from "@/src/providers/i18n-provider";
+import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 
 /** Breakpoint (px) where the drawer gives way to the desktop mega menus. */
 const DESKTOP_BREAKPOINT = 1024;
@@ -77,6 +82,8 @@ function CartLink({
 
 export default function Nav() {
   const dict = useDictionary();
+  const locale = useLocale();
+  const { isSignedIn } = useAuth();
 
   /**
    * The merchandising shortcuts, shared by the desktop mega-menu column and the
@@ -105,11 +112,22 @@ export default function Nav() {
   const [menuPath, setMenuPath] = useState<string | null>(null);
   const [drawerRequested, setDrawerRequested] = useState(false);
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
+  const [searchRequested, setSearchRequested] = useState(false);
+  const [searchPath, setSearchPath] = useState<string | null>(null);
   const pathname = usePathname();
+
+  /**
+   * The search trigger, so focus can be returned to it on close — a modal
+   * dialog that drops focus back on `<body>` strands a keyboard visitor at the
+   * top of the document.
+   */
+  const searchButtonRef = useRef<HTMLButtonElement>(null);
 
   const activeMenu = menuPath === pathname ? menuOpen : null;
   // Navigating away dismisses the drawer without an extra render pass.
   const drawerOpen = drawerPath === pathname && drawerRequested;
+  // The same derivation for the search panel: a result link closes it.
+  const searchOpen = searchPath === pathname && searchRequested;
   const navSolid = scrolled || activeMenu !== null || drawerOpen;
 
   useEffect(() => {
@@ -139,6 +157,20 @@ export default function Nav() {
     setDrawerPath(pathname);
     setDrawerRequested(!drawerOpen);
   };
+
+  /** Search takes over from whichever surface was open. */
+  const openSearch = () => {
+    closeMenu();
+    setDrawerRequested(false);
+    setSearchPath(pathname);
+    setSearchRequested(true);
+  };
+
+  const closeSearch = useCallback(() => {
+    setSearchRequested(false);
+    setSearchPath(pathname);
+    searchButtonRef.current?.focus();
+  }, [pathname]);
 
   // Escape closes whichever surface is open.
   useEffect(() => {
@@ -266,10 +298,20 @@ export default function Nav() {
           <div className="hidden sm:block">
             <LanguageSwitcher />
           </div>
+          {/*
+           * Visible at every width. It used to be `hidden sm:inline-flex`,
+           * which left a phone with no way to search at all — and a phone is
+           * where searching instead of browsing a mega-menu matters most.
+           */}
           <button
+            ref={searchButtonRef}
             type="button"
-            className="nav-link hidden sm:inline-flex"
+            className="nav-link"
             aria-label={dict.nav.search}
+            aria-haspopup="dialog"
+            aria-expanded={searchOpen}
+            aria-controls="search-overlay"
+            onClick={openSearch}
           >
             <SearchIcon />
           </button>
@@ -285,15 +327,47 @@ export default function Nav() {
             labelWithCount={dict.nav.cartCount}
             labelWithOne={dict.nav.cartCountOne}
           />
-          <LocaleLink
-            href="/account"
-            className="nav-link"
-            aria-label={dict.nav.account}
-          >
-            <AccountIcon />
-          </LocaleLink>
+          {/*
+           * Signed out, the icon leads to `/account` — where `src/proxy.ts`
+           * redirects to the sign-in page, so it is a live destination in
+           * both states. Signed in, it becomes Clerk's avatar menu, themed by
+           * the provider's appearance, with sign-out inside it.
+           *
+           * `useAuth()` rather than the `<Show>` control component: the root
+           * `Show` export in `@clerk/nextjs` is the App Router *server*
+           * variant (an async component), and this is a client component.
+           *
+           * The link is what renders while Clerk is still resolving, so the
+           * rail never collapses to a gap mid-hydration — the icon and the
+           * avatar occupy the same 26px box.
+           */}
+          {isSignedIn ? (
+            <span
+              className="flex items-center"
+              aria-label={dict.nav.accountMenu}
+            >
+              <UserButton
+                userProfileMode="navigation"
+                userProfileUrl={localizePath(locale, ACCOUNT_PATHS.profile)}
+                appearance={{
+                  elements: { avatarBox: { width: 26, height: 26 } },
+                }}
+              />
+            </span>
+          ) : (
+            <LocaleLink
+              href="/account"
+              className="nav-link"
+              aria-label={dict.nav.account}
+            >
+              <AccountIcon />
+            </LocaleLink>
+          )}
         </div>
       </nav>
+
+      {/* ── SEARCH PANEL ───────────────────────────── */}
+      <SearchOverlay open={searchOpen} onClose={closeSearch} />
 
       {/* ── MOBILE DRAWER ──────────────────────────── */}
       <div
@@ -386,6 +460,26 @@ export default function Nav() {
           <section>
             <p className="eyebrow mb-6">{dict.nav.boutique}</p>
             <div className="flex flex-col gap-3.5">
+              {/*
+               * Search is a control, not a destination, so it sits above the
+               * links rather than inside the list — the drawer is the only
+               * place a phone can reach the panel from besides the header.
+               */}
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  openSearch();
+                }}
+                className="group flex cursor-pointer items-center gap-3 text-start text-xs tracking-widest text-ivory/50 transition-colors duration-300 hover:text-gold"
+              >
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-px w-5 bg-current"
+                />
+                {dict.nav.search}
+              </button>
+
               {(
                 [
                   [dict.nav.stockists, "/stockists"],
@@ -404,6 +498,22 @@ export default function Nav() {
                   {label}
                 </LocaleLink>
               ))}
+
+              {/*
+               * The drawer is the only account surface on a phone, so it
+               * carries sign-out directly rather than sending the visitor to
+               * `/account` to find it. Hidden entirely for a guest, for whom
+               * it would be a control with nothing to end.
+               */}
+              {isSignedIn ? (
+                <span className="flex items-center gap-3 text-ivory/50">
+                  <span
+                    aria-hidden="true"
+                    className="inline-block h-px w-5 bg-current"
+                  />
+                  <SignOutButton className="text-xs tracking-widest text-ivory/50 hover:text-gold" />
+                </span>
+              ) : null}
             </div>
           </section>
 

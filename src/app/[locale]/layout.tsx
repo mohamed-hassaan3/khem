@@ -1,9 +1,12 @@
+import { ClerkProvider } from "@clerk/nextjs";
+import { arSA } from "@clerk/localizations";
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import "../globals.css";
 
 import Footer from "@/src/components/Footer";
 import Nav from "@/src/components/Nav";
+import { khemClerkAppearance } from "@/src/lib/clerk-appearance";
 import { getFontVariables } from "@/src/lib/fonts";
 import {
   LOCALES,
@@ -238,23 +241,52 @@ export default async function RootLayout({
         className={`${getFontVariables(locale)} bg-background font-body text-ivory antialiased`}
       >
         {/*
-         * Cart and wishlist wrap the whole tree, not just the two pages that
-         * list them: the Nav badge, the PDP buy block, and the collection grid
-         * hearts all read the same state, and they live on every route.
+         * `<ClerkProvider>` sits inside `<body>` — required by Clerk v7, where
+         * wrapping `<html>` (the Core 2 pattern) no longer works — and
+         * outermost of the providers, because `<UserButton>` in `Nav` and
+         * every account island need it in scope.
          *
-         * Both are client providers holding `localStorage`-backed state, so
-         * neither turns `children` into client components — a Server Component
-         * passed through as `children` stays server-rendered.
+         * The `dynamic` prop is deliberately **not** set. It opts the whole
+         * subtree into reading auth state during the render, which turns every
+         * route on the site dynamic — the build output went from prerendered
+         * pages to `ƒ` on all thirty of them, an invocation per view on pages
+         * that have no session data to show. The routes that do read the
+         * session declare `force-dynamic` themselves and call `auth()` there,
+         * which is all Clerk needs.
+         *
+         * The auth URLs are built per-locale, which is the whole reason this
+         * provider lives in the `[locale]` layout instead of a root one. With
+         * `as-needed` prefixing an Arabic visitor must be redirected to
+         * `/ar/sign-in` and returned to `/ar/account` — a single hardcoded
+         * `/sign-in` would drop them into the English tree mid-flow.
          */}
-        <I18nProvider locale={locale} dictionary={dictionary}>
-          <CartProvider>
-            <WishlistProvider>
-              <Nav />
-              {children}
-              <Footer locale={locale} />
-            </WishlistProvider>
-          </CartProvider>
-        </I18nProvider>
+        <ClerkProvider
+          appearance={khemClerkAppearance}
+          localization={locale === "ar" ? arSA : undefined}
+          signInUrl={localizePath(locale, "/sign-in")}
+          signUpUrl={localizePath(locale, "/sign-up")}
+          signInFallbackRedirectUrl={localizePath(locale, "/account")}
+          signUpFallbackRedirectUrl={localizePath(locale, "/account")}
+        >
+          {/*
+           * Cart and wishlist wrap the whole tree, not just the two pages that
+           * list them: the Nav badge, the PDP buy block, and the collection
+           * grid hearts all read the same state, and they live on every route.
+           *
+           * Both are client providers holding `localStorage`-backed state, so
+           * neither turns `children` into client components — a Server
+           * Component passed through as `children` stays server-rendered.
+           */}
+          <I18nProvider locale={locale} dictionary={dictionary}>
+            <CartProvider>
+              <WishlistProvider>
+                <Nav />
+                {children}
+                <Footer locale={locale} />
+              </WishlistProvider>
+            </CartProvider>
+          </I18nProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

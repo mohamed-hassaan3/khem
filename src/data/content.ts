@@ -44,7 +44,7 @@ export const TESTIMONIALS: Testimonial[] = [
     quote:
       "The attention to detail — from the bottle to the scent — signals a new era of Egyptian luxury.",
     author: "Sofia Marchetti",
-    authorTitle: "Creative Director, Milan",
+    authorTitle: "Creative Director, Dubai",
   },
 ];
 

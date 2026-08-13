@@ -47,6 +47,9 @@ export const ar: Dictionary = {
     cartCount: "حقيبة التسوّق، {count} عناصر",
     cartCountOne: "حقيبة التسوّق، عنصر واحد",
     account: "الحساب",
+    accountMenu: "قائمة الحساب",
+    signIn: "تسجيل الدخول",
+    signOut: "تسجيل الخروج",
     openMenu: "فتح القائمة",
     closeMenu: "إغلاق القائمة",
     featuredProduct: "سخم أمبريه",
@@ -766,6 +769,120 @@ export const ar: Dictionary = {
     },
   },
 
+  auth: {
+    signIn: {
+      meta: {
+        title: "تسجيل الدخول",
+        description:
+          "سجّل الدخول إلى حسابك في كيم لمتابعة طلباتك وعطورك المحفوظة وعناوينك.",
+      },
+      eyebrow: "الدار",
+      heading: "ادخل الدار",
+      body: "سجّل الدخول لمتابعة طلباتك وعطورك المحفوظة وعناوينك.",
+    },
+    signUp: {
+      meta: {
+        title: "إنشاء حساب",
+        description:
+          "أنشئ حسابًا في كيم للحصول على وصول مبكر للإصدارات الجديدة ودعوات لفعالياتنا الخاصة وشحن مجاني.",
+      },
+      eyebrow: "انضم إلى الدائرة",
+      heading: "إنشاء حساب",
+      body: "وصول مبكر للإصدارات الجديدة، ودعوات إلى فعالياتنا الخاصة، وشحن مجاني على كل الطلبات.",
+    },
+    marketing: {
+      label: "أرسل لي أخبار الدار وعروضها",
+      note: "الإصدارات الجديدة، والفعاليات الخاصة، والإصدارات الموسمية. يمكنك إلغاء الاشتراك في أي وقت.",
+    },
+    guestLead: "لا تملك حسابًا بعد؟ يمكنك التصفّح مع ذلك.",
+    guestCart: "حقيبتك",
+    guestWishlist: "مفضّلتك",
+  },
+
+  account: {
+    meta: {
+      title: "الحساب",
+      description: "حسابك في كيم.",
+    },
+    eyebrow: "أهلًا بعودتك",
+    heading: "{name}",
+    headingFallback: "حسابك",
+    nav: {
+      label: "أقسام الحساب",
+      overview: "نظرة عامة",
+      orders: "طلباتي",
+      addresses: "العناوين",
+      profile: "الملف الشخصي",
+      wishlist: "المفضّلة",
+    },
+    stats: {
+      orders: "إجمالي الطلبات",
+      spent: "إجمالي الإنفاق",
+      wishlist: "عناصر المفضّلة",
+      allTime: "منذ البداية",
+      saved: "محفوظة",
+    },
+    recentOrder: "أحدث طلب",
+    viewAllOrders: "عرض الكل",
+    benefits: {
+      heading: "مزايا حصرية للأعضاء",
+      body: "بصفتك عضوًا في كيم، تحصل على وصول مبكر للإصدارات الجديدة، ودعوات إلى فعالياتنا الخاصة، وشحن مجاني على كل الطلبات.",
+    },
+    orders: {
+      meta: {
+        title: "طلباتي",
+        description: "سجلّ طلباتك في كيم.",
+      },
+      eyebrow: "سجلّ الطلبات",
+      heading: "طلباتي",
+      tracking: "رقم التتبّع: {code}",
+      status: {
+        PENDING: "قيد الانتظار",
+        PROCESSING: "قيد التجهيز",
+        SHIPPED: "تم الشحن",
+        DELIVERED: "تم التسليم",
+        CANCELLED: "مُلغى",
+        REFUNDED: "مُسترد",
+      },
+      empty: {
+        heading: "لا توجد طلبات بعد",
+        body: "عند إتمام طلبك الأول، سيظهر هنا مع تفاصيل تتبّعه.",
+        cta: "استكشف المجموعات",
+      },
+    },
+    addresses: {
+      meta: {
+        title: "العناوين",
+        description: "عناوين التوصيل المحفوظة في كيم.",
+      },
+      eyebrow: "مواقع محفوظة",
+      heading: "العناوين",
+      default: "الافتراضي",
+      edit: "تعديل",
+      remove: "حذف",
+      add: "+ إضافة عنوان جديد",
+      empty: {
+        heading: "لا توجد عناوين محفوظة",
+        body: "ستُحفظ هنا العناوين التي تستخدمها عند إتمام الطلب لتستعملها لاحقًا.",
+        cta: "استكشف المجموعات",
+      },
+    },
+    profile: {
+      meta: {
+        title: "الملف الشخصي",
+        description: "تفاصيل ملفك الشخصي في كيم.",
+      },
+      eyebrow: "بياناتك",
+      heading: "الملف الشخصي",
+    },
+    wishlistPanel: {
+      eyebrow: "عناصر محفوظة",
+      heading: "المفضّلة",
+      body: "اعرض عطورك المحفوظة وأدرها.",
+      cta: "الذهاب إلى المفضّلة",
+    },
+  },
+
   testimonials: {
     showFrom: "عرض شهادة {author}",
   },
@@ -788,6 +905,62 @@ export const ar: Dictionary = {
     invalidEmail: "يرجى إدخال بريد إلكتروني صحيح",
     successMessage: "شكرًا لك. سنعاود التواصل قريبًا.",
     errorMessage: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  },
+
+  search: {
+    meta: {
+      title: "البحث",
+      titleWithQuery: "البحث: {query}",
+      description:
+        "ابحث في مكتبة كيم بالاسم أو النفحة أو الإحساس — عطور التوقيع والنوار والأحجار الكريمة، إلى جانب العناية بالجسم وعطور المكان والأطقم.",
+      ogTitle: "البحث | عطور كيم",
+      ogDescription: "اعثر على عطرك باسمه أو بنفحاته أو بالمزاج الذي تبحث عنه.",
+    },
+
+    dialogLabel: "البحث في كيم",
+    inputLabel: "ابحث في العطور والنفحات والمجموعات",
+    placeholder: "عود، عنبر، عطر لليالي الشتاء…",
+    close: "إغلاق البحث",
+    closeHint: "ESC",
+    clear: "مسح البحث",
+
+    eyebrow: "البحث",
+    headingEmpty: "البحث",
+    submit: "بحث",
+
+    recent: "عمليات البحث الأخيرة",
+    clearRecent: "مسح",
+    popular: "الأكثر بحثًا",
+    collections: "المجموعات",
+    products: "العطور",
+
+    loading: "جارٍ البحث",
+    resultCount: "{count} نتيجة",
+    resultCountOne: "نتيجة واحدة",
+    resultCountNone: "لا توجد نتائج",
+
+    noResults: "لا توجد نتائج لـ «{query}»",
+    noResultsHint: "جرّب نفحة — عود، عنبر، ياسمين — أو الإحساس الذي تبحث عنه.",
+    error: "البحث غير متاح في هذه اللحظة. يرجى المحاولة مرة أخرى.",
+    enterHint: "اضغط Enter لعرض كل النتائج",
+
+    emptyPrompt: "عمّ تبحث؟",
+    emptyPromptBody:
+      "ابحث بالاسم أو بالنفحة أو بالمزاج الذي تودّ ارتداءه — «عطر دخاني لليالي الشتاء» تعمل تمامًا كما تعمل «عود».",
+    browseCta: "تصفّح المجموعات",
+
+    /*
+     * `term` بالإنجليزية لأن بيانات الكتالوج مخزّنة بالإنجليزية؛ `label` وحده
+     * هو ما يُعرض. انظر التعليق المقابل في `en.ts`.
+     */
+    popularTerms: [
+      { label: "عود", term: "oud" },
+      { label: "عنبر", term: "amber" },
+      { label: "ياسمين", term: "jasmine" },
+      { label: "بخور", term: "incense" },
+      { label: "أطقم الهدايا", term: "gift set" },
+      { label: "الاكتشاف", term: "discovery" },
+    ],
   },
 
   notFound: undefined!,

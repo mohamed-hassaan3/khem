@@ -54,3 +54,29 @@ export function productHref(product: LinkableProduct): string {
 export function hasDetailPage(product: LinkableProduct): boolean {
   return product.collectionKind === "FRAGRANCE";
 }
+
+/**
+ * The customer portal's routes, as locale-agnostic app paths.
+ *
+ * Written once so the sidebar, the `aria-current` comparison, and the proxy's
+ * protected matcher cannot drift apart. `<LocaleLink>` adds the prefix; these
+ * values never carry one.
+ */
+export const ACCOUNT_PATHS = {
+  overview: "/account",
+  orders: "/account/orders",
+  addresses: "/account/addresses",
+  profile: "/account/profile",
+} as const;
+
+/**
+ * Auth routes.
+ *
+ * These are also what `<ClerkProvider signInUrl>` is built from in the locale
+ * layout — via `localizePath`, since Clerk needs the real prefixed URL rather
+ * than the app path.
+ */
+export const AUTH_PATHS = {
+  signIn: "/sign-in",
+  signUp: "/sign-up",
+} as const;

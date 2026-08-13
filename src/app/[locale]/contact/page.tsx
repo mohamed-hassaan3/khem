@@ -157,6 +157,8 @@ export default async function Contact({
                 {socialProfiles.map((profile) => (
                   <li key={profile.id}>
                     <a
+                      target="_blank"
+                      rel="noopener noreferrer"
                       href={profile.url}
                       aria-label={interpolate(
                         dict.contact.social.profileLabel,

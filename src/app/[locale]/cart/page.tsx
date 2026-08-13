@@ -14,8 +14,13 @@ import { getProductCardsByCollection } from "@/src/services/products";
  * per-visitor data at all — only the catalog the island resolves ids against —
  * so a dynamic render would cost a function invocation per view and buy
  * nothing. The revalidate window matches the PDP because both surfaces show
- * live catalog prices. **Restore `force-dynamic` when the cart moves to
- * Supabase behind a Clerk session.**
+ * live catalog prices.
+ *
+ * Clerk has since landed and this is still the right treatment: a guest must
+ * be able to fill a bag before signing in, so `/cart` is deliberately absent
+ * from the protected matcher in `src/proxy.ts`. **Restore `force-dynamic`
+ * when the cart itself moves to Supabase**, at which point the lines become
+ * server state tied to a `userId`.
  */
 export const revalidate = 300;
 

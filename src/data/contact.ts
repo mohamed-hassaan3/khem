@@ -60,18 +60,18 @@ export const SOCIAL_PROFILES: SocialProfile[] = [
     handle: "@khemperfumes",
     // TODO: replace with the real profile URL; external links then need
     // target="_blank" rel="noopener noreferrer".
-    url: "#",
+    url: "https://www.instagram.com/khemperfumes/",
   },
   {
     id: "pinterest",
     platform: "Pinterest",
-    handle: "khem.perfumes",
-    url: "#",
+    handle: "khemperfumes",
+    url: "https://www.pinterest.com/khemperfumes/",
   },
   {
     id: "facebook",
     platform: "Facebook",
     handle: "@khemperfumes",
-    url: "#",
+    url: "https://www.facebook.com/khemperfumes/",
   },
 ];

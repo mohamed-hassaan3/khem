@@ -16,6 +16,14 @@ export interface PageHeaderProps {
   meta?: string;
   /** Renders `meta` inside a polite live region, for counts that change. */
   metaLive?: boolean;
+  /**
+   * Direction for the heading alone.
+   *
+   * `/search` puts visitor-typed text of unknown script in this slot, where
+   * `"auto"` lets an English query keep its LTR run inside the Arabic page.
+   * Dictionary headings leave it unset and inherit the page direction.
+   */
+  headingDir?: "auto";
 }
 
 export default function PageHeader({
@@ -23,12 +31,16 @@ export default function PageHeader({
   heading,
   meta,
   metaLive = false,
+  headingDir,
 }: PageHeaderProps) {
   return (
     <header className="border-b border-border px-6 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
       <p className="eyebrow mb-3">{eyebrow}</p>
 
-      <h1 className="font-heading text-3xl font-normal text-ivory sm:text-4xl lg:text-5xl">
+      <h1
+        dir={headingDir}
+        className="font-heading text-3xl font-normal text-ivory sm:text-4xl lg:text-5xl"
+      >
         {heading}
       </h1>
 

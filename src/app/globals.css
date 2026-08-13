@@ -305,6 +305,94 @@
   .page-enter {
     animation: pageIn 0.6s var(--ease-luxury-bezier) forwards;
   }
+
+  /*
+   * Loading states.
+   *
+   * `.khem-orbit` is the gold arc circling the roundel on the full-screen
+   * loader; `.khem-shimmer` is the sweep across a skeleton placeholder. Both
+   * are strictly linear/eased — no spring, no bounce (AGENTS.md §2.2).
+   */
+  .khem-orbit {
+    transform-origin: center;
+    animation: khemOrbit 1.6s linear infinite;
+  }
+
+  /*
+   * Gold at 7%, not white: a white sweep over obsidian reads as a generic SaaS
+   * placeholder, which is exactly the register this brand avoids.
+   */
+  .khem-shimmer {
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--color-gold) 7%, transparent) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    background-position: -100% 0;
+    animation: khemShimmer 1.8s var(--ease-luxury) infinite;
+  }
+
+  /* The sweep is directional, so it follows the document, not the viewport. */
+  [dir="rtl"] .khem-shimmer {
+    animation-name: khemShimmerRtl;
+  }
+
+  /*
+   * The facet/sort transition on the collection grid. Filtering is synchronous
+   * — there is nothing to wait for — so the change is marked with a fade
+   * rather than a spinner that would need an invented delay to be seen.
+   */
+  .khem-fade {
+    animation: khemFade 0.25s var(--ease-luxury-bezier) both;
+  }
+
+  /*
+   * One suggestion row arriving in the search panel.
+   *
+   * An animation rather than a transition: a transition needs a prior state to
+   * move away from, which would mean painting every row invisible and flipping
+   * it in a second pass. The per-row delay is set inline by `<SearchOverlay>`.
+   */
+  .search-row {
+    animation: khemFade 0.4s var(--ease-luxury-bezier) both;
+  }
+
+  /*
+   * `type="search"` is the correct semantic input — it gets the right virtual
+   * keyboard and `enterKeyHint` — but WebKit decorates it with its own cancel
+   * glyph, which is a grey system control sitting inside a Cinzel field. The
+   * panel already has a gold clear button.
+   */
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    appearance: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .khem-orbit {
+    animation: none;
+    /* Rotation gone, the arc would read as a broken ring — close it. */
+    stroke-dasharray: none;
+  }
+
+  .khem-shimmer {
+    animation: none;
+    background-image: none;
+  }
+
+  .khem-fade {
+    animation: none;
+  }
+
+  .search-row {
+    animation: none;
+  }
 }
 
 /*
@@ -383,6 +471,44 @@
   from {
     opacity: 0;
     transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes khemOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes khemShimmer {
+  from {
+    background-position: -100% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes khemShimmerRtl {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes khemFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
   to {
     opacity: 1;

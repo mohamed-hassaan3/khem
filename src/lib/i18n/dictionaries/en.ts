@@ -46,6 +46,10 @@ export const en = {
     cartCount: "Shopping bag, {count} items",
     cartCountOne: "Shopping bag, 1 item",
     account: "Account",
+    /** Accessible label for the avatar button once a session exists. */
+    accountMenu: "Account menu",
+    signIn: "Sign In",
+    signOut: "Sign Out",
     openMenu: "Open menu",
     closeMenu: "Close menu",
     featuredProduct: "Sekhem Ambré",
@@ -804,6 +808,122 @@ export const en = {
     },
   },
 
+  auth: {
+    signIn: {
+      meta: {
+        title: "Sign In",
+        description:
+          "Sign in to your KHEM account to follow your orders, saved fragrances, and addresses.",
+      },
+      eyebrow: "The House",
+      heading: "Enter the House",
+      body: "Sign in to follow your orders, your saved fragrances, and your addresses.",
+    },
+    signUp: {
+      meta: {
+        title: "Create Account",
+        description:
+          "Create a KHEM account for early access to new releases, private events, and complimentary delivery.",
+      },
+      eyebrow: "Join the Circle",
+      heading: "Create an Account",
+      body: "Early access to new releases, invitations to private events, and complimentary delivery on every order.",
+    },
+    marketing: {
+      label: "Email me with news and offers",
+      note: "New releases, private events, and seasonal editions. You may unsubscribe at any time.",
+    },
+    /** Guest routes offered beneath the form — neither needs a session. */
+    guestLead: "No account yet? You can still browse.",
+    guestCart: "Your Bag",
+    guestWishlist: "Your Wishlist",
+  },
+
+  account: {
+    meta: {
+      title: "Account",
+      description: "Your KHEM account.",
+    },
+    eyebrow: "Welcome Back",
+    /** Greets by first name; falls back to `headingFallback` when unnamed. */
+    heading: "{name}",
+    headingFallback: "Your Account",
+    nav: {
+      label: "Account sections",
+      overview: "Overview",
+      orders: "My Orders",
+      addresses: "Addresses",
+      profile: "Profile",
+      wishlist: "Wishlist",
+    },
+    stats: {
+      orders: "Total Orders",
+      spent: "Total Spent",
+      wishlist: "Wishlist Items",
+      allTime: "All time",
+      saved: "Saved",
+    },
+    recentOrder: "Recent Order",
+    viewAllOrders: "View All",
+    benefits: {
+      heading: "Exclusive Member Benefits",
+      body: "As a KHEM member, you receive early access to new releases, invitations to private events, and complimentary delivery on all orders.",
+    },
+    orders: {
+      meta: {
+        title: "My Orders",
+        description: "Your KHEM order history.",
+      },
+      eyebrow: "Order History",
+      heading: "My Orders",
+      tracking: "Tracking: {code}",
+      status: {
+        PENDING: "Pending",
+        PROCESSING: "Processing",
+        SHIPPED: "Shipped",
+        DELIVERED: "Delivered",
+        CANCELLED: "Cancelled",
+        REFUNDED: "Refunded",
+      },
+      empty: {
+        heading: "No Orders Yet",
+        body: "When you place your first order, it will appear here with its tracking details.",
+        cta: "Explore Collections",
+      },
+    },
+    addresses: {
+      meta: {
+        title: "Addresses",
+        description: "Your saved KHEM delivery addresses.",
+      },
+      eyebrow: "Saved Locations",
+      heading: "Addresses",
+      default: "Default",
+      edit: "Edit",
+      remove: "Remove",
+      add: "+ Add New Address",
+      empty: {
+        heading: "No Saved Addresses",
+        body: "Addresses you use at checkout will be kept here for next time.",
+        cta: "Explore Collections",
+      },
+    },
+    profile: {
+      meta: {
+        title: "Profile",
+        description: "Your KHEM profile details.",
+      },
+      eyebrow: "Your Details",
+      heading: "Profile",
+    },
+    wishlistPanel: {
+      eyebrow: "Saved Items",
+      heading: "Wishlist",
+      body: "View and manage your saved fragrances.",
+      cta: "Go to Wishlist",
+    },
+  },
+
   testimonials: {
     showFrom: "Show testimonial from {author}",
   },
@@ -826,6 +946,64 @@ export const en = {
     invalidEmail: "Please enter a valid email address",
     successMessage: "Thank you. We will respond shortly.",
     errorMessage: "Something went wrong. Please try again.",
+  },
+
+  search: {
+    meta: {
+      title: "Search",
+      titleWithQuery: "Search: {query}",
+      description:
+        "Search the KHEM library by name, note, or feeling — the Signature, Noir, and Gemstone fragrances alongside body care, home fragrance, and sets.",
+      ogTitle: "Search | KHEM Perfumes",
+      ogDescription: "Find a fragrance by its name, its notes, or the mood you are after.",
+    },
+
+    dialogLabel: "Search KHEM",
+    inputLabel: "Search fragrances, notes, and collections",
+    placeholder: "Oud, amber, something for winter…",
+    close: "Close search",
+    closeHint: "ESC",
+    clear: "Clear search",
+
+    eyebrow: "Search",
+    headingEmpty: "Search",
+    submit: "Search",
+
+    recent: "Recent Searches",
+    clearRecent: "Clear",
+    popular: "Popular Searches",
+    collections: "Collections",
+    products: "Fragrances",
+
+    loading: "Searching",
+    resultCount: "{count} results",
+    resultCountOne: "1 result",
+    resultCountNone: "No results",
+
+    noResults: "No matches for “{query}”",
+    noResultsHint:
+      "Try a note — oud, amber, jasmine — or the feeling you are after.",
+    error: "Search is unavailable for a moment. Please try again.",
+    enterHint: "Press Enter for all results",
+
+    emptyPrompt: "What are you searching for?",
+    emptyPromptBody:
+      "Search by name, by note, or by the mood you want to wear — “something smoky for a winter night” works as well as “oud”.",
+    browseCta: "Browse the Collections",
+
+    /*
+     * The chip's `term` is what gets searched and the `label` is what is shown.
+     * They are separate because the catalog is stored in English: an Arabic
+     * chip has to display Arabic and search English, or it would return nothing.
+     */
+    popularTerms: [
+      { label: "Oud", term: "oud" },
+      { label: "Amber", term: "amber" },
+      { label: "Jasmine", term: "jasmine" },
+      { label: "Incense", term: "incense" },
+      { label: "Gift Sets", term: "gift set" },
+      { label: "Discovery", term: "discovery" },
+    ],
   },
 
   notFound: {

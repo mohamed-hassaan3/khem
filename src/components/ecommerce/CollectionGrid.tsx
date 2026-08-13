@@ -229,7 +229,27 @@ export default function CollectionGrid({
       {/* ── PRODUCT GRID ────────────────────────────── */}
       <section className="bg-background px-6 pb-24 pt-16 md:px-20 md:pb-36">
         {sorted.length > 0 ? (
-          <div className="mx-auto grid max-w-350 grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
+          /*
+           * Keyed on the view, so React remounts the grid and `.khem-fade`
+           * replays on every facet or sort change.
+           *
+           * This is deliberately a fade and not a spinner. `filtered` and
+           * `sorted` above are `useMemo` over an in-memory array — they resolve
+           * in the same tick as the click, so a loading indicator here would
+           * need an invented delay to ever be seen. The fade marks the change
+           * honestly without slowing it down.
+           *
+           * It also covers the one real seam on this route: the facet is read
+           * from the URL after mount (see the header comment on why it cannot
+           * come from `useSearchParams`), so a visit to
+           * `/collections?facet=best-sellers` paints the full catalog from the
+           * static HTML and narrows on hydration. The narrowing now animates
+           * in as a filter being applied rather than reading as a glitch.
+           */
+          <div
+            key={`${facet ?? "all"}-${sort}`}
+            className="khem-fade mx-auto grid max-w-350 grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3"
+          >
             {sorted.map((item) => {
               // Gated on hydration: the server render cannot know what is
               // saved, so the heart stays unfilled until the store is read.

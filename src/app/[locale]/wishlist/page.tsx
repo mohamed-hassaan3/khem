@@ -9,11 +9,14 @@ import { getProductCardsByCollection } from "@/src/services/products";
 /**
  * ISR, 5 minutes.
  *
- * AGENTS.md §8 lists `/wishlist` as protected and dynamic. Clerk is not
- * installed and saved fragrances live in the visitor's browser, so this route
- * currently renders no per-visitor data — see the identical note on
- * `/cart`. **Restore the protected dynamic treatment when the `Wishlist` table
- * and the Clerk session land.**
+ * AGENTS.md §8 lists `/wishlist` as protected and dynamic. Clerk has since
+ * landed and this route is still neither, deliberately: saved fragrances live
+ * in the visitor's browser, so the route renders no per-visitor data on the
+ * server, and requiring a session would lock guests out of a list their own
+ * browser is holding. It is not in the protected matcher in `src/proxy.ts`.
+ *
+ * **Revisit when the `Wishlist` table lands** — at that point saves become
+ * server state tied to a `userId`, and the §8 treatment becomes correct.
  */
 export const revalidate = 300;
 

@@ -64,7 +64,6 @@ export default async function Footer({ locale }: { locale: Locale }) {
   const legalLinks = [
     { label: dict.footer.links.privacyPolicy, href: "/privacy-policy" },
     { label: dict.footer.links.termsConditions, href: "/terms-conditions" },
-    { label: dict.footer.links.returns, href: "/return-exchange" },
     { label: dict.footer.links.cookiePolicy, href: "/cookie-policy" },
   ];
 
@@ -101,8 +100,10 @@ export default async function Footer({ locale }: { locale: Locale }) {
           <div className="flex flex-wrap gap-5">
             {socialLinks.map((name) => (
               <a
+                target="_blank"
+                rel="noopener noreferrer"
                 key={name}
-                href="#"
+                href={`https://www.${name.toLowerCase()}.com/khemperfumes/`}
                 dir="ltr"
                 lang="en"
                 className={socialLinkClass}
