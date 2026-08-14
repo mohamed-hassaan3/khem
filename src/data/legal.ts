@@ -546,11 +546,11 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentSlug, LegalDocument> = {
               rows: [
                 [
                   "Essential",
-                  "Keeps you signed in, keeps your bag intact, and secures checkout. These cannot be switched off — without them the shop does not work.",
+                  "Keeps you signed in, keeps your bag intact, shows prices in your currency, and secures checkout. These cannot be switched off — without them the shop does not work.",
                 ],
                 [
                   "Preferences",
-                  "Remembers your region, currency, and the fragrances you have recently viewed.",
+                  "Remembers your region and the fragrances you have recently viewed.",
                 ],
                 [
                   "Analytics",
@@ -558,6 +558,24 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentSlug, LegalDocument> = {
                 ],
               ],
             },
+          },
+        ],
+      },
+      {
+        id: "the-currency-cookie",
+        title: "The Currency Cookie",
+        blocks: [
+          {
+            kind: "text",
+            text: "One cookie is worth describing on its own, because it is the only one set from where you are. When you arrive, we read the country your connection resolves to and store a single three-letter currency code — USD, EGP, EUR, GBP, AED, or SAR — under the name khem.currency.v1, so the prices you see are in money you recognise.",
+          },
+          {
+            kind: "text",
+            text: "Your IP address is not stored, your country is not stored, and nothing about your location is logged or shared. Only the currency code is kept, only for a year, and only on your own device. Change the currency in the footer at any time and your choice replaces the detected one for good.",
+          },
+          {
+            kind: "note",
+            text: "We treat this as an essential cookie: without it a price cannot be shown, and it carries no identifier, so it cannot be used to recognise you here or anywhere else. Prices outside US Dollars are converted at an indicative rate — your order is charged in US Dollars.",
           },
         ],
       },

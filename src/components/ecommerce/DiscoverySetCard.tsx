@@ -4,11 +4,11 @@ import { Check, Heart } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-import { formatPrice } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { useCart } from "@/src/providers/cart-provider";
+import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import { useWishlist } from "@/src/providers/wishlist-provider";
 import type { ProductCardData } from "@/src/types/catalog";
@@ -40,6 +40,7 @@ export default function DiscoverySetCard({
   sizes = DEFAULT_SIZES,
 }: DiscoverySetCardProps) {
   const dict = useDictionary();
+  const formatPrice = useFormatPrice();
   const { addLine } = useCart();
   const wishlist = useWishlist();
   // Set names and contents come from `src/data` — English in both trees.
@@ -150,7 +151,7 @@ export default function DiscoverySetCard({
           ) : null}
         </div>
 
-        <p className="mb-5 font-heading text-2xl text-gold">
+        <p className="mb-5 font-heading text-2xl tabular-nums text-gold">
           {formatPrice(product.priceInCents)}
         </p>
 

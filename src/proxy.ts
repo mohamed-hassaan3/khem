@@ -3,6 +3,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import {
+  CURRENCY_COOKIE,
+  CURRENCY_COOKIE_MAX_AGE,
+  isCurrency,
+  resolveCurrencyForCountry,
+} from "./lib/currency";
+import {
   DEFAULT_LOCALE,
   LOCALES,
   localizePath,
@@ -53,6 +59,26 @@ import { ACCOUNT_PATHS, AUTH_PATHS } from "./lib/routes";
  * rather than a glob so the two URL shapes (`/account` and `/ar/account`)
  * cannot fall out of step — the divergence hazard the deprecation is about.
  *
+ * ## Currency detection
+ *
+ * The third job, and the only one that reads the visitor's location: the
+ * request's `x-vercel-ip-country` header is mapped to one of six display
+ * currencies and written to a cookie the client reads after hydration.
+ *
+ * This does not contradict the paragraph above. Auto-redirecting on
+ * `Accept-Language` is refused because it moves the visitor to a *different
+ * URL* — which fragments the CDN cache, overrides a deliberate link, and gives
+ * a crawler two answers for one address. A currency is none of that: it is a
+ * display transform applied to the same page, at the same URL, after the
+ * static HTML has already been served. Nothing about the cached document
+ * changes, so there is nothing to fragment.
+ *
+ * The cookie is written **only when absent or invalid**, which is what makes
+ * the footer switcher authoritative: once a visitor has chosen, geo never
+ * overwrites them. When the header is missing — local dev, or any non-Vercel
+ * host — nothing is written and the client falls back to its own timezone
+ * heuristic. A country is never fabricated.
+ *
  * `middleware.ts` is deprecated in Next 16; this is the `proxy.ts` convention,
  * and it is also the file Clerk's Next 16 setup expects.
  */
@@ -78,6 +104,45 @@ function localeRewrite(request: NextRequest): NextResponse {
   return NextResponse.rewrite(url);
 }
 
+/**
+ * Stamp the display currency onto a response, if it does not already have one.
+ *
+ * Every response leaving this file goes through here rather than only the two
+ * "normal" paths, so a future fourth `return` cannot silently ship a visitor
+ * without a currency.
+ *
+ * The country code is untrusted — a client can send that header to a non-Vercel
+ * origin — so it is only ever a key into the fixed map in `currency.ts`, and an
+ * unrecognised value resolves to USD. Nothing derived from the visitor's
+ * location is stored beyond the three-letter code: no IP, no country.
+ */
+function withCurrencyCookie(
+  request: NextRequest,
+  response: NextResponse,
+): NextResponse {
+  // A stored choice wins over geo — that is what makes the footer switcher
+  // stick. An invalid value (stale build, hand-edited cookie) is overwritten.
+  const stored = request.cookies.get(CURRENCY_COOKIE)?.value;
+  if (isCurrency(stored)) return response;
+
+  const country = request.headers.get("x-vercel-ip-country");
+  // No header means no geolocation available. Writing USD here would be a
+  // guess dressed as a decision, and it would lock out the client fallback.
+  if (country === null) return response;
+
+  response.cookies.set(CURRENCY_COOKIE, resolveCurrencyForCountry(country), {
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    // The client has to read this to format prices; it carries a display
+    // preference and nothing else, and must never be extended to carry more.
+    httpOnly: false,
+    maxAge: CURRENCY_COOKIE_MAX_AGE,
+  });
+
+  return response;
+}
+
 export default clerkMiddleware(async (auth, request) => {
   // The public pathname, split into the locale it addresses and the path
   // beneath — the same function the sidebar uses to mark its active link, so
@@ -100,11 +165,11 @@ export default clerkMiddleware(async (auth, request) => {
         request.url,
       );
 
-      return NextResponse.redirect(signInUrl);
+      return withCurrencyCookie(request, NextResponse.redirect(signInUrl));
     }
   }
 
-  return localeRewrite(request);
+  return withCurrencyCookie(request, localeRewrite(request));
 });
 
 export const config = {

@@ -1,4 +1,4 @@
-import { formatPrice } from "@/src/lib/format";
+import Price from "@/src/components/ecommerce/Price";
 import type { Locale } from "@/src/lib/i18n/config";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 import { interpolate } from "@/src/lib/i18n/interpolate";
@@ -76,8 +76,11 @@ export default function OrderCard({ order, locale, dict }: OrderCardProps) {
       </div>
 
       <div className="sm:text-end">
-        <p className="mb-4 font-heading text-xl text-gold">
-          {formatPrice(order.totalInCents)}
+        <p className="mb-4">
+          <Price
+            cents={order.totalInCents}
+            className="font-heading text-xl text-gold"
+          />
         </p>
       </div>
     </article>

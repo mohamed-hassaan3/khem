@@ -1016,6 +1016,69 @@ export const en = {
   languageSwitcher: {
     label: "Change language",
   },
+
+  /*
+   * Display currency. The names are the visitor's own words for their currency,
+   * not the ISO code — "Egyptian Pound", not "EGP" — because the switcher is
+   * chrome, and chrome is translated. The prices themselves keep the ISO symbol
+   * Intl gives them (`src/lib/format.ts`).
+   */
+  currencySwitcher: {
+    label: "Change currency",
+    names: {
+      USD: "US Dollar",
+      EGP: "Egyptian Pound",
+      EUR: "Euro",
+      GBP: "British Pound",
+      AED: "UAE Dirham",
+      SAR: "Saudi Riyal",
+    },
+    /*
+     * Shown wherever a non-USD price is committed to — the buy block and the
+     * bag. Prices outside USD are converted at an indicative rate, and saying
+     * so is not optional: the card is charged in dollars.
+     */
+    conversionNote:
+      "Shown in {currency} at an indicative rate. Your order is charged in US Dollars.",
+  },
+
+  /*
+   * Cookie consent. The category names and descriptions deliberately echo the
+   * table in the published Cookie Policy (`src/data/legal.ts`) — the banner and
+   * the policy must never describe different sets of cookies.
+   */
+  cookieConsent: {
+    regionLabel: "Cookie consent",
+    eyebrow: "Privacy",
+    title: "Cookies at KHEM",
+    body: "We use a small number of cookies to keep your bag intact, remember your preferences, and understand which pages are read. We run no advertising cookies and work with no ad networks — your browsing is never sold or shared.",
+    policyLink: "Read the Cookie Policy",
+    settingsLink: "Cookie Settings",
+    acceptAll: "Accept All",
+    decline: "Decline",
+    managePreferences: "Manage Preferences",
+    hidePreferences: "Hide Preferences",
+    savePreferences: "Save Preferences",
+    alwaysActive: "Always Active",
+    lastUpdated: "Last updated {date}",
+    categories: {
+      essential: {
+        name: "Essential",
+        description:
+          "Keeps you signed in, keeps your bag intact, and secures checkout. These cannot be switched off.",
+      },
+      preferences: {
+        name: "Preferences",
+        description:
+          "Remembers your language, region, and the fragrances you have recently viewed.",
+      },
+      analytics: {
+        name: "Analytics",
+        description:
+          "Anonymous, aggregated data on which pages are read and where visitors get stuck. It tells us what to fix; it does not tell us who you are.",
+      },
+    },
+  },
 };
 
 /**

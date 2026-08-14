@@ -1,7 +1,8 @@
 import Image from "next/image";
 
+import Price from "@/src/components/ecommerce/Price";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import { formatPrice, formatVolume } from "@/src/lib/format";
+import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
@@ -101,9 +102,10 @@ export default async function ProductCard({
         </div>
 
         <div className="flex items-center justify-between border-t border-border pt-2">
-          <span className="font-heading text-sm text-gold">
-            {formatPrice(product.priceInCents)}
-          </span>
+          <Price
+            cents={product.priceInCents}
+            className="font-heading text-sm text-gold"
+          />
           <span className="text-[10px] uppercase tracking-[0.15em] text-ivory/40">
             {formatVolume(product.volumeMl)}
           </span>

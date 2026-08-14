@@ -8,8 +8,9 @@ import {
   cartTotalInCents,
   shippingInCents,
 } from "@/src/lib/cart";
-import { formatPrice } from "@/src/lib/format";
+import { BASE_CURRENCY } from "@/src/lib/currency";
 import { interpolate } from "@/src/lib/i18n/interpolate";
+import { useCurrency } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 
 /**
@@ -29,6 +30,7 @@ export interface CartSummaryProps {
 
 export default function CartSummary({ subtotalInCents }: CartSummaryProps) {
   const dict = useDictionary();
+  const { currency, formatPrice } = useCurrency();
 
   const shipping = shippingInCents(subtotalInCents);
   const total = cartTotalInCents(subtotalInCents);
@@ -71,13 +73,26 @@ export default function CartSummary({ subtotalInCents }: CartSummaryProps) {
           <span className="font-heading text-sm tracking-[0.1em] text-ivory">
             {dict.cart.total}
           </span>
-          <span className="font-heading text-xl text-gold">
+          <span className="font-heading text-xl tabular-nums text-gold">
             {formatPrice(total)}
           </span>
         </div>
         <p className="mt-2 text-[10px] tracking-[0.05em] text-ivory/25">
           {dict.cart.taxNote}
         </p>
+
+        {/*
+         * The total above is a conversion; the card is charged in dollars. A
+         * shop that shows one currency and bills another without saying so is
+         * misleading, and this is the last screen before it happens.
+         */}
+        {currency !== BASE_CURRENCY ? (
+          <p className="mt-1.5 text-[10px] tracking-[0.05em] text-ivory/25">
+            {interpolate(dict.currencySwitcher.conversionNote, {
+              currency: dict.currencySwitcher.names[currency],
+            })}
+          </p>
+        ) : null}
       </div>
 
       {/*
@@ -132,7 +147,7 @@ function Row({
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-xs tracking-[0.08em] text-ivory/40">{label}</span>
-      <span className="font-heading text-[13px] text-ivory">{value}</span>
+      <span className="font-heading text-[13px] tabular-nums text-ivory">{value}</span>
     </div>
   );
 }

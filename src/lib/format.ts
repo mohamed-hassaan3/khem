@@ -4,28 +4,62 @@
  * Money is stored in the smallest currency unit (AGENTS.md §9) and dates are
  * stored as ISO-8601 strings; both are converted to display strings here and
  * nowhere else, so a currency or locale change is a one-file edit.
+ *
+ * Money now has two currencies, and the distinction matters: it is *stored* in
+ * USD and *displayed* in whichever of `src/lib/currency.ts`'s six the visitor
+ * resolved to. Only this file crosses between them. Everything upstream — the
+ * catalog, the cart maths, the order totals — stays in USD cents, so a display
+ * currency can never become a pricing input.
  */
 
+import {
+  BASE_CURRENCY,
+  CURRENCY_CONFIG,
+  convertFromUsdCents,
+  type Currency,
+} from "@/src/lib/currency";
+import type { Locale } from "@/src/lib/i18n/config";
 import type { Concentration, Product } from "@/src/types/catalog";
 
-const CURRENCY = "USD";
 const LOCALE = "en-US";
 
 /**
- * Formats a price held in cents.
+ * Formats a price held in USD cents, in the visitor's display currency.
  *
- * Whole amounts drop the decimals (29500 → "$295") to match the editorial
- * price treatment; non-whole amounts keep them (29550 → "$295.50").
+ * Whole USD amounts drop the decimals (29500 → "$295") to match the editorial
+ * price treatment; non-whole amounts keep them (29550 → "$295.50"). Converted
+ * currencies are rounded to a coarse unit before they arrive here, so they are
+ * always whole and print no decimals at all.
+ *
+ * Number formatting stays `en-US` on both locale trees. Prices describe
+ * English-only catalog records — the same reasoning that keeps
+ * `formatArticleDate` locale-free — so the Arabic tree changes the currency
+ * symbol without switching to Arabic-Indic digits mid-page.
+ *
+ * The `currency` parameter defaults to USD so a Server Component rendering
+ * before hydration, and any call site not yet reached by the currency provider,
+ * both produce the stored price rather than a wrong one.
  */
-export function formatPrice(priceInCents: number): string {
-  const hasFraction = priceInCents % 100 !== 0;
+export function formatPrice(
+  priceInCents: number,
+  currency: Currency = BASE_CURRENCY,
+): string {
+  const amountInMinorUnits = convertFromUsdCents(priceInCents, currency);
+  const { fractionDigits } = CURRENCY_CONFIG[currency];
+
+  const digits =
+    fractionDigits === "auto"
+      ? amountInMinorUnits % 100 !== 0
+        ? 2
+        : 0
+      : fractionDigits;
 
   return new Intl.NumberFormat(LOCALE, {
     style: "currency",
-    currency: CURRENCY,
-    minimumFractionDigits: hasFraction ? 2 : 0,
-    maximumFractionDigits: hasFraction ? 2 : 0,
-  }).format(priceInCents / 100);
+    currency,
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(amountInMinorUnits / 100);
 }
 
 /**
@@ -59,6 +93,26 @@ export function formatLegalDate(isoDate: string): string {
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(isoDate));
+}
+
+/**
+ * Formats the moment a consent decision was recorded, e.g. "14 August 2026".
+ *
+ * The only formatter here that takes a locale, and deliberately so: prices and
+ * catalog dates describe English-only records (see `src/lib/i18n/rtl.ts`),
+ * whereas this date sits inside fully translated chrome and would look wrong in
+ * Latin numerals on an Arabic page.
+ *
+ * No `timeZone` override, unlike the ISO-date formatters above: this is a real
+ * epoch timestamp rendered client-side only — the banner never appears before
+ * hydration — so the visitor's own zone is both correct and safe.
+ */
+export function formatConsentDate(epochMs: number, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : LOCALE, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(epochMs));
 }
 
 /** Volume label for a product, e.g. 100 → "100 ML". */

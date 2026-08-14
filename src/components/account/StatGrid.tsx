@@ -1,6 +1,6 @@
 "use client";
 
-import { formatPrice } from "@/src/lib/format";
+import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import { useWishlist } from "@/src/providers/wishlist-provider";
 import type { AccountSummary } from "@/src/types/account";
@@ -25,6 +25,7 @@ import type { AccountSummary } from "@/src/types/account";
 
 export default function StatGrid({ summary }: { summary: AccountSummary }) {
   const dict = useDictionary();
+  const formatPrice = useFormatPrice();
   const { count, isHydrated } = useWishlist();
 
   const stats = [

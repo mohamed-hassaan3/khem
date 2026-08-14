@@ -6,15 +6,12 @@ import Image from "next/image";
 import QuantityStepper from "@/src/components/ecommerce/QuantityStepper";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { lineTotalInCents, quantityCeiling } from "@/src/lib/cart";
-import {
-  formatPrice,
-  formatProductType,
-  formatVolume,
-} from "@/src/lib/format";
+import { formatProductType, formatVolume } from "@/src/lib/format";
 import { productHref } from "@/src/lib/routes";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
+import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { ProductCardData } from "@/src/types/catalog";
 
@@ -42,6 +39,7 @@ export default function CartLine({
   onRemove,
 }: CartLineProps) {
   const dict = useDictionary();
+  const formatPrice = useFormatPrice();
   const island = ltrIsland(locale);
 
   const maxQuantity = quantityCeiling(product.inventory);
@@ -82,7 +80,7 @@ export default function CartLine({
             </h2>
           </div>
 
-          <span className="font-heading text-base text-gold sm:text-lg" {...island}>
+          <span className="font-heading text-base tabular-nums text-gold sm:text-lg" {...island}>
             {formatPrice(lineTotalInCents({ priceInCents: product.priceInCents, quantity }))}
           </span>
         </div>

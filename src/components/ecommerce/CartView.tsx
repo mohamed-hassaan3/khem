@@ -8,10 +8,10 @@ import CartSummary from "@/src/components/ecommerce/CartSummary";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
 import PageHeader from "@/src/components/ecommerce/PageHeader";
 import { cartSubtotalInCents } from "@/src/lib/cart";
-import { formatPrice } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
+import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { ProductCardData } from "@/src/types/catalog";
 
@@ -36,6 +36,7 @@ export interface CartViewProps {
 
 export default function CartView({ locale, catalog }: CartViewProps) {
   const dict = useDictionary();
+  const formatPrice = useFormatPrice();
   const { lines, isHydrated, setQuantity, removeLine } = useCart();
 
   const productsById = useMemo(

@@ -6,6 +6,7 @@ import "../globals.css";
 
 import Footer from "@/src/components/Footer";
 import Nav from "@/src/components/Nav";
+import CookieConsent from "@/src/components/consent/CookieConsent";
 import { khemClerkAppearance } from "@/src/lib/clerk-appearance";
 import { getFontVariables } from "@/src/lib/fonts";
 import {
@@ -23,6 +24,8 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 // disagree about which domain KHEM lives on.
 import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { CartProvider } from "@/src/providers/cart-provider";
+import { ConsentProvider } from "@/src/providers/consent-provider";
+import { CurrencyProvider } from "@/src/providers/currency-provider";
 import { I18nProvider } from "@/src/providers/i18n-provider";
 import { WishlistProvider } from "@/src/providers/wishlist-provider";
 
@@ -280,13 +283,35 @@ export default async function RootLayout({
            * Component passed through as `children` stays server-rendered.
            */}
           <I18nProvider locale={locale} dictionary={dictionary}>
-            <CartProvider>
-              <WishlistProvider>
-                <Nav />
-                {children}
-                <Footer locale={locale} />
-              </WishlistProvider>
-            </CartProvider>
+            {/*
+             * Consent wraps cart and wishlist rather than nesting inside them:
+             * the footer's "Cookie Settings" trigger and the banner itself both
+             * need it, and it must outlive any surface that might one day be
+             * gated on a stored choice.
+             */}
+            <ConsentProvider>
+              {/*
+               * Currency wraps the shop the way I18n wraps the site: every
+               * price, in the catalog and in the bag alike, has to read one
+               * value. It renders USD on the server and swaps after hydration
+               * — which is what keeps these routes prerendered (see
+               * `currency-provider.tsx`).
+               */}
+              <CurrencyProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    <Nav />
+                    {children}
+                    <Footer locale={locale} />
+                    {/*
+                     * Last in the tree, and `fixed`, so it never participates
+                     * in document flow and cannot contribute to CLS.
+                     */}
+                    <CookieConsent />
+                  </WishlistProvider>
+                </CartProvider>
+              </CurrencyProvider>
+            </ConsentProvider>
           </I18nProvider>
         </ClerkProvider>
       </body>

@@ -1,6 +1,8 @@
 import Image from "next/image";
 
 import nameLogo from "@/public/logo/name-logo-transparent.svg";
+import CookieSettingsButton from "@/src/components/consent/CookieSettingsButton";
+import CurrencySwitcher from "@/src/components/i18n/CurrencySwitcher";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { collections, world } from "@/src/constants/navigation-pages";
 import { facetHref } from "@/src/lib/facets";
@@ -199,10 +201,26 @@ export default async function Footer({ locale }: { locale: Locale }) {
               {item.label}
             </LocaleLink>
           ))}
+          {/*
+           * The way back to a consent decision already made — a banner without
+           * one is not compliant. A button rather than a link because it opens
+           * the panel in place; it borrows the link class so the row still
+           * reads as four peers.
+           */}
+          <CookieSettingsButton className={legalLinkClass} />
         </div>
-        <p className="text-[11px] tracking-[0.08em] text-ivory/20">
-          {dict.footer.craftedIn}
-        </p>
+        {/*
+         * Currency sits beside "crafted in", not among the legal links: it is a
+         * control, and the row beside it is a set of destinations. The gap keeps
+         * the bar's three parts reading as three parts at `md` and above, and
+         * the pair wraps together on a phone.
+         */}
+        <div className="flex items-center gap-5">
+          <CurrencySwitcher />
+          <p className="text-[11px] tracking-[0.08em] text-ivory/20">
+            {dict.footer.craftedIn}
+          </p>
+        </div>
       </div>
     </footer>
   );

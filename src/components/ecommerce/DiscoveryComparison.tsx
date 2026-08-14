@@ -1,7 +1,8 @@
 import { Check, Minus } from "lucide-react";
 
 import Reveal from "@/src/components/animation/Reveal";
-import { formatPrice, formatVolume } from "@/src/lib/format";
+import Price from "@/src/components/ecommerce/Price";
+import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
@@ -27,8 +28,18 @@ export interface DiscoveryComparisonProps {
   locale: Locale;
 }
 
-/** A cell is either a printed string or a yes/no mark. */
-type Cell = { kind: "text"; value: string } | { kind: "flag"; value: boolean };
+/**
+ * A cell is a printed string, a yes/no mark, or a price.
+ *
+ * Price is its own kind rather than a pre-formatted `text` cell because the
+ * currency is not known at this point — it is resolved in the browser, after
+ * hydration. The row therefore carries the stored USD cents and lets the
+ * renderer decide how to say it, which keeps the data structure data.
+ */
+type Cell =
+  | { kind: "text"; value: string }
+  | { kind: "flag"; value: boolean }
+  | { kind: "price"; value: number };
 
 /** Does a set list something matching this pattern among its contents? */
 function includesMatching(set: ProductCardData, pattern: RegExp): boolean {
@@ -81,8 +92,8 @@ export default async function DiscoveryComparison({
     {
       label: dict.discovery.compare.rows.price,
       cells: sets.map((set) => ({
-        kind: "text" as const,
-        value: formatPrice(set.priceInCents),
+        kind: "price" as const,
+        value: set.priceInCents,
       })),
     },
   ];
@@ -140,6 +151,10 @@ export default async function DiscoveryComparison({
                     >
                       {cell.kind === "text" ? (
                         <span {...island}>{cell.value}</span>
+                      ) : cell.kind === "price" ? (
+                        <span {...island}>
+                          <Price cents={cell.value} />
+                        </span>
                       ) : cell.value ? (
                         <>
                           <Check

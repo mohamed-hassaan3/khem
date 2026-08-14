@@ -20,7 +20,7 @@ import {
   useRecentSearches,
 } from "./recent-searches";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import { formatPrice, formatProductType } from "@/src/lib/format";
+import { formatProductType } from "@/src/lib/format";
 import { localizePath } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { MAX_QUERY_LENGTH } from "@/src/lib/search/config";
@@ -30,6 +30,7 @@ import {
   queryTerms,
   searchHref,
 } from "@/src/lib/search/text";
+import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type {
   CollectionSuggestion,
@@ -681,6 +682,8 @@ function ProductRow({
   onSelect: () => void;
   typeLabel: string;
 }) {
+  const formatPrice = useFormatPrice();
+
   return (
     <button
       type="button"
@@ -715,7 +718,7 @@ function ProductRow({
         </span>
       </span>
 
-      <span className="shrink-0 font-heading text-[13px] text-gold/80">
+      <span className="shrink-0 font-heading text-[13px] tabular-nums text-gold/80">
         {formatPrice(product.priceInCents)}
       </span>
     </button>

@@ -5,15 +5,13 @@ import { useEffect, useRef, useState } from "react";
 
 import QuantityStepper from "@/src/components/ecommerce/QuantityStepper";
 import { quantityCeiling } from "@/src/lib/cart";
-import {
-  formatPrice,
-  formatProductType,
-  formatVolume,
-} from "@/src/lib/format";
+import { BASE_CURRENCY } from "@/src/lib/currency";
+import { formatProductType, formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { useCart } from "@/src/providers/cart-provider";
+import { useCurrency } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import { useWishlist } from "@/src/providers/wishlist-provider";
 import type { Product } from "@/src/types/catalog";
@@ -61,6 +59,7 @@ export default function ProductPurchase({
   locale,
 }: ProductPurchaseProps) {
   const dict = useDictionary();
+  const { currency, formatPrice } = useCurrency();
   const { addLine } = useCart();
   const wishlist = useWishlist();
   // Product name and subtitle come from `src/data` — English in both trees.
@@ -124,8 +123,8 @@ export default function ProductPurchase({
       <div className="gold-line my-9" />
 
       {/* Price and bottle format. The format is a spec, not a choice. */}
-      <div className="mb-10 flex flex-wrap items-baseline gap-4">
-        <span className="font-heading text-3xl text-gold">
+      <div className="mb-3 flex flex-wrap items-baseline gap-4">
+        <span className="font-heading text-3xl tabular-nums text-gold">
           {formatPrice(product.priceInCents)}
         </span>
         <span className="text-xs tracking-[0.1em] text-ivory/35">
@@ -133,6 +132,24 @@ export default function ProductPurchase({
           {formatProductType(product, dict.product.concentrations)}
         </span>
       </div>
+
+      {/*
+       * A converted price says what the bottle costs, not what the card is
+       * charged. The visitor is told which is which, here and in the bag.
+       *
+       * The paragraph is always in the document and only its text is
+       * conditional, because the currency is not known until after hydration:
+       * a line that appears at that moment would push the whole buy block down
+       * and put a CLS penalty on the product page (AGENTS.md §12). Reserving
+       * one line costs a few pixels of extra breathing room in USD.
+       */}
+      <p className="mb-7 min-h-3.5 text-[10px] tracking-[0.05em] text-ivory/25">
+        {currency === BASE_CURRENCY
+          ? null
+          : interpolate(dict.currencySwitcher.conversionNote, {
+              currency: dict.currencySwitcher.names[currency],
+            })}
+      </p>
 
       <div className="mb-10">
         <p className="mb-4 text-[10px] uppercase tracking-[0.25em] text-ivory/40">
