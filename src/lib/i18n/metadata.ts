@@ -2,7 +2,16 @@ import type { Metadata } from "next";
 
 import { OG_LOCALE, localeAlternates, localizePath, type Locale } from "./config";
 
-export const SITE_URL = "https://khemperfumes.vercel.app";
+/**
+ * The canonical origin — the custom domain, never the `*.vercel.app` deployment
+ * URL.
+ *
+ * Everything absolute is built from it: `metadataBase`, every canonical, every
+ * `hreflang` alternate, and every OpenGraph `url`. Pointing it at a deployment
+ * URL would tell crawlers the deployment is canonical and split the site's
+ * ranking signals across two origins.
+ */
+export const SITE_URL = "https://khemperfumes.com";
 
 const OG_IMAGE = {
   url: "/opengraph-image.png",

@@ -18,11 +18,13 @@ import {
   localizePath,
 } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
+// One origin for the whole app. This used to be a second copy of the constant,
+// which is how the root layout and every page's canonical could have come to
+// disagree about which domain KHEM lives on.
+import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { CartProvider } from "@/src/providers/cart-provider";
 import { I18nProvider } from "@/src/providers/i18n-provider";
 import { WishlistProvider } from "@/src/providers/wishlist-provider";
-
-const SITE_URL = "https://khemperfumes.vercel.app";
 
 /**
  * Both locale trees are prerendered. Without this, the `[locale]` segment would

@@ -20,6 +20,7 @@
  * but it must be checked by a lawyer before the store transacts.
  */
 
+import { HOUSE_EMAIL } from "@/src/data/contact";
 import type { LegalDocument, LegalDocumentSlug } from "@/src/types/legal";
 
 /**
@@ -28,10 +29,17 @@ import type { LegalDocument, LegalDocumentSlug } from "@/src/types/legal";
  */
 const ENTITY = "KHEM Fragrance House";
 
-/** Purpose-specific mailboxes, all on the brand domain used by `layout.tsx`. */
-const PRIVACY_EMAIL = "privacy@khemperfumes.com";
-const LEGAL_EMAIL = "legal@khemperfumes.com";
-const CARE_EMAIL = "care@khemperfumes.com";
+/**
+ * Contact addresses printed in the documents.
+ *
+ * All three resolve to the single house mailbox — see `HOUSE_EMAIL`. A privacy
+ * policy naming a `privacy@` address that bounces is worse than one naming a
+ * general address that works: the contact route is the part a data-protection
+ * regulator actually tests.
+ */
+const PRIVACY_EMAIL = HOUSE_EMAIL;
+const LEGAL_EMAIL = HOUSE_EMAIL;
+const CARE_EMAIL = HOUSE_EMAIL;
 
 /** Every document is republished together, so they share one revision date. */
 const LAST_UPDATED = "2026-08-09";

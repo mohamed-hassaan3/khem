@@ -1,0 +1,162 @@
+import type { MetadataRoute } from "next";
+
+import { LOCALES, localizePath, type Locale } from "@/src/lib/i18n/config";
+import { SITE_URL } from "@/src/lib/i18n/metadata";
+import { getJournalArticles } from "@/src/services/content";
+import { getLegalDocuments } from "@/src/services/legal";
+import {
+  getFragranceCollections,
+  getProductSlugs,
+} from "@/src/services/products";
+
+/**
+ * `/sitemap.xml` — every indexable URL, in both languages.
+ *
+ * Lives at the root of `app/`, not inside `[locale]/`: a metadata file
+ * convention is only recognised there, and `src/proxy.ts` already excludes
+ * `.xml` from its matcher, so the request is never rewritten into the `/en/*`
+ * tree.
+ *
+ * ## Both languages, cross-linked
+ *
+ * Each route appears **twice** — once as `/path` (English) and once as
+ * `/ar/path` — and each entry carries the full `alternates.languages` map
+ * including itself. That self-referential, bidirectional shape is what
+ * `hreflang` requires: an Arabic URL that names the English one without the
+ * English URL naming it back is ignored, and a language version missing from
+ * the sitemap is a language version Google may never pair with its sibling.
+ *
+ * The map is built from `localizePath()`, the same function the pages
+ * themselves use for `alternates`, so the sitemap and the `<link rel="alternate">`
+ * tags cannot disagree.
+ *
+ * ## What is deliberately absent
+ *
+ * `/cart`, `/wishlist`, `/account/*`, `/sign-in`, `/sign-up`, and `/search`.
+ * The first five are personal or transactional surfaces with nothing to index;
+ * `/search` already renders `noindex` (see `app/[locale]/search/page.tsx`) and
+ * a URL that declares itself unindexable has no business in a sitemap.
+ *
+ * ## `lastModified` and `priority`
+ *
+ * `lastModified` is set **only where the data actually carries a date** — the
+ * legal documents and the journal. The catalog has no `updatedAt` column yet
+ * (see the note in `src/types/catalog.ts`), and stamping `new Date()` on it
+ * would tell crawlers every product changed on every deploy, which is how a
+ * site teaches Google to stop trusting its `lastmod` entirely. Omitting it is
+ * honest and costs nothing.
+ *
+ * When the catalog moves to Postgres, `Product.updatedAt` and
+ * `Collection.updatedAt` already exist in the schema (AGENTS.md §9) — pass them
+ * through here and delete this paragraph.
+ *
+ * `priority` is relative *within* the site and is ignored outright by Google;
+ * it is set because other engines still read it, not because it moves rankings.
+ */
+
+/** Absolute URL for a locale-agnostic app path. */
+function absolute(locale: Locale, path: string): string {
+  return `${SITE_URL}${localizePath(locale, path)}`;
+}
+
+/** The `hreflang` map for a path — identical on every locale's entry. */
+function alternates(path: string) {
+  return {
+    languages: {
+      en: absolute("en", path),
+      ar: absolute("ar", path),
+      "x-default": absolute("en", path),
+    },
+  };
+}
+
+/** One sitemap entry per locale for a single app path. */
+function localizedEntries(
+  path: string,
+  options: { priority: number; lastModified?: string | Date },
+): MetadataRoute.Sitemap {
+  return LOCALES.map((locale) => ({
+    url: absolute(locale, path),
+    priority: options.priority,
+    ...(options.lastModified ? { lastModified: options.lastModified } : {}),
+    alternates: alternates(path),
+  }));
+}
+
+/**
+ * Static routes and their relative weight.
+ *
+ * Ordered as they are weighted: the shopfront first, the editorial world
+ * second, the legal shelf last.
+ */
+const STATIC_ROUTES: { path: string; priority: number }[] = [
+  { path: "/", priority: 1 },
+
+  // Shop
+  { path: "/collections", priority: 0.9 },
+  { path: "/new-arrival", priority: 0.8 },
+  { path: "/gift-set", priority: 0.8 },
+  { path: "/discovery", priority: 0.8 },
+  { path: "/body-care", priority: 0.7 },
+  { path: "/room-fragrance", priority: 0.7 },
+
+  // World of KHEM
+  { path: "/heritage", priority: 0.6 },
+  { path: "/craftsmanship", priority: 0.6 },
+  { path: "/journal", priority: 0.6 },
+  { path: "/ingredients", priority: 0.6 },
+  { path: "/about", priority: 0.6 },
+  { path: "/stockists", priority: 0.6 },
+  { path: "/contact", priority: 0.5 },
+];
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [collections, productSlugs, legalDocuments, articles] =
+    await Promise.all([
+      getFragranceCollections(),
+      getProductSlugs(),
+      getLegalDocuments(),
+      getJournalArticles(),
+    ]);
+
+  /*
+   * The journal index is only as fresh as its newest article — the one date on
+   * an editorial listing that is genuinely knowable.
+   */
+  const latestArticleDate = articles
+    .map((article) => article.publishedAt)
+    .sort()
+    .at(-1);
+
+  return [
+    ...STATIC_ROUTES.flatMap(({ path, priority }) =>
+      localizedEntries(path, {
+        priority,
+        lastModified:
+          path === "/journal" && latestArticleDate ? latestArticleDate : undefined,
+      }),
+    ),
+
+    // Fragrance collections. Body care, home fragrance, discovery, and gift
+    // sets are excluded here for the same reason the tab bar excludes them —
+    // they are not chapters of the perfume library and each already has its
+    // own route above, which would otherwise be a second URL for one page.
+    ...collections.flatMap((collection) =>
+      localizedEntries(`/collections/${collection.slug}`, { priority: 0.8 }),
+    ),
+
+    // Product detail pages — the deepest and most valuable URLs on the site.
+    // `getProductSlugs()` is fragrance-only, exactly like `generateStaticParams`,
+    // so nothing here can 404.
+    ...productSlugs.flatMap((slug) =>
+      localizedEntries(`/perfume/${slug}`, { priority: 0.9 }),
+    ),
+
+    ...legalDocuments.flatMap((document) =>
+      localizedEntries(`/${document.slug}`, {
+        priority: 0.3,
+        lastModified: document.updatedAt,
+      }),
+    ),
+  ];
+}

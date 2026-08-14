@@ -14,6 +14,7 @@
  * partner section, and renders as a non-interactive announcement.
  */
 
+import { HOUSE_EMAIL } from "@/src/data/contact";
 import type { Stockist, StockistRegion } from "@/src/types/stockist";
 
 /**
@@ -82,4 +83,4 @@ export const STOCKISTS: Stockist[] = [
 ];
 
 /** Address wholesale and partnership enquiries reach. Precedent: `CONCIERGE_EMAIL`. */
-export const WHOLESALE_EMAIL = "wholesale@khemperfumes.com";
+export const WHOLESALE_EMAIL = HOUSE_EMAIL;

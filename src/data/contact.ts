@@ -7,6 +7,22 @@
 
 import type { ContactChannel, SocialProfile } from "@/src/types/contact";
 
+/**
+ * The house mailbox — the one address that actually receives mail.
+ *
+ * Every "write to us" surface in the app resolves to this: the contact page,
+ * the concierge request, wholesale enquiries, and the three legal contacts in
+ * `src/data/legal.ts`. They used to be six purpose-specific addresses
+ * (`enquiries@`, `concierge@`, `wholesale@`, `privacy@`, `legal@`, `care@`),
+ * none of which exist on the domain — so every one of them bounced, including
+ * the two a privacy regulator would expect to work.
+ *
+ * They are still six *named constants*, so splitting them apart again is one
+ * line each once the aliases exist at the mail host. What must never happen is
+ * the app publishing an address that silently drops mail.
+ */
+export const HOUSE_EMAIL = "info@khemperfumes.com";
+
 export const CONTACT_CHANNELS: ContactChannel[] = [
   {
     id: "boutique",
@@ -17,8 +33,8 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
   {
     id: "email",
     label: "Email",
-    value: "enquiries@khemperfumes.com",
-    href: "mailto:enquiries@khemperfumes.com",
+    value: HOUSE_EMAIL,
+    href: `mailto:${HOUSE_EMAIL}`,
   },
   {
     id: "telephone",
@@ -35,7 +51,7 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
 ];
 
 /** Address the private-consultation request is sent to. */
-export const CONCIERGE_EMAIL = "concierge@khemperfumes.com";
+export const CONCIERGE_EMAIL = HOUSE_EMAIL;
 
 /**
  * Subject options on the contact form.
