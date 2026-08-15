@@ -490,8 +490,12 @@ export const en = {
     yourName: "Your Name",
     emailAddress: "Email Address",
     nameRequired: "Please enter your name.",
+    nameTooLong: "Please shorten your name.",
     emailInvalid: "Please enter a valid email address.",
+    subjectInvalid: "Please choose a subject from the list.",
     messageRequired: "Please enter a message.",
+    messageTooShort: "Please write a little more — at least ten characters.",
+    messageTooLong: "Please shorten your message to 4,000 characters or fewer.",
   },
 
   legal: {
@@ -946,6 +950,9 @@ export const en = {
     invalidEmail: "Please enter a valid email address",
     successMessage: "Thank you. We will respond shortly.",
     errorMessage: "Something went wrong. Please try again.",
+    rateLimited: "Too many messages just now. Please try again in a few minutes.",
+    deliveryFailed:
+      "We could not send your message. Please try again, or write to info@khemperfumes.com directly.",
   },
 
   search: {

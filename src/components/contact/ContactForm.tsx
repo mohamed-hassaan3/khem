@@ -1,24 +1,27 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, useTransition, type FormEvent } from "react";
 
-import { useDictionary } from "@/src/providers/i18n-provider";
+import { sendContactEnquiry } from "@/src/actions/contact";
+import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 
 /**
  * Contact enquiry form.
  *
- * IMPORTANT: nothing typed here is transmitted, logged, or stored. Validation
- * runs client-side only, which is a UX affordance — never a security boundary.
+ * The enquiry is delivered by `actions/contact.ts` to the house mailbox via
+ * Resend, with `Reply-To` set to the visitor.
  *
- * TODO: add `schemas/contact.ts` (Zod) + `actions/contact.ts` (Server Action)
- * and hand off to Resend. The server must re-validate every field, rate-limit
- * the action, and treat the message body as untrusted in the email template.
- * Until that lands the success copy's "within 24 hours" promise is not backed
- * by any delivery.
+ * The client-side validation below is a UX affordance — first-invalid-field
+ * focus, inline errors — and never a security boundary. `schemas/contact.ts`
+ * re-validates every field inside the action, which also throttles and treats
+ * the message body as untrusted when it builds the email.
  */
 
 /** Pragmatic shape check, matching `NewsletterForm`. */
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/** Mirrors `MESSAGE_MIN_LENGTH` in the schema, so the two agree on "too short". */
+const MESSAGE_MIN_LENGTH = 10;
 
 type Field = "name" | "email" | "message";
 
@@ -37,12 +40,37 @@ export interface ContactFormProps {
 
 export default function ContactForm({ subjects }: ContactFormProps) {
   const dict = useDictionary();
+  /** Sent with the enquiry so the acknowledgement arrives in this language. */
+  const locale = useLocale();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState(subjects[0] ?? "");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [isSent, setIsSent] = useState(false);
+  /** Delivery/throttle failure, as a dictionary string. Field errors go above. */
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  /**
+   * Honeypot. Hidden from sight and from the tab order, so only a bot walking
+   * the DOM fills it. The server drops any submission where it is non-empty.
+   */
+  const [company, setCompany] = useState("");
+
+  /**
+   * Error codes the action returns, resolved against the dictionary here — the
+   * server sends codes precisely so no English string can reach an Arabic page.
+   */
+  const fieldMessages: Record<string, string> = {
+    nameRequired: dict.contactForm.nameRequired,
+    nameTooLong: dict.contactForm.nameTooLong,
+    emailInvalid: dict.contactForm.emailInvalid,
+    subjectInvalid: dict.contactForm.subjectInvalid,
+    messageRequired: dict.contactForm.messageRequired,
+    messageTooShort: dict.contactForm.messageTooShort,
+    messageTooLong: dict.contactForm.messageTooLong,
+  };
 
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -60,6 +88,9 @@ export default function ContactForm({ subjects }: ContactFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (isPending) return;
+    setFormError(null);
+
     const nextErrors: Partial<Record<Field, string>> = {};
 
     if (name.trim().length === 0) {
@@ -70,6 +101,8 @@ export default function ContactForm({ subjects }: ContactFormProps) {
     }
     if (message.trim().length === 0) {
       nextErrors.message = dict.contactForm.messageRequired;
+    } else if (message.trim().length < MESSAGE_MIN_LENGTH) {
+      nextErrors.message = dict.contactForm.messageTooShort;
     }
 
     setErrors(nextErrors);
@@ -90,9 +123,44 @@ export default function ContactForm({ subjects }: ContactFormProps) {
       return;
     }
 
-    // TODO (see file header): hand `{ name, email, subject, message }` to the
-    // Server Action. Nothing leaves the browser today.
-    setIsSent(true);
+    startTransition(async () => {
+      const result = await sendContactEnquiry({
+        name: name.trim(),
+        email: email.trim(),
+        subject,
+        message: message.trim(),
+        company,
+        locale,
+      });
+
+      if (result.ok) {
+        setIsSent(true);
+        return;
+      }
+
+      if (result.error === "validation" && result.fieldErrors) {
+        // The server disagreed with the client check — a stricter rule, or a
+        // subject that is no longer on the list. Surface it on the field.
+        const serverErrors: Partial<Record<Field, string>> = {};
+        for (const [field, code] of Object.entries(result.fieldErrors)) {
+          const resolved = fieldMessages[code] ?? dict.forms.errorMessage;
+          if (field === "name" || field === "email" || field === "message") {
+            serverErrors[field] = resolved;
+          } else {
+            // `subject` has no inline slot; it belongs to the form-level region.
+            setFormError(resolved);
+          }
+        }
+        setErrors(serverErrors);
+        return;
+      }
+
+      setFormError(
+        result.error === "rateLimited"
+          ? dict.forms.rateLimited
+          : dict.forms.deliveryFailed,
+      );
+    });
   }
 
   if (isSent) {
@@ -125,7 +193,11 @@ export default function ContactForm({ subjects }: ContactFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="relative flex flex-col gap-5"
+    >
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="contact-name" className={LABEL_CLASS}>
@@ -207,6 +279,9 @@ export default function ContactForm({ subjects }: ContactFormProps) {
           name="message"
           ref={messageRef}
           rows={6}
+          // Matches MESSAGE_MAX_LENGTH in `schemas/contact.ts`. A convenience,
+          // not the limit — the server enforces the same cap independently.
+          maxLength={4000}
           value={message}
           onChange={(event) => {
             setMessage(event.target.value);
@@ -223,11 +298,40 @@ export default function ContactForm({ subjects }: ContactFormProps) {
         ) : null}
       </div>
 
+      {/*
+        Honeypot: off-screen rather than `display:none`, since some bots skip
+        hidden fields. `tabIndex={-1}` and `aria-hidden` keep it away from
+        keyboard and screen-reader users, who never encounter it.
+      */}
+      <div
+        className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
+        aria-hidden="true"
+      >
+        <label htmlFor="contact-company">Company</label>
+        <input
+          id="contact-company"
+          name="company"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={company}
+          onChange={(event) => setCompany(event.target.value)}
+        />
+      </div>
+
+      {formError ? (
+        <p role="alert" className="text-[12px] leading-relaxed text-danger">
+          {formError}
+        </p>
+      ) : null}
+
       <button
         type="submit"
-        className="btn-luxury btn-luxury-fill min-w-50 justify-center self-start"
+        disabled={isPending}
+        aria-busy={isPending}
+        className="btn-luxury btn-luxury-fill min-w-50 justify-center self-start disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {dict.forms.send}
+        {isPending ? dict.forms.sending : dict.forms.send}
       </button>
     </form>
   );

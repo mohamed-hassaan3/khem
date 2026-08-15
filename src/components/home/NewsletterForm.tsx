@@ -1,15 +1,18 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { useState, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 
-import { useDictionary } from "@/src/providers/i18n-provider";
+import { subscribeToNewsletter } from "@/src/actions/newsletter";
+import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 
 /**
  * Inner Circle signup.
  *
- * The email is validated and then discarded — nothing is transmitted or stored
- * yet. See the TODO in `handleSubmit` for the wiring contract.
+ * The address is emailed to the house mailbox by `actions/newsletter.ts`. It is
+ * deliberately *not* subscribed to anything: no audience, no double opt-in, no
+ * row anywhere. A human reads the notification and adds it — which is why the
+ * success copy promises a confirmation "shortly" rather than immediately.
  */
 
 /** Pragmatic shape check; the authoritative validation must happen server-side. */
@@ -19,13 +22,20 @@ const EASE_LUXURY: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export default function NewsletterForm() {
   const dict = useDictionary();
+  /** Sent with the signup so the welcome arrives in this language. */
+  const locale = useLocale();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  /** Honeypot — see `ContactForm.tsx` for why it is off-screen, not hidden. */
+  const [company, setCompany] = useState("");
   const prefersReducedMotion = useReducedMotion();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (isPending) return;
 
     const trimmed = email.trim();
 
@@ -36,10 +46,26 @@ export default function NewsletterForm() {
 
     setError(null);
 
-    // TODO: replace with a Server Action that validates `trimmed` with a Zod
-    // schema (schemas/newsletter.ts) and hands off to Resend. Until then the
-    // address is never persisted or transmitted.
-    setIsSubscribed(true);
+    startTransition(async () => {
+      const result = await subscribeToNewsletter({
+        email: trimmed,
+        company,
+        locale,
+      });
+
+      if (result.ok) {
+        setIsSubscribed(true);
+        return;
+      }
+
+      setError(
+        result.error === "rateLimited"
+          ? dict.forms.rateLimited
+          : result.error === "validation"
+            ? dict.forms.invalidEmail
+            : dict.forms.deliveryFailed,
+      );
+    });
   }
 
   if (isSubscribed) {
@@ -65,7 +91,7 @@ export default function NewsletterForm() {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="flex flex-col gap-3 sm:flex-row"
+      className="relative flex flex-col gap-3 sm:flex-row"
     >
       <div className="flex-1 text-start">
         <label htmlFor="newsletter-email" className="sr-only">
@@ -97,11 +123,29 @@ export default function NewsletterForm() {
         ) : null}
       </div>
 
+      <div
+        className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
+        aria-hidden="true"
+      >
+        <label htmlFor="newsletter-company">Company</label>
+        <input
+          id="newsletter-company"
+          name="company"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={company}
+          onChange={(event) => setCompany(event.target.value)}
+        />
+      </div>
+
       <button
         type="submit"
-        className="h-fit cursor-pointer bg-gold px-8 py-3 font-heading text-xs font-medium uppercase tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-champagne"
+        disabled={isPending}
+        aria-busy={isPending}
+        className="h-fit cursor-pointer bg-gold px-8 py-3 font-heading text-xs font-medium uppercase tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-champagne disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {dict.forms.subscribe}
+        {isPending ? dict.forms.sending : dict.forms.subscribe}
       </button>
     </form>
   );

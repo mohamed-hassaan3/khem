@@ -21,6 +21,28 @@ export interface ContactChannel {
   href: string | null;
 }
 
+/**
+ * What a public form action hands back.
+ *
+ * A discriminated union rather than a thrown error: a Server Action that throws
+ * surfaces as a generic runtime failure at the boundary, which tells the
+ * visitor nothing and the client nothing it can act on.
+ *
+ * `error` and `fieldErrors` carry **codes**, never sentences — the client maps
+ * them through the dictionary, so an Arabic page never renders English.
+ */
+export type FormActionResult =
+  | { ok: true }
+  | {
+      ok: false;
+      /** `validation` | `rateLimited` | `delivery`. */
+      error: FormActionError;
+      /** Field name → error code, present only for `validation`. */
+      fieldErrors?: Record<string, string>;
+    };
+
+export type FormActionError = "validation" | "rateLimited" | "delivery";
+
 /** A social profile shown on `/contact`. */
 export interface SocialProfile {
   id: string;

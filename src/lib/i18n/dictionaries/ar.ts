@@ -467,8 +467,12 @@ export const ar: Dictionary = {
     yourName: "اسمك",
     emailAddress: "البريد الإلكتروني",
     nameRequired: "يرجى إدخال اسمك.",
+    nameTooLong: "يرجى اختصار الاسم.",
     emailInvalid: "يرجى إدخال بريد إلكتروني صحيح.",
+    subjectInvalid: "يرجى اختيار موضوع من القائمة.",
     messageRequired: "يرجى كتابة رسالتك.",
+    messageTooShort: "يرجى كتابة المزيد — عشرة أحرف على الأقل.",
+    messageTooLong: "يرجى اختصار رسالتك إلى 4000 حرف أو أقل.",
   },
 
   legal: {
@@ -905,6 +909,9 @@ export const ar: Dictionary = {
     invalidEmail: "يرجى إدخال بريد إلكتروني صحيح",
     successMessage: "شكرًا لك. سنعاود التواصل قريبًا.",
     errorMessage: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    rateLimited: "رسائل كثيرة في وقت قصير. يرجى المحاولة بعد بضع دقائق.",
+    deliveryFailed:
+      "تعذّر إرسال رسالتك. يرجى المحاولة مرة أخرى، أو المراسلة مباشرة على info@khemperfumes.com.",
   },
 
   search: {
