@@ -5,9 +5,9 @@
  *
  *   {@link getSupabasePublic}  — publishable key. **RLS applies.** Every read
  *                                path in `src/services/` uses this one.
- *   {@link getSupabaseAdmin}   — secret key. **RLS is bypassed.** Only the
- *                                comment write action and the `scripts/db-*`
- *                                tooling may use it.
+ *   {@link getSupabaseAdmin}   — secret key. **RLS is bypassed.** The comment
+ *                                write action, the admin dashboard, and the
+ *                                `scripts/db-*` tooling. Nothing else.
  *
  * Why reads go through the weaker key: the tables in `supabase/sql/` publish
  * only what is meant to be public — non-archived products, published stockists,

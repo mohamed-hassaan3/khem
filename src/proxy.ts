@@ -10,7 +10,7 @@ import {
 } from "./lib/currency";
 import { signInPathWithReturn } from "./lib/auth-redirect";
 import { DEFAULT_LOCALE, LOCALES, stripLocale } from "./lib/i18n/config";
-import { ACCOUNT_PATHS } from "./lib/routes";
+import { ACCOUNT_PATHS, ADMIN_PATH } from "./lib/routes";
 
 /**
  * Locale routing with `as-needed` prefixing, wrapped in Clerk's auth gate.
@@ -47,6 +47,13 @@ import { ACCOUNT_PATHS } from "./lib/routes";
  * `app/[locale]/account/layout.tsx` and in every panel beneath it, each of
  * which calls `getViewer()` and redirects on its own behalf. Deleting the
  * block below would cost a redirect, not a protection.
+ *
+ * The same applies to `/admin`, added alongside it: the authoritative check
+ * there is `requireAdmin()` in `app/[locale]/admin/layout.tsx` and again at the
+ * top of every Server Action under `src/actions/admin/`, which compares a
+ * *verified email* against an allowlist rather than merely observing a session.
+ * This file cannot do that — `auth()` here yields a session, not a user record
+ * — which is precisely why it must not be mistaken for the gate.
  *
  * What the early redirect buys is real, though: `[locale]/loading.tsx` means
  * the response starts streaming before the layout resolves, so without it an
@@ -149,7 +156,21 @@ export default clerkMiddleware(async (auth, request) => {
     path === ACCOUNT_PATHS.overview ||
     path.startsWith(`${ACCOUNT_PATHS.overview}/`);
 
-  if (isAccountPath) {
+  /*
+   * The dashboard, shed early for the same reason and with the same caveat: it
+   * is a cost optimisation, not the boundary. The real check is
+   * `requireAdmin()` in `app/[locale]/admin/layout.tsx` and at the top of every
+   * action in `src/actions/admin/` — and it is a *stronger* check than anything
+   * expressible here, because it compares a verified email against the
+   * allowlist rather than merely asking whether somebody is signed in.
+   *
+   * Which is why this block redirects only the anonymous case. A signed-in
+   * customer is let through to the layout, which answers with `notFound()`
+   * rather than a redirect: 404 does not confirm that `/admin` exists.
+   */
+  const isAdminPath = path === ADMIN_PATH || path.startsWith(`${ADMIN_PATH}/`);
+
+  if (isAccountPath || isAdminPath) {
     const { userId } = await auth();
 
     if (userId === null) {

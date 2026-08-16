@@ -38,6 +38,12 @@ import {
   EMBEDDING_MODEL,
   EMBEDDING_VERSION,
 } from "../src/lib/search/config";
+/*
+ * Shared with `src/actions/admin/catalog.ts`, which embeds the single product
+ * an editor just saved. The credential check and the literal format live in one
+ * place so the batch path here and the one-row path there cannot drift.
+ */
+import { hasGatewayCredentials, toVectorLiteral } from "../src/lib/search/embed";
 import { redactUrl, connectionString, withClient } from "./db";
 
 /** Rows per gateway call. Large enough to be cheap, small enough to retry. */
@@ -46,15 +52,6 @@ const BATCH_SIZE = 32;
 interface PendingRow {
   slug: string;
   document: string;
-}
-
-function hasGatewayCredentials(): boolean {
-  return Boolean(process.env.AI_GATEWAY_API_KEY ?? process.env.VERCEL_OIDC_TOKEN);
-}
-
-/** pgvector's text input form: `[0.1,0.2,…]`. */
-function toVectorLiteral(vector: readonly number[]): string {
-  return `[${vector.join(",")}]`;
 }
 
 async function main(): Promise<void> {
@@ -125,9 +122,21 @@ async function main(): Promise<void> {
         }
 
         /*
-         * The update writes `embedding` only, and the invalidation trigger
-         * fires on `search_document` changing — which this cannot change — so
-         * writing a vector does not immediately null it again.
+         * ⚠ This does not currently persist, and the claim that used to stand
+         * here — "the invalidation trigger fires on `search_document` changing,
+         * which this cannot change" — is false in practice.
+         *
+         * `product_embedding_invalidation` is a BEFORE UPDATE trigger, and
+         * Postgres computes STORED generated columns *after* BEFORE triggers.
+         * So `new.search_document` is NULL inside it on every update, the
+         * `is distinct from` test always passes, and the vector this statement
+         * just wrote is nulled again before the row is stored. Verified against
+         * the live database: identical write, trigger disabled, value persists.
+         *
+         * Fix is in `supabase/sql/0004_search.sql`: guard the trigger on
+         * `new.embedding is not distinct from old.embedding`, or make it an
+         * AFTER trigger. Left for a schema pass rather than changed silently
+         * here.
          */
         await client.query(
           `update public."Product"

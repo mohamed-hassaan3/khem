@@ -62,19 +62,26 @@ export async function getViewer(): Promise<Viewer | null> {
 }
 
 /*
- * NEXT STEP — roles.
+ * ADMIN — see `src/lib/admin/auth.ts`.
  *
- * AGENTS.md §9 defines a `Role` enum and §10 an `/admin` matcher that reads
- * `sessionClaims.metadata.role`. Neither is wired here: `/admin` does not
- * exist yet and there is no `User` table to hold the role, so a check written
- * today would be a check nothing could fail. When it lands:
+ * `/admin` now exists, and authorization for it deliberately does **not** live
+ * here. It is an allowlist of verified email addresses, checked server-side in
+ * the dashboard layout and again in every admin Server Action. That module's
+ * header explains why the `publicMetadata.role` route sketched in AGENTS.md §10
+ * was the wrong first step: it cannot pass until a Clerk dashboard setting and
+ * a JWT claims customization both exist, so a fresh Clerk instance locks the
+ * house out of its own dashboard with no way back in short of a code change.
+ *
+ * The role route is still the right answer for a *team* — an editor who may
+ * write journal entries but not prices. When that day comes:
  *
  *   1. Set `publicMetadata.role` on the Clerk user (dashboard or Backend API).
- *   2. Add it to the session token via Clerk's JWT customization, so the
- *      middleware can read it without a network call.
+ *   2. Add it to the session token via Clerk's JWT customization, so it can be
+ *      read without a network call.
  *   3. Declare the claim shape in a `types/globals.d.ts` `CustomJwtSessionClaims`
  *      so `sessionClaims.metadata.role` is typed rather than `any`.
- *   4. Gate `/admin(.*)` in `src/proxy.ts` beside the existing account matcher.
+ *   4. Extend `src/lib/admin/auth.ts` to accept either signal — the allowlist
+ *      stays as the break-glass path for the owner.
  *
  * The role is never read from the database for authorization — a compromised
  * row must not be able to grant `ADMIN`. The database column, when it exists,

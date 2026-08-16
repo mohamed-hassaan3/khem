@@ -34,6 +34,10 @@ const DISALLOWED = [
   "/api/",
   "/account",
   "/ar/account",
+  // The dashboard. Every page beneath it also sends `noindex, nofollow` from
+  // its layout metadata — a crawler that ignores this file still gets told.
+  "/admin",
+  "/ar/admin",
   "/cart",
   "/ar/cart",
   "/wishlist",

@@ -70,6 +70,15 @@ export const ACCOUNT_PATHS = {
 } as const;
 
 /**
+ * The dashboard's root, as a locale-agnostic app path.
+ *
+ * Written once so `src/proxy.ts`'s early shed, `AdminShell`'s rail, and
+ * `robots.ts`'s disallow list all mean the same thing by "/admin". Everything
+ * beneath it is reached by string concatenation from here.
+ */
+export const ADMIN_PATH = "/admin";
+
+/**
  * Auth routes.
  *
  * These are also what `<ClerkProvider signInUrl>` is built from in the locale
