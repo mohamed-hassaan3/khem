@@ -19,7 +19,7 @@ const PATH = "/new-arrival";
  * The hero photograph belongs to the page, not to a product: neither flacon
  * should stand in for both, so this is texture rather than a bottle — dark
  * marble, the surface the showcase panels sit on. One of the vetted Unsplash
- * ids; see the imagery note in `src/data/products.ts`.
+ * ids; every image URL is a vetted host in `next.config.ts`.
  */
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1747696766706-5485b39bf358?w=1800&h=1200&fit=crop&auto=format";

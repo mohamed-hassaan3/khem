@@ -1,30 +1,59 @@
 /**
  * Stockist directory query layer.
  *
- * Same contract as `contact.ts`: the UI awaits these functions, so swapping the
- * source (a Supabase `Stockist` table or CMS globals) is a change of function
- * bodies only.
+ * Same contract as `content.ts`. Note that "published" is enforced by the RLS
+ * policy on `"Stockist"`, not by a filter here: an unpublished location is
+ * invisible to the publishable key whatever this file asks for.
  */
 
-// NOTE: add `import "server-only"` here once that package is installed.
+import "server-only";
 
-import {
-  STOCKISTS,
-  STOCKIST_REGIONS,
-  WHOLESALE_EMAIL,
-} from "@/src/data/stockists";
+import { getSupabasePublic } from "@/src/lib/supabase";
+import { parseList } from "@/src/schemas/db/catalog";
+import { STOCKIST_COLUMNS, toStockist } from "@/src/schemas/db/directory";
+import { getBoutiqueSettings } from "@/src/services/settings";
 import type { Stockist, StockistRegion } from "@/src/types/stockist";
+
+/**
+ * Canonical region order for the filter bar.
+ *
+ * The taxonomy sets the order; the data sets the membership. Kept in code
+ * rather than in a table because the union it mirrors is a compile-time
+ * contract with `dict.stockists.regions` — adding a region without translating
+ * it must be a type error, and a row in a table cannot be that.
+ */
+const STOCKIST_REGIONS: readonly StockistRegion[] = [
+  "middleEast",
+  "europe",
+  "americas",
+  "asiaPacific",
+];
+
+function logFailure(query: string, message: string): void {
+  console.error(`[stockists] ${query} failed: ${message}`);
+}
 
 /**
  * Every published location, open or announced.
  *
  * The directory lists both — an announced boutique is news worth carrying — so
  * this is what the map panel and the location list read.
- *
- * → supabase.from('Stockist').select('*').eq('isPublished', true).order('sortOrder')
  */
 export async function getStockists(): Promise<Stockist[]> {
-  return STOCKISTS;
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Stockist")
+    .select(STOCKIST_COLUMNS)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getStockists", error.message);
+    return [];
+  }
+
+  return parseList(data as unknown[] | null, toStockist);
 }
 
 /**
@@ -33,28 +62,39 @@ export async function getStockists(): Promise<Stockist[]> {
  * The "locations worldwide" count and the retail-partner section read this
  * rather than the full list: a boutique that has not opened is not somewhere a
  * visitor can go, and is not yet a retail partner.
- *
- * → supabase.from('Stockist').select('*').eq('status', 'open').order('sortOrder')
  */
 export async function getOpenStockists(): Promise<Stockist[]> {
-  return STOCKISTS.filter((stockist) => stockist.status === "open");
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Stockist")
+    .select(STOCKIST_COLUMNS)
+    .eq("status", "open")
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getOpenStockists", error.message);
+    return [];
+  }
+
+  return parseList(data as unknown[] | null, toStockist);
 }
 
 /**
  * Regions that actually contain a stockist, in taxonomy order.
  *
- * Derived from the records rather than listed by hand, so an empty region
- * never renders a dead tab — and a region gains its tab the moment a store
- * lands in it.
- *
- * → supabase.rpc('distinct_stockist_regions')
+ * Derived from the records rather than listed by hand, so an empty region never
+ * renders a dead tab — and a region gains its tab the moment a store lands in
+ * it.
  */
 export async function getStockistRegions(): Promise<StockistRegion[]> {
-  const present = new Set(STOCKISTS.map((stockist) => stockist.region));
+  const stockists = await getStockists();
+  const present = new Set(stockists.map((stockist) => stockist.region));
   return STOCKIST_REGIONS.filter((region) => present.has(region));
 }
 
-/** → supabase.from('BoutiqueSetting').select('wholesaleEmail').single() */
+/** Where wholesale and partnership enquiries reach. */
 export async function getWholesaleEmail(): Promise<string> {
-  return WHOLESALE_EMAIL;
+  return (await getBoutiqueSettings()).wholesaleEmail;
 }

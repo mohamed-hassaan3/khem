@@ -1,197 +1,152 @@
 /**
- * Offline catalog embedder — `npm run embed` (and `npm run embed -- --check`).
+ * Catalog embedder — `npm run embed` (and `npm run embed -- --check`).
  *
- * Embeddings are generated here, committed to the repository, and read at
- * request time. Three reasons it works this way rather than embedding on
- * demand:
+ * Fills `"Product".embedding` for every row where it is null, using the model
+ * in `src/lib/search/config.ts`. Those vectors are what
+ * `hybrid_search_products()` and `related_products()` rank against; until this
+ * has run, both degrade to their full-text and editorial orderings.
  *
- *  - `npm run build` and CI never need gateway credentials, and a build can
- *    never silently spend money.
- *  - The catalog changes when a merchandiser edits it, not when a visitor
- *    searches. Re-embedding on every request would pay for the same vectors
- *    thousands of times.
- *  - It mirrors the destination: in Postgres these vectors are a stored column
- *    filled by a background job, not something computed inside the query.
+ * ## What gets embedded
  *
- * `--check` re-hashes every product's document and exits non-zero if any has
- * drifted from the vector on file. That is the guard against the one silent
- * failure mode this design has — catalog text edited without a re-run, leaving
- * vectors that describe a product that no longer exists.
+ * `"Product".search_document` — a generated column, so the string that gets
+ * embedded is composed by Postgres, not here. That is deliberate: the full-text
+ * index reads the same column, and the two halves of a hybrid search must
+ * describe the same text or their rankings are about different documents. It
+ * also removes the drift risk of the old arrangement, where a TypeScript
+ * function and a SQL expression each built their own version of the document
+ * and nothing checked that they agreed.
  *
- * → Becomes a Supabase Edge Function on `pg_cron`, embedding rows whose
- *   `embedding` a trigger set to NULL. See `supabase/README.md`.
+ * ## Staleness
+ *
+ * A trigger nulls `embedding` whenever `search_document` changes, so editing a
+ * product marks it for re-embedding automatically. `--check` reports how many
+ * rows are waiting and exits non-zero if any are — the CI guard against a
+ * catalog edit that shipped without a re-run.
+ *
+ * ## Cost and credentials
+ *
+ * Batched, and only ever over rows with no vector, so a re-run after adding one
+ * product embeds one product. Needs `AI_GATEWAY_API_KEY` (or Vercel's OIDC
+ * token) for the gateway and `SUPABASE_DB_URL` for the write, which is why this
+ * is a script and not something a request can trigger.
  */
-
-import { createHash } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
 
 import { embedMany } from "ai";
 
-import { COLLECTIONS, PRODUCTS } from "../src/data/products";
 import {
   EMBEDDING_DIMENSIONS,
   EMBEDDING_MODEL,
   EMBEDDING_VERSION,
 } from "../src/lib/search/config";
-import { productEmbeddingSource } from "../src/lib/search/text";
-import type { EmbeddingIndex } from "../src/types/search";
+import { redactUrl, connectionString, withClient } from "./db";
 
-const OUTPUT_PATH = path.join(process.cwd(), "src/data/embeddings.generated.json");
+/** Rows per gateway call. Large enough to be cheap, small enough to retry. */
+const BATCH_SIZE = 32;
 
-/**
- * Stored precision.
- *
- * Six decimals roughly halves the file against full float64 output and moves
- * cosine similarities by less than 1e-6 — far below anything that could reorder
- * two results.
- */
-const PRECISION = 1e6;
-
-function hashDocument(document: string): string {
-  return createHash("sha256").update(document).digest("hex").slice(0, 16);
+interface PendingRow {
+  slug: string;
+  document: string;
 }
 
-/** Every product's embedding document, keyed by id. */
-function buildDocuments(): Map<string, string> {
-  const collectionNames = new Map(
-    COLLECTIONS.map((collection) => [collection.slug, collection.name]),
-  );
-
-  return new Map(
-    PRODUCTS.map((product) => [
-      product.id,
-      productEmbeddingSource(
-        product,
-        collectionNames.get(product.collectionSlug) ?? "KHEM",
-      ),
-    ]),
-  );
+function hasGatewayCredentials(): boolean {
+  return Boolean(process.env.AI_GATEWAY_API_KEY ?? process.env.VERCEL_OIDC_TOKEN);
 }
 
-/**
- * Read the committed index from disk rather than importing it — an import would
- * be cached by the module graph and, in `--check`, is exactly the file we may
- * have just rewritten.
- */
-async function readIndex(): Promise<EmbeddingIndex | null> {
-  try {
-    return JSON.parse(await readFile(OUTPUT_PATH, "utf8")) as EmbeddingIndex;
-  } catch {
-    return null;
-  }
+/** pgvector's text input form: `[0.1,0.2,…]`. */
+function toVectorLiteral(vector: readonly number[]): string {
+  return `[${vector.join(",")}]`;
 }
 
-/** Report drift between the committed vectors and the current catalog text. */
-async function check(documents: Map<string, string>): Promise<never> {
-  const index = await readIndex();
+async function main(): Promise<void> {
+  const checkOnly = process.argv.includes("--check");
 
-  if (index === null || Object.keys(index.items).length === 0) {
-    console.error(
-      "✗ No embeddings on file. Run `npm run embed` with AI_GATEWAY_API_KEY set.\n" +
-        "  (Search still works — it falls back to lexical matching.)",
+  await withClient(async (client) => {
+    const { rows: pending } = await client.query<PendingRow>(
+      `select slug, search_document as document
+         from public."Product"
+        where embedding is null
+          and "isArchived" = false
+          and "deletedAt" is null
+        order by slug`,
     );
-    process.exit(1);
-  }
 
-  const problems: string[] = [];
-
-  if (
-    index.model !== EMBEDDING_MODEL ||
-    index.dimensions !== EMBEDDING_DIMENSIONS ||
-    index.version !== EMBEDDING_VERSION
-  ) {
-    problems.push(
-      `index built with ${index.model}@${index.dimensions} v${index.version}, ` +
-        `config expects ${EMBEDDING_MODEL}@${EMBEDDING_DIMENSIONS} v${EMBEDDING_VERSION}`,
+    const { rows: totals } = await client.query<{ total: string }>(
+      `select count(*)::text as total from public."Product"`,
     );
-  }
+    const total = Number(totals[0].total);
 
-  for (const [id, document] of documents) {
-    const entry = index.items[id];
-    if (!entry) {
-      problems.push(`${id}: no vector`);
-    } else if (entry.sourceHash !== hashDocument(document)) {
-      problems.push(`${id}: catalog text changed since it was embedded`);
+    console.log(
+      `${redactUrl(connectionString())}: ${pending.length} of ${total} products ` +
+        `need an embedding (${EMBEDDING_MODEL}, ${EMBEDDING_DIMENSIONS}d, v${EMBEDDING_VERSION})`,
+    );
+
+    if (checkOnly) {
+      if (pending.length > 0) {
+        console.error(
+          `\n${pending.length} product(s) have no vector. Run \`npm run embed\`.`,
+        );
+        process.exitCode = 1;
+      } else {
+        console.log("Every product is embedded.");
+      }
+      return;
     }
-  }
 
-  for (const id of Object.keys(index.items)) {
-    if (!documents.has(id)) problems.push(`${id}: vector for a product that no longer exists`);
-  }
+    if (pending.length === 0) return;
 
-  if (problems.length > 0) {
-    console.error(`✗ Embedding index is stale:\n  ${problems.join("\n  ")}\n`);
-    console.error("  Run `npm run embed` to regenerate.");
-    process.exit(1);
-  }
-
-  console.log(`✓ ${documents.size} products, all embeddings current.`);
-  process.exit(0);
-}
-
-async function generate(documents: Map<string, string>): Promise<void> {
-  if (!process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
-    console.error(
-      "✗ No AI Gateway credentials.\n" +
-        "  Set AI_GATEWAY_API_KEY in .env.local, or run `vercel env pull` for an OIDC token.",
-    );
-    process.exit(1);
-  }
-
-  const ids = [...documents.keys()];
-  console.log(`Embedding ${ids.length} products with ${EMBEDDING_MODEL}…`);
-
-  const { embeddings, usage } = await embedMany({
-    model: EMBEDDING_MODEL,
-    values: ids.map((id) => documents.get(id) ?? ""),
-    providerOptions: { openai: { dimensions: EMBEDDING_DIMENSIONS } },
-  });
-
-  const items: EmbeddingIndex["items"] = {};
-
-  ids.forEach((id, position) => {
-    const vector = embeddings[position];
-    if (!vector || vector.length !== EMBEDDING_DIMENSIONS) {
+    if (!hasGatewayCredentials()) {
       throw new Error(
-        `Model returned ${vector?.length ?? 0} dimensions for ${id}, expected ${EMBEDDING_DIMENSIONS}.`,
+        "No AI Gateway credentials. Set AI_GATEWAY_API_KEY in .env.local, or run `vercel env pull`.",
       );
     }
 
-    items[id] = {
-      sourceHash: hashDocument(documents.get(id) ?? ""),
-      vector: vector.map((value) => Math.round(value * PRECISION) / PRECISION),
-    };
+    for (let offset = 0; offset < pending.length; offset += BATCH_SIZE) {
+      const batch = pending.slice(offset, offset + BATCH_SIZE);
+
+      const { embeddings } = await embedMany({
+        model: EMBEDDING_MODEL,
+        values: batch.map((row) => row.document),
+        maxRetries: 2,
+        providerOptions: { openai: { dimensions: EMBEDDING_DIMENSIONS } },
+      });
+
+      if (embeddings.length !== batch.length) {
+        throw new Error(
+          `Gateway returned ${embeddings.length} vectors for ${batch.length} documents.`,
+        );
+      }
+
+      for (const [index, embedding] of embeddings.entries()) {
+        if (embedding.length !== EMBEDDING_DIMENSIONS) {
+          throw new Error(
+            `Model returned ${embedding.length} dimensions, expected ${EMBEDDING_DIMENSIONS}. ` +
+              "Bump EMBEDDING_VERSION and the vector(N) column together.",
+          );
+        }
+
+        /*
+         * The update writes `embedding` only, and the invalidation trigger
+         * fires on `search_document` changing — which this cannot change — so
+         * writing a vector does not immediately null it again.
+         */
+        await client.query(
+          `update public."Product"
+              set embedding = $1::extensions.vector
+            where slug = $2`,
+          [toVectorLiteral(embedding), batch[index].slug],
+        );
+      }
+
+      console.log(`  embedded ${Math.min(offset + batch.length, pending.length)}/${pending.length}`);
+    }
+
+    console.log("Embeddings written.");
   });
+}
 
-  const index: EmbeddingIndex = {
-    model: EMBEDDING_MODEL,
-    dimensions: EMBEDDING_DIMENSIONS,
-    version: EMBEDDING_VERSION,
-    generatedAt: new Date().toISOString(),
-    items,
-  };
-
-  await writeFile(OUTPUT_PATH, `${JSON.stringify(index, null, 0)}\n`, "utf8");
-
-  console.log(
-    `✓ Wrote ${ids.length} vectors to src/data/embeddings.generated.json ` +
-      `(${usage.tokens} tokens). Commit this file.`,
+main().catch((cause: unknown) => {
+  console.error(
+    `Embedding failed: ${cause instanceof Error ? cause.message : "unknown error"}`,
   );
-}
-
-/*
- * Wrapped rather than top-level `await`: `tsx` transforms this to CommonJS on
- * Node 20, where a top-level await is a hard error.
- */
-async function main(): Promise<void> {
-  const documents = buildDocuments();
-
-  if (process.argv.includes("--check")) await check(documents);
-  else await generate(documents);
-}
-
-main().catch((error: unknown) => {
-  console.error("✗ Embedding failed.\n", error);
-  process.exit(1);
+  process.exitCode = 1;
 });

@@ -30,7 +30,7 @@ export default async function ProductIngredients({
   if (ingredients.length === 0) return null;
 
   const dict = await getDictionary(locale);
-  // Ingredient records come from `src/data` — English in both trees.
+  // Ingredient records come from the database — English in both trees.
   const island = ltrIsland(locale);
 
   return (

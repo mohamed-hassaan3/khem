@@ -2,6 +2,7 @@
 
 import { UserButton, useAuth } from "@clerk/nextjs";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { world, collections } from "../constants/navigation-pages";
@@ -13,6 +14,7 @@ import SignOutButton from "./account/SignOutButton";
 import LanguageSwitcher from "./i18n/LanguageSwitcher";
 import LocaleLink from "./i18n/LocaleLink";
 import SearchOverlay from "./search/SearchOverlay";
+import { signInPathWithReturn } from "@/src/lib/auth-redirect";
 import { facetHref } from "@/src/lib/facets";
 import { localizePath } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
@@ -328,10 +330,13 @@ export default function Nav() {
             labelWithOne={dict.nav.cartCountOne}
           />
           {/*
-           * Signed out, the icon leads to `/account` — where `src/proxy.ts`
-           * redirects to the sign-in page, so it is a live destination in
-           * both states. Signed in, it becomes Clerk's avatar menu, themed by
-           * the provider's appearance, with sign-out inside it.
+           * Signed out, the icon leads straight to the sign-in page carrying
+           * the current path as the return target. It used to point at
+           * `/account` and let the proxy bounce it, which meant someone who
+           * clicked it halfway down a product page was deposited in the
+           * portal after signing in and had to find their way back. Signed
+           * in, it becomes Clerk's avatar menu, themed by the provider's
+           * appearance, with sign-out inside it.
            *
            * `useAuth()` rather than the `<Show>` control component: the root
            * `Show` export in `@clerk/nextjs` is the App Router *server*
@@ -355,13 +360,23 @@ export default function Nav() {
               />
             </span>
           ) : (
-            <LocaleLink
-              href="/account"
+            /*
+             * A plain `<Link>`, not `<LocaleLink>`: `signInPathWithReturn`
+             * has already resolved the locale on both halves of this href.
+             *
+             * The target is the pathname alone — no query string. Reading one
+             * would mean `useSearchParams()` in a component that renders in
+             * the layout of every route, which opts all of them out of static
+             * rendering. Facet state on a listing page is the only thing lost,
+             * and it is not worth thirty dynamic pages.
+             */
+            <Link
+              href={signInPathWithReturn(locale, pathname)}
               className="nav-link"
               aria-label={dict.nav.account}
             >
               <AccountIcon />
-            </LocaleLink>
+            </Link>
           )}
         </div>
       </nav>

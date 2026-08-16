@@ -78,7 +78,7 @@ export default async function ProductCard({
             name: product.collectionName,
           })}
         </p>
-        {/* Product name, subtitle, and notes come from `src/data` — English only. */}
+        {/* Product name, subtitle, and notes come from the database — English only. */}
         <div {...ltrIsland(locale)}>
           <h3 className="mb-1 font-heading text-base font-normal tracking-wider text-ivory">
             {product.name}

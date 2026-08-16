@@ -18,7 +18,7 @@ import type { ContentImage } from "@/src/types/content";
  * previous implementation had — it matched on hardcoded country-name arrays
  * and fell through to "show everything" for any region it had no list for.
  *
- * Display order lives in `STOCKIST_REGIONS` (`src/data/stockists.ts`); the
+ * Display order lives in `STOCKIST_REGIONS` (`src/services/stockists.ts`); the
  * labels live in `dict.stockists.regions`, keyed by these members, so adding a
  * region without translating it is a compile error.
  */

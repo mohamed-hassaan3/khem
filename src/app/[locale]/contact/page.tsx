@@ -84,7 +84,7 @@ export default async function Contact({
           </Reveal>
 
           <Reveal delay={STAGGER_STEP * 2}>
-            {/* Channel labels and values come from `src/data` — English only. */}
+            {/* Channel labels and values come from the database — English only. */}
             <dl className="flex flex-col gap-8" {...island}>
               {channels.map((channel) => (
                 <div

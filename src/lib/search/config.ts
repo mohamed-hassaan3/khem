@@ -30,7 +30,7 @@ export const EMBEDDING_DIMENSIONS = 1536;
 
 /**
  * Bump whenever {@link EMBEDDING_MODEL}, {@link EMBEDDING_DIMENSIONS}, or
- * `productEmbeddingSource()` changes.
+ * the `search_document` column in `supabase/sql/0004_search.sql` changes.
  *
  * Stored vectors are only comparable to a query vector produced by the same
  * model from the same kind of document. The version is written into the

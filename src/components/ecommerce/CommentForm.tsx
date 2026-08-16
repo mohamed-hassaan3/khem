@@ -1,0 +1,223 @@
+"use client";
+
+import { useUser } from "@clerk/nextjs";
+import { useState, useTransition, type FormEvent } from "react";
+
+import CommentRow from "@/src/components/ecommerce/CommentRow";
+import { postProductComment } from "@/src/actions/comments";
+import type { Locale } from "@/src/lib/i18n/config";
+import { interpolate } from "@/src/lib/i18n/interpolate";
+import { COMMENT_MAX_LENGTH, COMMENT_MIN_LENGTH } from "@/src/schemas/comments";
+import { useDictionary } from "@/src/providers/i18n-provider";
+import type { ProductComment } from "@/src/types/comments";
+
+/**
+ * Leave a comment on a fragrance.
+ *
+ * There is no name field, by design. A signed-in visitor is attributed from
+ * their Clerk session and a signed-out one as "Guest" — both decided inside
+ * `actions/comments.ts`, which means the byline below is a *preview* of what
+ * the server will write, never an input to it. `useUser()` here is cosmetic;
+ * if it were wrong, the stored comment would still be right.
+ *
+ * The length checks are the same UX affordance `ContactForm` makes: the schema
+ * re-validates every submission inside the action, and the database carries the
+ * same bound as a CHECK.
+ */
+
+const FIELD_CLASS =
+  "w-full resize-y border border-border bg-ivory/3 px-5 py-4 text-[13px] leading-relaxed tracking-wide text-ivory transition-colors duration-300 placeholder:text-ivory/25 focus:border-gold/40 focus:outline-none";
+
+const LABEL_CLASS =
+  "mb-2.5 block font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35";
+
+export interface CommentFormProps {
+  slug: string;
+  locale: Locale;
+  /** Translated "Guest", for the byline preview and for guest rows. */
+  guestLabel: string;
+  /** Comment ids already rendered by the server list. */
+  storedIds: string[];
+}
+
+export default function CommentForm({
+  slug,
+  locale,
+  guestLabel,
+  storedIds,
+}: CommentFormProps) {
+  const dict = useDictionary();
+  const copy = dict.product.comments;
+
+  const { user } = useUser();
+  const [body, setBody] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSent, setIsSent] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  /**
+   * Comments posted in this session, newest first.
+   *
+   * Shown until the revalidated server list catches up — see the filter below,
+   * which retires each one the moment its id appears there.
+   */
+  const [posted, setPosted] = useState<ProductComment[]>([]);
+
+  /**
+   * Honeypot. Hidden from sight and from the tab order, so only a bot walking
+   * the DOM fills it. The action drops any submission where it is non-empty.
+   */
+  const [company, setCompany] = useState("");
+
+  /** Error codes the action returns, resolved against the dictionary here. */
+  const fieldMessages: Record<string, string> = {
+    bodyRequired: copy.bodyRequired,
+    bodyTooShort: copy.bodyTooShort,
+    bodyTooLong: copy.bodyTooLong,
+    slugInvalid: copy.deliveryError,
+  };
+
+  const stored = new Set(storedIds);
+  const pending = posted.filter((comment) => !stored.has(comment.id));
+
+  const trimmed = body.trim();
+  const canSubmit = trimmed.length >= COMMENT_MIN_LENGTH && !isPending;
+
+  const byline = interpolate(copy.postingAs, {
+    name: user?.fullName?.trim() || guestLabel,
+  });
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (isPending) return;
+
+    setError(null);
+    setIsSent(false);
+
+    if (trimmed.length < COMMENT_MIN_LENGTH) {
+      setError(trimmed.length === 0 ? copy.bodyRequired : copy.bodyTooShort);
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await postProductComment({
+        slug,
+        body: trimmed,
+        company,
+      });
+
+      if (result.ok) {
+        setBody("");
+        setIsSent(true);
+        // `null` is the honeypot branch: nothing was written, and nothing is
+        // shown. A human never reaches it.
+        const comment = result.comment;
+        if (comment) setPosted((current) => [comment, ...current]);
+        return;
+      }
+
+      if (result.error === "validation" && result.fieldErrors) {
+        const [code] = Object.values(result.fieldErrors);
+        setError(fieldMessages[code] ?? dict.forms.errorMessage);
+        return;
+      }
+
+      setError(
+        result.error === "rateLimited"
+          ? dict.forms.rateLimited
+          : copy.deliveryError,
+      );
+    });
+  }
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit} noValidate className="relative">
+        <label htmlFor="comment-body" className={LABEL_CLASS}>
+          {byline}
+        </label>
+
+        <textarea
+          id="comment-body"
+          name="body"
+          rows={4}
+          value={body}
+          maxLength={COMMENT_MAX_LENGTH}
+          placeholder={copy.placeholder}
+          onChange={(event) => {
+            setBody(event.target.value);
+            if (error) setError(null);
+            if (isSent) setIsSent(false);
+          }}
+          aria-label={copy.srLabel}
+          aria-invalid={error !== null}
+          aria-describedby={error ? "comment-error" : undefined}
+          className={FIELD_CLASS}
+        />
+
+        {/*
+          Honeypot: off-screen rather than `display:none`, since some bots skip
+          hidden fields. `tabIndex={-1}` and `aria-hidden` keep it away from
+          keyboard and screen-reader users, who never encounter it.
+        */}
+        <div
+          className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
+          aria-hidden="true"
+        >
+          <label htmlFor="comment-company">Company</label>
+          <input
+            id="comment-company"
+            name="company"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={company}
+            onChange={(event) => setCompany(event.target.value)}
+          />
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            aria-busy={isPending}
+            className="btn-luxury btn-luxury-fill min-w-50 justify-center disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending ? copy.submitting : copy.submit}
+          </button>
+
+          {error ? (
+            <p
+              id="comment-error"
+              role="alert"
+              className="text-[12px] leading-relaxed text-danger"
+            >
+              {error}
+            </p>
+          ) : null}
+
+          {isSent && !error ? (
+            <p role="status" className="text-[12px] tracking-wide text-gold">
+              {copy.sent}
+            </p>
+          ) : null}
+        </div>
+      </form>
+
+      {/* Only what this visitor just wrote, and only until the server list
+          carries it. Nothing renders here on a first visit. */}
+      {pending.length > 0 ? (
+        <div className="mt-14">
+          {pending.map((comment) => (
+            <CommentRow
+              key={comment.id}
+              comment={comment}
+              guestLabel={guestLabel}
+              locale={locale}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}

@@ -192,7 +192,7 @@ function StockistFeature({
           />
         </div>
 
-        {/* Store records come from `src/data` — English only. */}
+        {/* Store records come from the database — English only. */}
         <h3
           className="mb-2 font-heading text-2xl font-normal text-ivory md:text-3xl"
           {...island}
@@ -242,7 +242,7 @@ function StockistCard({
 
       <div className="px-6 py-7">
         <div className="mb-3 flex items-start justify-between gap-3">
-          {/* Store records come from `src/data` — English only. */}
+          {/* Store records come from the database — English only. */}
           <h3
             className="font-heading text-[15px] font-normal text-ivory"
             {...island}

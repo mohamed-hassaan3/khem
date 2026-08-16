@@ -296,7 +296,7 @@ function StockistRow({
   /** Name and location — identical in both branches. */
   const heading = (
     <span className="min-w-0">
-      {/* Store records come from `src/data` — English only. */}
+      {/* Store records come from the database — English only. */}
       <span
         className={`mb-1 block font-heading text-[15px] font-normal ${
           isComingSoon ? "text-ivory/60" : "text-ivory"

@@ -1,119 +1,94 @@
 /**
  * Catalog query layer.
  *
- * Every function here is the seam between the UI and the database. They are
- * already `async` and already return exactly the projection the UI consumes, so
- * migrating to Supabase means replacing the body of each function — never a
- * component, never a page.
+ * Every function here is the seam between the UI and the database. They return
+ * exactly the projection the UI consumes, which is what let the catalog move
+ * from `src/data/products.ts` into Postgres without a single component or page
+ * changing.
  *
- * Each function carries the Supabase query it will become. Keep those comments
- * accurate; they are the migration checklist.
+ * ## Rules this file keeps
+ *
+ * - Reads go through {@link getSupabasePublic}, the **publishable** key, so row
+ *   level security applies. The policies in `supabase/sql/0001_catalog.sql`
+ *   already exclude archived and soft-deleted rows; the explicit filters below
+ *   are belt and braces, and neither is trusted alone.
+ * - Explicit column lists, never `select('*')`. `ProductCardData` is
+ *   deliberately narrow and a list query honours that — and `select('*')` on
+ *   `"Product"` would drag a 1536-float embedding into the page payload.
+ * - Rows are parsed, never asserted (`src/schemas/db/catalog.ts`). One
+ *   malformed row is dropped; it does not blank the grid.
+ * - Failure returns `[]` or `null` and logs the provider's message. A database
+ *   outage degrades a page to its empty state; it does not 500 the site.
  */
 
-// NOTE: once the `server-only` package is installed, add `import "server-only"`
-// here so a stray client import of this module fails at build time instead of
-// shipping query logic (and later, credentials) to the browser.
+import "server-only";
 
-import { COLLECTIONS, FEATURED_PRODUCT_SLUG, PRODUCTS } from "@/src/data/products";
+import { getSupabasePublic } from "@/src/lib/supabase";
+import {
+  COLLECTION_COLUMNS,
+  PRODUCT_CARD_COLUMNS,
+  PRODUCT_WITH_IMAGES_COLUMNS,
+  parseList,
+  toCollection,
+  toProduct,
+  toProductCard,
+} from "@/src/schemas/db/catalog";
+import { BOUTIQUE_SETTING_COLUMNS, toBoutiqueSetting } from "@/src/schemas/db/directory";
 import type {
   Collection,
   CollectionKind,
   Product,
   ProductCardData,
-  ProductImage,
 } from "@/src/types/catalog";
 
-/** Fallback used when a product has no image flagged `isPrimary`. */
-const PLACEHOLDER_IMAGE: ProductImage = {
-  url: "https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=600&h=800&fit=crop&auto=format",
-  alt: "KHEM fragrance flacon",
-  isPrimary: true,
-  sortOrder: 0,
-};
-
-function resolvePrimaryImage(product: Product): ProductImage {
-  const sorted = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder);
-  return sorted.find((image) => image.isPrimary) ?? sorted[0] ?? PLACEHOLDER_IMAGE;
-}
-
-/** The two columns a card projection needs from the joined collection row. */
-type CollectionRef = Pick<Collection, "name" | "kind">;
-
-function toCardData(product: Product, collection: CollectionRef): ProductCardData {
-  return {
-    id: product.id,
-    name: product.name,
-    slug: product.slug,
-    subtitle: product.subtitle,
-    description: product.description,
-    topNotes: product.topNotes,
-    heartNotes: product.heartNotes,
-    baseNotes: product.baseNotes,
-    volumeMl: product.volumeMl,
-    priceInCents: product.priceInCents,
-    collectionSlug: product.collectionSlug,
-    inventory: product.inventory,
-    concentration: product.concentration,
-    format: product.format,
-    includes: product.includes,
-    badge: product.badge,
-    isBestseller: product.isBestseller,
-    tags: product.tags,
-    collectionName: collection.name,
-    collectionKind: collection.kind,
-    primaryImage: resolvePrimaryImage(product),
-  };
-}
-
-/**
- * Placeholder parent for a product whose collection is missing — a foreign key
- * this seed data cannot violate, but a join in Postgres eventually can.
- */
-const ORPHAN_COLLECTION: CollectionRef = { name: "KHEM", kind: "FRAGRANCE" };
-
-/** Index of the collections, built once per call and shared by the mappers. */
-function collectionsBySlug(): Map<string, Collection> {
-  return new Map(COLLECTIONS.map((collection) => [collection.slug, collection]));
-}
-
-/**
- * Map products to card projections, resolving each one's parent collection —
- * the join every list query performs.
- */
-function toCardList(products: readonly Product[]): ProductCardData[] {
-  const bySlug = collectionsBySlug();
-
-  return products.map((product) =>
-    toCardData(product, bySlug.get(product.collectionSlug) ?? ORPHAN_COLLECTION),
-  );
-}
-
-/** Products whose collection sells fragrances. */
-function fragranceProducts(): Product[] {
-  const bySlug = collectionsBySlug();
-
-  return PRODUCTS.filter(
-    (product) => bySlug.get(product.collectionSlug)?.kind === "FRAGRANCE",
-  );
+/** One log shape for the whole module: provider message, never row contents. */
+function logFailure(query: string, message: string): void {
+  console.error(`[catalog] ${query} failed: ${message}`);
 }
 
 /**
  * Collections shown on the home page.
  *
- * → supabase.from('Collection').select('*').eq('isFeatured', true).order('name')
+ * Ordered by `sortOrder`, not by name: the seed order is editorial — Signature
+ * reads before Noir because that is the story, not the alphabet.
  */
 export async function getFeaturedCollections(): Promise<Collection[]> {
-  return COLLECTIONS.filter((collection) => collection.isFeatured);
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Collection")
+    .select(COLLECTION_COLUMNS)
+    .eq("isFeatured", true)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getFeaturedCollections", error.message);
+    return [];
+  }
+
+  return parseList(data, toCollection);
 }
 
 /**
- * Every collection, of every kind. Used where the caller genuinely means all
- * of them — resolving a stored cart line, for instance.
- *
- * → supabase.from('Collection').select('*').order('name')
+ * Every collection, of every kind. Used where the caller genuinely means all of
+ * them — resolving a stored cart line, for instance.
  */
 export async function getCollections(): Promise<Collection[]> {
-  return COLLECTIONS;
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Collection")
+    .select(COLLECTION_COLUMNS)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getCollections", error.message);
+    return [];
+  }
+
+  return parseList(data, toCollection);
 }
 
 /**
@@ -122,23 +97,46 @@ export async function getCollections(): Promise<Collection[]> {
  * Body care, home fragrance, and discovery sets are collections too, but they
  * are not chapters of the perfume library and each has its own route; listing
  * them beside Signature and Noir would offer two URLs for the same goods.
- *
- * → supabase.from('Collection').select('*').eq('kind', 'FRAGRANCE').order('name')
  */
 export async function getFragranceCollections(): Promise<Collection[]> {
-  return COLLECTIONS.filter((collection) => collection.kind === "FRAGRANCE");
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Collection")
+    .select(COLLECTION_COLUMNS)
+    .eq("kind", "FRAGRANCE")
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getFragranceCollections", error.message);
+    return [];
+  }
+
+  return parseList(data, toCollection);
 }
 
 /**
  * A single collection by slug. Returns `null` when absent so the route can call
  * `notFound()` rather than throwing (AGENTS.md §1.7).
- *
- * → supabase.from('Collection').select('*').eq('slug', slug).maybeSingle()
  */
-export async function getCollectionBySlug(
-  slug: string,
-): Promise<Collection | null> {
-  return COLLECTIONS.find((collection) => collection.slug === slug) ?? null;
+export async function getCollectionBySlug(slug: string): Promise<Collection | null> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("Collection")
+    .select(COLLECTION_COLUMNS)
+    // Parameterised by the client, never interpolated into SQL.
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getCollectionBySlug", error.message);
+    return null;
+  }
+
+  return toCollection(data);
 }
 
 /**
@@ -146,8 +144,6 @@ export async function getCollectionBySlug(
  *
  * Scoped to `FRAGRANCE` so `/collections/body-care` 404s rather than rendering
  * a second, tab-less copy of `/body-care`.
- *
- * → …select('*').eq('slug', slug).eq('kind', 'FRAGRANCE').maybeSingle()
  */
 export async function getFragranceCollectionBySlug(
   slug: string,
@@ -157,14 +153,40 @@ export async function getFragranceCollectionBySlug(
 }
 
 /**
+ * The base card select: published products with their parent collection and
+ * their gallery. Filters are appended by the caller, `.order()` last — the
+ * builder stops accepting `.eq()` once a transform has been applied.
+ *
+ * Returns `null` when Supabase is unconfigured, which every caller reads as
+ * "render the empty state".
+ */
+function cardQuery() {
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  return supabase
+    .from("Product")
+    .select(PRODUCT_CARD_COLUMNS)
+    .eq("isArchived", false)
+    .is("deletedAt", null);
+}
+
+/** Shared tail: log a failure as `[]`, parse a success into cards. */
+function toCards(
+  label: string,
+  result: { data: unknown[] | null; error: { message: string } | null },
+): ProductCardData[] {
+  if (result.error) {
+    logFailure(label, result.error.message);
+    return [];
+  }
+
+  return parseList(result.data, toProductCard);
+}
+
+/**
  * Card projections for a collection listing. Omitting `collectionSlug` returns
  * the whole catalog, which is what `/collections` renders.
- *
- * → supabase
- *     .from('Product')
- *     .select('id,name,slug,subtitle,topNotes,heartNotes,baseNotes,volumeMl,priceInCents,inventory,concentration,collection:Collection(name,slug),images:ProductImage(url,alt,isPrimary,sortOrder)')
- *     .eq('isArchived', false).is('deletedAt', null)
- *     [+ .eq('collectionSlug', collectionSlug) when given]
  */
 export async function getProductCardsByCollection(
   collectionSlug?: string,
@@ -175,36 +197,35 @@ export async function getProductCardsByCollection(
    * a body-care line whose id is missing from it would silently vanish from
    * the visitor's bag.
    */
-  return toCardList(
-    PRODUCTS.filter(
-      (product) =>
-        collectionSlug === undefined ||
-        product.collectionSlug === collectionSlug,
-    ),
+  const query = cardQuery();
+  if (!query) return [];
+
+  const scoped =
+    collectionSlug === undefined
+      ? query
+      : query.eq("collectionSlug", collectionSlug);
+
+  return toCards(
+    "getProductCardsByCollection",
+    await scoped.order("sortOrder"),
   );
 }
 
 /**
  * Card projections for one category — `/body-care`, `/room-fragrance`, and
  * `/discovery` each render exactly one kind.
- *
- * → supabase
- *     .from('Product')
- *     .select('<the column list above>, collection:Collection!inner(name,slug,kind)')
- *     .eq('collection.kind', kind)
- *     .eq('isArchived', false).is('deletedAt', null)
  */
 export async function getProductCardsByKind(
   kind: CollectionKind,
 ): Promise<ProductCardData[]> {
-  const bySlug = new Map(
-    COLLECTIONS.map((collection) => [collection.slug, collection]),
-  );
+  const query = cardQuery();
+  if (!query) return [];
 
-  return toCardList(
-    PRODUCTS.filter(
-      (product) => bySlug.get(product.collectionSlug)?.kind === kind,
-    ),
+  // The `!inner` in `PRODUCT_CARD_COLUMNS` is what makes filtering on the
+  // embedded collection a join condition rather than a post-filter.
+  return toCards(
+    "getProductCardsByKind",
+    await query.eq("collection.kind", kind).order("sortOrder"),
   );
 }
 
@@ -217,14 +238,12 @@ export async function getProductCardsByKind(
  * appear, reachable through the facet chips. Their dedicated routes stay the
  * canonical place to buy them — a card here links back to its category page via
  * `productHref()` — so no second checkout URL is created.
- *
- * → supabase
- *     .from('Product')
- *     .select('<the column list above>, collection:Collection(name,slug,kind)')
- *     .eq('isArchived', false).is('deletedAt', null)
  */
 export async function getCatalogProductCards(): Promise<ProductCardData[]> {
-  return toCardList(PRODUCTS);
+  const query = cardQuery();
+  if (!query) return [];
+
+  return toCards("getCatalogProductCards", await query.order("sortOrder"));
 }
 
 /**
@@ -236,36 +255,43 @@ export async function getCatalogProductCards(): Promise<ProductCardData[]> {
  *
  * Fragrances only — the panel links to a detail page, and body care, home
  * fragrance, and sets have none.
- *
- * → supabase
- *     .from('Product')
- *     .select('*, images:ProductImage(*), collection:Collection!inner(kind)')
- *     .eq('collection.kind', 'FRAGRANCE')
- *     .contains('tags', ['NEW_ARRIVAL'])
- *     .eq('isArchived', false).is('deletedAt', null)
  */
 export async function getNewArrivals(): Promise<Product[]> {
-  return fragranceProducts().filter((product) =>
-    product.tags.includes("NEW_ARRIVAL"),
-  );
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Product")
+    .select(`${PRODUCT_WITH_IMAGES_COLUMNS}, collection:Collection!inner(kind)`)
+    .eq("collection.kind", "FRAGRANCE")
+    .contains("tags", ["NEW_ARRIVAL"])
+    .eq("isArchived", false)
+    .is("deletedAt", null)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getNewArrivals", error.message);
+    return [];
+  }
+
+  return parseList(data, toProduct);
 }
 
 /**
- * Bestsellers for the "Signature Fragrances" grid — fragrances only, whatever
- * a merchandiser flags on a candle.
- *
- * → supabase
- *     .from('Product')
- *     .select('<the column list above>, collection:Collection!inner(name,slug,kind)')
- *     .eq('collection.kind', 'FRAGRANCE')
- *     .eq('isBestseller', true).eq('isArchived', false).is('deletedAt', null)
- *     .limit(limit)
+ * Bestsellers for the "Signature Fragrances" grid — fragrances only, whatever a
+ * merchandiser flags on a candle.
  */
 export async function getFeaturedProducts(limit = 4): Promise<ProductCardData[]> {
-  return toCardList(
-    fragranceProducts()
-      .filter((product) => product.isBestseller)
-      .slice(0, limit),
+  const query = cardQuery();
+  if (!query) return [];
+
+  return toCards(
+    "getFeaturedProducts",
+    await query
+      .eq("collection.kind", "FRAGRANCE")
+      .eq("isBestseller", true)
+      .order("sortOrder")
+      .limit(limit),
   );
 }
 
@@ -278,22 +304,52 @@ export async function getFeaturedProducts(limit = 4): Promise<ProductCardData[]>
  * home fragrance, and discovery sets have no detail page, so
  * `/perfume/amber-room-spray` must 404 rather than render a PDP with an empty
  * pyramid — a URL no link on the site ever produces.
- *
- * → supabase.from('Product')
- *     .select('*, images:ProductImage(*), collection:Collection!inner(kind)')
- *     .eq('slug', slug).eq('collection.kind', 'FRAGRANCE').maybeSingle()
  */
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  return fragranceProducts().find((product) => product.slug === slug) ?? null;
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("Product")
+    .select(`${PRODUCT_WITH_IMAGES_COLUMNS}, collection:Collection!inner(kind)`)
+    .eq("slug", slug)
+    .eq("collection.kind", "FRAGRANCE")
+    .eq("isArchived", false)
+    .is("deletedAt", null)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getProductBySlug", error.message);
+    return null;
+  }
+
+  return toProduct(data);
 }
 
 /**
  * The fragrance given the full-bleed feature section on the home page.
  *
- * → supabase.from('Product').select('*, images:ProductImage(*)').eq('slug', FEATURED_PRODUCT_SLUG).maybeSingle()
+ * Which one that is now lives in `"BoutiqueSetting"."featuredProductSlug"`
+ * rather than in a constant — it is a merchandising decision, and merchandising
+ * decisions should not require a deploy.
  */
 export async function getFeaturedProduct(): Promise<Product | null> {
-  return getProductBySlug(FEATURED_PRODUCT_SLUG);
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("BoutiqueSetting")
+    .select(BOUTIQUE_SETTING_COLUMNS)
+    .eq("id", "default")
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getFeaturedProduct", error.message);
+    return null;
+  }
+
+  const slug = toBoutiqueSetting(data)?.featuredProductSlug;
+  return slug ? getProductBySlug(slug) : null;
 }
 
 /**
@@ -302,50 +358,62 @@ export async function getFeaturedProduct(): Promise<Product | null> {
  * Fragrances only: body care, home fragrance, and discovery sets are sold from
  * their category grid and have no PDP, so prerendering `/perfume/<their slug>`
  * would publish a URL nothing links to and `productHref()` never emits.
- *
- * → supabase.from('Product').select('slug, collection:Collection!inner(kind)')
- *     .eq('collection.kind', 'FRAGRANCE')
- *     .eq('isArchived', false).is('deletedAt', null)
  */
 export async function getProductSlugs(): Promise<string[]> {
-  return fragranceProducts().map((product) => product.slug);
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Product")
+    .select("slug, collection:Collection!inner(kind)")
+    .eq("collection.kind", "FRAGRANCE")
+    .eq("isArchived", false)
+    .is("deletedAt", null)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getProductSlugs", error.message);
+    return [];
+  }
+
+  return (data ?? [])
+    .map((row) => (typeof row.slug === "string" ? row.slug : null))
+    .filter((slug): slug is string => slug !== null);
 }
 
 /**
  * "You may also love" cards for a product detail page.
  *
- * Prefers the product's own collection and tops the list up from the rest of
- * the catalog when that collection is too small to fill it — Noir and Gemstone
- * both hold only three fragrances, so without the top-up a visitor would see
- * two suggestions on one page and three on another.
+ * Ranked by **scent**, not by shelf: `related_products()` orders candidates by
+ * cosine distance between their `search_document` embeddings, so a resinous
+ * Signature fragrance can surface beside a resinous Noir one instead of
+ * whichever three happen to share a collection.
  *
- * Fragrances only — the rail sits on a fragrance detail page under "Explore the
- * Collection", and a body mist is not an alternative to a perfume.
- *
- * → supabase
- *     .from('Product')
- *     .select('<the column list above>, collection:Collection!inner(name,slug,kind)')
- *     .eq('collection.kind', 'FRAGRANCE')
- *     .eq('isArchived', false).is('deletedAt', null).neq('slug', slug)
- *     .order('collectionSlug', { ascending: collectionSlug })  // own collection first
- *     .limit(limit)
+ * Two things it deliberately keeps from the previous implementation. It prefers
+ * the product's own collection whenever vectors cannot decide — which is the
+ * whole ordering until `npm run embed` has run, so the rail is never empty on a
+ * fresh database. And it tops the list up from the rest of the catalog: Noir
+ * and Gemstone hold only three fragrances each, and without the top-up a
+ * visitor would see two suggestions on one page and three on another.
  */
 export async function getRelatedProductCards(
   slug: string,
   limit = 3,
 ): Promise<ProductCardData[]> {
-  const product = PRODUCTS.find((entry) => entry.slug === slug);
-  if (!product) return [];
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
 
-  const candidates = fragranceProducts().filter(
-    (entry) => entry.slug !== slug,
-  );
-  const sameCollection = candidates.filter(
-    (entry) => entry.collectionSlug === product.collectionSlug,
-  );
-  const others = candidates.filter(
-    (entry) => entry.collectionSlug !== product.collectionSlug,
-  );
+  const { data, error } = await supabase
+    .rpc("related_products", { product_slug: slug, match_limit: limit })
+    // The function returns `setof "Product"`, so the projection is applied on
+    // top of it — without this the response would carry every column,
+    // embedding included.
+    .select(PRODUCT_CARD_COLUMNS);
 
-  return toCardList([...sameCollection, ...others].slice(0, limit));
+  // `data` is typed loosely for an RPC projection; the row schema is what
+  // actually decides whether each row is a card.
+  return toCards("getRelatedProductCards", {
+    data: data as unknown[] | null,
+    error,
+  });
 }

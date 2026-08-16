@@ -44,7 +44,7 @@ export async function generateMetadata({
  * Home fragrance — scent for a room.
  *
  * The filter bar lives inside `<MerchGrid>` and derives its tabs from the
- * products present, so a candle or a diffuser added to `src/data` appears as a
+ * products present, so a candle or a diffuser added to the catalog appears as a
  * filter with no edit here.
  */
 export default async function RoomFragrancePage({

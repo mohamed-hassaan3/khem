@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { getViewer } from "@/src/lib/auth";
+import { signInPathWithReturn } from "@/src/lib/auth-redirect";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
-import { ACCOUNT_PATHS, AUTH_PATHS } from "@/src/lib/routes";
+import { ACCOUNT_PATHS } from "@/src/lib/routes";
 
 /**
  * Profile.
@@ -54,7 +55,10 @@ export default async function ProfilePage({
 
   // Every protected resource checks for itself — see `src/proxy.ts` for why
   // the middleware no longer does it on this route's behalf.
-  if (viewer === null) redirect(localizePath(activeLocale, AUTH_PATHS.signIn));
+  // The panel the visitor asked for travels with the redirect, so signing in
+  // returns them here rather than to the portal index.
+  if (viewer === null)
+    redirect(signInPathWithReturn(activeLocale, localizePath(activeLocale, PATH)));
 
   const dict = await getDictionary(activeLocale);
 

@@ -1,10 +1,8 @@
 /**
  * The semantic half of the engine — query embedding and vector similarity.
  *
- * SERVER ONLY. This module reads `AI_GATEWAY_API_KEY` and must never be
- * imported from a Client Component. (When the `server-only` package is
- * installed, add `import "server-only"` at the top; the same note sits on
- * `src/services/products.ts`.)
+ * SERVER ONLY — `import "server-only"` below is the guard. This module reads
+ * `AI_GATEWAY_API_KEY` and must never reach a Client Component.
  *
  * Two rules govern everything here:
  *
@@ -17,23 +15,23 @@
  *    route handler, and the query-length cap in `text.ts` are all the same
  *    concern: this is a public endpoint in front of a metered API.
  *
- * → In Postgres, `rankSemantic()` disappears entirely: the brute-force loop
- *   becomes `order by embedding <=> query_embedding limit n` against an HNSW
- *   index. `embedQuery()` survives unchanged — the query still has to be
- *   embedded somewhere, and it will still be here.
+ * Ranking used to live here too, as a brute-force loop over a generated index.
+ * It is now `order by embedding <=> query_embedding` against an HNSW index
+ * inside `hybrid_search_products()`. Embedding the *query* stayed: it is the one
+ * part that cannot happen in Postgres.
  */
 
-import { cosineSimilarity, embed } from "ai";
+import "server-only";
+
+import { embed } from "ai";
 
 import {
   EMBEDDING_DIMENSIONS,
   EMBEDDING_MODEL,
   EMBEDDING_VERSION,
   EMBED_TIMEOUT_MS,
-  SIMILARITY_FLOOR,
 } from "./config";
 import { fold } from "./text";
-import type { EmbeddingIndex } from "@/src/types/search";
 
 /**
  * Query-embedding cache, keyed by model + version + folded query.
@@ -121,32 +119,4 @@ export async function embedQuery(query: string): Promise<number[] | null> {
     warnOnce("Query embedding failed.", error);
     return null;
   }
-}
-
-/**
- * Rank product ids by cosine similarity to the query vector, best first.
- *
- * The floor is what makes "no results" reachable: nearest-neighbour search
- * always returns a neighbour, so without it every query would match every
- * product to some degree.
- *
- * Brute force over the whole index — correct and microseconds-fast at catalog
- * scale, and precisely the loop the HNSW index replaces once the vectors live
- * in Postgres.
- */
-export function rankSemantic(
-  queryVector: readonly number[],
-  index: EmbeddingIndex,
-): { id: string; similarity: number }[] {
-  const ranked: { id: string; similarity: number }[] = [];
-
-  for (const [id, entry] of Object.entries(index.items)) {
-    // A vector of the wrong width is a stale entry, not a comparison.
-    if (entry.vector.length !== queryVector.length) continue;
-
-    const similarity = cosineSimilarity([...queryVector], entry.vector);
-    if (similarity >= SIMILARITY_FLOOR) ranked.push({ id, similarity });
-  }
-
-  return ranked.sort((a, b) => b.similarity - a.similarity || a.id.localeCompare(b.id));
 }

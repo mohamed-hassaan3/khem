@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import Reveal from "@/src/components/animation/Reveal";
 import ProductBreadcrumb from "@/src/components/ecommerce/ProductBreadcrumb";
+import ProductComments from "@/src/components/ecommerce/ProductComments";
 import ProductGallery from "@/src/components/ecommerce/ProductGallery";
 import ProductIngredients from "@/src/components/ecommerce/ProductIngredients";
 import ProductPurchase from "@/src/components/ecommerce/ProductPurchase";
@@ -149,6 +150,11 @@ export default async function PerfumePage({
           ) : null}
         </div>
       </section>
+
+      {/* Self-guarding, like `<ProductIngredients>`: renders nothing when the
+          database is unconfigured, and no empty panel when nobody has written
+          yet. Its own `Reveal` sits inside, after that guard. */}
+      <ProductComments slug={product.slug} locale={activeLocale} />
 
       <RelatedProducts products={related} locale={activeLocale} />
     </div>

@@ -129,7 +129,7 @@ export default async function About({
                   : "p-10 md:p-20"
               }
             >
-              {/* Mission copy comes from `src/data` — English only. */}
+              {/* Mission copy comes from the database — English only. */}
               <div {...island}>
                 <p className="eyebrow mb-6">{item.label}</p>
                 <h2 className="mb-7 font-heading text-2xl font-normal text-ivory sm:text-3xl">

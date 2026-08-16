@@ -28,6 +28,7 @@ import {
 } from "@/src/lib/email/templates";
 import { DEFAULT_LOCALE, isLocale } from "@/src/lib/i18n/config";
 import { newsletterSchema } from "@/src/schemas/newsletter";
+import { getSocialProfiles } from "@/src/services/contact";
 import type { FormActionResult } from "@/src/types/contact";
 
 /** Five per ten minutes — a signup costs less attention than an enquiry. */
@@ -47,7 +48,9 @@ async function sendWelcome(
   rawLocale: string,
 ): Promise<void> {
   const locale = isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
-  const payload = newsletterWelcomeEmail(locale);
+  // The signature's links live in `"SocialProfile"`; composing the body is
+  // synchronous, so the read happens here and the list is handed down.
+  const payload = newsletterWelcomeEmail(locale, await getSocialProfiles());
 
   try {
     const { error } = await resend.emails.send({

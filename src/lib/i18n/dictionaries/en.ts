@@ -6,7 +6,7 @@
  * it is translated.
  *
  * Scope is UI chrome and page-level editorial copy that lives in JSX. The
- * long-form records in `src/data/*.ts` (testimonials, timeline, craft steps,
+ * long-form records in Postgres (testimonials, timeline, craft steps,
  * ingredient detail, legal documents, products) are NOT translated here —
  * they stay English for both locales until that content layer moves to a CMS.
  */
@@ -585,6 +585,26 @@ export const en = {
       eyebrow: "You May Also Love",
       heading: "Explore the Collection",
     },
+    /*
+     * Visitor comments. `guest` is the attribution for anyone not signed in —
+     * it is a *label*, never stored text, so the same row reads "Guest" here
+     * and "ضيف" in the Arabic tree.
+     */
+    comments: {
+      eyebrow: "In Their Words",
+      heading: "Reflections",
+      postingAs: "Writing as {name}",
+      guest: "Guest",
+      placeholder: "Share how this fragrance wears on you…",
+      srLabel: "Your comment",
+      submit: "Post Comment",
+      submitting: "Posting",
+      sent: "Thank you. Your reflection is published.",
+      bodyRequired: "Please write a comment first",
+      bodyTooShort: "A little more, please",
+      bodyTooLong: "Please keep your comment under 1,200 characters",
+      deliveryError: "We could not post your comment. Please try again.",
+    },
   },
 
   bodyCare: {
@@ -1051,7 +1071,7 @@ export const en = {
 
   /*
    * Cookie consent. The category names and descriptions deliberately echo the
-   * table in the published Cookie Policy (`src/data/legal.ts`) — the banner and
+   * table in the published Cookie Policy (the `"LegalDocument"` row) — the banner and
    * the policy must never describe different sets of cookies.
    */
   cookieConsent: {

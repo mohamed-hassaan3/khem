@@ -1,15 +1,17 @@
 /**
  * Catalog types — a 1:1 mirror of the Prisma models defined in AGENTS.md §9.
  *
- * These shapes are deliberately identical (field names, casing, units) to the
- * eventual Postgres/Supabase tables so that migrating away from the local seed
- * data in `src/data/` is a change to `src/services/` only. No component or page
- * should ever need to be edited to switch the data source.
+ * These shapes are identical (field names, casing, units) to the Postgres
+ * tables in `supabase/sql/0001_catalog.sql`, which is what made moving the
+ * catalog out of local seed data a change to `src/services/` alone — no
+ * component and no page was edited.
  *
  * Deviations from Prisma, and why:
- *  - `id` values are stable slugs rather than uuids until the database assigns them.
- *  - Relations are expressed by slug (`collectionSlug`) instead of a uuid FK,
- *    for the same reason.
+ *  - `id` values are stable slugs rather than uuids, because the cart and the
+ *    wishlist persist product ids in `localStorage` and uuids would have
+ *    emptied every returning visitor's bag. See the SQL file's header.
+ *  - Relations are expressed by slug (`collectionSlug`) rather than by a uuid
+ *    FK, for the same reason; `slug` is unique, so the constraint is as strong.
  *  - Server-managed columns (`createdAt`, `updatedAt`, `deletedAt`, `isArchived`)
  *    are omitted because nothing in the UI reads them.
  */

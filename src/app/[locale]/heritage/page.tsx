@@ -258,7 +258,7 @@ export default async function Heritage({
                 className="bg-background p-10 md:p-12"
               >
                 <div className="gold-line mb-8" />
-                {/* Brand values come from `src/data` — English only. */}
+                {/* Brand values come from the database — English only. */}
                 <div {...island}>
                   <h3 className="mb-5 font-heading text-xl font-normal text-ivory">
                     {value.title}

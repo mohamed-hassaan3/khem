@@ -49,7 +49,7 @@ export default function MerchCard({
   const formatPrice = useFormatPrice();
   const { addLine } = useCart();
   const wishlist = useWishlist();
-  // Product copy comes from `src/data` — English in both trees.
+  // Product copy comes from the database — English in both trees.
   const island = ltrIsland(locale);
 
   const [justAdded, setJustAdded] = useState(false);

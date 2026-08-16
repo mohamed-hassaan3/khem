@@ -1,83 +1,123 @@
-# Supabase — search schema
+# Supabase — the database behind KHEM
 
-This directory holds the **designed but not yet applied** database side of KHEM
-search. Nothing here runs today: the catalog still lives in `src/data/`, and
-`src/services/` is the seam that will swap underneath the UI.
+Everything the site renders lives here: the catalog, the editorial content, the
+legal documents, the stockist directory, the contact details, and the product
+comments. `src/data/` no longer exists — `src/services/` queries Postgres, and
+no component or page knows the difference.
 
-## What is here
+## Layout
 
-- **`sql/product-search.sql`** — pgvector + full-text schema, the HNSW index, the
-  `hybrid_search_products()` RRF function, RLS policies, and the embedding
-  invalidation trigger. Reviewed and ready; not a migration file.
+```
+sql/     schema, applied in filename order by `npm run db:migrate`
+seed/    the frozen record export, loaded by `npm run db:seed`
+```
 
-## Turning it into a migration
+| File | What it creates |
+| :--- | :--- |
+| `sql/0001_catalog.sql` | `Collection`, `Product`, `ProductImage`, the three catalog enums, RLS |
+| `sql/0002_content.sql` | `Testimonial`, `Ingredient` (+ `IngredientFamily`, `IngredientUsage`), `Article`, `TimelineEvent`, `BrandValue`, `MissionStatement`, `CraftPillar`, `CraftStep`, `CraftStat`, `CraftQuote` |
+| `sql/0003_directory.sql` | `Stockist`, `ContactChannel`, `SocialProfile`, `EnquirySubject`, `BoutiqueSetting`, `LegalDocument` |
+| `sql/0004_search.sql` | pgvector + full-text columns, HNSW index, `hybrid_search_products()`, `related_products()`, the embedding-invalidation trigger |
+| `sql/0005_comments.sql` | `product_comment`, with a real foreign key onto `Product(slug)` |
+| `sql/0006_privileges.sql` | revokes the write grants Supabase hands `anon`/`authenticated` by default |
 
-Migration filenames are **generated, never hand-written** — an invented name
-breaks `supabase db diff` and the migration history.
+## Commands
 
 ```bash
-supabase migration new product_search      # creates the timestamped file
-# paste the contents of sql/product-search.sql into it
-supabase db reset --local                  # apply from scratch, locally
-supabase db advisors                       # security + performance lint (CLI ≥ 2.81.3)
-supabase migration list --local            # verify
+npm run db:migrate    # apply sql/*.sql — idempotent, safe to re-run
+npm run db:seed       # load seed/*.json — upserts, never deletes
+npm run db:verify     # counts, integrity, and the security assertions
+npm run embed         # fill Product.embedding through the AI Gateway
+npm run embed -- --check   # non-zero exit if any product lacks a vector
 ```
 
-Fix everything the advisors report before committing. Pay particular attention
-to anything about `security definer`, exposed schemas without RLS, or missing
-indexes on foreign keys.
+A fresh project is `db:migrate`, `db:seed`, `embed`, in that order.
 
-## What changes in the application
+### Connecting
 
-Exactly two files, by design:
+The scripts read `SUPABASE_DB_URL` from `.env.local` — the **session pooler**
+(`aws-0-<region>.pooler.supabase.com:5432`, user `postgres.<ref>`), not
+`db.<ref>.supabase.co`. The direct host publishes an AAAA record and no A
+record, so on a network without IPv6 it does not resolve at all. Session mode
+(port 5432, not 6543) because these scripts issue DDL and hold transactions.
 
-| File | Change |
-| :--- | :--- |
-| `src/services/search.ts` | `searchCatalog()`'s body becomes the `hybrid_search_products` RPC call already written in its doc comment. The lexical/semantic/fusion imports go away — Postgres does all three. |
-| `src/services/products.ts` | The other queries become the `supabase.from(...)` calls already written above each function. |
+Nothing under `src/` uses that URL. The application talks to the Data API,
+where row level security applies.
 
-`src/lib/search/semantic.ts` keeps `embedQuery()` — the query still has to be
-embedded somewhere — and loses `rankSemantic()`, whose brute-force loop the HNSW
-index replaces. No component and no page changes.
+## Security model
 
-## Prisma
+Three things hold, and `npm run db:verify` asserts all three:
 
-Prisma has no native `vector` type. Declare the column as unsupported so
-`prisma migrate` leaves it alone:
+1. **RLS is enabled on every table**, with a `select` policy carrying the
+   published predicate — `isArchived = false and deletedAt is null` for
+   products, `isPublished` for stockists, testimonials, articles and comments.
+   The policy is the access control, not a second copy of the query's `where`.
+2. **The public roles hold `select` and nothing else.** No insert, update or
+   delete policy exists for `anon` or `authenticated` anywhere, and
+   `0006_privileges.sql` takes back the DML grants a stock Supabase project
+   attaches to every new table in `public`.
+3. **Reads use the publishable key, writes use the secret key.** Every
+   `src/services/*` read goes through `getSupabasePublic()`, so a policy mistake
+   fails loudly instead of being masked by a key that bypasses RLS.
+   `getSupabaseAdmin()` — `SUPABASE_SECRET_KEY`, which *does* bypass RLS — is
+   reached only by `src/actions/comments.ts` and the `scripts/db-*` tooling, and
+   `src/lib/supabase.ts` is guarded by `server-only` so neither key can reach a
+   client bundle.
 
-```prisma
-model Product {
-  // …
-  embedding Unsupported("vector(1536)")?
-}
+Identity is Clerk's, not Supabase Auth's, so `auth.uid()` is always null and no
+policy can express "this row is mine". That is why comment authorship is stamped
+server-side from the session rather than enforced in SQL.
+
+## Search and related products
+
+Both run on the same vectors.
+
+`hybrid_search_products()` fuses a full-text ranking with a pgvector
+nearest-neighbour ranking using Reciprocal Rank Fusion — exact names stay on top
+while conceptual queries ("smoky, for a winter night") reach products that share
+no words with them. `related_products()` orders the PDP rail by cosine distance
+between product embeddings, so the suggestions are fragrances that actually
+smell alike rather than whichever three share a collection.
+
+What gets embedded is `Product.search_document`, a **generated column**. The
+full-text index reads the same column, so both halves of a hybrid search
+describe the same text — and there is no TypeScript twin of that string to drift
+out of step. A trigger nulls `embedding` whenever `search_document` changes, so
+editing a product marks it for re-embedding; `npm run embed` picks up the nulls.
+
+Until `npm run embed` has run, everything still works: search returns the
+full-text ranking and the related rail falls back to own-collection-first
+ordering. `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS` and `EMBEDDING_VERSION` in
+`src/lib/search/config.ts` must stay in step with the `vector(1536)` column —
+changing the model to one of a different width is an `alter` plus a full
+re-embed.
+
+Credentials: `AI_GATEWAY_API_KEY` locally, or Vercel's OIDC token in a
+deployment (`vercel env pull` brings it to a local checkout).
+
+## Editing content
+
+The database is the source of truth. Edit rows in the Supabase table editor;
+`seed/*.json` is a snapshot for rebuilding an empty project, not a place to make
+changes. `db:seed` upserts and never deletes, so removing a record from the JSON
+does not remove it from the database — unpublish or delete it deliberately.
+
+Two lists are deliberately duplicated in code, and `db:verify` fails if they
+drift:
+
+- `ENQUIRY_SUBJECTS` in `src/constants/contact.ts` is the allow-list the contact
+  Server Action validates against, because a submitted subject reaches a mail
+  header and must not be validated against an editable row.
+- The stockist regions and the olfactive families are unions in `src/types/`,
+  because the dictionary keys are typed against them.
+
+## Migrating this to the Supabase CLI
+
+The files are written so that adopting the CLI is a copy, not a rewrite.
+Migration filenames are generated, never invented:
+
+```bash
+supabase migration new catalog     # then paste sql/0001_catalog.sql, and so on
+supabase db reset --local
+supabase db advisors               # fix everything it reports before committing
 ```
-
-Vector queries then go through `$queryRaw` or — preferably — the RPC above.
-Never through the Prisma query builder, which cannot express `<=>`.
-
-## Embedding the catalog
-
-Today `npm run embed` writes `src/data/embeddings.generated.json`, committed to
-the repository so builds need no credentials. In Postgres that becomes a
-background job:
-
-1. The trigger in `sql/product-search.sql` nulls `embedding` whenever a
-   product's `search_document` changes.
-2. A `pg_cron` schedule invokes an Edge Function every few minutes.
-3. The function selects rows `where embedding is null limit 50`, embeds them
-   with the same model, and writes them back with the service-role key.
-
-The model, dimensions, and document text **must** stay in step with
-`src/lib/search/config.ts` and `productEmbeddingSource()`. A vector is only
-comparable to a query vector produced by the same model from the same kind of
-document; when they drift, the search does not error, it just quietly returns
-the wrong things. `EMBEDDING_VERSION` exists to make that drift loud.
-
-## Credentials
-
-- **Local:** `AI_GATEWAY_API_KEY` in `.env.local` (see `.env.example`).
-- **Deployed:** prefer OIDC — Vercel injects a token that rotates on its own, and
-  the AI SDK picks up whichever credential is present. `vercel env pull` brings
-  the same token to a local checkout.
-- The Supabase **service-role key is server-only** and never reaches a
-  `NEXT_PUBLIC_` variable. The embedding writer is the only thing that needs it.

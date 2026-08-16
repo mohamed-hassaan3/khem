@@ -110,7 +110,7 @@ export default async function Craftsmanship({
               <p className="mb-2.5 font-heading text-4xl font-semibold text-gold sm:text-5xl md:text-6xl">
                 {stat.value}
               </p>
-              {/* Stat labels come from `src/data` — English only. */}
+              {/* Stat labels come from the database — English only. */}
               <p
                 {...island}
                 className="text-[11px] leading-relaxed tracking-[0.12em] text-ivory/35"
@@ -165,7 +165,7 @@ export default async function Craftsmanship({
                       number: step.number,
                     })}
                   </p>
-                  {/* Step copy comes from `src/data` — English only. */}
+                  {/* Step copy comes from the database — English only. */}
                   <div {...island}>
                     <h2 className="mb-2.5 font-heading text-2xl font-normal leading-snug text-ivory sm:text-3xl md:text-4xl">
                       {step.title}
@@ -198,7 +198,7 @@ export default async function Craftsmanship({
           <div className="absolute inset-0 flex items-center justify-center">
             <Reveal className="max-w-3xl px-6 py-20 text-center md:px-20">
               <div className="gold-line mx-auto mb-9" />
-              {/* The quote comes from `src/data` — English only. */}
+              {/* The quote comes from the database — English only. */}
               <div {...island}>
                 <p className="mb-7 font-heading text-xl italic leading-relaxed text-ivory sm:text-2xl md:text-3xl">
                   &ldquo;{quote.quote}&rdquo;

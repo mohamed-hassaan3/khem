@@ -35,7 +35,7 @@ export default async function IngredientCard({
         />
       </div>
       <div className="border-t border-border p-6">
-        {/* Ingredient name and origin come from `src/data` — English only. */}
+        {/* Ingredient name and origin come from the database — English only. */}
         <div {...ltrIsland(locale)}>
           <h3 className="mb-1 font-heading text-base font-normal text-ivory">
             {ingredient.name}

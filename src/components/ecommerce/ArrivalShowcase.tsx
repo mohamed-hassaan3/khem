@@ -38,7 +38,7 @@ export default async function ArrivalShowcase({
   total,
 }: ArrivalShowcaseProps) {
   const dict = await getDictionary(locale);
-  // Product copy comes from `src/data` — English in both trees.
+  // Product copy comes from the database — English in both trees.
   const island = ltrIsland(locale);
 
   // Even entries lead with the image; odd ones lead with the copy.

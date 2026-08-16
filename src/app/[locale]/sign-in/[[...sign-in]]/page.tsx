@@ -1,8 +1,9 @@
-import { SignIn } from "@clerk/nextjs";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import AuthShell from "@/src/components/auth/AuthShell";
-import { LOCALES, isLocale, localizePath } from "@/src/lib/i18n/config";
+import SignInForm from "@/src/components/auth/SignInForm";
+import { LOCALES, isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 
@@ -67,15 +68,16 @@ export default async function SignInPage({
       guest={dict.auth}
     >
       {/*
-       * The redirect targets are locale-prefixed here as well as on the
-       * provider: this page is reachable directly, and a visitor who lands on
-       * `/ar/sign-in` from a bookmark must still be returned into the Arabic
-       * tree afterwards.
+       * A client island: the return target is read from the query string, and
+       * doing that here would make this route dynamic for every visitor. The
+       * `<Suspense>` boundary is what `useSearchParams()` requires to keep the
+       * shell around it prerendered — the fallback is `null` because Clerk's
+       * card paints its own skeleton and a second placeholder beneath the
+       * heading would only add a flash.
        */}
-      <SignIn
-        signUpUrl={localizePath(activeLocale, "/sign-up")}
-        fallbackRedirectUrl={localizePath(activeLocale, "/account")}
-      />
+      <Suspense fallback={null}>
+        <SignInForm locale={activeLocale} />
+      </Suspense>
     </AuthShell>
   );
 }

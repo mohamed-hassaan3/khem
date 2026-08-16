@@ -89,7 +89,7 @@ export default async function Journal({
               </div>
 
               <div className="flex flex-col justify-center p-8 md:p-15">
-                {/* Article metadata and copy come from `src/data` — English only. */}
+                {/* Article metadata and copy come from the database — English only. */}
                 <div className="mb-7 flex flex-wrap items-center gap-4" {...island}>
                   <span className="eyebrow">{featured.category}</span>
                   <span className="h-3 w-px bg-ivory/15" aria-hidden="true" />

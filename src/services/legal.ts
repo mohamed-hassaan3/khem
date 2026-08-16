@@ -1,33 +1,71 @@
 /**
  * Legal document query layer.
  *
- * Same contract as `contact.ts`: the UI awaits these functions, so swapping the
- * source (Supabase table or CMS globals) is a change of function bodies only.
+ * Same contract as `content.ts`. One difference worth knowing: these four
+ * routes must never 404, so `getLegalDocument()` throws when its document is
+ * missing rather than returning `null`. A privacy policy that quietly renders
+ * as an empty page is worse than a loud failure — the copy is a legal
+ * obligation, not decoration.
  */
 
-// NOTE: add `import "server-only"` here once that package is installed.
+import "server-only";
 
-import { LEGAL_DOCUMENTS, LEGAL_DOCUMENT_ORDER } from "@/src/data/legal";
+import { getSupabasePublic } from "@/src/lib/supabase";
+import { parseList } from "@/src/schemas/db/catalog";
+import { LEGAL_DOCUMENT_COLUMNS, toLegalDocument } from "@/src/schemas/db/directory";
 import type { LegalDocument, LegalDocumentSlug } from "@/src/types/legal";
 
+function logFailure(query: string, message: string): void {
+  console.error(`[legal] ${query} failed: ${message}`);
+}
+
 /**
- * → supabase.from('LegalDocument').select('*').eq('slug', slug).single()
+ * One document by slug.
  *
- * No `notFound()` branch: `slug` is a closed union and the record is keyed by
- * it, so a miss is impossible at compile time.
+ * `slug` is a closed union and the table's primary key is checked against the
+ * same four values, so a miss means the row is absent or malformed — a
+ * deployment fault, which is what the thrown error says.
  */
 export async function getLegalDocument(
   slug: LegalDocumentSlug,
 ): Promise<LegalDocument> {
-  return LEGAL_DOCUMENTS[slug];
+  const supabase = getSupabasePublic();
+
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("LegalDocument")
+      .select(LEGAL_DOCUMENT_COLUMNS)
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error) {
+      logFailure("getLegalDocument", error.message);
+    } else {
+      const document = toLegalDocument(data);
+      if (document) return document;
+    }
+  }
+
+  throw new Error(`Legal document "${slug}" is missing from the database.`);
 }
 
 /**
- * → supabase.from('LegalDocument').select('*').order('sortOrder')
- *
- * Returns the four documents in navigation order. Used by the footer, a future
- * `/legal` index, and the sitemap.
+ * The four documents in navigation order. Used by the footer, a future `/legal`
+ * index, and the sitemap.
  */
 export async function getLegalDocuments(): Promise<LegalDocument[]> {
-  return LEGAL_DOCUMENT_ORDER.map((slug) => LEGAL_DOCUMENTS[slug]);
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("LegalDocument")
+    .select(LEGAL_DOCUMENT_COLUMNS)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getLegalDocuments", error.message);
+    return [];
+  }
+
+  return parseList(data as unknown[] | null, toLegalDocument);
 }

@@ -8,13 +8,9 @@ import {
   isCurrency,
   resolveCurrencyForCountry,
 } from "./lib/currency";
-import {
-  DEFAULT_LOCALE,
-  LOCALES,
-  localizePath,
-  stripLocale,
-} from "./lib/i18n/config";
-import { ACCOUNT_PATHS, AUTH_PATHS } from "./lib/routes";
+import { signInPathWithReturn } from "./lib/auth-redirect";
+import { DEFAULT_LOCALE, LOCALES, stripLocale } from "./lib/i18n/config";
+import { ACCOUNT_PATHS } from "./lib/routes";
 
 /**
  * Locale routing with `as-needed` prefixing, wrapped in Clerk's auth gate.
@@ -160,8 +156,17 @@ export default clerkMiddleware(async (auth, request) => {
       // Built from the request's own origin and a locale that came out of
       // `stripLocale`, so the destination is same-origin by construction and
       // no crafted path can steer it off-site.
+      //
+      // The requested path rides along as Clerk's `redirect_url`, so someone
+      // who asked for `/account/orders` is returned to `/account/orders` and
+      // not dropped on the portal index. It is the real pathname plus its
+      // query — already same-origin, and re-checked by `signInPathWithReturn`
+      // on the way in.
       const signInUrl = new URL(
-        localizePath(locale, AUTH_PATHS.signIn),
+        signInPathWithReturn(
+          locale,
+          `${request.nextUrl.pathname}${request.nextUrl.search}`,
+        ),
         request.url,
       );
 

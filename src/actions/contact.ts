@@ -31,6 +31,7 @@ import {
 } from "@/src/lib/email/templates";
 import { DEFAULT_LOCALE, isLocale } from "@/src/lib/i18n/config";
 import { contactEnquirySchema } from "@/src/schemas/contact";
+import { getSocialProfiles } from "@/src/services/contact";
 import type { FormActionResult } from "@/src/types/contact";
 
 /**
@@ -67,7 +68,13 @@ async function sendAcknowledgement(
   // Locale arrives from the client and is therefore untrusted: validated, not
   // used to index a record directly.
   const locale = isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
-  const payload = enquiryAcknowledgementEmail(data, locale);
+  // As in `newsletter.ts`: the signature's links are rows, and the template is
+  // synchronous, so they are read here and passed in.
+  const payload = enquiryAcknowledgementEmail(
+    data,
+    locale,
+    await getSocialProfiles(),
+  );
 
   try {
     const { error } = await resend.emails.send({

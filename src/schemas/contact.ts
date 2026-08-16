@@ -11,7 +11,7 @@
 
 import { z } from "zod";
 
-import { ENQUIRY_SUBJECTS } from "@/src/data/contact";
+import { ENQUIRY_SUBJECTS } from "@/src/constants/contact";
 
 /** Cap on the message body, enforced independently of any client `maxlength`. */
 export const MESSAGE_MAX_LENGTH = 4_000;
@@ -23,9 +23,13 @@ export const contactEnquirySchema = z.object({
   name: z.string().trim().min(2, "nameRequired").max(80, "nameTooLong"),
   email: z.email("emailInvalid").max(254, "emailInvalid"),
   /*
-   * `ENQUIRY_SUBJECTS` is a `string[]`, not a literal tuple, so this is a
-   * refinement rather than `z.enum`. Same guarantee: a `<select>` is trivially
-   * bypassed, and an unvalidated subject would land in a mail header.
+   * `ENQUIRY_SUBJECTS` is a `readonly string[]`, not a literal tuple, so this
+   * is a refinement rather than `z.enum`. Same guarantee: a `<select>` is
+   * trivially bypassed, and an unvalidated subject would land in a mail header.
+   *
+   * Validated against the **constant**, never against `"EnquirySubject"`: the
+   * table is display copy an account with write access can edit, and the
+   * allow-list guarding a mail header must not be editable without a deploy.
    */
   subject: z
     .string()

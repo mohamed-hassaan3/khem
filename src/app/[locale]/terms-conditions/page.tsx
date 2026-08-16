@@ -48,7 +48,7 @@ export default async function TermsConditions({
   return (
     <div className="min-h-screen bg-background text-ivory">
       {/*
-        The legal documents in `src/data/legal.ts` are English-only for now.
+        The legal documents are stored in English only for now.
         Marking the subtree `ltr`/`en` keeps punctuation, numbering, and list
         markers correct when it renders inside the Arabic (RTL) page, and lets
         screen readers switch voice for it.

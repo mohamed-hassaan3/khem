@@ -115,6 +115,26 @@ export function formatConsentDate(epochMs: number, locale: Locale): string {
   }).format(new Date(epochMs));
 }
 
+/**
+ * Formats the moment a product comment was posted, e.g. "16 August 2026".
+ *
+ * Locale-aware for the same reason `formatConsentDate` is: a comment sits
+ * inside fully translated chrome, unlike the English-only catalog records.
+ *
+ * `timeZone: "UTC"` is not about date-only strings here — these are real
+ * `timestamptz` values — but about agreement. The stored thread is rendered on
+ * the server and a freshly posted comment on the client; pinning the zone is
+ * what stops the same comment showing two different days across that seam.
+ */
+export function formatCommentDate(isoDate: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : LOCALE, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(isoDate));
+}
+
 /** Volume label for a product, e.g. 100 → "100 ML". */
 export function formatVolume(volumeMl: number): string {
   return `${volumeMl} ML`;

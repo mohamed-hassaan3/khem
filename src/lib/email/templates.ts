@@ -17,6 +17,7 @@
  */
 
 import { LOCALE_DIRECTION, type Locale } from "@/src/lib/i18n/config";
+import type { SocialProfile } from "@/src/types/contact";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 
@@ -157,6 +158,7 @@ export function enquiryEmail(input: EnquiryInput): EmailPayload {
 export function enquiryAcknowledgementEmail(
   input: EnquiryInput,
   locale: Locale,
+  socials: readonly SocialProfile[],
 ): EmailPayload {
   const copy = ACKNOWLEDGEMENT_COPY[locale];
   const align = LOCALE_DIRECTION[locale] === "rtl" ? "right" : "left";
@@ -186,6 +188,7 @@ export function enquiryAcknowledgementEmail(
     // escaping here too would double-encode an apostrophe in "O'Brien".
     headline: interpolate(copy.headline, { name: input.name }),
     body,
+    socials,
   });
 
   const text = [
@@ -207,7 +210,10 @@ export function enquiryAcknowledgementEmail(
 }
 
 /** Welcome sent to a new Inner Circle subscriber. */
-export function newsletterWelcomeEmail(locale: Locale): EmailPayload {
+export function newsletterWelcomeEmail(
+  locale: Locale,
+  socials: readonly SocialProfile[],
+): EmailPayload {
   const copy = WELCOME_COPY[locale];
   const align = LOCALE_DIRECTION[locale] === "rtl" ? "right" : "left";
 
@@ -228,6 +234,7 @@ export function newsletterWelcomeEmail(locale: Locale): EmailPayload {
     eyebrow: copy.eyebrow,
     headline: copy.headline,
     body,
+    socials,
   });
 
   const text = [

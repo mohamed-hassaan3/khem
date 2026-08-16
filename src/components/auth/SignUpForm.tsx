@@ -1,11 +1,17 @@
 "use client";
 
 import { SignUp } from "@clerk/nextjs";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import {
+  AUTH_REDIRECT_PARAM,
+  sanitizeAuthRedirect,
+  signInPathWithReturn,
+} from "@/src/lib/auth-redirect";
 import type { Locale } from "@/src/lib/i18n/config";
 import { localizePath } from "@/src/lib/i18n/config";
-import { AUTH_PATHS, ACCOUNT_PATHS } from "@/src/lib/routes";
+import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { useDictionary } from "@/src/providers/i18n-provider";
 
 /**
@@ -32,12 +38,20 @@ import { useDictionary } from "@/src/providers/i18n-provider";
 
 export default function SignUpForm({ locale }: { locale: Locale }) {
   const dict = useDictionary();
+  const searchParams = useSearchParams();
+  const returnTo = sanitizeAuthRedirect(searchParams.get(AUTH_REDIRECT_PARAM));
   const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   return (
     <div className="flex w-full flex-col items-center">
+      {/*
+       * `redirect_url` is read off the URL by Clerk itself and preferred to
+       * the fallback below; it is re-read here only to rebuild the sign-in
+       * link, which Clerk does not carry the parameter onto. Sanitized on the
+       * way through — the value is whatever the query string says.
+       */}
       <SignUp
-        signInUrl={localizePath(locale, AUTH_PATHS.signIn)}
+        signInUrl={signInPathWithReturn(locale, returnTo)}
         fallbackRedirectUrl={localizePath(locale, ACCOUNT_PATHS.overview)}
         unsafeMetadata={{ marketingOptIn }}
       />

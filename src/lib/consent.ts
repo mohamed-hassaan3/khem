@@ -13,7 +13,8 @@
  *
  * ## Categories
  *
- * Exactly the three the published policy names (`src/data/legal.ts`,
+ * Exactly the three the published policy names (the `"LegalDocument"` row for
+ * `cookie-policy`,
  * "cookie-policy"): Essential, Preferences, Analytics. Essential is not
  * represented in the record at all — it is not a choice, so storing a boolean
  * for it would imply it could be `false`. KHEM runs no advertising cookies, so

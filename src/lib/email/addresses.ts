@@ -6,7 +6,7 @@
  * clone working without extra setup.
  */
 
-import { HOUSE_EMAIL } from "@/src/data/contact";
+import { HOUSE_EMAIL } from "@/src/constants/contact";
 import { getConciergeEmail } from "@/src/services/contact";
 
 /**
@@ -45,10 +45,10 @@ export function houseFromAddress(): string {
 /**
  * The house mailbox.
  *
- * Falls through to `getConciergeEmail()` so `src/data/contact.ts` stays the one
- * place the address is written — the same constant the contact page publishes
- * to visitors. An enquiry form that mails somewhere other than the address on
- * the page is the bug that file's header comment exists to prevent.
+ * Falls through to `getConciergeEmail()`, which reads `"BoutiqueSetting"` — the
+ * same row the contact page publishes to visitors. An enquiry form that mails
+ * somewhere other than the address on the page is the bug that arrangement
+ * exists to prevent.
  */
 export async function inboxAddress(): Promise<string> {
   return process.env.CONTACT_INBOX_EMAIL ?? (await getConciergeEmail());

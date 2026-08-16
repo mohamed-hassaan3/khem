@@ -1,7 +1,0 @@
-{
-  "model": "openai/text-embedding-3-small",
-  "dimensions": 1536,
-  "version": 1,
-  "generatedAt": "",
-  "items": {}
-}

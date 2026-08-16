@@ -62,7 +62,7 @@ export default function ProductPurchase({
   const { currency, formatPrice } = useCurrency();
   const { addLine } = useCart();
   const wishlist = useWishlist();
-  // Product name and subtitle come from `src/data` — English in both trees.
+  // Product name and subtitle come from the database — English in both trees.
   const island = ltrIsland(locale);
 
   const [quantity, setQuantity] = useState(1);

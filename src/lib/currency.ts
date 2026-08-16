@@ -4,7 +4,7 @@
  * ## What this is not
  *
  * KHEM has exactly one price per product, stored in Egyptian piastres
- * (`src/data/products.ts`), and exactly one settlement currency. Nothing here
+ * (`"Product"."priceInCents"`), and exactly one settlement currency. Nothing here
  * creates a second price. A non-EGP figure on the site is a *converted display*
  * of the same EGP amount, which is why the settlement note beside it says so,
  * and why the checkout Server Action — when it lands — must price the order

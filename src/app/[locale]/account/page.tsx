@@ -6,12 +6,13 @@ import OrderCard from "@/src/components/account/OrderCard";
 import StatGrid from "@/src/components/account/StatGrid";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { getViewer } from "@/src/lib/auth";
+import { signInPathWithReturn } from "@/src/lib/auth-redirect";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { readingArrow } from "@/src/lib/i18n/rtl";
-import { AUTH_PATHS, ACCOUNT_PATHS } from "@/src/lib/routes";
+import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { getAccountSummary, getOrdersForUser } from "@/src/services/account";
 
 /**
@@ -62,7 +63,10 @@ export default async function AccountPage({
   const [{ locale }, viewer] = await Promise.all([params, getViewer()]);
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  if (viewer === null) redirect(localizePath(activeLocale, AUTH_PATHS.signIn));
+  // The panel the visitor asked for travels with the redirect, so signing in
+  // returns them here rather than to the portal index.
+  if (viewer === null)
+    redirect(signInPathWithReturn(activeLocale, localizePath(activeLocale, PATH)));
 
   const [dict, summary, orders] = await Promise.all([
     getDictionary(activeLocale),

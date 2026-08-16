@@ -35,7 +35,7 @@ export default async function JournalCard({
         />
       </div>
       <div className="p-8">
-        {/* Article metadata and title come from `src/data` — English only. */}
+        {/* Article metadata and title come from the database — English only. */}
         <div {...ltrIsland(locale)}>
           <div className="mb-4 flex items-center justify-between">
             <span className="text-[9px] uppercase tracking-[0.2em] text-gold">

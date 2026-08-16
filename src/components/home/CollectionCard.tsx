@@ -56,7 +56,7 @@ export default async function CollectionCard({
         className={`absolute inset-0 flex flex-col justify-end bg-linear-to-t ${OVERLAY_TONE[tone]} via-transparent to-transparent p-8 md:p-12`}
       >
         <p className="eyebrow mb-3">{ordinal}</p>
-        {/* Collection name and description come from `src/data` — English only. */}
+        {/* Collection name and description come from the database — English only. */}
         <div {...ltrIsland(locale)}>
           <h3 className="mb-5 font-heading text-3xl font-normal text-ivory md:text-4xl">
             {collection.name}

@@ -39,7 +39,8 @@ export interface IngredientUsage {
  * card read from the same seven labels, so a typo in a record must fail
  * typecheck instead of silently producing an eighth, unfilterable family.
  *
- * The display order lives in `INGREDIENT_FAMILIES` (`src/data/content.ts`).
+ * The display order lives in the `"IngredientFamily"` table, whose rows a
+ * trigger validates every `Ingredient.families` value against.
  */
 export type IngredientFamily =
   | "Woody Aromas"

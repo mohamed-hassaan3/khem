@@ -5,10 +5,11 @@ import { redirect } from "next/navigation";
 import AddressCard from "@/src/components/account/AddressCard";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
 import { getViewer } from "@/src/lib/auth";
+import { signInPathWithReturn } from "@/src/lib/auth-redirect";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
-import { ACCOUNT_PATHS, AUTH_PATHS } from "@/src/lib/routes";
+import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { getAddressesForUser } from "@/src/services/account";
 
 /**
@@ -52,7 +53,10 @@ export default async function AddressesPage({
   const [{ locale }, viewer] = await Promise.all([params, getViewer()]);
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  if (viewer === null) redirect(localizePath(activeLocale, AUTH_PATHS.signIn));
+  // The panel the visitor asked for travels with the redirect, so signing in
+  // returns them here rather than to the portal index.
+  if (viewer === null)
+    redirect(signInPathWithReturn(activeLocale, localizePath(activeLocale, PATH)));
 
   const [dict, addresses] = await Promise.all([
     getDictionary(activeLocale),

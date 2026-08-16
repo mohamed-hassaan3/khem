@@ -23,7 +23,7 @@
 
 import { LOCALE_DIRECTION, LOCALE_HTML_TAG, type Locale } from "@/src/lib/i18n/config";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
-import { SOCIAL_PROFILES } from "@/src/data/contact";
+import type { SocialProfile } from "@/src/types/contact";
 import { SIGNATURE_COPY } from "./copy";
 import { escapeHtml } from "./escape";
 
@@ -120,13 +120,24 @@ export function quoteBlock(
  *    style and would otherwise render the 480px source at full size, blowing
  *    the layout apart.
  */
-export function signatureBlock(locale: Locale): string {
+export function signatureBlock(
+  locale: Locale,
+  socials: readonly SocialProfile[],
+): string {
   const copy = SIGNATURE_COPY[locale];
   const seal = `${assetBase()}/email/khem-seal.png`;
 
-  const byId = new Map(SOCIAL_PROFILES.map((profile) => [profile.id, profile]));
+  const byId = new Map(socials.map((profile) => [profile.id, profile]));
 
-  // Ordered as specified, not as `SOCIAL_PROFILES` happens to be sorted.
+  /*
+   * Passed in rather than imported: the profiles are rows in
+   * `"SocialProfile"` now, and reading them is async while building an email
+   * body is not. The async boundary belongs in the Server Action that sends the
+   * message, so it fetches once and hands the list down. A profile that is
+   * missing simply drops out of the signature below.
+   *
+   * Ordered as specified here, not as the query happens to sort.
+   */
   const links = [
     { label: "Instagram", url: byId.get("instagram")?.url },
     { label: "Facebook", url: byId.get("facebook")?.url },
@@ -182,6 +193,8 @@ export interface LuxuryShellInput {
   headline: string;
   /** Pre-composed HTML for the middle of the letter. Trusted or pre-escaped. */
   body: string;
+  /** House social profiles, for the signature. Read from `"SocialProfile"`. */
+  socials: readonly SocialProfile[];
 }
 
 /** The full customer-facing document. */
@@ -191,6 +204,7 @@ export function luxuryShell({
   eyebrow,
   headline,
   body,
+  socials,
 }: LuxuryShellInput): string {
   const dir = LOCALE_DIRECTION[locale];
   const align = dir === "rtl" ? "right" : "left";
@@ -234,7 +248,7 @@ export function luxuryShell({
 
             <!-- Signature -->
             <tr>
-              <td style="padding:38px 40px 44px 40px;">${signatureBlock(locale)}</td>
+              <td style="padding:38px 40px 44px 40px;">${signatureBlock(locale, socials)}</td>
             </tr>
           </table>
         </td>

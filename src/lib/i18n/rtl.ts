@@ -3,7 +3,7 @@ import { LOCALE_DIRECTION, type Locale } from "./config";
 /**
  * Attributes that mark a subtree as English left-to-right content.
  *
- * The records in `src/data/*.ts` (products, testimonials, ingredients, craft
+ * The records in Postgres (products, testimonials, ingredients, craft
  * steps, timeline, legal documents) are English-only in this pass. Dropping
  * them raw into an RTL page misplaces trailing punctuation, reverses list
  * markers, and leaves screen readers announcing English in an Arabic voice —

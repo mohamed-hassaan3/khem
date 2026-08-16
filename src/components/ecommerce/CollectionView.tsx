@@ -165,7 +165,7 @@ export default async function CollectionView({
         items={items}
         facets={facets}
         description={
-          /* A collection's own description comes from `src/data` — English only. */
+          /* A collection's own description comes from the database — English only. */
           <p
             className="max-w-lg text-[13px] leading-loose text-ivory/40"
             {...(collection ? island : {})}

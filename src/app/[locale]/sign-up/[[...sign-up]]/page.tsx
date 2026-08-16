@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import AuthShell from "@/src/components/auth/AuthShell";
 import SignUpForm from "@/src/components/auth/SignUpForm";
@@ -59,9 +60,13 @@ export default async function SignUpPage({
        * A client island: the marketing checkbox has to be readable at the
        * moment Clerk creates the user, so it and `<SignUp>` share one
        * component. See `SignUpForm` for why the field sits beneath the card
-       * rather than inside it.
+       * rather than inside it. It also reads the sign-in return target off the
+       * query string, which is why it sits behind `<Suspense>` — that is what
+       * `useSearchParams()` needs for this route to stay prerendered.
        */}
-      <SignUpForm locale={activeLocale} />
+      <Suspense fallback={null}>
+        <SignUpForm locale={activeLocale} />
+      </Suspense>
     </AuthShell>
   );
 }

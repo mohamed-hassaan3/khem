@@ -43,7 +43,7 @@ export default function DiscoverySetCard({
   const formatPrice = useFormatPrice();
   const { addLine } = useCart();
   const wishlist = useWishlist();
-  // Set names and contents come from `src/data` — English in both trees.
+  // Set names and contents come from the database — English in both trees.
   const island = ltrIsland(locale);
 
   const [justAdded, setJustAdded] = useState(false);

@@ -558,6 +558,21 @@ export const ar: Dictionary = {
       eyebrow: "قد يعجبك أيضًا",
       heading: "اكتشف المجموعة",
     },
+    comments: {
+      eyebrow: "بكلماتهم",
+      heading: "انطباعات",
+      postingAs: "تكتب باسم {name}",
+      guest: "ضيف",
+      placeholder: "شاركنا كيف يستقر هذا العطر على بشرتك…",
+      srLabel: "تعليقك",
+      submit: "نشر التعليق",
+      submitting: "جارٍ النشر",
+      sent: "شكرًا لك. نُشر انطباعك.",
+      bodyRequired: "يرجى كتابة تعليق أولًا",
+      bodyTooShort: "أضف قليلًا من الكلمات، من فضلك",
+      bodyTooLong: "يرجى ألا يتجاوز التعليق ١٬٢٠٠ حرف",
+      deliveryError: "تعذّر نشر تعليقك. يرجى المحاولة مرة أخرى.",
+    },
   },
 
   bodyCare: {

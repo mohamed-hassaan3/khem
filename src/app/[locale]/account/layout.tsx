@@ -37,6 +37,13 @@ export default async function AccountLayout({
   // The parent layout has already rejected any segment that is not a locale.
   const activeLocale = isLocale(locale) ? locale : "en";
 
+  /*
+   * No `redirect_url` here, unlike the panels beneath: a layout cannot know
+   * which child it is wrapping, so the only target it could name is `/account`
+   * — which is already Clerk's fallback. The precise return path is attached
+   * by whichever panel is being requested, and by `src/proxy.ts` before either
+   * of them runs.
+   */
   if (viewer === null) redirect(localizePath(activeLocale, AUTH_PATHS.signIn));
 
   return (

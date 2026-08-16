@@ -26,7 +26,7 @@ export default async function ProductBreadcrumb({
   productName,
 }: ProductBreadcrumbProps) {
   const dict = await getDictionary(locale);
-  // Collection and product names come from `src/data` — English in both trees.
+  // Collection and product names come from the database — English in both trees.
   const island = ltrIsland(locale);
 
   return (
