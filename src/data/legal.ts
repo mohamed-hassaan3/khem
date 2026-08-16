@@ -567,7 +567,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentSlug, LegalDocument> = {
         blocks: [
           {
             kind: "text",
-            text: "One cookie is worth describing on its own, because it is the only one set from where you are. When you arrive, we read the country your connection resolves to and store a single three-letter currency code — USD, EGP, EUR, GBP, AED, or SAR — under the name khem.currency.v1, so the prices you see are in money you recognise.",
+            text: "One cookie is worth describing on its own, because it is the only one set from where you are. When you arrive, we read the country your connection resolves to and store a single three-letter currency code — EGP, USD, EUR, GBP, AED, or SAR — under the name khem.currency.v1, so the prices you see are in money you recognise.",
           },
           {
             kind: "text",
@@ -575,7 +575,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentSlug, LegalDocument> = {
           },
           {
             kind: "note",
-            text: "We treat this as an essential cookie: without it a price cannot be shown, and it carries no identifier, so it cannot be used to recognise you here or anywhere else. Prices outside US Dollars are converted at an indicative rate — your order is charged in US Dollars.",
+            text: "We treat this as an essential cookie: without it a price cannot be shown, and it carries no identifier, so it cannot be used to recognise you here or anywhere else. Our prices are set in Egyptian Pounds; every other currency is converted at an indicative rate, and your order is charged in Egyptian Pounds.",
           },
         ],
       },

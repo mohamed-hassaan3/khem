@@ -276,7 +276,7 @@ export async function getFeaturedProducts(limit = 4): Promise<ProductCardData[]>
  *
  * Scoped to `FRAGRANCE` for the same reason `getProductSlugs()` is: body care,
  * home fragrance, and discovery sets have no detail page, so
- * `/perfume/noir-room-spray` must 404 rather than render a PDP with an empty
+ * `/perfume/amber-room-spray` must 404 rather than render a PDP with an empty
  * pyramid — a URL no link on the site ever produces.
  *
  * → supabase.from('Product')

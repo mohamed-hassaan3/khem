@@ -35,7 +35,7 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     id: "james-whitmore",
     quote:
-      "Kyphi Noir is unlike anything I have encountered. Ancient yet wholly modern. Extraordinary.",
+      "Onyx Night is unlike anything I have encountered. Ancient yet wholly modern. Extraordinary.",
     author: "James Whitmore",
     authorTitle: "Luxury Editor, Condé Nast",
   },
@@ -81,9 +81,8 @@ export const INGREDIENTS: Ingredient[] = [
     description:
       'Known as "liquid gold," oud is the most expensive natural ingredient in perfumery. It is the dark, resinous heartwood formed when the Aquilaria tree becomes infected with a specific mold. The result of this natural alchemy is a rich, complex material — simultaneously smoky, sweet, animalic, and sacred.',
     usedIn: [
-      { name: "Kyphi Noir", slug: "kyphi-noir" },
-      { name: "Obsidian Elixir", slug: "obsidian-elixir" },
-      { name: "Nile Absolue", slug: "nile-absolue" },
+      { name: "Onyx Night", slug: "onyx-night" },
+      { name: "Sapphire", slug: "sapphire" },
     ],
     facts: [
       "Wild Aquilaria trees take 100+ years to form oud",
@@ -107,8 +106,8 @@ export const INGREDIENTS: Ingredient[] = [
     description:
       "The most sacred of all ancient aromatics, frankincense has been burned in temples and used in ritual for over 5,000 years. The finest grade — Hojari from Oman — is hand-harvested by tapping the Boswellia sacra tree, which grows exclusively in the mountains of Dhofar.",
     usedIn: [
-      { name: "Kyphi Noir", slug: "kyphi-noir" },
-      { name: "Rā Soleil", slug: "ra-soleil" },
+      { name: "Onyx Night", slug: "onyx-night" },
+      { name: "Kyphi", slug: "kyphi" },
     ],
     facts: [
       "Used by Ancient Egyptians in mummification rituals",
@@ -132,8 +131,9 @@ export const INGREDIENTS: Ingredient[] = [
     description:
       "The world's most expensive spice by weight, saffron adds an incomparable warmth and subtle spiciness to fine fragrance. Each strand is the stigma of the Crocus sativus flower, hand-harvested at dawn before the blooms open. A single gram requires 150 flowers.",
     usedIn: [
-      { name: "Rā Soleil", slug: "ra-soleil" },
-      { name: "Horus Gold", slug: "horus-gold" },
+      { name: "Ivory Temple", slug: "ivory-temple" },
+      { name: "Crimson Sun", slug: "crimson-sun" },
+      { name: "Sunlit Citrine", slug: "sunlit-citrine" },
     ],
     facts: [
       "150 flowers yield just 1 gram of saffron",
@@ -157,9 +157,9 @@ export const INGREDIENTS: Ingredient[] = [
     description:
       "Distilled from the blossom of the bitter orange tree, neroli has an achingly beautiful quality — simultaneously honeyed, green, and almost metallic. We source exclusively from the orange groves of Egypt's Nile Delta, where the combination of soil and climate produces a neroli of exceptional complexity.",
     usedIn: [
-      { name: "Rā Soleil", slug: "ra-soleil" },
-      { name: "Lotus Blanc", slug: "lotus-blanc" },
-      { name: "Isis Rose", slug: "isis-rose" },
+      { name: "Ivory Temple", slug: "ivory-temple" },
+      { name: "Desert Lily", slug: "desert-lily" },
+      { name: "Turquoise", slug: "turquoise" },
     ],
     facts: [
       "Named after Princess Anne Marie Orsini of Nerola",
@@ -183,8 +183,8 @@ export const INGREDIENTS: Ingredient[] = [
     description:
       "The rarest fixative in all of perfumery, ambergris is produced in the digestive system of sperm whales and found floating in ocean waters after decades of natural transformation. It adds an incomparable depth and radiance to fragrance, fixing all other notes and making them last significantly longer on skin.",
     usedIn: [
-      { name: "Nile Absolue", slug: "nile-absolue" },
-      { name: "Kyphi Noir", slug: "kyphi-noir" },
+      { name: "Mendesian", slug: "mendesian" },
+      { name: "Lapis", slug: "lapis" },
     ],
     facts: [
       "Ages in the ocean for up to 30 years before use",
@@ -208,8 +208,9 @@ export const INGREDIENTS: Ingredient[] = [
     description:
       "Distilled from the roots of vetiver grass, Haitian vetiver is widely considered the finest in the world — deeper, smokier, and more complex than its Javanese or Indian counterparts. It is an extraordinary material that anchors fragrances, providing extraordinary longevity and a sense of ancient earth.",
     usedIn: [
-      { name: "Nile Absolue", slug: "nile-absolue" },
-      { name: "Anubis Ombre", slug: "anubis-ombre" },
+      { name: "Sunlit Citrine", slug: "sunlit-citrine" },
+      { name: "Emerald", slug: "emerald" },
+      { name: "Sapphire", slug: "sapphire" },
     ],
     facts: [
       "Roots can grow up to 3 meters deep into the earth",
@@ -233,8 +234,9 @@ export const INGREDIENTS: Ingredient[] = [
     description:
       "The queen of flowers, Rosa damascena has been cultivated in Grasse for fragrance production for over 300 years. Our rose absolue comes from a single family-owned estate in the Vallée des Fleurs. It is a full, honeyed, almost wine-like rose — nothing like the synthetic approximations found in most fragrances.",
     usedIn: [
-      { name: "Isis Rose", slug: "isis-rose" },
-      { name: "Obsidian Elixir", slug: "obsidian-elixir" },
+      { name: "Desert Lily", slug: "desert-lily" },
+      { name: "Onyx Night", slug: "onyx-night" },
+      { name: "Amber", slug: "amber" },
     ],
     facts: [
       "4 tonnes of flowers yield 1 kg of rose absolue",
@@ -258,8 +260,8 @@ export const INGREDIENTS: Ingredient[] = [
     description:
       "The national flower of Jordan, the black iris (Iris nigricans) is among the rarest botanical ingredients in all of perfumery. Its extraction is extraordinarily complex and yield minimal. The result is a singular, dark, almost unearthly note — simultaneously powdery, woody, and strangely metallic.",
     usedIn: [
-      { name: "Obsidian Elixir", slug: "obsidian-elixir" },
-      { name: "Anubis Ombre", slug: "anubis-ombre" },
+      { name: "Kyphi", slug: "kyphi" },
+      { name: "Sapphire", slug: "sapphire" },
     ],
     facts: [
       "The national flower of Jordan",
@@ -305,9 +307,9 @@ export const JOURNAL_ARTICLES: JournalArticle[] = [
     },
   },
   {
-    id: "inside-the-atelier-kyphi-noir",
-    slug: "inside-the-atelier-kyphi-noir",
-    title: "Inside the Atelier: The Making of Kyphi Noir",
+    id: "inside-the-atelier-onyx-night",
+    slug: "inside-the-atelier-onyx-night",
+    title: "Inside the Atelier: The Making of Onyx Night",
     category: "Craftsmanship",
     excerpt:
       "Master perfumer Mohamed Hassaan opens the doors of the KHEM atelier to share how our most complex fragrance took three years and 200 iterations to perfect.",
@@ -432,7 +434,7 @@ export const TIMELINE: TimelineEvent[] = [
     year: "2021 AD",
     title: "The First Collection",
     description:
-      "The Signature Collection launches to critical acclaim, including Kyphi Noir — KHEM's defining fragrance and the most complex formula in the house.",
+      "The Signature Collection launches to critical acclaim, including Onyx Night — KHEM's defining fragrance and the most complex formula in the house.",
   },
   {
     id: "the-noir-chapter",

@@ -6,16 +6,16 @@
  * nowhere else, so a currency or locale change is a one-file edit.
  *
  * Money now has two currencies, and the distinction matters: it is *stored* in
- * USD and *displayed* in whichever of `src/lib/currency.ts`'s six the visitor
- * resolved to. Only this file crosses between them. Everything upstream — the
- * catalog, the cart maths, the order totals — stays in USD cents, so a display
- * currency can never become a pricing input.
+ * Egyptian piastres and *displayed* in whichever of `src/lib/currency.ts`'s six
+ * the visitor resolved to. Only this file crosses between them. Everything
+ * upstream — the catalog, the cart maths, the order totals — stays in piastres,
+ * so a display currency can never become a pricing input.
  */
 
 import {
   BASE_CURRENCY,
   CURRENCY_CONFIG,
-  convertFromUsdCents,
+  convertFromBaseMinorUnits,
   type Currency,
 } from "@/src/lib/currency";
 import type { Locale } from "@/src/lib/i18n/config";
@@ -24,19 +24,19 @@ import type { Concentration, Product } from "@/src/types/catalog";
 const LOCALE = "en-US";
 
 /**
- * Formats a price held in USD cents, in the visitor's display currency.
+ * Formats a price held in Egyptian piastres, in the visitor's display currency.
  *
- * Whole USD amounts drop the decimals (29500 → "$295") to match the editorial
- * price treatment; non-whole amounts keep them (29550 → "$295.50"). Converted
- * currencies are rounded to a coarse unit before they arrive here, so they are
- * always whole and print no decimals at all.
+ * Whole EGP amounts drop the decimals (147000 → "EGP 1,470") to match the
+ * editorial price treatment; non-whole amounts keep them. Converted currencies
+ * are rounded to the nearest half unit before they arrive here, so they always
+ * print two decimals ("$30.50").
  *
  * Number formatting stays `en-US` on both locale trees. Prices describe
  * English-only catalog records — the same reasoning that keeps
  * `formatArticleDate` locale-free — so the Arabic tree changes the currency
  * symbol without switching to Arabic-Indic digits mid-page.
  *
- * The `currency` parameter defaults to USD so a Server Component rendering
+ * The `currency` parameter defaults to the base so a Server Component rendering
  * before hydration, and any call site not yet reached by the currency provider,
  * both produce the stored price rather than a wrong one.
  */
@@ -44,7 +44,7 @@ export function formatPrice(
   priceInCents: number,
   currency: Currency = BASE_CURRENCY,
 ): string {
-  const amountInMinorUnits = convertFromUsdCents(priceInCents, currency);
+  const amountInMinorUnits = convertFromBaseMinorUnits(priceInCents, currency);
   const { fractionDigits } = CURRENCY_CONFIG[currency];
 
   const digits =

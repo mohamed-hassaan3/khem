@@ -52,7 +52,7 @@ export const en = {
     signOut: "Sign Out",
     openMenu: "Open menu",
     closeMenu: "Close menu",
-    featuredProduct: "Sekhem Ambré",
+    featuredProduct: "Sunlit Citrine",
     featuredCollectionAlt: "Signature Collection",
     fromTheJournal: "From the Journal",
     journalLabel: "Journal",
@@ -570,7 +570,7 @@ export const en = {
     trust: {
       delivery: {
         title: "Complimentary Delivery",
-        desc: "On all orders over $200",
+        desc: "On all orders over EGP 2,000",
       },
       packaging: {
         title: "Luxury Packaging",
@@ -760,7 +760,7 @@ export const en = {
     meta: {
       title: "Shopping Bag",
       description:
-        "Review the fragrances in your KHEM bag before checkout — complimentary delivery on orders over $200.",
+        "Review the fragrances in your KHEM bag before checkout — complimentary delivery on orders over EGP 2,000.",
     },
     eyebrow: "Your Selection",
     heading: "The Cart",
@@ -1046,7 +1046,7 @@ export const en = {
      * so is not optional: the card is charged in dollars.
      */
     conversionNote:
-      "Shown in {currency} at an indicative rate. Your order is charged in US Dollars.",
+      "Shown in {currency} at an indicative rate. Your order is charged in Egyptian Pounds.",
   },
 
   /*

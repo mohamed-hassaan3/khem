@@ -121,7 +121,16 @@ export interface Product {
   heartNotes: string[];
   baseNotes: string[];
   volumeMl: number;
-  /** Smallest currency unit, per AGENTS.md §9 (29500 = $295.00). */
+  /**
+   * Smallest unit of the base currency — Egyptian piastres (147000 = EGP
+   * 1,470.00).
+   *
+   * The field keeps the `priceInCents` name because it mirrors the Prisma
+   * column in AGENTS.md §9, and the seed data exists to prefigure that schema.
+   * "Cents" there means "minor units", and the minor unit is the piastre:
+   * `src/lib/currency.ts` holds the base, and `formatPrice` is the only place
+   * that converts to anything else.
+   */
   priceInCents: number;
   sku: string;
   inventory: number;

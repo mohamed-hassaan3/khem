@@ -1,18 +1,23 @@
 /**
  * Cart arithmetic.
  *
- * Pure functions over cents, with no React and no storage dependency, so the
- * same module serves the client cart today and the checkout Server Action that
- * will price the order server-side tomorrow. A total shown to a visitor and a
- * total charged to a card must come from one implementation.
+ * Pure functions over the base currency's minor unit — Egyptian piastres, the
+ * unit `Product.priceInCents` is stored in — with no React and no storage
+ * dependency, so the same module serves the client cart today and the checkout
+ * Server Action that will price the order server-side tomorrow. A total shown
+ * to a visitor and a total charged to a card must come from one implementation.
+ *
+ * Nothing here ever sees a display currency: `formatPrice` converts at the edge
+ * (`src/lib/format.ts`), so the free-shipping threshold is crossed at the same
+ * real amount whichever currency the visitor is reading.
  */
 
-/** Free delivery at or above this subtotal — the figure published in
+/** Free delivery at or above this subtotal — EGP 2,000, the figure published in
  * `dict.product.trust.delivery`. Change both together. */
-export const FREE_SHIPPING_THRESHOLD_IN_CENTS = 20_000;
+export const FREE_SHIPPING_THRESHOLD_IN_CENTS = 200_000;
 
-/** Flat delivery fee below the threshold. */
-export const SHIPPING_FEE_IN_CENTS = 2_500;
+/** Flat delivery fee below the threshold — EGP 90. */
+export const SHIPPING_FEE_IN_CENTS = 9_000;
 
 /** Per-order quantity cap, independent of stock. Mirrored by the PDP stepper. */
 export const MAX_QUANTITY_PER_LINE = 10;

@@ -52,7 +52,7 @@ export const ar: Dictionary = {
     signOut: "تسجيل الخروج",
     openMenu: "فتح القائمة",
     closeMenu: "إغلاق القائمة",
-    featuredProduct: "سخم أمبريه",
+    featuredProduct: "سَنلِت سيترين",
     featuredCollectionAlt: "مجموعة سيغنتشر",
     fromTheJournal: "من المجلّة",
     journalLabel: "المجلّة",
@@ -543,7 +543,7 @@ export const ar: Dictionary = {
     trust: {
       delivery: {
         title: "شحن مجاني",
-        desc: "لجميع الطلبات التي تتجاوز ٢٠٠ دولار",
+        desc: "لجميع الطلبات التي تتجاوز ٢٬٠٠٠ جنيه",
       },
       packaging: {
         title: "تغليف فاخر",
@@ -730,7 +730,7 @@ export const ar: Dictionary = {
     meta: {
       title: "حقيبة التسوّق",
       description:
-        "راجع العطور في حقيبتك قبل إتمام الطلب — شحن مجاني للطلبات التي تتجاوز ٢٠٠ دولار.",
+        "راجع العطور في حقيبتك قبل إتمام الطلب — شحن مجاني للطلبات التي تتجاوز ٢٬٠٠٠ جنيه.",
     },
     eyebrow: "اختيارك",
     heading: "الحقيبة",
@@ -987,7 +987,7 @@ export const ar: Dictionary = {
       SAR: "ريال سعودي",
     },
     conversionNote:
-      "معروض بـ{currency} بسعر تقريبي. يُحصَّل طلبك بالدولار الأمريكي.",
+      "معروض بـ{currency} بسعر تقريبي. يُحصَّل طلبك بالجنيه المصري.",
   },
 
   cookieConsent: {

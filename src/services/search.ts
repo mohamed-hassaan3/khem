@@ -14,7 +14,7 @@
  *
  * ## Why hybrid rather than pure vector search
  *
- * Embeddings are good at "smoky, for a winter night" and bad at "Sekhem Ambré".
+ * Embeddings are good at "smoky, for a winter night" and bad at "Sunlit Citrine".
  * Asked for an exact product name, a vector search will happily rank a *similar*
  * fragrance first, because similarity is all it measures. Lexical matching is
  * the mirror image: precise about names and notes, blind to intent. Fusing the
