@@ -133,7 +133,7 @@ export function toAdminProduct(row: unknown): AdminProduct | null {
 // ── Article ───────────────────────────────────────────────────
 
 export const ADMIN_ARTICLE_COLUMNS =
-  "id, slug, title, category, excerpt, publishedAt, readTimeMinutes, " +
+  "id, slug, title, category, excerpt, body, publishedAt, readTimeMinutes, " +
   "isFeatured, isPublished, imageUrl, imageAlt";
 
 const adminArticleRowSchema = z.object({
@@ -142,6 +142,9 @@ const adminArticleRowSchema = z.object({
   title: z.string(),
   category: z.string(),
   excerpt: z.string(),
+  /* `not null default ''` in Postgres, so an article written as a headline and
+   * nothing else comes back as an empty string, not a null. */
+  body: z.string(),
   /* A `date` column; PostgREST renders it `YYYY-MM-DD`, which is what the
    * `<input type="date">` on the form wants back. */
   publishedAt: z.string(),

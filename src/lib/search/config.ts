@@ -43,6 +43,17 @@ export const EMBEDDING_VERSION = 1;
 /** The query parameter, so a search is linkable and shareable. */
 export const SEARCH_PARAM = "q";
 
+/**
+ * Query-string key carrying the locale to the suggestions endpoint.
+ *
+ * The panel is a Client Component with no route params of its own, and the
+ * endpoint sits outside the `[locale]` tree — so the locale travels as an
+ * explicit parameter rather than being inferred from a header or a referrer.
+ * It is narrowed with `isLocale()` on arrival; an unknown value degrades to
+ * English rather than erroring.
+ */
+export const LOCALE_PARAM = "locale";
+
 /** Below this, a query is a keystroke rather than an intent. */
 export const MIN_QUERY_LENGTH = 2;
 

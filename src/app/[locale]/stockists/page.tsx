@@ -57,16 +57,17 @@ export default async function Stockists({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, stockists, openStockists, regions, wholesaleEmail] =
-    await Promise.all([
-      params,
-      getStockists(),
-      getOpenStockists(),
-      getStockistRegions(),
-      getWholesaleEmail(),
-    ]);
-
+  // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  // Fetched after the locale, which decides which language comes back.
+  const [stockists, openStockists, regions, wholesaleEmail] = await Promise.all([
+    getStockists(activeLocale),
+    getOpenStockists(activeLocale),
+    getStockistRegions(activeLocale),
+    getWholesaleEmail(),
+  ]);
   const dict = await getDictionary(activeLocale);
   const island = ltrIsland(activeLocale);
 

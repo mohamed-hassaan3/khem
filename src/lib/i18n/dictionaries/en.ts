@@ -415,6 +415,18 @@ export const en = {
     readArticle: "Read Article",
     read: "Read",
     empty: "No essays in this category yet. Please return shortly.",
+
+    /* The detail page at `/journal/[slug]`. Article text itself is stored in
+     * Postgres and is English-only — only the chrome around it is translated. */
+    article: {
+      journal: "Journal",
+      breadcrumbLabel: "Breadcrumb",
+      backToJournal: "Back to the Journal",
+      related: {
+        eyebrow: "Continue Reading",
+        heading: "From the Journal",
+      },
+    },
   },
 
   stockists: {

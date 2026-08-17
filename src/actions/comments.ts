@@ -78,7 +78,9 @@ export async function postProductComment(
    *    (the catalog is still static). Matching it against the catalog is what
    *    stops the table filling with rows for products that do not exist.
    */
-  const product = await getProductBySlug(slug);
+  //    Existence check only — nothing here renders product copy, so the
+  //    default locale is the right argument.
+  const product = await getProductBySlug("en", slug);
   if (!product) {
     return { ok: false, error: "validation", fieldErrors: { slug: "slugInvalid" } };
   }

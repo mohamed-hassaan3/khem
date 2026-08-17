@@ -8,6 +8,7 @@
 
 import "server-only";
 
+import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { parseList } from "@/src/schemas/db/catalog";
 import {
@@ -24,7 +25,9 @@ function logFailure(query: string, message: string): void {
   console.error(`[contact] ${query} failed: ${message}`);
 }
 
-export async function getContactChannels(): Promise<ContactChannel[]> {
+export async function getContactChannels(
+  locale: Locale,
+): Promise<ContactChannel[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
@@ -38,7 +41,7 @@ export async function getContactChannels(): Promise<ContactChannel[]> {
     return [];
   }
 
-  return parseList(data as unknown[] | null, toContactChannel);
+  return parseList(data as unknown[] | null, (row) => toContactChannel(row, locale));
 }
 
 export async function getSocialProfiles(): Promise<SocialProfile[]> {

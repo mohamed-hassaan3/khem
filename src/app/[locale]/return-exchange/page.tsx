@@ -40,20 +40,17 @@ export default async function ReturnExchange({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, doc] = await Promise.all([
-    params,
-    getLegalDocument("return-exchange"),
-  ]);
+  // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
+  const activeLocale = isLocale(locale) ? locale : "en";
+
+  // The document is fetched *after* the locale, not beside it: which
+  // language's sections come back now depends on it.
+  const doc = await getLegalDocument(activeLocale, "return-exchange");
 
   return (
     <div className="min-h-screen bg-background text-ivory">
-      {/*
-        The legal documents are stored in English only for now.
-        Marking the subtree `ltr`/`en` keeps punctuation, numbering, and list
-        markers correct when it renders inside the Arabic (RTL) page, and lets
-        screen readers switch voice for it.
-      */}
-      <div {...(locale === "ar" ? { dir: "ltr" as const, lang: "en" } : {})}>
+      <div dir="auto">
         <LegalHero
           eyebrow={doc.eyebrow}
           title={doc.title}

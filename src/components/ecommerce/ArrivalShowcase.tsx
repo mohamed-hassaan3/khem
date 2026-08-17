@@ -99,23 +99,29 @@ export default async function ArrivalShowcase({
             </span>
           </p>
 
-          <div {...island}>
-            <h2 className="font-heading text-3xl font-normal leading-tight text-ivory sm:text-4xl md:text-5xl">
-              {product.name}
-            </h2>
+          {/* The perfume name is a Latin proper noun in both trees; the
+              subtitle beneath it is translated. */}
+          <h2
+            {...island}
+            className="font-heading text-3xl font-normal leading-tight text-ivory sm:text-4xl md:text-5xl"
+          >
+            {product.name}
+          </h2>
 
-            {product.subtitle ? (
-              <p className="mt-4 text-[13px] leading-loose tracking-wide text-ivory/45">
-                {product.subtitle}
-              </p>
-            ) : null}
-          </div>
+          {product.subtitle ? (
+            <p
+              dir="auto"
+              className="mt-4 text-[13px] leading-loose tracking-wide text-ivory/45"
+            >
+              {product.subtitle}
+            </p>
+          ) : null}
 
           <div className="gold-line my-8 w-16" />
 
           {product.story ? (
             <p
-              {...island}
+              dir="auto"
               className="mb-10 whitespace-pre-line text-[13px] leading-loose text-ivory/40"
             >
               {product.story}
@@ -128,7 +134,7 @@ export default async function ArrivalShowcase({
                 <dt className="mb-3 font-heading text-[9px] uppercase tracking-[0.25em] text-gold/50">
                   {tier.label}
                 </dt>
-                <dd {...island} className="text-xs leading-loose text-ivory/50">
+                <dd dir="auto" className="text-xs leading-loose text-ivory/50">
                   {tier.notes.join(" · ")}
                 </dd>
               </div>

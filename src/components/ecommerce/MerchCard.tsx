@@ -113,13 +113,17 @@ export default function MerchCard({
       </div>
 
       <div className="flex flex-1 flex-col p-7">
-        <div {...island} className="flex flex-1 flex-col">
+        <div dir="auto" className="flex flex-1 flex-col">
           <p className="eyebrow mb-2.5 text-[9px] text-gold/55">
             {product.format ?? product.collectionName}
             {product.subtitle ? ` · ${product.subtitle}` : ""}
           </p>
 
-          <h3 className="mb-2.5 font-heading text-lg font-normal text-ivory">
+          {/* Latin proper noun in both trees. */}
+          <h3
+            {...island}
+            className="mb-2.5 font-heading text-lg font-normal text-ivory"
+          >
             {product.name}
           </h3>
 

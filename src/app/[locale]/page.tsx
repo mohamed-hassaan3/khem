@@ -57,8 +57,12 @@ export default async function Home({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
+  const activeLocale = isLocale(locale) ? locale : "en";
+
+  // Fetched after the locale, which decides which language comes back.
   const [
-    { locale },
     collections,
     products,
     featuredProduct,
@@ -67,18 +71,14 @@ export default async function Home({
     articles,
     testimonials,
   ] = await Promise.all([
-    params,
-    getFeaturedCollections(),
-    getFeaturedProducts(),
-    getFeaturedProduct(),
+    getFeaturedCollections(activeLocale),
+    getFeaturedProducts(activeLocale),
+    getFeaturedProduct(activeLocale),
     getCraftPillars(),
     getIngredients(),
     getLatestArticles(),
     getTestimonials(),
   ]);
-
-  // The layout has already rejected any segment that is not a real locale.
-  const activeLocale = isLocale(locale) ? locale : "en";
   const dict = await getDictionary(activeLocale);
   const island = ltrIsland(activeLocale);
   const arrow = readingArrow(activeLocale);

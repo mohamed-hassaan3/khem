@@ -1,12 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 
-import LocaleLink from "@/src/components/i18n/LocaleLink";
-import { formatArticleDate } from "@/src/lib/format";
-import { interpolate } from "@/src/lib/i18n/interpolate";
-import { ltrIsland, readingArrow } from "@/src/lib/i18n/rtl";
+import ArticleCard from "@/src/components/journal/ArticleCard";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type { JournalArticle } from "@/src/types/content";
 
@@ -28,7 +24,6 @@ export interface JournalGridProps {
 export default function JournalGrid({ articles, categories }: JournalGridProps) {
   const dict = useDictionary();
   const locale = useLocale();
-  const island = ltrIsland(locale);
   const allLabel = categories[0] ?? "All";
   const [activeCategory, setActiveCategory] = useState(allLabel);
 
@@ -65,53 +60,15 @@ export default function JournalGrid({ articles, categories }: JournalGridProps) 
         {visible.length > 0 ? (
           <div className="mx-auto grid max-w-350 grid-cols-1 gap-0.5 bg-border sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((article) => (
-              <LocaleLink
+              <ArticleCard
                 key={article.id}
-                href={`/journal/${article.slug}`}
-                className="img-zoom group block bg-surface no-underline"
-              >
-                <div className="relative h-60 overflow-hidden">
-                  <Image
-                    src={article.image.url}
-                    alt={article.image.alt}
-                    fill
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover brightness-55 saturate-60"
-                  />
-                </div>
-
-                <div className="px-7 pb-9 pt-7" {...island}>
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <span className="eyebrow text-[9px]">
-                      {article.category}
-                    </span>
-                    <span className="text-[10px] tracking-wide text-ivory/25">
-                      {interpolate(dict.common.minRead, {
-                        minutes: article.readTimeMinutes,
-                      })}
-                    </span>
-                  </div>
-
-                  <h3 className="mb-3 font-heading text-[17px] font-normal leading-snug tracking-wide text-ivory">
-                    {article.title}
-                  </h3>
-                  <p className="mb-6 text-xs leading-relaxed text-ivory/40">
-                    {article.excerpt}
-                  </p>
-
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-heading text-[10px] tracking-[0.15em] text-gold transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
-                      {dict.journal.read} {readingArrow(locale)}
-                    </span>
-                    <time
-                      dateTime={article.publishedAt}
-                      className="text-[10px] tracking-wide text-ivory/25"
-                    >
-                      {formatArticleDate(article.publishedAt)}
-                    </time>
-                  </div>
-                </div>
-              </LocaleLink>
+                article={article}
+                locale={locale}
+                labels={{
+                  read: dict.journal.read,
+                  minRead: dict.common.minRead,
+                }}
+              />
             ))}
           </div>
         ) : (

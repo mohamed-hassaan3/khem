@@ -56,9 +56,47 @@ import { redactUrl, connectionString, withTransaction } from "./db";
 
 const SEED_DIR = path.join(process.cwd(), "supabase", "seed");
 
+/**
+ * The Arabic twin of every translatable column, as it appears in the seed JSON.
+ *
+ * The app types (`Collection`, `Product`, …) describe a record the UI has
+ * already *resolved* to one language, so they carry no `_ar` fields — that is
+ * the whole point of resolving in `src/schemas/db/*`. The seed file is the
+ * other side of that boundary: it holds both languages, and these intersections
+ * are where the difference is stated instead of being cast away.
+ *
+ * `null` is meaningful and is written through as `null`: it records "this field
+ * is deliberately untranslated" (a Latin proper noun), which is what
+ * `resolveText()` reads to fall back.
+ */
+type CollectionSeedRow = Collection & {
+  name_ar: string | null;
+  description_ar: string | null;
+  bannerAlt_ar: string | null;
+};
+
+type ProductSeedRow = Omit<Product, "images"> & {
+  subtitle_ar: string | null;
+  description_ar: string | null;
+  story_ar: string | null;
+  format_ar: string | null;
+  badge_ar: string | null;
+  includes_ar: string[] | null;
+  topNotes_ar: string[] | null;
+  heartNotes_ar: string[] | null;
+  baseNotes_ar: string[] | null;
+  images: {
+    url: string;
+    alt: string;
+    alt_ar: string | null;
+    isPrimary: boolean;
+    sortOrder: number;
+  }[];
+};
+
 interface CatalogSeed {
-  collections: Collection[];
-  products: Product[];
+  collections: CollectionSeedRow[];
+  products: ProductSeedRow[];
   featuredProductSlug: string;
 }
 
@@ -76,9 +114,31 @@ interface ContentSeed {
   craftQuote: CraftQuote | null;
 }
 
+type StockistSeedRow = Omit<Stockist, "image"> & {
+  name_ar: string | null;
+  city_ar: string | null;
+  country_ar: string | null;
+  address_ar: string | null;
+  hours_ar: string | null;
+  image: { url: string; alt: string; alt_ar: string | null };
+};
+
+type ContactChannelSeedRow = ContactChannel & {
+  label_ar: string | null;
+  value_ar: string | null;
+};
+
+type LegalDocumentSeedRow = Omit<LegalDocument, "banner"> & {
+  eyebrow_ar: string | null;
+  title_ar: string | null;
+  lede_ar: string | null;
+  sections_ar: LegalDocument["sections"] | null;
+  banner: { url: string; alt: string; alt_ar: string | null };
+};
+
 interface DirectorySeed {
-  stockists: Stockist[];
-  contactChannels: ContactChannel[];
+  stockists: StockistSeedRow[];
+  contactChannels: ContactChannelSeedRow[];
   socialProfiles: SocialProfile[];
   enquirySubjects: string[];
   settings: {
@@ -86,7 +146,7 @@ interface DirectorySeed {
     conciergeEmail: string;
     wholesaleEmail: string;
   };
-  legalDocuments: LegalDocument[];
+  legalDocuments: LegalDocumentSeedRow[];
 }
 
 async function readSeed<T>(name: string): Promise<T> {
@@ -155,10 +215,13 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
     ordered(seed.collections, (collection, index) => ({
       id: collection.id,
       name: collection.name,
+      name_ar: collection.name_ar,
       slug: collection.slug,
       description: collection.description,
+      description_ar: collection.description_ar,
       bannerUrl: collection.bannerUrl,
       bannerAlt: collection.bannerAlt,
+      bannerAlt_ar: collection.bannerAlt_ar,
       isFeatured: collection.isFeatured,
       kind: collection.kind,
       sortOrder: index,
@@ -174,16 +237,25 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
       name: product.name,
       slug: product.slug,
       subtitle: product.subtitle,
+      subtitle_ar: product.subtitle_ar,
       description: product.description,
+      description_ar: product.description_ar,
       story: product.story,
+      story_ar: product.story_ar,
       concentration: product.concentration,
       format: product.format,
+      format_ar: product.format_ar,
       includes: product.includes,
+      includes_ar: product.includes_ar,
       badge: product.badge,
+      badge_ar: product.badge_ar,
       tags: product.tags,
       topNotes: product.topNotes,
+      topNotes_ar: product.topNotes_ar,
       heartNotes: product.heartNotes,
+      heartNotes_ar: product.heartNotes_ar,
       baseNotes: product.baseNotes,
+      baseNotes_ar: product.baseNotes_ar,
       volumeMl: product.volumeMl,
       priceInCents: product.priceInCents,
       sku: product.sku,
@@ -206,6 +278,7 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
         productSlug: product.slug,
         url: image.url,
         alt: image.alt,
+        alt_ar: image.alt_ar,
         isPrimary: image.isPrimary,
         sortOrder: image.sortOrder,
       })),
@@ -286,6 +359,7 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
       title: article.title,
       category: article.category,
       excerpt: article.excerpt,
+      body: article.body,
       publishedAt: article.publishedAt,
       readTimeMinutes: article.readTimeMinutes,
       isFeatured: article.isFeatured,
@@ -400,18 +474,24 @@ async function seedDirectory(
     ordered(seed.stockists, (stockist, index) => ({
       id: stockist.id,
       name: stockist.name,
+      name_ar: stockist.name_ar,
       city: stockist.city,
+      city_ar: stockist.city_ar,
       country: stockist.country,
+      country_ar: stockist.country_ar,
       region: stockist.region,
       type: stockist.type,
       status: stockist.status,
       address: stockist.address,
+      address_ar: stockist.address_ar,
       phone: stockist.phone,
       phoneHref: stockist.phoneHref,
       hours: stockist.hours,
+      hours_ar: stockist.hours_ar,
       mapsUrl: stockist.mapsUrl,
       imageUrl: stockist.image.url,
       imageAlt: stockist.image.alt,
+      imageAlt_ar: stockist.image.alt_ar,
       isPublished: true,
       sortOrder: index,
     })),
@@ -424,7 +504,9 @@ async function seedDirectory(
     ordered(seed.contactChannels, (channel, index) => ({
       id: channel.id,
       label: channel.label,
+      label_ar: channel.label_ar,
       value: channel.value,
+      value_ar: channel.value_ar,
       href: channel.href,
       sortOrder: index,
     })),
@@ -472,13 +554,22 @@ async function seedDirectory(
     ordered(seed.legalDocuments, (document, index) => ({
       slug: document.slug,
       eyebrow: document.eyebrow,
+      eyebrow_ar: document.eyebrow_ar,
       title: document.title,
+      title_ar: document.title_ar,
       lede: document.lede,
+      lede_ar: document.lede_ar,
       updatedAt: document.updatedAt,
       bannerUrl: document.banner.url,
       bannerAlt: document.banner.alt,
+      bannerAlt_ar: document.banner.alt_ar,
       // jsonb: the driver sends the string, Postgres parses and validates it.
       sections: JSON.stringify(document.sections),
+      // Null stays null rather than becoming the string "null": an
+      // untranslated policy must fall back to the English sections.
+      sections_ar: document.sections_ar
+        ? JSON.stringify(document.sections_ar)
+        : null,
       contactEmail: document.contactEmail,
       sortOrder: index,
     })),

@@ -113,9 +113,12 @@ const STATIC_ROUTES: { path: string; priority: number }[] = [
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [collections, productSlugs, legalDocuments, articles] =
     await Promise.all([
-      getFragranceCollections(),
+      // URLs only — every slug is identical in both trees (localizing one
+      // would fork the URL space), so the default locale is the right and
+      // cheapest argument here.
+      getFragranceCollections("en"),
       getProductSlugs(),
-      getLegalDocuments(),
+      getLegalDocuments("en"),
       getJournalArticles(),
     ]);
 
@@ -150,6 +153,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // so nothing here can 404.
     ...productSlugs.flatMap((slug) =>
       localizedEntries(`/perfume/${slug}`, { priority: 0.9 }),
+    ),
+
+    // Journal articles. `getJournalArticles()` reads through the publishable
+    // key, so an unpublished draft is not in this list — the RLS policy on
+    // `"Article"` decides what is indexable, exactly as it decides what is
+    // readable.
+    ...articles.flatMap((article) =>
+      localizedEntries(`/journal/${article.slug}`, {
+        priority: 0.5,
+        lastModified: article.publishedAt,
+      }),
     ),
 
     ...legalDocuments.flatMap((document) =>

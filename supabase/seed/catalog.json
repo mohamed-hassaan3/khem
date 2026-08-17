@@ -3,70 +3,91 @@
     {
       "id": "signature",
       "name": "Signature",
+      "name_ar": null,
       "slug": "signature",
       "description": "Timeless expressions of Egyptian heritage. Fragrances that carry the warmth of temples and the spirit of sacred rituals.",
+      "description_ar": "تعبيرات خالدة عن التراث المصري. عطور تحمل دفء المعابد وروح الطقوس المقدّسة.",
       "bannerUrl": "https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=900&h=1200&fit=crop&auto=format",
       "bannerAlt": "A golden flacon lit from the side against a warm obsidian backdrop",
+      "bannerAlt_ar": "قنينة ذهبية مضاءة من جانبها أمام خلفية أبنوسية دافئة",
       "isFeatured": true,
       "kind": "FRAGRANCE"
     },
     {
       "id": "noir",
       "name": "Noir",
+      "name_ar": null,
       "slug": "noir",
       "description": "The house at its most concentrated. Two compositions drawn from the perfumes the temples actually burned — held back from the Signature range because neither would sit quietly beside anything else.",
+      "description_ar": "الدار في أشدّ حالاتها تركيزًا. تركيبتان مستلهمتان من العطور التي أُحرقت في المعابد فعلًا — حُجبتا عن مجموعة Signature لأن أيًّا منهما لا يقبل الجلوس بهدوء إلى جانب سواه.",
       "bannerUrl": "https://images.unsplash.com/photo-1778058505814-6d247ccb600c?w=900&h=1200&fit=crop&auto=format",
       "bannerAlt": "A black glass perfume bottle half-consumed by shadow",
+      "bannerAlt_ar": "قنينة عطر من الزجاج الأسود يبتلعها الظل إلى نصفها",
       "isFeatured": true,
       "kind": "FRAGRANCE"
     },
     {
       "id": "gemstone",
       "name": "Gemstone",
+      "name_ar": null,
       "slug": "gemstone",
       "description": "Mineral light made wearable. Six fragrances cut from the stones the Egyptians buried with their kings — lapis and turquoise from the desert mines, amber from the resin roads, emerald, sapphire, and opal from the trade that followed.",
+      "description_ar": "ضوء المعادن وقد صار عطرًا يُرتدى. ستة عطور مقتطعة من الأحجار التي دُفنت مع الملوك — اللازورد والفيروز من مناجم الصحراء، والعنبر من طرق الراتنج، والزمرد والياقوت والأوبال ممّا حملته التجارة بعدها.",
       "bannerUrl": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=900&h=1200&fit=crop&auto=format",
       "bannerAlt": "A faceted flacon throwing coloured light across dark stone",
+      "bannerAlt_ar": "قنينة مصقولة الأوجه تبعثر ضوءًا ملوّنًا على حجر داكن",
       "isFeatured": false,
       "kind": "FRAGRANCE"
     },
     {
       "id": "body-care",
       "name": "Body Care",
+      "name_ar": "العناية بالجسم",
       "slug": "body-care",
       "description": "Ancient Egyptians understood that beauty was ritual. Our body mists extend the KHEM fragrance experience beyond the flacon — a fine veil worn over skin and hair, alone or beneath the eau de parfum it shares an accord with.",
+      "description_ar": "أدرك المصريون القدماء أن الجمال طقس. رذاذ الجسم لدينا يمدّ تجربة KHEM العطرية إلى ما وراء القنينة — حجاب رفيع يُرتدى على البشرة والشعر، وحده أو تحت ماء العطر الذي يشاركه أكورده.",
       "bannerUrl": "https://images.unsplash.com/photo-1779524477261-12141ccbd8d9?w=1800&h=900&fit=crop&auto=format",
       "bannerAlt": "Oiled skin catching low warm light against a dark bathing chamber",
+      "bannerAlt_ar": "بشرة مرطّبة تلتقط ضوءًا دافئًا خافتًا في حجرة استحمام معتمة",
       "isFeatured": false,
       "kind": "BODY"
     },
     {
       "id": "room-fragrance",
       "name": "Home Fragrance",
+      "name_ar": "عطور المنزل",
       "slug": "room-fragrance",
       "description": "In Ancient Egypt, a scented space was a sacred space. Our room sprays extend the KHEM world into your interiors — a few pumps into the air of a room, and the atmosphere changes before anyone has entered it.",
+      "description_ar": "في مصر القديمة، كان المكان المعطّر مكانًا مقدّسًا. بخاخاتنا تمدّ عالم KHEM إلى فضاءاتك — بضع نفحات في هواء الغرفة، فيتبدّل المناخ قبل أن يدخلها أحد.",
       "bannerUrl": "https://images.unsplash.com/photo-1609599176235-f93af914fde0?w=1800&h=900&fit=crop&auto=format",
       "bannerAlt": "A dim interior lit by a single flame, smoke rising slowly",
+      "bannerAlt_ar": "فضاء داخلي معتم تضيئه شعلة واحدة، والدخان يتصاعد ببطء",
       "isFeatured": false,
       "kind": "HOME"
     },
     {
       "id": "discovery",
       "name": "Discovery Sets",
+      "name_ar": "أطقم الاكتشاف",
       "slug": "discovery",
       "description": "Every journey into KHEM should begin with discovery. Our curated sets allow you to explore the full range of our olfactory world before committing to a full-size flacon.",
+      "description_ar": "كل رحلة إلى KHEM ينبغي أن تبدأ باكتشاف. أطقمنا المنتقاة تتيح لك استكشاف عالمنا الشمّي كاملًا قبل أن تلتزم بقنينة بالحجم الكامل.",
       "bannerUrl": "https://images.unsplash.com/photo-1674620213535-9b2a2553ef40?w=1800&h=900&fit=crop&auto=format",
       "bannerAlt": "A row of small sample vials laid out on dark lacquered wood",
+      "bannerAlt_ar": "صف من قوارير العيّنات الصغيرة على خشب داكن مصقول",
       "isFeatured": false,
       "kind": "DISCOVERY"
     },
     {
       "id": "gift-set",
       "name": "Gift Sets",
+      "name_ar": "أطقم الهدايا",
       "slug": "gift-set",
       "description": "The house presented as an offering. Full-size flacons, ritual objects, and hand-finished presentation — composed for the moment a fragrance is given rather than chosen.",
+      "description_ar": "الدار مقدَّمةً كقربان. قنائن بالحجم الكامل، وأدوات طقسية، وتغليف يُنجَز باليد — مؤلَّفة للحظة يُهدى فيها العطر لا للحظة يُختار.",
       "bannerUrl": "https://images.unsplash.com/photo-1762530211537-011645caef57?w=1800&h=900&fit=crop&auto=format",
       "bannerAlt": "Ancient Egyptian vessels used for blending sacred oils, arranged for presentation",
+      "bannerAlt_ar": "أوانٍ مصرية قديمة كانت تُستخدم لمزج الزيوت المقدّسة، مرتّبة للعرض",
       "isFeatured": false,
       "kind": "GIFT"
     }
@@ -77,12 +98,18 @@
       "name": "Sunlit Citrine",
       "slug": "sunlit-citrine",
       "subtitle": "The season's first light on resin",
+      "subtitle_ar": "أول ضوء الموسم على الراتنج",
       "description": "Golden amber lifted by saffron and immortelle, closing on labdanum and Haitian vetiver.",
+      "description_ar": "عنبر ذهبي يرفعه الزعفران والخالدة، ويغلق على اللاذن والفيتيفر الهايتي.",
       "story": "Citrine was the stone the Egyptians cut for the living rather than the dead — worn at the throat, kept in the light, never sealed into a tomb. Sunlit Citrine is built the same way: a fragrance for the hours you are awake in.\n\nIt opens bright and dry, pink pepper over mandarin leaf, before the resins arrive. Immortelle and saffron hold the middle with an almost honeyed weight, and labdanum, tonka, and Haitian vetiver take it down into skin. It is the warmest fragrance the house has released, and the first composed entirely in the new Cairo atelier.",
+      "story_ar": "كان السيترين هو الحجر الذي قطعه المصريون للأحياء لا للأموات — يُلبس عند العنق، ويُبقى في الضوء، ولا يُختم في مقبرة قط. وSunlit Citrine مبنيّ على النهج نفسه: عطر للساعات التي تكون فيها مستيقظًا.\n\nيفتتح ساطعًا جافًّا، فلفل وردي فوق ورق اليوسفي، قبل أن تصل الراتنجات. تمسك الخالدة والزعفران بالوسط بثقل يكاد يكون عسليًّا، ثم يأخذه اللاذن والتونكا والفيتيفر الهايتي نزولًا إلى البشرة. هو أدفأ عطر أصدرته الدار، وأول ما أُلِّف بالكامل في مرسم القاهرة الجديد.",
       "concentration": "EXTRAIT_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": "New",
+      "badge_ar": "جديد",
       "tags": [
         "NEW_ARRIVAL"
       ],
@@ -91,15 +118,30 @@
         "Pink Pepper",
         "Mandarin Leaf"
       ],
+      "topNotes_ar": [
+        "العنبر الذهبي",
+        "الفلفل الوردي",
+        "ورق اليوسفي"
+      ],
       "heartNotes": [
         "Immortelle",
         "Saffron",
         "Orris Butter"
       ],
+      "heartNotes_ar": [
+        "الخالدة",
+        "الزعفران",
+        "زبدة جذر السوسن"
+      ],
       "baseNotes": [
         "Labdanum",
         "Tonka Bean",
         "Haitian Vetiver"
+      ],
+      "baseNotes_ar": [
+        "اللاذن",
+        "حبة التونكا",
+        "الفيتيفر الهايتي"
       ],
       "volumeMl": 100,
       "priceInCents": 147000,
@@ -111,18 +153,21 @@
         {
           "url": "https://images.unsplash.com/photo-1709662217788-6a8a1b31562a?w=600&h=800&fit=crop&auto=format",
           "alt": "The Sunlit Citrine flacon lit from above on warm stone",
+          "alt_ar": "قنينة Sunlit Citrine مضاءة من أعلى على حجر دافئ",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1667070796007-185faecdf8a1?w=900&h=1100&fit=crop&auto=format",
           "alt": "Sunlit Citrine photographed beside cut resin and saffron threads",
+          "alt_ar": "Sunlit Citrine مصوَّرًا إلى جانب راتنج مقطوع وخيوط زعفران",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1613549026666-73c9c9083c62?w=900&h=1100&fit=crop&auto=format",
           "alt": "Sunlit Citrine held against a low golden horizon",
+          "alt_ar": "Sunlit Citrine ممسوكًا أمام أفق ذهبي منخفض",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -133,12 +178,18 @@
       "name": "Sapphire",
       "slug": "sapphire",
       "subtitle": "The hour before the sun returns",
+      "subtitle_ar": "الساعة التي تسبق عودة الشمس",
       "description": "Night iris over smoked oud and black leather, closing on ash wood and grey ambrette.",
+      "description_ar": "سوسن الليل فوق العود المدخّن والجلد الأسود، ويغلق على خشب الدردار والمسك النباتي الرمادي.",
       "story": "Sapphire is the darkest stone the house works with, and this is the darkest thing in the Gemstone range — a fragrance about the last hour of night rather than the first hour of morning.\n\nIt opens cold: night iris, bergamot chilled almost to bitterness, a thread of elemi. Then it closes over. Smoked oud and black leather sit at the centre without ever becoming sweet, and the drydown is ash wood, grey ambrette, and a vetiver so dark it reads as stone. Composed in a run of six hundred, and not repeated.",
+      "story_ar": "الياقوت الأزرق أغمق حجر تشتغل عليه الدار، وهذا أغمق ما في مجموعة Gemstone — عطر عن الساعة الأخيرة من الليل لا عن الساعة الأولى من الصباح.\n\nيفتتح باردًا: سوسن الليل، وبرغموت مبرَّد حتى حافة المرارة، وخيط من الإيلمي. ثم ينغلق. يجلس العود المدخّن والجلد الأسود في القلب من غير أن يتحوّلا إلى حلاوة، وينتهي الجفاف إلى خشب الدردار والمسك النباتي الرمادي وفيتيفر من الدكنة بحيث يُقرأ حجرًا. أُلِّف في دفعة من ستمئة، ولم يُكرَّر.",
       "concentration": "EXTRAIT_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": "New · Limited",
+      "badge_ar": "جديد · إصدار محدود",
       "tags": [
         "NEW_ARRIVAL",
         "LIMITED_EDITION"
@@ -148,15 +199,30 @@
         "Cold Bergamot",
         "Elemi"
       ],
+      "topNotes_ar": [
+        "سوسن الليل",
+        "البرغموت البارد",
+        "الإيلمي"
+      ],
       "heartNotes": [
         "Smoked Oud",
         "Black Leather",
         "Cypriol"
       ],
+      "heartNotes_ar": [
+        "العود المدخّن",
+        "الجلد الأسود",
+        "السعد"
+      ],
       "baseNotes": [
         "Ash Wood",
         "Grey Ambrette",
         "Vetiver Noir"
+      ],
+      "baseNotes_ar": [
+        "خشب الدردار",
+        "المسك النباتي الرمادي",
+        "الفيتيفر الأسود"
       ],
       "volumeMl": 50,
       "priceInCents": 84000,
@@ -168,18 +234,21 @@
         {
           "url": "https://images.unsplash.com/photo-1533603208986-24fd819e718a?w=600&h=800&fit=crop&auto=format",
           "alt": "The Sapphire flacon almost lost against an unlit background",
+          "alt_ar": "قنينة Sapphire تكاد تضيع أمام خلفية غير مضاءة",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1738664926458-d8ca7f56549f?w=900&h=1100&fit=crop&auto=format",
           "alt": "Sapphire lit by a single blue edge of light",
+          "alt_ar": "Sapphire يضيئه حرف واحد من ضوء أزرق",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1654612514062-7cc235e7b68c?w=900&h=1100&fit=crop&auto=format",
           "alt": "Sapphire standing on cold polished stone before dawn",
+          "alt_ar": "Sapphire واقفًا على حجر بارد مصقول قبل الفجر",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -190,27 +259,48 @@
       "name": "Onyx Night",
       "slug": "onyx-night",
       "subtitle": "Sacred temple incense reimagined",
+      "subtitle_ar": "بخور المعبد المقدّس بقراءة جديدة",
       "description": "Black frankincense and smoked incense over black oud, labdanum, and dark rose.",
+      "description_ar": "لبان أسود وبخور مدخّن فوق العود الأسود واللاذن والورد الداكن.",
       "story": "Onyx was carved into the amulets laid against the chest, the stone the Egyptians trusted to hold something in place. This fragrance is built around the same idea: an incense composition that settles rather than rises.\n\nIt opens with frankincense and black pepper, smoke without heat. The heart is black oud and a rose so dark it reads as resin, and the base — amber, myrrh, sandalwood — is what remains on the skin the following morning. The most complex formula the house has released, and its most requested.",
+      "story_ar": "نُقش الأونيكس في التمائم التي تُوضع على الصدر، وهو الحجر الذي ائتمنه المصريون على تثبيت ما ينبغي أن يثبت. وهذا العطر مبنيّ على الفكرة نفسها: تركيبة بخور تستقرّ ولا تتصاعد.\n\nيفتتح باللبان والفلفل الأسود، دخان بلا حرارة. القلب عود أسود وورد من الدكنة بحيث يُقرأ راتنجًا، أما القاعدة — عنبر ومُرّ وخشب صندل — فهي ما يبقى على البشرة صباح اليوم التالي. أعقد تركيبة أصدرتها الدار، وأكثرها طلبًا.",
       "concentration": "EXTRAIT_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [
         "Frankincense",
         "Smoked Incense",
         "Black Pepper"
       ],
+      "topNotes_ar": [
+        "اللبان",
+        "البخور المدخّن",
+        "الفلفل الأسود"
+      ],
       "heartNotes": [
         "Black Oud",
         "Labdanum",
         "Dark Rose"
       ],
+      "heartNotes_ar": [
+        "العود الأسود",
+        "اللاذن",
+        "الورد الداكن"
+      ],
       "baseNotes": [
         "Amber",
         "Myrrh",
         "Sandalwood"
+      ],
+      "baseNotes_ar": [
+        "العنبر",
+        "المُرّ",
+        "خشب الصندل"
       ],
       "volumeMl": 100,
       "priceInCents": 147000,
@@ -222,18 +312,21 @@
         {
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/Gemini_Generated_Image_3vrr7v3vrr7v3vrr.png",
           "alt": "The Onyx Night flacon standing in low incense smoke",
+          "alt_ar": "قنينة Onyx Night واقفة في دخان بخور منخفض",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1738664926458-d8ca7f56549f?w=900&h=1100&fit=crop&auto=format",
           "alt": "Onyx Night against a wall of unlit black stone",
+          "alt_ar": "Onyx Night أمام جدار من حجر أسود غير مضاء",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1643797517714-a273548abc3c?w=900&h=1100&fit=crop&auto=format",
           "alt": "Frankincense resin beside the Onyx Night flacon",
+          "alt_ar": "راتنج اللبان إلى جانب قنينة Onyx Night",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -244,27 +337,48 @@
       "name": "Ivory Temple",
       "slug": "ivory-temple",
       "subtitle": "The golden radiance of dawn",
+      "subtitle_ar": "إشراقة الفجر الذهبية",
       "description": "The golden radiance of dawn captured in solar musk, saffron, and white amber.",
+      "description_ar": "إشراقة الفجر الذهبية ملتقَطة في المسك الشمسي والزعفران والعنبر الأبيض.",
       "story": "The limestone of the temple at Deir el-Bahari turns almost white an hour after sunrise, and holds the heat of it until evening. Ivory Temple is that hour: an opening of solar musk and bergamot so bright it reads almost colourless.\n\nBeneath it, saffron and neroli warm the composition the way a stone wall warms through a morning. What remains on the skin hours later is white amber and vanilla absolue — not the dawn itself, but the memory of standing in it.",
+      "story_ar": "يكاد حجر معبد الدير البحري يبيضّ بعد ساعة من الشروق، ويحتفظ بحرارته حتى المساء. وIvory Temple هو تلك الساعة: افتتاح من المسك الشمسي والبرغموت، من السطوع بحيث يكاد يُقرأ بلا لون.\n\nتحته، يدفّئ الزعفران والنيرولي التركيبة كما يدفأ جدار حجري على مدى صباح. وما يبقى على البشرة بعد ساعات هو العنبر الأبيض وخلاصة الفانيليا — لا الفجر نفسه، بل ذكرى الوقوف فيه.",
       "concentration": "EXTRAIT_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [
         "Solar Musk",
         "Bergamot",
         "Aldehydes"
       ],
+      "topNotes_ar": [
+        "المسك الشمسي",
+        "البرغموت",
+        "ألدهيدات"
+      ],
       "heartNotes": [
         "Saffron",
         "Neroli",
         "Jasmine Sambac"
       ],
+      "heartNotes_ar": [
+        "الزعفران",
+        "النيرولي",
+        "الياسمين السامباك"
+      ],
       "baseNotes": [
         "White Amber",
         "Sandalwood",
         "Vanilla Absolue"
+      ],
+      "baseNotes_ar": [
+        "العنبر الأبيض",
+        "خشب الصندل",
+        "خلاصة الفانيليا"
       ],
       "volumeMl": 100,
       "priceInCents": 147000,
@@ -276,18 +390,21 @@
         {
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-ivory_temple.png",
           "alt": "Ivory Temple flacon catching gold light at dawn",
+          "alt_ar": "قنينة Ivory Temple تلتقط ضوءًا ذهبيًّا عند الفجر",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-ivory_temple.png",
           "alt": "Ivory Temple gilded shoulder throwing a long morning shadow",
+          "alt_ar": "كتف Ivory Temple المذهَّب يلقي ظلًّا صباحيًّا طويلًا",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-ivory_temple.png",
           "alt": "Ivory Temple photographed against a warm ochre backdrop",
+          "alt_ar": "Ivory Temple مصوَّرًا أمام خلفية مغرة دافئة",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -298,27 +415,48 @@
       "name": "Silk Serenity",
       "slug": "silk-serenity",
       "subtitle": "Sacred purity from dark waters",
+      "subtitle_ar": "نقاء مقدّس من مياه داكنة",
       "description": "White lotus over aquatic musk and water lily, resting on cedar and white musk.",
+      "description_ar": "لوتس أبيض فوق المسك المائي وزنبق الماء، يستقرّ على الأرز والمسك الأبيض.",
       "story": "The blue lotus closes at dusk and sinks below the surface of the water, and opens again at first light — which is why the Egyptians painted it into every scene of rebirth they carved.\n\nSilk Serenity holds that moment of opening. White lotus and a green accord above, aquatic musk and water lily through the middle, cedar and ambrette beneath. The lightest thing the house makes, and the one most often bought for someone else.",
+      "story_ar": "ينغلق اللوتس الأزرق عند الغسق ويهبط تحت سطح الماء، ثم ينفتح من جديد مع أول ضوء — ولهذا رسمه المصريون في كل مشهد بعث نقشوه.\n\nيحتفظ Silk Serenity بلحظة الانفتاح تلك. لوتس أبيض وأكورد أخضر في الأعلى، ومسك مائي وزنبق ماء في الوسط، وأرز وبذور مسك نباتي تحتهما. أخفّ ما تصنعه الدار، وأكثر ما يُشترى ليُهدى.",
       "concentration": "EAU_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [
         "White Lotus",
         "Bergamot",
         "Green Accord"
       ],
+      "topNotes_ar": [
+        "اللوتس الأبيض",
+        "البرغموت",
+        "أكورد أخضر"
+      ],
       "heartNotes": [
         "Aquatic Musk",
         "Water Lily",
         "Jasmine"
       ],
+      "heartNotes_ar": [
+        "مسك مائي",
+        "زنبق الماء",
+        "الياسمين"
+      ],
       "baseNotes": [
         "Cedar",
         "White Musk",
         "Ambrette"
+      ],
+      "baseNotes_ar": [
+        "الأرز",
+        "المسك الأبيض",
+        "بذور المسك النباتي"
       ],
       "volumeMl": 100,
       "priceInCents": 147000,
@@ -330,18 +468,21 @@
         {
           "url": "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=600&h=800&fit=crop&auto=format",
           "alt": "The Silk Serenity flacon against pale water-lit stone",
+          "alt_ar": "قنينة Silk Serenity أمام حجر شاحب يضيئه الماء",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=900&h=1100&fit=crop&auto=format",
           "alt": "Silk Serenity photographed beside still water",
+          "alt_ar": "Silk Serenity مصوَّرًا إلى جانب ماء ساكن",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1760860992203-85ca32536788?w=900&h=1100&fit=crop&auto=format",
           "alt": "Silk Serenity in flat morning light on a white surface",
+          "alt_ar": "Silk Serenity في ضوء صباحي مستوٍ على سطح أبيض",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -352,27 +493,48 @@
       "name": "Desert Lily",
       "slug": "desert-lily",
       "subtitle": "The eternal feminine",
+      "subtitle_ar": "الأنوثة الخالدة",
       "description": "Rose absolute and pink pepper over neroli and jasmine, settling into sandalwood and white musk.",
+      "description_ar": "خلاصة الورد والفلفل الوردي فوق النيرولي والياسمين، تستقرّ في خشب الصندل والمسك الأبيض.",
       "story": "The desert lily flowers after rain that may not come for years, and flowers anyway — which is the closest thing Egyptian botany has to a statement of faith.\n\nThe fragrance is built around rose absolute, but it is not a rose soliflore: pink pepper cuts the opening, neroli and orris keep the heart from turning sweet, and sandalwood and benzoin hold it close to the skin. It is the fragrance the atelier recommends most often to someone who says they do not wear florals.",
+      "story_ar": "تزهر زنبقة الصحراء بعد مطر قد لا يأتي لسنوات، ثم تزهر على أي حال — وهو أقرب ما في نبات مصر إلى إعلان إيمان.\n\nالعطر مبنيّ حول خلاصة الورد، لكنه ليس ورديًّا مفردًا: يقطع الفلفل الوردي الافتتاح، ويمنع النيرولي وجذر السوسن القلب من الانزلاق إلى الحلاوة، ويمسكه خشب الصندل واللبان الجاوي قريبًا من البشرة. هو العطر الذي يرشّحه المرسم أكثر من غيره لمن يقول إنه لا يرتدي العطور الزهرية.",
       "concentration": "EAU_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [
         "Rose Absolute",
         "Pink Pepper",
         "Bergamot"
       ],
+      "topNotes_ar": [
+        "خلاصة الورد",
+        "الفلفل الوردي",
+        "البرغموت"
+      ],
       "heartNotes": [
         "Neroli",
         "Jasmine",
         "Orris"
       ],
+      "heartNotes_ar": [
+        "النيرولي",
+        "الياسمين",
+        "جذر السوسن"
+      ],
       "baseNotes": [
         "Sandalwood",
         "White Musk",
         "Benzoin"
+      ],
+      "baseNotes_ar": [
+        "خشب الصندل",
+        "المسك الأبيض",
+        "اللبان الجاوي"
       ],
       "volumeMl": 100,
       "priceInCents": 147000,
@@ -384,18 +546,21 @@
         {
           "url": "https://images.unsplash.com/photo-1608721279136-cd41b752fa41?w=600&h=800&fit=crop&auto=format",
           "alt": "The Desert Lily flacon beside cut rose heads",
+          "alt_ar": "قنينة Desert Lily إلى جانب رؤوس ورد مقطوفة",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=900&h=1100&fit=crop&auto=format",
           "alt": "Desert Lily lit warmly against a dark ground",
+          "alt_ar": "Desert Lily مضاءً بدفء أمام أرضية داكنة",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1747696766706-5485b39bf358?w=900&h=1100&fit=crop&auto=format",
           "alt": "Desert Lily photographed on sun-warmed sand",
+          "alt_ar": "Desert Lily مصوَّرًا على رمل دفّأته الشمس",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -406,27 +571,48 @@
       "name": "Crimson Sun",
       "slug": "crimson-sun",
       "subtitle": "Forged of sunlight and kingship",
+      "subtitle_ar": "مصوغ من ضوء الشمس والمُلك",
       "description": "Saffron and cardamom over a gold accord and jasmine sambac, closing on amber resin.",
+      "description_ar": "زعفران وهيل فوق أكورد ذهبي وياسمين سامباك، ويغلق على راتنج العنبر.",
       "story": "The sun the Egyptians carved above a king's head is never yellow in the surviving pigment — it is red, the colour of the disc at the moment it touches the horizon and the day is decided.\n\nCrimson Sun is that colour worn. Saffron and cardamom open it with heat rather than brightness; a gold accord and jasmine sambac hold the centre; amber resin, sandalwood, and tonka carry it into the evening. Formal, and unmistakably an evening fragrance.",
+      "story_ar": "الشمس التي نقشها المصريون فوق رأس الملك ليست صفراء قط في ما بقي من الصبغة — بل حمراء، لون القرص لحظة يلامس الأفق ويُحسم النهار.\n\nوCrimson Sun هو ذلك اللون مُرتدى. يفتحه الزعفران والهيل بالحرارة لا بالسطوع؛ ويمسك أكورد ذهبي وياسمين سامباك بالمركز؛ ويحمله راتنج العنبر وخشب الصندل والتونكا إلى المساء. رسميّ، وعطر مسائي بلا التباس.",
       "concentration": "EXTRAIT_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [
         "Saffron",
         "Bergamot",
         "Cardamom"
       ],
+      "topNotes_ar": [
+        "الزعفران",
+        "البرغموت",
+        "الهيل"
+      ],
       "heartNotes": [
         "Gold Accord",
         "Jasmine Sambac",
         "Orris"
       ],
+      "heartNotes_ar": [
+        "أكورد ذهبي",
+        "الياسمين السامباك",
+        "جذر السوسن"
+      ],
       "baseNotes": [
         "Amber Resin",
         "Sandalwood",
         "Tonka Bean"
+      ],
+      "baseNotes_ar": [
+        "راتنج العنبر",
+        "خشب الصندل",
+        "حبة التونكا"
       ],
       "volumeMl": 100,
       "priceInCents": 147000,
@@ -438,18 +624,21 @@
         {
           "url": "https://images.unsplash.com/photo-1640975972263-1f73398e943b?w=600&h=800&fit=crop&auto=format",
           "alt": "The Crimson Sun flacon burning with reflected red light",
+          "alt_ar": "قنينة Crimson Sun تتّقد بضوء أحمر منعكس",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=900&h=1100&fit=crop&auto=format",
           "alt": "Crimson Sun against a gilded surface at last light",
+          "alt_ar": "Crimson Sun أمام سطح مذهَّب عند آخر الضوء",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=900&h=1100&fit=crop&auto=format",
           "alt": "Crimson Sun throwing warm colour across dark stone",
+          "alt_ar": "Crimson Sun يبعثر لونًا دافئًا على حجر داكن",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -460,12 +649,18 @@
       "name": "Kyphi",
       "slug": "kyphi",
       "subtitle": "The compound burned at sunset",
+      "subtitle_ar": "المركّب الذي كان يُحرق عند الغروب",
       "description": "Black iris and incense smoke over patchouli, dark rose, and cistus, closing on burnt wood.",
+      "description_ar": "سوسن أسود ودخان بخور فوق الباتشولي والورد الداكن واللادن، ويغلق على الخشب المحروق.",
       "story": "Kyphi was not a perfume in the modern sense. It was a compound of sixteen ingredients — resins, wine, honey, raisins, myrrh — kneaded, aged, and burned in the temples as the sun went down, and the recipe survives in full on the walls at Edfu and Philae.\n\nThis is not a reconstruction of it; a literal one would be undrinkable smoke. It is what that ritual smells like from the far side of the courtyard: black iris and incense above, patchouli and cistus at the centre, burnt wood and benzoin at the end. The most concentrated thing the house makes.",
+      "story_ar": "لم يكن الكيفي عطرًا بالمعنى الحديث. كان مركّبًا من ستة عشر مكوّنًا — راتنجات ونبيذ وعسل وزبيب ومُرّ — يُعجن ويُعتَّق ويُحرق في المعابد مع مغيب الشمس، ووصفته باقية كاملة على جدران إدفو وفيلة.\n\nهذا ليس إعادة بناء له؛ فالنسخة الحرفية دخان لا يُحتمل. هو ما تشمّه من ذلك الطقس من الطرف الآخر للفناء: سوسن أسود وبخور في الأعلى، وباتشولي ولادن في المركز، وخشب محروق ولبان جاوي في النهاية. أكثر ما تصنعه الدار تركيزًا.",
       "concentration": "PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [
         "LIMITED_EDITION"
       ],
@@ -474,15 +669,30 @@
         "Incense Smoke",
         "Bergamot"
       ],
+      "topNotes_ar": [
+        "السوسن الأسود",
+        "دخان البخور",
+        "البرغموت"
+      ],
       "heartNotes": [
         "Patchouli",
         "Dark Rose",
         "Cistus"
       ],
+      "heartNotes_ar": [
+        "الباتشولي",
+        "الورد الداكن",
+        "اللادن"
+      ],
       "baseNotes": [
         "Burnt Wood",
         "Benzoin",
         "Dark Musk"
+      ],
+      "baseNotes_ar": [
+        "الخشب المحروق",
+        "اللبان الجاوي",
+        "المسك الداكن"
       ],
       "volumeMl": 100,
       "priceInCents": 288000,
@@ -494,18 +704,21 @@
         {
           "url": "https://images.unsplash.com/photo-1643797517714-a273548abc3c?w=600&h=800&fit=crop&auto=format",
           "alt": "The Kyphi flacon beside burning resin",
+          "alt_ar": "قنينة Kyphi إلى جانب راتنج مشتعل",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1533603208986-24fd819e718a?w=900&h=1100&fit=crop&auto=format",
           "alt": "Kyphi almost invisible against an unlit wall",
+          "alt_ar": "Kyphi يكاد يكون غير مرئي أمام جدار غير مضاء",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1738664926458-d8ca7f56549f?w=900&h=1100&fit=crop&auto=format",
           "alt": "Kyphi lit by a single low flame",
+          "alt_ar": "Kyphi تضيئه شعلة واحدة منخفضة",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -516,12 +729,18 @@
       "name": "Mendesian",
       "slug": "mendesian",
       "subtitle": "The oil of the Delta",
+      "subtitle_ar": "زيت الدلتا",
       "description": "Papyrus and an aquatic accord over vetiver and lotus, closing on dark musk and driftwood.",
+      "description_ar": "بردي وأكورد مائي فوق الفيتيفر واللوتس، يغلق على المسك الداكن وخشب البحر.",
       "story": "The Mendesian was made at Mendes in the Nile Delta and traded across the Mediterranean for a thousand years — myrrh, cassia, and resin carried in oil, the most expensive perfume of the ancient world.\n\nThe modern reading keeps the river rather than the recipe. Papyrus and violet leaf open it green and cold; vetiver, lotus, and iris hold the middle; dark musk, driftwood, and ambergris close it the way silt closes over stone. It smells of moving water, which is a difficult thing to make and the reason this one took three years.",
+      "story_ar": "صُنع المنديسي في مندس بدلتا النيل، وتُوجِّر به عبر المتوسط ألف سنة — مُرّ وسليخة وراتنج محمولة في زيت، أغلى عطور العالم القديم.\n\nالقراءة الحديثة تُبقي النهر لا الوصفة. يفتحه البردي وورق البنفسج أخضر باردًا؛ ويمسك الفيتيفر واللوتس والسوسن بالوسط؛ ويغلقه المسك الداكن وخشب البحر والعنبر الخام كما يُطبق الطمي على الحجر. رائحته رائحة ماء يتحرّك، وهو أمر عسير الصنع، وسبب أن هذا العطر استغرق ثلاث سنوات.",
       "concentration": "PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [
         "LIMITED_EDITION"
       ],
@@ -530,15 +749,30 @@
         "Aquatic Accord",
         "Violet Leaf"
       ],
+      "topNotes_ar": [
+        "البردي",
+        "أكورد مائي",
+        "ورق البنفسج"
+      ],
       "heartNotes": [
         "Vetiver",
         "Lotus Flower",
         "Iris"
       ],
+      "heartNotes_ar": [
+        "الفيتيفر",
+        "زهرة اللوتس",
+        "السوسن"
+      ],
       "baseNotes": [
         "Dark Musk",
         "Driftwood",
         "Ambergris"
+      ],
+      "baseNotes_ar": [
+        "المسك الداكن",
+        "خشب البحر",
+        "العنبر الخام"
       ],
       "volumeMl": 100,
       "priceInCents": 288000,
@@ -550,18 +784,21 @@
         {
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-noir_1.png",
           "alt": "The Mendesian flacon standing in near darkness",
+          "alt_ar": "قنينة Mendesian واقفة في عتمة شبه كاملة",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=900&h=1100&fit=crop&auto=format",
           "alt": "Mendesian photographed beside still river water",
+          "alt_ar": "Mendesian مصوَّرًا إلى جانب ماء نهر ساكن",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=900&h=1100&fit=crop&auto=format",
           "alt": "Mendesian resting on wet stone under flat daylight",
+          "alt_ar": "Mendesian مستقرًّا على حجر مبلَّل تحت ضوء نهار مستوٍ",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -572,27 +809,48 @@
       "name": "Lapis",
       "slug": "lapis",
       "subtitle": "The blue of the burial mask",
+      "subtitle_ar": "زرقة قناع الدفن",
       "description": "Blue iris and juniper over violet leaf and orris, closing on ambergris and cashmere wood.",
+      "description_ar": "سوسن أزرق وعرعر فوق ورق البنفسج وجذر السوسن، يغلق على العنبر الخام وخشب الكشمير.",
       "story": "Every scrap of lapis in Egypt came six thousand kilometres by land from Badakhshan, and it was still ground into powder and laid across the face of a dead king. No stone was ever worth more trouble.\n\nThe fragrance is cool and mineral rather than floral: blue iris and juniper above, violet leaf and orris through the middle, ambergris and cashmere wood beneath. It wears close to the skin and stays there — the quietest thing in the Gemstone range, and the one that lasts longest.",
+      "story_ar": "كل شظية لازورد في مصر قطعت ستة آلاف كيلومتر برًّا من بدخشان، ومع ذلك سُحقت مسحوقًا ووُضعت على وجه ملك ميت. ما من حجر استحقّ هذا العناء.\n\nالعطر بارد ومعدنيّ لا زهريّ: سوسن أزرق وعرعر في الأعلى، وورق بنفسج وجذر سوسن في الوسط، وعنبر خام وخشب كشمير تحتهما. يُرتدى قريبًا من البشرة ويبقى هناك — أهدأ ما في مجموعة Gemstone، وأطولها بقاءً.",
       "concentration": "EAU_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [
         "Blue Iris",
         "Bergamot",
         "Juniper"
       ],
+      "topNotes_ar": [
+        "السوسن الأزرق",
+        "البرغموت",
+        "العرعر"
+      ],
       "heartNotes": [
         "Violet Leaf",
         "Orris",
         "Jasmine"
       ],
+      "heartNotes_ar": [
+        "ورق البنفسج",
+        "جذر السوسن",
+        "الياسمين"
+      ],
       "baseNotes": [
         "Ambergris",
         "Cashmere Wood",
         "White Musk"
+      ],
+      "baseNotes_ar": [
+        "العنبر الخام",
+        "خشب الكشمير",
+        "المسك الأبيض"
       ],
       "volumeMl": 50,
       "priceInCents": 84000,
@@ -604,18 +862,21 @@
         {
           "url": "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?w=600&h=800&fit=crop&auto=format",
           "alt": "The Lapis flacon reading almost ultramarine against dark stone",
+          "alt_ar": "قنينة Lapis تكاد تُقرأ زرقاء غامقة أمام حجر داكن",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=900&h=1100&fit=crop&auto=format",
           "alt": "Lapis throwing blue light across a polished surface",
+          "alt_ar": "Lapis يبعثر ضوءًا أزرق على سطح مصقول",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=900&h=1100&fit=crop&auto=format",
           "alt": "Lapis photographed beside raw blue mineral",
+          "alt_ar": "Lapis مصوَّرًا إلى جانب معدن أزرق خام",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -626,27 +887,48 @@
       "name": "Amber",
       "slug": "amber",
       "subtitle": "Warm stone, warmer skin",
+      "subtitle_ar": "حجر دافئ، وبشرة أدفأ",
       "description": "Pink pepper and blood orange over red amber and rose, closing on cedarwood and benzoin.",
+      "description_ar": "فلفل وردي وبرتقال دموي فوق العنبر الأحمر والورد، يغلق على خشب الأرز واللبان الجاوي.",
       "story": "Amber is not a stone at all — it is resin that waited forty million years to harden, which the Egyptians understood well enough to burn it as an offering rather than cut it as a gem.\n\nThe fragrance keeps that warmth literal. Blood orange and cinnamon open it, red amber and immortelle hold the centre, cedarwood and tonka close it. It reads warmer on skin than it does on paper, which is why the atelier asks you to wear it for an hour before deciding.",
+      "story_ar": "العنبر ليس حجرًا أصلًا — هو راتنج انتظر أربعين مليون سنة ليتصلّب، وهو ما فهمه المصريون بما يكفي ليحرقوه قربانًا بدل أن يقطعوه جوهرة.\n\nيُبقي العطر تلك الدفء حرفيًّا. يفتحه البرتقال الدموي والقرفة، ويمسك العنبر الأحمر والخالدة بالمركز، ويغلقه خشب الأرز والتونكا. يُقرأ على البشرة أدفأ ممّا يُقرأ على الورق، ولهذا يطلب منك المرسم أن ترتديه ساعة قبل أن تقرّر.",
       "concentration": "EAU_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [
         "Pink Pepper",
         "Blood Orange",
         "Cinnamon"
       ],
+      "topNotes_ar": [
+        "الفلفل الوردي",
+        "البرتقال الدموي",
+        "القرفة"
+      ],
       "heartNotes": [
         "Red Amber",
         "Rose",
         "Immortelle"
       ],
+      "heartNotes_ar": [
+        "العنبر الأحمر",
+        "الورد",
+        "الخالدة"
+      ],
       "baseNotes": [
         "Cedarwood",
         "Benzoin",
         "Tonka Bean"
+      ],
+      "baseNotes_ar": [
+        "خشب الأرز",
+        "اللبان الجاوي",
+        "حبة التونكا"
       ],
       "volumeMl": 50,
       "priceInCents": 84000,
@@ -658,18 +940,21 @@
         {
           "url": "https://images.unsplash.com/photo-1747696766706-5485b39bf358?w=600&h=800&fit=crop&auto=format",
           "alt": "The Amber flacon glowing against warm sand",
+          "alt_ar": "قنينة Amber متوهّجة أمام رمل دافئ",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1640975972263-1f73398e943b?w=900&h=1100&fit=crop&auto=format",
           "alt": "Amber lit from behind, the liquid reading almost red",
+          "alt_ar": "Amber مضاءً من الخلف، والسائل يكاد يُقرأ أحمر",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=900&h=1100&fit=crop&auto=format",
           "alt": "Amber beside pieces of raw resin on dark stone",
+          "alt_ar": "Amber إلى جانب قطع من الراتنج الخام على حجر داكن",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -680,12 +965,18 @@
       "name": "Emerald",
       "slug": "emerald",
       "subtitle": "Cut from the mines at Sikait",
+      "subtitle_ar": "مقتطع من مناجم سكيت",
       "description": "Galbanum and fig leaf over green cardamom and orris, closing on vetiver and moss.",
+      "description_ar": "قلبانوم وورق تين فوق الهيل الأخضر وجذر السوسن، يغلق على الفيتيفر والطحلب.",
       "story": "The emerald mines at Sikait, in the Eastern Desert, are the oldest worked emerald deposits on earth — Cleopatra's mines, still standing as cut galleries in the rock.\n\nEmerald is the green in the range, and it is green in the difficult sense: galbanum and fig leaf at the top, sharp and almost bitter, softened only slowly by green cardamom and orris. Vetiver, moss, and cedar close it. Nothing here is sweet, and nothing here is trying to be.",
+      "story_ar": "مناجم الزمرد في سكيت، بالصحراء الشرقية، أقدم مكامن زمرد مستغَلّة على الأرض — مناجم كليوباترا، وما تزال قائمة أروقةً منحوتة في الصخر.\n\nالزمرد هو الأخضر في المجموعة، وهو أخضر بالمعنى الصعب: قلبانوم وورق تين في القمة، حادّان يكادان يمرّان، لا يليّنهما إلا ببطء الهيل الأخضر وجذر السوسن. ويغلقه الفيتيفر والطحلب والأرز. لا شيء هنا حلو، ولا شيء هنا يحاول أن يكون.",
       "concentration": "EAU_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [
         "LIMITED_EDITION"
       ],
@@ -694,15 +985,30 @@
         "Fig Leaf",
         "Green Mandarin"
       ],
+      "topNotes_ar": [
+        "القلبانوم",
+        "ورق التين",
+        "اليوسفي الأخضر"
+      ],
       "heartNotes": [
         "Green Cardamom",
         "Orris",
         "Violet Leaf"
       ],
+      "heartNotes_ar": [
+        "الهيل الأخضر",
+        "جذر السوسن",
+        "ورق البنفسج"
+      ],
       "baseNotes": [
         "Vetiver",
         "Oakmoss",
         "Cedar"
+      ],
+      "baseNotes_ar": [
+        "الفيتيفر",
+        "طحلب البلوط",
+        "الأرز"
       ],
       "volumeMl": 50,
       "priceInCents": 84000,
@@ -714,18 +1020,21 @@
         {
           "url": "https://images.unsplash.com/photo-1654612514062-7cc235e7b68c?w=600&h=800&fit=crop&auto=format",
           "alt": "The Emerald flacon against deep green shadow",
+          "alt_ar": "قنينة Emerald أمام ظلّ أخضر عميق",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1778058505814-6d247ccb600c?w=900&h=1100&fit=crop&auto=format",
           "alt": "Emerald photographed beside cut fig leaves",
+          "alt_ar": "Emerald مصوَّرًا إلى جانب أوراق تين مقطوفة",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1608721279136-cd41b752fa41?w=900&h=1100&fit=crop&auto=format",
           "alt": "Emerald throwing green light across rough stone",
+          "alt_ar": "Emerald يبعثر ضوءًا أخضر على حجر خشن",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -736,27 +1045,48 @@
       "name": "Opal",
       "slug": "opal",
       "subtitle": "One stone, several colours",
+      "subtitle_ar": "حجر واحد، وألوان عدّة",
       "description": "Aldehydes and white pepper over silver iris and heliotrope, closing on white amber and mineral musk.",
+      "description_ar": "ألدهيدات وفلفل أبيض فوق السوسن الفضي والهليوتروب، يغلق على العنبر الأبيض والمسك المعدني.",
       "story": "An opal does not have a colour. It has an angle — turn it and the fire in it moves, which is why the stone was cut into inlay rather than beads, set flat where it could be looked at rather than worn end-on.\n\nThe fragrance is built to do the same thing. Aldehydes and white pepper open it almost colourless; silver iris and heliotrope give it a powdery centre that reads differently on different skin; white amber, mineral musk, and ambrette close it. Two people wearing Opal rarely smell as though they are wearing the same thing.",
+      "story_ar": "ليس للأوبال لون. له زاوية — أدِرْه تتحرّك النار فيه، ولهذا قُطع تطعيمًا لا خرزًا، ورُكّب مسطّحًا حيث يمكن النظر إليه لا ارتداؤه على حرفه.\n\nوالعطر مبنيّ ليفعل الشيء نفسه. تفتحه الألدهيدات والفلفل الأبيض بلا لون تقريبًا؛ ويمنحه السوسن الفضي والهليوتروب مركزًا بودريًّا يُقرأ على كل بشرة قراءةً مختلفة؛ ويغلقه العنبر الأبيض والمسك المعدني وبذور المسك النباتي. نادرًا ما يشمّ اثنان يرتديان Opal الشيء نفسه.",
       "concentration": "EAU_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [
         "Aldehydes",
         "White Pepper",
         "Bergamot"
       ],
+      "topNotes_ar": [
+        "ألدهيدات",
+        "الفلفل الأبيض",
+        "البرغموت"
+      ],
       "heartNotes": [
         "Silver Iris",
         "Heliotrope",
         "Orris Butter"
       ],
+      "heartNotes_ar": [
+        "السوسن الفضي",
+        "الهليوتروب",
+        "زبدة جذر السوسن"
+      ],
       "baseNotes": [
         "White Amber",
         "Mineral Musk",
         "Ambrette"
+      ],
+      "baseNotes_ar": [
+        "العنبر الأبيض",
+        "المسك المعدني",
+        "بذور المسك النباتي"
       ],
       "volumeMl": 50,
       "priceInCents": 84000,
@@ -768,18 +1098,21 @@
         {
           "url": "https://images.unsplash.com/photo-1760860992203-85ca32536788?w=600&h=800&fit=crop&auto=format",
           "alt": "The Opal flacon catching shifting pale light",
+          "alt_ar": "قنينة Opal تلتقط ضوءًا شاحبًا متحوّلًا",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1667070796007-185faecdf8a1?w=900&h=1100&fit=crop&auto=format",
           "alt": "Opal photographed against a pearl-grey surface",
+          "alt_ar": "Opal مصوَّرًا أمام سطح رمادي لؤلؤي",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1613549026666-73c9c9083c62?w=900&h=1100&fit=crop&auto=format",
           "alt": "Opal throwing an iridescent edge of colour",
+          "alt_ar": "Opal يبعثر حرفًا قزحيًّا من اللون",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -790,27 +1123,48 @@
       "name": "Turquoise",
       "slug": "turquoise",
       "subtitle": "Mined from the Sinai",
+      "subtitle_ar": "مستخرَج من سيناء",
       "description": "Neroli and green mandarin over sea salt and orange blossom, closing on white musk and driftwood.",
+      "description_ar": "نيرولي ويوسفي أخضر فوق ملح البحر وزهر البرتقال، يغلق على المسك الأبيض وخشب البحر.",
       "story": "Turquoise came out of Serabit el-Khadim in the Sinai, where the miners cut a temple to Hathor into the rock beside the workings and left their names on it.\n\nThe fragrance is the sea end of the range: neroli and green mandarin above, sea salt and orange blossom through the middle, white musk and driftwood beneath. Bright, saline, and easily the most worn thing the house makes in summer.",
+      "story_ar": "خرج الفيروز من سرابيط الخادم في سيناء، حيث نحت العمّال معبدًا لحتحور في الصخر إلى جانب المناجم وتركوا أسماءهم عليه.\n\nالعطر هو الطرف البحري من المجموعة: نيرولي ويوسفي أخضر في الأعلى، وملح بحر وزهر برتقال في الوسط، ومسك أبيض وخشب بحر تحتهما. ساطع، مالح، وبلا منازع أكثر ما تصنعه الدار ارتداءً في الصيف.",
       "concentration": "EAU_DE_PARFUM",
       "format": null,
+      "format_ar": null,
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [
         "Neroli",
         "Bergamot",
         "Green Mandarin"
       ],
+      "topNotes_ar": [
+        "النيرولي",
+        "البرغموت",
+        "اليوسفي الأخضر"
+      ],
       "heartNotes": [
         "Sea Salt",
         "Orange Blossom",
         "Jasmine"
       ],
+      "heartNotes_ar": [
+        "ملح البحر",
+        "زهر البرتقال",
+        "الياسمين"
+      ],
       "baseNotes": [
         "White Musk",
         "Driftwood",
         "Ambrette"
+      ],
+      "baseNotes_ar": [
+        "المسك الأبيض",
+        "خشب البحر",
+        "بذور المسك النباتي"
       ],
       "volumeMl": 50,
       "priceInCents": 84000,
@@ -822,18 +1176,21 @@
         {
           "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=600&h=800&fit=crop&auto=format",
           "alt": "The Turquoise flacon against pale sea-lit stone",
+          "alt_ar": "قنينة Turquoise أمام حجر شاحب يضيئه البحر",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
           "url": "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?w=900&h=1100&fit=crop&auto=format",
           "alt": "Turquoise lit from behind, the glass reading almost sea-blue",
+          "alt_ar": "Turquoise مضاءً من الخلف، والزجاج يكاد يُقرأ أزرق بحريًّا",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
           "url": "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=900&h=1100&fit=crop&auto=format",
           "alt": "Turquoise resting on wet stone under flat daylight",
+          "alt_ar": "Turquoise مستقرًّا على حجر مبلَّل تحت ضوء نهار مستوٍ",
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -844,16 +1201,25 @@
       "name": "Amber",
       "slug": "amber-body-mist",
       "subtitle": "Light · Layerable · Everyday",
+      "subtitle_ar": "خفيف · قابل للطبقات · ليومك",
       "description": "A fine mist carrying the Amber accord — blood orange, red amber, benzoin — over skin and hair. Light enough to wear on its own through the day, and made to be layered beneath the eau de parfum it shares its heart with.",
+      "description_ar": "رذاذ رفيع يحمل أكورد Amber — برتقال دموي، وعنبر أحمر، ولبان جاوي — على البشرة والشعر. خفيف بما يكفي ليُرتدى وحده طوال النهار، ومصنوع ليُطبَّق تحت ماء العطر الذي يشاركه قلبه.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "Body Mist",
+      "format_ar": "رذاذ للجسم",
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 150,
       "priceInCents": 39000,
       "sku": "KHEM-BOD-AMB-150",
@@ -864,6 +1230,7 @@
         {
           "url": "https://images.unsplash.com/photo-1767360963892-3353defd6584?w=600&h=800&fit=crop&auto=format",
           "alt": "The Amber body mist bottle standing in soft golden light",
+          "alt_ar": "قارورة رذاذ Amber للجسم واقفة في ضوء ذهبي ناعم",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -874,16 +1241,25 @@
       "name": "Opal",
       "slug": "opal-body-mist",
       "subtitle": "Light · Layerable · Everyday",
+      "subtitle_ar": "خفيف · قابل للطبقات · ليومك",
       "description": "The Opal accord as a mist — aldehydes, silver iris, and white amber, sprayed over skin and hair. Powdery and almost weightless, it settles differently on everyone who wears it.",
+      "description_ar": "أكورد Opal رذاذًا — ألدهيدات، وسوسن فضي، وعنبر أبيض، يُرشّ على البشرة والشعر. بودريّ ولا وزن له تقريبًا، ويستقرّ على كل من يرتديه استقرارًا مختلفًا.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "Body Mist",
+      "format_ar": "رذاذ للجسم",
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 150,
       "priceInCents": 39000,
       "sku": "KHEM-BOD-OPA-150",
@@ -894,6 +1270,7 @@
         {
           "url": "https://images.unsplash.com/photo-1779524477261-12141ccbd8d9?w=600&h=800&fit=crop&auto=format",
           "alt": "The Opal body mist bottle against a pale bathing chamber wall",
+          "alt_ar": "قارورة رذاذ Opal للجسم أمام جدار حجرة استحمام شاحب",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -904,16 +1281,25 @@
       "name": "Lapis",
       "slug": "lapis-body-mist",
       "subtitle": "Light · Layerable · Everyday",
+      "subtitle_ar": "خفيف · قابل للطبقات · ليومك",
       "description": "The Lapis accord as a mist — blue iris, violet leaf, and cashmere wood. Cool and mineral on the skin, and the one to reach for when a full eau de parfum would be too much.",
+      "description_ar": "أكورد Lapis رذاذًا — سوسن أزرق، وورق بنفسج، وخشب كشمير. بارد ومعدنيّ على البشرة، وهو ما تمدّ يدك إليه حين يكون ماء العطر الكامل أكثر من اللازم.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "Body Mist",
+      "format_ar": "رذاذ للجسم",
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 150,
       "priceInCents": 39000,
       "sku": "KHEM-BOD-LAP-150",
@@ -924,6 +1310,7 @@
         {
           "url": "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?w=600&h=800&fit=crop&auto=format",
           "alt": "The Lapis body mist bottle reading deep blue in low light",
+          "alt_ar": "قارورة رذاذ Lapis للجسم تُقرأ زرقاء عميقة في ضوء خافت",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -934,16 +1321,25 @@
       "name": "Turquoise",
       "slug": "turquoise-body-mist",
       "subtitle": "Light · Layerable · Everyday",
+      "subtitle_ar": "خفيف · قابل للطبقات · ليومك",
       "description": "The Turquoise accord as a mist — neroli, sea salt, and white musk, misted over skin and hair after sun or shower. The lightest thing the house makes, and the one that disappears fastest in the heat.",
+      "description_ar": "أكورد Turquoise رذاذًا — نيرولي، وملح بحر، ومسك أبيض، يُرذّ على البشرة والشعر بعد الشمس أو الاستحمام. أخفّ ما تصنعه الدار، وأسرعها تلاشيًا في الحرّ.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "Body Mist",
+      "format_ar": "رذاذ للجسم",
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 150,
       "priceInCents": 39000,
       "sku": "KHEM-BOD-TUR-150",
@@ -954,6 +1350,7 @@
         {
           "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=600&h=800&fit=crop&auto=format",
           "alt": "The Turquoise body mist bottle against pale sea-lit stone",
+          "alt_ar": "قارورة رذاذ Turquoise للجسم أمام حجر شاحب يضيئه البحر",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -964,16 +1361,25 @@
       "name": "Amber",
       "slug": "amber-room-spray",
       "subtitle": "Five pumps · One atmosphere",
+      "subtitle_ar": "خمس نفحات · مناخ كامل",
       "description": "Five pumps into the air of a room and it changes. The Amber accord — blood orange, red amber, benzoin — hangs for hours without settling into anything heavy. Made for the hour before people arrive.",
+      "description_ar": "خمس نفحات في هواء الغرفة فتتبدّل. يبقى أكورد Amber — برتقال دموي، وعنبر أحمر، ولبان جاوي — معلّقًا ساعات من غير أن يستقرّ في ثقل. مصنوع للساعة التي تسبق وصول الناس.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "Room Spray",
+      "format_ar": "بخاخ للمكان",
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 200,
       "priceInCents": 49000,
       "sku": "KHEM-HOM-AMB-200",
@@ -984,6 +1390,7 @@
         {
           "url": "https://images.unsplash.com/photo-1738520420642-bc8761cc9f16?w=600&h=800&fit=crop&auto=format",
           "alt": "The Amber room spray bottle against a warm interior wall",
+          "alt_ar": "قارورة بخاخ Amber للمكان أمام جدار داخلي دافئ",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -994,16 +1401,25 @@
       "name": "Opal",
       "slug": "opal-room-spray",
       "subtitle": "Five pumps · One atmosphere",
+      "subtitle_ar": "خمس نفحات · مناخ كامل",
       "description": "The Opal accord sprayed into a room — aldehydes, silver iris, white amber. Clean and powdery rather than sweet, and the one that suits a bedroom or a dressing room best.",
+      "description_ar": "أكورد Opal مرشوشًا في الغرفة — ألدهيدات، وسوسن فضي، وعنبر أبيض. نظيف وبودريّ لا حلو، وهو الأنسب لغرفة نوم أو غرفة ملابس.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "Room Spray",
+      "format_ar": "بخاخ للمكان",
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 200,
       "priceInCents": 49000,
       "sku": "KHEM-HOM-OPA-200",
@@ -1014,6 +1430,7 @@
         {
           "url": "https://images.unsplash.com/photo-1609599176235-f93af914fde0?w=600&h=800&fit=crop&auto=format",
           "alt": "The Opal room spray bottle in a dim interior",
+          "alt_ar": "قارورة بخاخ Opal للمكان في فضاء داخلي معتم",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1024,16 +1441,25 @@
       "name": "Lapis",
       "slug": "lapis-room-spray",
       "subtitle": "Five pumps · One atmosphere",
+      "subtitle_ar": "خمس نفحات · مناخ كامل",
       "description": "The Lapis accord sprayed into a room — blue iris, juniper, cashmere wood. Cool and mineral, it holds a room at a distance rather than warming it, which is exactly right for a study.",
+      "description_ar": "أكورد Lapis مرشوشًا في الغرفة — سوسن أزرق، وعرعر، وخشب كشمير. بارد ومعدنيّ، يُمسك الغرفة على مسافة بدل أن يدفّئها، وهو تمامًا ما يليق بمكتب.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "Room Spray",
+      "format_ar": "بخاخ للمكان",
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 200,
       "priceInCents": 49000,
       "sku": "KHEM-HOM-LAP-200",
@@ -1044,6 +1470,7 @@
         {
           "url": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=600&h=800&fit=crop&auto=format",
           "alt": "The Lapis room spray bottle throwing blue light across dark stone",
+          "alt_ar": "قارورة بخاخ Lapis للمكان تبعثر ضوءًا أزرق على حجر داكن",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1054,16 +1481,25 @@
       "name": "Turquoise",
       "slug": "turquoise-room-spray",
       "subtitle": "Five pumps · One atmosphere",
+      "subtitle_ar": "خمس نفحات · مناخ كامل",
       "description": "The Turquoise accord sprayed into a room — neroli, sea salt, driftwood. It reads like a window opened onto the sea, and it is the one to use in a room that has been closed all day.",
+      "description_ar": "أكورد Turquoise مرشوشًا في الغرفة — نيرولي، وملح بحر، وخشب بحر. يُقرأ كنافذة فُتحت على البحر، وهو ما تستعمله في غرفة ظلّت مغلقة طوال اليوم.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "Room Spray",
+      "format_ar": "بخاخ للمكان",
       "includes": [],
+      "includes_ar": [],
       "badge": null,
+      "badge_ar": null,
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 200,
       "priceInCents": 49000,
       "sku": "KHEM-HOM-TUR-200",
@@ -1074,6 +1510,7 @@
         {
           "url": "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=600&h=800&fit=crop&auto=format",
           "alt": "The Turquoise room spray bottle against pale sea-lit stone",
+          "alt_ar": "قارورة بخاخ Turquoise للمكان أمام حجر شاحب يضيئه البحر",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1084,10 +1521,14 @@
       "name": "The Initiation Set",
       "slug": "initiation-set",
       "subtitle": "The complete introduction",
+      "subtitle_ar": "المدخل الكامل",
       "description": "Contains six of our Signature 3ml vials — one from each fragrance in the founding range. The complete introduction to the world of KHEM.",
+      "description_ar": "يضمّ ستًّا من قواريرنا سعة 3 مل من مجموعة Signature — واحدة من كل عطر في المجموعة المؤسِّسة. المدخل الكامل إلى عالم KHEM.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "6 × 3 ML Vials",
+      "format_ar": "6 قوارير × 3 مل",
       "includes": [
         "Onyx Night 3ml",
         "Ivory Temple 3ml",
@@ -1096,11 +1537,23 @@
         "Desert Lily 3ml",
         "Crimson Sun 3ml"
       ],
+      "includes_ar": [
+        "Onyx Night 3 مل",
+        "Ivory Temple 3 مل",
+        "Sunlit Citrine 3 مل",
+        "Silk Serenity 3 مل",
+        "Desert Lily 3 مل",
+        "Crimson Sun 3 مل"
+      ],
       "badge": "Most Popular",
+      "badge_ar": "الأكثر رواجًا",
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 18,
       "priceInCents": 69000,
       "sku": "KHEM-DIS-INI-018",
@@ -1111,6 +1564,7 @@
         {
           "url": "https://images.unsplash.com/photo-1674620213535-9b2a2553ef40?w=600&h=800&fit=crop&auto=format",
           "alt": "Six discovery vials arranged in a shallow presentation tray",
+          "alt_ar": "ست قوارير اكتشاف مرتّبة في صينية تقديم ضحلة",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1121,22 +1575,35 @@
       "name": "The Noir Initiation",
       "slug": "noir-initiation-set",
       "subtitle": "The darker chapter",
+      "subtitle_ar": "الفصل الأكثر عتمة",
       "description": "Both Noir compositions, presented in weighted vials. For those drawn to shadow, depth, and the more esoteric expressions of Egyptian heritage.",
+      "description_ar": "تركيبتا Noir كلتاهما، مقدَّمتين في قوارير موزونة. لمن يجذبهم الظل والعمق والتعبيرات الأكثر باطنيةً عن التراث المصري.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "2 × 10 ML Vials",
+      "format_ar": "قارورتان × 10 مل",
       "includes": [
         "Kyphi 10ml",
         "Mendesian 10ml",
         "KHEM story booklet"
       ],
+      "includes_ar": [
+        "Kyphi 10 مل",
+        "Mendesian 10 مل",
+        "كُتيّب حكاية KHEM"
+      ],
       "badge": "Limited",
+      "badge_ar": "إصدار محدود",
       "tags": [
         "LIMITED_EDITION"
       ],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 20,
       "priceInCents": 129000,
       "sku": "KHEM-DIS-NOI-020",
@@ -1147,6 +1614,7 @@
         {
           "url": "https://images.unsplash.com/photo-1694481901573-a970f982ac5e?w=600&h=800&fit=crop&auto=format",
           "alt": "Two weighted black vials resting on unpolished dark stone",
+          "alt_ar": "قاروراتان سوداوان موزونتان على حجر داكن غير مصقول",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1157,10 +1625,14 @@
       "name": "The Complete Library",
       "slug": "complete-library-set",
       "subtitle": "The full collection in miniature",
+      "subtitle_ar": "المجموعة كاملةً مصغَّرة",
       "description": "The complete KHEM library in miniature. Every fragrance from all three collections, presented in a lacquered collector's box designed to be kept and displayed.",
+      "description_ar": "مكتبة KHEM كاملةً مصغَّرة. كل عطر من المجموعات الثلاث، مقدَّمًا في صندوق مقتنيات مطليّ باللاكيه، مصمَّم ليُقتنى ويُعرض.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "14 × 3 ML Vials",
+      "format_ar": "14 قارورة × 3 مل",
       "includes": [
         "All 6 Signature fragrances 3ml",
         "Both Noir fragrances 3ml",
@@ -1169,11 +1641,23 @@
         "KHEM story booklet",
         "Black wax seal"
       ],
+      "includes_ar": [
+        "عطور Signature الستة 3 مل",
+        "عطرا Noir كلاهما 3 مل",
+        "عطور Gemstone الستة 3 مل",
+        "صندوق مقتنيات مطليّ باللاكيه",
+        "كُتيّب حكاية KHEM",
+        "ختم من الشمع الأسود"
+      ],
       "badge": "Exclusive",
+      "badge_ar": "حصري",
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 42,
       "priceInCents": 189000,
       "sku": "KHEM-DIS-LIB-042",
@@ -1184,6 +1668,7 @@
         {
           "url": "https://images.unsplash.com/photo-1605174697130-0bb0b83c92fc?w=600&h=800&fit=crop&auto=format",
           "alt": "A lacquered collector's box holding the full library of vials",
+          "alt_ar": "صندوق مقتنيات مطليّ باللاكيه يضمّ مكتبة القوارير كاملة",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1194,10 +1679,14 @@
       "name": "The Gilded Offering",
       "slug": "gilded-offering-set",
       "subtitle": "Two full flacons, presented",
+      "subtitle_ar": "قنينتان كاملتان، مقدَّمتان",
       "description": "The two fragrances that opened the house, in full size, laid in a lacquered box with a gold-embossed card written by hand at the atelier.",
+      "description_ar": "العطران اللذان افتتحا الدار، بالحجم الكامل، موضوعين في صندوق مطليّ باللاكيه مع بطاقة منقوشة بالذهب تُكتب باليد في المرسم.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "2 × 50 ML Flacons",
+      "format_ar": "قنينتان × 50 مل",
       "includes": [
         "Onyx Night 50ml",
         "Ivory Temple 50ml",
@@ -1205,11 +1694,22 @@
         "Gold-embossed card, hand-written",
         "KHEM story booklet"
       ],
+      "includes_ar": [
+        "Onyx Night 50 مل",
+        "Ivory Temple 50 مل",
+        "صندوق تقديم مطليّ باللاكيه",
+        "بطاقة منقوشة بالذهب، مكتوبة باليد",
+        "كُتيّب حكاية KHEM"
+      ],
       "badge": "Most Loved",
+      "badge_ar": "الأكثر تفضيلًا",
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 100,
       "priceInCents": 270000,
       "sku": "KHEM-GFT-GLD-100",
@@ -1220,6 +1720,7 @@
         {
           "url": "https://images.unsplash.com/photo-1709666414115-47ecd5143293?w=600&h=800&fit=crop&auto=format",
           "alt": "Two full-size flacons filled with amber liquid, side by side",
+          "alt_ar": "قنينتان بالحجم الكامل مملوءتان بسائل عنبري، جنبًا إلى جنب",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1230,23 +1731,37 @@
       "name": "The Obsidian Coffret",
       "slug": "obsidian-coffret-set",
       "subtitle": "The Noir chapter, sealed in wax",
+      "subtitle_ar": "فصل Noir، مختومًا بالشمع",
       "description": "Both Noir fragrances at 30ml, hand-sealed in black wax and set in a weighted coffret. Produced once a year, in a numbered run.",
+      "description_ar": "عطرا Noir كلاهما بسعة 30 مل، مختومين باليد بالشمع الأسود وموضوعين في علبة موزونة. يُنتَج مرة واحدة في السنة، في دفعة مرقّمة.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "2 × 30 ML Flacons",
+      "format_ar": "قنينتان × 30 مل",
       "includes": [
         "Kyphi 30ml",
         "Mendesian 30ml",
         "Weighted coffret with black wax seal",
         "Numbered certificate"
       ],
+      "includes_ar": [
+        "Kyphi 30 مل",
+        "Mendesian 30 مل",
+        "علبة موزونة بختم من الشمع الأسود",
+        "شهادة مرقّمة"
+      ],
       "badge": "Limited",
+      "badge_ar": "إصدار محدود",
       "tags": [
         "LIMITED_EDITION"
       ],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 60,
       "priceInCents": 240000,
       "sku": "KHEM-GFT-OBS-060",
@@ -1257,6 +1772,7 @@
         {
           "url": "https://images.unsplash.com/photo-1618994492420-b4f4d6b4890c?w=600&h=800&fit=crop&auto=format",
           "alt": "Crystal flacons arranged on dark wood before packing",
+          "alt_ar": "قنائن كريستال مرتّبة على خشب داكن قبل التغليف",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1267,10 +1783,14 @@
       "name": "The Temple Hearth",
       "slug": "temple-hearth-set",
       "subtitle": "A scented room, given whole",
+      "subtitle_ar": "غرفة معطَّرة، تُهدى كاملة",
       "description": "Everything needed to scent a room the way a temple was scented: the Amber accord as a room spray, a hand-poured candle, and frankincense cones with their brass holder.",
+      "description_ar": "كل ما يلزم لتعطير غرفة كما كان يُعطَّر المعبد: أكورد Amber بخاخًا للمكان، وشمعة مصبوبة باليد، ومخاريط لبان مع حاملها النحاسي.",
       "story": null,
+      "story_ar": null,
       "concentration": null,
       "format": "Room Spray · Candle · Incense",
+      "format_ar": "بخاخ للمكان · شمعة · بخور",
       "includes": [
         "Amber Room Spray 200ml",
         "Hand-poured ritual candle, 45 hours",
@@ -1278,11 +1798,22 @@
         "Cast brass incense holder",
         "KHEM story booklet"
       ],
+      "includes_ar": [
+        "بخاخ Amber للمكان 200 مل",
+        "شمعة طقسية مصبوبة باليد، 45 ساعة",
+        "مخاريط بخور اللبان",
+        "حامل بخور من النحاس المصبوب",
+        "كُتيّب حكاية KHEM"
+      ],
       "badge": "For the Home",
+      "badge_ar": "للمنزل",
       "tags": [],
       "topNotes": [],
+      "topNotes_ar": [],
       "heartNotes": [],
+      "heartNotes_ar": [],
       "baseNotes": [],
+      "baseNotes_ar": [],
       "volumeMl": 200,
       "priceInCents": 119000,
       "sku": "KHEM-GFT-HRT-200",
@@ -1293,6 +1824,7 @@
         {
           "url": "https://images.unsplash.com/photo-1609599176235-f93af914fde0?w=600&h=800&fit=crop&auto=format",
           "alt": "A room spray and candle vessel set against a dark interior wall",
+          "alt_ar": "بخاخ للمكان ووعاء شمعة أمام جدار داخلي داكن",
           "isPrimary": true,
           "sortOrder": 0
         }

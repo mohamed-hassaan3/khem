@@ -55,14 +55,15 @@ export default async function Collections({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, collections, products] = await Promise.all([
-    params,
-    getFragranceCollections(),
-    getCatalogProductCards(),
-  ]);
-
   // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  // Fetched after the locale, which now decides what comes back.
+  const [collections, products] = await Promise.all([
+    getFragranceCollections(activeLocale),
+    getCatalogProductCards(activeLocale),
+  ]);
 
   return (
     <CollectionView

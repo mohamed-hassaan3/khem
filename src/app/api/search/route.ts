@@ -14,8 +14,10 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 
+import { isLocale } from "@/src/lib/i18n/config";
 import {
   COLLECTION_SUGGESTION_LIMIT,
+  LOCALE_PARAM,
   SEARCH_PARAM,
   SUGGESTION_LIMIT,
 } from "@/src/lib/search/config";
@@ -93,6 +95,11 @@ export async function GET(request: NextRequest) {
 
   const query = normalizeQuery(request.nextUrl.searchParams.get(SEARCH_PARAM));
 
+  // Untrusted query-string input, narrowed to the union before it reaches the
+  // query layer — services take `Locale`, never a raw string.
+  const requestedLocale = request.nextUrl.searchParams.get(LOCALE_PARAM) ?? "";
+  const locale = isLocale(requestedLocale) ? requestedLocale : "en";
+
   /*
    * A too-short query is an in-flight keystroke, not a client error — 200 with
    * an empty payload, and crucially without reaching the metered provider.
@@ -103,8 +110,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const [result, collections] = await Promise.all([
-      searchCatalog(query, { limit: SUGGESTION_LIMIT }),
-      searchCollections(query),
+      searchCatalog(locale, query, { limit: SUGGESTION_LIMIT }),
+      searchCollections(locale, query),
     ]);
 
     const payload: SearchSuggestionsPayload = {

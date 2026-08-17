@@ -88,6 +88,16 @@ export interface JournalArticle {
   category: string;
   excerpt: string;
   /**
+   * The essay itself, as stored: blank lines separate blocks, `## ` opens a
+   * subheading, `> ` opens a pull quote. Never HTML —
+   * `parseArticleBody()` in `src/lib/journal/body.ts` turns it into blocks the
+   * detail page renders as text nodes.
+   *
+   * Empty string on a list query, which selects `ARTICLE_CARD_COLUMNS` and
+   * therefore never carries the body over the wire.
+   */
+  body: string;
+  /**
    * ISO-8601 date. Never store a pre-formatted display string — formatting is
    * a presentation concern handled by `formatArticleDate()`.
    */

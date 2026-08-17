@@ -31,6 +31,7 @@ import {
   searchHref,
 } from "@/src/lib/search/text";
 import { useFormatPrice } from "@/src/providers/currency-provider";
+import { LOCALE_PARAM } from "@/src/lib/search/config";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type {
   CollectionSuggestion,
@@ -196,7 +197,8 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
     const timer = setTimeout(async () => {
       try {
         const response = await fetch(
-          `/api/search?q=${encodeURIComponent(normalized)}`,
+          `/api/search?q=${encodeURIComponent(normalized)}` +
+            `&${LOCALE_PARAM}=${encodeURIComponent(locale)}`,
           { signal: controller.signal },
         );
         if (!response.ok) throw new Error(`Search failed: ${response.status}`);
@@ -223,7 +225,10 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [open, active, normalized, current, hasFailed]);
+    // `locale` is a dependency, not an incidental read: it is part of the
+    // request, so a language switch with the panel open must refetch rather
+    // than leave the previous language's suggestions on screen.
+  }, [open, active, normalized, current, hasFailed, locale]);
 
   /** Go to the full results page for `value`. */
   const submit = useCallback(

@@ -19,7 +19,9 @@ export const revalidate = 600;
  * would force the route into dynamic rendering.
  */
 export async function generateStaticParams() {
-  const collections = await getFragranceCollections();
+  // Slugs only; they are identical in both trees, so the locale is
+  // immaterial here and the default keeps the query cache warm.
+  const collections = await getFragranceCollections("en");
 
   return LOCALES.flatMap((locale) =>
     collections.map((collection) => ({ locale, slug: collection.slug })),
@@ -38,7 +40,7 @@ export async function generateMetadata({
 
   const [dict, collection] = await Promise.all([
     getDictionary(activeLocale),
-    getFragranceCollectionBySlug(slug),
+    getFragranceCollectionBySlug(activeLocale, slug),
   ]);
 
   // An unknown slug renders the 404 below; its metadata falls back to the
@@ -69,21 +71,22 @@ export default async function CollectionPage({
   params: Promise<RouteParams>;
 }) {
   const { locale, slug } = await params;
+  const activeLocale = isLocale(locale) ? locale : "en";
 
   // The segment is untrusted input: it is only ever matched against seeded
   // slugs, and an unknown value 404s rather than reaching the page.
   const [collection, collections] = await Promise.all([
-    getFragranceCollectionBySlug(slug),
-    getFragranceCollections(),
+    getFragranceCollectionBySlug(activeLocale, slug),
+    getFragranceCollections(activeLocale),
   ]);
 
   if (!collection) notFound();
 
-  const products = await getProductCardsByCollection(collection.slug);
+  const products = await getProductCardsByCollection(activeLocale, collection.slug);
 
   return (
     <CollectionView
-      locale={isLocale(locale) ? locale : "en"}
+      locale={activeLocale}
       collection={collection}
       products={products}
       collections={collections}

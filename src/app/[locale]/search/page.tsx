@@ -85,7 +85,7 @@ export default async function Search({
 
   const query = normalizeQuery(firstValue(resolvedParams[SEARCH_PARAM]));
   const { products } = isSearchable(query)
-    ? await searchCatalog(query, { limit: RESULTS_LIMIT })
+    ? await searchCatalog(activeLocale, query, { limit: RESULTS_LIMIT })
     : { products: [] };
 
   const count = products.length;

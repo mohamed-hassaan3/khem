@@ -10,6 +10,7 @@
 
 import "server-only";
 
+import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { parseList } from "@/src/schemas/db/catalog";
 import { LEGAL_DOCUMENT_COLUMNS, toLegalDocument } from "@/src/schemas/db/directory";
@@ -27,6 +28,7 @@ function logFailure(query: string, message: string): void {
  * deployment fault, which is what the thrown error says.
  */
 export async function getLegalDocument(
+  locale: Locale,
   slug: LegalDocumentSlug,
 ): Promise<LegalDocument> {
   const supabase = getSupabasePublic();
@@ -60,7 +62,7 @@ export async function getLegalDocument(
     );
   }
 
-  const document = toLegalDocument(data);
+  const document = toLegalDocument(data, locale);
   if (document) return document;
 
   throw new Error(`Legal document "${slug}" is missing from the database.`);
@@ -70,7 +72,9 @@ export async function getLegalDocument(
  * The four documents in navigation order. Used by the footer, a future `/legal`
  * index, and the sitemap.
  */
-export async function getLegalDocuments(): Promise<LegalDocument[]> {
+export async function getLegalDocuments(
+  locale: Locale,
+): Promise<LegalDocument[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
@@ -84,5 +88,5 @@ export async function getLegalDocuments(): Promise<LegalDocument[]> {
     return [];
   }
 
-  return parseList(data as unknown[] | null, toLegalDocument);
+  return parseList(data as unknown[] | null, (row) => toLegalDocument(row, locale));
 }

@@ -1,4 +1,3 @@
-import type { LtrIsland } from "@/src/lib/i18n/rtl";
 
 /**
  * The fragrance pyramid — Server Component.
@@ -16,14 +15,11 @@ export interface NoteTier {
 export interface ProductPyramidProps {
   tiers: NoteTier[];
   heading: string;
-  /** Set on the Arabic tree; note names stay English. */
-  island: LtrIsland;
 }
 
 export default function ProductPyramid({
   tiers,
   heading,
-  island,
 }: ProductPyramidProps) {
   return (
     <section>
@@ -36,7 +32,8 @@ export default function ProductPyramid({
               {tier.label}
             </p>
 
-            <ul className="flex flex-col gap-2.5" {...island}>
+            {/* Note names are perfumery vocabulary and are translated. */}
+            <ul className="flex flex-col gap-2.5" dir="auto">
               {tier.notes.map((note) => (
                 <li
                   key={note}

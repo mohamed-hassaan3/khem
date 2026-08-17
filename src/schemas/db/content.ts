@@ -95,9 +95,20 @@ export function toIngredient(row: unknown): Ingredient | null {
 
 // ── Article ───────────────────────────────────────────────────
 
-export const ARTICLE_COLUMNS =
+/**
+ * Everything a card needs, and nothing more.
+ *
+ * The body of a fifteen-minute essay has no business travelling with a grid of
+ * six cards, and `embedding` — 1536 floats — has no business leaving the
+ * database at all. Both are absent here by construction rather than by
+ * discipline at each call site.
+ */
+export const ARTICLE_CARD_COLUMNS =
   "id, slug, title, category, excerpt, publishedAt, readTimeMinutes, isFeatured, " +
   "imageUrl, imageAlt";
+
+/** The card projection plus the essay. Only `getArticleBySlug()` asks for it. */
+export const ARTICLE_COLUMNS = `${ARTICLE_CARD_COLUMNS}, body`;
 
 const articleRowSchema = z.object({
   id: z.string(),
@@ -112,6 +123,17 @@ const articleRowSchema = z.object({
   isFeatured: z.boolean(),
   imageUrl: z.string(),
   imageAlt: z.string(),
+  /*
+   * Absent from a card projection and present on the detail one, which is why
+   * it defaults rather than being required. The column itself is
+   * `not null default ''` in Postgres, so the default describes the *query*,
+   * not a row that could be missing the value.
+   *
+   * One schema for both projections rather than two: a second schema is a
+   * second place to add the next column to, and forgetting it there would fail
+   * a page rather than a type check.
+   */
+  body: z.string().default(""),
 });
 
 export function toArticle(row: unknown): JournalArticle | null {

@@ -104,9 +104,10 @@ export default function WishlistCard({
           })}
         </p>
 
-        {/* Catalog records are English in both trees. */}
-        <div {...island}>
-          <h2 className="mb-2 font-heading text-lg font-normal text-ivory">
+        {/* The name inside is a Latin proper noun; subtitle and notes around
+            it are translated, so the block reads its own direction. */}
+        <div dir="auto">
+          <h2 {...island} className="mb-2 font-heading text-lg font-normal text-ivory">
             <LocaleLink
               href={productHref(product)}
               className="transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"

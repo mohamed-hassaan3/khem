@@ -58,16 +58,16 @@ export default async function CartPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, catalog] = await Promise.all([
-    params,
-    // The whole catalog: `localStorage` is unreadable on the server, so the
-    // page cannot know *which* products to fetch. A dozen card projections is
-    // cheaper than the round trip that knowing would cost.
-    getProductCardsByCollection(),
-  ]);
-
   // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  // The whole catalog: `localStorage` is unreadable on the server, so the
+  // page cannot know *which* products to fetch. A dozen card projections is
+  // cheaper than the round trip that knowing would cost.
+  //
+  // Fetched after the locale, which decides which language the cards carry.
+  const catalog = await getProductCardsByCollection(activeLocale);
 
   return <CartView locale={activeLocale} catalog={catalog} />;
 }

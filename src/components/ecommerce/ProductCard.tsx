@@ -78,27 +78,33 @@ export default async function ProductCard({
             name: product.collectionName,
           })}
         </p>
-        {/* Product name, subtitle, and notes come from the database — English only. */}
-        <div {...ltrIsland(locale)}>
-          <h3 className="mb-1 font-heading text-base font-normal tracking-wider text-ivory">
-            {product.name}
-          </h3>
-          {product.subtitle ? (
-            <p className="mb-4 text-xs tracking-wide text-ivory/40">
-              {product.subtitle}
-            </p>
-          ) : null}
+        {/*
+          The perfume name is a proper noun and stays Latin in both trees, so it
+          keeps a real LTR island. Subtitle and notes are translated, and take
+          `dir="auto"` instead: an untranslated row falls back to English, and
+          only the rendered text can decide which way that runs.
+        */}
+        <h3
+          {...ltrIsland(locale)}
+          className="mb-1 font-heading text-base font-normal tracking-wider text-ivory"
+        >
+          {product.name}
+        </h3>
+        {product.subtitle ? (
+          <p dir="auto" className="mb-4 text-xs tracking-wide text-ivory/40">
+            {product.subtitle}
+          </p>
+        ) : null}
 
-          <div className="mb-4 flex flex-wrap gap-1.5">
-            {pills.map((note) => (
-              <span
-                key={note}
-                className="border border-gold/20 bg-gold/5 px-2 py-0.5 text-[9px] tracking-widest text-gold/70"
-              >
-                {note}
-              </span>
-            ))}
-          </div>
+        <div dir="auto" className="mb-4 flex flex-wrap gap-1.5">
+          {pills.map((note) => (
+            <span
+              key={note}
+              className="border border-gold/20 bg-gold/5 px-2 py-0.5 text-[9px] tracking-widest text-gold/70"
+            >
+              {note}
+            </span>
+          ))}
         </div>
 
         <div className="flex items-center justify-between border-t border-border pt-2">

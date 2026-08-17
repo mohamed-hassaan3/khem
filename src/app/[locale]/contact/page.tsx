@@ -45,16 +45,17 @@ export default async function Contact({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, channels, socialProfiles, subjects, conciergeEmail] =
-    await Promise.all([
-      params,
-      getContactChannels(),
-      getSocialProfiles(),
-      getEnquirySubjects(),
-      getConciergeEmail(),
-    ]);
-
+  // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  // Fetched after the locale, which decides which language comes back.
+  const [channels, socialProfiles, subjects, conciergeEmail] = await Promise.all([
+    getContactChannels(activeLocale),
+    getSocialProfiles(),
+    getEnquirySubjects(),
+    getConciergeEmail(),
+  ]);
   const dict = await getDictionary(activeLocale);
   const island = ltrIsland(activeLocale);
 

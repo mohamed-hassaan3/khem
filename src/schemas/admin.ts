@@ -36,6 +36,13 @@ export const ALLOWED_IMAGE_HOSTS = [
 const LONG_TEXT_MAX = 4_000;
 
 /**
+ * Ceiling on a journal body. Roughly a 40-minute read — longer than anything
+ * the journal has published, and short enough that one paste cannot fill a
+ * column, an embedding request, and a cached page at once.
+ */
+const ARTICLE_BODY_MAX = 40_000;
+
+/**
  * URL-safe, lowercase, hyphen-separated. The shape every seeded row already
  * has, and the shape `/perfume/[slug]` puts in front of a visitor.
  */
@@ -317,6 +324,21 @@ const articleFields = {
     .trim()
     .min(10, "Write at least a sentence of excerpt.")
     .max(LONG_TEXT_MAX, "That excerpt is too long."),
+  /*
+   * The essay. Optional, because an article is routinely created from a
+   * headline and an image and written afterwards — and because the column is
+   * `not null default ''`, so "not written yet" is an empty string rather than
+   * a null.
+   *
+   * The ceiling is generous but present: this text is stored, embedded, and
+   * rendered, and an unbounded textarea posting to a Server Action is an
+   * unbounded write.
+   */
+  body: z
+    .string()
+    .trim()
+    .max(ARTICLE_BODY_MAX, "That body is longer than the journal can store.")
+    .default(""),
   /* A `date` column. Stored as `YYYY-MM-DD`; `formatArticleDate()` owns display. */
   publishedAt: z
     .string()

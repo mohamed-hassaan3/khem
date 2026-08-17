@@ -13,7 +13,6 @@ import RelatedProducts from "@/src/components/ecommerce/RelatedProducts";
 import { LOCALES, isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
-import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { getIngredientsForProduct } from "@/src/services/content";
 import {
   getCollectionBySlug,
@@ -47,7 +46,7 @@ export async function generateMetadata({
 
   const [dict, product] = await Promise.all([
     getDictionary(activeLocale),
-    getProductBySlug(slug),
+    getProductBySlug(activeLocale, slug),
   ]);
 
   // An unknown slug renders the 404 below; its metadata falls back to the
@@ -83,17 +82,16 @@ export default async function PerfumePage({
   // The segment is untrusted input: it is only ever matched against seeded
   // slugs, and an unknown value 404s rather than falling back to a product the
   // visitor did not ask for.
-  const product = await getProductBySlug(slug);
+  const product = await getProductBySlug(activeLocale, slug);
   if (!product) notFound();
 
   const [dict, collection, related, ingredients] = await Promise.all([
     getDictionary(activeLocale),
-    getCollectionBySlug(product.collectionSlug),
-    getRelatedProductCards(product.slug),
+    getCollectionBySlug(activeLocale, product.collectionSlug),
+    getRelatedProductCards(activeLocale, product.slug),
     getIngredientsForProduct(product.slug),
   ]);
 
-  const island = ltrIsland(activeLocale);
   const gallery = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder);
 
   const tiers = [
@@ -126,17 +124,12 @@ export default async function PerfumePage({
               <ProductStory
                 story={product.story}
                 heading={dict.product.storyHeading}
-                island={island}
               />
             </Reveal>
           ) : null}
 
           <Reveal>
-            <ProductPyramid
-              tiers={tiers}
-              heading={dict.product.pyramidHeading}
-              island={island}
-            />
+            <ProductPyramid tiers={tiers} heading={dict.product.pyramidHeading} />
           </Reveal>
 
           {/* Guarded here too: an empty <Reveal> would still occupy a gap row. */}

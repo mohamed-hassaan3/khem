@@ -117,9 +117,21 @@ export function revalidateProduct(input: {
   revalidateSitemap();
 }
 
-/** After an article is created, edited, published or unpublished. */
-export function revalidateArticle(): void {
+/**
+ * After an article is created, edited, published or unpublished.
+ *
+ * The slug is optional only so an older call site cannot silently do nothing;
+ * every caller in the dashboard passes one, because an editor who fixes a
+ * sentence checks the article, not the index — and `/journal/[slug]` is cached
+ * for an hour.
+ */
+export function revalidateArticle(slug?: string): void {
   revalidateAllLocales(HOME);
   revalidateAllLocales("/journal");
+
+  if (slug) {
+    revalidateAllLocales(`/journal/${slug}`);
+  }
+
   revalidateSitemap();
 }

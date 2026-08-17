@@ -35,6 +35,7 @@
 
 import "server-only";
 
+import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import {
   LEXICAL_WEIGHT,
@@ -69,10 +70,11 @@ export interface SearchResult {
  * lines it costs.
  */
 async function fallbackSearch(
+  locale: Locale,
   normalized: string,
   limit: number,
 ): Promise<SearchResult> {
-  const products = await getCatalogProductCards();
+  const products = await getCatalogProductCards(locale);
   const ranked = rankLexical(products, queryTerms(normalized));
 
   return {
@@ -93,6 +95,7 @@ async function fallbackSearch(
  * expression and not as SQL.
  */
 export async function searchCatalog(
+  locale: Locale,
   query: string,
   options: { limit?: number } = {},
 ): Promise<SearchResult> {
@@ -126,6 +129,14 @@ export async function searchCatalog(
       full_text_weight: LEXICAL_WEIGHT,
       semantic_weight: SEMANTIC_WEIGHT,
       similarity_floor: SIMILARITY_FLOOR,
+      /*
+       * Selects which generated tsvector and which text-search configuration
+       * the full-text CTE reads — `search_vector_ar` under `simple` on `/ar`.
+       * The semantic pass is unaffected: the stored embeddings are built from
+       * the English `search_document`, a limit `0008_i18n_content.sql` states
+       * rather than hides.
+       */
+      search_locale: locale,
     })
     // The function returns `setof "Product"`; without a projection the response
     // would carry every column, the 1536-float embedding included.
@@ -133,10 +144,12 @@ export async function searchCatalog(
 
   if (error) {
     console.error(`[search] hybrid_search_products failed: ${error.message}`);
-    return fallbackSearch(normalized, limit);
+    return fallbackSearch(locale, normalized, limit);
   }
 
-  const products = parseList(data as unknown[] | null, toProductCard);
+  const products = parseList(data as unknown[] | null, (row) =>
+    toProductCard(row, locale),
+  );
 
   /*
    * An empty full-text result is not the same as no match. `websearch_to_tsquery`
@@ -147,7 +160,7 @@ export async function searchCatalog(
    * terms, which is a better answer than an empty page.
    */
   if (products.length === 0 && !queryVector) {
-    return fallbackSearch(normalized, limit);
+    return fallbackSearch(locale, normalized, limit);
   }
 
   return {
@@ -166,12 +179,15 @@ export async function searchCatalog(
  * grammar is comma- and parenthesis-delimited, so splicing a visitor's query
  * into it is a small injection surface for no gain over folding three rows.
  */
-export async function searchCollections(query: string): Promise<Collection[]> {
+export async function searchCollections(
+  locale: Locale,
+  query: string,
+): Promise<Collection[]> {
   const normalized = normalizeQuery(query);
   if (!isSearchable(normalized)) return [];
 
   const terms = queryTerms(normalized);
-  const collections = await getFragranceCollections();
+  const collections = await getFragranceCollections(locale);
 
   return collections.filter((collection) => {
     const haystack = fold(`${collection.name} ${collection.description}`);

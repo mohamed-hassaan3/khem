@@ -62,6 +62,7 @@ export default function ArticleForm({
   const [slugTouched, setSlugTouched] = useState(isEdit);
   const [category, setCategory] = useState(article?.category ?? "");
   const [excerpt, setExcerpt] = useState(article?.excerpt ?? "");
+  const [body, setBody] = useState(article?.body ?? "");
   const [publishedAt, setPublishedAt] = useState(article?.publishedAt ?? today());
   const [readTimeMinutes, setReadTimeMinutes] = useState(
     String(article?.readTimeMinutes ?? 5),
@@ -85,6 +86,7 @@ export default function ArticleForm({
         title,
         category,
         excerpt,
+        body,
         publishedAt,
         readTimeMinutes,
         isFeatured,
@@ -173,8 +175,22 @@ export default function ArticleForm({
         rows={4}
         value={excerpt}
         error={fieldErrors.excerpt}
-        hint="The passage shown on the card. The journal has no long-form body field yet."
+        hint="The passage shown on the card, and the lead paragraph on the article page."
         onChange={setExcerpt}
+      />
+
+      <AdminTextarea
+        id="body"
+        label="Body"
+        rows={22}
+        value={body}
+        error={fieldErrors.body}
+        hint={
+          "The essay itself. Leave a blank line between paragraphs. Start a line with " +
+          "## for a section heading, or > for a pull quote. Plain text only — " +
+          "HTML is never rendered as markup."
+        }
+        onChange={setBody}
       />
 
       <div className="grid gap-6 sm:grid-cols-2">

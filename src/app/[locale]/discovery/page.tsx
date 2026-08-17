@@ -50,14 +50,15 @@ export default async function DiscoveryPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, collection, sets] = await Promise.all([
-    params,
-    getCollectionBySlug(COLLECTION_SLUG),
-    getProductCardsByKind("DISCOVERY"),
-  ]);
-
   // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  // Fetched after the locale, which now decides what comes back.
+  const [collection, sets] = await Promise.all([
+    getCollectionBySlug(activeLocale, COLLECTION_SLUG),
+    getProductCardsByKind(activeLocale, "DISCOVERY"),
+  ]);
   const dict = await getDictionary(activeLocale);
 
   if (!collection) notFound();

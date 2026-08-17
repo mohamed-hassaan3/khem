@@ -31,6 +31,12 @@ const OG_IMAGE = {
  *
  * So every page builds its OpenGraph block here, complete, instead of
  * hand-rolling a partial one.
+ *
+ * `image` and `article` exist for the journal, which is the one part of the
+ * site where a page has a picture and a publication date of its own. They are
+ * options on this function rather than a second `openGraph` block on the
+ * article page, for exactly the reason above: a partial block would drop
+ * `og:locale` and cost the Arabic tree its pairing.
  */
 export function localeMetadata({
   locale,
@@ -39,6 +45,8 @@ export function localeMetadata({
   description,
   ogTitle,
   ogDescription,
+  image,
+  article,
 }: {
   locale: Locale;
   /** Locale-agnostic app path, e.g. `/journal`. */
@@ -47,19 +55,33 @@ export function localeMetadata({
   description: string;
   ogTitle?: string;
   ogDescription?: string;
+  /**
+   * Page-specific share image. Falls back to the house card. No `width`/
+   * `height`: the article banners are remote and their dimensions are not known
+   * here, and a declared size that is wrong is worse than none.
+   */
+  image?: { url: string; alt: string };
+  /** Present on an editorial page; switches `og:type` to `article`. */
+  article?: { publishedTime: string; section?: string };
 }): Metadata {
   return {
     title,
     description,
     alternates: localeAlternates(locale, path),
     openGraph: {
-      type: "website",
+      ...(article
+        ? {
+            type: "article",
+            publishedTime: article.publishedTime,
+            ...(article.section ? { section: article.section } : {}),
+          }
+        : { type: "website" }),
       locale: OG_LOCALE[locale],
       url: `${SITE_URL}${localizePath(locale, path)}`,
       siteName: "KHEM Perfumes",
       title: ogTitle ?? title,
       description: ogDescription ?? description,
-      images: [OG_IMAGE],
+      images: [image ? { url: image.url, alt: image.alt } : OG_IMAGE],
     },
   };
 }

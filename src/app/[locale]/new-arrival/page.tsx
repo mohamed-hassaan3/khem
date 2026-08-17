@@ -61,10 +61,12 @@ export default async function NewArrivalPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, arrivals] = await Promise.all([params, getNewArrivals()]);
-
   // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  // Fetched after the locale, which decides which language comes back.
+  const arrivals = await getNewArrivals(activeLocale);
   const dict = await getDictionary(activeLocale);
 
   const count =

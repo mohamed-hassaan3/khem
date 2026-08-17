@@ -46,7 +46,9 @@ export default async function ProductBreadcrumb({
           <>
             <Separator />
             <BreadcrumbLink href={`/collections/${collection.slug}`}>
-              <span {...island}>{collection.name}</span>
+              {/* Category collections carry an Arabic name; the house ranges
+                  fall back to their Latin one. */}
+              <span dir="auto">{collection.name}</span>
             </BreadcrumbLink>
           </>
         ) : null}

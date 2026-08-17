@@ -58,14 +58,15 @@ export default async function GiftSetPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, collection, sets] = await Promise.all([
-    params,
-    getCollectionBySlug(COLLECTION_SLUG),
-    getProductCardsByKind("GIFT"),
-  ]);
-
   // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  // Fetched after the locale, which now decides what comes back.
+  const [collection, sets] = await Promise.all([
+    getCollectionBySlug(activeLocale, COLLECTION_SLUG),
+    getProductCardsByKind(activeLocale, "GIFT"),
+  ]);
   const dict = await getDictionary(activeLocale);
 
   // The collection is what supplies the hero. Its absence means the category

@@ -4,7 +4,7 @@ import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { formatArticleDate } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
-import { ltrIsland, readingArrow } from "@/src/lib/i18n/rtl";
+import { readingArrow } from "@/src/lib/i18n/rtl";
 import type { JournalArticle } from "@/src/types/content";
 
 /** Journal article card — Server Component. */
@@ -35,8 +35,9 @@ export default async function JournalCard({
         />
       </div>
       <div className="p-8">
-        {/* Article metadata and title come from the database — English only. */}
-        <div {...ltrIsland(locale)}>
+        {/* Category and title are translated; the date is formatted by
+            `formatArticleDate()` in Western digits for both trees. */}
+        <div dir="auto">
           <div className="mb-4 flex items-center justify-between">
             <span className="text-[9px] uppercase tracking-[0.2em] text-gold">
               {article.category}

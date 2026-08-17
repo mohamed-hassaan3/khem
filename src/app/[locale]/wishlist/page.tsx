@@ -52,13 +52,12 @@ export default async function WishlistPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, catalog] = await Promise.all([
-    params,
-    getProductCardsByCollection(),
-  ]);
-
   // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  // Fetched after the locale, which now decides what comes back.
+  const catalog = await getProductCardsByCollection(activeLocale);
 
   return <WishlistView locale={activeLocale} catalog={catalog} />;
 }

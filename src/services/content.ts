@@ -12,6 +12,7 @@ import "server-only";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { parseList } from "@/src/schemas/db/catalog";
 import {
+  ARTICLE_CARD_COLUMNS,
   ARTICLE_COLUMNS,
   BRAND_VALUE_COLUMNS,
   CRAFT_PILLAR_COLUMNS,
@@ -173,7 +174,7 @@ export async function getLatestArticles(limit = 3): Promise<JournalArticle[]> {
 
   const { data, error } = await supabase
     .from("Article")
-    .select(ARTICLE_COLUMNS)
+    .select(ARTICLE_CARD_COLUMNS)
     .order("publishedAt", { ascending: false })
     .limit(limit);
 
@@ -192,7 +193,7 @@ export async function getJournalArticles(): Promise<JournalArticle[]> {
 
   const { data, error } = await supabase
     .from("Article")
-    .select(ARTICLE_COLUMNS)
+    .select(ARTICLE_CARD_COLUMNS)
     .order("publishedAt", { ascending: false });
 
   if (error) {
@@ -217,7 +218,7 @@ export async function getFeaturedArticle(): Promise<JournalArticle | null> {
 
   const { data, error } = await supabase
     .from("Article")
-    .select(ARTICLE_COLUMNS)
+    .select(ARTICLE_CARD_COLUMNS)
     .eq("isFeatured", true)
     .order("publishedAt", { ascending: false })
     .limit(1)
@@ -233,6 +234,87 @@ export async function getFeaturedArticle(): Promise<JournalArticle | null> {
 
   const [newest] = await getLatestArticles(1);
   return newest ?? null;
+}
+
+/**
+ * One article, body included, or `null`.
+ *
+ * The only query in this file that selects {@link ARTICLE_COLUMNS}: the essay
+ * is fetched for the page that renders it and nowhere else.
+ *
+ * An unpublished article is invisible here without a filter, because the read
+ * goes through the publishable key and the RLS policy on `"Article"` publishes
+ * `isPublished` rows only. The detail page turns the `null` into a 404.
+ */
+export async function getArticleBySlug(
+  slug: string,
+): Promise<JournalArticle | null> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("Article")
+    .select(ARTICLE_COLUMNS)
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getArticleBySlug", error.message);
+    return null;
+  }
+
+  return toArticle(data);
+}
+
+/** Published article slugs, for `generateStaticParams()`. */
+export async function getArticleSlugs(): Promise<string[]> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Article")
+    .select("slug")
+    .order("publishedAt", { ascending: false });
+
+  if (error) {
+    logFailure("getArticleSlugs", error.message);
+    return [];
+  }
+
+  return (data ?? [])
+    .map((row) => (typeof row.slug === "string" ? row.slug : null))
+    .filter((slug): slug is string => slug !== null);
+}
+
+/**
+ * "Continue Reading" — the essays nearest this one in meaning.
+ *
+ * `related_articles()` (supabase/sql/0009_journal.sql) ranks by cosine distance
+ * over the pgvector embeddings and falls back to same-category-first when no
+ * vector exists, so the rail is full on a database where `npm run embed` has
+ * never run.
+ *
+ * The `.select()` on top of the RPC matters: the function returns
+ * `setof "Article"`, so without a projection the response would carry the body
+ * of every article in the rail *and* its 1536-float embedding.
+ */
+export async function getRelatedArticles(
+  slug: string,
+  limit = 3,
+): Promise<JournalArticle[]> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .rpc("related_articles", { article_slug: slug, match_limit: limit })
+    .select(ARTICLE_CARD_COLUMNS);
+
+  if (error) {
+    logFailure("getRelatedArticles", error.message);
+    return [];
+  }
+
+  return parseList(data as unknown[] | null, toArticle);
 }
 
 /**

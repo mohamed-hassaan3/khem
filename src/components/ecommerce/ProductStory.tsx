@@ -1,5 +1,3 @@
-import type { LtrIsland } from "@/src/lib/i18n/rtl";
-
 /**
  * The editorial story block on a product detail page — Server Component.
  *
@@ -14,22 +12,19 @@ import type { LtrIsland } from "@/src/lib/i18n/rtl";
 export interface ProductStoryProps {
   story: string;
   heading: string;
-  /** Set on the Arabic tree; the story itself stays English. */
-  island: LtrIsland;
 }
 
-export default function ProductStory({
-  story,
-  heading,
-  island,
-}: ProductStoryProps) {
+export default function ProductStory({ story, heading }: ProductStoryProps) {
   const paragraphs = story.split("\n\n");
 
   return (
     <section>
       <h2 className="eyebrow mb-5">{heading}</h2>
 
-      <div {...island}>
+      {/* The story is translated. `dir="auto"` rather than a fixed
+          direction, because an untranslated product falls back to the English
+          story and only the rendered text can decide which way it runs. */}
+      <div dir="auto">
         {paragraphs.map((paragraph) => (
           <p
             key={paragraph.slice(0, 48)}

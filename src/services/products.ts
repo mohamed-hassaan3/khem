@@ -23,6 +23,7 @@
 
 import "server-only";
 
+import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import {
   COLLECTION_COLUMNS,
@@ -52,7 +53,9 @@ function logFailure(query: string, message: string): void {
  * Ordered by `sortOrder`, not by name: the seed order is editorial — Signature
  * reads before Noir because that is the story, not the alphabet.
  */
-export async function getFeaturedCollections(): Promise<Collection[]> {
+export async function getFeaturedCollections(
+  locale: Locale,
+): Promise<Collection[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
@@ -67,14 +70,14 @@ export async function getFeaturedCollections(): Promise<Collection[]> {
     return [];
   }
 
-  return parseList(data, toCollection);
+  return parseList(data, (row) => toCollection(row, locale));
 }
 
 /**
  * Every collection, of every kind. Used where the caller genuinely means all of
  * them — resolving a stored cart line, for instance.
  */
-export async function getCollections(): Promise<Collection[]> {
+export async function getCollections(locale: Locale): Promise<Collection[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
@@ -88,7 +91,7 @@ export async function getCollections(): Promise<Collection[]> {
     return [];
   }
 
-  return parseList(data, toCollection);
+  return parseList(data, (row) => toCollection(row, locale));
 }
 
 /**
@@ -98,7 +101,9 @@ export async function getCollections(): Promise<Collection[]> {
  * are not chapters of the perfume library and each has its own route; listing
  * them beside Signature and Noir would offer two URLs for the same goods.
  */
-export async function getFragranceCollections(): Promise<Collection[]> {
+export async function getFragranceCollections(
+  locale: Locale,
+): Promise<Collection[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
@@ -113,14 +118,17 @@ export async function getFragranceCollections(): Promise<Collection[]> {
     return [];
   }
 
-  return parseList(data, toCollection);
+  return parseList(data, (row) => toCollection(row, locale));
 }
 
 /**
  * A single collection by slug. Returns `null` when absent so the route can call
  * `notFound()` rather than throwing (AGENTS.md §1.7).
  */
-export async function getCollectionBySlug(slug: string): Promise<Collection | null> {
+export async function getCollectionBySlug(
+  locale: Locale,
+  slug: string,
+): Promise<Collection | null> {
   const supabase = getSupabasePublic();
   if (!supabase) return null;
 
@@ -136,7 +144,7 @@ export async function getCollectionBySlug(slug: string): Promise<Collection | nu
     return null;
   }
 
-  return toCollection(data);
+  return toCollection(data, locale);
 }
 
 /**
@@ -146,9 +154,10 @@ export async function getCollectionBySlug(slug: string): Promise<Collection | nu
  * a second, tab-less copy of `/body-care`.
  */
 export async function getFragranceCollectionBySlug(
+  locale: Locale,
   slug: string,
 ): Promise<Collection | null> {
-  const collection = await getCollectionBySlug(slug);
+  const collection = await getCollectionBySlug(locale, slug);
   return collection?.kind === "FRAGRANCE" ? collection : null;
 }
 
@@ -173,6 +182,7 @@ function cardQuery() {
 
 /** Shared tail: log a failure as `[]`, parse a success into cards. */
 function toCards(
+  locale: Locale,
   label: string,
   result: { data: unknown[] | null; error: { message: string } | null },
 ): ProductCardData[] {
@@ -181,7 +191,7 @@ function toCards(
     return [];
   }
 
-  return parseList(result.data, toProductCard);
+  return parseList(result.data, (row) => toProductCard(row, locale));
 }
 
 /**
@@ -189,6 +199,7 @@ function toCards(
  * the whole catalog, which is what `/collections` renders.
  */
 export async function getProductCardsByCollection(
+  locale: Locale,
   collectionSlug?: string,
 ): Promise<ProductCardData[]> {
   /*
@@ -206,6 +217,7 @@ export async function getProductCardsByCollection(
       : query.eq("collectionSlug", collectionSlug);
 
   return toCards(
+    locale,
     "getProductCardsByCollection",
     await scoped.order("sortOrder"),
   );
@@ -216,6 +228,7 @@ export async function getProductCardsByCollection(
  * `/discovery` each render exactly one kind.
  */
 export async function getProductCardsByKind(
+  locale: Locale,
   kind: CollectionKind,
 ): Promise<ProductCardData[]> {
   const query = cardQuery();
@@ -224,6 +237,7 @@ export async function getProductCardsByKind(
   // The `!inner` in `PRODUCT_CARD_COLUMNS` is what makes filtering on the
   // embedded collection a join condition rather than a post-filter.
   return toCards(
+    locale,
     "getProductCardsByKind",
     await query.eq("collection.kind", kind).order("sortOrder"),
   );
@@ -239,11 +253,13 @@ export async function getProductCardsByKind(
  * canonical place to buy them — a card here links back to its category page via
  * `productHref()` — so no second checkout URL is created.
  */
-export async function getCatalogProductCards(): Promise<ProductCardData[]> {
+export async function getCatalogProductCards(
+  locale: Locale,
+): Promise<ProductCardData[]> {
   const query = cardQuery();
   if (!query) return [];
 
-  return toCards("getCatalogProductCards", await query.order("sortOrder"));
+  return toCards(locale, "getCatalogProductCards", await query.order("sortOrder"));
 }
 
 /**
@@ -256,7 +272,7 @@ export async function getCatalogProductCards(): Promise<ProductCardData[]> {
  * Fragrances only — the panel links to a detail page, and body care, home
  * fragrance, and sets have none.
  */
-export async function getNewArrivals(): Promise<Product[]> {
+export async function getNewArrivals(locale: Locale): Promise<Product[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
@@ -274,18 +290,22 @@ export async function getNewArrivals(): Promise<Product[]> {
     return [];
   }
 
-  return parseList(data, toProduct);
+  return parseList(data, (row) => toProduct(row, locale));
 }
 
 /**
  * Bestsellers for the "Signature Fragrances" grid — fragrances only, whatever a
  * merchandiser flags on a candle.
  */
-export async function getFeaturedProducts(limit = 4): Promise<ProductCardData[]> {
+export async function getFeaturedProducts(
+  locale: Locale,
+  limit = 4,
+): Promise<ProductCardData[]> {
   const query = cardQuery();
   if (!query) return [];
 
   return toCards(
+    locale,
     "getFeaturedProducts",
     await query
       .eq("collection.kind", "FRAGRANCE")
@@ -305,7 +325,10 @@ export async function getFeaturedProducts(limit = 4): Promise<ProductCardData[]>
  * `/perfume/amber-room-spray` must 404 rather than render a PDP with an empty
  * pyramid — a URL no link on the site ever produces.
  */
-export async function getProductBySlug(slug: string): Promise<Product | null> {
+export async function getProductBySlug(
+  locale: Locale,
+  slug: string,
+): Promise<Product | null> {
   const supabase = getSupabasePublic();
   if (!supabase) return null;
 
@@ -323,7 +346,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return null;
   }
 
-  return toProduct(data);
+  return toProduct(data, locale);
 }
 
 /**
@@ -333,7 +356,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
  * rather than in a constant — it is a merchandising decision, and merchandising
  * decisions should not require a deploy.
  */
-export async function getFeaturedProduct(): Promise<Product | null> {
+export async function getFeaturedProduct(locale: Locale): Promise<Product | null> {
   const supabase = getSupabasePublic();
   if (!supabase) return null;
 
@@ -349,7 +372,7 @@ export async function getFeaturedProduct(): Promise<Product | null> {
   }
 
   const slug = toBoutiqueSetting(data)?.featuredProductSlug;
-  return slug ? getProductBySlug(slug) : null;
+  return slug ? getProductBySlug(locale, slug) : null;
 }
 
 /**
@@ -397,6 +420,7 @@ export async function getProductSlugs(): Promise<string[]> {
  * visitor would see two suggestions on one page and three on another.
  */
 export async function getRelatedProductCards(
+  locale: Locale,
   slug: string,
   limit = 3,
 ): Promise<ProductCardData[]> {
@@ -412,7 +436,7 @@ export async function getRelatedProductCards(
 
   // `data` is typed loosely for an RPC projection; the row schema is what
   // actually decides whether each row is a card.
-  return toCards("getRelatedProductCards", {
+  return toCards(locale, "getRelatedProductCards", {
     data: data as unknown[] | null,
     error,
   });

@@ -43,13 +43,15 @@ export default async function ProductIngredients({
             key={ingredient.id}
             href="/ingredients"
             className="flex flex-col gap-2 bg-surface p-6 no-underline transition-colors duration-300 ease-out hover:bg-card focus-visible:bg-card focus-visible:outline-none sm:flex-row sm:gap-6"
-            {...island}
+            dir="auto"
           >
             <div className="sm:w-40 sm:shrink-0">
               <p className="font-heading text-[13px] text-ivory">
                 {ingredient.name}
               </p>
-              <p className="text-[10px] italic text-ivory/30">
+              {/* A botanical binomial is Latin in every language — this is the
+                  one genuine LTR island on the row. */}
+              <p {...island} className="text-[10px] italic text-ivory/30">
                 {ingredient.latinName}
               </p>
               <p className="mt-1 text-[10px] tracking-wide text-gold/60">

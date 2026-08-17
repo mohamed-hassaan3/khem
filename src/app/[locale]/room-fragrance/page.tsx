@@ -52,14 +52,15 @@ export default async function RoomFragrancePage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, collection, products] = await Promise.all([
-    params,
-    getCollectionBySlug(COLLECTION_SLUG),
-    getProductCardsByKind("HOME"),
-  ]);
-
   // The layout has already rejected any segment that is not a real locale.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  // Fetched after the locale, which now decides what comes back.
+  const [collection, products] = await Promise.all([
+    getCollectionBySlug(activeLocale, COLLECTION_SLUG),
+    getProductCardsByKind(activeLocale, "HOME"),
+  ]);
   const dict = await getDictionary(activeLocale);
 
   if (!collection) notFound();

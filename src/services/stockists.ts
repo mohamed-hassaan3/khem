@@ -8,6 +8,7 @@
 
 import "server-only";
 
+import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { parseList } from "@/src/schemas/db/catalog";
 import { STOCKIST_COLUMNS, toStockist } from "@/src/schemas/db/directory";
@@ -39,7 +40,7 @@ function logFailure(query: string, message: string): void {
  * The directory lists both — an announced boutique is news worth carrying — so
  * this is what the map panel and the location list read.
  */
-export async function getStockists(): Promise<Stockist[]> {
+export async function getStockists(locale: Locale): Promise<Stockist[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
@@ -53,7 +54,7 @@ export async function getStockists(): Promise<Stockist[]> {
     return [];
   }
 
-  return parseList(data as unknown[] | null, toStockist);
+  return parseList(data as unknown[] | null, (row) => toStockist(row, locale));
 }
 
 /**
@@ -63,7 +64,7 @@ export async function getStockists(): Promise<Stockist[]> {
  * rather than the full list: a boutique that has not opened is not somewhere a
  * visitor can go, and is not yet a retail partner.
  */
-export async function getOpenStockists(): Promise<Stockist[]> {
+export async function getOpenStockists(locale: Locale): Promise<Stockist[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
@@ -78,7 +79,7 @@ export async function getOpenStockists(): Promise<Stockist[]> {
     return [];
   }
 
-  return parseList(data as unknown[] | null, toStockist);
+  return parseList(data as unknown[] | null, (row) => toStockist(row, locale));
 }
 
 /**
@@ -88,8 +89,10 @@ export async function getOpenStockists(): Promise<Stockist[]> {
  * renders a dead tab — and a region gains its tab the moment a store lands in
  * it.
  */
-export async function getStockistRegions(): Promise<StockistRegion[]> {
-  const stockists = await getStockists();
+export async function getStockistRegions(
+  locale: Locale,
+): Promise<StockistRegion[]> {
+  const stockists = await getStockists(locale);
   const present = new Set(stockists.map((stockist) => stockist.region));
   return STOCKIST_REGIONS.filter((region) => present.has(region));
 }

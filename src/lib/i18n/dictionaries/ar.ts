@@ -403,6 +403,16 @@ export const ar: Dictionary = {
     readArticle: "اقرأ المقال",
     read: "اقرأ",
     empty: "لا توجد مقالات في هذا التصنيف بعد. نرجو العودة قريبًا.",
+
+    article: {
+      journal: "المجلّة",
+      breadcrumbLabel: "مسار التصفّح",
+      backToJournal: "العودة إلى المجلّة",
+      related: {
+        eyebrow: "تابع القراءة",
+        heading: "من المجلّة",
+      },
+    },
   },
 
   stockists: {
