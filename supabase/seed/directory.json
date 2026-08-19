@@ -18,6 +18,7 @@
       "hours": "Mon–Sat 10:00–20:00",
       "hours_ar": "الاثنين–السبت 10:00–20:00",
       "mapsUrl": "https://www.google.com/maps/search/?api=1&query=KHEM+Flagship+Boutique+New+Cairo+City+Cairo+Governorate+Egypt",
+      "isPublished": true,
       "image": {
         "url": "https://images.unsplash.com/photo-1747696766706-5485b39bf358?w=1200&h=800&fit=crop&auto=format",
         "alt": "The KHEM flagship boutique interior, lit low against dark stone",
@@ -42,6 +43,7 @@
       "hours": null,
       "hours_ar": null,
       "mapsUrl": null,
+      "isPublished": true,
       "image": {
         "url": "https://images.unsplash.com/photo-1709666414115-47ecd5143293?w=1200&h=800&fit=crop&auto=format",
         "alt": "A darkened atelier interior awaiting its opening",
@@ -104,13 +106,34 @@
     }
   ],
   "enquirySubjects": [
-    "General Enquiry",
-    "Order Support",
-    "Bespoke Commission",
-    "Press & Media",
-    "Wholesale & Stockists",
-    "Private Consultation",
-    "Other"
+    {
+      "label": "General Enquiry",
+      "label_ar": null
+    },
+    {
+      "label": "Order Support",
+      "label_ar": null
+    },
+    {
+      "label": "Bespoke Commission",
+      "label_ar": null
+    },
+    {
+      "label": "Press & Media",
+      "label_ar": null
+    },
+    {
+      "label": "Wholesale & Stockists",
+      "label_ar": null
+    },
+    {
+      "label": "Private Consultation",
+      "label_ar": null
+    },
+    {
+      "label": "Other",
+      "label_ar": null
+    }
   ],
   "settings": {
     "houseEmail": "info@khemperfumes.com",
@@ -603,9 +626,9 @@
               "text": "You have fourteen days from delivery to return an unopened, sealed product in its original packaging. Samples and discovery sets are final sale. Opened fragrance cannot be returned for hygiene reasons unless it is faulty."
             },
             {
+              "href": "/return-exchange",
               "kind": "link",
               "text": "The full procedure, including damaged and incorrect orders, is set out on our",
-              "href": "/return-exchange",
               "label": "Returns & Exchanges page"
             }
           ]
@@ -747,9 +770,9 @@
               "text": "لديك أربعة عشر يومًا من التسليم لإرجاع منتج غير مفتوح ومختوم في عبوته الأصلية. والعيّنات وأطقم الاكتشاف بيع نهائي. ولا يمكن إرجاع عطر مفتوح لأسباب صحية ما لم يكن معيبًا."
             },
             {
+              "href": "/return-exchange",
               "kind": "link",
               "text": "الإجراء الكامل، بما فيه الطلبات التالفة والخاطئة، مبيَّن في",
-              "href": "/return-exchange",
               "label": "صفحة الإرجاع والاستبدال"
             }
           ]
@@ -1188,9 +1211,9 @@
           "title": "More Information",
           "blocks": [
             {
+              "href": "/privacy-policy",
               "kind": "link",
               "text": "Some cookies process limited personal data such as an IP address. How we handle that, and the rights you have over it, are set out in our",
-              "href": "/privacy-policy",
               "label": "Privacy Policy"
             },
             {
@@ -1305,9 +1328,9 @@
           "title": "مزيد من المعلومات",
           "blocks": [
             {
+              "href": "/privacy-policy",
               "kind": "link",
               "text": "بعض الملفات تعالج بيانات شخصية محدودة مثل عنوان IP. وكيفية تعاملنا مع ذلك، والحقوق التي لك عليه، مبيّنة في",
-              "href": "/privacy-policy",
               "label": "سياسة الخصوصية"
             },
             {

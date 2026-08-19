@@ -3,25 +3,30 @@ import Image from "next/image";
 
 import CollectionGrid, {
   type CollectionGridItem,
-  type FacetOption,
+  type CollectionOption,
 } from "@/src/components/ecommerce/CollectionGrid";
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import { FACET_ORDER, productFacets } from "@/src/lib/facets";
+import { productFacets } from "@/src/lib/facets";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
-import { ltrIsland, type LtrIsland } from "@/src/lib/i18n/rtl";
 import type { Collection, ProductCardData } from "@/src/types/catalog";
 
 /**
  * The body shared by `/collections` and `/collections/[slug]` — Server
  * Component.
  *
- * Both routes render the same page: hero, breadcrumb, description, tab bar,
- * product grid. The only difference is whether a collection is in scope, so the
- * two `page.tsx` files stay thin (params, metadata, data) and the composition
- * lives here.
+ * Both routes render the same page: hero, breadcrumb, description, one filter
+ * row, product grid. The only difference is whether a collection is in scope, so
+ * the two `page.tsx` files stay thin (params, metadata, data) and the
+ * composition lives here.
+ *
+ * That one row differs in kind between them, and only in kind: the overview
+ * filters the catalog in place with chips, a collection page navigates between
+ * collections with links. Chips on a single-collection page would be a filter
+ * with one possible value; links on the overview would make choosing a chapter a
+ * page load, which is exactly what the in-place filter is for.
  *
  * Cards are rendered here, on the server, and handed to `<CollectionGrid>` as
  * nodes; only the sort state and the wishlist toggle are client-side.
@@ -29,10 +34,14 @@ import type { Collection, ProductCardData } from "@/src/types/catalog";
 
 export interface CollectionViewProps {
   locale: Locale;
-  /** `null` renders the "All Fragrances" overview. */
+  /** `null` renders the whole-catalogue overview. */
   collection: Collection | null;
   products: ProductCardData[];
-  /** Every collection — drives the tab bar, so a fourth needs no edit here. */
+  /**
+   * Every collection — drives the filter row, so an eighth needs no edit here.
+   * The overview is passed all kinds; the single-collection route is passed the
+   * fragrance collections its tab bar can address.
+   */
   collections: Collection[];
 }
 
@@ -57,7 +66,6 @@ export default async function CollectionView({
   collections,
 }: CollectionViewProps) {
   const dict = await getDictionary(locale);
-  const island = ltrIsland(locale);
 
   const isDark = collection !== null && DARK_COLLECTIONS.has(collection.slug);
   const heroImage = collection?.bannerUrl ?? ALL_HERO_IMAGE;
@@ -69,6 +77,7 @@ export default async function CollectionView({
     id: product.id,
     name: product.name,
     priceInCents: product.priceInCents,
+    collectionSlug: product.collectionSlug,
     facets: productFacets(product),
     card: (
       <ProductCard product={product} locale={locale} sizes={CARD_SIZES} />
@@ -76,14 +85,13 @@ export default async function CollectionView({
   }));
 
   /*
-   * Facets belong to the overview alone. A single collection is already a
-   * filtered view, and every facet but one would empty it — `<CollectionGrid>`
-   * drops the chips it cannot fill, so passing them there would leave a bar
-   * that flickers into existence for Noir and nowhere else.
+   * The chip row belongs to the overview alone — see the note at the top of this
+   * file. `<CollectionGrid>` drops the chips it cannot fill, so a collection with
+   * nothing live in it takes its chip with it.
    */
-  const facets: FacetOption[] | undefined =
+  const collectionOptions: CollectionOption[] | undefined =
     collection === null
-      ? FACET_ORDER.map((key) => ({ key, label: dict.collections.facets[key] }))
+      ? collections.map((entry) => ({ slug: entry.slug, label: entry.name }))
       : undefined;
 
   return (
@@ -130,7 +138,7 @@ export default async function CollectionView({
               <span
                 aria-current="page"
                 className="text-[11px] tracking-wide text-gold/70"
-                {...(collection ? island : {})}
+                dir="auto"
               >
                 {title}
               </span>
@@ -152,7 +160,7 @@ export default async function CollectionView({
 
             <h1
               className="font-heading text-4xl font-normal text-ivory sm:text-6xl md:text-7xl"
-              {...(collection ? island : {})}
+              dir="auto"
             >
               {title}
             </h1>
@@ -163,36 +171,47 @@ export default async function CollectionView({
       {/* ── DESCRIPTION + SORT · TABS · GRID ────────── */}
       <CollectionGrid
         items={items}
-        facets={facets}
+        collections={collectionOptions}
+        facetLabels={dict.collections.facets}
         description={
-          /* A collection's own description comes from the database — English only. */
+          /*
+           * A collection's own description comes from the database, which has
+           * carried Arabic columns since `0007_i18n_content.sql` — so `dir="auto"`
+           * resolves direction from the text that actually rendered.
+           */
           <p
             className="max-w-lg text-[13px] leading-loose text-ivory/40"
-            {...(collection ? island : {})}
+            dir="auto"
           >
             {description}
           </p>
         }
+        /*
+         * Links, and only on the single-collection route: the overview gets the
+         * chip row instead, and printing both would be the two-row bar this page
+         * was cut down from.
+         */
         tabs={
-          <div className="border-b border-border bg-background">
-            <div className="mx-auto flex max-w-350 gap-10 overflow-x-auto px-6 md:px-20">
-              <CollectionTab
-                href="/collections"
-                label={dict.collections.tabAll}
-                isActive={collection === null}
-              />
-
-              {collections.map((entry) => (
+          collection === null ? undefined : (
+            <div className="border-b border-border bg-background">
+              <div className="mx-auto flex max-w-350 gap-10 overflow-x-auto px-6 md:px-20">
                 <CollectionTab
-                  key={entry.id}
-                  href={`/collections/${entry.slug}`}
-                  label={entry.name}
-                  isActive={collection?.slug === entry.slug}
-                  island={island}
+                  href="/collections"
+                  label={dict.collections.tabAll}
+                  isActive={false}
                 />
-              ))}
+
+                {collections.map((entry) => (
+                  <CollectionTab
+                    key={entry.id}
+                    href={`/collections/${entry.slug}`}
+                    label={entry.name}
+                    isActive={collection.slug === entry.slug}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )
         }
       />
     </div>
@@ -214,13 +233,10 @@ function CollectionTab({
   href,
   label,
   isActive,
-  island,
 }: {
   href: string;
   label: string;
   isActive: boolean;
-  /** Set for data-sourced collection names, which stay English. */
-  island?: LtrIsland;
 }) {
   return (
     <LocaleLink
@@ -232,7 +248,11 @@ function CollectionTab({
           ? "border-gold text-gold"
           : "border-transparent text-ivory/40 hover:text-ivory/70"
       }`}
-      {...island}
+      /*
+       * Collection names are translated database columns, so direction is a
+       * runtime fact about the row — see `src/lib/i18n/rtl.ts`.
+       */
+      dir="auto"
     >
       {label}
     </LocaleLink>

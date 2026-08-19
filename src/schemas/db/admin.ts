@@ -44,8 +44,16 @@ const productTagSchema = z.enum(["NEW_ARRIVAL", "LIMITED_EDITION"]);
 // ── Collection ────────────────────────────────────────────────
 
 export const ADMIN_COLLECTION_COLUMNS =
-  "id, name, slug, description, bannerUrl, bannerAlt, isFeatured, kind, sortOrder";
+  "id, name, slug, description, bannerUrl, bannerAlt, cardUrl, cardAlt, " +
+  "isFeatured, kind, sortOrder";
 
+/**
+ * Note `cardUrl` / `cardAlt` stay **raw** here, null and all — unlike
+ * `toCollection()` in `schemas/db/catalog.ts`, which falls them back to the
+ * banner. The storefront wants the effective image; the dashboard wants the
+ * stored one, or the edit form would show a banner URL in the card field and an
+ * editor pressing Save would silently promote the fallback into a real value.
+ */
 const adminCollectionRowSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -53,6 +61,8 @@ const adminCollectionRowSchema = z.object({
   description: z.string(),
   bannerUrl: z.string(),
   bannerAlt: z.string(),
+  cardUrl: z.string().nullable().default(null),
+  cardAlt: z.string().nullable().default(null),
   isFeatured: z.boolean(),
   kind: collectionKindSchema,
   sortOrder: z.number(),

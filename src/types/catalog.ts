@@ -68,8 +68,18 @@ export interface Collection {
   name: string;
   slug: string;
   description: string;
+  /** Landscape. The hero on `/collections/[slug]` and the category routes. */
   bannerUrl: string;
   bannerAlt: string;
+  /**
+   * Portrait. What `<CollectionCard>` renders in the home page grid.
+   *
+   * Never null at this level: `toCollection()` has already fallen back to the
+   * banner for a collection with no card crop of its own, so no component
+   * carries that decision — see `src/schemas/db/catalog.ts`.
+   */
+  cardUrl: string;
+  cardAlt: string;
   isFeatured: boolean;
   /** What this collection sells — see {@link CollectionKind}. */
   kind: CollectionKind;
@@ -182,7 +192,8 @@ export type ProductCardData = Pick<
   | "includes"
   | "badge"
   /*
-   * The merchandising flags the `/collections` facet chips filter on. Carried
+   * The merchandising flags the `/collections` `?facet=` cuts filter on — the
+   * best-sellers and limited-edition views the Nav and Footer link to. Carried
    * on the card projection because the filter runs over the cards already in
    * hand — a list query selects the column rather than the grid re-fetching.
    */

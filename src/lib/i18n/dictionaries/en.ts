@@ -199,7 +199,7 @@ export const en = {
     meta: {
       title: "Collections",
       description:
-        "The complete KHEM catalogue — the Signature, Noir, and Gemstone fragrances alongside body care, home fragrance, discovery and gift sets. Filter by new arrivals, best sellers, and limited editions.",
+        "The complete KHEM catalogue — browse by collection: Signature, Noir, and Gemstone alongside body care, home fragrance, discovery sets, and gift sets.",
       ogTitle: "Collections | The Complete KHEM Library",
       ogDescription:
         "Browse everything KHEM makes in one place — three fragrance collections, body care, home fragrance, and sets.",
@@ -213,21 +213,21 @@ export const en = {
     countLabel: "{count} Fragrances",
     /** The overview lists more than fragrances, so it counts neutrally. */
     countLabelAll: "{count} Pieces",
-    filterLabel: "Filter the catalogue",
-    facetAll: "Everything",
+    /** Accessible name for the one filter row — the collection chips. */
+    filterByCollection: "Filter by collection",
+    /** Dismisses the `?facet=` cut a Nav or Footer link arrived with. */
+    clearFilter: "Clear",
     /*
      * Keyed by `ProductFacet` (`src/lib/facets.ts`) — kebab-case because the
      * key is also the `?facet=` value, and one spelling for both is one fewer
-     * mapping to keep in step.
+     * mapping to keep in step. These name the active cut above the grid; they
+     * are not chips, because `/collections` offers one filter row and it filters
+     * by collection.
      */
     facets: {
       "new-arrivals": "New Arrivals",
       "best-sellers": "Best Sellers",
       limited: "Limited Editions",
-      "gift-sets": "Gift Sets",
-      "discovery-sets": "Discovery Sets",
-      "body-care": "Body Care",
-      "home-fragrance": "Home Fragrance",
     },
     sortBy: "Sort By",
     sortOptions: {
@@ -567,7 +567,10 @@ export const en = {
     ingredientsHeading: "Key Ingredients",
     ingredientOrigin: "From {origin}",
     gallery: {
+      label: "{name} gallery",
       thumbnail: "View image {index} of {total}",
+      previous: "Previous image",
+      next: "Next image",
     },
     /*
      * Keyed by the `Concentration` union so a new enum member is a compile

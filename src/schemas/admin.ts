@@ -66,22 +66,42 @@ const slugField = z
  * dashboard and breaks the grid it appears in. Catching it here is the
  * difference between a clear message and a mystery.
  */
+function isRenderableImageUrl(value: string): boolean {
+  try {
+    const { protocol, hostname } = new URL(value);
+    return (
+      protocol === "https:" &&
+      (ALLOWED_IMAGE_HOSTS as readonly string[]).includes(hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+const IMAGE_HOST_MESSAGE = `Images must be https and hosted on: ${ALLOWED_IMAGE_HOSTS.join(", ")}.`;
+
 const imageUrlField = z
   .url("That is not a valid URL.")
   .max(2_000, "That URL is too long.")
+  .refine(isRenderableImageUrl, IMAGE_HOST_MESSAGE);
+
+/**
+ * The same gate, for an image a record may simply not have.
+ *
+ * `imageUrlField` cannot express this: `z.url()` rejects `""`, which is what an
+ * untouched text input actually submits. Blank collapses to `null` first, and
+ * only a non-empty value is held to the host rule.
+ */
+const optionalImageUrlField = z
+  .string()
+  .trim()
+  .max(2_000, "That URL is too long.")
+  .transform((value) => (value.length === 0 ? null : value))
+  .nullable()
+  .default(null)
   .refine(
-    (value) => {
-      try {
-        const { protocol, hostname } = new URL(value);
-        return (
-          protocol === "https:" &&
-          (ALLOWED_IMAGE_HOSTS as readonly string[]).includes(hostname)
-        );
-      } catch {
-        return false;
-      }
-    },
-    `Images must be https and hosted on: ${ALLOWED_IMAGE_HOSTS.join(", ")}.`,
+    (value) => value === null || isRenderableImageUrl(value),
+    IMAGE_HOST_MESSAGE,
   );
 
 /**
@@ -160,15 +180,53 @@ const collectionFields = {
     .trim()
     .min(3, "Describe the banner for screen readers.")
     .max(200, "That alt text is too long."),
+  /**
+   * The portrait card crop, optional. Blank means "reuse the banner" —
+   * `toCollection()` performs that fallback, so a collection without one looks
+   * exactly as it did before `0010_collection_card_image.sql`.
+   */
+  cardUrl: optionalImageUrlField,
+  cardAlt: optionalText(200),
   isFeatured: z.boolean().default(false),
   kind: collectionKindField,
   sortOrder: z.coerce.number().int().min(0).max(9_999).default(0),
 };
 
-export const createCollectionSchema = z.object({
-  slug: slugField,
-  ...collectionFields,
-});
+/**
+ * A card image and its alt text arrive together or not at all.
+ *
+ * The twin of `collection_card_image_pair` in
+ * `supabase/sql/0010_collection_card_image.sql`. The constraint is what
+ * actually holds — this exists so an editor reads "the card image needs alt
+ * text" against the field, rather than a constraint name in a failed save.
+ */
+function checkCardImagePair(
+  value: { cardUrl: string | null; cardAlt: string | null },
+  ctx: z.RefinementCtx,
+): void {
+  if (value.cardUrl !== null && value.cardAlt === null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["cardAlt"],
+      message: "Describe the card image for screen readers.",
+    });
+  }
+
+  if (value.cardUrl === null && value.cardAlt !== null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["cardUrl"],
+      message: "Add a card image, or clear this alt text.",
+    });
+  }
+}
+
+export const createCollectionSchema = z
+  .object({
+    slug: slugField,
+    ...collectionFields,
+  })
+  .superRefine(checkCardImagePair);
 
 /**
  * Update takes the slug as the *target*, never as a new value.
@@ -178,10 +236,12 @@ export const createCollectionSchema = z.object({
  * every indexed URL. The edit forms render it read-only and this schema has no
  * field that could change it.
  */
-export const updateCollectionSchema = z.object({
-  slug: slugField,
-  ...collectionFields,
-});
+export const updateCollectionSchema = z
+  .object({
+    slug: slugField,
+    ...collectionFields,
+  })
+  .superRefine(checkCardImagePair);
 
 export type CreateCollectionInput = z.input<typeof createCollectionSchema>;
 export type UpdateCollectionInput = z.input<typeof updateCollectionSchema>;

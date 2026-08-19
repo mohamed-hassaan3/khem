@@ -67,25 +67,56 @@ export const collectionRowSchema = z.object({
   bannerUrl: z.string(),
   bannerAlt: z.string(),
   bannerAlt_ar: z.string().nullable().default(null),
+  // The portrait card crop — see `0010_collection_card_image.sql`. Nullable and
+  // defaulted, so a row read before that migration lands still parses rather
+  // than dropping the collection out of the grid.
+  cardUrl: z.string().nullable().default(null),
+  cardAlt: z.string().nullable().default(null),
+  cardAlt_ar: z.string().nullable().default(null),
   isFeatured: z.boolean(),
   kind: collectionKindSchema,
 });
 
 export const COLLECTION_COLUMNS =
   "id, name, name_ar, slug, description, description_ar, bannerUrl, bannerAlt, " +
-  "bannerAlt_ar, isFeatured, kind";
+  "bannerAlt_ar, cardUrl, cardAlt, cardAlt_ar, isFeatured, kind";
 
 export function toCollection(row: unknown, locale: Locale): Collection | null {
   const parsed = collectionRowSchema.safeParse(row);
   if (!parsed.success) return null;
 
-  const { name_ar, description_ar, bannerAlt_ar, ...collection } = parsed.data;
+  const {
+    name_ar,
+    description_ar,
+    bannerAlt_ar,
+    cardUrl,
+    cardAlt,
+    cardAlt_ar,
+    ...collection
+  } = parsed.data;
+
+  const bannerAltResolved = resolveText(collection.bannerAlt, bannerAlt_ar, locale);
 
   return {
     ...collection,
     name: resolveText(collection.name, name_ar, locale),
     description: resolveText(collection.description, description_ar, locale),
-    bannerAlt: resolveText(collection.bannerAlt, bannerAlt_ar, locale),
+    bannerAlt: bannerAltResolved,
+    /*
+     * The fallback is resolved here rather than at the two call sites, so
+     * `Collection.cardUrl` is a plain `string` and no component has to know
+     * that a collection may not have a card crop of its own.
+     *
+     * The alt falls back with the image, not independently: alt text describes
+     * a specific photograph, so reusing the card's wording over the banner's
+     * picture would narrate the wrong image to a screen reader. The database
+     * constraint keeps the pair from separating in the first place.
+     */
+    cardUrl: cardUrl ?? collection.bannerUrl,
+    cardAlt:
+      cardUrl !== null && cardAlt !== null
+        ? resolveText(cardAlt, cardAlt_ar, locale)
+        : bannerAltResolved,
   };
 }
 

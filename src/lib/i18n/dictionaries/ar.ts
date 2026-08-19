@@ -194,7 +194,7 @@ export const ar: Dictionary = {
     meta: {
       title: "المجموعات",
       description:
-        "كتالوج كيم كاملًا — عطور سيغنتشر ونور والأحجار الكريمة، إلى جانب العناية بالجسم وعطور المكان وعلب الاكتشاف والإهداء. صفِّ حسب الوصول الحديث والأكثر مبيعًا والإصدارات المحدودة.",
+        "كتالوج كيم كاملًا — تصفّح حسب المجموعة: سيغنتشر ونور والأحجار الكريمة، إلى جانب العناية بالجسم وعطور المكان وعلب الاكتشاف والإهداء.",
       ogTitle: "المجموعات | مكتبة كيم كاملة",
       ogDescription:
         "تصفّح كل ما يصنعه كيم في مكان واحد — ثلاث مجموعات عطرية، والعناية بالجسم، وعطور المكان، والعلب.",
@@ -207,16 +207,12 @@ export const ar: Dictionary = {
     home: "الرئيسية",
     countLabel: "{count} عطرًا",
     countLabelAll: "{count} قطعة",
-    filterLabel: "تصفية الكتالوج",
-    facetAll: "كل شيء",
+    filterByCollection: "تصفية حسب المجموعة",
+    clearFilter: "إلغاء",
     facets: {
       "new-arrivals": "وصل حديثًا",
       "best-sellers": "الأكثر مبيعًا",
       limited: "إصدارات محدودة",
-      "gift-sets": "علب الإهداء",
-      "discovery-sets": "علب الاكتشاف",
-      "body-care": "العناية بالجسم",
-      "home-fragrance": "عطور المكان",
     },
     sortBy: "الترتيب حسب",
     sortOptions: {
@@ -542,7 +538,10 @@ export const ar: Dictionary = {
     ingredientsHeading: "المكوّنات الأساسية",
     ingredientOrigin: "من {origin}",
     gallery: {
+      label: "معرض صور {name}",
       thumbnail: "عرض الصورة {index} من {total}",
+      previous: "الصورة السابقة",
+      next: "الصورة التالية",
     },
     concentrations: {
       PARFUM: "بارفان",

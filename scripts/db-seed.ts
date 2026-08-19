@@ -12,9 +12,11 @@
  * project (a preview branch, a restored backup, a new environment) can be
  * rebuilt with two commands instead of by hand.
  *
- * Editing content means editing the database — the Supabase table editor, or a
- * future admin surface. If you want the export to match again afterwards, dump
- * it back; do not treat these files as the source of truth.
+ * Editing content means editing the database — the Supabase table editor, or
+ * the admin dashboard. Supabase is the source of truth; these files are not.
+ * When you have edited content on the platform, run `npm run db:dump` to bring
+ * the export back into line and commit the diff. `db-dump.ts` is the exact
+ * inverse of this script for `catalog.json`.
  *
  * ## Safety
  *
@@ -36,118 +38,15 @@ import path from "node:path";
 import type { Client } from "pg";
 
 import { ENQUIRY_SUBJECTS } from "../src/constants/contact";
-import type { Collection, Product } from "../src/types/catalog";
-import type {
-  BrandValue,
-  CraftPillar,
-  CraftQuote,
-  CraftStat,
-  CraftStep,
-  Ingredient,
-  JournalArticle,
-  MissionStatement,
-  Testimonial,
-  TimelineEvent,
-} from "../src/types/content";
-import type { LegalDocument } from "../src/types/legal";
-import type { Stockist } from "../src/types/stockist";
-import type { ContactChannel, SocialProfile } from "../src/types/contact";
 import { redactUrl, connectionString, withTransaction } from "./db";
+import type { CatalogSeed, ContentSeed, DirectorySeed } from "./seed-types";
 
 const SEED_DIR = path.join(process.cwd(), "supabase", "seed");
 
-/**
- * The Arabic twin of every translatable column, as it appears in the seed JSON.
- *
- * The app types (`Collection`, `Product`, …) describe a record the UI has
- * already *resolved* to one language, so they carry no `_ar` fields — that is
- * the whole point of resolving in `src/schemas/db/*`. The seed file is the
- * other side of that boundary: it holds both languages, and these intersections
- * are where the difference is stated instead of being cast away.
- *
- * `null` is meaningful and is written through as `null`: it records "this field
- * is deliberately untranslated" (a Latin proper noun), which is what
- * `resolveText()` reads to fall back.
+/*
+ * The shape of all three seed files — and the `_ar` twins the app types drop —
+ * lives in `./seed-types`, because `db-dump.ts` writes the files this reads.
  */
-type CollectionSeedRow = Collection & {
-  name_ar: string | null;
-  description_ar: string | null;
-  bannerAlt_ar: string | null;
-};
-
-type ProductSeedRow = Omit<Product, "images"> & {
-  subtitle_ar: string | null;
-  description_ar: string | null;
-  story_ar: string | null;
-  format_ar: string | null;
-  badge_ar: string | null;
-  includes_ar: string[] | null;
-  topNotes_ar: string[] | null;
-  heartNotes_ar: string[] | null;
-  baseNotes_ar: string[] | null;
-  images: {
-    url: string;
-    alt: string;
-    alt_ar: string | null;
-    isPrimary: boolean;
-    sortOrder: number;
-  }[];
-};
-
-interface CatalogSeed {
-  collections: CollectionSeedRow[];
-  products: ProductSeedRow[];
-  featuredProductSlug: string;
-}
-
-interface ContentSeed {
-  testimonials: Testimonial[];
-  ingredientFamilies: string[];
-  ingredients: Ingredient[];
-  articles: JournalArticle[];
-  timeline: TimelineEvent[];
-  brandValues: BrandValue[];
-  missionStatements: MissionStatement[];
-  craftPillars: CraftPillar[];
-  craftSteps: CraftStep[];
-  craftStats: CraftStat[];
-  craftQuote: CraftQuote | null;
-}
-
-type StockistSeedRow = Omit<Stockist, "image"> & {
-  name_ar: string | null;
-  city_ar: string | null;
-  country_ar: string | null;
-  address_ar: string | null;
-  hours_ar: string | null;
-  image: { url: string; alt: string; alt_ar: string | null };
-};
-
-type ContactChannelSeedRow = ContactChannel & {
-  label_ar: string | null;
-  value_ar: string | null;
-};
-
-type LegalDocumentSeedRow = Omit<LegalDocument, "banner"> & {
-  eyebrow_ar: string | null;
-  title_ar: string | null;
-  lede_ar: string | null;
-  sections_ar: LegalDocument["sections"] | null;
-  banner: { url: string; alt: string; alt_ar: string | null };
-};
-
-interface DirectorySeed {
-  stockists: StockistSeedRow[];
-  contactChannels: ContactChannelSeedRow[];
-  socialProfiles: SocialProfile[];
-  enquirySubjects: string[];
-  settings: {
-    houseEmail: string;
-    conciergeEmail: string;
-    wholesaleEmail: string;
-  };
-  legalDocuments: LegalDocumentSeedRow[];
-}
 
 async function readSeed<T>(name: string): Promise<T> {
   return JSON.parse(await readFile(path.join(SEED_DIR, name), "utf8")) as T;
@@ -222,6 +121,9 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
       bannerUrl: collection.bannerUrl,
       bannerAlt: collection.bannerAlt,
       bannerAlt_ar: collection.bannerAlt_ar,
+      cardUrl: collection.cardUrl,
+      cardAlt: collection.cardAlt,
+      cardAlt_ar: collection.cardAlt_ar,
       isFeatured: collection.isFeatured,
       kind: collection.kind,
       sortOrder: index,
@@ -294,9 +196,14 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
     ordered(seed.testimonials, (testimonial, index) => ({
       id: testimonial.id,
       quote: testimonial.quote,
+      quote_ar: testimonial.quote_ar,
       author: testimonial.author,
+      author_ar: testimonial.author_ar,
       authorTitle: testimonial.authorTitle,
-      isPublished: true,
+      authorTitle_ar: testimonial.authorTitle_ar,
+      // Read from the export, not hard-coded: unpublishing a testimonial in the
+      // dashboard used to survive only until the next seed put it back.
+      isPublished: testimonial.isPublished,
       sortOrder: index,
     })),
   );
@@ -307,8 +214,9 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
     client,
     "IngredientFamily",
     "name",
-    ordered(seed.ingredientFamilies, (name, index) => ({
-      name,
+    ordered(seed.ingredientFamilies, (family, index) => ({
+      name: family.name,
+      label_ar: family.label_ar,
       sortOrder: index,
     })),
   );
@@ -320,16 +228,22 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
     ordered(seed.ingredients, (ingredient, index) => ({
       id: ingredient.id,
       name: ingredient.name,
+      name_ar: ingredient.name_ar,
       slug: ingredient.slug,
       latinName: ingredient.latinName,
       origin: ingredient.origin,
+      origin_ar: ingredient.origin_ar,
       families: ingredient.families,
       rarity: ingredient.rarity,
+      rarity_ar: ingredient.rarity_ar,
       priceTier: ingredient.priceTier,
       description: ingredient.description,
+      description_ar: ingredient.description_ar,
       facts: ingredient.facts,
+      facts_ar: ingredient.facts_ar,
       imageUrl: ingredient.image.url,
       imageAlt: ingredient.image.alt,
+      imageAlt_ar: ingredient.image.alt_ar,
       sortOrder: index,
     })),
   );
@@ -357,15 +271,20 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
       id: article.id,
       slug: article.slug,
       title: article.title,
+      title_ar: article.title_ar,
       category: article.category,
+      category_ar: article.category_ar,
       excerpt: article.excerpt,
+      excerpt_ar: article.excerpt_ar,
       body: article.body,
+      body_ar: article.body_ar,
       publishedAt: article.publishedAt,
       readTimeMinutes: article.readTimeMinutes,
       isFeatured: article.isFeatured,
-      isPublished: true,
+      isPublished: article.isPublished,
       imageUrl: article.image.url,
       imageAlt: article.image.alt,
+      imageAlt_ar: article.image.alt_ar,
     })),
   );
 
@@ -376,8 +295,11 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
     ordered(seed.timeline, (event, index) => ({
       id: event.id,
       year: event.year,
+      year_ar: event.year_ar,
       title: event.title,
+      title_ar: event.title_ar,
       description: event.description,
+      description_ar: event.description_ar,
       sortOrder: index,
     })),
   );
@@ -389,7 +311,9 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
     ordered(seed.brandValues, (value, index) => ({
       id: value.id,
       title: value.title,
+      title_ar: value.title_ar,
       description: value.description,
+      description_ar: value.description_ar,
       sortOrder: index,
     })),
   );
@@ -401,8 +325,11 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
     ordered(seed.missionStatements, (statement, index) => ({
       id: statement.id,
       label: statement.label,
+      label_ar: statement.label_ar,
       title: statement.title,
+      title_ar: statement.title_ar,
       text: statement.text,
+      text_ar: statement.text_ar,
       sortOrder: index,
     })),
   );
@@ -415,7 +342,9 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
       id: pillar.id,
       number: pillar.number,
       title: pillar.title,
+      title_ar: pillar.title_ar,
       description: pillar.description,
+      description_ar: pillar.description_ar,
       sortOrder: index,
     })),
   );
@@ -428,10 +357,14 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
       id: step.id,
       number: step.number,
       title: step.title,
+      title_ar: step.title_ar,
       subtitle: step.subtitle,
+      subtitle_ar: step.subtitle_ar,
       body: step.body,
+      body_ar: step.body_ar,
       imageUrl: step.image.url,
       imageAlt: step.image.alt,
+      imageAlt_ar: step.image.alt_ar,
       sortOrder: index,
     })),
   );
@@ -443,7 +376,9 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
     ordered(seed.craftStats, (stat, index) => ({
       id: stat.id,
       value: stat.value,
+      value_ar: stat.value_ar,
       label: stat.label,
+      label_ar: stat.label_ar,
       sortOrder: index,
     })),
   );
@@ -453,9 +388,12 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
       {
         id: seed.craftQuote.id,
         quote: seed.craftQuote.quote,
+        quote_ar: seed.craftQuote.quote_ar,
         author: seed.craftQuote.author,
+        author_ar: seed.craftQuote.author_ar,
         authorTitle: seed.craftQuote.authorTitle,
-        isPublished: true,
+        authorTitle_ar: seed.craftQuote.authorTitle_ar,
+        isPublished: seed.craftQuote.isPublished,
         sortOrder: 0,
       },
     ]);
@@ -492,7 +430,7 @@ async function seedDirectory(
       imageUrl: stockist.image.url,
       imageAlt: stockist.image.alt,
       imageAlt_ar: stockist.image.alt_ar,
-      isPublished: true,
+      isPublished: stockist.isPublished,
       sortOrder: index,
     })),
   );
@@ -526,15 +464,28 @@ async function seedDirectory(
   );
 
   /*
-   * Seeded from the constant, not from the JSON: `src/schemas/contact.ts`
-   * validates a submitted subject against `ENQUIRY_SUBJECTS`, so the table has
-   * to be a copy of that list rather than a second, independently editable one.
+   * *Which* subjects exist comes from the constant, not from the JSON:
+   * `src/schemas/contact.ts` validates a submitted subject against
+   * `ENQUIRY_SUBJECTS`, so the table has to be a copy of that list rather than a
+   * second, independently editable one. A subject added in Supabase would be
+   * rejected by the form it appears on.
+   *
+   * The *translation* has no such constraint — it is edited on the platform like
+   * any other — so `label_ar` is carried over from the export by label.
    */
+  const subjectTranslations = new Map(
+    seed.enquirySubjects.map((subject) => [subject.label, subject.label_ar]),
+  );
+
   await upsert(
     client,
     "EnquirySubject",
     "label",
-    ordered(ENQUIRY_SUBJECTS, (label, index) => ({ label, sortOrder: index })),
+    ordered(ENQUIRY_SUBJECTS, (label, index) => ({
+      label,
+      label_ar: subjectTranslations.get(label) ?? null,
+      sortOrder: index,
+    })),
   );
 
   await upsert(client, "BoutiqueSetting", "id", [

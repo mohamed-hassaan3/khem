@@ -45,8 +45,8 @@ export default async function CollectionCard({
       className="img-zoom group relative block aspect-3/4 overflow-hidden bg-surface no-underline"
     >
       <Image
-        src={collection.bannerUrl}
-        alt={collection.bannerAlt}
+        src={collection.cardUrl}
+        alt={collection.cardAlt}
         fill
         sizes="(min-width: 768px) 50vw, 100vw"
         className={`object-cover transition-[filter] duration-700 ease-out ${IMAGE_TONE[tone]}`}

@@ -7,9 +7,12 @@
       "slug": "signature",
       "description": "Timeless expressions of Egyptian heritage. Fragrances that carry the warmth of temples and the spirit of sacred rituals.",
       "description_ar": "تعبيرات خالدة عن التراث المصري. عطور تحمل دفء المعابد وروح الطقوس المقدّسة.",
-      "bannerUrl": "https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=900&h=1200&fit=crop&auto=format",
+      "bannerUrl": "https://res.cloudinary.com/co1xzkhf/image/upload/sign-coll-banner.jpg",
       "bannerAlt": "A golden flacon lit from the side against a warm obsidian backdrop",
       "bannerAlt_ar": "قنينة ذهبية مضاءة من جانبها أمام خلفية أبنوسية دافئة",
+      "cardUrl": "https://res.cloudinary.com/co1xzkhf/image/upload/sign-coll-card.jpg",
+      "cardAlt": "A golden flacon lit from the side against a warm obsidian backdrop",
+      "cardAlt_ar": null,
       "isFeatured": true,
       "kind": "FRAGRANCE"
     },
@@ -20,9 +23,12 @@
       "slug": "noir",
       "description": "The house at its most concentrated. Two compositions drawn from the perfumes the temples actually burned — held back from the Signature range because neither would sit quietly beside anything else.",
       "description_ar": "الدار في أشدّ حالاتها تركيزًا. تركيبتان مستلهمتان من العطور التي أُحرقت في المعابد فعلًا — حُجبتا عن مجموعة Signature لأن أيًّا منهما لا يقبل الجلوس بهدوء إلى جانب سواه.",
-      "bannerUrl": "https://images.unsplash.com/photo-1778058505814-6d247ccb600c?w=900&h=1200&fit=crop&auto=format",
+      "bannerUrl": "https://res.cloudinary.com/co1xzkhf/image/upload/noir-coll-banner.jpg",
       "bannerAlt": "A black glass perfume bottle half-consumed by shadow",
       "bannerAlt_ar": "قنينة عطر من الزجاج الأسود يبتلعها الظل إلى نصفها",
+      "cardUrl": "https://res.cloudinary.com/co1xzkhf/image/upload/noir-coll-card.jpg",
+      "cardAlt": "A black glass perfume bottle half-consumed by shadow",
+      "cardAlt_ar": null,
       "isFeatured": true,
       "kind": "FRAGRANCE"
     },
@@ -33,9 +39,12 @@
       "slug": "gemstone",
       "description": "Mineral light made wearable. Six fragrances cut from the stones the Egyptians buried with their kings — lapis and turquoise from the desert mines, amber from the resin roads, emerald, sapphire, and opal from the trade that followed.",
       "description_ar": "ضوء المعادن وقد صار عطرًا يُرتدى. ستة عطور مقتطعة من الأحجار التي دُفنت مع الملوك — اللازورد والفيروز من مناجم الصحراء، والعنبر من طرق الراتنج، والزمرد والياقوت والأوبال ممّا حملته التجارة بعدها.",
-      "bannerUrl": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=900&h=1200&fit=crop&auto=format",
+      "bannerUrl": "https://res.cloudinary.com/co1xzkhf/image/upload/banner-gamestone.jpg",
       "bannerAlt": "A faceted flacon throwing coloured light across dark stone",
       "bannerAlt_ar": "قنينة مصقولة الأوجه تبعثر ضوءًا ملوّنًا على حجر داكن",
+      "cardUrl": null,
+      "cardAlt": null,
+      "cardAlt_ar": null,
       "isFeatured": false,
       "kind": "FRAGRANCE"
     },
@@ -49,6 +58,9 @@
       "bannerUrl": "https://images.unsplash.com/photo-1779524477261-12141ccbd8d9?w=1800&h=900&fit=crop&auto=format",
       "bannerAlt": "Oiled skin catching low warm light against a dark bathing chamber",
       "bannerAlt_ar": "بشرة مرطّبة تلتقط ضوءًا دافئًا خافتًا في حجرة استحمام معتمة",
+      "cardUrl": null,
+      "cardAlt": null,
+      "cardAlt_ar": null,
       "isFeatured": false,
       "kind": "BODY"
     },
@@ -62,6 +74,9 @@
       "bannerUrl": "https://images.unsplash.com/photo-1609599176235-f93af914fde0?w=1800&h=900&fit=crop&auto=format",
       "bannerAlt": "A dim interior lit by a single flame, smoke rising slowly",
       "bannerAlt_ar": "فضاء داخلي معتم تضيئه شعلة واحدة، والدخان يتصاعد ببطء",
+      "cardUrl": null,
+      "cardAlt": null,
+      "cardAlt_ar": null,
       "isFeatured": false,
       "kind": "HOME"
     },
@@ -75,6 +90,9 @@
       "bannerUrl": "https://images.unsplash.com/photo-1674620213535-9b2a2553ef40?w=1800&h=900&fit=crop&auto=format",
       "bannerAlt": "A row of small sample vials laid out on dark lacquered wood",
       "bannerAlt_ar": "صف من قوارير العيّنات الصغيرة على خشب داكن مصقول",
+      "cardUrl": null,
+      "cardAlt": null,
+      "cardAlt_ar": null,
       "isFeatured": false,
       "kind": "DISCOVERY"
     },
@@ -88,6 +106,9 @@
       "bannerUrl": "https://images.unsplash.com/photo-1762530211537-011645caef57?w=1800&h=900&fit=crop&auto=format",
       "bannerAlt": "Ancient Egyptian vessels used for blending sacred oils, arranged for presentation",
       "bannerAlt_ar": "أوانٍ مصرية قديمة كانت تُستخدم لمزج الزيوت المقدّسة، مرتّبة للعرض",
+      "cardUrl": null,
+      "cardAlt": null,
+      "cardAlt_ar": null,
       "isFeatured": false,
       "kind": "GIFT"
     }
@@ -151,21 +172,21 @@
       "collectionSlug": "signature",
       "images": [
         {
-          "url": "https://images.unsplash.com/photo-1709662217788-6a8a1b31562a?w=600&h=800&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-Sunlit_Citrine.jpg",
           "alt": "The Sunlit Citrine flacon lit from above on warm stone",
           "alt_ar": "قنينة Sunlit Citrine مضاءة من أعلى على حجر دافئ",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
-          "url": "https://images.unsplash.com/photo-1667070796007-185faecdf8a1?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-Sunlit_Citrine.jpg",
           "alt": "Sunlit Citrine photographed beside cut resin and saffron threads",
           "alt_ar": "Sunlit Citrine مصوَّرًا إلى جانب راتنج مقطوع وخيوط زعفران",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
-          "url": "https://images.unsplash.com/photo-1613549026666-73c9c9083c62?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-Sunlit_Citrine.jpg",
           "alt": "Sunlit Citrine held against a low golden horizon",
           "alt_ar": "Sunlit Citrine ممسوكًا أمام أفق ذهبي منخفض",
           "isPrimary": false,
@@ -310,21 +331,21 @@
       "collectionSlug": "signature",
       "images": [
         {
-          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/Gemini_Generated_Image_3vrr7v3vrr7v3vrr.png",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-onyx_night.jpg",
           "alt": "The Onyx Night flacon standing in low incense smoke",
           "alt_ar": "قنينة Onyx Night واقفة في دخان بخور منخفض",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
-          "url": "https://images.unsplash.com/photo-1738664926458-d8ca7f56549f?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-onyx_night.jpg",
           "alt": "Onyx Night against a wall of unlit black stone",
           "alt_ar": "Onyx Night أمام جدار من حجر أسود غير مضاء",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
-          "url": "https://images.unsplash.com/photo-1643797517714-a273548abc3c?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-onyx_night.jpg",
           "alt": "Frankincense resin beside the Onyx Night flacon",
           "alt_ar": "راتنج اللبان إلى جانب قنينة Onyx Night",
           "isPrimary": false,
@@ -395,14 +416,14 @@
           "sortOrder": 0
         },
         {
-          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-ivory_temple.png",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-ivory_temple.jpg",
           "alt": "Ivory Temple gilded shoulder throwing a long morning shadow",
           "alt_ar": "كتف Ivory Temple المذهَّب يلقي ظلًّا صباحيًّا طويلًا",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
-          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-ivory_temple.png",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-ivory_temple.jpg",
           "alt": "Ivory Temple photographed against a warm ochre backdrop",
           "alt_ar": "Ivory Temple مصوَّرًا أمام خلفية مغرة دافئة",
           "isPrimary": false,
@@ -466,21 +487,21 @@
       "collectionSlug": "signature",
       "images": [
         {
-          "url": "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=600&h=800&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-Silk_Serenity.jpg",
           "alt": "The Silk Serenity flacon against pale water-lit stone",
           "alt_ar": "قنينة Silk Serenity أمام حجر شاحب يضيئه الماء",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
-          "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-Silk_Serenity.jpg",
           "alt": "Silk Serenity photographed beside still water",
           "alt_ar": "Silk Serenity مصوَّرًا إلى جانب ماء ساكن",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
-          "url": "https://images.unsplash.com/photo-1760860992203-85ca32536788?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-Silk_Serenity.jpg",
           "alt": "Silk Serenity in flat morning light on a white surface",
           "alt_ar": "Silk Serenity في ضوء صباحي مستوٍ على سطح أبيض",
           "isPrimary": false,
@@ -544,21 +565,21 @@
       "collectionSlug": "signature",
       "images": [
         {
-          "url": "https://images.unsplash.com/photo-1608721279136-cd41b752fa41?w=600&h=800&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-desert_lily.jpg",
           "alt": "The Desert Lily flacon beside cut rose heads",
           "alt_ar": "قنينة Desert Lily إلى جانب رؤوس ورد مقطوفة",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
-          "url": "https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-desert_lily.jpg",
           "alt": "Desert Lily lit warmly against a dark ground",
           "alt_ar": "Desert Lily مضاءً بدفء أمام أرضية داكنة",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
-          "url": "https://images.unsplash.com/photo-1747696766706-5485b39bf358?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-desert_lily.jpg",
           "alt": "Desert Lily photographed on sun-warmed sand",
           "alt_ar": "Desert Lily مصوَّرًا على رمل دفّأته الشمس",
           "isPrimary": false,
@@ -622,21 +643,21 @@
       "collectionSlug": "signature",
       "images": [
         {
-          "url": "https://images.unsplash.com/photo-1640975972263-1f73398e943b?w=600&h=800&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-crimson_sun.jpg",
           "alt": "The Crimson Sun flacon burning with reflected red light",
           "alt_ar": "قنينة Crimson Sun تتّقد بضوء أحمر منعكس",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
-          "url": "https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-crimson_sun.jpg",
           "alt": "Crimson Sun against a gilded surface at last light",
           "alt_ar": "Crimson Sun أمام سطح مذهَّب عند آخر الضوء",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
-          "url": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifstyle-crimson_sun.jpg",
           "alt": "Crimson Sun throwing warm colour across dark stone",
           "alt_ar": "Crimson Sun يبعثر لونًا دافئًا على حجر داكن",
           "isPrimary": false,
@@ -702,21 +723,21 @@
       "collectionSlug": "noir",
       "images": [
         {
-          "url": "https://images.unsplash.com/photo-1643797517714-a273548abc3c?w=600&h=800&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-kyphi.png",
           "alt": "The Kyphi flacon beside burning resin",
           "alt_ar": "قنينة Kyphi إلى جانب راتنج مشتعل",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
-          "url": "https://images.unsplash.com/photo-1533603208986-24fd819e718a?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-kyphi.png",
           "alt": "Kyphi almost invisible against an unlit wall",
           "alt_ar": "Kyphi يكاد يكون غير مرئي أمام جدار غير مضاء",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
-          "url": "https://images.unsplash.com/photo-1738664926458-d8ca7f56549f?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-kyphi.png",
           "alt": "Kyphi lit by a single low flame",
           "alt_ar": "Kyphi تضيئه شعلة واحدة منخفضة",
           "isPrimary": false,
@@ -782,21 +803,21 @@
       "collectionSlug": "noir",
       "images": [
         {
-          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-noir_1.png",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-mendesian.png",
           "alt": "The Mendesian flacon standing in near darkness",
           "alt_ar": "قنينة Mendesian واقفة في عتمة شبه كاملة",
           "isPrimary": true,
           "sortOrder": 0
         },
         {
-          "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-mendesian.png",
           "alt": "Mendesian photographed beside still river water",
           "alt_ar": "Mendesian مصوَّرًا إلى جانب ماء نهر ساكن",
           "isPrimary": false,
           "sortOrder": 1
         },
         {
-          "url": "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=900&h=1100&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-mendesian.jpg",
           "alt": "Mendesian resting on wet stone under flat daylight",
           "alt_ar": "Mendesian مستقرًّا على حجر مبلَّل تحت ضوء نهار مستوٍ",
           "isPrimary": false,

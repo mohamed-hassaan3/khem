@@ -1,18 +1,25 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { interpolate } from "@/src/lib/i18n/interpolate";
-import { useDictionary } from "@/src/providers/i18n-provider";
+import { useDictionary, useDir } from "@/src/providers/i18n-provider";
 import type { ProductImage } from "@/src/types/catalog";
 
 /**
  * Product gallery — the only state on this page's left column.
  *
- * Frames are stacked and cross-faded on `opacity` alone: swapping `src` on a
- * single element would flash, and animating anything but opacity would shift
- * the layout of a column that is sticky for the whole scroll.
+ * A native scroll-snap track rather than a cross-fade or a carousel library:
+ * the browser gives swipe, momentum, trackpad and shift+wheel for free, and the
+ * strip stays usable before hydration. Scroll position is the source of truth —
+ * `activeIndex` is *derived* from an IntersectionObserver, so a manual swipe
+ * and a thumbnail click both end in the same state and never fight each other.
+ *
+ * Nothing here does arithmetic on `scrollLeft`: its sign and origin flip under
+ * RTL. Scrolling goes through `scrollIntoView` on the slide itself, which is
+ * direction-agnostic.
  */
 
 export interface ProductGalleryProps {
@@ -23,33 +30,144 @@ export interface ProductGalleryProps {
 
 const SIZES = "(min-width: 1024px) 50vw, 100vw";
 
+/** Enough of a slide must be on screen before it counts as "the" slide. */
+const VISIBLE_THRESHOLD = 0.6;
+
+const ARROW_CLASS =
+  "absolute top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center border border-border-gold bg-background/60 text-ivory backdrop-blur-md transition-all duration-500 ease-out hover:border-gold hover:text-gold hover:shadow-[0_0_20px_rgba(200,169,106,0.25)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:opacity-40 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100";
+
 export default function ProductGallery({
   images,
   productName,
 }: ProductGalleryProps) {
   const dict = useDictionary();
+  const dir = useDir();
+  const trackRef = useRef<HTMLUListElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const hasMultiple = images.length > 1;
+
+  /**
+   * Report whichever slide is actually on screen. Registered once per gallery;
+   * `images.length` is the only thing that can add or remove observed nodes.
+   */
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || !hasMultiple) return;
+
+    const slides = Array.from(track.children);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const index = slides.indexOf(entry.target);
+          if (index >= 0) setActiveIndex(index);
+        }
+      },
+      { root: track, threshold: VISIBLE_THRESHOLD },
+    );
+
+    for (const slide of slides) observer.observe(slide);
+
+    return () => observer.disconnect();
+  }, [hasMultiple, images.length]);
+
+  const goTo = useCallback(
+    (index: number) => {
+      const track = trackRef.current;
+      if (!track) return;
+
+      const clamped = Math.min(Math.max(index, 0), images.length - 1);
+      const slide = track.children.item(clamped);
+      if (!slide) return;
+
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      slide.scrollIntoView({
+        behavior: reduced ? "auto" : "smooth",
+        inline: "start",
+        block: "nearest",
+      });
+    },
+    [images.length],
+  );
+
+  /** `←`/`→` are physical keys; "next" is whichever way the text runs. */
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+
+    const forward =
+      dir === "rtl" ? event.key === "ArrowLeft" : event.key === "ArrowRight";
+
+    event.preventDefault();
+    goTo(activeIndex + (forward ? 1 : -1));
+  };
+
+  const PreviousIcon = dir === "rtl" ? ChevronRight : ChevronLeft;
+  const NextIcon = dir === "rtl" ? ChevronLeft : ChevronRight;
 
   return (
     <div className="flex w-full flex-col overflow-hidden bg-card lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)]">
-      <div className="relative aspect-4/5 w-full overflow-hidden lg:aspect-auto lg:flex-1">
-        {images.map((image, index) => (
-          <Image
-            key={image.url}
-            src={image.url}
-            alt={image.alt || productName}
-            fill
-            priority={index === 0}
-            quality={85}
-            sizes={SIZES}
-            className={`object-cover brightness-90 transition-opacity duration-700 ease-out ${
-              index === activeIndex ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        ))}
+      <div className="group relative aspect-4/5 w-full overflow-hidden lg:aspect-auto lg:flex-1">
+        <ul
+          ref={trackRef}
+          // Focusable so the arrow keys have somewhere to land; a plain list
+          // would leave keyboard users with the thumbnails only.
+          tabIndex={hasMultiple ? 0 : undefined}
+          onKeyDown={hasMultiple ? handleKeyDown : undefined}
+          aria-roledescription={hasMultiple ? "carousel" : undefined}
+          aria-label={interpolate(dict.product.gallery.label, {
+            name: productName,
+          })}
+          className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain outline-none [scrollbar-width:none] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gold motion-safe:scroll-smooth [&::-webkit-scrollbar]:hidden"
+        >
+          {images.map((image, index) => (
+            <li
+              key={image.url}
+              className="relative h-full w-full flex-none snap-start"
+            >
+              <Image
+                src={image.url}
+                alt={image.alt || productName}
+                fill
+                priority={index === 0}
+                quality={85}
+                sizes={SIZES}
+                className="object-cover brightness-90"
+              />
+            </li>
+          ))}
+        </ul>
+
+        {hasMultiple ? (
+          <>
+            <button
+              type="button"
+              onClick={() => goTo(activeIndex - 1)}
+              disabled={activeIndex === 0}
+              aria-label={dict.product.gallery.previous}
+              className={`${ARROW_CLASS} start-4`}
+            >
+              <PreviousIcon className="size-4" strokeWidth={1.25} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => goTo(activeIndex + 1)}
+              disabled={activeIndex === images.length - 1}
+              aria-label={dict.product.gallery.next}
+              className={`${ARROW_CLASS} end-4`}
+            >
+              <NextIcon className="size-4" strokeWidth={1.25} />
+            </button>
+          </>
+        ) : null}
       </div>
 
-      {images.length > 1 ? (
+      {hasMultiple ? (
         <div className="flex gap-px bg-background p-px">
           {images.map((image, index) => (
             <button
@@ -60,7 +178,7 @@ export default function ProductGallery({
                 index: index + 1,
                 total: images.length,
               })}
-              onClick={() => setActiveIndex(index)}
+              onClick={() => goTo(index)}
               className={`relative h-20 flex-1 overflow-hidden outline-2 -outline-offset-2 transition-[outline-color] duration-300 ease-out focus-visible:outline-gold ${
                 index === activeIndex ? "outline-gold" : "outline-transparent"
               }`}

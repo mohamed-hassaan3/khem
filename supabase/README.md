@@ -9,7 +9,8 @@ no component or page knows the difference.
 
 ```
 sql/     schema, applied in filename order by `npm run db:migrate`
-seed/    the frozen record export, loaded by `npm run db:seed`
+seed/    a generated export of the database — written by `npm run db:dump`,
+         loaded back by `npm run db:seed`
 ```
 
 | File | What it creates |
@@ -26,12 +27,52 @@ seed/    the frozen record export, loaded by `npm run db:seed`
 ```bash
 npm run db:migrate    # apply sql/*.sql — idempotent, safe to re-run
 npm run db:seed       # load seed/*.json — upserts, never deletes
+npm run db:dump       # write seed/*.json back out of the database
 npm run db:verify     # counts, integrity, and the security assertions
 npm run embed         # fill Product.embedding through the AI Gateway
 npm run embed -- --check   # non-zero exit if any product lacks a vector
 ```
 
 A fresh project is `db:migrate`, `db:seed`, `embed`, in that order.
+
+## Where content is edited
+
+**In Supabase — never in `seed/`.** The table editor and the admin dashboard
+are the only places content changes. The JSON under `seed/` is a
+*generated export*, kept in git so a fresh project (a preview branch, a restored
+backup, a new environment) can be rebuilt from the repository rather than by
+hand. It is not a second, editable copy of the catalog.
+
+That makes the loop:
+
+```bash
+# 1. edit in the Supabase table editor or /admin
+npm run db:dump              # 2. pull the change into seed/*.json
+git diff supabase/seed/       # 3. read it — this is your changelog
+git commit                    # 4. keep it
+```
+
+`db:dump` is read-only, so it is safe against production, and it refuses to
+write an empty catalog — pointing it at the wrong project fails loudly instead
+of replacing the export with `[]`. Dumping an unedited database produces no
+diff at all, so any diff is a real change.
+
+The direction that has teeth is the other one: `db:seed` writes the file *into*
+the database. Run it after a dump, not before, or you will push a stale export
+over live edits. It only ever upserts — a row deleted in Supabase is not deleted
+by seeding — so deletions stay deliberate.
+
+`db:dump` covers all three files — the catalog, the editorial content, and the
+directory — including every `_ar` translation and every `isPublished` flag. An
+article unpublished in the dashboard stays unpublished through a seed; a
+translation written on the platform survives one. Nothing here is edited in the
+repository any more.
+
+The only field the database does not own is *which* enquiry subjects exist:
+`src/schemas/contact.ts` validates a submitted subject against the
+`ENQUIRY_SUBJECTS` constant, so a subject added in Supabase would be rejected by
+the form it appeared on. Add one in the constant. Its Arabic label is ordinary
+content and round-trips like everything else.
 
 ### Connecting
 

@@ -65,6 +65,11 @@ export default function CollectionForm({
   const [description, setDescription] = useState(collection?.description ?? "");
   const [bannerUrl, setBannerUrl] = useState(collection?.bannerUrl ?? "");
   const [bannerAlt, setBannerAlt] = useState(collection?.bannerAlt ?? "");
+  // Empty means "reuse the banner". `AdminCollection` deliberately keeps the
+  // stored null rather than the fallback, so this field shows what is actually
+  // set — see `src/schemas/db/admin.ts`.
+  const [cardUrl, setCardUrl] = useState(collection?.cardUrl ?? "");
+  const [cardAlt, setCardAlt] = useState(collection?.cardAlt ?? "");
   const [kind, setKind] = useState<string>(collection?.kind ?? "FRAGRANCE");
   const [isFeatured, setIsFeatured] = useState(collection?.isFeatured ?? false);
   const [sortOrder, setSortOrder] = useState(String(collection?.sortOrder ?? 0));
@@ -84,6 +89,8 @@ export default function CollectionForm({
         description,
         bannerUrl,
         bannerAlt,
+        cardUrl,
+        cardAlt,
         kind,
         isFeatured,
         sortOrder,
@@ -161,28 +168,72 @@ export default function CollectionForm({
         onChange={setDescription}
       />
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <AdminInput
-          id="bannerUrl"
-          label="Banner URL"
-          required
-          type="url"
-          value={bannerUrl}
-          error={fieldErrors.bannerUrl}
-          hint="Must be an https image on an allowed host (Unsplash or Cloudinary)."
-          onChange={setBannerUrl}
-        />
+      {/*
+        Two images, because they are cropped for two different frames: the
+        banner is the landscape hero on the collection page, the card is the
+        portrait tile in the home page grid. Grouped under headings rather than
+        left as four adjacent URL fields, which is where the wrong file gets
+        pasted into the wrong box.
+      */}
+      <fieldset className="space-y-6 border-t border-border pt-8">
+        <legend className="sr-only">Banner image</legend>
 
-        <AdminInput
-          id="bannerAlt"
-          label="Banner alt text"
-          required
-          value={bannerAlt}
-          error={fieldErrors.bannerAlt}
-          hint="Read aloud by screen readers. Describe the photograph, not the brand."
-          onChange={setBannerAlt}
-        />
-      </div>
+        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+          Banner image
+        </p>
+
+        <div className="grid gap-6 sm:grid-cols-2">
+          <AdminInput
+            id="bannerUrl"
+            label="Banner URL"
+            required
+            type="url"
+            value={bannerUrl}
+            error={fieldErrors.bannerUrl}
+            hint="Landscape, around 1800×900. The hero on the collection page. Must be an https image on an allowed host (Unsplash or Cloudinary)."
+            onChange={setBannerUrl}
+          />
+
+          <AdminInput
+            id="bannerAlt"
+            label="Banner alt text"
+            required
+            value={bannerAlt}
+            error={fieldErrors.bannerAlt}
+            hint="Read aloud by screen readers. Describe the photograph, not the brand."
+            onChange={setBannerAlt}
+          />
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-6 border-t border-border pt-8">
+        <legend className="sr-only">Card image</legend>
+
+        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+          Card image
+        </p>
+
+        <div className="grid gap-6 sm:grid-cols-2">
+          <AdminInput
+            id="cardUrl"
+            label="Card URL"
+            type="url"
+            value={cardUrl}
+            error={fieldErrors.cardUrl}
+            hint="Portrait 3:4, around 900×1200. The tile in the home page grid. Leave blank to reuse the banner."
+            onChange={setCardUrl}
+          />
+
+          <AdminInput
+            id="cardAlt"
+            label="Card alt text"
+            value={cardAlt}
+            error={fieldErrors.cardAlt}
+            hint="Required once a card image is set — it is a different photograph, so it needs its own description."
+            onChange={setCardAlt}
+          />
+        </div>
+      </fieldset>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <AdminSelect
