@@ -13,7 +13,10 @@ import {
 import AdminSearch from "@/src/components/admin/AdminSearch";
 import { matchesTerm, searchTerm } from "@/src/lib/admin/filter";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
-import { listAdminCollections } from "@/src/services/admin/catalog";
+import {
+  listAdminCollections,
+  listAdminMerchPages,
+} from "@/src/services/admin/catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -28,17 +31,32 @@ export default async function AdminCollectionsPage({
   const activeLocale = isLocale(locale) ? locale : "en";
 
   const term = searchTerm(query);
-  const all = await listAdminCollections();
+  const [all, allMerchPages] = await Promise.all([
+    listAdminCollections(),
+    listAdminMerchPages(),
+  ]);
 
   const collections = all.filter((collection) =>
     matchesTerm(term, [collection.name, collection.slug, collection.kind]),
   );
 
+  /*
+   * The merchandising pages sit in the same table because that is where an
+   * editor looks for "the pages under /collections". They are not collections:
+   * no product belongs to one, so they have no kind, no featured flag and no
+   * running order — hence the em dashes rather than invented values.
+   */
+  const merchPages = allMerchPages.filter((page) =>
+    matchesTerm(term, [page.name, page.slug, "MERCHANDISING"]),
+  );
+
+  const rows = collections.length + merchPages.length;
+
   return (
     <>
       <AdminPageHeader
         title="Collections"
-        description="A collection decides where its products are sold: fragrances get their own detail pages, everything else sells from a category grid."
+        description="A collection decides where its products are sold: fragrances get their own detail pages, everything else sells from a category grid. The last two are merchandising pages — cuts across the whole catalogue rather than somewhere a product belongs."
         action={
           <AdminLinkButton href={localizePath(activeLocale, "/admin/collections/new")}>
             <Plus size={13} strokeWidth={1.25} />
@@ -49,7 +67,7 @@ export default async function AdminCollectionsPage({
 
       <AdminSearch placeholder="Search by name, slug or kind" />
 
-      {collections.length === 0 ? (
+      {rows === 0 ? (
         <AdminEmpty
           message={
             term.length > 0
@@ -94,6 +112,24 @@ export default async function AdminCollectionsPage({
                     activeLocale,
                     `/admin/collections/${collection.slug}`,
                   )}
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                >
+                  Edit
+                </Link>
+              </AdminCell>
+            </AdminRow>
+          ))}
+
+          {merchPages.map((page) => (
+            <AdminRow key={page.slug}>
+              <AdminCell>{page.name}</AdminCell>
+              <AdminCell muted>{page.slug}</AdminCell>
+              <AdminCell muted>MERCHANDISING</AdminCell>
+              <AdminCell muted>—</AdminCell>
+              <AdminCell muted>—</AdminCell>
+              <AdminCell>
+                <Link
+                  href={localizePath(activeLocale, `/admin/collections/${page.slug}`)}
                   className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
                 >
                   Edit

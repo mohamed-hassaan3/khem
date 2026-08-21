@@ -35,6 +35,7 @@
 import { requireAdmin } from "@/src/lib/admin/auth";
 import {
   revalidateCollection,
+  revalidateMerchPage,
   revalidateProduct,
 } from "@/src/lib/admin/revalidate";
 import { embedDocument, toVectorLiteral } from "@/src/lib/search/embed";
@@ -45,6 +46,7 @@ import {
   saveProductImagesSchema,
   setProductArchivedSchema,
   updateCollectionSchema,
+  updateMerchPageSchema,
   updateProductSchema,
   type AdminActionResult,
 } from "@/src/schemas/admin";
@@ -264,6 +266,70 @@ export async function deleteCollection(
   console.log(`[admin] collection deleted by ${actor.email} → ${slug}`);
 
   return { ok: true, slug, message: `Collection "${collection.name}" deleted.` };
+}
+
+// ── Merchandising pages ───────────────────────────────────────
+
+/**
+ * Edit the copy and the hero of `/collections/best-sellers` or
+ * `/collections/limited-edition`.
+ *
+ * Update only. These two pages exist because `MERCH_PAGE_FACETS` routes them,
+ * so there is nothing to create and nothing that may be deleted — a missing row
+ * would leave the route rendering its dictionary fallback, and a third row
+ * would be a page with no URL. The schema and a check constraint both say so.
+ *
+ * What is *in* the page is not edited here: membership follows each product's
+ * own Bestseller toggle and Limited edition tag, which is why the form says so
+ * and why this action revalidates one path rather than a catalogue's worth.
+ */
+export async function updateMerchPage(
+  input: unknown,
+): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = updateMerchPageSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Some fields need attention.",
+      fieldErrors: fieldErrorsFrom(parsed.error),
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  // The slug identifies the row and is never a value: it is the page's URL.
+  const { slug, ...rest } = parsed.data;
+
+  const { data, error } = await supabase
+    .from("MerchPage")
+    .update({ ...rest, updatedAt: new Date().toISOString() })
+    .eq("slug", slug)
+    .select("slug")
+    .maybeSingle();
+
+  if (error) {
+    console.error(`[admin] updateMerchPage rejected (${actor.email}): ${error.message}`);
+    return postgresFailure(error as PostgresErrorLike, "merchandising page");
+  }
+
+  if (!data) {
+    // The row was never seeded, or somebody removed it. The page still renders
+    // from the dictionary, so this is a recoverable state rather than a 404 —
+    // and saying so is more useful than "saved" over a write that hit nothing.
+    return {
+      ok: false,
+      message:
+        "There is no stored row for this page yet, so nothing was saved. Run the migrations, then try again.",
+    };
+  }
+
+  revalidateMerchPage(slug);
+  console.log(`[admin] merchandising page updated by ${actor.email} → ${slug}`);
+
+  return { ok: true, slug, message: `“${parsed.data.name}” saved.` };
 }
 
 // ── Products ──────────────────────────────────────────────────

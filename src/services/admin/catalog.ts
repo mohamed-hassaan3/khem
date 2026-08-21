@@ -27,15 +27,19 @@
 
 import "server-only";
 
+import { MERCH_PAGE_FACETS, type MerchPageFacet } from "@/src/lib/facets";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
   ADMIN_COLLECTION_COLUMNS,
+  ADMIN_MERCH_PAGE_COLUMNS,
   ADMIN_PRODUCT_COLUMNS,
   ADMIN_PRODUCT_WITH_IMAGES_COLUMNS,
   parseList,
   toAdminCollection,
+  toAdminMerchPage,
   toAdminProduct,
   type AdminCollection,
+  type AdminMerchPage,
   type AdminProduct,
 } from "@/src/schemas/db/admin";
 
@@ -107,6 +111,94 @@ export async function countProductsInCollection(slug: string): Promise<number> {
   }
 
   return count ?? 0;
+}
+
+/**
+ * The two merchandising pages.
+ *
+ * Ordered by {@link MERCH_PAGE_FACETS} rather than by a `sortOrder` column: the
+ * table has no such column because the running order of two fixed pages is not
+ * a merchandising decision, and the list they appear in is the same list that
+ * routes them.
+ */
+export async function listAdminMerchPages(): Promise<AdminMerchPage[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("MerchPage")
+    .select(ADMIN_MERCH_PAGE_COLUMNS);
+
+  if (error) {
+    logFailure("listAdminMerchPages", error.message);
+    return [];
+  }
+
+  const pages = parseList(data, toAdminMerchPage);
+
+  return [...pages].sort(
+    (a, b) => MERCH_PAGE_FACETS.indexOf(a.slug) - MERCH_PAGE_FACETS.indexOf(b.slug),
+  );
+}
+
+export async function getAdminMerchPage(
+  slug: string,
+): Promise<AdminMerchPage | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("MerchPage")
+    .select(ADMIN_MERCH_PAGE_COLUMNS)
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getAdminMerchPage", error.message);
+    return null;
+  }
+
+  return toAdminMerchPage(data);
+}
+
+/**
+ * How many live products each merchandising cut currently holds.
+ *
+ * The same rule `productFacets()` applies on the storefront, expressed as two
+ * count queries rather than by pulling the catalogue into memory: the dashboard
+ * only ever prints the number. Archived and soft-deleted rows are excluded
+ * because the storefront pages exclude them — a tile that disagreed with the
+ * page it links to would be worse than no tile.
+ */
+export async function countMerchPageProducts(): Promise<
+  Record<MerchPageFacet, number>
+> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return { "best-sellers": 0, "limited-edition": 0 };
+
+  const live = () =>
+    supabase
+      .from("Product")
+      .select("slug", { count: "exact", head: true })
+      .eq("isArchived", false)
+      .is("deletedAt", null);
+
+  const [bestSellers, limited] = await Promise.all([
+    live().eq("isBestseller", true),
+    live().contains("tags", ["LIMITED_EDITION"]),
+  ]);
+
+  if (bestSellers.error) {
+    logFailure("countMerchPageProducts(best-sellers)", bestSellers.error.message);
+  }
+  if (limited.error) {
+    logFailure("countMerchPageProducts(limited-edition)", limited.error.message);
+  }
+
+  return {
+    "best-sellers": bestSellers.count ?? 0,
+    "limited-edition": limited.count ?? 0,
+  };
 }
 
 /** The full product list, archived rows included, newest edits first. */

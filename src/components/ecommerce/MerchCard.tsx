@@ -4,6 +4,8 @@ import { Check, Heart } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import ProductFlag from "@/src/components/ecommerce/ProductFlag";
+import { productFlag } from "@/src/lib/facets";
 import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
@@ -72,6 +74,9 @@ export default function MerchCard({
   const wishlisted = wishlist.isHydrated && wishlist.has(product.id);
   const isSoldOut = product.inventory === 0;
 
+  // Same order as every other card: the stored `badge` overrides the flag.
+  const flag = productFlag(product);
+
   const handleAddToCart = () => {
     addLine(product.id, 1, product.inventory);
     if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
@@ -81,6 +86,12 @@ export default function MerchCard({
 
   return (
     <article className="img-zoom relative flex flex-col bg-surface">
+      {product.badge ? (
+        <ProductFlag label={product.badge} locale={locale} island />
+      ) : flag ? (
+        <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
+      ) : null}
+
       {/* Logical inset, so the control mirrors to the top-left in Arabic. */}
       <button
         type="button"

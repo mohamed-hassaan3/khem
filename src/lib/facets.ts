@@ -131,3 +131,22 @@ export type MerchPageFacet = (typeof MERCH_PAGE_FACETS)[number];
 export function parseMerchPageFacet(slug: string): MerchPageFacet | null {
   return MERCH_PAGE_FACETS.find((facet) => facet === slug) ?? null;
 }
+
+/**
+ * The one merchandising flag a card prints, or `null`.
+ *
+ * A limited run outranks volume: "Limited Edition" is a fact about scarcity
+ * that changes whether somebody buys today, and a best seller that is also a
+ * limited edition is far better described by the rarer of the two. Only one is
+ * ever shown — two pills stacked in one corner of a card is not a design, and
+ * a product's free-text `badge` outranks both at the call site, because a
+ * merchandiser who typed "Most Popular" meant it to be the badge.
+ *
+ * Deliberately narrower than {@link productFacets}: `new-arrivals` has its own
+ * showroom at `/new-arrival` and is announced there rather than on a pill.
+ */
+export function productFlag(product: ProductCardData): MerchPageFacet | null {
+  if (product.tags.includes("LIMITED_EDITION")) return "limited-edition";
+  if (product.isBestseller) return "best-sellers";
+  return null;
+}

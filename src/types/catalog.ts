@@ -85,6 +85,34 @@ export interface Collection {
   kind: CollectionKind;
 }
 
+/**
+ * The presentation of a merchandising page — `/collections/best-sellers` and
+ * `/collections/limited-edition`.
+ *
+ * Mirrors `"MerchPage"` (`supabase/sql/0012_merch_page.sql`), which stores how
+ * such a page introduces itself and nothing about what is *in* it: membership
+ * is derived by `productFacets()` from a product's own flags, because a product
+ * already points at exactly one collection and these cuts run across all of
+ * them.
+ *
+ * `slug` is typed as a plain string here even though only two values exist.
+ * The narrow union lives in `src/lib/facets.ts`, and importing it back into
+ * this module would close a cycle — `facets.ts` already reads
+ * {@link ProductCardData} from here — which is not a style objection: an
+ * erased-looking type edge between two modules that also exchange *values* is
+ * exactly how `MERCH_PAGE_FACETS` ends up undefined inside a Zod schema at
+ * module-evaluation time. `toMerchPage()` narrows the value at the boundary,
+ * which is where the guarantee belongs anyway.
+ */
+export interface MerchPage {
+  slug: string;
+  name: string;
+  description: string;
+  /** Landscape. The hero on the merchandising page. */
+  bannerUrl: string;
+  bannerAlt: string;
+}
+
 /** Mirrors the `Product` model. */
 export interface Product {
   id: string;

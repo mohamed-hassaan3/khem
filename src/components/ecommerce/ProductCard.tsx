@@ -1,7 +1,9 @@
 import Image from "next/image";
 
 import Price from "@/src/components/ecommerce/Price";
+import ProductFlag from "@/src/components/ecommerce/ProductFlag";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
+import { productFlag } from "@/src/lib/facets";
 import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
@@ -57,11 +59,25 @@ export default async function ProductCard({
    */
   const pills = notes.length > 0 ? notes : product.format ? [product.format] : [];
 
+  /*
+   * One badge, resolved in the same order on all three card types: the stored
+   * free-text `badge` is a merchandiser's deliberate override and wins, then
+   * the merchandising flag. `productFlag()` decides between Limited Edition and
+   * Best Seller, so a card never has to.
+   */
+  const flag = productFlag(product);
+
   return (
     <LocaleLink
       href={productHref(product)}
       className="img-zoom group relative block overflow-hidden bg-surface no-underline"
     >
+      {product.badge ? (
+        <ProductFlag label={product.badge} locale={locale} island />
+      ) : flag ? (
+        <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
+      ) : null}
+
       <div className="relative aspect-3/4 overflow-hidden bg-card">
         <Image
           src={product.primaryImage.url}

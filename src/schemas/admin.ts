@@ -26,6 +26,8 @@
 
 import { z } from "zod";
 
+import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
+
 /** Hosts `next/image` is configured for in `next.config.ts`. */
 export const ALLOWED_IMAGE_HOSTS = [
   "images.unsplash.com",
@@ -245,6 +247,41 @@ export const updateCollectionSchema = z
 
 export type CreateCollectionInput = z.input<typeof createCollectionSchema>;
 export type UpdateCollectionInput = z.input<typeof updateCollectionSchema>;
+
+// ── MerchPage ─────────────────────────────────────────────────
+
+/**
+ * Editing one of the two merchandising pages.
+ *
+ * There is no create and no delete schema, and the slug is a `z.enum` rather
+ * than `slugField`: which merchandising pages exist is decided by
+ * {@link MERCH_PAGE_FACETS}, which is what routes them, and the table carries
+ * the same restriction as a check constraint. A payload naming anything else is
+ * refused here before it reaches a query.
+ *
+ * The Arabic columns are absent by design — no dashboard screen writes them.
+ */
+export const updateMerchPageSchema = z.object({
+  slug: z.enum(MERCH_PAGE_FACETS),
+  name: z
+    .string()
+    .trim()
+    .min(2, "This page needs a name.")
+    .max(120, "That name is too long."),
+  description: z
+    .string()
+    .trim()
+    .min(10, "Write at least a sentence of description.")
+    .max(LONG_TEXT_MAX, "That description is too long."),
+  bannerUrl: imageUrlField,
+  bannerAlt: z
+    .string()
+    .trim()
+    .min(3, "Describe the banner for screen readers.")
+    .max(200, "That alt text is too long."),
+});
+
+export type UpdateMerchPageInput = z.input<typeof updateMerchPageSchema>;
 
 // ── Product ───────────────────────────────────────────────────
 

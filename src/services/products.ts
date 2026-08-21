@@ -25,17 +25,25 @@ import "server-only";
 
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
+import type { MerchPageFacet } from "@/src/lib/facets";
 import {
   COLLECTION_COLUMNS,
+  MERCH_PAGE_COLUMNS,
   PRODUCT_CARD_COLUMNS,
   PRODUCT_WITH_IMAGES_COLUMNS,
   parseList,
   toCollection,
+  toMerchPage,
   toProduct,
   toProductCard,
 } from "@/src/schemas/db/catalog";
 import { BOUTIQUE_SETTING_COLUMNS, toBoutiqueSetting } from "@/src/schemas/db/directory";
-import type { Collection, Product, ProductCardData } from "@/src/types/catalog";
+import type {
+  Collection,
+  MerchPage,
+  Product,
+  ProductCardData,
+} from "@/src/types/catalog";
 
 /** One log shape for the whole module: provider message, never row contents. */
 function logFailure(query: string, message: string): void {
@@ -141,6 +149,38 @@ export async function getCollectionBySlug(
   }
 
   return toCollection(data, locale);
+}
+
+/**
+ * The stored presentation of a merchandising page.
+ *
+ * `null` when there is no row, when the row cannot be parsed, or when the read
+ * fails — and the route treats all three the same way, by falling back to the
+ * dictionary copy and the banner constants it used before this table existed.
+ * That is deliberate: the Nav links straight at these pages, so one must never
+ * fail to render because a table is empty.
+ */
+export async function getMerchPage(
+  locale: Locale,
+  facet: MerchPageFacet,
+): Promise<MerchPage | null> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("MerchPage")
+    .select(MERCH_PAGE_COLUMNS)
+    // Parameterised by the client, and already narrowed to the two-member
+    // union by `parseMerchPageFacet()` before it reaches here.
+    .eq("slug", facet)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getMerchPage", error.message);
+    return null;
+  }
+
+  return toMerchPage(data, locale);
 }
 
 /**

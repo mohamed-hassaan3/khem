@@ -18,6 +18,7 @@ import {
   getCatalogProductCards,
   getCollectionBySlug,
   getCollections,
+  getMerchPage,
   getProductCardsByCollection,
 } from "@/src/services/products";
 import type { Collection } from "@/src/types/catalog";
@@ -48,12 +49,14 @@ export async function generateStaticParams() {
 }
 
 /**
- * The hero photographs for the two merchandising pages.
+ * The hero photographs of last resort.
  *
- * They have no `Collection` row and therefore no `bannerUrl` column to read, so
- * the choice lives in code. Both are already loading elsewhere in the app, so
- * `next.config.ts` needs no new remote pattern — and replacing either with real
- * photography is one line here.
+ * `"MerchPage"` (`supabase/sql/0012_merch_page.sql`) is where these now live,
+ * editable from the dashboard, and it is seeded with exactly these two URLs.
+ * They stay here as the floor under {@link getMerchPage}: with no row, an
+ * unparseable row, or the database unreachable, the page renders what it
+ * rendered before the table existed rather than failing. Both hosts are already
+ * in `next.config.ts`.
  */
 const MERCH_PAGE_BANNERS: Record<MerchPageFacet, string> = {
   "best-sellers":
@@ -229,14 +232,20 @@ async function renderMerchPage(locale: Locale, slug: string) {
   const facet = parseMerchPageFacet(slug);
   if (!facet) notFound();
 
-  const [dict, catalog] = await Promise.all([
+  const [dict, catalog, stored] = await Promise.all([
     getDictionary(locale),
     getCatalogProductCards(locale),
+    getMerchPage(locale, facet),
   ]);
 
   const copy = dict.collections.merchPages[facet];
 
-  const header: CollectionHeader = {
+  /*
+   * The stored row wins whole, rather than field by field: a half-database,
+   * half-dictionary header would put an editor's new hero above the old
+   * description and give nobody a way to reason about what they are looking at.
+   */
+  const header: CollectionHeader = stored ?? {
     slug: facet,
     name: copy.name,
     description: copy.description,

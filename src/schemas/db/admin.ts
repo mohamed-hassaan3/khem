@@ -22,6 +22,8 @@
 
 import { z } from "zod";
 
+import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
+
 import { parseList } from "./catalog";
 
 const collectionKindSchema = z.enum([
@@ -72,6 +74,40 @@ export type AdminCollection = z.infer<typeof adminCollectionRowSchema>;
 
 export function toAdminCollection(row: unknown): AdminCollection | null {
   const parsed = adminCollectionRowSchema.safeParse(row);
+  return parsed.success ? parsed.data : null;
+}
+
+// ── MerchPage ─────────────────────────────────────────────────
+
+export const ADMIN_MERCH_PAGE_COLUMNS =
+  "slug, name, description, bannerUrl, bannerAlt, " +
+  "name_ar, description_ar, bannerAlt_ar, updatedAt";
+
+/**
+ * The `_ar` columns are carried but never edited.
+ *
+ * No dashboard screen has ever written Arabic — the translations are seeded and
+ * revised in SQL — so the form edits the English columns only. They are read
+ * here so a page whose translation is present cannot be dropped by the parser,
+ * and so the list can eventually say which pages are translated without another
+ * projection.
+ */
+const adminMerchPageRowSchema = z.object({
+  slug: z.enum(MERCH_PAGE_FACETS),
+  name: z.string(),
+  description: z.string(),
+  bannerUrl: z.string(),
+  bannerAlt: z.string(),
+  name_ar: z.string().nullable().default(null),
+  description_ar: z.string().nullable().default(null),
+  bannerAlt_ar: z.string().nullable().default(null),
+  updatedAt: z.string(),
+});
+
+export type AdminMerchPage = z.infer<typeof adminMerchPageRowSchema>;
+
+export function toAdminMerchPage(row: unknown): AdminMerchPage | null {
+  const parsed = adminMerchPageRowSchema.safeParse(row);
   return parsed.success ? parsed.data : null;
 }
 

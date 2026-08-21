@@ -13,10 +13,12 @@
 
 import { z } from "zod";
 
+import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
 import type { Locale } from "@/src/lib/i18n/config";
 import { resolveList, resolveOptionalText, resolveText } from "@/src/lib/i18n/resolve";
 import type {
   Collection,
+  MerchPage,
   Product,
   ProductCardData,
   ProductImage,
@@ -117,6 +119,46 @@ export function toCollection(row: unknown, locale: Locale): Collection | null {
       cardUrl !== null && cardAlt !== null
         ? resolveText(cardAlt, cardAlt_ar, locale)
         : bannerAltResolved,
+  };
+}
+
+// ── MerchPage ─────────────────────────────────────────────────
+
+/**
+ * `"MerchPage"` — how `/collections/best-sellers` and
+ * `/collections/limited-edition` introduce themselves.
+ *
+ * `slug` is validated against {@link MERCH_PAGE_FACETS} rather than accepted as
+ * a string: the table has a check constraint saying the same thing, and parsing
+ * it here is what lets `MerchPage.slug` be the narrow union the route already
+ * switches on. A row for a page that no longer has a route parses to `null` and
+ * is ignored, which is the correct outcome — the code decides which pages exist.
+ */
+const merchPageRowSchema = z.object({
+  slug: z.enum(MERCH_PAGE_FACETS),
+  name: z.string(),
+  name_ar: z.string().nullable().default(null),
+  description: z.string(),
+  description_ar: z.string().nullable().default(null),
+  bannerUrl: z.string(),
+  bannerAlt: z.string(),
+  bannerAlt_ar: z.string().nullable().default(null),
+});
+
+export const MERCH_PAGE_COLUMNS =
+  "slug, name, name_ar, description, description_ar, bannerUrl, bannerAlt, bannerAlt_ar";
+
+export function toMerchPage(row: unknown, locale: Locale): MerchPage | null {
+  const parsed = merchPageRowSchema.safeParse(row);
+  if (!parsed.success) return null;
+
+  const { name_ar, description_ar, bannerAlt_ar, ...page } = parsed.data;
+
+  return {
+    ...page,
+    name: resolveText(page.name, name_ar, locale),
+    description: resolveText(page.description, description_ar, locale),
+    bannerAlt: resolveText(page.bannerAlt, bannerAlt_ar, locale),
   };
 }
 

@@ -29,7 +29,12 @@ export interface PostgresErrorLike {
 }
 
 /** What kind of row the caller was writing, for the message wording. */
-export type AdminEntity = "collection" | "product" | "article" | "image";
+export type AdminEntity =
+  | "collection"
+  | "merchandising page"
+  | "product"
+  | "article"
+  | "image";
 
 /**
  * Returned when `SUPABASE_SECRET_KEY` is absent.

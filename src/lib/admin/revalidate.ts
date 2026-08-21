@@ -22,6 +22,7 @@ import "server-only";
 
 import { revalidatePath } from "next/cache";
 
+import { MERCH_PAGE_FACETS, type MerchPageFacet } from "@/src/lib/facets";
 import { LOCALES } from "@/src/lib/i18n/config";
 import type { CollectionKind, ProductTag } from "@/src/types/catalog";
 
@@ -76,6 +77,25 @@ function revalidateSitemap(): void {
   revalidatePath("/sitemap.xml");
 }
 
+/**
+ * The two merchandising pages, both locales.
+ *
+ * On **every** product write, not only when a flag was set: the case that needs
+ * it most is a flag being *removed*, where the product must disappear from a
+ * page the write no longer mentions. Revalidating a path that was never
+ * rendered is a no-op, so the unconditional call costs nothing.
+ */
+function revalidateMerchPages(): void {
+  for (const facet of MERCH_PAGE_FACETS) {
+    revalidateAllLocales(`/collections/${facet}`);
+  }
+}
+
+/** After the copy or the hero of one merchandising page is edited. */
+export function revalidateMerchPage(slug: MerchPageFacet): void {
+  revalidateAllLocales(`/collections/${slug}`);
+}
+
 /** After a collection is created, edited or deleted. */
 export function revalidateCollection(slug: string, kind: CollectionKind): void {
   revalidateAllLocales(HOME);
@@ -113,6 +133,8 @@ export function revalidateProduct(input: {
   if (input.tags.includes("NEW_ARRIVAL")) {
     revalidateAllLocales("/new-arrival");
   }
+
+  revalidateMerchPages();
 
   revalidateSitemap();
 }

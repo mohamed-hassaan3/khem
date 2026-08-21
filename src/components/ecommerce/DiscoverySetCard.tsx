@@ -4,6 +4,8 @@ import { Check, Heart } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import ProductFlag from "@/src/components/ecommerce/ProductFlag";
+import { productFlag } from "@/src/lib/facets";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
@@ -58,6 +60,9 @@ export default function DiscoverySetCard({
   const wishlisted = wishlist.isHydrated && wishlist.has(product.id);
   const isSoldOut = product.inventory === 0;
 
+  // Same order as every other card: the stored `badge` overrides the flag.
+  const flag = productFlag(product);
+
   const handleAddToCart = () => {
     addLine(product.id, 1, product.inventory);
     if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
@@ -68,17 +73,16 @@ export default function DiscoverySetCard({
   return (
     <article className="img-zoom relative flex flex-col bg-surface">
       {/*
-       * Badge at the end of the line, wishlist at the start: the two controls
+       * Badge at the start of the line, wishlist at the end: the two controls
        * both want the top corner, and both insets are logical, so they swap
-       * sides together in Arabic and never collide.
+       * sides together in Arabic and never collide. The sides are the way round
+       * they are because `<MerchCard>` had already spent its end corner on the
+       * heart — all three cards now put the badge in the same place.
        */}
       {product.badge ? (
-        <p
-          className="absolute end-5 top-5 z-2 bg-gold px-3 py-1.5 font-heading text-[9px] font-semibold tracking-[0.2em] text-background"
-          {...island}
-        >
-          {product.badge}
-        </p>
+        <ProductFlag label={product.badge} locale={locale} island />
+      ) : flag ? (
+        <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
       ) : null}
 
       <button
@@ -89,7 +93,7 @@ export default function DiscoverySetCard({
           { name: product.name },
         )}
         onClick={() => wishlist.toggle(product.id)}
-        className={`absolute start-5 top-5 z-2 grid size-9 place-items-center border bg-background/70 backdrop-blur-sm transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none ${
+        className={`absolute end-5 top-5 z-2 grid size-9 place-items-center border bg-background/70 backdrop-blur-sm transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none ${
           wishlisted ? "border-gold" : "border-white/10"
         }`}
       >
