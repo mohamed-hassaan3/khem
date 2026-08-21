@@ -23,7 +23,8 @@ import { LOCALES } from "@/src/lib/i18n/config";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { productCommentSchema } from "@/src/schemas/comments";
 import { COMMENT_COLUMNS, toComment } from "@/src/services/comments";
-import { getProductBySlug } from "@/src/services/products";
+import { productHref } from "@/src/lib/routes";
+import { getDetailPageTarget } from "@/src/services/products";
 import type { CommentActionResult } from "@/src/types/comments";
 
 /**
@@ -74,13 +75,17 @@ export async function postProductComment(
   const { slug, body } = parsed.data;
 
   /*
-   * 4. The slug is untrusted input and the table has no foreign key to lean on
-   *    (the catalog is still static). Matching it against the catalog is what
-   *    stops the table filling with rows for products that do not exist.
+   * 4. The slug is untrusted input. The table does have a foreign key onto
+   *    `"Product"(slug)` now, but matching first is what returns a clean field
+   *    error to the visitor instead of a constraint violation.
+   *
+   *    Scoped to products with a *detail page*, not to fragrances: a comment
+   *    can only be read where a thread renders, and since
+   *    `0013_product_image_caption.sql` that includes body care and home
+   *    fragrance. Checking against the fragrance-only query here is what would
+   *    reject every ritual comment with `slugInvalid`.
    */
-  //    Existence check only — nothing here renders product copy, so the
-  //    default locale is the right argument.
-  const product = await getProductBySlug("en", slug);
+  const product = await getDetailPageTarget(slug);
   if (!product) {
     return { ok: false, error: "validation", fieldErrors: { slug: "slugInvalid" } };
   }
@@ -132,9 +137,15 @@ export async function postProductComment(
      * 6. The page is ISR at 300s (see the route's `revalidate`), so without
      *    this the comment would be invisible to everyone else for up to five
      *    minutes. Both locales, because the same thread renders on each.
+     *
+     *    The path comes from `productHref()` rather than a `/perfume/` literal:
+     *    a body mist's thread lives at `/ritual/…`, and revalidating a hard-
+     *    coded perfume path would purge a page that does not exist while
+     *    leaving the one the visitor just wrote on stale.
      */
+    const path = productHref(product);
     for (const locale of LOCALES) {
-      revalidatePath(`/${locale}/perfume/${product.slug}`);
+      revalidatePath(`/${locale}${path}`);
     }
 
     return { ok: true, comment };

@@ -58,6 +58,19 @@ export type ProductTag = "NEW_ARRIVAL" | "LIMITED_EDITION";
 export interface ProductImage {
   url: string;
   alt: string;
+  /**
+   * One line of story, told by this photograph — the triptych on
+   * `/ritual/[slug]` (`supabase/sql/0013_product_image_caption.sql`).
+   *
+   * `null` everywhere else, and the fragrance gallery is deliberately left that
+   * way: a caption belongs *to* a picture, which is why it is a column here
+   * rather than three nullable `story2`/`story3` columns on the product that
+   * nothing would keep in step with the photographs they describe.
+   *
+   * Not the alt text reworded. `alt` narrates the image to somebody who cannot
+   * see it; this is printed beside the image for somebody who can.
+   */
+  caption: string | null;
   isPrimary: boolean;
   sortOrder: number;
 }

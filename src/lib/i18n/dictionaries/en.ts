@@ -11,7 +11,7 @@
  * they stay English for both locales until that content layer moves to a CMS.
  */
 
-import type { Concentration } from "@/src/types/catalog";
+import type { CollectionKind, Concentration } from "@/src/types/catalog";
 
 export const en = {
   common: {
@@ -552,7 +552,7 @@ export const en = {
 
   ingredientsExplorer: {
     filterByFamily: "Filter by Family",
-    priceTier: "Price tier {tier} of {max}",
+    closeDetails: "Close {name} details",
     foundIn: "Found in",
     rareFacts: "Rare Facts",
   },
@@ -731,6 +731,30 @@ export const en = {
     filterLabel: "Filter by type",
     filterAll: "All",
     empty: "New home fragrances are being prepared. Please return shortly.",
+  },
+
+  /**
+   * `/ritual/[slug]` — the body-care and home-fragrance detail page.
+   *
+   * One section for two collection kinds, because they are one page shape. Only
+   * the eyebrow differs, and it is keyed by `CollectionKind` so a renamed member
+   * of that union is a compile error here rather than a blank line above a
+   * product name.
+   */
+  ritual: {
+    meta: {
+      title: "The Ritual",
+      description:
+        "Body care and home fragrance from KHEM — each object presented with the materials it is made from and the story behind it.",
+      ogTitle: "The Ritual | KHEM",
+      ogDescription:
+        "Three photographs and a short story for every mist and every room spray the house makes.",
+    },
+    /* Only `BODY` and `HOME` reach this page; the other kinds have no entry. */
+    eyebrow: {
+      BODY: "The Ritual",
+      HOME: "Scent Your Sanctuary",
+    } satisfies Record<Extract<CollectionKind, "BODY" | "HOME">, string>,
   },
 
   newArrival: {

@@ -181,6 +181,8 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
         url: image.url,
         alt: image.alt,
         alt_ar: image.alt_ar,
+        caption: image.caption,
+        caption_ar: image.caption_ar,
         isPrimary: image.isPrimary,
         sortOrder: image.sortOrder,
       })),

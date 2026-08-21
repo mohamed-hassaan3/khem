@@ -26,6 +26,7 @@ import "server-only";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import type { MerchPageFacet } from "@/src/lib/facets";
+import type { LinkableProduct } from "@/src/lib/routes";
 import {
   COLLECTION_COLUMNS,
   MERCH_PAGE_COLUMNS,
@@ -33,6 +34,7 @@ import {
   PRODUCT_WITH_IMAGES_COLUMNS,
   parseList,
   toCollection,
+  toDetailPageTarget,
   toMerchPage,
   toProduct,
   toProductCard,
@@ -40,6 +42,7 @@ import {
 import { BOUTIQUE_SETTING_COLUMNS, toBoutiqueSetting } from "@/src/schemas/db/directory";
 import type {
   Collection,
+  CollectionKind,
   MerchPage,
   Product,
   ProductCardData,
@@ -49,6 +52,49 @@ import type {
 function logFailure(query: string, message: string): void {
   console.error(`[catalog] ${query} failed: ${message}`);
 }
+
+/**
+ * The collection kinds served by `/ritual/[slug]`.
+ *
+ * Body care and home fragrance are one page shape — three photographs, three
+ * captions, a story, a buy block — so they share one route, and the kind only
+ * decides which eyebrow it opens with.
+ *
+ * Typed as `CollectionKind[]` rather than left to inference so a renamed member
+ * of the union is a compile error here, in the file that queries on it.
+ */
+const RITUAL_KINDS: readonly CollectionKind[] = ["BODY", "HOME"];
+
+/**
+ * Every kind with a detail page of its own — the fragrances plus the two above.
+ *
+ * The query-side statement of `hasDetailPage()` in `src/lib/routes.ts`, and the
+ * two must agree: this is what decides whether a slug can be commented on and
+ * what a related rail is allowed to link to. The sets are absent from both,
+ * because they sell from a category grid.
+ */
+const DETAIL_PAGE_KINDS: readonly CollectionKind[] = [
+  "FRAGRANCE",
+  ...RITUAL_KINDS,
+];
+
+/**
+ * What a ritual page's related rail may draw from.
+ *
+ * Deliberately identical to {@link DETAIL_PAGE_KINDS} rather than an alias of
+ * it: a rail may only ever offer pages that exist, so if a sixth kind gains a
+ * detail page these should move together — but they answer different questions,
+ * and collapsing them would hide the day one needs to change without the other.
+ *
+ * A body mist's neighbours are its own room-spray twin, the other mists, and
+ * the eau de parfum it was drawn from. `related_products()` breaks ties toward
+ * the same kind first, so the rail opens on the shelf the visitor is standing
+ * at before it reaches across to the perfumes.
+ */
+export const RITUAL_RELATED_KINDS: readonly CollectionKind[] = [
+  "FRAGRANCE",
+  ...RITUAL_KINDS,
+];
 
 /**
  * Collections shown on the home page.
@@ -352,6 +398,90 @@ export async function getProductBySlug(
 }
 
 /**
+ * A single **ritual** product by slug — the body-care and home-fragrance detail
+ * page (`/ritual/[slug]`). Returns `null` when absent so the route can call
+ * `notFound()` rather than throwing (AGENTS.md §1.7).
+ *
+ * A separate function rather than a widened {@link getProductBySlug}, and the
+ * `in` filter is the reason: each detail page is scoped to the kinds it can
+ * actually render. A fragrance under `/ritual/…` would print a triptych with no
+ * captions and no pyramid at all; a body mist under `/perfume/…` would print an
+ * empty pyramid. Both are 404s, and one URL space per page shape is what keeps
+ * them that way.
+ *
+ * Discovery and gift sets are deliberately absent: they sell a boxed
+ * composition from `<DiscoverySetCard>` on their category page and have no
+ * detail page — `productHref()` still routes them there.
+ */
+export async function getRitualProductBySlug(
+  locale: Locale,
+  slug: string,
+): Promise<Product | null> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("Product")
+    .select(`${PRODUCT_WITH_IMAGES_COLUMNS}, collection:Collection!inner(kind)`)
+    .eq("slug", slug)
+    .in("collection.kind", RITUAL_KINDS)
+    .eq("isArchived", false)
+    .is("deletedAt", null)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getRitualProductBySlug", error.message);
+    return null;
+  }
+
+  return toProduct(data, locale);
+}
+
+/**
+ * Where a product's detail page is, by slug — or `null` when it has none.
+ *
+ * The lookup a *page-agnostic* caller needs, and `actions/comments.ts` is the
+ * one that exists. It is not {@link getProductBySlug}, which is
+ * fragrance-scoped by design: validating a comment through that rejected every
+ * body-care and home-fragrance slug with `slugInvalid` the moment
+ * `/ritual/[slug]` began rendering the form.
+ *
+ * Returns a {@link LinkableProduct} rather than a `Product` because that is
+ * genuinely all the caller wants — does this exist, and which page does it live
+ * on. Selecting a full row with its gallery to answer an existence check would
+ * be the over-selection this file's header rules out, on a write path at that.
+ *
+ * Still scoped, not unscoped: a discovery or gift-set slug is rejected as
+ * firmly as an unknown one, because neither has a page a comment could appear
+ * on. That is the same rule as `hasDetailPage()`, asked of the database.
+ */
+export async function getDetailPageTarget(
+  slug: string,
+): Promise<LinkableProduct | null> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("Product")
+    .select("slug, collection:Collection!inner(kind)")
+    .eq("slug", slug)
+    .in("collection.kind", DETAIL_PAGE_KINDS)
+    .eq("isArchived", false)
+    .is("deletedAt", null)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getDetailPageTarget", error.message);
+    return null;
+  }
+
+  // The embed arrives as an object or a single-element array depending on how
+  // PostgREST resolves the relationship; `detailPageTargetSchema` accepts both
+  // and rejects anything else rather than asserting a shape onto `unknown`.
+  return toDetailPageTarget(data);
+}
+
+/**
  * The fragrance given the full-bleed feature section on the home page.
  *
  * Which one that is now lives in `"BoutiqueSetting"."featuredProductSlug"`
@@ -407,6 +537,36 @@ export async function getProductSlugs(): Promise<string[]> {
 }
 
 /**
+ * Every body-care and home-fragrance slug, for `/ritual/[slug]`'s
+ * `generateStaticParams` and for the sitemap.
+ *
+ * The list twin of {@link getRitualProductBySlug}, scoped by the same `in`
+ * filter — so the routes that get prerendered are exactly the routes that
+ * resolve, and nothing in the sitemap can 404.
+ */
+export async function getRitualProductSlugs(): Promise<string[]> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Product")
+    .select("slug, collection:Collection!inner(kind)")
+    .in("collection.kind", RITUAL_KINDS)
+    .eq("isArchived", false)
+    .is("deletedAt", null)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getRitualProductSlugs", error.message);
+    return [];
+  }
+
+  return (data ?? [])
+    .map((row) => (typeof row.slug === "string" ? row.slug : null))
+    .filter((slug): slug is string => slug !== null);
+}
+
+/**
  * "You may also love" cards for a product detail page.
  *
  * Ranked by **scent**, not by shelf: `related_products()` orders candidates by
@@ -420,17 +580,29 @@ export async function getProductSlugs(): Promise<string[]> {
  * fresh database. And it tops the list up from the rest of the catalog: Noir
  * and Gemstone hold only three fragrances each, and without the top-up a
  * visitor would see two suggestions on one page and three on another.
+ *
+ * `kinds` is what the rail is allowed to draw from, and it defaults to the
+ * fragrances so `/perfume/[slug]` reads exactly as it did before the argument
+ * existed. Only `/ritual/[slug]` widens it — see {@link RITUAL_RELATED_KINDS}.
+ * It is a server-side constant at every call site and never request-derived:
+ * this is the one parameter that decides what a visitor is shown, so it must
+ * not be something they can set.
  */
 export async function getRelatedProductCards(
   locale: Locale,
   slug: string,
   limit = 3,
+  kinds: readonly CollectionKind[] = ["FRAGRANCE"],
 ): Promise<ProductCardData[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
   const { data, error } = await supabase
-    .rpc("related_products", { product_slug: slug, match_limit: limit })
+    .rpc("related_products", {
+      product_slug: slug,
+      match_limit: limit,
+      kinds,
+    })
     // The function returns `setof "Product"`, so the projection is applied on
     // top of it — without this the response would carry every column,
     // embedding included.

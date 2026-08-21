@@ -19,9 +19,9 @@ import type { ProductCardData } from "@/src/types/catalog";
  * the list query never has to over-select.
  *
  * Kind-agnostic since `/collections` began listing the whole catalog: the link
- * comes from `productHref()`, so a gift set or a body oil in that grid opens its
- * category page — where it can actually be bought — instead of a `/perfume/…`
- * URL that would 404.
+ * comes from `productHref()`, so a body oil in that grid opens `/ritual/…` and a
+ * gift set its category page — where each can actually be bought — instead of a
+ * `/perfume/…` URL that would 404.
  */
 
 export interface ProductCardProps {

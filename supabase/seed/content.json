@@ -126,6 +126,14 @@
         {
           "name": "Kyphi",
           "slug": "kyphi"
+        },
+        {
+          "name": "Amber",
+          "slug": "amber-body-mist"
+        },
+        {
+          "name": "Amber",
+          "slug": "amber-room-spray"
         }
       ],
       "facts": [
@@ -211,6 +219,14 @@
         {
           "name": "Turquoise",
           "slug": "turquoise"
+        },
+        {
+          "name": "Turquoise",
+          "slug": "turquoise-body-mist"
+        },
+        {
+          "name": "Turquoise",
+          "slug": "turquoise-room-spray"
         }
       ],
       "facts": [
@@ -250,6 +266,30 @@
         {
           "name": "Lapis",
           "slug": "lapis"
+        },
+        {
+          "name": "Amber",
+          "slug": "amber-body-mist"
+        },
+        {
+          "name": "Amber",
+          "slug": "amber-room-spray"
+        },
+        {
+          "name": "Opal",
+          "slug": "opal-body-mist"
+        },
+        {
+          "name": "Opal",
+          "slug": "opal-room-spray"
+        },
+        {
+          "name": "Turquoise",
+          "slug": "turquoise-body-mist"
+        },
+        {
+          "name": "Turquoise",
+          "slug": "turquoise-room-spray"
         }
       ],
       "facts": [
@@ -293,6 +333,14 @@
         {
           "name": "Sapphire",
           "slug": "sapphire"
+        },
+        {
+          "name": "Lapis",
+          "slug": "lapis-body-mist"
+        },
+        {
+          "name": "Lapis",
+          "slug": "lapis-room-spray"
         }
       ],
       "facts": [
@@ -375,6 +423,22 @@
         {
           "name": "Sapphire",
           "slug": "sapphire"
+        },
+        {
+          "name": "Opal",
+          "slug": "opal-body-mist"
+        },
+        {
+          "name": "Opal",
+          "slug": "opal-room-spray"
+        },
+        {
+          "name": "Lapis",
+          "slug": "lapis-body-mist"
+        },
+        {
+          "name": "Lapis",
+          "slug": "lapis-room-spray"
         }
       ],
       "facts": [

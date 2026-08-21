@@ -87,8 +87,8 @@ async function fallbackSearch(
  * Free-text catalog search, ordered by relevance.
  *
  * Every kind is searchable — a body oil is a legitimate result — and each card
- * links through `productHref()`, so a non-fragrance lands on its category page
- * rather than a `/perfume/…` URL that would 404.
+ * links through `productHref()`, so a body mist lands on `/ritual/…` and a set
+ * on its category page, rather than a `/perfume/…` URL that would 404.
  *
  * The query text is a bound RPC argument, never interpolated: inside the
  * function it reaches `websearch_to_tsquery`, which parses it as a search

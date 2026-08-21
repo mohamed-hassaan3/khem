@@ -175,6 +175,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-Sunlit_Citrine.jpg",
           "alt": "The Sunlit Citrine flacon lit from above on warm stone",
           "alt_ar": "قنينة Sunlit Citrine مضاءة من أعلى على حجر دافئ",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -182,6 +184,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-Sunlit_Citrine.jpg",
           "alt": "Sunlit Citrine photographed beside cut resin and saffron threads",
           "alt_ar": "Sunlit Citrine مصوَّرًا إلى جانب راتنج مقطوع وخيوط زعفران",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -189,6 +193,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-Sunlit_Citrine.jpg",
           "alt": "Sunlit Citrine held against a low golden horizon",
           "alt_ar": "Sunlit Citrine ممسوكًا أمام أفق ذهبي منخفض",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -256,6 +262,8 @@
           "url": "https://images.unsplash.com/photo-1533603208986-24fd819e718a?w=600&h=800&fit=crop&auto=format",
           "alt": "The Sapphire flacon almost lost against an unlit background",
           "alt_ar": "قنينة Sapphire تكاد تضيع أمام خلفية غير مضاءة",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -263,6 +271,8 @@
           "url": "https://images.unsplash.com/photo-1738664926458-d8ca7f56549f?w=900&h=1100&fit=crop&auto=format",
           "alt": "Sapphire lit by a single blue edge of light",
           "alt_ar": "Sapphire يضيئه حرف واحد من ضوء أزرق",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -270,6 +280,8 @@
           "url": "https://images.unsplash.com/photo-1654612514062-7cc235e7b68c?w=900&h=1100&fit=crop&auto=format",
           "alt": "Sapphire standing on cold polished stone before dawn",
           "alt_ar": "Sapphire واقفًا على حجر بارد مصقول قبل الفجر",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -334,6 +346,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-onyx_night.jpg",
           "alt": "The Onyx Night flacon standing in low incense smoke",
           "alt_ar": "قنينة Onyx Night واقفة في دخان بخور منخفض",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -341,6 +355,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-onyx_night.jpg",
           "alt": "Onyx Night against a wall of unlit black stone",
           "alt_ar": "Onyx Night أمام جدار من حجر أسود غير مضاء",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -348,6 +364,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-onyx_night.jpg",
           "alt": "Frankincense resin beside the Onyx Night flacon",
           "alt_ar": "راتنج اللبان إلى جانب قنينة Onyx Night",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -412,6 +430,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-ivory_temple.png",
           "alt": "Ivory Temple flacon catching gold light at dawn",
           "alt_ar": "قنينة Ivory Temple تلتقط ضوءًا ذهبيًّا عند الفجر",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -419,6 +439,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-ivory_temple.jpg",
           "alt": "Ivory Temple gilded shoulder throwing a long morning shadow",
           "alt_ar": "كتف Ivory Temple المذهَّب يلقي ظلًّا صباحيًّا طويلًا",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -426,6 +448,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-ivory_temple.jpg",
           "alt": "Ivory Temple photographed against a warm ochre backdrop",
           "alt_ar": "Ivory Temple مصوَّرًا أمام خلفية مغرة دافئة",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -490,6 +514,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-Silk_Serenity.jpg",
           "alt": "The Silk Serenity flacon against pale water-lit stone",
           "alt_ar": "قنينة Silk Serenity أمام حجر شاحب يضيئه الماء",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -497,6 +523,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-Silk_Serenity.jpg",
           "alt": "Silk Serenity photographed beside still water",
           "alt_ar": "Silk Serenity مصوَّرًا إلى جانب ماء ساكن",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -504,6 +532,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-Silk_Serenity.jpg",
           "alt": "Silk Serenity in flat morning light on a white surface",
           "alt_ar": "Silk Serenity في ضوء صباحي مستوٍ على سطح أبيض",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -568,6 +598,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-desert_lily.jpg",
           "alt": "The Desert Lily flacon beside cut rose heads",
           "alt_ar": "قنينة Desert Lily إلى جانب رؤوس ورد مقطوفة",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -575,6 +607,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-desert_lily.jpg",
           "alt": "Desert Lily lit warmly against a dark ground",
           "alt_ar": "Desert Lily مضاءً بدفء أمام أرضية داكنة",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -582,6 +616,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-desert_lily.jpg",
           "alt": "Desert Lily photographed on sun-warmed sand",
           "alt_ar": "Desert Lily مصوَّرًا على رمل دفّأته الشمس",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -646,6 +682,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-crimson_sun.jpg",
           "alt": "The Crimson Sun flacon burning with reflected red light",
           "alt_ar": "قنينة Crimson Sun تتّقد بضوء أحمر منعكس",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -653,6 +691,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-crimson_sun.jpg",
           "alt": "Crimson Sun against a gilded surface at last light",
           "alt_ar": "Crimson Sun أمام سطح مذهَّب عند آخر الضوء",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -660,6 +700,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifstyle-crimson_sun.jpg",
           "alt": "Crimson Sun throwing warm colour across dark stone",
           "alt_ar": "Crimson Sun يبعثر لونًا دافئًا على حجر داكن",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -726,6 +768,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-kyphi.png",
           "alt": "The Kyphi flacon beside burning resin",
           "alt_ar": "قنينة Kyphi إلى جانب راتنج مشتعل",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -733,6 +777,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-kyphi.png",
           "alt": "Kyphi almost invisible against an unlit wall",
           "alt_ar": "Kyphi يكاد يكون غير مرئي أمام جدار غير مضاء",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -740,6 +786,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-kyphi.png",
           "alt": "Kyphi lit by a single low flame",
           "alt_ar": "Kyphi تضيئه شعلة واحدة منخفضة",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -806,6 +854,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-mendesian.png",
           "alt": "The Mendesian flacon standing in near darkness",
           "alt_ar": "قنينة Mendesian واقفة في عتمة شبه كاملة",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -813,6 +863,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingerdints-mendesian.png",
           "alt": "Mendesian photographed beside still river water",
           "alt_ar": "Mendesian مصوَّرًا إلى جانب ماء نهر ساكن",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -820,6 +872,8 @@
           "url": "https://res.cloudinary.com/co1xzkhf/image/upload/lifestyle-mendesian.jpg",
           "alt": "Mendesian resting on wet stone under flat daylight",
           "alt_ar": "Mendesian مستقرًّا على حجر مبلَّل تحت ضوء نهار مستوٍ",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -884,6 +938,8 @@
           "url": "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?w=600&h=800&fit=crop&auto=format",
           "alt": "The Lapis flacon reading almost ultramarine against dark stone",
           "alt_ar": "قنينة Lapis تكاد تُقرأ زرقاء غامقة أمام حجر داكن",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -891,6 +947,8 @@
           "url": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=900&h=1100&fit=crop&auto=format",
           "alt": "Lapis throwing blue light across a polished surface",
           "alt_ar": "Lapis يبعثر ضوءًا أزرق على سطح مصقول",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -898,6 +956,8 @@
           "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=900&h=1100&fit=crop&auto=format",
           "alt": "Lapis photographed beside raw blue mineral",
           "alt_ar": "Lapis مصوَّرًا إلى جانب معدن أزرق خام",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -962,6 +1022,8 @@
           "url": "https://images.unsplash.com/photo-1747696766706-5485b39bf358?w=600&h=800&fit=crop&auto=format",
           "alt": "The Amber flacon glowing against warm sand",
           "alt_ar": "قنينة Amber متوهّجة أمام رمل دافئ",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -969,6 +1031,8 @@
           "url": "https://images.unsplash.com/photo-1640975972263-1f73398e943b?w=900&h=1100&fit=crop&auto=format",
           "alt": "Amber lit from behind, the liquid reading almost red",
           "alt_ar": "Amber مضاءً من الخلف، والسائل يكاد يُقرأ أحمر",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -976,6 +1040,8 @@
           "url": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=900&h=1100&fit=crop&auto=format",
           "alt": "Amber beside pieces of raw resin on dark stone",
           "alt_ar": "Amber إلى جانب قطع من الراتنج الخام على حجر داكن",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -1042,6 +1108,8 @@
           "url": "https://images.unsplash.com/photo-1654612514062-7cc235e7b68c?w=600&h=800&fit=crop&auto=format",
           "alt": "The Emerald flacon against deep green shadow",
           "alt_ar": "قنينة Emerald أمام ظلّ أخضر عميق",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -1049,6 +1117,8 @@
           "url": "https://images.unsplash.com/photo-1778058505814-6d247ccb600c?w=900&h=1100&fit=crop&auto=format",
           "alt": "Emerald photographed beside cut fig leaves",
           "alt_ar": "Emerald مصوَّرًا إلى جانب أوراق تين مقطوفة",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -1056,6 +1126,8 @@
           "url": "https://images.unsplash.com/photo-1608721279136-cd41b752fa41?w=900&h=1100&fit=crop&auto=format",
           "alt": "Emerald throwing green light across rough stone",
           "alt_ar": "Emerald يبعثر ضوءًا أخضر على حجر خشن",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -1120,6 +1192,8 @@
           "url": "https://images.unsplash.com/photo-1760860992203-85ca32536788?w=600&h=800&fit=crop&auto=format",
           "alt": "The Opal flacon catching shifting pale light",
           "alt_ar": "قنينة Opal تلتقط ضوءًا شاحبًا متحوّلًا",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -1127,6 +1201,8 @@
           "url": "https://images.unsplash.com/photo-1667070796007-185faecdf8a1?w=900&h=1100&fit=crop&auto=format",
           "alt": "Opal photographed against a pearl-grey surface",
           "alt_ar": "Opal مصوَّرًا أمام سطح رمادي لؤلؤي",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -1134,6 +1210,8 @@
           "url": "https://images.unsplash.com/photo-1613549026666-73c9c9083c62?w=900&h=1100&fit=crop&auto=format",
           "alt": "Opal throwing an iridescent edge of colour",
           "alt_ar": "Opal يبعثر حرفًا قزحيًّا من اللون",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -1198,6 +1276,8 @@
           "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=600&h=800&fit=crop&auto=format",
           "alt": "The Turquoise flacon against pale sea-lit stone",
           "alt_ar": "قنينة Turquoise أمام حجر شاحب يضيئه البحر",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         },
@@ -1205,6 +1285,8 @@
           "url": "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?w=900&h=1100&fit=crop&auto=format",
           "alt": "Turquoise lit from behind, the glass reading almost sea-blue",
           "alt_ar": "Turquoise مضاءً من الخلف، والزجاج يكاد يُقرأ أزرق بحريًّا",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 1
         },
@@ -1212,6 +1294,8 @@
           "url": "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=900&h=1100&fit=crop&auto=format",
           "alt": "Turquoise resting on wet stone under flat daylight",
           "alt_ar": "Turquoise مستقرًّا على حجر مبلَّل تحت ضوء نهار مستوٍ",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": false,
           "sortOrder": 2
         }
@@ -1225,8 +1309,8 @@
       "subtitle_ar": "خفيف · قابل للطبقات · ليومك",
       "description": "A fine mist carrying the Amber accord — blood orange, red amber, benzoin — over skin and hair. Light enough to wear on its own through the day, and made to be layered beneath the eau de parfum it shares its heart with.",
       "description_ar": "رذاذ رفيع يحمل أكورد Amber — برتقال دموي، وعنبر أحمر، ولبان جاوي — على البشرة والشعر. خفيف بما يكفي ليُرتدى وحده طوال النهار، ومصنوع ليُطبَّق تحت ماء العطر الذي يشاركه قلبه.",
-      "story": null,
-      "story_ar": null,
+      "story": "Amber began as a resin burned in temple courtyards — something a room wore, not a person. The mist is the house's concession to a modern morning: the same blood orange and benzoin, loosened until they sit on skin without announcing themselves. Sprayed at the shoulders it holds through a working day, and it deepens rather than fades when the eau de parfum goes over it.",
+      "story_ar": "بدأ Amber راتنجًا يُحرق في أفنية المعابد — عطرًا ترتديه الغرفة لا الإنسان. وهذا الرذاذ هو تنازل الدار للصباح المعاصر: البرتقال الدموي واللبان الجاوي نفساهما، مخفَّفان حتى يستقرّا على البشرة دون أن يعلنا عن نفسيهما. رشّة عند الكتفين تكفي ليوم عمل كامل، ويزداد عمقًا — لا خفوتًا — حين يأتي ماء العطر فوقه.",
       "concentration": null,
       "format": "Body Mist",
       "format_ar": "رذاذ للجسم",
@@ -1252,8 +1336,28 @@
           "url": "https://images.unsplash.com/photo-1767360963892-3353defd6584?w=600&h=800&fit=crop&auto=format",
           "alt": "The Amber body mist bottle standing in soft golden light",
           "alt_ar": "زجاجه رذاذ Amber للجسم واقفة في ضوء ذهبي ناعم",
+          "caption": "The bottle, photographed under the same low light the accord was corrected in.",
+          "caption_ar": "الزجاجة، مصوَّرة تحت الضوء الخافت نفسه الذي صُحِّح فيه الأكورد.",
           "isPrimary": true,
           "sortOrder": 0
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1643797517714-a273548abc3c?w=800&h=1000&fit=crop&auto=format",
+          "alt": "Frankincense resin tears in low golden light",
+          "alt_ar": "دموع راتنج اللبان في ضوء ذهبي خافت",
+          "caption": "Benzoin arrives as resin, is weighed as resin, and is never rushed into solution.",
+          "caption_ar": "يصل اللبان الجاوي راتنجًا، ويُوزن راتنجًا، ولا يُستعجَل ذوبانه أبدًا.",
+          "isPrimary": false,
+          "sortOrder": 1
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1760860992203-85ca32536788?w=800&h=1000&fit=crop&auto=format",
+          "alt": "A weathered piece of ambergris against deep shadow",
+          "alt_ar": "قطعة عنبر بحري متعتّقة أمام ظلّ عميق",
+          "caption": "Red amber — what the courtyards burned, at a fraction of the strength.",
+          "caption_ar": "العنبر الأحمر — ما كانت تحرقه الأفنية، بجزء يسير من قوّته.",
+          "isPrimary": false,
+          "sortOrder": 2
         }
       ]
     },
@@ -1265,8 +1369,8 @@
       "subtitle_ar": "خفيف · قابل للطبقات · ليومك",
       "description": "The Opal accord as a mist — aldehydes, silver iris, and white amber, sprayed over skin and hair. Powdery and almost weightless, it settles differently on everyone who wears it.",
       "description_ar": "أكورد Opal رذاذًا — ألدهيدات، وسوسن فضي، وعنبر أبيض، يُرشّ على البشرة والشعر. بودريّ ولا وزن له تقريبًا، ويستقرّ على كل من يرتديه استقرارًا مختلفًا.",
-      "story": null,
-      "story_ar": null,
+      "story": "Opal was composed for the hour after bathing, when skin is warm and takes scent too readily. Aldehydes and silver iris give it the powder; white amber keeps the powder from going cold. It is the lightest way into the accord — worn alone it reads almost as clean skin, which is the point, and layered it turns the eau de parfum quieter and longer.",
+      "story_ar": "رُكِّب Opal للساعة التي تلي الاستحمام، حين تكون البشرة دافئة وتلتقط العطر بسهولة مفرطة. الألدهيدات وسوسن الفضة تمنحه البودرة، والعنبر الأبيض يمنع تلك البودرة من أن تبرد. هو أخفّ مدخل إلى الأكورد — وحده يكاد يُقرأ كبشرة نظيفة، وهذا هو المقصد؛ وفوق ماء العطر يجعله أهدأ وأطول بقاءً.",
       "concentration": null,
       "format": "Body Mist",
       "format_ar": "رذاذ للجسم",
@@ -1292,8 +1396,28 @@
           "url": "https://images.unsplash.com/photo-1779524477261-12141ccbd8d9?w=600&h=800&fit=crop&auto=format",
           "alt": "The Opal body mist bottle against a pale bathing chamber wall",
           "alt_ar": "زجاجه رذاذ Opal للجسم أمام جدار حجرة استحمام شاحب",
+          "caption": "Photographed against a bathing-chamber wall, which is where it was meant to stand.",
+          "caption_ar": "مصوَّرة أمام جدار حجرة استحمام، وهو المكان الذي صُنعت لتقف فيه.",
           "isPrimary": true,
           "sortOrder": 0
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1631189944771-466264f05965?w=800&h=1000&fit=crop&auto=format",
+          "alt": "A dark iris bloom against deep shadow",
+          "alt_ar": "زهرة سوسن داكنة أمام ظلّ عميق",
+          "caption": "Silver iris, cut at dawn — the rhizome, not the flower, is what is distilled.",
+          "caption_ar": "سوسن فضي يُقطف عند الفجر — والجذمور، لا الزهرة، هو ما يُقطَّر.",
+          "isPrimary": false,
+          "sortOrder": 1
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1618994492420-b4f4d6b4890c?w=800&h=1000&fit=crop&auto=format",
+          "alt": "A mouth-blown crystal flacon resting after hand-polishing",
+          "alt_ar": "قارورة كريستال منفوخة بالفم تستريح بعد الصقل اليدوي",
+          "caption": "Even the mist is finished by hand; nothing leaves the atelier unpolished.",
+          "caption_ar": "حتى الرذاذ يُنهى يدويًا؛ لا شيء يغادر المشغل دون صقل.",
+          "isPrimary": false,
+          "sortOrder": 2
         }
       ]
     },
@@ -1305,8 +1429,8 @@
       "subtitle_ar": "خفيف · قابل للطبقات · ليومك",
       "description": "The Lapis accord as a mist — blue iris, violet leaf, and cashmere wood. Cool and mineral on the skin, and the one to reach for when a full eau de parfum would be too much.",
       "description_ar": "أكورد Lapis رذاذًا — سوسن أزرق، وورق بنفسج، وخشب كشمير. بارد ومعدنيّ على البشرة، وهو ما تمدّ يدك إليه حين يكون ماء العطر الكامل أكثر من اللازم.",
-      "story": null,
-      "story_ar": null,
+      "story": "The stone this accord is named for was ground for eyelids long before it was set in gold. Blue iris, violet leaf and cashmere wood keep something of that mineral coolness — the mist sits a little away from the skin rather than melting into it. It is the one to reach for on a day too warm for an extrait, and the one that layers cleanest.",
+      "story_ar": "الحجر الذي حمل هذا الأكورد اسمه كان يُسحق للجفون قبل أن يُرصَّع في الذهب بزمن طويل. يحتفظ السوسن الأزرق وورق البنفسج وخشب الكشمير بشيء من ذلك البرود المعدني — فيستقرّ الرذاذ على مبعدة قليلة من البشرة بدل أن يذوب فيها. هو ما تختاره في يوم أدفأ من أن يحتمل الإكستريه، وهو الأنظف حين يُطبَّق طبقات.",
       "concentration": null,
       "format": "Body Mist",
       "format_ar": "رذاذ للجسم",
@@ -1332,8 +1456,28 @@
           "url": "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?w=600&h=800&fit=crop&auto=format",
           "alt": "The Lapis body mist bottle reading deep blue in low light",
           "alt_ar": "زجاجه رذاذ Lapis للجسم تُقرأ زرقاء عميقة في ضوء خافت",
+          "caption": "Deep blue in low light only; by a window the bottle reads almost grey.",
+          "caption_ar": "أزرق عميق في الضوء الخافت وحده؛ وقرب النافذة تكاد الزجاجة تُقرأ رمادية.",
           "isPrimary": true,
           "sortOrder": 0
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1613549026666-73c9c9083c62?w=800&h=1000&fit=crop&auto=format",
+          "alt": "Vetiver roots drying before distillation",
+          "alt_ar": "جذور نجيل الهند تجفّ قبل التقطير",
+          "caption": "Vetiver roots, dried upright for a season before they are allowed near a still.",
+          "caption_ar": "جذور نجيل الهند، تُجفَّف واقفة موسمًا كاملًا قبل أن يُسمح لها بالاقتراب من الإنبيق.",
+          "isPrimary": false,
+          "sortOrder": 1
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1667070796007-185faecdf8a1?w=800&h=1000&fit=crop&auto=format",
+          "alt": "Carved hieroglyphs lit by low raking light",
+          "alt_ar": "نقوش هيروغليفية محفورة يضيئها ضوء مائل خافت",
+          "caption": "The blue the tomb painters ground by hand, and the reason for the name.",
+          "caption_ar": "الأزرق الذي سحقه رسّامو المقابر بأيديهم، وهو سبب التسمية.",
+          "isPrimary": false,
+          "sortOrder": 2
         }
       ]
     },
@@ -1345,8 +1489,8 @@
       "subtitle_ar": "خفيف · قابل للطبقات · ليومك",
       "description": "The Turquoise accord as a mist — neroli, sea salt, and white musk, misted over skin and hair after sun or shower. The lightest thing the house makes, and the one that disappears fastest in the heat.",
       "description_ar": "أكورد Turquoise رذاذًا — نيرولي، وملح بحر، ومسك أبيض، يُرذّ على البشرة والشعر بعد الشمس أو الاستحمام. أخفّ ما تصنعه الدار، وأسرعها تلاشيًا في الحرّ.",
-      "story": null,
-      "story_ar": null,
+      "story": "The lightest thing the house makes, and deliberately so. Neroli, sea salt and white musk, misted over skin after sun or shower, where anything heavier would sit wrongly. It does not last the day and is not meant to — this is the fragrance of the hour just after water, and the house would rather it were reapplied than made to endure.",
+      "story_ar": "أخفّ ما تصنعه الدار، وعن قصد. نيرولي وملح البحر والمسك الأبيض، تُرذّ على البشرة بعد الشمس أو الاستحمام، حيث يستقرّ أي شيء أثقل في غير موضعه. لا يدوم اليوم كلّه، ولم يُصنع ليدوم — هذا عطر الساعة التي تلي الماء مباشرة، والدار تفضّل أن يُعاد رشّه على أن يُثقَل ليبقى.",
       "concentration": null,
       "format": "Body Mist",
       "format_ar": "رذاذ للجسم",
@@ -1372,8 +1516,28 @@
           "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=600&h=800&fit=crop&auto=format",
           "alt": "The Turquoise body mist bottle against pale sea-lit stone",
           "alt_ar": "زجاجه رذاذ Turquoise للجسم أمام حجر شاحب يضيئه البحر",
+          "caption": "Pale sea-lit stone — the light the accord was corrected under.",
+          "caption_ar": "حجر شاحب يضيئه ضوء البحر — الضوء الذي صُحِّح الأكورد تحته.",
           "isPrimary": true,
           "sortOrder": 0
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1533603208986-24fd819e718a?w=800&h=1000&fit=crop&auto=format",
+          "alt": "Neroli blossoms from the Egyptian bitter orange harvest",
+          "alt_ar": "أزهار نيرولي من حصاد البرتقال المرّ المصري",
+          "caption": "Neroli from the Egyptian bitter orange harvest, picked before the heat reaches it.",
+          "caption_ar": "نيرولي من حصاد البرتقال المرّ المصري، يُقطف قبل أن يبلغه حرّ النهار.",
+          "isPrimary": false,
+          "sortOrder": 1
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1615885108069-7d5bef9a7e22?w=800&h=1000&fit=crop&auto=format",
+          "alt": "Raw botanical materials laid out for grading before selection",
+          "alt_ar": "مواد نباتية خام مفروشة للتصنيف قبل الاختيار",
+          "caption": "Every botanical is graded by hand before it is allowed into a mist this light.",
+          "caption_ar": "تُصنَّف كل مادة نباتية يدويًا قبل أن يُسمح لها بدخول رذاذ بهذه الخفّة.",
+          "isPrimary": false,
+          "sortOrder": 2
         }
       ]
     },
@@ -1385,8 +1549,8 @@
       "subtitle_ar": "خمس نفحات · مناخ كامل",
       "description": "Five pumps into the air of a room and it changes. The Amber accord — blood orange, red amber, benzoin — hangs for hours without settling into anything heavy. Made for the hour before people arrive.",
       "description_ar": "خمس نفحات في هواء الغرفة فتتبدّل. يبقى أكورد Amber — برتقال دموي، وعنبر أحمر، ولبان جاوي — معلّقًا ساعات من غير أن يستقرّ في ثقل. مصنوع للساعة التي تسبق وصول الناس.",
-      "story": null,
-      "story_ar": null,
+      "story": "Five pumps and a room changes. Amber was always a room's fragrance first — resin on coals, in a courtyard, for hours — and the spray is the shortest way back to that. It hangs at head height without settling into anything sweet, and it suits the rooms people sit still in: a study after dark, a dining table between courses.",
+      "story_ar": "خمس ضغطات وتتبدّل الغرفة. كان Amber عطر غرفة قبل كل شيء — راتنج على الجمر، في فناء، لساعات — وهذا البخّاخ هو أقصر طريق للعودة إلى ذلك. يعلق في مستوى الرأس دون أن يستقرّ في حلاوة، ويليق بالغرف التي يسكن فيها الناس: مكتب بعد حلول الظلام، أو مائدة بين طبقين.",
       "concentration": null,
       "format": "Room Spray",
       "format_ar": "بخاخ للمكان",
@@ -1412,8 +1576,28 @@
           "url": "https://images.unsplash.com/photo-1738520420642-bc8761cc9f16?w=600&h=800&fit=crop&auto=format",
           "alt": "The Amber room spray bottle against a warm interior wall",
           "alt_ar": "زجاجه بخاخ Amber للمكان أمام جدار داخلي دافئ",
+          "caption": "Against a warm interior wall — the light this accord furnishes best.",
+          "caption_ar": "أمام جدار داخلي دافئ — الضوء الذي يؤثّثه هذا الأكورد أفضل ما يكون.",
           "isPrimary": true,
           "sortOrder": 0
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1762530211537-011645caef57?w=800&h=1000&fit=crop&auto=format",
+          "alt": "Ancient Egyptian vessels used for blending sacred oils",
+          "alt_ar": "أوانٍ مصرية قديمة كانت تُستخدم لمزج الزيوت المقدّسة",
+          "caption": "The vessels the oils were blended in, before a room could be scented in seconds.",
+          "caption_ar": "الأواني التي كانت تُمزج فيها الزيوت، قبل أن يصير تعطير غرفة أمر ثوانٍ.",
+          "isPrimary": false,
+          "sortOrder": 1
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1678287714479-adaa0cfbe6c6?w=800&h=1000&fit=crop&auto=format",
+          "alt": "Ancient Egyptian relief carvings in warm low light",
+          "alt_ar": "نقوش مصرية قديمة بارزة في ضوء دافئ خافت",
+          "caption": "Courtyard walls held this smell for a thousand years. The spray holds it for six hours.",
+          "caption_ar": "احتفظت جدران الأفنية بهذه الرائحة ألف عام. ويحتفظ بها البخّاخ ست ساعات.",
+          "isPrimary": false,
+          "sortOrder": 2
         }
       ]
     },
@@ -1425,8 +1609,8 @@
       "subtitle_ar": "خمس نفحات · مناخ كامل",
       "description": "The Opal accord sprayed into a room — aldehydes, silver iris, white amber. Clean and powdery rather than sweet, and the one that suits a bedroom or a dressing room best.",
       "description_ar": "أكورد Opal مرشوشًا في الغرفة — ألدهيدات، وسوسن فضي، وعنبر أبيض. نظيف وبودريّ لا حلو، وهو الأنسب لغرفة نوم أو غرفة ملابس.",
-      "story": null,
-      "story_ar": null,
+      "story": "Clean rather than sweet, which is rarer in a room spray than it should be. Aldehydes and silver iris give a room the quality of fresh linen without the laundry note that usually stands in for it. It belongs in a bedroom, a bathroom, or any room that should feel recently opened — and it leaves politely rather than lingering into the evening.",
+      "story_ar": "نظيف لا حلو، وهو أمر أندر في بخّاخات الغرف مما ينبغي. تمنح الألدهيدات وسوسن الفضة الغرفة صفة الكتّان الطازج، دون نغمة الغسيل التي تحلّ محلّها عادة. مكانه غرفة نوم أو حمّام، أو أي غرفة يُراد لها أن تبدو حديثة الفتح — ثم ينصرف بلياقة بدل أن يتمدّد حتى المساء.",
       "concentration": null,
       "format": "Room Spray",
       "format_ar": "بخاخ للمكان",
@@ -1452,8 +1636,28 @@
           "url": "https://images.unsplash.com/photo-1609599176235-f93af914fde0?w=600&h=800&fit=crop&auto=format",
           "alt": "The Opal room spray bottle in a dim interior",
           "alt_ar": "زجاجه بخاخ Opal للمكان في فضاء داخلي معتم",
+          "caption": "A dim interior, which is where the powder in it becomes legible.",
+          "caption_ar": "غرفة خافتة الضوء، وفيها تصير البودرة في تركيبته مقروءة.",
           "isPrimary": true,
           "sortOrder": 0
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1709662217788-6a8a1b31562a?w=800&h=1000&fit=crop&auto=format",
+          "alt": "A bottle being filled by hand and fitted with its onyx stopper",
+          "alt_ar": "زجاجة تُعبّأ يدويًا وتُركَّب لها سدادة الأونيكس",
+          "caption": "Filled by hand, one bottle at a time, and stoppered the same way.",
+          "caption_ar": "يُعبّأ يدويًا، زجاجة تلو الأخرى، وتُركَّب سدادته بالطريقة نفسها.",
+          "isPrimary": false,
+          "sortOrder": 1
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1674620213535-9b2a2553ef40?w=800&h=1000&fit=crop&auto=format",
+          "alt": "A lacquered black presentation box lined with hand-marbled tissue",
+          "alt_ar": "علبة تقديم سوداء مطليّة بالورنيش مبطّنة بورق مرمَّر يدويًا",
+          "caption": "It arrives boxed like a flacon; a room spray is not a lesser object here.",
+          "caption_ar": "يصل معلَّبًا كقارورة عطر؛ فبخّاخ الغرفة ليس شيئًا أدنى في هذه الدار.",
+          "isPrimary": false,
+          "sortOrder": 2
         }
       ]
     },
@@ -1465,8 +1669,8 @@
       "subtitle_ar": "خمس نفحات · مناخ كامل",
       "description": "The Lapis accord sprayed into a room — blue iris, juniper, cashmere wood. Cool and mineral, it holds a room at a distance rather than warming it, which is exactly right for a study.",
       "description_ar": "أكورد Lapis مرشوشًا في الغرفة — سوسن أزرق، وعرعر، وخشب كشمير. بارد ومعدنيّ، يُمسك الغرفة على مسافة بدل أن يدفّئها، وهو تمامًا ما يليق بمكتب.",
-      "story": null,
-      "story_ar": null,
+      "story": "Cool where the others are warm. Blue iris, juniper and cashmere wood hold a room at a slight distance instead of filling it, which is why it works in a hallway or a study and not especially well in a bedroom. Use it early in the day. It is the only home fragrance the house makes that reads as morning.",
+      "story_ar": "بارد حيث تكون البقية دافئة. يُبقي السوسن الأزرق والعرعر وخشب الكشمير الغرفة على مسافة بدل أن يملأها، ولهذا ينجح في ممرّ أو مكتب ولا ينجح كثيرًا في غرفة نوم. استخدمه في أول النهار. هو عطر المنزل الوحيد في الدار الذي يُقرأ صباحًا.",
       "concentration": null,
       "format": "Room Spray",
       "format_ar": "بخاخ للمكان",
@@ -1492,8 +1696,28 @@
           "url": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=600&h=800&fit=crop&auto=format",
           "alt": "The Lapis room spray bottle throwing blue light across dark stone",
           "alt_ar": "زجاجه بخاخ Lapis للمكان تبعثر ضوءًا أزرق على حجر داكن",
+          "caption": "Blue thrown across dark stone — the only way this accord photographs honestly.",
+          "caption_ar": "أزرق يُلقى على حجر داكن — الطريقة الوحيدة التي يُصوَّر بها هذا الأكورد بصدق.",
           "isPrimary": true,
           "sortOrder": 0
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1654612514062-7cc235e7b68c?w=800&h=1000&fit=crop&auto=format",
+          "alt": "A caravan route at dusk, tracing the historic oud trade",
+          "alt_ar": "درب قافلة عند الغسق، يتتبّع تجارة العود التاريخية",
+          "caption": "Juniper came down the same routes as the resins, and arrived the colder of the two.",
+          "caption_ar": "جاء العرعر عبر الطرق نفسها التي جاءت منها الراتنجات، ووصل أبردهما.",
+          "isPrimary": false,
+          "sortOrder": 1
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1709666414115-47ecd5143293?w=800&h=1000&fit=crop&auto=format",
+          "alt": "The perfumer's organ, ranked with trial vials mid-formulation",
+          "alt_ar": "أرغن العطّار مصفوفًا بقوارير التجربة في منتصف التركيب",
+          "caption": "Nineteen trials before the juniper stopped reading as gin.",
+          "caption_ar": "تسع عشرة تجربة قبل أن يكفّ العرعر عن أن يُقرأ كالجن.",
+          "isPrimary": false,
+          "sortOrder": 2
         }
       ]
     },
@@ -1505,8 +1729,8 @@
       "subtitle_ar": "خمس نفحات · مناخ كامل",
       "description": "The Turquoise accord sprayed into a room — neroli, sea salt, driftwood. It reads like a window opened onto the sea, and it is the one to use in a room that has been closed all day.",
       "description_ar": "أكورد Turquoise مرشوشًا في الغرفة — نيرولي، وملح بحر، وخشب بحر. يُقرأ كنافذة فُتحت على البحر، وهو ما تستعمله في غرفة ظلّت مغلقة طوال اليوم.",
-      "story": null,
-      "story_ar": null,
+      "story": "A window opened onto the sea, for a room that has no window onto anything. Neroli, sea salt and driftwood, and no sweetness at all — it is the one for a room that has been closed up, or lived in a little too long. Three pumps is usually enough; it is stronger than its lightness suggests.",
+      "story_ar": "نافذة مفتوحة على البحر، لغرفة لا نافذة لها على شيء. نيرولي وملح البحر وخشب الطافي، وبلا أي حلاوة على الإطلاق — هو ما تستخدمه في غرفة ظلّت مغلقة، أو سُكنت أطول قليلًا مما ينبغي. ثلاث ضغطات تكفي عادة؛ فهو أقوى مما توحي خفّته.",
       "concentration": null,
       "format": "Room Spray",
       "format_ar": "بخاخ للمكان",
@@ -1532,8 +1756,28 @@
           "url": "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=600&h=800&fit=crop&auto=format",
           "alt": "The Turquoise room spray bottle against pale sea-lit stone",
           "alt_ar": "زجاجه بخاخ Turquoise للمكان أمام حجر شاحب يضيئه البحر",
+          "caption": "Pale stone, sea light — the room this was made for, if you have one.",
+          "caption_ar": "حجر شاحب وضوء بحر — الغرفة التي صُنع لها، إن كانت لديك.",
           "isPrimary": true,
           "sortOrder": 0
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1533603208986-24fd819e718a?w=800&h=1000&fit=crop&auto=format",
+          "alt": "Neroli blossoms from the Egyptian bitter orange harvest",
+          "alt_ar": "أزهار نيرولي من حصاد البرتقال المرّ المصري",
+          "caption": "The same neroli as the body mist, at twice the concentration.",
+          "caption_ar": "النيرولي نفسه الذي في رذاذ الجسم، بضعف التركيز.",
+          "isPrimary": false,
+          "sortOrder": 1
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1618994492420-b4f4d6b4890c?w=800&h=1000&fit=crop&auto=format",
+          "alt": "A mouth-blown crystal flacon resting after hand-polishing",
+          "alt_ar": "قارورة كريستال منفوخة بالفم تستريح بعد الصقل اليدوي",
+          "caption": "Glass this heavy is a decision about where a bottle will stand, not how it travels.",
+          "caption_ar": "زجاج بهذا الثقل قرار يخصّ المكان الذي ستقف فيه الزجاجة، لا كيف تُنقل.",
+          "isPrimary": false,
+          "sortOrder": 2
         }
       ]
     },
@@ -1586,6 +1830,8 @@
           "url": "https://images.unsplash.com/photo-1674620213535-9b2a2553ef40?w=600&h=800&fit=crop&auto=format",
           "alt": "Six discovery vials arranged in a shallow presentation tray",
           "alt_ar": "ست زجاج اكتشاف مرتّبة في صينية تقديم ضحلة",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1636,6 +1882,8 @@
           "url": "https://images.unsplash.com/photo-1694481901573-a970f982ac5e?w=600&h=800&fit=crop&auto=format",
           "alt": "Two weighted black vials resting on unpolished dark stone",
           "alt_ar": "قاروراتان سوداوان موزونتان على حجر داكن غير مصقول",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1690,6 +1938,8 @@
           "url": "https://images.unsplash.com/photo-1605174697130-0bb0b83c92fc?w=600&h=800&fit=crop&auto=format",
           "alt": "A lacquered collector's box holding the full library of vials",
           "alt_ar": "صندوق مقتنيات مطليّ باللاكيه يضمّ مكتبة الزجاج كاملة",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1742,6 +1992,8 @@
           "url": "https://images.unsplash.com/photo-1709666414115-47ecd5143293?w=600&h=800&fit=crop&auto=format",
           "alt": "Two full-size flacons filled with amber liquid, side by side",
           "alt_ar": "قنينتان بالحجم الكامل مملوءتان بسائل عنبري، جنبًا إلى جنب",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1794,6 +2046,8 @@
           "url": "https://images.unsplash.com/photo-1618994492420-b4f4d6b4890c?w=600&h=800&fit=crop&auto=format",
           "alt": "Crystal flacons arranged on dark wood before packing",
           "alt_ar": "قنائن كريستال مرتّبة على خشب داكن قبل التغليف",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1846,6 +2100,8 @@
           "url": "https://images.unsplash.com/photo-1609599176235-f93af914fde0?w=600&h=800&fit=crop&auto=format",
           "alt": "A room spray and candle vessel set against a dark interior wall",
           "alt_ar": "بخاخ للمكان ووعاء شمعة أمام جدار داخلي داكن",
+          "caption": null,
+          "caption_ar": null,
           "isPrimary": true,
           "sortOrder": 0
         }

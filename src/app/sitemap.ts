@@ -5,7 +5,11 @@ import { LOCALES, localizePath, type Locale } from "@/src/lib/i18n/config";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { getJournalArticles } from "@/src/services/content";
 import { getLegalDocuments } from "@/src/services/legal";
-import { getCollections, getProductSlugs } from "@/src/services/products";
+import {
+  getCollections,
+  getProductSlugs,
+  getRitualProductSlugs,
+} from "@/src/services/products";
 
 /**
  * `/sitemap.xml` — every indexable URL, in both languages.
@@ -110,13 +114,14 @@ const STATIC_ROUTES: { path: string; priority: number }[] = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [collections, productSlugs, legalDocuments, articles] =
+  const [collections, productSlugs, ritualSlugs, legalDocuments, articles] =
     await Promise.all([
       // URLs only — every slug is identical in both trees (localizing one
       // would fork the URL space), so the default locale is the right and
       // cheapest argument here.
       getCollections("en"),
       getProductSlugs(),
+      getRitualProductSlugs(),
       getLegalDocuments("en"),
       getJournalArticles(),
     ]);
@@ -158,6 +163,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // so nothing here can 404.
     ...productSlugs.flatMap((slug) =>
       localizedEntries(`/perfume/${slug}`, { priority: 0.9 }),
+    ),
+
+    // Body care and home fragrance, which have detail pages of their own since
+    // `0013_product_image_caption.sql`. Scoped by the same query
+    // `generateStaticParams` uses, so nothing here can 404 either — and a shade
+    // below the fragrances, which are what the house is searched for.
+    ...ritualSlugs.flatMap((slug) =>
+      localizedEntries(`/ritual/${slug}`, { priority: 0.7 }),
     ),
 
     // Journal articles. `getJournalArticles()` reads through the publishable

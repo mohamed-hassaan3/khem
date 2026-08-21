@@ -6,6 +6,7 @@ import ProductForm from "@/src/components/admin/ProductForm";
 import ProductImageEditor from "@/src/components/admin/ProductImageEditor";
 import StatusToggle from "@/src/components/admin/StatusToggle";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
+import { hasDetailPage, productHref } from "@/src/lib/routes";
 import { getAdminProduct, listAdminCollections } from "@/src/services/admin/catalog";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,18 @@ export default async function EditProductPage({
   if (!product) notFound();
 
   const collection = collections.find((entry) => entry.slug === product.collectionSlug);
-  const hasDetailPage = collection?.kind === "FRAGRANCE";
+
+  /*
+   * Both facts come from `src/lib/routes.ts` rather than from a `kind ===
+   * "FRAGRANCE"` test written out again here. That local copy of the rule went
+   * stale the moment body care and home fragrance gained `/ritual/[slug]`: an
+   * editor would have been left with no way to preview a page that exists.
+   *
+   * A product whose collection could not be resolved gets no link, since there
+   * is no kind to route on.
+   */
+  const linkable = collection ? { slug: product.slug, collectionKind: collection.kind } : null;
+  const storefrontHref = linkable && hasDetailPage(linkable) ? productHref(linkable) : null;
 
   return (
     <>
@@ -34,9 +46,9 @@ export default async function EditProductPage({
         title={product.name}
         description={product.isArchived ? "Archived — not visible anywhere on the storefront." : undefined}
         action={
-          hasDetailPage ? (
+          storefrontHref ? (
             <Link
-              href={localizePath(activeLocale, `/perfume/${product.slug}`)}
+              href={localizePath(activeLocale, storefrontHref)}
               className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/40 transition-colors duration-300 hover:text-gold"
             >
               View on storefront ↗

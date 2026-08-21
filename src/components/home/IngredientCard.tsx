@@ -22,7 +22,7 @@ export default async function IngredientCard({
 
   return (
     <LocaleLink
-      href="/ingredients"
+      href={`/ingredients?ingredient=${ingredient.slug}`}
       className="img-zoom group relative w-[260px] flex-none overflow-hidden bg-surface no-underline sm:w-[300px]"
     >
       <div className="relative h-[380px] overflow-hidden">

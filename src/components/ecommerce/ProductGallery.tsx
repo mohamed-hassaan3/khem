@@ -20,6 +20,15 @@ import type { ProductImage } from "@/src/types/catalog";
  * Nothing here does arithmetic on `scrollLeft`: its sign and origin flip under
  * RTL. Scrolling goes through `scrollIntoView` on the slide itself, which is
  * direction-agnostic.
+ *
+ * ## Captions
+ *
+ * An image may carry a line of its own (`ProductImage.caption`), and the strip
+ * under the track prints whichever belongs to the slide on screen. Every
+ * fragrance photograph has `caption: null`, so this is inert on
+ * `/perfume/[slug]` and only appears for the body-care and home-fragrance
+ * galleries that were written with one — see
+ * `supabase/sql/0013_product_image_caption.sql`.
  */
 
 export interface ProductGalleryProps {
@@ -46,6 +55,7 @@ export default function ProductGallery({
   const [activeIndex, setActiveIndex] = useState(0);
 
   const hasMultiple = images.length > 1;
+  const hasCaptions = images.some((image) => image.caption !== null);
 
   /**
    * Report whichever slide is actually on screen. Registered once per gallery;
@@ -166,6 +176,23 @@ export default function ProductGallery({
           </>
         ) : null}
       </div>
+
+      {/*
+        Rendered whenever *any* image has a line, and kept mounted as the slide
+        changes: sizing the strip per slide would jog the thumbnails up and down
+        each time the visitor stepped onto an uncaptioned photograph. `min-h`
+        holds two lines open; `aria-live` is deliberately absent, since the
+        caption follows a navigation the visitor just made rather than
+        announcing itself.
+      */}
+      {hasCaptions ? (
+        <p
+          dir="auto"
+          className="min-h-16 border-t border-border bg-background px-6 py-4 text-xs leading-loose text-ivory/40"
+        >
+          {images[activeIndex]?.caption ?? ""}
+        </p>
+      ) : null}
 
       {hasMultiple ? (
         <div className="flex gap-px bg-background p-px">

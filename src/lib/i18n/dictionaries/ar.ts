@@ -499,7 +499,7 @@ export const ar: Dictionary = {
 
   ingredientsExplorer: {
     filterByFamily: "تصفية حسب العائلة",
-    priceTier: "درجة السعر {tier} من {max}",
+    closeDetails: "إغلاق تفاصيل {name}",
     foundIn: "يدخل في",
     rareFacts: "حقائق نادرة",
   },
@@ -669,6 +669,21 @@ export const ar: Dictionary = {
     filterLabel: "تصفية حسب النوع",
     filterAll: "الكل",
     empty: "يجري تحضير عطور منزلية جديدة. نرجو العودة قريبًا.",
+  },
+
+  ritual: {
+    meta: {
+      title: "الطقس",
+      description:
+        "العناية بالجسم وعطور المنزل من كيم — كل قطعة مقدَّمة بموادّها التي صُنعت منها والحكاية التي خلفها.",
+      ogTitle: "الطقس | KHEM",
+      ogDescription:
+        "ثلاث صور وحكاية قصيرة لكل رذاذ ولكل بخّاخ غرفة تصنعه الدار.",
+    },
+    eyebrow: {
+      BODY: "الطقس",
+      HOME: "عطِّر ملاذك",
+    },
   },
 
   newArrival: {

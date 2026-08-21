@@ -5,11 +5,13 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import ProductFlag from "@/src/components/ecommerce/ProductFlag";
+import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { productFlag } from "@/src/lib/facets";
 import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
+import { productHref } from "@/src/lib/routes";
 import { useCart } from "@/src/providers/cart-provider";
 import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
@@ -19,16 +21,18 @@ import type { ProductCardData } from "@/src/types/catalog";
 /**
  * A body-care or home-fragrance product, sold straight from the card.
  *
- * These goods have no detail page — there is no pyramid to unfold and no story
- * to tell at length — so the card carries the buy control itself, exactly as
- * the original design did. Cart and wishlist writes go to the
- * `localStorage`-backed stores, which persist a product id and a quantity:
- * when Clerk and Supabase land, the two handlers become Server Action calls and
- * this markup is unchanged.
+ * The card still carries the buy control itself, as the original design did:
+ * these goods now *have* a detail page (`/ritual/[slug]`), but reaching it
+ * should be an offer, not a toll on the way to the bag. So the photograph and
+ * the name are links and everything else is unchanged — one click still adds.
+ *
+ * Cart and wishlist writes go to the `localStorage`-backed stores, which
+ * persist a product id and a quantity: when Clerk and Supabase land, the two
+ * handlers become Server Action calls and this markup is unchanged.
  *
  * A sibling of `<ProductCard>` rather than a wrapper: that one is an async
- * Server Component whose whole surface is a link to a PDP, which is precisely
- * what does not apply here.
+ * Server Component whose *whole surface* is a link to the detail page, which
+ * would swallow the buy button and the wishlist heart if it were reused here.
  */
 
 const CONFIRMATION_MS = 2500;
@@ -76,6 +80,7 @@ export default function MerchCard({
 
   // Same order as every other card: the stored `badge` overrides the flag.
   const flag = productFlag(product);
+  const href = productHref(product);
 
   const handleAddToCart = () => {
     addLine(product.id, 1, product.inventory);
@@ -113,15 +118,23 @@ export default function MerchCard({
         />
       </button>
 
-      <div className="relative aspect-3/4 overflow-hidden bg-card">
+      {/* `tabIndex={-1}` and an empty alt: this is the same destination as the
+          name below it, and a screen reader announcing the link twice — once as
+          the photograph, once as the heading — is noise, not navigation. */}
+      <LocaleLink
+        href={href}
+        tabIndex={-1}
+        aria-hidden="true"
+        className="relative block aspect-3/4 overflow-hidden bg-card"
+      >
         <Image
           src={product.primaryImage.url}
-          alt={product.primaryImage.alt}
+          alt=""
           fill
           sizes={sizes}
           className="object-cover brightness-65 saturate-60"
         />
-      </div>
+      </LocaleLink>
 
       <div className="flex flex-1 flex-col p-7">
         <div dir="auto" className="flex flex-1 flex-col">
@@ -130,12 +143,15 @@ export default function MerchCard({
             {product.subtitle ? ` · ${product.subtitle}` : ""}
           </p>
 
-          {/* Latin proper noun in both trees. */}
-          <h3
-            {...island}
-            className="mb-2.5 font-heading text-lg font-normal text-ivory"
-          >
-            {product.name}
+          {/* Latin proper noun in both trees. The heading carries the link, so
+              the photograph above can stay out of the tab order. */}
+          <h3 {...island} className="mb-2.5 font-heading text-lg font-normal">
+            <LocaleLink
+              href={href}
+              className="text-ivory no-underline transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
+            >
+              {product.name}
+            </LocaleLink>
           </h3>
 
           <p className="mb-6 flex-1 text-xs leading-loose text-ivory/40">

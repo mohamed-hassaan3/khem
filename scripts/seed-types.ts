@@ -60,6 +60,9 @@ export interface ProductImageSeedRow {
   url: string;
   alt: string;
   alt_ar: string | null;
+  /** The triptych line — `0013_product_image_caption.sql`. */
+  caption: string | null;
+  caption_ar: string | null;
   isPrimary: boolean;
   sortOrder: number;
 }

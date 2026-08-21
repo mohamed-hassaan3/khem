@@ -1,13 +1,20 @@
 /**
  * Product URLs.
  *
- * The one place a catalog record becomes a link. Fragrances have a detail page;
- * body care, home fragrance, and the sets do not — they are sold straight from
- * their collection page, so a cart or wishlist line for one of those links back
- * to the grid it came from rather than to a `/perfume/…` URL that would 404.
+ * The one place a catalog record becomes a link, and the reason adding a detail
+ * page for a whole category of goods was the single-line change this header
+ * used to promise it would be.
  *
- * Keeping this in one function is what makes adding a detail page for those
- * goods later a single-line change.
+ * Two page shapes, two URL spaces. A fragrance opens on `/perfume/[slug]` — a
+ * pyramid, an ingredient list, a scent-ranked rail. Body care and home
+ * fragrance open on `/ritual/[slug]` — three photographs, three captions, a
+ * story. Neither route will render the other's goods (see `RITUAL_KINDS` in
+ * `src/services/products.ts`), so the split is enforced at the query and not
+ * just here.
+ *
+ * The discovery and gift sets still have no page of their own: they sell a
+ * boxed composition straight from `<DiscoverySetCard>`, so a cart or wishlist
+ * line for one links back to the grid it came from.
  */
 
 import type { CollectionKind } from "@/src/types/catalog";
@@ -19,17 +26,19 @@ export interface LinkableProduct {
 }
 
 /**
- * Category landing page for each non-fragrance kind.
+ * Category landing page for the kinds that sell from the grid.
  *
- * All four live under `/collections/[slug]` since the category routes were
- * folded in; the old top-level paths remain only as 308s.
+ * Both live under `/collections/[slug]` since the category routes were folded
+ * in; the old top-level paths remain only as 308s.
+ *
+ * Body care and home fragrance are no longer here — they have `/ritual/[slug]`
+ * now. Their collection pages are unchanged and still the place to browse them;
+ * what changed is where a single *product* points.
  */
 const CATEGORY_PATH = {
-  BODY: "/collections/body-care",
-  HOME: "/collections/home-fragrance",
   DISCOVERY: "/collections/discovery",
   GIFT: "/collections/gift-set",
-} as const satisfies Record<Exclude<CollectionKind, "FRAGRANCE">, string>;
+} as const satisfies Record<Extract<CollectionKind, "DISCOVERY" | "GIFT">, string>;
 
 /**
  * Where a product's own page lives, as a locale-agnostic app path —
@@ -44,6 +53,7 @@ export function productHref(product: LinkableProduct): string {
       return `/perfume/${product.slug}`;
     case "BODY":
     case "HOME":
+      return `/ritual/${product.slug}`;
     case "DISCOVERY":
     case "GIFT":
       return CATEGORY_PATH[product.collectionKind];
@@ -54,9 +64,18 @@ export function productHref(product: LinkableProduct): string {
   }
 }
 
-/** True when a product has a detail page of its own. */
+/**
+ * True when a product has a detail page of its own.
+ *
+ * Written against the two kinds that do *not* rather than the three that do:
+ * the sets are the exception now, and stating the exception is what makes a
+ * sixth kind default to having a page — which is the safer wrong answer, since
+ * a missing page 404s loudly and a page nothing links to is invisible.
+ */
 export function hasDetailPage(product: LinkableProduct): boolean {
-  return product.collectionKind === "FRAGRANCE";
+  return (
+    product.collectionKind !== "DISCOVERY" && product.collectionKind !== "GIFT"
+  );
 }
 
 /**

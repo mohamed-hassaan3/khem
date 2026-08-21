@@ -149,7 +149,8 @@ async function readCatalog(client: Client): Promise<CatalogSeed> {
   );
 
   const images = await client.query<ImageRow>(
-    `select "productSlug", url, alt, alt_ar, "isPrimary", "sortOrder"
+    `select "productSlug", url, alt, alt_ar, caption, caption_ar,
+            "isPrimary", "sortOrder"
        from public."ProductImage"
       order by "productSlug", "sortOrder"`,
   );
@@ -189,11 +190,13 @@ async function readCatalog(client: Client): Promise<CatalogSeed> {
   for (const image of images.rows) {
     const gallery = byProduct.get(image.productSlug) ?? [];
     // Restated as a literal rather than spread-minus-key, so the image objects
-    // in the file carry exactly these five fields in exactly this order.
+    // in the file carry exactly these seven fields in exactly this order.
     gallery.push({
       url: image.url,
       alt: image.alt,
       alt_ar: image.alt_ar,
+      caption: image.caption,
+      caption_ar: image.caption_ar,
       isPrimary: image.isPrimary,
       // Kept, unlike the parent rows': `db-seed.ts` reads `image.sortOrder` off
       // the object rather than from array position.

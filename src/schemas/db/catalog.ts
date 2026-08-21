@@ -166,16 +166,28 @@ const imageRowSchema = z.object({
   url: z.string(),
   alt: z.string(),
   alt_ar: z.string().nullable().default(null),
+  // The triptych line — `0013_product_image_caption.sql`. Nullable *and*
+  // defaulted for both the reason above and the one this file's header gives:
+  // a gallery read before that migration lands still parses, rather than
+  // dropping every photograph out of every product page at once.
+  caption: z.string().nullable().default(null),
+  caption_ar: z.string().nullable().default(null),
   isPrimary: z.boolean(),
   sortOrder: z.number(),
 });
 
 /** Image columns, as selected for both the gallery and the card projection. */
-const IMAGE_COLUMNS = "url, alt, alt_ar, isPrimary, sortOrder";
+const IMAGE_COLUMNS =
+  "url, alt, alt_ar, caption, caption_ar, isPrimary, sortOrder";
 
 function toImage(image: z.infer<typeof imageRowSchema>, locale: Locale): ProductImage {
-  const { alt_ar, ...rest } = image;
-  return { ...rest, alt: resolveText(image.alt, alt_ar, locale) };
+  const { alt_ar, caption, caption_ar, ...rest } = image;
+
+  return {
+    ...rest,
+    alt: resolveText(image.alt, alt_ar, locale),
+    caption: resolveOptionalText(caption, caption_ar, locale),
+  };
 }
 
 /**
@@ -197,8 +209,42 @@ const embeddedCollection = z.union([
   z.array(embeddedCollectionShape).min(1),
 ]);
 
+/** The same embed where only the kind was selected. */
+const embeddedCollectionKindShape = z.object({ kind: collectionKindSchema });
+
+const embeddedCollectionKind = z.union([
+  embeddedCollectionKindShape,
+  z.array(embeddedCollectionKindShape).min(1),
+]);
+
 function firstOf<T>(value: T | T[]): T {
   return Array.isArray(value) ? value[0] : value;
+}
+
+/**
+ * The narrowest product projection there is: a slug and its collection's kind.
+ *
+ * Enough to answer "does this exist, and which page does it live on" —
+ * `getDetailPageTarget()`'s row, and the shape `productHref()` takes. Parsed
+ * like every other row rather than asserted, because a `select` this small is
+ * still a `select`, and the reason for parsing does not scale with the column
+ * count.
+ */
+const detailPageTargetRowSchema = z.object({
+  slug: z.string(),
+  collection: embeddedCollectionKind,
+});
+
+export function toDetailPageTarget(
+  row: unknown,
+): { slug: string; collectionKind: z.infer<typeof collectionKindSchema> } | null {
+  const parsed = detailPageTargetRowSchema.safeParse(row);
+  if (!parsed.success) return null;
+
+  return {
+    slug: parsed.data.slug,
+    collectionKind: firstOf(parsed.data.collection).kind,
+  };
 }
 
 /**
@@ -366,6 +412,7 @@ export const PRODUCT_CARD_COLUMNS =
 export const PLACEHOLDER_IMAGE: ProductImage = {
   url: "https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=600&h=800&fit=crop&auto=format",
   alt: "KHEM fragrance flacon",
+  caption: null,
   isPrimary: true,
   sortOrder: 0,
 };

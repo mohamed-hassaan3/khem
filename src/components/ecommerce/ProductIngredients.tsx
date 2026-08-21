@@ -41,7 +41,7 @@ export default async function ProductIngredients({
         {ingredients.map((ingredient) => (
           <LocaleLink
             key={ingredient.id}
-            href="/ingredients"
+            href={`/ingredients?ingredient=${ingredient.slug}`}
             className="flex flex-col gap-2 bg-surface p-6 no-underline transition-colors duration-300 ease-out hover:bg-card focus-visible:bg-card focus-visible:outline-none sm:flex-row sm:gap-6"
             dir="auto"
           >
