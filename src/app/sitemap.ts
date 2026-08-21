@@ -1,13 +1,11 @@
 import type { MetadataRoute } from "next";
 
+import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
 import { LOCALES, localizePath, type Locale } from "@/src/lib/i18n/config";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { getJournalArticles } from "@/src/services/content";
 import { getLegalDocuments } from "@/src/services/legal";
-import {
-  getFragranceCollections,
-  getProductSlugs,
-} from "@/src/services/products";
+import { getCollections, getProductSlugs } from "@/src/services/products";
 
 /**
  * `/sitemap.xml` — every indexable URL, in both languages.
@@ -94,11 +92,12 @@ const STATIC_ROUTES: { path: string; priority: number }[] = [
 
   // Shop
   { path: "/collections", priority: 0.9 },
+  /*
+   * The four category pages are no longer listed here: they are collections
+   * under `/collections/[slug]` now, and come from the dynamic loop below with
+   * the fragrance collections.
+   */
   { path: "/new-arrival", priority: 0.8 },
-  { path: "/gift-set", priority: 0.8 },
-  { path: "/discovery", priority: 0.8 },
-  { path: "/body-care", priority: 0.7 },
-  { path: "/room-fragrance", priority: 0.7 },
 
   // World of KHEM
   { path: "/heritage", priority: 0.6 },
@@ -116,7 +115,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // URLs only — every slug is identical in both trees (localizing one
       // would fork the URL space), so the default locale is the right and
       // cheapest argument here.
-      getFragranceCollections("en"),
+      getCollections("en"),
       getProductSlugs(),
       getLegalDocuments("en"),
       getJournalArticles(),
@@ -140,12 +139,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
     ),
 
-    // Fragrance collections. Body care, home fragrance, discovery, and gift
-    // sets are excluded here for the same reason the tab bar excludes them —
-    // they are not chapters of the perfume library and each already has its
-    // own route above, which would otherwise be a second URL for one page.
+    // Every collection — all seven. Body care, home fragrance, discovery and
+    // gift sets used to hold routes of their own and were excluded here to
+    // avoid a second URL for one page; those routes are 308s now, so these are
+    // the canonical ones.
     ...collections.flatMap((collection) =>
       localizedEntries(`/collections/${collection.slug}`, { priority: 0.8 }),
+    ),
+
+    // The two merchandising pages share that URL space without being rows —
+    // see `MERCH_PAGE_FACETS` in `src/lib/facets.ts`.
+    ...MERCH_PAGE_FACETS.flatMap((facet) =>
+      localizedEntries(`/collections/${facet}`, { priority: 0.8 }),
     ),
 
     // Product detail pages — the deepest and most valuable URLs on the site.

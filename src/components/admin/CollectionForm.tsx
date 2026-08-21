@@ -32,7 +32,7 @@ import type { AdminCollection } from "@/src/schemas/db/admin";
 const KIND_OPTIONS = [
   { value: "FRAGRANCE", label: "Fragrance — sold from /perfume/[slug]" },
   { value: "BODY", label: "Body care — sold from /body-care" },
-  { value: "HOME", label: "Home fragrance — sold from /room-fragrance" },
+  { value: "HOME", label: "Home fragrances — sold from /collections/home-fragrance" },
   { value: "DISCOVERY", label: "Discovery — sold from /discovery" },
   { value: "GIFT", label: "Gift set — sold from /gift-set" },
 ] as const;

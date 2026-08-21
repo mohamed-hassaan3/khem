@@ -35,12 +35,7 @@ import {
   toProductCard,
 } from "@/src/schemas/db/catalog";
 import { BOUTIQUE_SETTING_COLUMNS, toBoutiqueSetting } from "@/src/schemas/db/directory";
-import type {
-  Collection,
-  CollectionKind,
-  Product,
-  ProductCardData,
-} from "@/src/types/catalog";
+import type { Collection, Product, ProductCardData } from "@/src/types/catalog";
 
 /** One log shape for the whole module: provider message, never row contents. */
 function logFailure(query: string, message: string): void {
@@ -95,11 +90,12 @@ export async function getCollections(locale: Locale): Promise<Collection[]> {
 }
 
 /**
- * Fragrance collections only — the `/collections` overview and its tab bar.
+ * Fragrance collections only — what the search panel offers to browse.
  *
- * Body care, home fragrance, and discovery sets are collections too, but they
- * are not chapters of the perfume library and each has its own route; listing
- * them beside Signature and Noir would offer two URLs for the same goods.
+ * Body care, home fragrance and the sets are collections too, and since their
+ * category routes were folded into `/collections/[slug]` they sit beside
+ * Signature and Noir in the tab bar. They are still not chapters of the perfume
+ * library, which is what this narrower list means.
  */
 export async function getFragranceCollections(
   locale: Locale,
@@ -145,20 +141,6 @@ export async function getCollectionBySlug(
   }
 
   return toCollection(data, locale);
-}
-
-/**
- * A single fragrance collection by slug, for `/collections/[slug]`.
- *
- * Scoped to `FRAGRANCE` so `/collections/body-care` 404s rather than rendering
- * a second, tab-less copy of `/body-care`.
- */
-export async function getFragranceCollectionBySlug(
-  locale: Locale,
-  slug: string,
-): Promise<Collection | null> {
-  const collection = await getCollectionBySlug(locale, slug);
-  return collection?.kind === "FRAGRANCE" ? collection : null;
 }
 
 /**
@@ -224,34 +206,14 @@ export async function getProductCardsByCollection(
 }
 
 /**
- * Card projections for one category — `/body-care`, `/room-fragrance`, and
- * `/discovery` each render exactly one kind.
- */
-export async function getProductCardsByKind(
-  locale: Locale,
-  kind: CollectionKind,
-): Promise<ProductCardData[]> {
-  const query = cardQuery();
-  if (!query) return [];
-
-  // The `!inner` in `PRODUCT_CARD_COLUMNS` is what makes filtering on the
-  // embedded collection a join condition rather than a post-filter.
-  return toCards(
-    locale,
-    "getProductCardsByKind",
-    await query.eq("collection.kind", kind).order("sortOrder"),
-  );
-}
-
-/**
  * The entire catalog as cards — every kind — for the `/collections` overview.
  *
  * That page is the one screen a visitor can reach every product from, so it
  * deliberately crosses the fragrance boundary the rest of the fragrance
  * surfaces hold: body care, home fragrance, discovery sets, and gift sets all
- * appear, reachable through the facet chips. Their dedicated routes stay the
- * canonical place to buy them — a card here links back to its category page via
- * `productHref()` — so no second checkout URL is created.
+ * appear, reachable through the facet chips. Each collection's own page under
+ * `/collections/[slug]` stays the canonical place to buy from — a card here
+ * links back to it via `productHref()` — so no second checkout URL is created.
  */
 export async function getCatalogProductCards(
   locale: Locale,

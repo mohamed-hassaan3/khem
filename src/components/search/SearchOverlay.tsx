@@ -599,16 +599,17 @@ function IdleState({
         <p className="eyebrow mb-5">{dict.search.collections}</p>
         <div className="flex flex-col gap-4">
           {/*
-           * The same five destinations the Nav mega-menu lists, reusing its
-           * dictionary keys rather than a second copy of the copy.
+           * The Nav mega-menu's collections column, reusing its dictionary keys
+           * rather than a second copy of the copy. New Arrival is left out — it
+           * is a showroom rather than a collection to search within.
            */}
           {(
             [
               ["signature", "/collections/signature"],
-              ["noir", "/collections/noir"],
               ["gemstone", "/collections/gemstone"],
-              ["bodyCare", "/body-care"],
-              ["roomFragrance", "/room-fragrance"],
+              ["noir", "/collections/noir"],
+              ["bodyCare", "/collections/body-care"],
+              ["homeFragrance", "/collections/home-fragrance"],
             ] as const
           ).map(([key, href]) => (
             <LocaleLink

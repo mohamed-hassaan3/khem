@@ -10,8 +10,8 @@ import { useDictionary } from "@/src/providers/i18n-provider";
 import type { ProductCardData } from "@/src/types/catalog";
 
 /**
- * The product grid for `/body-care` and `/room-fragrance`, with an optional
- * format filter.
+ * The product grid for the body care and home fragrance collections, with an
+ * optional format filter.
  *
  * The filter values are **derived from the products themselves** — the original
  * home-fragrance page shipped six hardcoded English buttons (Candles,
@@ -68,12 +68,12 @@ export default function MerchGrid({
     <>
       {showBar ? (
         <nav
-          aria-label={dict.roomFragrance.filterLabel}
+          aria-label={dict.homeFragrance.filterLabel}
           className="border-b border-border bg-surface"
         >
           <div className="mx-auto flex max-w-350 gap-9 overflow-x-auto px-6 md:px-20">
             <FilterTab
-              label={dict.roomFragrance.filterAll}
+              label={dict.homeFragrance.filterAll}
               isActive={active === ALL}
               onSelect={() => setActive(ALL)}
             />

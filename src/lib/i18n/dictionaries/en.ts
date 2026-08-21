@@ -58,34 +58,35 @@ export const en = {
     journalLabel: "Journal",
     featuredArticleTitle: "The Alchemy of Ancient Egyptian Perfumery",
     featuredArticleAlt: "Heritage",
+    /*
+     * The "Our Collections" column, in the order it is printed. New Arrival
+     * opens it — the newest work is what a returning visitor came for — and the
+     * sets moved out to Quick Access, which is where a destination that is not
+     * a chapter of the library belongs.
+     */
     collectionItems: {
+      newArrival: {
+        label: "New Arrival",
+        desc: "The most recent work to leave the house",
+      },
       signature: {
         label: "Signature Collection",
         desc: "Timeless expressions of Egyptian heritage",
-      },
-      noir: {
-        label: "Noir Collection",
-        desc: "A darker, more exclusive chapter",
       },
       gemstone: {
         label: "Gemstone Collection",
         desc: "Mineral light made wearable",
       },
-      /*
-       * Collections only. New Arrivals and Gift Sets are destinations, not
-       * collections, and they already appear in the Quick Access column of the
-       * same menu — listing them here printed both twice.
-       */
-      discovery: {
-        label: "Discovery Set",
-        desc: "Begin your journey with KHEM",
+      noir: {
+        label: "Noir Collection",
+        desc: "A darker, more exclusive chapter",
       },
       bodyCare: {
         label: "Body Care",
         desc: "Rituals for the skin",
       },
-      roomFragrance: {
-        label: "Room Fragrance",
+      homeFragrance: {
+        label: "Home Fragrances",
         desc: "Scent your sanctuary",
       },
     },
@@ -96,10 +97,16 @@ export const en = {
       journal: { label: "Journal" },
       about: { label: "About KHEM" },
     },
+    /*
+     * Quick Access, in the order it is printed. The two set categories are
+     * destinations rather than chapters of the library; the two cuts beneath
+     * them cross every collection at once and so have no page of their own —
+     * they address the `?facet=` filter. See `src/lib/facets.ts`.
+     */
     quickAccessItems: {
-      newArrivals: "New Arrivals",
-      bestSellers: "Best Sellers",
+      discoverySets: "Discovery Sets",
       giftSets: "Gift Sets",
+      bestSellers: "Best Sellers",
       limitedEditions: "Limited Editions",
     },
   },
@@ -115,10 +122,12 @@ export const en = {
     rights: "© {year} KHEM Fragrance House. All rights reserved.",
     craftedIn: "Crafted with reverence in Cairo",
     logoAlt: "KHEM Perfumes — Essence of Heritage",
+    /*
+     * The Collections column is no longer listed here: it is rendered from the
+     * same `collections` / `quickAccess` tables the Nav uses, so the two
+     * surfaces cannot drift apart. What remains is copy the Footer alone prints.
+     */
     links: {
-      newArrivals: "New Arrivals",
-      giftSets: "Gift Sets",
-      bestSellers: "Best Sellers",
       theJournal: "The Journal",
       stockists: "Stockists",
       contact: "Contact",
@@ -213,21 +222,73 @@ export const en = {
     countLabel: "{count} Fragrances",
     /** The overview lists more than fragrances, so it counts neutrally. */
     countLabelAll: "{count} Pieces",
-    /** Accessible name for the one filter row — the collection chips. */
-    filterByCollection: "Filter by collection",
-    /** Dismisses the `?facet=` cut a Nav or Footer link arrived with. */
-    clearFilter: "Clear",
+    /** Accessible name for the one filter row — the facet chips. */
+    filterLabel: "Filter the catalogue",
     /*
      * Keyed by `ProductFacet` (`src/lib/facets.ts`) — kebab-case because the
      * key is also the `?facet=` value, and one spelling for both is one fewer
-     * mapping to keep in step. These name the active cut above the grid; they
-     * are not chips, because `/collections` offers one filter row and it filters
-     * by collection.
+     * mapping to keep in step. Declared in chip order, which `FACET_ORDER`
+     * owns; this object only supplies the words.
      */
     facets: {
-      "new-arrivals": "New Arrivals",
+      "new-arrivals": "New Arrival",
+      signature: "Signature",
+      gemstone: "Gemstone",
+      noir: "Noir",
+      "body-care": "Body Care",
+      "home-fragrance": "Home Fragrances",
+      discovery: "Discovery Sets",
+      "gift-set": "Gift Sets",
       "best-sellers": "Best Sellers",
-      limited: "Limited Editions",
+      "limited-edition": "Limited Edition",
+    },
+    /*
+     * The state line above the grid on `/collections`. Both the filter and the
+     * sort can be arrived at rather than chosen — a shared `?facet=` URL, a sort
+     * left set from earlier in the visit — so the page says what it is showing
+     * instead of leaving a two-thirds shorter catalogue unexplained.
+     */
+    activeState: {
+      filteredBy: "Filtered by {name}",
+      sortedBy: "Sorted by {name}",
+      clear: "Clear",
+    },
+    /*
+     * The two merchandising cuts that have a page of their own — see
+     * `MERCH_PAGE_FACETS` in `src/lib/facets.ts`. Keyed by facet, like
+     * `facets` above, and carrying what a `Collection` row would have supplied
+     * for a seeded collection: a name, a description, and the alt text of a
+     * hero it has no column to store.
+     */
+    merchPages: {
+      "best-sellers": {
+        name: "Best Sellers",
+        description:
+          "The pieces the house cannot keep on the shelf — chosen by our customers rather than by us, and drawn from every collection we make.",
+        bannerAlt: "Black marble lit from one side, veined with pale gold",
+        meta: {
+          title: "Best Sellers",
+          description:
+            "The most sought-after KHEM pieces, across every collection — fragrance, body care, home fragrance, and the sets composed for giving.",
+          ogTitle: "Best Sellers | KHEM",
+          ogDescription:
+            "What our customers reach for most, drawn from every KHEM collection.",
+        },
+      },
+      "limited-edition": {
+        name: "Limited Edition",
+        description:
+          "Small runs, made once. Rare materials and short harvests decide how many bottles exist, and when they are gone the composition is retired.",
+        bannerAlt: "A single flacon in low light, gold leaf catching the edge",
+        meta: {
+          title: "Limited Edition",
+          description:
+            "KHEM compositions released in numbered runs — rare materials, short harvests, and no second pressing.",
+          ogTitle: "Limited Edition | KHEM",
+          ogDescription:
+            "Numbered runs from the Cairo atelier. Once they are gone, the composition is retired.",
+        },
+      },
     },
     sortBy: "Sort By",
     sortOptions: {
@@ -653,18 +714,18 @@ export const en = {
     empty: "New rituals are being prepared. Please return shortly.",
   },
 
-  roomFragrance: {
+  homeFragrance: {
     meta: {
-      title: "Home Fragrance",
+      title: "Home Fragrances",
       description:
         "Room sprays and home scents that turn an interior into a temple of olfactory experience.",
-      ogTitle: "Home Fragrance | KHEM",
+      ogTitle: "Home Fragrances | KHEM",
       ogDescription:
         "In Ancient Egypt, a scented space was a sacred space. Bring the KHEM world into your interiors.",
     },
     eyebrow: "Scent Your Sanctuary",
     titleLead: "Home",
-    titleAccent: "Fragrance",
+    titleAccent: "Fragrances",
     description:
       "In Ancient Egypt, a scented space was a sacred space. Our home fragrance range extends the KHEM world into your interiors — transforming rooms into temples of olfactory experience.",
     filterLabel: "Filter by type",

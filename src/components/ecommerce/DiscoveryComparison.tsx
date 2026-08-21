@@ -108,8 +108,25 @@ export default async function DiscoveryComparison({
           </h2>
         </Reveal>
 
-        {/* The table scrolls inside its own container; the page never does. */}
-        <div className="overflow-x-auto">
+        {/*
+         * The table scrolls inside its own container; the page never does.
+         *
+         * `relative` is what makes that true, and it is not decoration. A table
+         * is 560px wide at its narrowest (`min-w-140`), and a static scroll
+         * container still propagates its content's layout overflow up the
+         * containing-block chain — so on a phone the *document* measured 511px
+         * against a 375px screen. The visible cost was the header: `<nav>` is
+         * `fixed inset-x-0`, and a mobile browser widens the layout viewport to
+         * cover overflowing content, so the bar stretched with it and left the
+         * bag and account icons off the right edge, jumping as the page was
+         * nudged sideways. Positioning the container makes it the containing
+         * block, so the overflow stops here, where the scrollbar is.
+         *
+         * Measured, not assumed: with this class the document reports 375px on
+         * a 375px screen; without it, 511px. Discovery was the only page in the
+         * site with the symptom because it is the only page with this table.
+         */}
+        <div className="relative overflow-x-auto">
           <table className="w-full min-w-140 border-collapse">
             <caption className="sr-only">
               {dict.discovery.compare.caption}

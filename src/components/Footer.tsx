@@ -4,8 +4,7 @@ import nameLogo from "@/public/logo/name-logo-transparent.svg";
 import CookieSettingsButton from "@/src/components/consent/CookieSettingsButton";
 import CurrencySwitcher from "@/src/components/i18n/CurrencySwitcher";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import { collections, world } from "@/src/constants/navigation-pages";
-import { facetHref } from "@/src/lib/facets";
+import { collections, quickAccess, world } from "@/src/constants/navigation-pages";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
@@ -26,21 +25,21 @@ export default async function Footer({ locale }: { locale: Locale }) {
   const dict = await getDictionary(locale);
   const year = new Date().getFullYear();
 
+  /*
+   * The Nav's two shop columns, one under the other. Both tables come from
+   * `src/constants/navigation-pages.ts`, so the footer offers exactly the
+   * destinations the menu does — the lists cannot drift apart on the next edit
+   * because there is only one list.
+   */
   const collectionLinks = [
     ...collections.map((c) => ({
       label: dict.nav.collectionItems[c.key].label,
       path: c.path,
     })),
-    /*
-     * The three destinations that are not collections. `collections` above
-     * lists the collections themselves — the Nav's mega-menu shows the same
-     * list — so these are named here rather than smuggled into that constant.
-     * Best sellers is a merchandising cut with no route of its own, so it
-     * addresses the `/collections` facet filter.
-     */
-    { label: dict.footer.links.newArrivals, path: "/new-arrival" },
-    { label: dict.footer.links.giftSets, path: "/gift-set" },
-    { label: dict.footer.links.bestSellers, path: facetHref("best-sellers") },
+    ...quickAccess.map((item) => ({
+      label: dict.nav.quickAccessItems[item.key],
+      path: item.path,
+    })),
   ];
 
   const worldLinks = [

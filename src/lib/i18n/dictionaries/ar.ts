@@ -59,28 +59,28 @@ export const ar: Dictionary = {
     featuredArticleTitle: "كيمياء صناعة العطور في مصر القديمة",
     featuredArticleAlt: "التراث",
     collectionItems: {
+      newArrival: {
+        label: "وصل حديثًا",
+        desc: "أحدث ما غادر الدار",
+      },
       signature: {
         label: "مجموعة سيغنتشر",
         desc: "تعبيرات خالدة عن التراث المصري",
-      },
-      noir: {
-        label: "مجموعة نور",
-        desc: "فصل أكثر عمقًا وحصرية",
       },
       gemstone: {
         label: "مجموعة الأحجار الكريمة",
         desc: "ضوء المعادن يُرتدى عطرًا",
       },
-      discovery: {
-        label: "علبة الاكتشاف",
-        desc: "ابدأ رحلتك مع كيم",
+      noir: {
+        label: "مجموعة نور",
+        desc: "فصل أكثر عمقًا وحصرية",
       },
       bodyCare: {
         label: "العناية بالجسم",
         desc: "طقوس للبشرة",
       },
-      roomFragrance: {
-        label: "عطور المكان",
+      homeFragrance: {
+        label: "عطور المنزل",
         desc: "عطّر مساحتك الخاصة",
       },
     },
@@ -92,9 +92,9 @@ export const ar: Dictionary = {
       about: { label: "عن كيم" },
     },
     quickAccessItems: {
-      newArrivals: "وصل حديثًا",
-      bestSellers: "الأكثر مبيعًا",
+      discoverySets: "علب الاكتشاف",
       giftSets: "علب الهدايا",
+      bestSellers: "الأكثر مبيعًا",
       limitedEditions: "إصدارات محدودة",
     },
   },
@@ -111,9 +111,6 @@ export const ar: Dictionary = {
     craftedIn: "صُنع بإتقان وتقدير في القاهرة",
     logoAlt: "عطور كيم — جوهر التراث",
     links: {
-      newArrivals: "وصل حديثًا",
-      giftSets: "علب الإهداء",
-      bestSellers: "الأكثر مبيعًا",
       theJournal: "المجلّة",
       stockists: "نقاط البيع",
       contact: "تواصل معنا",
@@ -207,12 +204,52 @@ export const ar: Dictionary = {
     home: "الرئيسية",
     countLabel: "{count} عطرًا",
     countLabelAll: "{count} قطعة",
-    filterByCollection: "تصفية حسب المجموعة",
-    clearFilter: "إلغاء",
+    filterLabel: "تصفية الكتالوج",
     facets: {
       "new-arrivals": "وصل حديثًا",
+      signature: "سيغنتشر",
+      gemstone: "الأحجار الكريمة",
+      noir: "نوار",
+      "body-care": "العناية بالجسم",
+      "home-fragrance": "عطور المنزل",
+      discovery: "علب الاكتشاف",
+      "gift-set": "علب الإهداء",
       "best-sellers": "الأكثر مبيعًا",
-      limited: "إصدارات محدودة",
+      "limited-edition": "إصدار محدود",
+    },
+    activeState: {
+      filteredBy: "التصفية: {name}",
+      sortedBy: "الترتيب: {name}",
+      clear: "إلغاء",
+    },
+    merchPages: {
+      "best-sellers": {
+        name: "الأكثر مبيعًا",
+        description:
+          "القطع التي لا تبقى على الرفّ طويلًا — اختارها عملاؤنا لا نحن، وهي مستقاة من كل مجموعة نصنعها.",
+        bannerAlt: "رخام أسود يضيئه ضوء جانبي، تتخلله عروق ذهبية شاحبة",
+        meta: {
+          title: "الأكثر مبيعًا",
+          description:
+            "أكثر قطع كيم طلبًا، من كل المجموعات — العطور، والعناية بالجسم، وعطور المنزل، والعلب المُصاغة للإهداء.",
+          ogTitle: "الأكثر مبيعًا | KHEM",
+          ogDescription: "ما يقصده عملاؤنا أكثر من غيره، من كل مجموعات كيم.",
+        },
+      },
+      "limited-edition": {
+        name: "إصدار محدود",
+        description:
+          "إصدارات صغيرة تُصنع مرّة واحدة. ندرة المواد وقِصَر موسم الحصاد هما ما يحدّد عدد الزجاجات، وحين تنفد يُطوى العطر.",
+        bannerAlt: "زجاجة واحدة في ضوء خافت، تلتمع حوافها بورق الذهب",
+        meta: {
+          title: "إصدار محدود",
+          description:
+            "تركيبات كيم الصادرة بأعداد مرقّمة — مواد نادرة، ومواسم قصيرة، ولا إصدار ثانٍ.",
+          ogTitle: "إصدار محدود | KHEM",
+          ogDescription:
+            "إصدارات مرقّمة من أتيليه القاهرة. وحين تنفد، يُطوى العطر.",
+        },
+      },
     },
     sortBy: "الترتيب حسب",
     sortOptions: {
@@ -615,7 +652,7 @@ export const ar: Dictionary = {
     empty: "يجري تحضير طقوس جديدة. نرجو العودة قريبًا.",
   },
 
-  roomFragrance: {
+  homeFragrance: {
     meta: {
       title: "عطور المنزل",
       description:

@@ -5,7 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { world, collections } from "../constants/navigation-pages";
+import {
+  world,
+  collections,
+  quickAccess,
+} from "../constants/navigation-pages";
 import { Heart, Search, ShoppingBag, UserRound, X } from "lucide-react";
 
 import nameLogo from "@/public/logo/name-logo-transparent.svg";
@@ -15,7 +19,6 @@ import LanguageSwitcher from "./i18n/LanguageSwitcher";
 import LocaleLink from "./i18n/LocaleLink";
 import SearchOverlay from "./search/SearchOverlay";
 import { signInPathWithReturn } from "@/src/lib/auth-redirect";
-import { facetHref } from "@/src/lib/facets";
 import { localizePath } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
@@ -60,7 +63,7 @@ function CartLink({
   return (
     <LocaleLink
       href="/cart"
-      className="nav-link relative"
+      className="nav-link relative shrink-0"
       aria-label={
         showCount
           ? count === 1
@@ -87,27 +90,13 @@ export default function Nav() {
   const locale = useLocale();
   const { isSignedIn } = useAuth();
 
-  /**
-   * The merchandising shortcuts, shared by the desktop mega-menu column and the
-   * mobile drawer.
-   *
-   * New Arrivals and Gift Sets are deliberately *not* in the "Our Collections"
-   * list beside them: that list is the collections themselves, and printing the
-   * same two destinations twice in one menu reads as a mistake. The drawer has
-   * no second column to put them in, so it renders this list as its own
-   * section — otherwise removing them from the collections list would strand
-   * both pages on mobile.
-   *
-   * Best Sellers and Limited Editions are cuts across every collection rather
-   * than chapters of one, so they address the `/collections` facet filter
-   * rather than a route of their own. See `src/lib/facets.ts`.
+  /*
+   * Both shop columns come from `src/constants/navigation-pages.ts`, which the
+   * Footer renders as well — the two surfaces offer the same ten destinations
+   * because they read the same tables, not because someone kept two lists in
+   * step. The drawer prints them as two stacked sections, having no second
+   * column to put Quick Access in.
    */
-  const quickAccess = [
-    [dict.nav.quickAccessItems.newArrivals, "/new-arrival"],
-    [dict.nav.quickAccessItems.bestSellers, facetHref("best-sellers")],
-    [dict.nav.quickAccessItems.giftSets, "/gift-set"],
-    [dict.nav.quickAccessItems.limitedEditions, facetHref("limited")],
-  ] as const;
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
@@ -223,7 +212,7 @@ export default function Nav() {
             : "border-b border-transparent bg-transparent",
         ].join(" ")}
       >
-        <div className="flex flex-1 items-center gap-9">
+        <div className="flex min-w-0 flex-1 items-center gap-9">
           <button
             type="button"
             aria-label={drawerOpen ? dict.nav.closeMenu : dict.nav.openMenu}
@@ -296,7 +285,12 @@ export default function Nav() {
           />
         </LocaleLink>
 
-        <div className="flex flex-1 items-center justify-end gap-5 sm:gap-7">
+        {/*
+         * `min-w-0` on both rails, and a gap that opens up with the viewport:
+         * the rails are `flex-1`, so on a 320px screen the row needs to tighten
+         * rather than push its last icons past the edge.
+         */}
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-4 sm:gap-5 lg:gap-7">
           <div className="hidden sm:block">
             <LanguageSwitcher />
           </div>
@@ -308,7 +302,7 @@ export default function Nav() {
           <button
             ref={searchButtonRef}
             type="button"
-            className="nav-link"
+            className="nav-link shrink-0"
             aria-label={dict.nav.search}
             aria-haspopup="dialog"
             aria-expanded={searchOpen}
@@ -319,7 +313,7 @@ export default function Nav() {
           </button>
           <LocaleLink
             href="/wishlist"
-            className="nav-link hidden sm:inline-flex"
+            className="nav-link hidden shrink-0 sm:inline-flex"
             aria-label={dict.nav.wishlist}
           >
             <WishlistIcon />
@@ -348,7 +342,7 @@ export default function Nav() {
            */}
           {isSignedIn ? (
             <span
-              className="flex items-center"
+              className="flex shrink-0 items-center"
               aria-label={dict.nav.accountMenu}
             >
               <UserButton
@@ -372,7 +366,7 @@ export default function Nav() {
              */
             <Link
               href={signInPathWithReturn(locale, pathname)}
-              className="nav-link"
+              className="nav-link shrink-0"
               aria-label={dict.nav.account}
             >
               <AccountIcon />
@@ -438,15 +432,15 @@ export default function Nav() {
           <section>
             <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
             <div className="flex flex-col gap-3.5">
-              {quickAccess.map(([label, path]) => (
+              {quickAccess.map((item) => (
                 <LocaleLink
-                  key={label}
-                  href={path}
+                  key={item.path}
+                  href={item.path}
                   onClick={closeDrawer}
                   className="group flex items-center gap-3 text-xs tracking-widest text-ivory/50 no-underline transition-colors duration-300 hover:text-gold"
                 >
                   <span className="inline-block h-px w-5 bg-current" />
-                  {label}
+                  {dict.nav.quickAccessItems[item.key]}
                 </LocaleLink>
               ))}
             </div>
@@ -600,14 +594,14 @@ export default function Nav() {
           <div>
             <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
             <div className="flex flex-col gap-3.5">
-              {quickAccess.map(([label, path]) => (
+              {quickAccess.map((item) => (
                 <LocaleLink
-                  key={label}
-                  href={path}
+                  key={item.path}
+                  href={item.path}
                   className="group flex items-center gap-3 text-xs tracking-widest text-ivory/50 no-underline transition-colors duration-300 hover:text-gold"
                 >
                   <span className="inline-block h-px w-5 bg-current" />
-                  {label}
+                  {dict.nav.quickAccessItems[item.key]}
                 </LocaleLink>
               ))}
             </div>

@@ -1,10 +1,10 @@
 import Image from "next/image";
 
 /**
- * The opening hero shared by `/body-care`, `/room-fragrance`, and `/discovery`
- * — Server Component.
+ * The opening hero shared by the four category collections under
+ * `/collections/[slug]` — Server Component.
  *
- * All three routes open on the same shape: a full-bleed photograph graded down
+ * All of them open on the same shape: a full-bleed photograph graded down
  * to near-black, a two-line display title whose second line is gold, a rule,
  * and a paragraph. Keeping it in one component is what stops the three pages
  * drifting apart the way the original SPA files had, where the same hero was

@@ -2,10 +2,9 @@
  * Product URLs.
  *
  * The one place a catalog record becomes a link. Fragrances have a detail page;
- * body care, home fragrance, and discovery sets do not — they are sold straight
- * from their category grid, so a cart or wishlist line for one of those links
- * back to the grid it came from rather than to a `/perfume/…` URL that would
- * 404.
+ * body care, home fragrance, and the sets do not — they are sold straight from
+ * their collection page, so a cart or wishlist line for one of those links back
+ * to the grid it came from rather than to a `/perfume/…` URL that would 404.
  *
  * Keeping this in one function is what makes adding a detail page for those
  * goods later a single-line change.
@@ -19,12 +18,17 @@ export interface LinkableProduct {
   collectionKind: CollectionKind;
 }
 
-/** Category landing page for each non-fragrance kind. */
+/**
+ * Category landing page for each non-fragrance kind.
+ *
+ * All four live under `/collections/[slug]` since the category routes were
+ * folded in; the old top-level paths remain only as 308s.
+ */
 const CATEGORY_PATH = {
-  BODY: "/body-care",
-  HOME: "/room-fragrance",
-  DISCOVERY: "/discovery",
-  GIFT: "/gift-set",
+  BODY: "/collections/body-care",
+  HOME: "/collections/home-fragrance",
+  DISCOVERY: "/collections/discovery",
+  GIFT: "/collections/gift-set",
 } as const satisfies Record<Exclude<CollectionKind, "FRAGRANCE">, string>;
 
 /**

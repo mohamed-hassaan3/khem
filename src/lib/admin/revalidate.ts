@@ -13,9 +13,9 @@
  *    cache entries of the same row. Revalidating one leaves the other stale,
  *    and the one an editor is least likely to check is the one that stays wrong.
  * 2. **Category paths come from `src/lib/routes.ts`.** Hard-coding
- *    `/room-fragrance` here would mean a sixth `CollectionKind` compiles fine
- *    and silently stops revalidating; going through `CATEGORY_PATH` makes it a
- *    compile error in one place instead.
+ *    `/collections/home-fragrance` here would mean a sixth `CollectionKind`
+ *    compiles fine and silently stops revalidating; going through
+ *    `CATEGORY_PATH` makes it a compile error in one place instead.
  */
 
 import "server-only";
@@ -37,21 +37,21 @@ const HOME = "/";
  * Where a collection's goods are sold, by kind.
  *
  * Mirrors `productHref()` in `src/lib/routes.ts` — fragrances live at
- * `/perfume/[slug]` behind their collection page, everything else sells from a
- * category grid. Written as an exhaustive switch so a new kind fails here.
+ * `/perfume/[slug]` behind their collection page, everything else sells from
+ * its collection page under `/collections/[slug]`. Written as an exhaustive switch so a new kind fails here.
  */
 function categoryPathsForKind(kind: CollectionKind): string[] {
   switch (kind) {
     case "FRAGRANCE":
       return ["/collections"];
     case "BODY":
-      return ["/body-care"];
+      return ["/collections/body-care"];
     case "HOME":
-      return ["/room-fragrance"];
+      return ["/collections/home-fragrance"];
     case "DISCOVERY":
-      return ["/discovery"];
+      return ["/collections/discovery"];
     case "GIFT":
-      return ["/gift-set"];
+      return ["/collections/gift-set"];
     default: {
       const unreachable: never = kind;
       return unreachable;

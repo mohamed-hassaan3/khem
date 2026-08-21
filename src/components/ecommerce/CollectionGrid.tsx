@@ -4,6 +4,7 @@ import { ChevronDown, Heart } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import {
+  FACET_ORDER,
   FACET_PARAM,
   parseFacet,
   type ProductFacet,
@@ -25,25 +26,23 @@ import { useWishlist } from "@/src/providers/wishlist-provider";
  * across the client boundary. This component only filters and reorders the
  * nodes it is given and overlays the wishlist control.
  *
- * ## One filter row, two parameters
+ * ## One filter row, one parameter, and a line that says what it did
  *
- * The overview offers exactly one row of chips, and it filters by **collection**
- * — `?collection=<slug>`. That is the whole vocabulary a visitor is given here.
+ * The overview offers exactly one row of chips, and every chip writes
+ * `?facet=`. A facet is either a collection or a merchandising cut that crosses
+ * them — `src/lib/facets.ts` explains why those are one vocabulary and not two.
+ * This component used to carry a second parameter, `?collection=`, for a second
+ * row that never existed on the same screen; the chips it would have needed are
+ * these chips, so it is gone. It also used to carry a `tabs` slot for the
+ * collection bar on `/collections/[slug]`: a collection page offers no filter
+ * and no navigation row at all now, so the slot went with it.
  *
- * `?facet=` is the second parameter and has no chips. It carries the
- * merchandising cuts that run across collections (best sellers, limited
- * editions, new arrivals), and it is entered by *arriving* from the Nav
- * quick-access column or the Footer — see `src/lib/facets.ts`. Rather than
- * printing a second row beside the first, the page names the active cut above
- * the grid with a Clear control, so a narrowed catalog is never unexplained. The
- * two compose: Noir on a best-sellers URL shows Noir best sellers.
- *
- * WHY THE PARAMETERS ARE READ FROM `window`, NOT FROM `useSearchParams`:
- * the filters have to be linkable — the Nav and the Footer point at
+ * WHY THE PARAMETER IS READ FROM `window`, NOT FROM `useSearchParams`:
+ * the filter has to be linkable — the Nav and the Footer point at
  * `/collections?facet=best-sellers` — but `useSearchParams` forces the subtree
  * under it to bail out to client rendering, which would strip the entire
  * product grid out of the prerendered HTML that this listing page depends on
- * for SEO. Reading the parameters after mount instead keeps the full catalog in
+ * for SEO. Reading the parameter after mount instead keeps the full catalog in
  * the static HTML and narrows it on hydration. Writes go through
  * `history.replaceState`, which updates the URL without a router round trip for
  * what is purely a client-side view change.
@@ -51,8 +50,18 @@ import { useWishlist } from "@/src/providers/wishlist-provider";
 
 export type SortKey = "featured" | "price-asc" | "price-desc";
 
-/** The query parameter the chips write to, beside `FACET_PARAM`. */
-export const COLLECTION_PARAM = "collection";
+/**
+ * `SortKey` → the dictionary key its label lives under.
+ *
+ * The two spellings differ (`price-asc` is a URL-shaped value, `priceAsc` a
+ * dictionary key), so the state line and the `<select>` print the same string
+ * through this map rather than through a second copy of the copy.
+ */
+const SORT_LABEL_KEY = {
+  featured: "featured",
+  "price-asc": "priceAsc",
+  "price-desc": "priceDesc",
+} as const satisfies Record<SortKey, string>;
 
 export interface CollectionGridItem {
   id: string;
@@ -60,56 +69,46 @@ export interface CollectionGridItem {
   name: string;
   /** The sort key. Smallest currency unit, per AGENTS.md §9. */
   priceInCents: number;
-  /** Parent collection — what the chip row filters on. */
-  collectionSlug: string;
-  /** Every merchandising cut this product belongs to — see `productFacets()`. */
+  /** Every facet this product belongs to — see `productFacets()`. */
   facets: readonly ProductFacet[];
   /** The server-rendered `<ProductCard>`. */
   card: ReactNode;
 }
 
-/** One filter chip: a collection and its name as stored. */
-export interface CollectionOption {
-  slug: string;
-  label: string;
-}
-
 export interface CollectionGridProps {
   items: CollectionGridItem[];
   /**
-   * The filter chips. Omitted on a single-collection page, which is already a
-   * filtered view — a filter with one possible value is not one.
+   * Offer the chip row. The single-collection route is already a filtered view,
+   * so it passes `false` — a filter whose answer is the page you are on is not
+   * one.
    */
-  collections?: readonly CollectionOption[];
-  /**
-   * Translated names for the merchandising cuts, for the active-cut line. Always
-   * passed: a `?facet=` URL can be opened on either route.
-   */
+  showFacets?: boolean;
+  /** Translated chip labels, keyed by facet. */
   facetLabels: Readonly<Record<ProductFacet, string>>;
+  /**
+   * Offer the sort control. `/collections` is the one screen that lists the
+   * whole house, so reordering by price belongs there; a single collection is
+   * short enough to read as it was composed, and the control only crowded the
+   * bar its description shares.
+   */
+  showSort?: boolean;
   /**
    * The collection description, server-rendered. It shares a bar with the sort
    * control, and the sort control's state lives here — so the bar is assembled
    * in this component from a slot rather than duplicated in the page.
    */
   description: ReactNode;
-  /**
-   * The server-rendered collection tab bar. Set on `/collections/[slug]`, where
-   * moving between collections is navigation rather than filtering; the overview
-   * passes nothing and gets the chip row above instead.
-   */
-  tabs?: ReactNode;
 }
 
 export default function CollectionGrid({
   items,
-  collections,
+  showFacets = false,
   facetLabels,
+  showSort = false,
   description,
-  tabs,
 }: CollectionGridProps) {
   const dict = useDictionary();
   const [sort, setSort] = useState<SortKey>("featured");
-  const [collection, setCollection] = useState<string | null>(null);
   const [facet, setFacet] = useState<ProductFacet | null>(null);
 
   /**
@@ -122,72 +121,69 @@ export default function CollectionGrid({
   const wishlist = useWishlist();
 
   /**
-   * Only collections with something in them are offered — the `<MerchGrid>`
+   * Only facets with something behind them are offered — the `<MerchGrid>`
    * rule: a chip that filters to nothing is a dead affordance, and an emptied
    * collection should take its chip with it rather than wait for a code change.
+   * `FACET_ORDER` supplies the order, so the row reads the same on every visit
+   * whatever the catalog happens to hold.
    */
   const available = useMemo(() => {
-    if (!collections) return [];
-    const present = new Set(items.map((item) => item.collectionSlug));
-    return collections.filter((option) => present.has(option.slug));
-  }, [collections, items]);
+    if (!showFacets) return [];
+    const present = new Set(items.flatMap((item) => item.facets));
+    return FACET_ORDER.filter((option) => present.has(option));
+  }, [showFacets, items]);
 
   /*
-   * Adopt both parameters on mount, and again whenever the visitor uses the Back
+   * Adopt the parameter on mount, and again whenever the visitor uses the Back
    * button — `history.replaceState` below does not fire `popstate` itself, but
    * arriving here from a Nav link that carried a cut does. An unrecognised value
-   * resolves to `null` on either parameter, so a mistyped URL shows the whole
-   * catalog rather than an empty grid.
+   * resolves to `null`, so a mistyped URL shows the whole catalog rather than an
+   * empty grid.
    */
   useEffect(() => {
     const read = () => {
       const params = new URLSearchParams(window.location.search);
-
-      const slug = params.get(COLLECTION_PARAM);
-      setCollection(
-        available.some((option) => option.slug === slug) ? slug : null,
-      );
-
       setFacet(parseFacet(params.get(FACET_PARAM)));
     };
 
     read();
     window.addEventListener("popstate", read);
     return () => window.removeEventListener("popstate", read);
-    // `available` is derived from the props; a catalog edit re-validates the slug.
-  }, [available]);
+  }, []);
 
-  /** One writer for both parameters, so the URL never disagrees with the view. */
-  const writeParam = (param: string, value: string | null) => {
+  const selectFacet = (next: ProductFacet | null) => {
+    setFacet(next);
+
     const url = new URL(window.location.href);
 
-    if (value === null) {
-      url.searchParams.delete(param);
+    if (next === null) {
+      url.searchParams.delete(FACET_PARAM);
     } else {
-      url.searchParams.set(param, value);
+      url.searchParams.set(FACET_PARAM, next);
     }
 
     window.history.replaceState(null, "", url);
   };
 
-  const selectCollection = (next: string | null) => {
-    setCollection(next);
-    writeParam(COLLECTION_PARAM, next);
+  /**
+   * One control for both pieces of state.
+   *
+   * The line it sits on names the filter and the sort together, so a Clear that
+   * dropped only the filter would leave half of what it just described in
+   * place.
+   */
+  const clearAll = () => {
+    setSort("featured");
+    selectFacet(null);
   };
 
-  const clearFacet = () => {
-    setFacet(null);
-    writeParam(FACET_PARAM, null);
-  };
+  const isFiltered = facet !== null;
+  const isSorted = sort !== "featured";
 
   const filtered = useMemo(
     () =>
-      items.filter(
-        (item) =>
-          (collection === null || item.collectionSlug === collection) &&
-          (facet === null || item.facets.includes(facet)),
-      ),
-    [items, collection, facet],
+      items.filter((item) => facet === null || item.facets.includes(facet)),
+    [items, facet],
   );
 
   const sorted = useMemo(() => {
@@ -210,71 +206,65 @@ export default function CollectionGrid({
         <div className="mx-auto flex max-w-350 flex-col gap-6 md:flex-row md:items-center md:justify-between">
           {description}
 
-          <div className="flex items-center gap-5">
-            <label
-              htmlFor="collection-sort"
-              className="whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-ivory/35"
-            >
-              {dict.collections.sortBy}
-            </label>
-
-            <div className="relative">
-              <select
-                id="collection-sort"
-                value={sort}
-                onChange={(event) => setSort(event.target.value as SortKey)}
-                className="cursor-pointer appearance-none border border-white/10 bg-white/4 px-4 py-2.5 pe-9 font-heading text-[11px] tracking-[0.1em] text-ivory transition-colors duration-300 ease-out hover:border-gold/50 focus-visible:border-gold focus-visible:outline-none"
+          {showSort ? (
+            <div className="flex items-center gap-5">
+              <label
+                htmlFor="collection-sort"
+                className="whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-ivory/35"
               >
-                <option value="featured">
-                  {dict.collections.sortOptions.featured}
-                </option>
-                <option value="price-asc">
-                  {dict.collections.sortOptions.priceAsc}
-                </option>
-                <option value="price-desc">
-                  {dict.collections.sortOptions.priceDesc}
-                </option>
-              </select>
+                {dict.collections.sortBy}
+              </label>
 
-              <ChevronDown
-                size={14}
-                strokeWidth={1.25}
-                aria-hidden="true"
-                className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-gold/60"
-              />
+              <div className="relative">
+                <select
+                  id="collection-sort"
+                  value={sort}
+                  onChange={(event) => setSort(event.target.value as SortKey)}
+                  className="cursor-pointer appearance-none border border-white/10 bg-white/4 px-4 py-2.5 pe-9 font-heading text-[11px] tracking-[0.1em] text-ivory transition-colors duration-300 ease-out hover:border-gold/50 focus-visible:border-gold focus-visible:outline-none"
+                >
+                  <option value="featured">
+                    {dict.collections.sortOptions.featured}
+                  </option>
+                  <option value="price-asc">
+                    {dict.collections.sortOptions.priceAsc}
+                  </option>
+                  <option value="price-desc">
+                    {dict.collections.sortOptions.priceDesc}
+                  </option>
+                </select>
+
+                <ChevronDown
+                  size={14}
+                  strokeWidth={1.25}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-gold/60"
+                />
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </section>
 
-      {/* ── COLLECTION TABS (single-collection route) ── */}
-      {tabs}
-
-      {/* ── COLLECTION FILTER (overview) ────────────── */}
+      {/* ── FACET FILTER (overview) ─────────────────── */}
       {available.length > 0 ? (
         <nav
-          aria-label={dict.collections.filterByCollection}
+          aria-label={dict.collections.filterLabel}
           className="border-b border-border bg-surface"
         >
+          {/* One scrolling strip at every width — never a second line. */}
           <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-x-auto px-6 py-4 md:px-20">
             <FilterChip
               label={dict.collections.tabAll}
-              isActive={collection === null}
-              onSelect={() => selectCollection(null)}
+              isActive={facet === null}
+              onSelect={() => selectFacet(null)}
             />
 
             {available.map((option) => (
               <FilterChip
-                key={option.slug}
-                /*
-                 * Collection names are translated database columns since
-                 * `0007_i18n_content.sql`, so which direction a label runs is a
-                 * runtime fact about the row — `dir="auto"` resolves it from the
-                 * text that actually rendered.
-                 */
-                label={option.label}
-                isActive={collection === option.slug}
-                onSelect={() => selectCollection(option.slug)}
+                key={option}
+                label={facetLabels[option]}
+                isActive={facet === option}
+                onSelect={() => selectFacet(option)}
               />
             ))}
           </div>
@@ -284,21 +274,49 @@ export default function CollectionGrid({
       {/* ── PRODUCT GRID ────────────────────────────── */}
       <section className="bg-background px-6 pb-24 pt-16 md:px-20 md:pb-36">
         {/*
-         * The active merchandising cut. It has no chip of its own — it was
-         * entered from the Nav or the Footer — so without this line a visitor
-         * would face a catalog that is quietly two thirds shorter than it should
-         * be, with nothing to press to widen it.
+         * What the visitor is looking at, in words.
+         *
+         * Both halves of this view can be *arrived* at rather than chosen — a
+         * `?facet=` URL someone shared, a sort left set from earlier in the
+         * visit — and a catalogue that is quietly two thirds shorter than it
+         * should be, in an order nobody remembers picking, is the one thing this
+         * page must not do silently. The chips say which one is pressed; this
+         * says what that means, and offers the way back.
+         *
+         * Plain type rather than a second row of controls: the chips above are
+         * the controls, and duplicating them here would be two places to press
+         * for one result.
          */}
-        {facet !== null ? (
-          <div className="mx-auto mb-10 flex max-w-350 items-center gap-4 text-[10px] uppercase tracking-[0.2em] text-ivory/35">
-            <span className="text-gold/70">{facetLabels[facet]}</span>
+        {showFacets && (isFiltered || isSorted) ? (
+          <div className="mx-auto mb-10 flex max-w-350 flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-wide text-ivory/40">
+            {isFiltered ? (
+              <span>
+                {interpolate(dict.collections.activeState.filteredBy, {
+                  name: facetLabels[facet],
+                })}
+              </span>
+            ) : null}
+
+            {isFiltered && isSorted ? (
+              <span aria-hidden="true" className="text-ivory/20">
+                ·
+              </span>
+            ) : null}
+
+            {isSorted ? (
+              <span>
+                {interpolate(dict.collections.activeState.sortedBy, {
+                  name: dict.collections.sortOptions[SORT_LABEL_KEY[sort]],
+                })}
+              </span>
+            ) : null}
 
             <button
               type="button"
-              onClick={clearFacet}
+              onClick={clearAll}
               className="cursor-pointer border-b border-transparent pb-0.5 uppercase tracking-[0.2em] transition-colors duration-300 ease-out hover:border-gold/50 hover:text-gold focus-visible:border-gold focus-visible:text-gold focus-visible:outline-none"
             >
-              {dict.collections.clearFilter}
+              {dict.collections.activeState.clear}
             </button>
           </div>
         ) : null}
@@ -322,7 +340,7 @@ export default function CollectionGrid({
            * in as a filter being applied rather than reading as a glitch.
            */
           <div
-            key={`${collection ?? "all"}-${facet ?? "all"}-${sort}`}
+            key={`${facet ?? "all"}-${sort}`}
             className="khem-fade mx-auto grid max-w-350 grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3"
           >
             {sorted.map((item) => {
@@ -380,9 +398,8 @@ export default function CollectionGrid({
  * route: the pill reads as a control that acts on the grid in place, which is
  * exactly what it does, while an underlined tab reads as a destination.
  *
- * `dir="auto"` on the label: collection names come from the database, and the
- * Arabic tree renders Arabic names where a row has them and the English
- * fallback where it does not.
+ * `dir="auto"` on the label: the labels are translated dictionary copy, so the
+ * Arabic tree runs them right-to-left inside an otherwise shared row.
  */
 function FilterChip({
   label,

@@ -65,10 +65,10 @@
       "kind": "BODY"
     },
     {
-      "id": "room-fragrance",
-      "name": "Home Fragrance",
+      "id": "home-fragrance",
+      "name": "Home Fragrances",
       "name_ar": "عطور المنزل",
-      "slug": "room-fragrance",
+      "slug": "home-fragrance",
       "description": "In Ancient Egypt, a scented space was a sacred space. Our room sprays extend the KHEM world into your interiors — a few pumps into the air of a room, and the atmosphere changes before anyone has entered it.",
       "description_ar": "في مصر القديمة، كان المكان المعطّر مكانًا مقدّسًا. بخاخاتنا تمدّ عالم KHEM إلى فضاءاتك — بضع نفحات في هواء الغرفة، فيتبدّل المناخ قبل أن يدخلها أحد.",
       "bannerUrl": "https://images.unsplash.com/photo-1609599176235-f93af914fde0?w=1800&h=900&fit=crop&auto=format",
@@ -89,7 +89,7 @@
       "description_ar": "كل رحلة إلى KHEM ينبغي أن تبدأ باكتشاف. أطقمنا المنتقاة تتيح لك استكشاف عالمنا الشمّي كاملًا قبل أن تلتزم بقنينة بالحجم الكامل.",
       "bannerUrl": "https://images.unsplash.com/photo-1674620213535-9b2a2553ef40?w=1800&h=900&fit=crop&auto=format",
       "bannerAlt": "A row of small sample vials laid out on dark lacquered wood",
-      "bannerAlt_ar": "صف من قوارير العيّنات الصغيرة على خشب داكن مصقول",
+      "bannerAlt_ar": "صف من زجاج العيّنات الصغيرة على خشب داكن مصقول",
       "cardUrl": null,
       "cardAlt": null,
       "cardAlt_ar": null,
@@ -1251,7 +1251,7 @@
         {
           "url": "https://images.unsplash.com/photo-1767360963892-3353defd6584?w=600&h=800&fit=crop&auto=format",
           "alt": "The Amber body mist bottle standing in soft golden light",
-          "alt_ar": "قارورة رذاذ Amber للجسم واقفة في ضوء ذهبي ناعم",
+          "alt_ar": "زجاجه رذاذ Amber للجسم واقفة في ضوء ذهبي ناعم",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1291,7 +1291,7 @@
         {
           "url": "https://images.unsplash.com/photo-1779524477261-12141ccbd8d9?w=600&h=800&fit=crop&auto=format",
           "alt": "The Opal body mist bottle against a pale bathing chamber wall",
-          "alt_ar": "قارورة رذاذ Opal للجسم أمام جدار حجرة استحمام شاحب",
+          "alt_ar": "زجاجه رذاذ Opal للجسم أمام جدار حجرة استحمام شاحب",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1331,7 +1331,7 @@
         {
           "url": "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?w=600&h=800&fit=crop&auto=format",
           "alt": "The Lapis body mist bottle reading deep blue in low light",
-          "alt_ar": "قارورة رذاذ Lapis للجسم تُقرأ زرقاء عميقة في ضوء خافت",
+          "alt_ar": "زجاجه رذاذ Lapis للجسم تُقرأ زرقاء عميقة في ضوء خافت",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1371,7 +1371,7 @@
         {
           "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=600&h=800&fit=crop&auto=format",
           "alt": "The Turquoise body mist bottle against pale sea-lit stone",
-          "alt_ar": "قارورة رذاذ Turquoise للجسم أمام حجر شاحب يضيئه البحر",
+          "alt_ar": "زجاجه رذاذ Turquoise للجسم أمام حجر شاحب يضيئه البحر",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1406,12 +1406,12 @@
       "sku": "KHEM-HOM-AMB-200",
       "inventory": 24,
       "isBestseller": false,
-      "collectionSlug": "room-fragrance",
+      "collectionSlug": "home-fragrance",
       "images": [
         {
           "url": "https://images.unsplash.com/photo-1738520420642-bc8761cc9f16?w=600&h=800&fit=crop&auto=format",
           "alt": "The Amber room spray bottle against a warm interior wall",
-          "alt_ar": "قارورة بخاخ Amber للمكان أمام جدار داخلي دافئ",
+          "alt_ar": "زجاجه بخاخ Amber للمكان أمام جدار داخلي دافئ",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1446,12 +1446,12 @@
       "sku": "KHEM-HOM-OPA-200",
       "inventory": 24,
       "isBestseller": false,
-      "collectionSlug": "room-fragrance",
+      "collectionSlug": "home-fragrance",
       "images": [
         {
           "url": "https://images.unsplash.com/photo-1609599176235-f93af914fde0?w=600&h=800&fit=crop&auto=format",
           "alt": "The Opal room spray bottle in a dim interior",
-          "alt_ar": "قارورة بخاخ Opal للمكان في فضاء داخلي معتم",
+          "alt_ar": "زجاجه بخاخ Opal للمكان في فضاء داخلي معتم",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1486,12 +1486,12 @@
       "sku": "KHEM-HOM-LAP-200",
       "inventory": 22,
       "isBestseller": false,
-      "collectionSlug": "room-fragrance",
+      "collectionSlug": "home-fragrance",
       "images": [
         {
           "url": "https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=600&h=800&fit=crop&auto=format",
           "alt": "The Lapis room spray bottle throwing blue light across dark stone",
-          "alt_ar": "قارورة بخاخ Lapis للمكان تبعثر ضوءًا أزرق على حجر داكن",
+          "alt_ar": "زجاجه بخاخ Lapis للمكان تبعثر ضوءًا أزرق على حجر داكن",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1526,12 +1526,12 @@
       "sku": "KHEM-HOM-TUR-200",
       "inventory": 26,
       "isBestseller": false,
-      "collectionSlug": "room-fragrance",
+      "collectionSlug": "home-fragrance",
       "images": [
         {
           "url": "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=600&h=800&fit=crop&auto=format",
           "alt": "The Turquoise room spray bottle against pale sea-lit stone",
-          "alt_ar": "قارورة بخاخ Turquoise للمكان أمام حجر شاحب يضيئه البحر",
+          "alt_ar": "زجاجه بخاخ Turquoise للمكان أمام حجر شاحب يضيئه البحر",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1544,12 +1544,12 @@
       "subtitle": "The complete introduction",
       "subtitle_ar": "المدخل الكامل",
       "description": "Contains six of our Signature 3ml vials — one from each fragrance in the founding range. The complete introduction to the world of KHEM.",
-      "description_ar": "يضمّ ستًّا من قواريرنا سعة 3 مل من مجموعة Signature — واحدة من كل عطر في المجموعة المؤسِّسة. المدخل الكامل إلى عالم KHEM.",
+      "description_ar": "يضمّ ستًّا من زجاجنا سعة 3 مل من مجموعة Signature — واحدة من كل عطر في المجموعة المؤسِّسة. المدخل الكامل إلى عالم KHEM.",
       "story": null,
       "story_ar": null,
       "concentration": null,
       "format": "6 × 3 ML Vials",
-      "format_ar": "6 قوارير × 3 مل",
+      "format_ar": "6 زجاج × 3 مل",
       "includes": [
         "Onyx Night 3ml",
         "Ivory Temple 3ml",
@@ -1585,7 +1585,7 @@
         {
           "url": "https://images.unsplash.com/photo-1674620213535-9b2a2553ef40?w=600&h=800&fit=crop&auto=format",
           "alt": "Six discovery vials arranged in a shallow presentation tray",
-          "alt_ar": "ست قوارير اكتشاف مرتّبة في صينية تقديم ضحلة",
+          "alt_ar": "ست زجاج اكتشاف مرتّبة في صينية تقديم ضحلة",
           "isPrimary": true,
           "sortOrder": 0
         }
@@ -1598,12 +1598,12 @@
       "subtitle": "The darker chapter",
       "subtitle_ar": "الفصل الأكثر عتمة",
       "description": "Both Noir compositions, presented in weighted vials. For those drawn to shadow, depth, and the more esoteric expressions of Egyptian heritage.",
-      "description_ar": "تركيبتا Noir كلتاهما، مقدَّمتين في قوارير موزونة. لمن يجذبهم الظل والعمق والتعبيرات الأكثر باطنيةً عن التراث المصري.",
+      "description_ar": "تركيبتا Noir كلتاهما، مقدَّمتين في زجاج موزونة. لمن يجذبهم الظل والعمق والتعبيرات الأكثر باطنيةً عن التراث المصري.",
       "story": null,
       "story_ar": null,
       "concentration": null,
       "format": "2 × 10 ML Vials",
-      "format_ar": "قارورتان × 10 مل",
+      "format_ar": "زجاجتان × 10 مل",
       "includes": [
         "Kyphi 10ml",
         "Mendesian 10ml",
@@ -1653,7 +1653,7 @@
       "story_ar": null,
       "concentration": null,
       "format": "14 × 3 ML Vials",
-      "format_ar": "14 قارورة × 3 مل",
+      "format_ar": "14 زجاجه × 3 مل",
       "includes": [
         "All 6 Signature fragrances 3ml",
         "Both Noir fragrances 3ml",
@@ -1689,7 +1689,7 @@
         {
           "url": "https://images.unsplash.com/photo-1605174697130-0bb0b83c92fc?w=600&h=800&fit=crop&auto=format",
           "alt": "A lacquered collector's box holding the full library of vials",
-          "alt_ar": "صندوق مقتنيات مطليّ باللاكيه يضمّ مكتبة القوارير كاملة",
+          "alt_ar": "صندوق مقتنيات مطليّ باللاكيه يضمّ مكتبة الزجاج كاملة",
           "isPrimary": true,
           "sortOrder": 0
         }
