@@ -19,11 +19,11 @@
  * server and never from a route param, a search param, or a client prop.
  */
 
-// NOTE: once the `server-only` package is installed, add `import "server-only"`
-// here so a stray client import of this module fails at build time instead of
-// shipping query logic — and later, credentials — to the browser. The same
-// note sits at the top of `src/services/products.ts`.
+import "server-only";
 
+import { getSupabaseAdmin } from "@/src/lib/supabase";
+import { parseList } from "@/src/schemas/db/catalog";
+import { customerOrderSchema } from "@/src/schemas/db/orders";
 import type {
   AccountSummary,
   OrderSummary,
@@ -33,30 +33,51 @@ import type {
 /**
  * A customer's orders, newest first.
  *
- * Becomes:
+ * ## Why this reads with the secret key
  *
- * ```ts
- * const { data, error } = await supabase
- *   .from("Order")
- *   .select(
- *     `id, orderNumber, createdAt, status, totalInCents, trackingCode,
- *      items:OrderItem ( quantity, product:Product ( name ) )`,
- *   )
- *   .eq("user.clerkId", userId)
- *   .order("createdAt", { ascending: false });
- * ```
+ * `supabase/sql/0015_orders.sql` grants the public roles nothing on `"Order"`:
+ * the row holds a name, an email and a phone number, and identity here is
+ * Clerk's, so no RLS policy could express "this order is mine" — `auth.uid()`
+ * is always null. The filter *is* the access control, which puts two
+ * obligations on this function and nowhere else:
  *
- * Two things that are easy to get wrong later, so they are written down now:
- * the filter must be on the *session's* user id and never on a value the
- * client supplied, and RLS on `Order` must key on the Clerk JWT's `sub` claim
- * so a leaked service-role key is the only way to read another customer's
- * history.
+ *  - `userId` must arrive from `await auth()` on the server. Never a route
+ *    param, never a search param, never a form field. Every caller today does;
+ *    it is the one thing to check when a new one appears.
+ *  - The projection must stay narrow. A customer's own order is theirs to see,
+ *    but the desk's private `note` is not part of it.
+ *
+ * Walk-in orders recorded at the boutique carry no `clerkUserId`, so they
+ * correctly do not appear in anybody's history.
  */
 export async function getOrdersForUser(
   userId: string,
 ): Promise<readonly OrderSummary[]> {
-  void userId;
-  return [];
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Order")
+    .select(
+      "id, orderNumber, placedAt, status, totalInCents, trackingCode, " +
+        "items:OrderItem(productName, quantity)",
+    )
+    .eq("clerkUserId", userId)
+    .order("placedAt", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    console.error(`[account] getOrdersForUser failed: ${error.message}`);
+    return [];
+  }
+
+  return parseList(data, (row) => {
+    const parsed = customerOrderSchema.safeParse(row);
+    if (!parsed.success) return null;
+
+    const { items, ...order } = parsed.data;
+    return { ...order, lines: items } satisfies OrderSummary;
+  });
 }
 
 /**
@@ -85,22 +106,28 @@ export async function getAddressesForUser(
 /**
  * Order count and lifetime spend for the overview panel.
  *
- * Becomes a single aggregate rather than counting a fetched list in JS:
+ * Derived from the same rows the history list renders rather than from a
+ * separate aggregate. That is the opposite of what the dashboard does — there,
+ * counting in TypeScript would mean fetching every order in the boutique — but
+ * here the set is one person's order history, already capped, and a second
+ * definition of "lifetime spend" living in SQL is a second thing that can
+ * disagree with the list printed above it.
  *
- * ```ts
- * const { data } = await supabase
- *   .rpc("account_summary", { clerk_id: userId });
- * ```
- *
- * Cancelled and refunded orders are excluded from lifetime spend by that
- * function — a refunded order is not money the house kept, and printing it as
- * such would overstate every customer's standing.
+ * Cancelled and refunded orders are excluded from the spend: a refunded order
+ * is not money the house kept, and counting it overstates the customer's
+ * standing. They still count as orders placed, because they were.
  */
 export async function getAccountSummary(
   userId: string,
 ): Promise<AccountSummary> {
-  void userId;
-  return { orderCount: 0, lifetimeSpendInCents: 0 };
+  const orders = await getOrdersForUser(userId);
+
+  return {
+    orderCount: orders.length,
+    lifetimeSpendInCents: orders
+      .filter((order) => order.status !== "CANCELLED" && order.status !== "REFUNDED")
+      .reduce((sum, order) => sum + order.totalInCents, 0),
+  };
 }
 
 /*

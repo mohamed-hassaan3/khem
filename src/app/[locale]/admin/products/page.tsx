@@ -13,24 +13,11 @@ import {
 import AdminSearch from "@/src/components/admin/AdminSearch";
 import StatusToggle from "@/src/components/admin/StatusToggle";
 import { matchesTerm, searchTerm } from "@/src/lib/admin/filter";
+import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listAdminProducts } from "@/src/services/admin/catalog";
 
 export const dynamic = "force-dynamic";
-
-/**
- * Piastres as pounds, for a working list.
- *
- * Not `formatPrice()` from `src/lib/format.ts`: that converts into the
- * visitor's display currency, which is the last thing this screen wants. An
- * editor is checking what they stored, and what they stored is EGP.
- */
-function egp(priceInCents: number): string {
-  return `EGP ${(priceInCents / 100).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
 
 export default async function AdminProductsPage({
   params,

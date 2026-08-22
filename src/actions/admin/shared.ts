@@ -18,7 +18,10 @@
 
 import type { z } from "zod";
 
+import { revalidateProduct } from "@/src/lib/admin/revalidate";
 import type { AdminActionResult } from "@/src/schemas/admin";
+import { getAdminCollection, listAdminProducts } from "@/src/services/admin/catalog";
+import type { CollectionKind } from "@/src/types/catalog";
 
 /** The shape supabase-js hands back in `{ error }`. */
 export interface PostgresErrorLike {
@@ -159,5 +162,52 @@ export function postgresFailure(
         ok: false,
         message: "The database refused that change. The details are in the server log.",
       };
+  }
+}
+
+/**
+ * Re-render every storefront surface that quotes a product's stock.
+ *
+ * A sale and a stock correction change exactly what a catalog edit changes —
+ * the sold-out state on a card, the "only 2 remaining" line on the detail page,
+ * the disabled add-to-cart — so this reuses `revalidateProduct()` rather than
+ * inventing a second, shorter list that will drift from it.
+ *
+ * The collection kind has to be looked up because the paths a product appears
+ * on depend on it, and the inventory screen only ever holds a slug. One lookup
+ * per distinct collection, not per product: an order of five fragrances would
+ * otherwise ask the same question five times.
+ *
+ * Failure here is quiet on purpose. The write already succeeded; a stale card
+ * for the length of one ISR window is a smaller problem than telling an editor
+ * their sale did not save because a revalidation lookup failed.
+ */
+export async function revalidateProductsBySlug(
+  slugs: readonly string[],
+): Promise<void> {
+  if (slugs.length === 0) return;
+
+  const wanted = new Set(slugs);
+  const products = (await listAdminProducts()).filter((product) =>
+    wanted.has(product.slug),
+  );
+
+  const kinds = new Map<string, CollectionKind>();
+
+  for (const collectionSlug of new Set(products.map((p) => p.collectionSlug))) {
+    const collection = await getAdminCollection(collectionSlug);
+    if (collection) kinds.set(collectionSlug, collection.kind);
+  }
+
+  for (const product of products) {
+    const collectionKind = kinds.get(product.collectionSlug);
+    if (!collectionKind) continue;
+
+    revalidateProduct({
+      slug: product.slug,
+      collectionSlug: product.collectionSlug,
+      collectionKind,
+      tags: product.tags,
+    });
   }
 }

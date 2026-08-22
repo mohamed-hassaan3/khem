@@ -1,28 +1,56 @@
 import Link from "next/link";
 
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import {
+  AdminCell,
+  AdminPageHeader,
+  AdminRow,
+  AdminTable,
+} from "@/src/components/admin/AdminTable";
+import ChartPanel from "@/src/components/admin/charts/ChartPanel";
+import RangeTabs from "@/src/components/admin/charts/RangeTabs";
+import SalesChart from "@/src/components/admin/charts/SalesChart";
+import StockChip from "@/src/components/admin/StockChip";
+import { egp, egpCompact } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
+import { LOW_STOCK_THRESHOLD, stockState } from "@/src/lib/inventory";
+import {
+  getSalesSeries,
+  getSalesTotals,
+  listInventoryRows,
+  parseRange,
+} from "@/src/services/admin/analytics";
 import {
   countProductsMissingEmbedding,
   listAdminCollections,
   listAdminProducts,
 } from "@/src/services/admin/catalog";
 import { listAdminArticles } from "@/src/services/admin/journal";
+import { listAdminOrders } from "@/src/services/admin/orders";
 
 /**
- * Dashboard index.
+ * Dashboard index — the desk's first screen.
  *
- * Counts and three doors. `force-dynamic` because an editor must never be shown
- * a cached copy of a number they just changed — that is the whole reason a
- * dashboard exists beside a set of ISR pages.
+ * It answers three questions in the order they get asked: what has been
+ * selling, what is about to run out, and what is waiting to be edited.
  *
- * The embedding figure earns its place: a product with no vector is completely
- * invisible as a problem from the storefront (search still returns it, ranked
- * on words alone), so a number on this screen is the only thing that turns it
- * into something anyone notices.
+ * `force-dynamic` because an editor must never be shown a cached copy of a
+ * number they just changed — that is the whole reason a dashboard exists
+ * beside a set of ISR pages.
+ *
+ * Two figures earn their place by being invisible problems everywhere else:
+ *
+ *  - **Low stock.** A product at 2 still sells; it just tells every visitor it
+ *    is nearly gone, and nothing on the storefront tells the boutique.
+ *  - **Missing embeddings.** A product with no vector is fully visible in
+ *    keyword search and completely absent from "you may also love", so a
+ *    number here is the only thing that turns it into something anyone
+ *    notices.
  */
 
 export const dynamic = "force-dynamic";
+
+/** How many recent orders the desk sees before it should open the order book. */
+const RECENT_ORDERS = 5;
 
 function Tile({
   label,
@@ -49,32 +77,218 @@ function Tile({
   );
 }
 
+function placedOn(iso: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(new Date(iso));
+}
+
 export default async function AdminDashboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { locale } = await params;
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  const [collections, products, articles, missingEmbeddings] = await Promise.all([
+  const range = parseRange(query.range);
+
+  const [
+    collections,
+    products,
+    articles,
+    missingEmbeddings,
+    totals,
+    series,
+    inventory,
+    recentOrders,
+  ] = await Promise.all([
     listAdminCollections(),
     listAdminProducts(),
     listAdminArticles(),
     countProductsMissingEmbedding(),
+    getSalesTotals(range),
+    getSalesSeries(range),
+    listInventoryRows(range),
+    listAdminOrders({ limit: RECENT_ORDERS }),
   ]);
 
   const live = products.filter((product) => !product.isArchived).length;
   const drafts = articles.filter((article) => !article.isPublished).length;
+
+  const needsStock = inventory.filter((row) => stockState(row.inventory) !== "in");
+  const outOfStock = needsStock.filter((row) => row.inventory === 0).length;
+
+  const revenuePoints = series.map((point) => ({
+    time: point.day,
+    value: point.revenueInCents / 100,
+  }));
+
+  const ordersPath = localizePath(activeLocale, "/admin/orders");
 
   return (
     <>
       <AdminPageHeader
         title="Boutique Desk"
         description="Everything the storefront reads lives in the database. Changes made here are live on the site within a reload — there is no build step and no CMS in between."
+        action={
+          <RangeTabs
+            basePath={localizePath(activeLocale, "/admin")}
+            active={range}
+            query={query}
+          />
+        }
       />
 
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      {/* ── Trade ────────────────────────────────────────── */}
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <Tile
+          label={`Revenue · ${range}d`}
+          value={egpCompact(totals.revenueInCents)}
+          note="Merchandise only, delivery excluded"
+          href={localizePath(activeLocale, "/admin/analytics")}
+        />
+        <Tile
+          label={`Orders · ${range}d`}
+          value={totals.orderCount}
+          note={`${totals.units} unit${totals.units === 1 ? "" : "s"} sold`}
+          href={ordersPath}
+        />
+        <Tile
+          label="Awaiting fulfilment"
+          value={totals.awaitingFulfilment}
+          note={
+            totals.awaitingFulfilment > 0
+              ? "Pending or being prepared"
+              : "Nothing outstanding"
+          }
+          href={`${ordersPath}?status=PENDING`}
+        />
+        <Tile
+          label="Needs stock"
+          value={needsStock.length}
+          note={
+            outOfStock > 0
+              ? `${outOfStock} sold out`
+              : needsStock.length > 0
+                ? `Below ${LOW_STOCK_THRESHOLD}`
+                : "Every product in stock"
+          }
+          href={localizePath(activeLocale, "/admin/inventory")}
+        />
+      </div>
+
+      {/* ── The curve ────────────────────────────────────── */}
+      <div className="mt-6">
+        <ChartPanel
+          title={`Revenue · last ${range} days`}
+          figure={egpCompact(totals.revenueInCents)}
+          caption="Cancelled and refunded orders are not counted."
+          isEmpty={totals.units === 0}
+          emptyMessage="No sales recorded in this window. Record an order and the curve starts here."
+        >
+          <SalesChart points={revenuePoints} kind="area" unit="egp" />
+        </ChartPanel>
+      </div>
+
+      {/* ── Recent orders ────────────────────────────────── */}
+      <section className="mt-6">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+            Latest orders
+          </h2>
+          <Link
+            href={ordersPath}
+            className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+          >
+            The whole book
+          </Link>
+        </div>
+
+        {recentOrders.length === 0 ? (
+          <div className="border border-border px-8 py-12 text-center">
+            <p className="text-[12px] leading-relaxed text-ivory/35">
+              No orders yet. A sale recorded at{" "}
+              <Link href={`${ordersPath}/new`} className="text-gold/80 hover:text-gold">
+                Orders → Record order
+              </Link>{" "}
+              takes its units out of stock and appears on the charts above.
+            </p>
+          </div>
+        ) : (
+          <AdminTable
+            headers={["Order", "Customer", "Placed", "Total", "Status", { label: "Open", hidden: true }]}
+          >
+            {recentOrders.map((order) => (
+              <AdminRow key={order.id}>
+                <AdminCell>
+                  <span className="font-heading text-[11px] tracking-[0.1em]">
+                    {order.orderNumber}
+                  </span>
+                </AdminCell>
+                <AdminCell muted>{order.customerName}</AdminCell>
+                <AdminCell muted>{placedOn(order.placedAt)}</AdminCell>
+                <AdminCell>{egp(order.totalInCents)}</AdminCell>
+                <AdminCell muted>
+                  {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
+                </AdminCell>
+                <AdminCell>
+                  <Link
+                    href={`${ordersPath}/${order.orderNumber}`}
+                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  >
+                    Open
+                  </Link>
+                </AdminCell>
+              </AdminRow>
+            ))}
+          </AdminTable>
+        )}
+      </section>
+
+      {/* ── Stock warnings ───────────────────────────────── */}
+      {needsStock.length > 0 ? (
+        <div className="mt-6 border border-warning/30 bg-warning/5 p-6">
+          <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-warning">
+            Running out
+          </p>
+          <p className="mt-3 max-w-2xl text-[12px] leading-relaxed text-ivory/50">
+            These products are below {LOW_STOCK_THRESHOLD} on the website. The
+            storefront has already stopped saying &ldquo;in stock&rdquo; on them
+            and is naming the remaining count instead.
+          </p>
+
+          <ul className="mt-5 space-y-2">
+            {needsStock.slice(0, 6).map((row) => (
+              <li key={row.slug} className="flex items-center justify-between gap-4">
+                <Link
+                  href={localizePath(activeLocale, `/admin/products/${row.slug}`)}
+                  className="text-[12px] tracking-wide text-ivory/70 transition-colors duration-300 hover:text-gold"
+                >
+                  {row.name}
+                </Link>
+                <StockChip inventory={row.inventory} />
+              </li>
+            ))}
+          </ul>
+
+          {needsStock.length > 6 ? (
+            <Link
+              href={localizePath(activeLocale, "/admin/inventory")}
+              className="mt-5 inline-block font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+            >
+              {needsStock.length - 6} more in inventory
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* ── Catalog ──────────────────────────────────────── */}
+      <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         <Tile
           label="Collections"
           value={collections.length}

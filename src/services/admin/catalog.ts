@@ -27,6 +27,8 @@
 
 import "server-only";
 
+import { cache } from "react";
+
 import { MERCH_PAGE_FACETS, type MerchPageFacet } from "@/src/lib/facets";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
@@ -202,7 +204,18 @@ export async function countMerchPageProducts(): Promise<
 }
 
 /** The full product list, archived rows included, newest edits first. */
-export async function listAdminProducts(): Promise<AdminProduct[]> {
+/**
+ * Memoised for the length of one request.
+ *
+ * The dashboard index asks for the product list twice — once for the catalog
+ * tiles, once through `listInventoryRows()` for the low-stock panel — and both
+ * want the same rows as of the same instant. `cache()` collapses that into one
+ * round trip without either caller having to know about the other, and expires
+ * with the request, so a `force-dynamic` screen is still reading live data.
+ */
+export const listAdminProducts = cache(async function listAdminProducts(): Promise<
+  AdminProduct[]
+> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return [];
 
@@ -219,7 +232,7 @@ export async function listAdminProducts(): Promise<AdminProduct[]> {
   }
 
   return parseList(data, toAdminProduct);
-}
+});
 
 /** One product with its gallery — the edit screen's projection. */
 export async function getAdminProduct(slug: string): Promise<AdminProduct | null> {

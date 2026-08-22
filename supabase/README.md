@@ -21,6 +21,7 @@ seed/    a generated export of the database — written by `npm run db:dump`,
 | `sql/0004_search.sql` | pgvector + full-text columns, HNSW index, `hybrid_search_products()`, `related_products()`, the embedding-invalidation trigger |
 | `sql/0005_comments.sql` | `product_comment`, with a real foreign key onto `Product(slug)` |
 | `sql/0006_privileges.sql` | revokes the write grants Supabase hands `anon`/`authenticated` by default |
+| `sql/0015_orders.sql` | `Order`, `OrderItem`, the three order enums, `place_order()` / `restock_order()` / `set_order_status()`, and the sales reports — readable with the **secret key only** |
 
 ## Commands
 

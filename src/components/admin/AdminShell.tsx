@@ -17,13 +17,32 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ExternalLink, FileText, LayoutGrid, Package, Sparkles } from "lucide-react";
+import {
+  BarChart3,
+  Boxes,
+  ExternalLink,
+  FileText,
+  LayoutGrid,
+  Package,
+  Receipt,
+  Sparkles,
+} from "lucide-react";
 import type { ReactNode } from "react";
 
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
 
+/**
+ * Trade first, then the catalog behind it.
+ *
+ * Orders and inventory are what a desk opens the dashboard for on a normal
+ * day; collections and the journal are edited occasionally. The rail is
+ * ordered by how often each is reached for, not by how the tables relate.
+ */
 const SECTIONS = [
   { path: "/admin", label: "Dashboard", icon: LayoutGrid },
+  { path: "/admin/orders", label: "Orders", icon: Receipt },
+  { path: "/admin/inventory", label: "Inventory", icon: Boxes },
+  { path: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { path: "/admin/collections", label: "Collections", icon: Sparkles },
   { path: "/admin/products", label: "Products", icon: Package },
   { path: "/admin/journal", label: "Journal", icon: FileText },
@@ -61,8 +80,8 @@ export default function AdminShell({
 
         {/*
           Below `lg` the rail becomes a horizontal strip that scrolls rather
-          than wrapping: four items wrapping to two rows pushes the panel down
-          the page on every screen.
+          than wrapping: seven items wrapping to three rows would push the
+          panel down the page on every screen.
         */}
         <nav className="flex gap-1 overflow-x-auto px-4 py-3 lg:mt-10 lg:flex-col lg:px-4 lg:py-0">
           {SECTIONS.map((section) => {

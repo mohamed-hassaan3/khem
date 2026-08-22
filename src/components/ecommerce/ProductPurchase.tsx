@@ -7,6 +7,7 @@ import QuantityStepper from "@/src/components/ecommerce/QuantityStepper";
 import { quantityCeiling } from "@/src/lib/cart";
 import { BASE_CURRENCY } from "@/src/lib/currency";
 import { formatProductType, formatVolume } from "@/src/lib/format";
+import { LOW_STOCK_THRESHOLD } from "@/src/lib/inventory";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
@@ -50,7 +51,6 @@ export interface ProductPurchaseProps {
   locale: Locale;
 }
 
-const LOW_STOCK_THRESHOLD = 6;
 const CONFIRMATION_MS = 2500;
 
 export default function ProductPurchase({
@@ -97,6 +97,10 @@ export default function ProductPurchase({
     timeoutRef.current = setTimeout(() => setJustAdded(false), CONFIRMATION_MS);
   };
 
+  // The threshold lives in `src/lib/inventory.ts` so this line and the
+  // dashboard's low-stock warning are answering the same question. It used to
+  // be a local `6`, which meant the boutique was never told about the products
+  // this page was already describing as nearly gone.
   const stockLabel = isSoldOut
     ? dict.product.soldOut
     : product.inventory < LOW_STOCK_THRESHOLD
