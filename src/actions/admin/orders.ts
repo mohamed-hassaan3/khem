@@ -19,6 +19,15 @@
  * endpoints — and every input is parsed by `schemas/orders.ts` before a value
  * reaches a query.
  *
+ * ## Moving an order also tells the customer
+ *
+ * `updateOrderStatus` sends a branded email on every status a customer would
+ * want to hear about — shipped, delivered, cancelled, refunded — written in
+ * `"Order"."locale"` rather than in the language of whoever clicked the button.
+ * The mapping lives in `src/lib/email/send-order-mail.ts` so this file does not
+ * restate it, and the send is best-effort by construction: a mail outage must
+ * never turn a successful status change into a red toast on the desk.
+ *
  * ## Logging
  *
  * Actor, action, order number. **Never** the customer's name, email, phone or
@@ -27,6 +36,10 @@
  */
 
 import { requireAdmin } from "@/src/lib/admin/auth";
+import {
+  mailKindForStatus,
+  notifyCustomerOfOrder,
+} from "@/src/lib/email/send-order-mail";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
   canTransition,
@@ -36,6 +49,7 @@ import {
   type AdminActionResult,
 } from "@/src/schemas/orders";
 import { getAdminOrderById } from "@/src/services/admin/orders";
+import { getOrderForMail } from "@/src/services/orders";
 
 import {
   UNCONFIGURED,
@@ -173,10 +187,34 @@ export async function updateOrderStatus(input: unknown): Promise<AdminActionResu
   // do not, and revalidating anyway is a cheap no-op beside getting it wrong.
   await revalidateProductsBySlug(order.lines.map((line) => line.productSlug));
 
+  /*
+   * Tell the customer. `PENDING` maps to null and sends nothing — "your order
+   * is pending" is anxiety with no information in it.
+   *
+   * `notifyCustomerOfOrder` swallows its own failures, so this cannot throw and
+   * cannot change what the desk sees. The row is re-read rather than reusing
+   * `order`, because that projection was taken *before* the status changed and
+   * carries no address, tracking code or locale — the three things the email
+   * needs. It is also the read that picks up a tracking code saved a moment ago.
+   */
+  const notified = mailKindForStatus(parsed.data.status);
+  let mailed = false;
+
+  if (notified) {
+    const record = await getOrderForMail(parsed.data.orderId);
+
+    if (record?.customerEmail) {
+      await notifyCustomerOfOrder(record, notified);
+      mailed = true;
+    }
+  }
+
   return {
     ok: true,
     slug: order.orderNumber,
-    message: `Order ${order.orderNumber} is now ${parsed.data.status.toLowerCase()}.`,
+    message: mailed
+      ? `Order ${order.orderNumber} is now ${parsed.data.status.toLowerCase()}. The customer has been notified.`
+      : `Order ${order.orderNumber} is now ${parsed.data.status.toLowerCase()}.`,
   };
 }
 

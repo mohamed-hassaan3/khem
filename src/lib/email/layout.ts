@@ -21,6 +21,7 @@
  * only by its contrast with a background we do not control.
  */
 
+import { HOUSE_EMAIL } from "@/src/constants/contact";
 import { LOCALE_DIRECTION, LOCALE_HTML_TAG, type Locale } from "@/src/lib/i18n/config";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
 import type { SocialProfile } from "@/src/types/contact";
@@ -46,9 +47,12 @@ const SANS = "'Helvetica Neue', Helvetica, Arial, sans-serif";
 /**
  * Absolute base for image URLs.
  *
- * Email cannot resolve relative paths and cannot reach `localhost`, so the
- * seal only renders once the site is deployed. The override exists for staging
- * against a preview deployment.
+ * The fallback path only. The mark normally travels as an inline attachment
+ * (`src/lib/email/logo.ts`), which renders without the reader having to allow
+ * remote images; this is what the signature falls back to when the attachment
+ * could not be read. Email cannot resolve relative paths and cannot reach
+ * `localhost`, so in that fallback state the mark appears only once the site is
+ * deployed. The override exists for staging against a preview deployment.
  */
 function assetBase(): string {
   return process.env.EMAIL_ASSET_BASE_URL ?? SITE_URL;
@@ -109,23 +113,43 @@ export function quoteBlock(
 /**
  * House signature.
  *
- * The seal, the name, the tagline, then the four links. Two deliberate
- * choices:
+ * ```
+ *            [ seal ]
+ *          KHEM Perfumes
+ *        Essence of Heritage
  *
- *  - The name and tagline are **live text under the image**, not part of it.
- *    Most clients block remote images until the reader allows them, and a
- *    signature that vanishes entirely in that state is not a signature. The
- *    `alt` carries the mark's meaning in the meantime.
- *  - `width`/`height` attributes sit alongside the CSS. Outlook ignores the
+ * Instagram • Facebook • Pinterest • Official House
+ *          info@khemperfumes.com
+ * ```
+ *
+ * Four deliberate choices:
+ *
+ *  - **The mark is normally an inline attachment.** `src` arrives as
+ *    `cid:khem-logo` from `src/lib/email/logo.ts`, so it renders on first open
+ *    without the reader allowing remote images. `logoSrc` falls back to an
+ *    absolute URL when the attachment could not be read, and the parameter
+ *    defaults to that URL so the two existing callers in `templates.ts` keep
+ *    working unchanged.
+ *  - **The name and tagline are live text under the image**, not part of it. A
+ *    signature that vanishes entirely when images are blocked is not a
+ *    signature; the `alt` carries the mark's meaning in the meantime.
+ *  - **`width`/`height` attributes sit alongside the CSS.** Outlook ignores the
  *    style and would otherwise render the 480px source at full size, blowing
- *    the layout apart.
+ *    the layout apart. The source is square (480×480, circular alpha), so the
+ *    box is square too — the earlier 1536×1024 asset was being squashed into
+ *    the same square box.
+ *  - **The house address is a `mailto:`, below the links.** It is the one line
+ *    in the signature somebody acts on, and `HOUSE_EMAIL` is the same constant
+ *    that builds the `From:` header, so the address a reader is invited to
+ *    write to is the address that actually receives mail.
  */
 export function signatureBlock(
   locale: Locale,
   socials: readonly SocialProfile[],
+  logoSrc: string = `${assetBase()}/email/khem-logo.png`,
 ): string {
   const copy = SIGNATURE_COPY[locale];
-  const seal = `${assetBase()}/email/khem-seal.png`;
+  const seal = logoSrc;
 
   const byId = new Map(socials.map((profile) => [profile.id, profile]));
 
@@ -176,7 +200,12 @@ export function signatureBlock(
         </td>
       </tr>
       <tr>
-        <td align="center" style="padding:0 0 18px 0;">${links}</td>
+        <td align="center" style="padding:0 0 12px 0;">${links}</td>
+      </tr>
+      <tr>
+        <td align="center" style="padding:0 0 16px 0;">
+          <a href="mailto:${escapeHtml(HOUSE_EMAIL)}" dir="ltr" style="font-family:${SANS};font-size:12px;letter-spacing:0.06em;color:${CHAMPAGNE};text-decoration:none;">${escapeHtml(HOUSE_EMAIL)}</a>
+        </td>
       </tr>
       <tr>
         <td align="center">
@@ -195,6 +224,12 @@ export interface LuxuryShellInput {
   body: string;
   /** House social profiles, for the signature. Read from `"SocialProfile"`. */
   socials: readonly SocialProfile[];
+  /**
+   * Where the signature's mark comes from — `cid:khem-logo` when the sender
+   * attached it, an absolute URL otherwise. Built by `logoSrc()` in
+   * `src/lib/email/logo.ts`. Omitted, the signature uses the URL fallback.
+   */
+  logoSrc?: string;
 }
 
 /** The full customer-facing document. */
@@ -205,6 +240,7 @@ export function luxuryShell({
   headline,
   body,
   socials,
+  logoSrc,
 }: LuxuryShellInput): string {
   const dir = LOCALE_DIRECTION[locale];
   const align = dir === "rtl" ? "right" : "left";
@@ -248,7 +284,7 @@ export function luxuryShell({
 
             <!-- Signature -->
             <tr>
-              <td style="padding:38px 40px 44px 40px;">${signatureBlock(locale, socials)}</td>
+              <td style="padding:38px 40px 44px 40px;">${signatureBlock(locale, socials, logoSrc)}</td>
             </tr>
           </table>
         </td>

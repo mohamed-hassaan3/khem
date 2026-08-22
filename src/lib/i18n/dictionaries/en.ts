@@ -900,7 +900,6 @@ export const en = {
     total: "Total",
     taxNote: "Taxes calculated at checkout",
     checkout: "Proceed to Checkout",
-    checkoutSoon: "Secure checkout opens shortly.",
     continueShopping: "Continue Shopping",
     /** Visible label on the button; `remove` is its accessible name. */
     removeLabel: "Remove",
@@ -911,6 +910,175 @@ export const en = {
       heading: "Your Cart is Empty",
       body: "Discover our collection of luxury fragrances and begin your journey with KHEM.",
       cta: "Explore Collections",
+    },
+  },
+
+  /**
+   * Checkout.
+   *
+   * `errors` is keyed by what `src/schemas/checkout.ts` puts in a Zod message.
+   * That file writes **keys**, not sentences — unlike the admin schemas, whose
+   * one reader is an English-only dashboard — so a validation message with no
+   * entry here is a lookup miss the client shows as `errors.server`. Adding a
+   * rule there means adding a line here and in `ar.ts`.
+   */
+  checkout: {
+    meta: {
+      title: "Checkout",
+      description:
+        "Complete your KHEM order — card or cash on delivery, wrapped and sealed in Cairo.",
+    },
+    eyebrow: "Final Step",
+    heading: "Checkout",
+
+    steps: {
+      contact: "Contact",
+      delivery: "Delivery",
+      payment: "Payment",
+    },
+
+    contact: {
+      name: "Full Name",
+      namePlaceholder: "As it should appear on the parcel",
+      email: "Email Address",
+      emailPlaceholder: "you@example.com",
+      emailHint: "Your receipt and every update are sent here.",
+      phone: "Phone Number",
+      phonePlaceholder: "+20 1X XXX XXXX",
+      phoneHint: "The courier calls ahead before delivering.",
+      signedInAs: "Signed in as {email}",
+      guestNote:
+        "Ordering as a guest. Create an account after checkout to follow this order.",
+    },
+
+    delivery: {
+      line1: "Street Address",
+      line1Placeholder: "Building, street, apartment",
+      line2: "Landmark or Additional Detail",
+      line2Placeholder: "Optional",
+      city: "City",
+      state: "Governorate",
+      postalCode: "Postal Code",
+      postalCodePlaceholder: "Optional",
+      country: "Country",
+      note: "Delivery Instructions",
+      notePlaceholder: "Optional — a gate code, a preferred hour",
+    },
+
+    payment: {
+      heading: "How would you like to pay?",
+      card: {
+        title: "Pay by Card",
+        body: "Visa, Mastercard and Meeza. Encrypted and processed by Stripe.",
+      },
+      cash: {
+        title: "Cash on Delivery",
+        body: "Pay the courier in cash when your parcel arrives.",
+      },
+      /** Shown in place of the card option when Stripe is not configured. */
+      cardUnavailable: "Card payment is temporarily unavailable.",
+      cashNotice:
+        "Please have the exact amount ready. Our courier does not carry change.",
+      settlement:
+        "Charged in Egyptian pounds ({amount}), whichever currency you are browsing in.",
+      securedBy: "Secured by Stripe",
+    },
+
+    review: {
+      heading: "Your Order",
+      edit: "Edit bag",
+      itemCountOne: "1 item",
+      itemCount: "{count} items",
+      subtotal: "Subtotal",
+      delivery: "Delivery",
+      complimentary: "Complimentary",
+      total: "Total",
+      taxNote: "All prices include tax.",
+    },
+
+    submit: {
+      cash: "Place Order",
+      card: "Pay {amount}",
+      working: "Securing your order",
+      /** Between placing the order and the card form appearing. */
+      preparing: "Preparing secure payment",
+    },
+
+    empty: {
+      heading: "Your Cart is Empty",
+      body: "There is nothing to check out yet. Choose a fragrance and return here.",
+      cta: "Explore Collections",
+    },
+
+    errors: {
+      /* Field-level, keyed by the Zod messages in `src/schemas/checkout.ts`. */
+      name: "Please tell us who this order is for.",
+      nameLong: "That name is too long.",
+      email: "Please enter a valid email address.",
+      phone: "Please enter a phone number the courier can reach.",
+      line1: "Please enter the street address.",
+      line1Long: "That address line is too long.",
+      line2Long: "That line is too long.",
+      city: "Please enter the city.",
+      cityLong: "That city name is too long.",
+      state: "Please enter the governorate.",
+      stateLong: "That governorate name is too long.",
+      postalCodeLong: "That postal code is too long.",
+      country: "Please enter the country.",
+      countryLong: "That country name is too long.",
+      noteLong: "Please keep delivery instructions under 500 characters.",
+      quantity: "One of the quantities is not valid.",
+      paymentMethod: "Please choose how you would like to pay.",
+      locale: "Something went wrong with your language setting.",
+
+      /* Form-level. */
+      validation: "Some details need your attention.",
+      emptyCart: "Your bag is empty.",
+      tooManyLines: "That is more lines than one order can hold.",
+      duplicateLines: "The same fragrance appears twice in your bag.",
+      outOfStock:
+        "One of your fragrances is no longer available in that quantity.",
+      unavailable: "One of your fragrances is no longer available.",
+      cartChanged:
+        "Your bag no longer matches our catalogue. Please review it and try again.",
+      rateLimited: "Too many attempts. Please wait a few minutes and try again.",
+      unconfigured:
+        "Orders cannot be taken on this deployment. Please contact the house.",
+      server: "Something went wrong on our side. Your card was not charged.",
+      /* Card-specific, from Stripe or from the intent route. */
+      payment: "Your payment could not be completed. Please try again.",
+      paymentSetup:
+        "We could not open a secure payment. Please try again in a moment.",
+    },
+
+    confirmed: {
+      meta: {
+        title: "Order Confirmed",
+        description: "Your KHEM order has been received.",
+      },
+      eyebrow: "Thank You",
+      heading: "Your order is confirmed",
+      /** Cash orders. */
+      headingCash: "Your order is confirmed",
+      body: "It has reached the house in Cairo and is being prepared by hand.",
+      bodyCash:
+        "It has reached the house in Cairo and is being prepared by hand. Please have {amount} ready for the courier.",
+      orderNumber: "Order",
+      placedOn: "Placed",
+      total: "Total",
+      paymentMethod: "Payment",
+      card: "Card",
+      cash: "Cash on delivery",
+      emailSent: "A confirmation is on its way to {email}.",
+      emailSentGeneric: "A confirmation is on its way to you.",
+      trackCta: "Track Your Order",
+      createAccountCta: "Create an Account to Track It",
+      continueCta: "Continue Exploring",
+      notFound: {
+        heading: "We cannot find that order",
+        body: "The reference may be mistyped. If you have a confirmation email, its number is the one to use.",
+        cta: "Return Home",
+      },
     },
   },
 

@@ -12,6 +12,7 @@ import OrderStatusControl from "@/src/components/admin/OrderStatusControl";
 import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getAdminOrder } from "@/src/services/admin/orders";
+import type { OrderShippingAddress } from "@/src/types/order";
 
 /**
  * One order.
@@ -23,7 +24,8 @@ import { getAdminOrder } from "@/src/services/admin/orders";
  *
  * Line names and prices are the snapshots stored on `OrderItem`, never a fresh
  * lookup — a product renamed or repriced since the sale must still print what
- * was actually sold and charged.
+ * was actually sold and charged. The delivery address is a snapshot for the
+ * same reason: it records where a parcel went, not where the customer lives now.
  */
 
 export const dynamic = "force-dynamic";
@@ -41,6 +43,23 @@ function stamp(iso: string): string {
     minute: "2-digit",
     timeZone: "UTC",
   }).format(new Date(iso));
+}
+
+/** True when there is anything to print on a parcel. A walk-in has nothing. */
+function hasAddress(shipping: OrderShippingAddress): boolean {
+  return Object.values(shipping).some((value) => Boolean(value?.trim()));
+}
+
+/** The address as a courier reads it: one line per line, empties dropped. */
+function addressLines(shipping: OrderShippingAddress): string[] {
+  return [
+    shipping.line1,
+    shipping.line2,
+    [shipping.city, shipping.state].filter(Boolean).join(", "),
+    [shipping.postalCode, shipping.country].filter(Boolean).join(" "),
+  ]
+    .map((line) => line?.trim())
+    .filter((line): line is string => Boolean(line && line.length > 0));
 }
 
 function Detail({ term, children }: { term: string; children: React.ReactNode }) {
@@ -150,8 +169,50 @@ export default async function AdminOrderPage({
                 <Detail term="Phone">{order.customerPhone}</Detail>
               ) : null}
               <Detail term="Status">{label(order.status)}</Detail>
-              <Detail term="Payment">{label(order.paymentStatus)}</Detail>
-              {order.note ? <Detail term="Desk note">{order.note}</Detail> : null}
+              {/*
+               * Method and state, together and in that order. They are
+               * different questions and the desk has to read both: a cash order
+               * is PROCESSING and UNPAID until the courier collects, which is
+               * healthy, while a card order in the same state means the money
+               * never arrived.
+               */}
+              <Detail term="Payment">
+                {order.paymentMethod === "CARD" ? "Card" : "Cash on delivery"} ·{" "}
+                {label(order.paymentStatus)}
+                {order.paidAt ? (
+                  <span className="block text-ivory/35">
+                    Paid {stamp(order.paidAt)}
+                  </span>
+                ) : null}
+              </Detail>
+              {order.trackingCode ? (
+                <Detail term="Tracking">{order.trackingCode}</Detail>
+              ) : null}
+              {/*
+               * Written out, not one line: this is the block somebody copies
+               * onto a parcel, and a comma-joined string is harder to read off
+               * a screen than five lines are.
+               */}
+              {hasAddress(order.shipping) ? (
+                <Detail term="Deliver to">
+                  {addressLines(order.shipping).map((line) => (
+                    <span key={line} className="block">
+                      {line}
+                    </span>
+                  ))}
+                </Detail>
+              ) : null}
+              {order.locale === "ar" ? (
+                <Detail term="Writes to them in">Arabic</Detail>
+              ) : null}
+              {order.stripePaymentIntentId ? (
+                <Detail term="Stripe intent">
+                  <span className="break-all text-ivory/45">
+                    {order.stripePaymentIntentId}
+                  </span>
+                </Detail>
+              ) : null}
+              {order.note ? <Detail term="Customer note">{order.note}</Detail> : null}
             </dl>
           </div>
 

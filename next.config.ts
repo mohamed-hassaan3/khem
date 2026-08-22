@@ -35,6 +35,23 @@ const MOVED_CATEGORY_PATHS: ReadonlyArray<readonly [string, string]> = [
 ];
 
 const nextConfig: NextConfig = {
+  /**
+   * Files the bundler cannot see being read, but that a function needs anyway.
+   *
+   * `src/lib/email/logo.ts` reads `public/email/khem-logo.png` at send time and
+   * attaches it inline, so the mark renders before the reader has allowed
+   * remote images. The path is built with `path.join(process.cwd(), …)`, which
+   * no static analysis can follow, so without this entry the file is left out
+   * of the deployed function and every email quietly falls back to a remote URL.
+   *
+   * `public/` being served over HTTP is a separate mechanism entirely and does
+   * not make the file readable from a lambda's filesystem.
+   */
+  outputFileTracingIncludes: {
+    "/api/**": ["./public/email/khem-logo.png"],
+    "/[locale]/**": ["./public/email/khem-logo.png"],
+  },
+
   async redirects() {
     return LOCALES.flatMap((locale) =>
       MOVED_CATEGORY_PATHS.map(([from, to]) => {

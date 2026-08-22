@@ -53,3 +53,35 @@ export function houseFromAddress(): string {
 export async function inboxAddress(): Promise<string> {
   return process.env.CONTACT_INBOX_EMAIL ?? (await getConciergeEmail());
 }
+
+/**
+ * Where a new-order notification lands.
+ *
+ * Deliberately **not** {@link inboxAddress}. The two answer different
+ * questions, and collapsing them would be wrong in both directions:
+ *
+ *  - `inboxAddress()` is the address published to visitors on the contact page.
+ *    An enquiry has to arrive there, or the site is advertising a mailbox
+ *    nobody reads.
+ *  - This is the *operational* mailbox — the one somebody opens to pick, wrap
+ *    and dispatch a parcel. It is fulfilment, not correspondence, and it is
+ *    routinely a different person or a different account entirely.
+ *
+ * Defaults to `khem.official@outlook.com`, the house operations account.
+ * `ORDER_NOTIFICATION_EMAIL` overrides it, which makes redirecting fulfilment
+ * mail a dashboard edit rather than a deploy.
+ *
+ * A hardcoded default rather than a database read, unlike `inboxAddress()`:
+ * this address is never published to anybody, so there is no page for it to
+ * agree with — and the one thing that must never happen is a new order going
+ * unannounced because a settings row was missing.
+ *
+ * Synchronous in everything but signature. It stays `async` so that switching
+ * it to a `"BoutiqueSetting"` row later is a change of body, not of every
+ * caller.
+ */
+const DEFAULT_ORDER_INBOX = "khem.official@outlook.com";
+
+export async function orderInboxAddress(): Promise<string> {
+  return process.env.ORDER_NOTIFICATION_EMAIL ?? DEFAULT_ORDER_INBOX;
+}

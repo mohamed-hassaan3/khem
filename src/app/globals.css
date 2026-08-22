@@ -374,6 +374,95 @@
   }
 }
 
+/*
+ * ── Order confirmation sequence ─────────────────────────────
+ *
+ * The `/checkout/confirmed` celebration, driven entirely by CSS so the
+ * compositor runs it: no chain of `setTimeout`s, no re-render per step, and no
+ * drift under load. `OrderCelebration.tsx` sets the per-element delays inline
+ * where they vary; the durations and curves live here.
+ *
+ * Every curve is `--ease-luxury-bezier`. Zero spring, zero bounce — AGENTS.md
+ * §2.2. What "celebration" means on this site is light coming up on an object,
+ * not particles.
+ */
+
+/* 1. A gold hairline draws itself outward from the centre. */
+@keyframes khem-rule-draw {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 56px;
+    opacity: 1;
+  }
+}
+
+.khem-rule-draw {
+  width: 56px;
+  animation: khem-rule-draw 600ms var(--ease-luxury-bezier) both;
+}
+
+/* 2. The seal fades in and settles the last 4% of its scale. */
+@keyframes khem-seal-settle {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.khem-seal-settle {
+  animation: khem-seal-settle 900ms var(--ease-luxury-bezier) 400ms both;
+}
+
+/*
+ * 3. A slow radial bloom rises behind the seal and stays.
+ *
+ * `forwards` and no reverse: this is a light being turned on, not a pulse. A
+ * looping glow would draw the eye back every few seconds, which is exactly the
+ * "cartoonish keyframe" the house rules refuse.
+ */
+@keyframes khem-bloom {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.18;
+  }
+}
+
+.khem-bloom {
+  opacity: 0;
+  background: radial-gradient(
+    circle,
+    var(--color-gold) 0%,
+    color-mix(in srgb, var(--color-gold) 40%, transparent) 30%,
+    transparent 68%
+  );
+  animation: khem-bloom 1200ms var(--ease-luxury-bezier) 900ms forwards;
+}
+
+/* 4. Each line rises 12px into place. Delays are set per element. */
+@keyframes khem-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.khem-rise {
+  animation: khem-rise 700ms var(--ease-luxury-bezier) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .khem-orbit {
     animation: none;
@@ -392,6 +481,35 @@
 
   .search-row {
     animation: none;
+  }
+
+  /*
+   * The confirmation sequence, reduced: everything arrives in its final state,
+   * fading only. No draw, no scale, no translate.
+   *
+   * `.khem-bloom` keeps its opacity rather than losing it — once it has stopped
+   * moving it is a static gradient, and removing it would leave the seal
+   * floating in a void. It is the light in the room, not the motion.
+   */
+  .khem-rule-draw,
+  .khem-seal-settle,
+  .khem-rise {
+    animation: khem-fade-in 400ms ease-out both;
+    animation-delay: 0ms !important;
+  }
+
+  .khem-bloom {
+    animation: none;
+    opacity: 0.18;
+  }
+}
+
+@keyframes khem-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

@@ -17,7 +17,8 @@ import { useDictionary } from "@/src/providers/i18n-provider";
  * Order summary: totals, the free-delivery nudge, and the checkout CTAs.
  *
  * Every figure is derived here from `subtotalInCents` via `src/lib/cart.ts` —
- * the same module the checkout Server Action will price the real order with.
+ * the same module `src/actions/checkout.ts` prices the real order with, which is
+ * what keeps the total quoted here and the total charged from ever disagreeing.
  *
  * No promo-code field: there is no `Discount` model and no endpoint behind it,
  * and a field that silently does nothing is worse than its absence
@@ -96,20 +97,19 @@ export default function CartSummary({ subtotalInCents }: CartSummaryProps) {
       </div>
 
       {/*
-       * `/checkout` does not exist yet (AGENTS.md §8 has it planned). Sending
-       * the primary conversion CTA to the 404 page would be worse than saying
-       * plainly that it is not open — so the button is disabled and labelled.
+       * The till is open. This was a disabled button labelled "secure checkout
+       * opens shortly" until `/checkout` landed — the honest rendering of a
+       * route that did not exist. `dict.cart.checkoutSoon` went with it.
+       *
+       * A link rather than a button: it navigates, it should be middle-clickable
+       * and openable in a new tab, and it needs no JavaScript to work.
        */}
-      <button
-        type="button"
-        disabled
-        className="btn-luxury btn-luxury-fill w-full cursor-not-allowed justify-center opacity-45"
+      <LocaleLink
+        href="/checkout"
+        className="btn-luxury btn-luxury-fill mb-6 w-full justify-center"
       >
         {dict.cart.checkout}
-      </button>
-      <p className="mb-6 mt-3 text-center text-[10px] tracking-[0.05em] text-ivory/25">
-        {dict.cart.checkoutSoon}
-      </p>
+      </LocaleLink>
 
       <LocaleLink
         href="/collections"

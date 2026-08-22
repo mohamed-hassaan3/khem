@@ -39,6 +39,17 @@ export const paymentStatusSchema = z.enum(["UNPAID", "PAID", "FAILED", "REFUNDED
 
 export const orderChannelSchema = z.enum(["ONLINE", "OFFLINE"]);
 
+/**
+ * Added by `supabase/sql/0016_checkout.sql`.
+ *
+ * `.catch("CASH")` rather than a bare enum: the column has a `not null default
+ * 'CASH'`, so a row can only be one of the two — but a *stale deployment*
+ * reading a database that has moved ahead would otherwise blank the whole
+ * order screen over one unrecognised value. The house rule is one malformed row
+ * dropped, never a blanked screen; this applies it to one field.
+ */
+export const paymentMethodSchema = z.enum(["CARD", "CASH"]).catch("CASH");
+
 // ── Order ─────────────────────────────────────────────────────
 
 /**
@@ -52,8 +63,10 @@ export const ORDER_SUMMARY_COLUMNS =
 
 export const ORDER_DETAIL_COLUMNS =
   'id, orderNumber, customerName, customerEmail, customerPhone, note, ' +
-  'status, paymentStatus, channel, subtotalInCents, shipInCents, ' +
-  'totalInCents, stockReleasedAt, placedAt, ' +
+  'status, paymentStatus, paymentMethod, channel, locale, ' +
+  'subtotalInCents, shipInCents, totalInCents, stockReleasedAt, placedAt, ' +
+  'trackingCode, stripePaymentIntentId, paidAt, ' +
+  'shipLine1, shipLine2, shipCity, shipState, shipPostalCode, shipCountry, ' +
   'items:OrderItem(id, productSlug, productName, quantity, priceInCents)';
 
 const orderLineRowSchema = z.object({
@@ -93,6 +106,20 @@ const orderDetailRowSchema = orderSummaryRowSchema
     subtotalInCents: z.number(),
     shipInCents: z.number(),
     stockReleasedAt: z.string().nullable().default(null),
+    paymentMethod: paymentMethodSchema,
+    // Same defensive `.catch` as the method, and the same reason: a third
+    // locale arriving before this deployment knows about it must not blank the
+    // desk's screen.
+    locale: z.enum(["en", "ar"]).catch("en"),
+    trackingCode: z.string().nullable().default(null),
+    stripePaymentIntentId: z.string().nullable().default(null),
+    paidAt: z.string().nullable().default(null),
+    shipLine1: z.string().nullable().default(null),
+    shipLine2: z.string().nullable().default(null),
+    shipCity: z.string().nullable().default(null),
+    shipState: z.string().nullable().default(null),
+    shipPostalCode: z.string().nullable().default(null),
+    shipCountry: z.string().nullable().default(null),
     items: z.array(orderLineRowSchema).default([]),
   });
 
@@ -112,7 +139,16 @@ export function toAdminOrderDetail(row: unknown): AdminOrderDetail | null {
   const parsed = orderDetailRowSchema.safeParse(row);
   if (!parsed.success) return null;
 
-  const { items, ...order } = parsed.data;
+  const {
+    items,
+    shipLine1,
+    shipLine2,
+    shipCity,
+    shipState,
+    shipPostalCode,
+    shipCountry,
+    ...order
+  } = parsed.data;
 
   // Lines print in the order they were sold; the database has no sort column
   // for them because an order is not an editorial sequence.
@@ -120,7 +156,21 @@ export function toAdminOrderDetail(row: unknown): AdminOrderDetail | null {
     a.productName.localeCompare(b.productName),
   );
 
-  return { ...order, itemCount: countItems(items), lines };
+  return {
+    ...order,
+    itemCount: countItems(items),
+    lines,
+    // Gathered into one object rather than six flat fields, so a component can
+    // ask "is there an address?" once instead of six times.
+    shipping: {
+      line1: shipLine1,
+      line2: shipLine2,
+      city: shipCity,
+      state: shipState,
+      postalCode: shipPostalCode,
+      country: shipCountry,
+    },
+  };
 }
 
 /**

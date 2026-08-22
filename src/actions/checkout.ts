@@ -1,0 +1,255 @@
+"use server";
+
+/**
+ * Placing an order from the storefront.
+ *
+ * ## The rule this file inherits
+ *
+ * An order and the stock it consumes are **one event**. `src/actions/admin/orders.ts`
+ * states it for the desk and it holds here without exception: nothing in this
+ * module reads an inventory count, decides, and writes it back. Every order is
+ * created by `place_order()` in `supabase/sql/0016_checkout.sql`, which takes
+ * the row locks and does both halves in one transaction.
+ *
+ * ## Where the money comes from
+ *
+ * Not from the request. The browser posts `{ productId, quantity }` pairs —
+ * that is literally all `src/providers/cart-provider.tsx` persists — and every
+ * figure is derived server-side:
+ *
+ *   line prices  → `place_order()`, from `"Product"` rows it has locked
+ *   subtotal     → `place_order()`, summed from those same rows
+ *   delivery     → `shippingInCents()` here, from a subtotal read a moment
+ *                  earlier; it is the one number the SQL function cannot
+ *                  derive, so it is passed in
+ *   total        → `place_order()`, subtotal + delivery
+ *
+ * The display currency never enters any of this. An order settles in Egyptian
+ * pounds, and `src/lib/currency.ts` says outright that a converted figure must
+ * never become a pricing input.
+ *
+ * ## Card versus cash
+ *
+ * Both create the order here. They differ in what state it lands in:
+ *
+ *   CASH → PROCESSING immediately, UNPAID until the courier collects. Nothing
+ *          is being waited for, so both emails go out now.
+ *   CARD → PENDING and UNPAID, stock already reserved. **No customer email
+ *          yet** — an unpaid order is not a confirmed one. The client then asks
+ *          `/api/checkout/intent` for a client secret, and the webhook promotes
+ *          the order and sends the mail once Stripe says the money moved.
+ *
+ * The cost of reserving stock before payment is abandoned baskets holding
+ * bottles; `/api/cron/sweep-unpaid-orders` is what pays it.
+ *
+ * ## Logging
+ *
+ * Order number, method, and provider errors. **Never** the name, email, phone,
+ * address, or note. These rows hold a street address now, which makes the rule
+ * stricter than it was, not looser.
+ */
+
+import { getUserId } from "@/src/lib/auth";
+import { shippingInCents } from "@/src/lib/cart";
+import { clientKey, isRateLimited } from "@/src/lib/email/rate-limit";
+import { announceOrder } from "@/src/lib/email/send-order-mail";
+import { getSupabaseAdmin } from "@/src/lib/supabase";
+import { checkoutFieldErrors, checkoutSchema } from "@/src/schemas/checkout";
+import { getOrderForMailByNumber, resolveCartToLines } from "@/src/services/orders";
+import type { CheckoutFormInput, CheckoutResult } from "@/src/types/checkout";
+
+import { revalidateProductsBySlug } from "./admin/shared";
+
+/**
+ * Eight attempts per ten minutes per client.
+ *
+ * Higher than the contact form's three, because the thing being protected is
+ * different. There, the scarce resource is the attention of whoever opens the
+ * mailbox. Here it is stock: every accepted request reserves bottles. But a
+ * genuine buyer whose first card is declined will legitimately try again, and a
+ * limit that locks them out after two attempts loses a sale to a bank's fraud
+ * heuristic.
+ */
+const LIMIT = { limit: 8, windowMs: 10 * 60 * 1_000 };
+
+/**
+ * Turn a `place_order()` raise into something the visitor can act on.
+ *
+ * "Nefertem has only 2 in stock" is not a field error a schema could have
+ * caught — the answer lives in a row that may change between the page being
+ * rendered and the button being pressed. The database raises with a sentence;
+ * this decides which translated message frames it.
+ *
+ * The sentence itself is English-only and rides along as `detail`, shown
+ * beneath the translated line rather than instead of it. Translating a message
+ * built inside Postgres would mean parsing it, and a checkout that guesses at
+ * the shape of an error string is a checkout that shows the wrong one.
+ */
+function placementFailure(message: string): CheckoutResult {
+  if (message.includes("in stock")) {
+    return { ok: false, formError: "outOfStock", detail: message };
+  }
+
+  if (message.includes("archived")) {
+    return { ok: false, formError: "unavailable", detail: message };
+  }
+
+  return { ok: false, formError: "server" };
+}
+
+export async function placeCustomerOrder(
+  input: CheckoutFormInput,
+): Promise<CheckoutResult> {
+  /*
+   * Order is deliberate, and matches `src/actions/contact.ts`: cheapest and
+   * most traffic-shedding first, so nothing that costs stock or a metered call
+   * runs before the throttle.
+   *
+   * 1. Honeypot. A bot walked the DOM. Report success and do nothing — telling
+   *    a scraper it was detected only teaches it to adapt. It gets a plausible
+   *    number that belongs to no order.
+   */
+  if (input.company.length > 0) {
+    return { ok: true, orderNumber: "KHEM-0000-0000", paymentMethod: "CASH" };
+  }
+
+  // 2. Throttle, before any parsing or database call.
+  if (isRateLimited("checkout", await clientKey(), LIMIT)) {
+    return { ok: false, formError: "rateLimited" };
+  }
+
+  // 3. Authoritative validation. The form checked the same rules; that was an
+  //    affordance, this is the boundary.
+  const parsed = checkoutSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return {
+      ok: false,
+      formError: "validation",
+      fieldErrors: checkoutFieldErrors(parsed.error),
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    console.error("[checkout] SUPABASE_SECRET_KEY is not set; no order written.");
+    return { ok: false, formError: "unconfigured" };
+  }
+
+  // 4. Ids → slugs and prices. The slugs are what `place_order()` takes; the
+  //    subtotal exists only to compute the delivery fee below.
+  const resolution = await resolveCartToLines(parsed.data.items);
+
+  if (!resolution.ok) {
+    return {
+      ok: false,
+      formError: resolution.reason === "missing" ? "cartChanged" : "unconfigured",
+      detail: resolution.productName,
+    };
+  }
+
+  // 5. The one figure the database cannot derive. Same function the cart page
+  //    used to quote it, so the total shown and the total charged come from one
+  //    implementation — which is the promise `src/lib/cart.ts` opens with.
+  const shipInCents = shippingInCents(resolution.subtotalInCents);
+
+  // 6. Identity from the session, never from the body. A guest gets null here
+  //    and their order correctly never appears in anybody's portal.
+  const clerkUserId = await getUserId();
+
+  const { data, error } = await supabase.rpc("place_order", {
+    payload: {
+      customerName: parsed.data.customerName,
+      customerEmail: parsed.data.customerEmail,
+      customerPhone: parsed.data.customerPhone,
+      clerkUserId: clerkUserId ?? "",
+      // Never `OFFLINE` from this path. It is what separates storefront revenue
+      // from walk-ins in `"DailySales"`.
+      channel: "ONLINE",
+      paymentMethod: parsed.data.paymentMethod,
+      locale: parsed.data.locale,
+      note: parsed.data.note,
+      shipLine1: parsed.data.line1,
+      shipLine2: parsed.data.line2,
+      shipCity: parsed.data.city,
+      shipState: parsed.data.state,
+      shipPostalCode: parsed.data.postalCode,
+      shipCountry: parsed.data.country,
+      shipInCents,
+      items: resolution.lines.map((line) => ({
+        slug: line.slug,
+        quantity: line.quantity,
+      })),
+    },
+  });
+
+  if (error) {
+    console.error(`[checkout] place_order failed: ${error.message}`);
+    return placementFailure(error.message);
+  }
+
+  const orderNumber = typeof data === "string" ? data : "";
+
+  if (orderNumber === "") {
+    console.error("[checkout] place_order returned no order number.");
+    return { ok: false, formError: "server" };
+  }
+
+  console.info(
+    `[checkout] ${orderNumber} placed — ${parsed.data.paymentMethod}, ${resolution.lines.length} line(s)`,
+  );
+
+  // Stock just moved, so every surface printing a sold-out badge or a remaining
+  // count is stale. Awaited but never allowed to change the outcome — the sale
+  // is already recorded.
+  await revalidateProductsBySlug(resolution.lines.map((line) => line.slug));
+
+  const order = await getOrderForMailByNumber(orderNumber);
+
+  if (!order) {
+    // The row exists — `place_order()` returned its number — so this is a read
+    // failure, not a write one. The customer is not told a successful order
+    // failed over an email that did not send.
+    console.error(`[checkout] ${orderNumber} placed but could not be read back.`);
+    return {
+      ok: true,
+      orderNumber,
+      paymentMethod: parsed.data.paymentMethod,
+    };
+  }
+
+  if (parsed.data.paymentMethod === "CASH") {
+    // Nothing to wait for, so the order joins the desk's queue immediately.
+    // Routed through `set_order_status` rather than an update, because that is
+    // the one entry point 0015 allows for a status change.
+    const { error: statusError } = await supabase.rpc("set_order_status", {
+      order_id: order.id,
+      next_status: "PROCESSING",
+    });
+
+    if (statusError) {
+      // The order stands, and the desk can move it by hand. Worth a loud log
+      // and nothing more — refusing the sale here would be strictly worse.
+      console.error(
+        `[checkout] ${orderNumber} could not be moved to PROCESSING: ${statusError.message}`,
+      );
+    }
+
+    await announceOrder({
+      ...order,
+      status: statusError ? order.status : "PROCESSING",
+    });
+
+    return { ok: true, orderNumber, paymentMethod: "CASH" };
+  }
+
+  // Card: the order is PENDING and its stock is held. No customer email — an
+  // unpaid order is not a confirmed one, and the webhook sends both messages
+  // once Stripe confirms the money moved.
+  return {
+    ok: true,
+    orderNumber,
+    orderId: order.id,
+    paymentMethod: "CARD",
+  };
+}

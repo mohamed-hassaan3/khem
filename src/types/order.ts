@@ -11,12 +11,24 @@
  */
 
 import type { OrderStatus } from "./account";
+import type { PaymentMethod } from "./checkout";
 
 /** Where a sale came from. Both draw stock from the same website inventory. */
 export type OrderChannel = "ONLINE" | "OFFLINE";
 
 /** Mirrors the §9 `PaymentStatus` enum and the Postgres type of the same name. */
 export type PaymentStatus = "UNPAID" | "PAID" | "FAILED" | "REFUNDED";
+
+/**
+ * How the money is taken. Added by `supabase/sql/0016_checkout.sql`.
+ *
+ * Distinct from {@link PaymentStatus}, and the distinction matters at the desk:
+ * a cash order is PROCESSING and UNPAID for as long as it takes a courier to
+ * reach the door, which is a healthy state and not a failed payment.
+ *
+ * Re-exported from `src/types/checkout.ts` rather than declared twice.
+ */
+export type { PaymentMethod };
 
 /** One line of an order as the desk prints it — name and price are snapshots. */
 export interface AdminOrderLine {
@@ -40,6 +52,24 @@ export interface AdminOrderSummary {
   itemCount: number;
 }
 
+/**
+ * A delivery address as it was at the moment of sale.
+ *
+ * Denormalised onto `"Order"`, not a pointer into an address book: a shipping
+ * address is a snapshot of where a parcel went, and a customer correcting their
+ * saved address later must not rewrite the label on a parcel already sent.
+ *
+ * Every field is nullable because a walk-in carries their own bottle home.
+ */
+export interface OrderShippingAddress {
+  line1: string | null;
+  line2: string | null;
+  city: string | null;
+  state: string | null;
+  postalCode: string | null;
+  country: string | null;
+}
+
 /** An order on its own screen — everything the list omits. */
 export interface AdminOrderDetail extends AdminOrderSummary {
   customerEmail: string | null;
@@ -49,6 +79,18 @@ export interface AdminOrderDetail extends AdminOrderSummary {
   shipInCents: number;
   /** Set once the units went back on the shelf; the restock guard. */
   stockReleasedAt: string | null;
+  /** `CARD` or `CASH`. Every pre-checkout row reads `CASH`, correctly. */
+  paymentMethod: PaymentMethod;
+  /** Which language this customer is written to in. */
+  locale: "en" | "ar";
+  /** Printed on the parcel. Empty of everything for a walk-in. */
+  shipping: OrderShippingAddress;
+  /** Stripe's id for the intent that paid this, when one did. */
+  stripePaymentIntentId: string | null;
+  /** When the money actually landed. Null for an unpaid order. */
+  paidAt: string | null;
+  /** Set once the parcel is with the courier. */
+  trackingCode: string | null;
   lines: readonly AdminOrderLine[];
 }
 

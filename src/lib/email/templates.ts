@@ -50,7 +50,14 @@ const BORDER = "rgba(255,255,255,0.08)";
 const SERIF = "Georgia, 'Times New Roman', serif";
 const SANS = "'Helvetica Neue', Helvetica, Arial, sans-serif";
 
-/** One label/value pair. `value` must already be escaped. */
+/**
+ * One label/value pair. `value` must already be escaped.
+ *
+ * Exported as `internalRow` alongside {@link internalShell} so
+ * `./order-templates.ts` can build the house picking slip in the same dense
+ * format, rather than inventing a second internal look. The local name stays
+ * `row` because this file uses it a dozen times.
+ */
 function row(label: string, value: string): string {
   return `
     <tr>
@@ -99,6 +106,21 @@ function shell(heading: string, body: string): string {
   </body>
 </html>`;
 }
+
+/**
+ * The internal notification format, for the one other module that needs it.
+ *
+ * `./order-templates.ts` sends the house a picking slip on every order, and it
+ * must look like the enquiry notification directly above it in the same inbox —
+ * dense, English, no seal. Re-exported rather than duplicated so a change to
+ * the internal look lands in both.
+ *
+ * Deliberately **not** the customer-facing shell: that one is `luxuryShell` in
+ * `./layout.ts`, and the difference between them is the difference between a
+ * brand surface and a work queue.
+ */
+export const internalShell = shell;
+export const internalRow = row;
 
 export interface EnquiryInput {
   name: string;
