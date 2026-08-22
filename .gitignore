@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the example, which is the opt-in. It documents which variables the
+# app needs and holds a value for none of them, so it is safe to commit — and
+# useless if it is not: a fresh clone otherwise gets no list at all.
+!.env.example
 
 # vercel
 .vercel

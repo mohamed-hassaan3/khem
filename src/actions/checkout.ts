@@ -40,7 +40,8 @@
  *          the order and sends the mail once Stripe says the money moved.
  *
  * The cost of reserving stock before payment is abandoned baskets holding
- * bottles; `/api/cron/sweep-unpaid-orders` is what pays it.
+ * bottles, and this module pays most of it itself — see {@link sweepStaleHolds}.
+ * `/api/cron/sweep-unpaid-orders` is the backstop.
  *
  * ## Logging
  *
@@ -71,6 +72,60 @@ import { revalidateProductsBySlug } from "./admin/shared";
  * heuristic.
  */
 const LIMIT = { limit: 8, windowMs: 10 * 60 * 1_000 };
+
+/** How long an unpaid card order may hold its bottles. Matches the cron route. */
+const HOLD_MINUTES = 30;
+
+/**
+ * Release stock from card orders nobody came back to pay for.
+ *
+ * ## Why this is here and not only on a schedule
+ *
+ * `vercel.json` runs the same sweep on a cron, but the Hobby plan permits at
+ * most one cron run per day — a more frequent expression makes Vercel refuse
+ * the deployment outright, which is what kept the first version of this feature
+ * from ever reaching production. Once a day is far too slow: a basket abandoned
+ * at 09:00 would hold its bottles until the small hours.
+ *
+ * So the sweep runs *here*, on the one event that both cares about the answer
+ * and happens exactly as often as it needs to. A shopper reaching checkout is
+ * the moment stale reservations matter, and running it **before**
+ * `place_order()` means bottles freed by this call are available to this very
+ * order — someone can buy the last bottle that an abandoned basket was sitting
+ * on, instead of being told it is out of stock.
+ *
+ * Cheap enough to be unremarkable: `order_unpaid_card_idx` is a partial index
+ * over exactly the at-risk rows, so the usual result is zero rows and one round
+ * trip. On Pro, tighten the cron and this becomes pure redundancy — which is
+ * the right thing for it to become, not a reason to remove it.
+ *
+ * Never allowed to fail a sale. A sweep that errors leaves stock reserved a
+ * little longer; a sweep that throws would refuse a customer's money.
+ */
+async function sweepStaleHolds(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
+): Promise<void> {
+  try {
+    const { data, error } = await supabase.rpc("expire_unpaid_orders", {
+      older_than_minutes: HOLD_MINUTES,
+    });
+
+    if (error) {
+      console.error(`[checkout] sweep failed: ${error.message}`);
+      return;
+    }
+
+    const cancelled = Array.isArray(data) ? data.length : 0;
+    if (cancelled > 0) {
+      console.info(`[checkout] released ${cancelled} stale hold(s) before placing.`);
+    }
+  } catch (cause) {
+    console.error(
+      "[checkout] sweep threw:",
+      cause instanceof Error ? cause.message : "unknown error",
+    );
+  }
+}
 
 /**
  * Turn a `place_order()` raise into something the visitor can act on.
@@ -153,7 +208,11 @@ export async function placeCustomerOrder(
   //    implementation — which is the promise `src/lib/cart.ts` opens with.
   const shipInCents = shippingInCents(resolution.subtotalInCents);
 
-  // 6. Identity from the session, never from the body. A guest gets null here
+  // 6. Free anything abandoned before asking for stock, so a bottle held by a
+  //    basket nobody paid for is available to the person standing here now.
+  await sweepStaleHolds(supabase);
+
+  // 7. Identity from the session, never from the body. A guest gets null here
   //    and their order correctly never appears in anybody's portal.
   const clerkUserId = await getUserId();
 

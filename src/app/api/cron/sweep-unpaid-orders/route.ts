@@ -8,8 +8,23 @@
  * inventory, and this is what pays it: anything still PENDING, UNPAID and CARD
  * after thirty minutes is cancelled and restocked.
  *
- * Scheduled every fifteen minutes by `vercel.json`, so nothing waits longer
- * than about forty-five.
+ * ## The schedule, and why it is only a backstop
+ *
+ * `vercel.json` runs this **once a day**, because the Hobby plan permits no
+ * more than that — a quarter-hourly expression makes Vercel refuse the entire
+ * deployment, which is exactly what kept the first version of this feature out
+ * of production.
+ *
+ * Once a day is too slow to be the only sweep, so it is not the only sweep:
+ * `sweepStaleHolds()` in `src/actions/checkout.ts` runs the same function
+ * before every order, which is both more timely and better targeted. This route
+ * exists for the day on which nobody orders anything — the one case the
+ * opportunistic sweep cannot cover.
+ *
+ * On Pro, tighten the schedule to `0,15,30,45 * * * *`; nothing else has to
+ * change. (Written the long way rather than with a step: the shorthand for it
+ * contains the two characters that end a block comment, and this one is a block
+ * comment.)
  *
  * ## Why the work is one SQL call
  *
