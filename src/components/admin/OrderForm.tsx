@@ -72,7 +72,7 @@ export default function OrderForm({
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [channel, setChannel] = useState("OFFLINE");
+  const [channel, setChannel] = useState("ONLINE");
   const [shipEgp, setShipEgp] = useState("0");
   const [note, setNote] = useState("");
   const [lines, setLines] = useState<Line[]>([newLine()]);
@@ -187,8 +187,8 @@ export default function OrderForm({
             onChange={setChannel}
             error={fieldErrors.channel}
             options={[
-              { value: "OFFLINE", label: "Offline — recorded at the boutique" },
               { value: "ONLINE", label: "Online — placed through the site" },
+              { value: "OFFLINE", label: "Offline — recorded at the boutique" },
             ]}
             hint="Both draw stock from the same website inventory. This records where the sale came from."
           />

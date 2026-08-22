@@ -23,8 +23,13 @@ export function AdminPageHeader({
 }) {
   return (
     <header className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
-      <div>
-        <h1 className="font-heading text-2xl uppercase tracking-[0.2em] text-ivory">
+      {/*
+        `min-w-0` so a long order number wraps instead of widening the panel
+        past the viewport — the flex item would otherwise take its content's
+        intrinsic width and push the page into a horizontal scroll.
+      */}
+      <div className="min-w-0">
+        <h1 className="font-heading text-xl uppercase tracking-[0.2em] text-ivory break-words sm:text-2xl">
           {title}
         </h1>
         {description ? (

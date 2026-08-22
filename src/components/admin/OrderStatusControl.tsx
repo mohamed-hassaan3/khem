@@ -7,11 +7,14 @@
  * order can be delivered and unpaid (a walk-in on account), or paid and still
  * sitting on the bench.
  *
- * Only the transitions `schemas/orders.ts` allows are offered, so the
- * impossible ones are not rendered and then refused — an editor never sees a
- * button that cannot work. The server re-checks anyway against the row as it
- * is *now*, because this page may have been open while somebody else cancelled
- * the order.
+ * Both groups render **every** value they can hold, and flag the current one.
+ * A group whose membership changed with the selection meant an editor watched
+ * options vanish as they worked and could not see, at a glance, where in the
+ * sequence an order sat. What `schemas/orders.ts` allows now decides which
+ * buttons are *disabled*, not which exist. The server re-checks anyway against
+ * the row as it is *now*, because this page may have been open while somebody
+ * else cancelled the order — a button forced back to life in devtools is
+ * refused there, not here.
  *
  * Cancelling and refunding are armed-then-confirmed, the pattern
  * `StatusToggle` uses: both put units back on the shelf, and that is not a
@@ -22,7 +25,12 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { updateOrderStatus, updatePaymentStatus } from "@/src/actions/admin/orders";
-import { allowedTransitions, paymentStatusValues } from "@/src/schemas/orders";
+import {
+  allowedTransitions,
+  canTransition,
+  orderStatusValues,
+  paymentStatusValues,
+} from "@/src/schemas/orders";
 import type { OrderStatus } from "@/src/types/account";
 import type { PaymentStatus } from "@/src/types/order";
 
@@ -89,37 +97,51 @@ export default function OrderStatusControl({
         </p>
 
         {next.length === 0 ? (
-          <p className="text-[12px] leading-relaxed text-ivory/30">
+          <p className="mb-4 text-[12px] leading-relaxed text-ivory/30">
             This order is closed. Its units were returned to stock and it cannot
             be reopened — record a new order instead.
           </p>
-        ) : (
-          <div className="flex flex-wrap gap-3">
-            {next.map((to) => {
-              const restocks = RESTOCKING.includes(to);
-              const isArmed = armed === to;
+        ) : null}
 
-              return (
-                <button
-                  key={to}
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => move(to)}
-                  onBlur={() => setArmed(null)}
-                  className={`rounded-none border px-5 py-2.5 font-heading text-[9px] uppercase tracking-[0.2em] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none disabled:opacity-40 ${
-                    isArmed
+        <div className="flex flex-wrap gap-3">
+          {orderStatusValues.map((to) => {
+            const active = to === status;
+            const reachable = canTransition(status, to);
+            const restocks = RESTOCKING.includes(to);
+            const isArmed = armed === to;
+
+            return (
+              <button
+                key={to}
+                type="button"
+                disabled={isPending || active || !reachable}
+                aria-pressed={active}
+                onClick={() => move(to)}
+                onBlur={() => setArmed(null)}
+                title={
+                  active
+                    ? "Where this order is now."
+                    : reachable
+                      ? undefined
+                      : `An order that is ${status.toLowerCase()} cannot become ${to.toLowerCase()}.`
+                }
+                className={`rounded-none border px-5 py-2.5 font-heading text-[9px] uppercase tracking-[0.2em] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none disabled:pointer-events-none ${
+                  active
+                    ? "border-gold/50 bg-gold/10 text-gold"
+                    : isArmed
                       ? "border-danger bg-danger/10 text-danger"
-                      : restocks
-                        ? "border-border text-ivory/40 hover:border-danger/50 hover:text-danger"
-                        : "border-border text-ivory/45 hover:border-gold/40 hover:text-gold"
-                  }`}
-                >
-                  {isArmed ? `Confirm — restocks` : label(to)}
-                </button>
-              );
-            })}
-          </div>
-        )}
+                      : !reachable
+                        ? "border-border/50 text-ivory/15"
+                        : restocks
+                          ? "border-border text-ivory/40 hover:border-danger/50 hover:text-danger"
+                          : "border-border text-ivory/45 hover:border-gold/40 hover:text-gold"
+                }`}
+              >
+                {isArmed ? `Confirm — restocks` : label(to)}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div>

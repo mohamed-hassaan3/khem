@@ -66,12 +66,14 @@ function Tile({
   return (
     <Link
       href={href}
-      className="block border border-border bg-ivory/2 p-8 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/30"
+      className="block border border-border bg-ivory/2 p-6 transition-colors sm:p-8 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/30"
     >
       <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
         {label}
       </p>
-      <p className="mt-4 font-heading text-4xl tracking-[0.1em] text-gold">{value}</p>
+      <p className="mt-4 font-heading text-3xl tracking-[0.1em] text-gold sm:text-4xl">
+        {value}
+      </p>
       {note ? <p className="mt-3 text-[11px] text-ivory/30">{note}</p> : null}
     </Link>
   );
@@ -210,7 +212,7 @@ export default async function AdminDashboardPage({
         </div>
 
         {recentOrders.length === 0 ? (
-          <div className="border border-border px-8 py-12 text-center">
+          <div className="border border-border px-5 py-12 text-center sm:px-8">
             <p className="text-[12px] leading-relaxed text-ivory/35">
               No orders yet. A sale recorded at{" "}
               <Link href={`${ordersPath}/new`} className="text-gold/80 hover:text-gold">
@@ -252,7 +254,7 @@ export default async function AdminDashboardPage({
 
       {/* ── Stock warnings ───────────────────────────────── */}
       {needsStock.length > 0 ? (
-        <div className="mt-6 border border-warning/30 bg-warning/5 p-6">
+        <div className="mt-6 border border-warning/30 bg-warning/5 p-5 sm:p-6">
           <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-warning">
             Running out
           </p>
@@ -313,7 +315,7 @@ export default async function AdminDashboardPage({
       </div>
 
       {missingEmbeddings > 0 ? (
-        <div className="mt-8 border border-warning/30 bg-warning/5 p-6">
+        <div className="mt-8 border border-warning/30 bg-warning/5 p-5 sm:p-6">
           <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-warning">
             Search vectors
           </p>
