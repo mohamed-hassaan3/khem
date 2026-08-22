@@ -32,12 +32,15 @@
  *
  * Both create the order here. They differ in what state it lands in:
  *
- *   CASH → PROCESSING immediately, UNPAID until the courier collects. Nothing
- *          is being waited for, so both emails go out now.
+ *   CASH → PENDING and UNPAID until the courier collects. Nothing is being
+ *          waited for, so both emails go out now; the desk moves it to
+ *          PROCESSING when it actually starts preparing the parcel.
  *   CARD → PENDING and UNPAID, stock already reserved. **No customer email
  *          yet** — an unpaid order is not a confirmed one. The client then asks
- *          `/api/checkout/intent` for a client secret, and the webhook promotes
- *          the order and sends the mail once Stripe says the money moved.
+ *          `/api/checkout/intent` for a client secret, and the webhook marks it
+ *          paid and sends the mail once Stripe says the money moved. Paying
+ *          does not advance the status either: see
+ *          `supabase/sql/0017_order_events.sql`.
  *
  * The cost of reserving stock before payment is abandoned baskets holding
  * bottles, and this module pays most of it itself — see {@link sweepStaleHolds}.
@@ -278,26 +281,18 @@ export async function placeCustomerOrder(
   }
 
   if (parsed.data.paymentMethod === "CASH") {
-    // Nothing to wait for, so the order joins the desk's queue immediately.
-    // Routed through `set_order_status` rather than an update, because that is
-    // the one entry point 0015 allows for a status change.
-    const { error: statusError } = await supabase.rpc("set_order_status", {
-      order_id: order.id,
-      next_status: "PROCESSING",
-    });
-
-    if (statusError) {
-      // The order stands, and the desk can move it by hand. Worth a loud log
-      // and nothing more — refusing the sale here would be strictly worse.
-      console.error(
-        `[checkout] ${orderNumber} could not be moved to PROCESSING: ${statusError.message}`,
-      );
-    }
-
-    await announceOrder({
-      ...order,
-      status: statusError ? order.status : "PROCESSING",
-    });
+    /*
+     * The order stays PENDING, and both emails go now.
+     *
+     * It used to be promoted to PROCESSING here, on the reasoning that there
+     * was nothing to wait for. But PROCESSING means somebody in Cairo has
+     * begun preparing the parcel, and thirty seconds after checkout nobody
+     * has. The customer's rail lit its second station before the first had
+     * been earned. PENDING is the true state — the desk moves it when work
+     * starts — and the desk still sees it, because `OPEN_STATUSES` in
+     * `src/services/admin/orders.ts` counts PENDING as owed.
+     */
+    await announceOrder(order);
 
     return { ok: true, orderNumber, paymentMethod: "CASH" };
   }

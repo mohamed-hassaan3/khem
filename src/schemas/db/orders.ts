@@ -191,6 +191,17 @@ export const customerOrderSchema = z.object({
   items: z
     .array(z.object({ productName: z.string(), quantity: z.number() }))
     .default([]),
+  /*
+   * The rail. Embedded rather than fetched separately because the two are one
+   * question — "what is this order and how far has it got" — and a second
+   * round trip per order would turn a history page into N+1 queries.
+   *
+   * Unordered here: PostgREST does not promise an order for an embedded
+   * resource, so `src/services/account.ts` sorts and de-duplicates.
+   */
+  events: z
+    .array(z.object({ status: orderStatusSchema, occurredAt: z.string() }))
+    .default([]),
 });
 
 // ── Reports ───────────────────────────────────────────────────

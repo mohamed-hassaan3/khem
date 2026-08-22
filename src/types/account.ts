@@ -21,6 +21,20 @@ export type OrderStatus =
   | "CANCELLED"
   | "REFUNDED";
 
+/**
+ * One station on the rail — a status the order actually reached, and when.
+ *
+ * Rows of `"OrderStatusEvent"` (`supabase/sql/0017_order_events.sql`), written
+ * by the same database functions that set the status. This is what lets the
+ * tracker print a date under a station instead of an unlabelled dot: `"Order"`
+ * itself holds one `updatedAt` and could never say *when* a parcel shipped.
+ */
+export interface OrderEvent {
+  status: OrderStatus;
+  /** ISO-8601, formatted at the edge in the active locale. */
+  occurredAt: string;
+}
+
 /** One line of an order, as the history list prints it. */
 export interface OrderLine {
   productName: string;
@@ -42,6 +56,14 @@ export interface OrderSummary {
   status: OrderStatus;
   totalInCents: number;
   lines: readonly OrderLine[];
+  /**
+   * The stations this order has reached, oldest first, one entry per status.
+   *
+   * A status the desk set twice appears once, stamped with the first time —
+   * that is the date the customer was told, and a rail that moved its own
+   * dates backwards and forwards would be worse than one with none.
+   */
+  events: readonly OrderEvent[];
   /** Absent until the order ships. */
   trackingCode: string | null;
 }

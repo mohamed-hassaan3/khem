@@ -25,11 +25,10 @@ import type { Locale } from "@/src/lib/i18n/config";
 /**
  * The five moments a customer hears from the house about one order.
  *
- * `PENDING` is deliberately not among them. An order awaiting a card
- * authorisation is a state the buyer is already watching on screen; mailing
- * "your order is pending" adds anxiety and no information. `PROCESSING` reuses
- * `confirmation`, because a desk pulling an order forward from PENDING is
- * telling the customer the same thing checkout would have.
+ Five messages, six statuses: `PENDING` and `PROCESSING` share `confirmation`,
+ * because both say the same thing to the buyer — the house has the order and is
+ * getting to it. See `mailKindForStatus()` in `./send-order-mail.ts` for the
+ * mapping and for why PENDING stopped being silent.
  */
 export type OrderMailKind =
   | "confirmation"

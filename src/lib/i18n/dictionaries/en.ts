@@ -1169,6 +1169,23 @@ export const en = {
       eyebrow: "Order History",
       heading: "My Orders",
       tracking: "Tracking: {code}",
+      /** Marks the newest order in the list; the service does the sorting. */
+      latest: "Latest",
+      /*
+       * The station rail. Keyed by the `OrderStatus` union like `status`
+       * above, so a seventh status is a compile error rather than a blank
+       * stop — but worded as *stops on a journey* rather than as states: a
+       * customer reads "On Its Way", not "Shipped".
+       */
+      tracker: {
+        label: "Order progress",
+        PENDING: "Order Placed",
+        PROCESSING: "Being Prepared",
+        SHIPPED: "On Its Way",
+        DELIVERED: "Delivered",
+        CANCELLED: "Cancelled",
+        REFUNDED: "Refunded",
+      },
       status: {
         PENDING: "Pending",
         PROCESSING: "Processing",

@@ -13,12 +13,14 @@ import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { getOrdersForUser } from "@/src/services/account";
 
 /**
- * Order history.
+ * Order history, and where "Track Your Order" in the emails lands.
  *
- * The list is empty today because there is no `Order` table — see the seam in
- * `src/services/account.ts`. It renders the empty state honestly rather than
- * the three invented orders the previous page shipped, and it renders the real
- * list the moment that service returns rows, with no change here.
+ * Newest first, each card carrying the rail of stations the order has reached.
+ * `force-dynamic` is what makes that rail current: a status the desk changed a
+ * minute ago is on the page at the next load. There is no live subscription and
+ * there cannot be one — `supabase/sql/0015_orders.sql` grants the public roles
+ * nothing on `"Order"`, so a browser cannot listen to it. The email is what
+ * actively notifies; this page is what the customer opens when it does.
  */
 export const dynamic = "force-dynamic";
 
@@ -80,12 +82,17 @@ export default async function OrdersPage({
         />
       ) : (
         <div className="flex flex-col gap-0.5">
-          {orders.map((order) => (
+          {/*
+            * Newest first — the sort lives in `getOrdersForUser`, and the
+            * index here only marks which card wears the badge.
+            */}
+          {orders.map((order, index) => (
             <OrderCard
               key={order.id}
               order={order}
               locale={activeLocale}
               dict={dict.account.orders}
+              isLatest={index === 0}
             />
           ))}
         </div>

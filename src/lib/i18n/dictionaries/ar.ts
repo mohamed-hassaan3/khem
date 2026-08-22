@@ -1066,6 +1066,16 @@ export const ar: Dictionary = {
       eyebrow: "سجلّ الطلبات",
       heading: "طلباتي",
       tracking: "رقم التتبّع: {code}",
+      latest: "الأحدث",
+      tracker: {
+        label: "مسار الطلب",
+        PENDING: "تم استلام الطلب",
+        PROCESSING: "قيد التجهيز",
+        SHIPPED: "في الطريق إليك",
+        DELIVERED: "تم التسليم",
+        CANCELLED: "مُلغى",
+        REFUNDED: "مُسترد",
+      },
       status: {
         PENDING: "قيد الانتظار",
         PROCESSING: "قيد التجهيز",

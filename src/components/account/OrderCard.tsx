@@ -1,3 +1,4 @@
+import OrderTracker from "@/src/components/account/OrderTracker";
 import Price from "@/src/components/ecommerce/Price";
 import type { Locale } from "@/src/lib/i18n/config";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
@@ -21,15 +22,28 @@ import type { OrderSummary } from "@/src/types/account";
  *
  * Order numbers, tracking codes, and product names are LTR islands: all three
  * are Latin/numeric strings whose character order carries meaning.
+ *
+ * The `id` is the order number, and it is what the "Track Your Order" button in
+ * the emails links to — `/en/account/orders#KHEM-2026-1042`. `scroll-mt` is
+ * what stops that landing under the fixed navigation. A fragment never reaches
+ * the server, so it selects nothing and grants nothing: the list was already
+ * filtered to this customer before it rendered.
  */
 
 export interface OrderCardProps {
   order: OrderSummary;
   locale: Locale;
   dict: Dictionary["account"]["orders"];
+  /** The newest order in the list. A marker, not a sort — the service sorts. */
+  isLatest?: boolean;
 }
 
-export default function OrderCard({ order, locale, dict }: OrderCardProps) {
+export default function OrderCard({
+  order,
+  locale,
+  dict,
+  isLatest = false,
+}: OrderCardProps) {
   const placedAt = new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
     day: "numeric",
     month: "long",
@@ -44,44 +58,61 @@ export default function OrderCard({ order, locale, dict }: OrderCardProps) {
     .join(" · ");
 
   return (
-    <article className="grid grid-cols-1 items-start gap-6 bg-surface p-8 sm:grid-cols-[1fr_auto]">
-      <div>
-        <div className="mb-3 flex flex-wrap items-center gap-4">
-          <span
-            {...ltrIsland(locale)}
-            className="font-heading text-sm text-ivory"
-          >
-            {order.orderNumber}
-          </span>
+    <article id={order.orderNumber} className="scroll-mt-32 bg-surface p-8">
+      <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-[1fr_auto]">
+        <div>
+          <div className="mb-3 flex flex-wrap items-center gap-4">
+            <span
+              {...ltrIsland(locale)}
+              className="font-heading text-sm text-ivory"
+            >
+              {order.orderNumber}
+            </span>
 
-          <span className="border border-gold/25 px-2.5 py-0.5 font-heading text-[9px] tracking-[0.15em] text-gold/80">
-            {dict.status[order.status]}
-          </span>
+            <span className="border border-gold/25 px-2.5 py-0.5 font-heading text-[9px] tracking-[0.15em] text-gold/80">
+              {dict.status[order.status]}
+            </span>
+
+            {isLatest ? (
+              <span className="font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/30">
+                {dict.latest}
+              </span>
+            ) : null}
+          </div>
+
+          <p {...ltrIsland(locale)} className="mb-2 text-xs text-ivory/50">
+            {items}
+          </p>
+
+          <p className="mb-3 text-[11px] text-ivory/25">{placedAt}</p>
+
+          {order.trackingCode ? (
+            <p
+              {...ltrIsland(locale)}
+              className="text-[10px] tracking-[0.08em] text-ivory/25"
+            >
+              {interpolate(dict.tracking, { code: order.trackingCode })}
+            </p>
+          ) : null}
         </div>
 
-        <p {...ltrIsland(locale)} className="mb-2 text-xs text-ivory/50">
-          {items}
-        </p>
-
-        <p className="mb-3 text-[11px] text-ivory/25">{placedAt}</p>
-
-        {order.trackingCode ? (
-          <p
-            {...ltrIsland(locale)}
-            className="text-[10px] tracking-[0.08em] text-ivory/25"
-          >
-            {interpolate(dict.tracking, { code: order.trackingCode })}
+        <div className="sm:text-end">
+          <p>
+            <Price
+              cents={order.totalInCents}
+              className="font-heading text-xl text-gold"
+            />
           </p>
-        ) : null}
+        </div>
       </div>
 
-      <div className="sm:text-end">
-        <p className="mb-4">
-          <Price
-            cents={order.totalInCents}
-            className="font-heading text-xl text-gold"
-          />
-        </p>
+      <div className="mt-8 border-t border-border pt-8">
+        <OrderTracker
+          status={order.status}
+          events={order.events}
+          locale={locale}
+          dict={dict.tracker}
+        />
       </div>
     </article>
   );

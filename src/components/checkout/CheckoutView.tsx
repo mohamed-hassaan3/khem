@@ -16,7 +16,7 @@
  * Both call `placeCustomerOrder`, which writes the order and reserves its
  * stock. They diverge on what happens next:
  *
- *   CASH → the action already moved it to PROCESSING and sent both emails.
+ *   CASH → the action left it PENDING for the desk and sent both emails.
  *          Clear the bag, go to the confirmation.
  *   CARD → the order is PENDING. Ask `/api/checkout/intent` for a client
  *          secret, mount the Payment Element, and let Stripe take it from

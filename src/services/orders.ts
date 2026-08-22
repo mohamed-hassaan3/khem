@@ -221,6 +221,13 @@ const mailRowSchema = z.object({
   customerName: z.string(),
   customerEmail: z.string().nullable().default(null),
   customerPhone: z.string().nullable().default(null),
+  /*
+   * Never printed in a letter — only branched on. It is what decides whether
+   * "Track Your Order" can point at the customer portal at all: an order placed
+   * without a session belongs to no account and would land a guest on a
+   * sign-in wall. See `customerOrderEmail` in `src/lib/email/order-templates.ts`.
+   */
+  clerkUserId: z.string().nullable().default(null),
   status: orderStatusSchema,
   paymentMethod: z.enum(["CARD", "CASH"]),
   paymentStatus: z.enum(["UNPAID", "PAID", "FAILED", "REFUNDED"]),
@@ -272,7 +279,7 @@ export async function getOrderForMail(
   const { data, error } = await supabase
     .from("Order")
     .select(
-      "id, orderNumber, customerName, customerEmail, customerPhone, status, " +
+      "id, orderNumber, customerName, customerEmail, customerPhone, clerkUserId, status, " +
         "paymentMethod, paymentStatus, locale, subtotalInCents, shipInCents, " +
         "totalInCents, trackingCode, shipLine1, shipLine2, shipCity, shipState, " +
         "shipPostalCode, shipCountry, note, placedAt, " +

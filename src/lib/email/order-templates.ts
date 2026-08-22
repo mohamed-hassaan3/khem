@@ -30,7 +30,11 @@
  */
 
 import { formatPrice } from "@/src/lib/format";
-import { LOCALE_DIRECTION, type Locale } from "@/src/lib/i18n/config";
+import {
+  LOCALE_DIRECTION,
+  localizePath,
+  type Locale,
+} from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
@@ -244,6 +248,45 @@ function paymentBlock(order: OrderMailRecord, locale: Locale): string {
     </table>`;
 }
 
+/**
+ * Where the button goes.
+ *
+ * Three destinations, and the choice between the first two is the whole reason
+ * this is a function:
+ *
+ *  - **A signed-in customer** is sent to their own order history, in the
+ *    language the order was placed in, with the order number as a fragment —
+ *    `/ar/account/orders#KHEM-2026-1042`. `<OrderCard>` carries that `id`, so
+ *    the browser scrolls the right order into view. A fragment never leaves the
+ *    browser, so it selects nothing on the server and grants nothing; the list
+ *    was already filtered on the session before it rendered.
+ *  - **A guest** has no account for the order to appear in — checkout without a
+ *    session stores no `clerkUserId` — so the portal would be a sign-in wall
+ *    in front of an order that would not be there afterwards. They get the
+ *    confirmation page instead, which is built to be safe to open by number.
+ *  - **A closed order** gets the collections, because there is nothing left to
+ *    track.
+ *
+ * `localizePath` rather than a bare path: the letter is written in
+ * `order.locale`, and a link that switches the reader back to English at the
+ * click is the same bug as an untranslated subject line.
+ */
+function trackingHref(order: OrderMailRecord, kind: OrderMailKind): string {
+  const open = kind === "confirmation" || kind === "shipped";
+
+  if (!open) return `${SITE_URL}${localizePath(order.locale, "/collections")}`;
+
+  if (order.clerkUserId) {
+    return `${SITE_URL}${localizePath(order.locale, ACCOUNT_PATHS.orders)}#${
+      order.orderNumber
+    }`;
+  }
+
+  return `${SITE_URL}${localizePath(order.locale, "/checkout/confirmed")}?order=${encodeURIComponent(
+    order.orderNumber,
+  )}`;
+}
+
 export interface CustomerOrderEmailInput {
   order: OrderMailRecord;
   kind: OrderMailKind;
@@ -296,10 +339,7 @@ export function customerOrderEmail({
   // address panel would be noise at best and a false promise at worst.
   const isOpen = kind === "confirmation" || kind === "shipped" || kind === "delivered";
 
-  const ctaHref =
-    kind === "confirmation" || kind === "shipped"
-      ? `${SITE_URL}${ACCOUNT_PATHS.orders}`
-      : `${SITE_URL}/collections`;
+  const ctaHref = trackingHref(order, kind);
 
   const body = [
     paragraph(copy.intro, align),
@@ -325,7 +365,11 @@ export function customerOrderEmail({
     logoSrc,
   });
 
-  return { subject, html, text: customerOrderText(order, kind, headline) };
+  return {
+    subject,
+    html,
+    text: customerOrderText(order, kind, headline, ctaHref),
+  };
 }
 
 /**
@@ -339,6 +383,7 @@ function customerOrderText(
   order: OrderMailRecord,
   kind: OrderMailKind,
   headline: string,
+  ctaHref: string,
 ): string {
   const locale = order.locale;
   const copy = ORDER_COPY[locale][kind];
@@ -372,6 +417,8 @@ function customerOrderText(
     order.trackingCode && kind === "shipped"
       ? interpolate(labels.trackingCode, { code: order.trackingCode })
       : "",
+    "",
+    `${copy.cta}: ${ctaHref}`,
     "",
     copy.signoff,
     "KHEM Perfumes — Essence of Heritage",

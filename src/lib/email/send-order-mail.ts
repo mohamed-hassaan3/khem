@@ -193,9 +193,16 @@ export async function announceOrder(order: OrderMailRecord): Promise<void> {
 /**
  * Which status change is worth an email, and which message it gets.
  *
- * `PENDING` maps to nothing — see the note on `OrderMailKind`. `PROCESSING`
- * reuses the confirmation, because a desk pulling an order forward is telling
- * the customer what checkout would have.
+ * Every status is. `PENDING` used to map to nothing, on the reasoning that an
+ * order awaiting a card authorisation is a state the buyer is already watching
+ * on screen — but since `supabase/sql/0017_order_events.sql` stopped promoting
+ * paid orders to PROCESSING, PENDING is where an order genuinely *sits* until
+ * the desk picks it up, and silence there is silence for the whole first leg of
+ * the journey. It sends the confirmation, which is the same thing checkout
+ * would have said.
+ *
+ * `PROCESSING` reuses that confirmation too, because a desk pulling an order
+ * forward is telling the customer the same thing in different words.
  *
  * Exported so `src/actions/admin/orders.ts` does not have to restate the
  * mapping, and so adding a status to `OrderStatus` fails to compile here.
@@ -215,7 +222,7 @@ export function mailKindForStatus(
     case "REFUNDED":
       return "refunded";
     case "PENDING":
-      return null;
+      return "confirmation";
     default: {
       const unreachable: never = status;
       return unreachable;

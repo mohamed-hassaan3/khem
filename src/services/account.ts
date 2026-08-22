@@ -26,6 +26,8 @@ import { parseList } from "@/src/schemas/db/catalog";
 import { customerOrderSchema } from "@/src/schemas/db/orders";
 import type {
   AccountSummary,
+  OrderEvent,
+  OrderStatus,
   OrderSummary,
   SavedAddress,
 } from "@/src/types/account";
@@ -60,7 +62,8 @@ export async function getOrdersForUser(
     .from("Order")
     .select(
       "id, orderNumber, placedAt, status, totalInCents, trackingCode, " +
-        "items:OrderItem(productName, quantity)",
+        "items:OrderItem(productName, quantity), " +
+        "events:OrderStatusEvent(status, occurredAt)",
     )
     .eq("clerkUserId", userId)
     .order("placedAt", { ascending: false })
@@ -75,9 +78,41 @@ export async function getOrdersForUser(
     const parsed = customerOrderSchema.safeParse(row);
     if (!parsed.success) return null;
 
-    const { items, ...order } = parsed.data;
-    return { ...order, lines: items } satisfies OrderSummary;
+    const { items, events, ...order } = parsed.data;
+    return {
+      ...order,
+      lines: items,
+      events: firstVisitPerStatus(events),
+    } satisfies OrderSummary;
   });
+}
+
+/**
+ * The rail, oldest first, one station per status.
+ *
+ * `"OrderStatusEvent"` is append-only, so a desk that corrects SHIPPED back to
+ * PROCESSING and forward again leaves three rows and two of them share a
+ * status. The station keeps the **earliest** of the two: that is the date the
+ * customer was told the parcel had shipped, and a date that walked backwards
+ * on a later correction would be worse than no date at all.
+ *
+ * Sorted here rather than in the query because PostgREST gives no ordering
+ * guarantee for an embedded resource, and a rail that depends on one is a rail
+ * that scrambles the day the planner changes its mind.
+ */
+function firstVisitPerStatus(
+  events: readonly OrderEvent[],
+): readonly OrderEvent[] {
+  const earliest = new Map<OrderStatus, OrderEvent>();
+
+  for (const event of events) {
+    const seen = earliest.get(event.status);
+    if (!seen || event.occurredAt < seen.occurredAt) earliest.set(event.status, event);
+  }
+
+  return [...earliest.values()].sort((a, b) =>
+    a.occurredAt.localeCompare(b.occurredAt),
+  );
 }
 
 /**

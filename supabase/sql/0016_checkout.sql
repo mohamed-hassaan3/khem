@@ -309,10 +309,11 @@ $$;
 -- already calls `restock_order()`, which is already idempotent by
 -- `"stockReleasedAt"`. Running the sweep twice cancels once and restocks once.
 --
--- Only CARD orders are swept. A cash order is never PENDING — it is created
--- and immediately moved to PROCESSING, because there is nothing to wait for —
--- and a walk-in left PENDING by the desk is the desk's business, not a
--- scheduled job's.
+-- Only CARD orders are swept, and this filter carries more weight since
+-- `0017_order_events.sql`: a cash order now *stays* PENDING and UNPAID until
+-- the courier collects, so without `"paymentMethod" = 'CARD'` this job would
+-- cancel every cash sale an hour after it was placed. A walk-in left PENDING
+-- by the desk is the desk's business, not a scheduled job's.
 
 create or replace function public.expire_unpaid_orders(older_than_minutes int)
 returns setof text
