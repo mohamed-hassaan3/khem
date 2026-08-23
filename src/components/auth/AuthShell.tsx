@@ -55,21 +55,12 @@ export default function AuthShell({
           {guest.guestLead}
         </p>
 
-        <div className="flex items-center justify-center gap-6">
+        <div className="flex items-center justify-center">
           <LocaleLink
             href="/cart"
             className="font-heading text-[11px] uppercase tracking-[0.15em] text-gold/70 no-underline transition-colors duration-300 hover:text-gold"
           >
             {guest.guestCart}
-          </LocaleLink>
-
-          <span aria-hidden="true" className="h-3 w-px bg-border" />
-
-          <LocaleLink
-            href="/wishlist"
-            className="font-heading text-[11px] uppercase tracking-[0.15em] text-gold/70 no-underline transition-colors duration-300 hover:text-gold"
-          >
-            {guest.guestWishlist}
           </LocaleLink>
         </div>
       </footer>

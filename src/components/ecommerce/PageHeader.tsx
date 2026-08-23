@@ -1,9 +1,9 @@
 /**
  * The bar a utility page opens on — eyebrow, title, and an optional count line.
  *
- * Shared by `/cart` and `/wishlist`, which are the two routes that begin on a
- * rule rather than a hero. Editorial routes keep their full-bleed heroes; this
- * is deliberately the quieter opening.
+ * Used by `/cart`, the utility route that begins on a rule rather than a hero.
+ * Editorial routes keep their full-bleed heroes; this is deliberately the
+ * quieter opening.
  *
  * Every string here is dictionary copy, translated in both trees — so unlike
  * the product blocks below it, nothing on this bar is wrapped in an LTR island.

@@ -40,7 +40,6 @@ export const en = {
     newArrival: "New Arrival",
     ourCollections: "Our Collections",
     search: "Search",
-    wishlist: "Wishlist",
     cart: "Shopping bag",
     /** Accessible label for the bag link once it holds something. */
     cartCount: "Shopping bag, {count} items",
@@ -133,7 +132,6 @@ export const en = {
       contact: "Contact",
       myAccount: "My Account",
       myOrders: "My Orders",
-      wishlist: "Wishlist",
       trackOrder: "Track Order",
       returns: "Returns & Exchanges",
       privacyPolicy: "Privacy Policy",
@@ -297,8 +295,10 @@ export const en = {
       priceDesc: "Price: High to Low",
     },
     tabAll: "All",
-    wishlistAdd: "Add {name} to wishlist",
-    wishlistRemove: "Remove {name} from wishlist",
+    /** Accessible name of the add-to-bag control overlaid on each card. */
+    addToBag: "Add {name} to bag",
+    /** The same control when the product has no stock left. */
+    soldOut: "{name} is sold out",
     empty: "New fragrances are being prepared. Please return shortly.",
   },
 
@@ -618,8 +618,6 @@ export const en = {
     soldOut: "Sold Out",
     inStock: "In stock — ships within 48 hours",
     lowStock: "Only {count} remaining",
-    wishlistAdd: "Add {name} to wishlist",
-    wishlistRemove: "Remove {name} from wishlist",
     storyHeading: "The Story",
     pyramidHeading: "Fragrance Pyramid",
     topNotes: "Top Notes",
@@ -906,6 +904,19 @@ export const en = {
     remove: "Remove {name} from your bag",
     /** Announced when a quantity or total changes. */
     updated: "Bag updated. {count} items, {total}.",
+    /**
+     * The slide-in panel. It shares every other string on this block with
+     * `/cart` — the two surfaces list the same bag and must not drift into
+     * two vocabularies for it — and adds only what a panel needs that a page
+     * does not.
+     */
+    drawer: {
+      heading: "Shopping Bag",
+      close: "Close shopping bag",
+      /** Leads out of the panel to the full `/cart` page. */
+      viewBag: "View Bag",
+      error: "We could not load your bag just now.",
+    },
     empty: {
       heading: "Your Cart is Empty",
       body: "Discover our collection of luxury fragrances and begin your journey with KHEM.",
@@ -1082,24 +1093,6 @@ export const en = {
     },
   },
 
-  wishlist: {
-    meta: {
-      title: "Wishlist",
-      description:
-        "The KHEM fragrances you have saved, kept for whenever you are ready.",
-    },
-    eyebrow: "Saved Fragrances",
-    heading: "Wishlist",
-    itemCountOne: "1 fragrance saved",
-    itemCount: "{count} fragrances saved",
-    remove: "Remove {name} from your wishlist",
-    empty: {
-      heading: "Your Wishlist is Empty",
-      body: "Save fragrances you love to revisit them later.",
-      cta: "Explore Collections",
-    },
-  },
-
   auth: {
     signIn: {
       meta: {
@@ -1128,7 +1121,6 @@ export const en = {
     /** Guest routes offered beneath the form — neither needs a session. */
     guestLead: "No account yet? You can still browse.",
     guestCart: "Your Bag",
-    guestWishlist: "Your Wishlist",
   },
 
   account: {
@@ -1146,14 +1138,11 @@ export const en = {
       orders: "My Orders",
       addresses: "Addresses",
       profile: "Profile",
-      wishlist: "Wishlist",
     },
     stats: {
       orders: "Total Orders",
       spent: "Total Spent",
-      wishlist: "Wishlist Items",
       allTime: "All time",
-      saved: "Saved",
     },
     recentOrder: "Recent Order",
     viewAllOrders: "View All",
@@ -1224,12 +1213,6 @@ export const en = {
       },
       eyebrow: "Your Details",
       heading: "Profile",
-    },
-    wishlistPanel: {
-      eyebrow: "Saved Items",
-      heading: "Wishlist",
-      body: "View and manage your saved fragrances.",
-      cta: "Go to Wishlist",
     },
   },
 

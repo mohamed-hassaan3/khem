@@ -272,9 +272,9 @@ export async function getProductCardsByCollection(
 ): Promise<ProductCardData[]> {
   /*
    * Omitting the slug deliberately returns EVERY kind, not just fragrances:
-   * `/cart` and `/wishlist` resolve persisted ids against this projection, and
-   * a body-care line whose id is missing from it would silently vanish from
-   * the visitor's bag.
+   * `/cart` and the cart panel resolve persisted ids against this projection,
+   * and a body-care line whose id is missing from it would silently vanish
+   * from the visitor's bag.
    */
   const query = cardQuery();
   if (!query) return [];

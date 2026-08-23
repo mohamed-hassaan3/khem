@@ -11,9 +11,8 @@ import { ltrIsland } from "@/src/lib/i18n/rtl";
  * component decides nothing about what a card says, only how it looks saying it.
  *
  * Placement is the inline-**start** corner across all three cards, because
- * `<MerchCard>` and `<DiscoverySetCard>` already spend the end corner on the
- * wishlist heart. Both insets are logical, so the pair swaps sides together in
- * Arabic and never collides.
+ * `<ProductCard>` spends the end corner on the add-to-bag control. Both insets
+ * are logical, so the pair swaps sides together in Arabic and never collides.
  */
 export default function ProductFlag({
   label,

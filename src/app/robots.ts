@@ -40,8 +40,6 @@ const DISALLOWED = [
   "/ar/admin",
   "/cart",
   "/ar/cart",
-  "/wishlist",
-  "/ar/wishlist",
   "/sign-in",
   "/ar/sign-in",
   "/sign-up",

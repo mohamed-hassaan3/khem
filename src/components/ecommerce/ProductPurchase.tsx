@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Heart } from "lucide-react";
+import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import QuantityStepper from "@/src/components/ecommerce/QuantityStepper";
@@ -14,7 +14,6 @@ import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { useCart } from "@/src/providers/cart-provider";
 import { useCurrency } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
-import { useWishlist } from "@/src/providers/wishlist-provider";
 import type { Product } from "@/src/types/catalog";
 
 /**
@@ -25,11 +24,10 @@ import type { Product } from "@/src/types/catalog";
  * volume, one price, and one SKU — which is exactly what `Product` stores. The
  * format is stated beside the price rather than chosen.
  *
- * Cart and wishlist writes go to the `localStorage`-backed stores in
- * `src/providers/`, which persist a product id and a quantity — exactly what
- * `OrderItem` and `WishlistItem` hold (AGENTS.md §9). There is no cart service
- * and no Clerk session yet; when those land, the two handlers below become
- * Server Action calls (`addToCart`, `toggleWishlist`) and the markup is
+ * Cart writes go to the `localStorage`-backed store in `src/providers/`, which
+ * persists a product id and a quantity — exactly what an `OrderItem` holds
+ * (AGENTS.md §9). There is no cart service yet; when one lands, the handler
+ * below becomes a Server Action call (`addToCart`) and the markup is
  * unchanged.
  */
 
@@ -61,23 +59,12 @@ export default function ProductPurchase({
   const dict = useDictionary();
   const { currency, formatPrice } = useCurrency();
   const { addLine } = useCart();
-  const wishlist = useWishlist();
   // Product name and subtitle come from the database — English in both trees.
   const island = ltrIsland(locale);
 
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  /*
-   * Derived, not local: the store is the single source of truth, so the heart
-   * is already filled when a visitor returns to a fragrance they saved — and it
-   * stays in step with the same product's heart on `/collections`.
-   *
-   * `isHydrated` gates it because the server render cannot know what is saved;
-   * showing an unfilled heart until the store is read matches that HTML.
-   */
-  const wishlisted = wishlist.isHydrated && wishlist.has(product.id);
 
   // Clearing on unmount, and before each restart, keeps a fast double-click
   // from leaving the button stuck in its confirmed state.
@@ -168,12 +155,15 @@ export default function ProductPurchase({
         />
       </div>
 
-      <div className="flex gap-3">
+      {/* This used to share its row with a save control. It is the only
+          control here now, so it takes the full width rather than leaving a
+          gap where the other one stood. */}
+      <div>
         <button
           type="button"
           disabled={isSoldOut}
           onClick={handleAddToCart}
-          className="btn-luxury btn-luxury-fill flex-1 justify-center disabled:pointer-events-none disabled:opacity-40"
+          className="btn-luxury btn-luxury-fill w-full justify-center disabled:pointer-events-none disabled:opacity-40"
         >
           {isSoldOut ? (
             dict.product.soldOut
@@ -185,26 +175,6 @@ export default function ProductPurchase({
           ) : (
             dict.product.addToCart
           )}
-        </button>
-
-        <button
-          type="button"
-          aria-pressed={wishlisted}
-          aria-label={interpolate(
-            wishlisted ? dict.product.wishlistRemove : dict.product.wishlistAdd,
-            { name: product.name },
-          )}
-          onClick={() => wishlist.toggle(product.id)}
-          className={`grid size-13 shrink-0 place-items-center border transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none ${
-            wishlisted ? "border-gold" : "border-white/12"
-          }`}
-        >
-          <Heart
-            size={16}
-            strokeWidth={1.25}
-            aria-hidden="true"
-            className={wishlisted ? "fill-current text-gold" : "text-ivory/50"}
-          />
         </button>
       </div>
 

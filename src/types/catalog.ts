@@ -7,9 +7,9 @@
  * component and no page was edited.
  *
  * Deviations from Prisma, and why:
- *  - `id` values are stable slugs rather than uuids, because the cart and the
- *    wishlist persist product ids in `localStorage` and uuids would have
- *    emptied every returning visitor's bag. See the SQL file's header.
+ *  - `id` values are stable slugs rather than uuids, because the cart persists
+ *    product ids in `localStorage` and uuids would have emptied every
+ *    returning visitor's bag. See the SQL file's header.
  *  - Relations are expressed by slug (`collectionSlug`) rather than by a uuid
  *    FK, for the same reason; `slug` is unique, so the constraint is as strong.
  *  - Server-managed columns (`createdAt`, `updatedAt`, `deletedAt`, `isArchived`)
@@ -212,10 +212,11 @@ export type ProductCardData = Pick<
   | "priceInCents"
   | "collectionSlug"
   /*
-   * The last two are not read by `<ProductCard>` — they are here for the cart
-   * and wishlist, which resolve stored product ids against this same
-   * projection. The cart needs `inventory` to cap its quantity stepper and
-   * `concentration` to print the format line beside the price, and neither
+   * The last two are not read for the card's own body — they are here for the
+   * cart, which resolves stored product ids against this same projection, and
+   * for the add-to-bag control the grid overlays on each card. `inventory`
+   * caps the quantity stepper and disables that control when a product is out
+   * of stock; `concentration` prints the format line beside the price. Neither
    * surface can afford a second round trip for two columns a list query
    * already has in hand.
    */
@@ -245,8 +246,8 @@ export type ProductCardData = Pick<
   collectionName: string;
   /**
    * Resolved kind of the parent collection — the same join. Carried on the
-   * card projection so `productHref()` can route a cart or wishlist line
-   * without a second query for one column.
+   * card projection so `productHref()` can route a cart line without a second
+   * query for one column.
    */
   collectionKind: CollectionKind;
   /** The single `isPrimary` image; a list query never needs the full gallery. */

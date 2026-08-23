@@ -57,7 +57,6 @@ export default async function Footer({ locale }: { locale: Locale }) {
   const accountLinks = [
     { label: dict.footer.links.myAccount, path: "/account" },
     { label: dict.footer.links.myOrders, path: "/account" },
-    { label: dict.footer.links.wishlist, path: "/wishlist" },
     { label: dict.footer.links.trackOrder, path: "/account" },
     { label: dict.footer.links.returns, path: "/return-exchange" },
   ];

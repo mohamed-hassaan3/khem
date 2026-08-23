@@ -29,7 +29,7 @@ import type { ProductCardData } from "@/src/types/catalog";
  * goods.
  *
  * Cards are rendered here, on the server, and handed to `<CollectionGrid>` as
- * nodes; only the sort state and the wishlist toggle are client-side.
+ * nodes; only the sort state and the add-to-bag control are client-side.
  */
 
 /**
@@ -95,6 +95,7 @@ export default async function CollectionView({
     id: product.id,
     name: product.name,
     priceInCents: product.priceInCents,
+    inventory: product.inventory,
     facets: productFacets(product),
     card: (
       <ProductCard product={product} locale={locale} sizes={CARD_SIZES} />

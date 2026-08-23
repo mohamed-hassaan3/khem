@@ -7,6 +7,7 @@ import "../globals.css";
 import Footer from "@/src/components/Footer";
 import Nav from "@/src/components/Nav";
 import CookieConsent from "@/src/components/consent/CookieConsent";
+import CartDrawer from "@/src/components/ecommerce/CartDrawer";
 import { khemClerkAppearance } from "@/src/lib/clerk-appearance";
 import { getFontVariables } from "@/src/lib/fonts";
 import {
@@ -23,11 +24,11 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 // which is how the root layout and every page's canonical could have come to
 // disagree about which domain KHEM lives on.
 import { SITE_URL } from "@/src/lib/i18n/metadata";
+import { CartDrawerProvider } from "@/src/providers/cart-drawer-provider";
 import { CartProvider } from "@/src/providers/cart-provider";
 import { ConsentProvider } from "@/src/providers/consent-provider";
 import { CurrencyProvider } from "@/src/providers/currency-provider";
 import { I18nProvider } from "@/src/providers/i18n-provider";
-import { WishlistProvider } from "@/src/providers/wishlist-provider";
 
 /**
  * Both locale trees are prerendered. Without this, the `[locale]` segment would
@@ -274,18 +275,19 @@ export default async function RootLayout({
           signUpFallbackRedirectUrl={localizePath(locale, "/account")}
         >
           {/*
-           * Cart and wishlist wrap the whole tree, not just the two pages that
-           * list them: the Nav badge, the PDP buy block, and the collection
-           * grid hearts all read the same state, and they live on every route.
+           * The cart wraps the whole tree, not just the page that lists it:
+           * the Nav badge, the PDP buy block, and the add-to-bag control on
+           * every card in the collection grid all read the same state, and
+           * they live on every route.
            *
-           * Both are client providers holding `localStorage`-backed state, so
-           * neither turns `children` into client components — a Server
+           * It is a client provider holding `localStorage`-backed state, which
+           * does not turn `children` into client components — a Server
            * Component passed through as `children` stays server-rendered.
            */}
           <I18nProvider locale={locale} dictionary={dictionary}>
             {/*
-             * Consent wraps cart and wishlist rather than nesting inside them:
-             * the footer's "Cookie Settings" trigger and the banner itself both
+             * Consent wraps the cart rather than nesting inside it: the
+             * footer's "Cookie Settings" trigger and the banner itself both
              * need it, and it must outlive any surface that might one day be
              * gated on a stored choice.
              */}
@@ -299,16 +301,30 @@ export default async function RootLayout({
                */}
               <CurrencyProvider>
                 <CartProvider>
-                  <WishlistProvider>
+                  {/*
+                   * Panel visibility, nested inside the cart rather than
+                   * merged into it: one is persisted domain state, the other a
+                   * boolean about the current viewport. It is a provider and
+                   * not `useState` in `<Nav>` because two unrelated subtrees
+                   * open the same panel — the header bag and the add-to-bag
+                   * control on every product card.
+                   */}
+                  <CartDrawerProvider>
                     <Nav />
                     {children}
                     <Footer locale={locale} />
+                    {/*
+                     * Mounted once here rather than inside `<Nav>`: it is a
+                     * modal dialog over the whole document, and it is opened
+                     * from the product grid as well as from the header.
+                     */}
+                    <CartDrawer />
                     {/*
                      * Last in the tree, and `fixed`, so it never participates
                      * in document flow and cannot contribute to CLS.
                      */}
                     <CookieConsent />
-                  </WishlistProvider>
+                  </CartDrawerProvider>
                 </CartProvider>
               </CurrencyProvider>
             </ConsentProvider>

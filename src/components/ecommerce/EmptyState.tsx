@@ -3,13 +3,15 @@ import type { LucideIcon } from "lucide-react";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 
 /**
- * The centred "nothing here yet" block shared by `/cart` and `/wishlist`.
+ * The centred "nothing here yet" block on `/cart`.
  *
- * The icon is passed as a Lucide component rather than drawn inline — the two
- * pages previously carried hand-written `<svg>` paths, which is exactly the
- * duplication this component removes (AGENTS.md §6: Lucide, `strokeWidth`
- * 1.25 — lighter here because the glyph is rendered at 64px, where 1.25 reads
- * as a heavy outline).
+ * The icon is passed as a Lucide component rather than drawn inline (AGENTS.md
+ * §6: Lucide, `strokeWidth` 1.25 — lighter here because the glyph is rendered
+ * at 64px, where 1.25 reads as a heavy outline).
+ *
+ * The cart panel does not use it: at 400px this block's 64px glyph and 60vh
+ * floor are a page-scale composition, so `<CartDrawer>` inlines a compact
+ * version rather than growing props here to shrink it.
  */
 
 export interface EmptyStateProps {

@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import logo from "@/public/logo/logo-transparent.svg";
 import Reveal from "@/src/components/animation/Reveal";
+import AddToBagButton from "@/src/components/ecommerce/AddToBagButton";
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import CollectionCard from "@/src/components/home/CollectionCard";
 import IngredientCard from "@/src/components/home/IngredientCard";
@@ -209,6 +210,13 @@ export default async function Home({
               </h2>
             </Reveal>
             <Reveal>
+              {/*
+               * The whole catalogue, not `/collections/signature`. The grid
+               * above is `getFeaturedProducts()` — bestselling *fragrances*
+               * across every collection — so a card here is often from Noir or
+               * Gemstone, and a link to the Signature collection would open a
+               * page missing half of what the visitor just looked at.
+               */}
               <LocaleLink
                 href="/collections"
                 className="whitespace-nowrap border border-gold/40 px-8 py-3 font-heading text-[11px] uppercase tracking-[0.2em] text-ivory no-underline transition-all duration-300 ease-out hover:border-gold hover:bg-gold/10"
@@ -222,7 +230,21 @@ export default async function Home({
             <div className="grid grid-cols-1 gap-0.5 bg-border sm:grid-cols-2 lg:grid-cols-4">
               {products.map((product, index) => (
                 <Reveal key={product.id} delay={index * STAGGER_STEP}>
-                  <ProductCard product={product} locale={activeLocale} />
+                  {/*
+                   * The same `relative` wrapper `<CollectionGrid>` uses: the
+                   * card is a Server Component whose whole surface is a link,
+                   * so the bag control is overlaid as a sibling rather than
+                   * nested inside it.
+                   */}
+                  <div className="relative">
+                    <AddToBagButton
+                      productId={product.id}
+                      name={product.name}
+                      inventory={product.inventory}
+                    />
+
+                    <ProductCard product={product} locale={activeLocale} />
+                  </div>
                 </Reveal>
               ))}
             </div>

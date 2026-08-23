@@ -22,9 +22,9 @@
 --
 -- The products' own slugs (`amber-room-spray`, …) are left alone. They name the
 -- object, not the category — a room spray is still a room spray in a house that
--- calls the shelf Home Fragrances — and they are the ids the cart and the
--- wishlist persist to `localStorage`, so renaming them would silently empty
--- every returning visitor's bag. That is the same reasoning that made the ids
+-- calls the shelf Home Fragrances — and they are the ids the cart persists to
+-- `localStorage`, so renaming them would silently empty every returning
+-- visitor's bag. That is the same reasoning that made the ids
 -- slugs in the first place; see `0001_catalog.sql`'s header.
 --
 -- `/room-fragrance` itself keeps answering: the route is a 308 to

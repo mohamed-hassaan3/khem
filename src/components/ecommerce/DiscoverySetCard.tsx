@@ -1,18 +1,16 @@
 "use client";
 
-import { Check, Heart } from "lucide-react";
+import { Check } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import ProductFlag from "@/src/components/ecommerce/ProductFlag";
 import { productFlag } from "@/src/lib/facets";
 import type { Locale } from "@/src/lib/i18n/config";
-import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { useCart } from "@/src/providers/cart-provider";
 import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
-import { useWishlist } from "@/src/providers/wishlist-provider";
 import type { ProductCardData } from "@/src/types/catalog";
 
 /**
@@ -44,7 +42,6 @@ export default function DiscoverySetCard({
   const dict = useDictionary();
   const formatPrice = useFormatPrice();
   const { addLine } = useCart();
-  const wishlist = useWishlist();
   // Set names and contents come from the database — English in both trees.
   const island = ltrIsland(locale);
 
@@ -57,7 +54,6 @@ export default function DiscoverySetCard({
     };
   }, []);
 
-  const wishlisted = wishlist.isHydrated && wishlist.has(product.id);
   const isSoldOut = product.inventory === 0;
 
   // Same order as every other card: the stored `badge` overrides the flag.
@@ -73,37 +69,16 @@ export default function DiscoverySetCard({
   return (
     <article className="img-zoom relative flex flex-col bg-surface">
       {/*
-       * Badge at the start of the line, wishlist at the end: the two controls
-       * both want the top corner, and both insets are logical, so they swap
-       * sides together in Arabic and never collide. The sides are the way round
-       * they are because `<MerchCard>` had already spent its end corner on the
-       * heart — all three cards now put the badge in the same place.
+       * The badge sits in the inline-**start** corner, which is where all three
+       * card types put it. The end corner is left clear: `<ProductCard>` spends
+       * it on the add-to-bag control, and a set carries its own buy button
+       * below, so nothing should compete for the space here.
        */}
       {product.badge ? (
         <ProductFlag label={product.badge} locale={locale} island />
       ) : flag ? (
         <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
       ) : null}
-
-      <button
-        type="button"
-        aria-pressed={wishlisted}
-        aria-label={interpolate(
-          wishlisted ? dict.product.wishlistRemove : dict.product.wishlistAdd,
-          { name: product.name },
-        )}
-        onClick={() => wishlist.toggle(product.id)}
-        className={`absolute end-5 top-5 z-2 grid size-9 place-items-center border bg-background/70 backdrop-blur-sm transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none ${
-          wishlisted ? "border-gold" : "border-white/10"
-        }`}
-      >
-        <Heart
-          size={14}
-          strokeWidth={1.25}
-          aria-hidden="true"
-          className={wishlisted ? "fill-current text-gold" : "text-ivory/50"}
-        />
-      </button>
 
       <div className="relative aspect-square overflow-hidden bg-card">
         <Image

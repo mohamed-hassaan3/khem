@@ -24,7 +24,7 @@ import { createPersistentStore } from "@/src/lib/persistent-store";
 /**
  * Cookie consent — browser state, persisted to `localStorage`.
  *
- * Structurally identical to `wishlist-provider.tsx`: a module-level store in
+ * Structurally identical to `cart-provider.tsx`: a module-level store in
  * the `useSyncExternalStore` shape, module-level mutators so the context value
  * stays referentially stable, and a throwing hook.
  *

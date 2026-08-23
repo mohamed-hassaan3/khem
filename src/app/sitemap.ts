@@ -34,7 +34,7 @@ import {
  *
  * ## What is deliberately absent
  *
- * `/cart`, `/wishlist`, `/account/*`, `/sign-in`, `/sign-up`, and `/search`.
+ * `/cart`, `/account/*`, `/sign-in`, `/sign-up`, and `/search`.
  * The first five are personal or transactional surfaces with nothing to index;
  * `/search` already renders `noindex` (see `app/[locale]/search/page.tsx`) and
  * a URL that declares itself unindexable has no business in a sitemap.

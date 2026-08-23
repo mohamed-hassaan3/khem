@@ -233,7 +233,7 @@ export const createCollectionSchema = z
 /**
  * Update takes the slug as the *target*, never as a new value.
  *
- * Renaming a slug would break every stored cart and wishlist line (they persist
+ * Renaming a slug would break every stored cart line (they persist
  * product ids, and ids are slugs — see `supabase/sql/0001_catalog.sql`), plus
  * every indexed URL. The edit forms render it read-only and this schema has no
  * field that could change it.

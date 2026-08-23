@@ -42,7 +42,6 @@ export const ar: Dictionary = {
     newArrival: "وصل حديثًا",
     ourCollections: "مجموعاتنا",
     search: "بحث",
-    wishlist: "المفضّلة",
     cart: "حقيبة التسوّق",
     cartCount: "حقيبة التسوّق، {count} عناصر",
     cartCountOne: "حقيبة التسوّق، عنصر واحد",
@@ -116,7 +115,6 @@ export const ar: Dictionary = {
       contact: "تواصل معنا",
       myAccount: "حسابي",
       myOrders: "طلباتي",
-      wishlist: "المفضّلة",
       trackOrder: "تتبّع الطلب",
       returns: "الاسترجاع والاستبدال",
       privacyPolicy: "سياسة الخصوصية",
@@ -258,8 +256,8 @@ export const ar: Dictionary = {
       priceDesc: "السعر: من الأعلى إلى الأقل",
     },
     tabAll: "الكل",
-    wishlistAdd: "أضف {name} إلى المفضّلة",
-    wishlistRemove: "أزل {name} من المفضّلة",
+    addToBag: "أضف {name} إلى الحقيبة",
+    soldOut: "نفدت كمية {name}",
     empty: "يجري تحضير عطور جديدة. عد إلينا قريبًا.",
   },
 
@@ -565,8 +563,6 @@ export const ar: Dictionary = {
     soldOut: "نفدت الكمية",
     inStock: "متوفر — يُشحن خلال ٤٨ ساعة",
     lowStock: "لم يتبقَّ سوى {count}",
-    wishlistAdd: "أضف {name} إلى المفضلة",
-    wishlistRemove: "احذف {name} من المفضلة",
     storyHeading: "الحكاية",
     pyramidHeading: "هرم العطر",
     topNotes: "النفحات العليا",
@@ -824,6 +820,12 @@ export const ar: Dictionary = {
     removeLabel: "حذف",
     remove: "احذف {name} من الحقيبة",
     updated: "تم تحديث الحقيبة. {count} عناصر، {total}.",
+    drawer: {
+      heading: "حقيبة التسوّق",
+      close: "إغلاق حقيبة التسوّق",
+      viewBag: "عرض الحقيبة",
+      error: "تعذّر تحميل حقيبتك في الوقت الحالي.",
+    },
     empty: {
       heading: "حقيبتك فارغة",
       body: "اكتشف مجموعتنا من العطور الفاخرة وابدأ رحلتك مع كيم.",
@@ -982,23 +984,6 @@ export const ar: Dictionary = {
     },
   },
 
-  wishlist: {
-    meta: {
-      title: "المفضّلة",
-      description: "العطور التي حفظتها من كيم، بانتظارك متى شئت.",
-    },
-    eyebrow: "عطور محفوظة",
-    heading: "المفضّلة",
-    itemCountOne: "عطر واحد محفوظ",
-    itemCount: "{count} عطور محفوظة",
-    remove: "احذف {name} من المفضلة",
-    empty: {
-      heading: "قائمة المفضلة فارغة",
-      body: "احفظ العطور التي تحبها لتعود إليها لاحقًا.",
-      cta: "استكشف المجموعات",
-    },
-  },
-
   auth: {
     signIn: {
       meta: {
@@ -1026,7 +1011,6 @@ export const ar: Dictionary = {
     },
     guestLead: "لا تملك حسابًا بعد؟ يمكنك التصفّح مع ذلك.",
     guestCart: "حقيبتك",
-    guestWishlist: "مفضّلتك",
   },
 
   account: {
@@ -1043,14 +1027,11 @@ export const ar: Dictionary = {
       orders: "طلباتي",
       addresses: "العناوين",
       profile: "الملف الشخصي",
-      wishlist: "المفضّلة",
     },
     stats: {
       orders: "إجمالي الطلبات",
       spent: "إجمالي الإنفاق",
-      wishlist: "عناصر المفضّلة",
       allTime: "منذ البداية",
-      saved: "محفوظة",
     },
     recentOrder: "أحدث طلب",
     viewAllOrders: "عرض الكل",
@@ -1114,12 +1095,6 @@ export const ar: Dictionary = {
       },
       eyebrow: "بياناتك",
       heading: "الملف الشخصي",
-    },
-    wishlistPanel: {
-      eyebrow: "عناصر محفوظة",
-      heading: "المفضّلة",
-      body: "اعرض عطورك المحفوظة وأدرها.",
-      cta: "الذهاب إلى المفضّلة",
     },
   },
 

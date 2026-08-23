@@ -18,8 +18,6 @@ import { ACCOUNT_PATHS } from "@/src/lib/routes";
  * The panels were tabs in `useState` before this change. They are routes now:
  * shareable, back-button correct, and each one free to become its own query.
  *
- * Wishlist is the exception — it links to the existing `/wishlist` page rather
- * than duplicating it as a fifth section.
  */
 
 export default function AccountSidebar() {
@@ -35,7 +33,6 @@ export default function AccountSidebar() {
     { href: ACCOUNT_PATHS.orders, label: dict.account.nav.orders },
     { href: ACCOUNT_PATHS.addresses, label: dict.account.nav.addresses },
     { href: ACCOUNT_PATHS.profile, label: dict.account.nav.profile },
-    { href: "/wishlist", label: dict.account.nav.wishlist },
   ] as const;
 
   return (

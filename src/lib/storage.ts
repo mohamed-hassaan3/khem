@@ -11,14 +11,21 @@
  * 2. **Its contents are untrusted input.** A visitor — or a script that reached
  *    the page — can write anything under any key. Values are therefore parsed
  *    through a caller-supplied type guard, and a blob that fails it is treated
- *    as absent rather than thrown. This is the only place in the cart and
- *    wishlist path where unvalidated data enters, and it is where a Zod schema
- *    belongs if validation ever grows beyond these two shapes.
+ *    as absent rather than thrown. This is the only place in the cart path
+ *    where unvalidated data enters, and it is where a Zod schema belongs if
+ *    validation ever grows beyond this one shape.
  */
 
 /** Versioned so a future shape change can be introduced without a migration. */
 export const CART_STORAGE_KEY = "khem.cart.v1";
-export const WISHLIST_STORAGE_KEY = "khem.wishlist.v1";
+
+/*
+ * `khem.wishlist.v1` used to live here. The wishlist is gone, and no cleanup
+ * code was written to reclaim the key: a returning visitor may still carry the
+ * blob, and shipping a delete into every browser's boot path to recover a few
+ * hundred bytes is a worse trade than leaving it to expire with the origin's
+ * storage. Nothing reads it, so nothing can act on it.
+ */
 
 /**
  * Upper bound on a persisted list. Guards against a crafted blob with a hundred

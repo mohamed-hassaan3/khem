@@ -215,7 +215,7 @@ export default function ProductForm({
             error={fieldErrors.slug}
             hint={
               isEdit
-                ? "Fixed after creation — carts and wishlists store this value."
+                ? "Fixed after creation — stored carts reference this value."
                 : "Becomes /perfume/<slug> for fragrances. Choose carefully; it cannot change later."
             }
             onChange={(value) => {

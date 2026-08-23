@@ -1,8 +1,9 @@
 "use client";
 
-import { ChevronDown, Heart } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
+import AddToBagButton from "@/src/components/ecommerce/AddToBagButton";
 import {
   FACET_ORDER,
   FACET_PARAM,
@@ -11,7 +12,6 @@ import {
 } from "@/src/lib/facets";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useDictionary } from "@/src/providers/i18n-provider";
-import { useWishlist } from "@/src/providers/wishlist-provider";
 
 /**
  * Collection filter + sort control + product grid.
@@ -24,7 +24,7 @@ import { useWishlist } from "@/src/providers/wishlist-provider";
  * `ReactNode`s — `<ProductCard>` is an async Server Component, so re-authoring
  * its markup here would fork the card design and drag the catalog projection
  * across the client boundary. This component only filters and reorders the
- * nodes it is given and overlays the wishlist control.
+ * nodes it is given and overlays `<AddToBagButton>` on each.
  *
  * ## One filter row, one parameter, and a line that says what it did
  *
@@ -65,12 +65,18 @@ const SORT_LABEL_KEY = {
 
 export interface CollectionGridItem {
   id: string;
-  /** Product name — interpolated into the wishlist button's accessible label. */
+  /** Product name — interpolated into the bag button's accessible label. */
   name: string;
   /** The sort key. Smallest currency unit, per AGENTS.md §9. */
   priceInCents: number;
   /** Every facet this product belongs to — see `productFacets()`. */
   facets: readonly ProductFacet[];
+  /**
+   * Stock. Caps what the bag control may add — `addLine` clamps against it —
+   * and at zero it disables the control rather than letting a card promise
+   * something the checkout would refuse.
+   */
+  inventory: number;
   /** The server-rendered `<ProductCard>`. */
   card: ReactNode;
 }
@@ -110,15 +116,6 @@ export default function CollectionGrid({
   const dict = useDictionary();
   const [sort, setSort] = useState<SortKey>("featured");
   const [facet, setFacet] = useState<ProductFacet | null>(null);
-
-  /**
-   * Wishlist membership comes from the shared store, so a heart filled here is
-   * the same heart filled on the product page and the same entry listed on
-   * `/wishlist`. State is persisted to `localStorage`; there is no `Wishlist`
-   * table and no Clerk session yet, and when both land this becomes a Server
-   * Action call with the button below unchanged.
-   */
-  const wishlist = useWishlist();
 
   /**
    * Only facets with something behind them are offered — the `<MerchGrid>`
@@ -343,43 +340,17 @@ export default function CollectionGrid({
             key={`${facet ?? "all"}-${sort}`}
             className="khem-fade mx-auto grid max-w-350 grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3"
           >
-            {sorted.map((item) => {
-              // Gated on hydration: the server render cannot know what is
-              // saved, so the heart stays unfilled until the store is read.
-              const isSaved = wishlist.isHydrated && wishlist.has(item.id);
+            {sorted.map((item) => (
+              <div key={item.id} className="relative">
+                <AddToBagButton
+                  productId={item.id}
+                  name={item.name}
+                  inventory={item.inventory}
+                />
 
-              return (
-                <div key={item.id} className="relative">
-                  {/*
-                   * Logical inset (`end-5`), so the control mirrors to the
-                   * top-left of the card on the Arabic tree.
-                   */}
-                  <button
-                    type="button"
-                    aria-pressed={isSaved}
-                    aria-label={interpolate(
-                      isSaved
-                        ? dict.collections.wishlistRemove
-                        : dict.collections.wishlistAdd,
-                      { name: item.name },
-                    )}
-                    onClick={() => wishlist.toggle(item.id)}
-                    className="absolute end-5 top-5 z-2 grid size-9 place-items-center border border-white/10 bg-background/70 backdrop-blur-sm transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none"
-                  >
-                    <Heart
-                      size={14}
-                      strokeWidth={1.25}
-                      aria-hidden="true"
-                      className={
-                        isSaved ? "fill-current text-gold" : "text-ivory/50"
-                      }
-                    />
-                  </button>
-
-                  {item.card}
-                </div>
-              );
-            })}
+                {item.card}
+              </div>
+            ))}
           </div>
         ) : (
           <p className="py-16 text-center text-sm text-ivory/40">

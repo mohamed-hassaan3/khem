@@ -13,7 +13,7 @@
  * just here.
  *
  * The discovery and gift sets still have no page of their own: they sell a
- * boxed composition straight from `<DiscoverySetCard>`, so a cart or wishlist
+ * boxed composition straight from `<DiscoverySetCard>`, so a cart
  * line for one links back to the grid it came from.
  */
 

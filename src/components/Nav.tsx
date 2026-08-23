@@ -10,7 +10,7 @@ import {
   collections,
   quickAccess,
 } from "../constants/navigation-pages";
-import { Heart, Search, ShoppingBag, UserRound, X } from "lucide-react";
+import { Search, ShoppingBag, UserRound, X } from "lucide-react";
 
 import nameLogo from "@/public/logo/name-logo-transparent.svg";
 
@@ -23,17 +23,24 @@ import { localizePath } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { useCart } from "@/src/providers/cart-provider";
+import { useCartDrawer } from "@/src/providers/cart-drawer-provider";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 
 /** Breakpoint (px) where the drawer gives way to the desktop mega menus. */
 const DESKTOP_BREAKPOINT = 1024;
 
+/**
+ * One row in the mobile drawer's Boutique list.
+ *
+ * Extracted because the list is no longer uniform: the bag is a `<button>`
+ * that opens the cart panel while its neighbours are links, and the two must
+ * still be indistinguishable to the eye.
+ */
+const BOUTIQUE_ROW =
+  "group flex items-center gap-3 text-xs tracking-widest text-ivory/50 no-underline transition-colors duration-300 hover:text-gold";
+
 function SearchIcon() {
   return <Search width={17} height={17} />;
-}
-
-function WishlistIcon() {
-  return <Heart width={17} height={17} />;
 }
 
 function AccountIcon() {
@@ -41,14 +48,19 @@ function AccountIcon() {
 }
 
 /**
- * Bag link with a live count.
+ * Bag trigger with a live count.
+ *
+ * A `<button>`, not a link: it opens `<CartDrawer>` over the current page
+ * rather than navigating to `/cart`. The route still exists and is one click
+ * away inside the panel — leaving the catalog to look in the bag was the thing
+ * the drawer removed, so the header control must not still do it.
  *
  * The badge is rendered only once the cart store has read `localStorage` — the
  * server HTML cannot know the count, so painting one before hydration would
- * mismatch. The count is carried in the link's accessible name rather than
+ * mismatch. The count is carried in the button's accessible name rather than
  * announced from the badge, which stays decorative.
  */
-function CartLink({
+function CartButton({
   label,
   labelWithCount,
   labelWithOne,
@@ -58,12 +70,17 @@ function CartLink({
   labelWithOne: string;
 }) {
   const { count, isHydrated } = useCart();
+  const { isOpen, open } = useCartDrawer();
   const showCount = isHydrated && count > 0;
 
   return (
-    <LocaleLink
-      href="/cart"
-      className="nav-link relative shrink-0"
+    <button
+      type="button"
+      onClick={open}
+      className="nav-link relative shrink-0 cursor-pointer"
+      aria-haspopup="dialog"
+      aria-expanded={isOpen}
+      aria-controls="cart-drawer"
       aria-label={
         showCount
           ? count === 1
@@ -81,7 +98,7 @@ function CartLink({
           {count}
         </span>
       ) : null}
-    </LocaleLink>
+    </button>
   );
 }
 
@@ -89,6 +106,7 @@ export default function Nav() {
   const dict = useDictionary();
   const locale = useLocale();
   const { isSignedIn } = useAuth();
+  const { open: openCartDrawer } = useCartDrawer();
 
   /*
    * Both shop columns come from `src/constants/navigation-pages.ts`, which the
@@ -311,14 +329,7 @@ export default function Nav() {
           >
             <SearchIcon />
           </button>
-          <LocaleLink
-            href="/wishlist"
-            className="nav-link hidden shrink-0 sm:inline-flex"
-            aria-label={dict.nav.wishlist}
-          >
-            <WishlistIcon />
-          </LocaleLink>
-          <CartLink
+          <CartButton
             label={dict.nav.cart}
             labelWithCount={dict.nav.cartCount}
             labelWithOne={dict.nav.cartCountOne}
@@ -489,24 +500,52 @@ export default function Nav() {
                 {dict.nav.search}
               </button>
 
-              {(
-                [
-                  [dict.nav.stockists, "/stockists"],
-                  [dict.nav.wishlist, "/wishlist"],
-                  [dict.nav.cart, "/cart"],
-                  [dict.nav.account, "/account"],
-                ] as const
-              ).map(([label, path]) => (
-                <LocaleLink
-                  key={path}
-                  href={path}
-                  onClick={closeDrawer}
-                  className="group flex items-center gap-3 text-xs tracking-widest text-ivory/50 no-underline transition-colors duration-300 hover:text-gold"
-                >
-                  <span className="inline-block h-px w-5 bg-current" />
-                  {label}
-                </LocaleLink>
-              ))}
+              <LocaleLink
+                href="/stockists"
+                onClick={closeDrawer}
+                className={BOUTIQUE_ROW}
+              >
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-px w-5 bg-current"
+                />
+                {dict.nav.stockists}
+              </LocaleLink>
+
+              {/*
+               * The bag is a control here too, for the same reason it is in the
+               * header: it opens the panel rather than navigating. The nav
+               * drawer stands down first — two overlays on a phone at once is
+               * one too many, and the cart panel is the one that was asked for.
+               */}
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  openCartDrawer();
+                }}
+                aria-haspopup="dialog"
+                aria-controls="cart-drawer"
+                className={`${BOUTIQUE_ROW} cursor-pointer text-start`}
+              >
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-px w-5 bg-current"
+                />
+                {dict.nav.cart}
+              </button>
+
+              <LocaleLink
+                href="/account"
+                onClick={closeDrawer}
+                className={BOUTIQUE_ROW}
+              >
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-px w-5 bg-current"
+                />
+                {dict.nav.account}
+              </LocaleLink>
 
               {/*
                * The drawer is the only account surface on a phone, so it

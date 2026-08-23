@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Heart } from "lucide-react";
+import { Check } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -9,13 +9,11 @@ import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { productFlag } from "@/src/lib/facets";
 import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
-import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { productHref } from "@/src/lib/routes";
 import { useCart } from "@/src/providers/cart-provider";
 import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
-import { useWishlist } from "@/src/providers/wishlist-provider";
 import type { ProductCardData } from "@/src/types/catalog";
 
 /**
@@ -26,13 +24,13 @@ import type { ProductCardData } from "@/src/types/catalog";
  * should be an offer, not a toll on the way to the bag. So the photograph and
  * the name are links and everything else is unchanged — one click still adds.
  *
- * Cart and wishlist writes go to the `localStorage`-backed stores, which
- * persist a product id and a quantity: when Clerk and Supabase land, the two
- * handlers become Server Action calls and this markup is unchanged.
+ * Cart writes go to the `localStorage`-backed store, which persists a product
+ * id and a quantity: when the bag moves to Supabase the handler becomes a
+ * Server Action call and this markup is unchanged.
  *
  * A sibling of `<ProductCard>` rather than a wrapper: that one is an async
  * Server Component whose *whole surface* is a link to the detail page, which
- * would swallow the buy button and the wishlist heart if it were reused here.
+ * would swallow the buy button if it were reused here.
  */
 
 const CONFIRMATION_MS = 2500;
@@ -54,7 +52,6 @@ export default function MerchCard({
   const dict = useDictionary();
   const formatPrice = useFormatPrice();
   const { addLine } = useCart();
-  const wishlist = useWishlist();
   // Product copy comes from the database — English in both trees.
   const island = ltrIsland(locale);
 
@@ -69,13 +66,6 @@ export default function MerchCard({
     };
   }, []);
 
-  /*
-   * Derived from the store, never local: the same product's heart on
-   * `/wishlist` has to agree with this one, and a returning visitor must find
-   * it already filled. `isHydrated` gates it because the server render cannot
-   * know what is saved.
-   */
-  const wishlisted = wishlist.isHydrated && wishlist.has(product.id);
   const isSoldOut = product.inventory === 0;
 
   // Same order as every other card: the stored `badge` overrides the flag.
@@ -96,27 +86,6 @@ export default function MerchCard({
       ) : flag ? (
         <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
       ) : null}
-
-      {/* Logical inset, so the control mirrors to the top-left in Arabic. */}
-      <button
-        type="button"
-        aria-pressed={wishlisted}
-        aria-label={interpolate(
-          wishlisted ? dict.product.wishlistRemove : dict.product.wishlistAdd,
-          { name: product.name },
-        )}
-        onClick={() => wishlist.toggle(product.id)}
-        className={`absolute end-5 top-5 z-2 grid size-9 place-items-center border bg-background/70 backdrop-blur-sm transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none ${
-          wishlisted ? "border-gold" : "border-white/10"
-        }`}
-      >
-        <Heart
-          size={14}
-          strokeWidth={1.25}
-          aria-hidden="true"
-          className={wishlisted ? "fill-current text-gold" : "text-ivory/50"}
-        />
-      </button>
 
       {/* `tabIndex={-1}` and an empty alt: this is the same destination as the
           name below it, and a screen reader announcing the link twice — once as

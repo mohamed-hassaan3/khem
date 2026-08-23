@@ -189,7 +189,7 @@ khem/
 │   ├── (auth)/             # Auth group (sign-in, sign-up, sso-callback)
 │   ├── (marketing)/        # Editorial pages (heritage, journal, craftsmanship, about)
 │   ├── (shop)/             # E-commerce core (perfumes, collections, discovery-set)
-│   ├── (user)/             # Customer portal (account, orders, wishlist)
+│   ├── (user)/             # Customer portal (account, orders, addresses)
 │   ├── admin/              # Admin Flagship Management Dashboard
 │   ├── api/                # Route Handlers (stripe-webhooks, cloudinary, ai)
 │   ├── layout.tsx          # Root Layout (Fonts, Metadata, Analytics, Providers)
@@ -209,7 +209,7 @@ khem/
 │   ├── fragrance-matcher/  # AI Quiz component & logic
 │   ├── checkout/           # Stripe payment workflow modules
 │   └── journal/            # Editorial article modules
-├── hooks/                  # Custom React hooks (useCart, useWishlist, useScrollThreshold)
+├── hooks/                  # Custom React hooks (useCart, useCartDrawer, useScrollThreshold)
 ├── lib/                    # Shared core infrastructure
 │   ├── prisma.ts           # Global Prisma Client singleton
 │   ├── supabase.ts         # Supabase client & server instances
@@ -257,10 +257,9 @@ All routes must follow strict dynamic parameters, metadata definitions, and layo
 | `/journal/[slug]` | Dynamic | ISR (1h) | Article detail view with rich text typography and embedded product tags |
 | `/craftsmanship` | Static | Static | Sourcing, Rare Botanical Ingredients, Glass Blowing & Gold Leaf gilding |
 | `/stockists` | Static | Static | Store Locator for Boutique locations worldwide (Interactive Map) |
-| `/cart` | Client | Force Dynamic | Shopping Bag overview, GWP (Gift with Purchase) progress bar |
+| `/cart` | Client | ISR (5m) | Shopping Bag overview, GWP (Gift with Purchase) progress bar. Also reachable as a slide-in panel (`<CartDrawer>`) from the header bag and from every product card |
 | `/checkout` | Client | Force Dynamic | Embedded Stripe Elements checkout with auto address auto-complete |
 | `/account` | Protected | Dynamic | Customer Portal: Order History, Fragrance Profile, Saved Addresses |
-| `/wishlist` | Protected | Dynamic | Saved Perfumes & Custom Discovery Sets |
 | `/admin/*` | Protected | Dynamic | Admin Flagship Suite (RBAC: `admin` role required) |
 
 ---
@@ -324,7 +323,6 @@ model User {
   
   addresses     Address[]
   orders        Order[]
-  wishlist      Wishlist?
   reviews       Review[]
 
   @@index([clerkId])
@@ -380,7 +378,6 @@ model Product {
   collection      Collection    @relation(fields: [collectionId], references: [id])
   images          ProductImage[]
   orderItems      OrderItem[]
-  wishlistItems   WishlistItem[]
   reviews         Review[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -432,25 +429,13 @@ model OrderItem {
   priceInCents Int
 }
 
-model Wishlist {
-  id        String         @id @default(uuid())
-  userId    String         @unique
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     WishlistItem[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-}
-
-model WishlistItem {
-  id         String   @id @default(uuid())
-  wishlistId String
-  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
-  productId  String
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-
-  @@unique([wishlistId, productId])
-}
+// REMOVED — `Wishlist` and `WishlistItem` were specified here but never
+// migrated: no such table has ever existed in `supabase/sql/`. The feature was
+// shipped as browser-only state and has since been withdrawn from the product
+// entirely — the `/wishlist` route, its components, its provider, and its
+// `localStorage` key are all gone. **Do not rebuild it from this section.**
+// If saving ever returns it starts from a fresh decision, not from these
+// models.
 
 model Review {
   id        String   @id @default(uuid())

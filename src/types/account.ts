@@ -87,9 +87,7 @@ export interface SavedAddress {
  * The counts on the overview panel.
  *
  * Derived server-side rather than in the component so the page never has to
- * hold every order in memory to print a total. The wishlist count is *not*
- * here: saved fragrances live in the browser today, so that stat is read live
- * from `useWishlist()` instead of being fabricated on the server.
+ * hold every order in memory to print a total.
  */
 export interface AccountSummary {
   orderCount: number;

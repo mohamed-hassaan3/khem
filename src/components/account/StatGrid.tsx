@@ -2,31 +2,25 @@
 
 import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
-import { useWishlist } from "@/src/providers/wishlist-provider";
 import type { AccountSummary } from "@/src/types/account";
 
 /**
- * The three counts on the overview panel.
+ * The two counts on the overview panel.
  *
- * All three numbers were literals before this change — an order count, a
- * lifetime total, and a saved-item count, printed identically for every
- * visitor regardless of who they were. Now:
+ * Both come from `getAccountSummary`, which reads real rows: an order count
+ * and lifetime spend. A third tile counted saved fragrances out of the
+ * browser; it went when saving did, and took the last piece of browser state
+ * this component read with it.
  *
- *  - orders and lifetime spend come from `getAccountSummary`, which reads
- *    zero rows today and the real ones the day the `Order` table lands. The
- *    component does not change then;
- *  - the wishlist count is **live**, because saved fragrances already exist —
- *    they live in the browser, which is why this is a client component.
- *
- * Before hydration the browser's wishlist is unknown, so that tile shows an
- * em-dash rather than a `0` that would flicker to the real count. The same
- * reasoning as the hydration guard in `CartView`.
+ * It nonetheless stays a **client** component. `useFormatPrice()` is the whole
+ * reason: the displayed currency is a per-visitor choice resolved after
+ * hydration (see `currency-provider.tsx`), so lifetime spend cannot be
+ * formatted on the server without pinning every visitor to the base currency.
  */
 
 export default function StatGrid({ summary }: { summary: AccountSummary }) {
   const dict = useDictionary();
   const formatPrice = useFormatPrice();
-  const { count, isHydrated } = useWishlist();
 
   const stats = [
     {
@@ -41,16 +35,10 @@ export default function StatGrid({ summary }: { summary: AccountSummary }) {
       label: dict.account.stats.spent,
       sub: dict.account.stats.allTime,
     },
-    {
-      key: "wishlist",
-      value: isHydrated ? String(count) : "—",
-      label: dict.account.stats.wishlist,
-      sub: dict.account.stats.saved,
-    },
   ] as const;
 
   return (
-    <div className="mb-15 grid grid-cols-1 gap-px sm:grid-cols-3">
+    <div className="mb-15 grid grid-cols-1 gap-px sm:grid-cols-2">
       {stats.map((stat) => (
         <div key={stat.key} className="bg-surface px-8 py-9">
           <p className="mb-2 font-heading text-3xl font-semibold text-gold">

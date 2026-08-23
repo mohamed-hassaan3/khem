@@ -7,8 +7,8 @@
 -- ── Two deliberate deviations from AGENTS.md §9 ──────────────
 --
 -- 1. Primary keys are `text` holding the slug-shaped ids the app already uses
---    ("signature", "onyx-night"), not `uuid`. The cart and the wishlist persist
---    *product ids* in `localStorage` (`src/providers/cart-provider.tsx`), so
+--    ("signature", "onyx-night"), not `uuid`. The cart persists *product ids*
+--    in `localStorage` (`src/providers/cart-provider.tsx`), so
 --    generated uuids would silently empty every returning visitor's bag on
 --    deploy day. The ids are already stable, unique, and opaque to the app.
 --
