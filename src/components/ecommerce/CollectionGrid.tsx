@@ -244,9 +244,18 @@ export default function CollectionGrid({
 
       {/* ── FACET FILTER (overview) ─────────────────── */}
       {available.length > 0 ? (
+        /*
+         * Pinned under the fixed 5rem header while the grid scrolls beneath it.
+         * The catalogue is long enough that the chips left the viewport within
+         * one flick, and a filter you have to scroll back to the top to reach is
+         * a filter that gets used once. `z-30` keeps it under every overlay the
+         * app can raise over it — the header is `z-1000`, its scrim `z-998`, the
+         * drawers `z-1001` — and the header's own blurred fill is what stops the
+         * cards from reading through it.
+         */
         <nav
           aria-label={dict.collections.filterLabel}
-          className="border-b border-border bg-surface"
+          className="sticky top-20 z-30 border-b border-border bg-[color-mix(in_srgb,var(--color-surface)_96%,transparent)] backdrop-blur-xl"
         >
           {/* One scrolling strip at every width — never a second line. */}
           <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-x-auto px-6 py-4 md:px-20">

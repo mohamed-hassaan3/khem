@@ -42,27 +42,29 @@ export type CollectionEntry =
     };
 
 /**
- * The "Our Collections" column.
+ * The "Our Collections" column — the library, in two disclosures and two links.
  *
- * Every collection now lives under `/collections/[slug]` — body care, home
- * fragrance and the sets used to hold routes of their own, and folding them in
- * removed the second URL for the same goods. New Arrival opens the column and
- * keeps its own route: `/new-arrival` is an editorial showroom with the full
- * story and note pyramid of each release, which the catalogue grid has nowhere
- * to put. Its `?facet=` twin is the in-page cut of the same products.
+ * Every collection lives under `/collections/[slug]`; body care, home fragrance
+ * and the sets used to hold routes of their own, and folding them in removed the
+ * second URL for the same goods.
  *
- * Signature, Gemstone and Noir sit one level down, under `fragrances`. The
- * column listed six siblings, of which three were the perfume library proper
- * and three were something else — a showroom, a skin range, a home range — and
- * the flat list gave a reader no way to see that. The group is a disclosure in
- * the nav, not a page: there is nothing at "Fragrances" to navigate to that the
- * three collections do not already say better.
+ * The column is now *the shelf*, and nothing else. Signature, Gemstone and Noir
+ * sit under `fragrances`; the five olfactive cuts sit under `scentProfiles`; the
+ * two non-perfume ranges close it. What was removed is what a shopper reaches
+ * for rather than browses — New Arrival and the whole catalogue — which moved to
+ * Quick Access below, where a way *in* belongs.
  *
- * The Footer flattens the group back out. Its column is a sitemap, where a
- * heading that is not a link is noise.
+ * Both groups are disclosures, not pages: there is nothing at "Fragrances" or at
+ * "Scent Profiles" to navigate to that the rows underneath do not say better.
+ * The Footer flattens both back out — its column is a sitemap, where a heading
+ * that is not a link is noise.
+ *
+ * Scent profiles are pages, not `?facet=` cuts, and each one is a real
+ * destination: a hero, a name, a short piece of writing, and the products built
+ * on materials of that family. Membership is derived through
+ * `"Ingredient"` → `"IngredientUsage"`; see `src/lib/scent-profiles.ts`.
  */
 export const collections: ReadonlyArray<CollectionEntry> = [
-  { kind: "link", key: "newArrival", path: "/new-arrival" },
   {
     kind: "group",
     key: "fragrances",
@@ -70,6 +72,17 @@ export const collections: ReadonlyArray<CollectionEntry> = [
       { key: "signature", path: "/collections/signature" },
       { key: "gemstone", path: "/collections/gemstone" },
       { key: "noir", path: "/collections/noir" },
+    ],
+  },
+  {
+    kind: "group",
+    key: "scentProfiles",
+    children: [
+      { key: "oriental", path: "/collections/oriental" },
+      { key: "floral", path: "/collections/floral" },
+      { key: "fresh", path: "/collections/fresh" },
+      { key: "woody", path: "/collections/woody" },
+      { key: "gourmand", path: "/collections/gourmand" },
     ],
   },
   { kind: "link", key: "bodyCare", path: "/collections/body-care" },
@@ -88,31 +101,36 @@ export const collectionLinks: ReadonlyArray<CollectionLink> = collections.flatMa
 );
 
 /**
- * The "Quick Access" column.
+ * The "Quick Access" column — the ways in, in the order they are printed.
  *
- * Four destinations, all of them pages. Discovery and gift sets are collections
- * with rows of their own, but they are ways of buying rather than chapters of
- * the fragrance library, so they read better here than beside Signature and
- * Noir. Best sellers cross every collection at once and so cannot be a row at
- * all — it is assembled in `/collections/[slug]` from the catalogue
- * (`MERCH_PAGE_FACETS` in `src/lib/facets.ts`). Either way a menu link lands on
- * a page with a hero and a name, never on the catalogue with a filter silently
- * applied.
+ * New Arrival opens it: the newest work is what a returning visitor came for,
+ * and `/new-arrival` is an editorial showroom with the full story and note
+ * pyramid of each release, which the catalogue grid has nowhere to put. All
+ * Products is the whole shelf at `/collections`, the one screen every product is
+ * reachable from — a column of chapters needs a row that means "all of it".
  *
- * Key Ingredients is the odd one out: an editorial page, not a way of buying.
- * It replaced Limited Editions here, which `/collections/limited-edition` still
- * serves for anyone arriving by link — the page was not withdrawn, only the
- * menu row. Someone reading about oud is one click from the perfumes built on
- * it, which is a shorter path into the catalogue than a second facet cut.
+ * Then the two set categories, which are ways of buying rather than chapters of
+ * the library, and Best Sellers, which crosses every collection at once and so
+ * could never be a row in the column above — it is assembled in
+ * `/collections/[slug]` from the catalogue (`MERCH_PAGE_FACETS` in
+ * `src/lib/facets.ts`). Either way a menu link lands on a page with a hero and a
+ * name, never on the catalogue with a filter silently applied.
+ *
+ * Key Ingredients is no longer here: the olfactive cuts it stood in for are now
+ * pages of their own under Scent Profiles above. `/ingredients` was not
+ * withdrawn — it keeps its row in `world` below, which is where an editorial
+ * page belongs. `/collections/limited-edition` likewise still serves anyone
+ * arriving by link.
  */
 export const quickAccess: ReadonlyArray<{
   key: QuickAccessKey;
   path: string;
 }> = [
+  { key: "newArrival", path: "/new-arrival" },
+  { key: "allProducts", path: "/collections" },
   { key: "discoverySets", path: "/collections/discovery" },
   { key: "giftSets", path: "/collections/gift-set" },
   { key: "bestSellers", path: "/collections/best-sellers" },
-  { key: "keyIngredients", path: "/ingredients" },
 ];
 
 export const world: ReadonlyArray<{ key: WorldKey; path: string }> = [

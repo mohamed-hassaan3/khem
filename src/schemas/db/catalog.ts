@@ -14,6 +14,7 @@
 import { z } from "zod";
 
 import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
+import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 import type { Locale } from "@/src/lib/i18n/config";
 import { resolveList, resolveOptionalText, resolveText } from "@/src/lib/i18n/resolve";
 import type {
@@ -22,6 +23,7 @@ import type {
   Product,
   ProductCardData,
   ProductImage,
+  ScentProfile,
 } from "@/src/types/catalog";
 
 /**
@@ -159,6 +161,50 @@ export function toMerchPage(row: unknown, locale: Locale): MerchPage | null {
     name: resolveText(page.name, name_ar, locale),
     description: resolveText(page.description, description_ar, locale),
     bannerAlt: resolveText(page.bannerAlt, bannerAlt_ar, locale),
+  };
+}
+
+/**
+ * A `"ScentProfile"` row — `supabase/sql/0020_scent_profile.sql`.
+ *
+ * `slug` is validated against {@link SCENT_PROFILE_SLUGS} for the reason the
+ * merch-page schema above gives: the table carries a check constraint saying the
+ * same thing, and a row for a profile that no longer has a route parses to
+ * `null` and is ignored. `families` is left as free strings — the closed
+ * vocabulary is enforced by a trigger on the table, and a family the storefront
+ * has not heard of should narrow the query, not drop the page.
+ */
+const scentProfileRowSchema = z.object({
+  slug: z.enum(SCENT_PROFILE_SLUGS),
+  name: z.string(),
+  name_ar: z.string().nullable().default(null),
+  description: z.string(),
+  description_ar: z.string().nullable().default(null),
+  bannerUrl: z.string(),
+  bannerAlt: z.string(),
+  bannerAlt_ar: z.string().nullable().default(null),
+  families: z.array(z.string()).default([]),
+  sortOrder: z.number().default(0),
+});
+
+export const SCENT_PROFILE_COLUMNS =
+  "slug, name, name_ar, description, description_ar, bannerUrl, bannerAlt, " +
+  "bannerAlt_ar, families, sortOrder";
+
+export function toScentProfile(
+  row: unknown,
+  locale: Locale,
+): ScentProfile | null {
+  const parsed = scentProfileRowSchema.safeParse(row);
+  if (!parsed.success) return null;
+
+  const { name_ar, description_ar, bannerAlt_ar, ...profile } = parsed.data;
+
+  return {
+    ...profile,
+    name: resolveText(profile.name, name_ar, locale),
+    description: resolveText(profile.description, description_ar, locale),
+    bannerAlt: resolveText(profile.bannerAlt, bannerAlt_ar, locale),
   };
 }
 

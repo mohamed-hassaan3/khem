@@ -58,16 +58,12 @@ export const en = {
     featuredArticleTitle: "The Alchemy of Ancient Egyptian Perfumery",
     featuredArticleAlt: "Heritage",
     /*
-     * The "Our Collections" column, in the order it is printed. New Arrival
-     * opens it — the newest work is what a returning visitor came for — and the
-     * sets moved out to Quick Access, which is where a destination that is not
-     * a chapter of the library belongs.
+     * The "Our Collections" column, in the order it is printed: the three
+     * fragrance chapters, the five olfactive cuts, then the two non-perfume
+     * ranges. New Arrival and the sets moved out to Quick Access, which is where
+     * a way *into* the catalogue belongs rather than a chapter of it.
      */
     collectionItems: {
-      newArrival: {
-        label: "New Arrival",
-        desc: "The most recent work to leave the house",
-      },
       signature: {
         label: "Signature Collection",
         desc: "Timeless expressions of Egyptian heritage",
@@ -79,6 +75,26 @@ export const en = {
       noir: {
         label: "Noir Collection",
         desc: "A darker, more exclusive chapter",
+      },
+      oriental: {
+        label: "Oriental",
+        desc: "Resin, amber and incense — warmth that stays",
+      },
+      floral: {
+        label: "Floral",
+        desc: "Petals treated as material, never as decoration",
+      },
+      fresh: {
+        label: "Fresh",
+        desc: "Citrus peel, sea air and cut green stems",
+      },
+      woody: {
+        label: "Woody",
+        desc: "Oud, sandalwood and cedar — the bones of a scent",
+      },
+      gourmand: {
+        label: "Gourmand",
+        desc: "Honey and vanilla, kept dry and kept adult",
       },
       bodyCare: {
         label: "Body Care",
@@ -96,6 +112,7 @@ export const en = {
      */
     collectionGroups: {
       fragrances: "Fragrances",
+      scentProfiles: "Scent Profiles",
     },
     worldItems: {
       heritage: { label: "Our Heritage" },
@@ -105,17 +122,18 @@ export const en = {
       about: { label: "About KHEM" },
     },
     /*
-     * Quick Access, in the order it is printed. The two set categories are
-     * destinations rather than chapters of the library; Best Sellers crosses
-     * every collection at once and so has no page of its own — it addresses the
-     * `?facet=` filter. See `src/lib/facets.ts`. Key Ingredients is editorial
-     * and leads out of the shop entirely, to `/ingredients`.
+     * Quick Access, in the order it is printed — the ways in. The newest work
+     * first, then the whole shelf, then the two set categories, which are ways
+     * of buying rather than chapters of the library, and Best Sellers, which
+     * crosses every collection at once. See `src/constants/navigation-pages.ts`
+     * for why Key Ingredients is no longer among them.
      */
     quickAccessItems: {
+      newArrival: "New Arrival",
+      allProducts: "All Products",
       discoverySets: "Discovery Sets",
       giftSets: "Gift Sets",
       bestSellers: "Best Sellers",
-      keyIngredients: "Key Ingredients",
     },
   },
 
@@ -294,6 +312,87 @@ export const en = {
           ogTitle: "Limited Edition | KHEM",
           ogDescription:
             "Numbered runs from the Cairo atelier. Once they are gone, the composition is retired.",
+        },
+      },
+    },
+    /*
+     * The five scent-profile pages — see `src/lib/scent-profiles.ts`. Keyed by
+     * slug, and carrying what a `Collection` row would have supplied: a name, a
+     * description, and the alt text of a hero it has no column to store.
+     *
+     * This is the *fallback*. `"ScentProfile"` is seeded with the same copy and
+     * is what the pages render when the database is reachable, so an editor can
+     * rewrite a profile's story without a deploy.
+     */
+    scentProfiles: {
+      oriental: {
+        name: "Oriental",
+        description:
+          "Warmth with something withheld in it. Resins, amber and incense that settle into the skin and stay there — the register KHEM was founded on, and the one a room notices an hour after you have left it.",
+        bannerAlt: "A carved temple relief of offering bearers with their vessels",
+        meta: {
+          title: "Oriental Fragrances",
+          description:
+            "KHEM compositions built on resin, amber and incense — the warm, long-staying register the house was founded on.",
+          ogTitle: "Oriental | KHEM",
+          ogDescription:
+            "Resin, amber and incense. The warmest register in the KHEM library.",
+        },
+      },
+      floral: {
+        name: "Floral",
+        description:
+          "Flowers taken seriously. Jasmine picked before dawn, rose distilled the same day it is cut — petals treated as material rather than as decoration, and composed with enough shadow to keep them from turning sweet.",
+        bannerAlt: "A single crocus in bloom against deep shadow",
+        meta: {
+          title: "Floral Fragrances",
+          description:
+            "KHEM compositions built on jasmine, rose and orange blossom — petals treated as material, and given shadow enough to stay serious.",
+          ogTitle: "Floral | KHEM",
+          ogDescription:
+            "Jasmine picked before dawn, rose distilled the day it is cut.",
+        },
+      },
+      fresh: {
+        name: "Fresh",
+        description:
+          "The first breath of the composition, and the reason you lean in again. Citrus peel, sea air and cut green stems — light, but never thin: every one of these is built over something that holds.",
+        bannerAlt: "Turquoise surf breaking over pale sand, seen from above",
+        meta: {
+          title: "Fresh Fragrances",
+          description:
+            "KHEM compositions built on citrus, sea air and green stems — light on the skin, and built over something that holds.",
+          ogTitle: "Fresh | KHEM",
+          ogDescription:
+            "Citrus peel, sea air and cut green stems. Light, but never thin.",
+        },
+      },
+      woody: {
+        name: "Woody",
+        description:
+          "The bones of a fragrance. Oud, sandalwood and cedar — the materials the house travels furthest for, and the ones that decide how a perfume behaves in its last hour rather than its first.",
+        bannerAlt: "Low sunlight through a stand of pines",
+        meta: {
+          title: "Woody Fragrances",
+          description:
+            "KHEM compositions built on oud, sandalwood and cedar — the materials that decide how a perfume behaves in its last hour.",
+          ogTitle: "Woody | KHEM",
+          ogDescription:
+            "Oud, sandalwood and cedar. The bones of a KHEM composition.",
+        },
+      },
+      gourmand: {
+        name: "Gourmand",
+        description:
+          "Edible in the way a memory is edible. Honey, vanilla, dried fruit and roasted almond, kept dry and kept adult — appetite rather than dessert, and worn closer to the skin than any other register we make.",
+        bannerAlt: "A glass of honey beside blossom and dried fruit in low light",
+        meta: {
+          title: "Gourmand Fragrances",
+          description:
+            "KHEM compositions built on honey, vanilla and dried fruit — appetite rather than dessert, worn close to the skin.",
+          ogTitle: "Gourmand | KHEM",
+          ogDescription:
+            "Honey, vanilla and dried fruit, kept dry and kept adult.",
         },
       },
     },
@@ -637,6 +736,14 @@ export const en = {
     baseNotes: "Base Notes",
     ingredientsHeading: "Key Ingredients",
     ingredientOrigin: "From {origin}",
+    /*
+     * The "Scent Profile" line — one profile, or two at the most. Derived from
+     * the materials the perfume is built on rather than stored on the product;
+     * `productScentProfiles()` in `src/lib/scent-profiles.ts` explains the count.
+     * The names themselves come from `collections.scentProfiles`, so the chip
+     * and the page it links to cannot disagree.
+     */
+    scentProfileHeading: "Scent Profile",
     gallery: {
       label: "{name} gallery",
       thumbnail: "View image {index} of {total}",

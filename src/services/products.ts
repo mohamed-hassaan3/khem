@@ -26,17 +26,20 @@ import "server-only";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import type { MerchPageFacet } from "@/src/lib/facets";
+import type { ScentProfileSlug } from "@/src/lib/scent-profiles";
 import type { LinkableProduct } from "@/src/lib/routes";
 import {
   COLLECTION_COLUMNS,
   MERCH_PAGE_COLUMNS,
   PRODUCT_CARD_COLUMNS,
   PRODUCT_WITH_IMAGES_COLUMNS,
+  SCENT_PROFILE_COLUMNS,
   parseList,
   toCollection,
   toDetailPageTarget,
   toMerchPage,
   toProduct,
+  toScentProfile,
   toProductCard,
 } from "@/src/schemas/db/catalog";
 import { BOUTIQUE_SETTING_COLUMNS, toBoutiqueSetting } from "@/src/schemas/db/directory";
@@ -46,6 +49,7 @@ import type {
   MerchPage,
   Product,
   ProductCardData,
+  ScentProfile,
 } from "@/src/types/catalog";
 
 /** One log shape for the whole module: provider message, never row contents. */
@@ -227,6 +231,106 @@ export async function getMerchPage(
   }
 
   return toMerchPage(data, locale);
+}
+
+/**
+ * The stored presentation of a scent-profile page, and the families it spans.
+ *
+ * `null` on a missing row, an unparseable row, or a failed read — the route
+ * treats all three alike and falls back to the dictionary copy and the constants
+ * in `src/lib/scent-profiles.ts`, for the reason {@link getMerchPage} gives: the
+ * Nav links straight at these five pages, so one must never fail to render
+ * because a table is empty.
+ */
+export async function getScentProfile(
+  locale: Locale,
+  slug: ScentProfileSlug,
+): Promise<ScentProfile | null> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("ScentProfile")
+    .select(SCENT_PROFILE_COLUMNS)
+    // Parameterised by the client, and already narrowed to the five-member
+    // union by `parseScentProfileSlug()` before it reaches here.
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getScentProfile", error.message);
+    return null;
+  }
+
+  return toScentProfile(data, locale);
+}
+
+/**
+ * The product slugs built on materials of the given olfactive families.
+ *
+ * Two hops of a relation that already exists: `"Ingredient".families` overlaps
+ * the profile's families, and `"IngredientUsage"` names the perfumes each of
+ * those materials is used in — a real foreign key to `"Product".slug`
+ * (`supabase/sql/0002_content.sql`). Nothing derives membership from the note
+ * pyramid, which names accords rather than sourced materials.
+ *
+ * `!inner` is deliberately *not* used: a catalogued material with no usage rows
+ * yet should contribute nothing rather than exclude the query, and an empty
+ * embedded array does exactly that.
+ */
+async function scentProfileProductSlugs(
+  families: readonly string[],
+): Promise<string[]> {
+  const supabase = getSupabasePublic();
+  if (!supabase || families.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("Ingredient")
+    // The same embedded-relation alias `INGREDIENT_COLUMNS` uses, narrowed to
+    // the one column this needs — the profile page renders products, not
+    // materials.
+    .select("usedIn:IngredientUsage(productSlug)")
+    .overlaps("families", [...families]);
+
+  if (error) {
+    logFailure("scentProfileProductSlugs", error.message);
+    return [];
+  }
+
+  const slugs = new Set<string>();
+
+  for (const row of (data ?? []) as { usedIn?: { productSlug?: unknown }[] }[]) {
+    for (const usage of row.usedIn ?? []) {
+      if (typeof usage.productSlug === "string") slugs.add(usage.productSlug);
+    }
+  }
+
+  return [...slugs];
+}
+
+/**
+ * Card projections for a scent-profile page.
+ *
+ * Every kind, not fragrances alone: an ingredient can be used in a body oil or
+ * a candle, and a cedar candle is woody by the same rule a cedar perfume is.
+ * Catalogue order is preserved — `sortOrder`, like every other listing — so the
+ * profile pages read in the same sequence as the collections they draw from.
+ */
+export async function getProductCardsByScentProfile(
+  locale: Locale,
+  families: readonly string[],
+): Promise<ProductCardData[]> {
+  const slugs = await scentProfileProductSlugs(families);
+  if (slugs.length === 0) return [];
+
+  const query = cardQuery();
+  if (!query) return [];
+
+  return toCards(
+    locale,
+    "getProductCardsByScentProfile",
+    await query.in("slug", slugs).order("sortOrder"),
+  );
 }
 
 /**

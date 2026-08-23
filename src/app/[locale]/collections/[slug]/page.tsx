@@ -11,6 +11,12 @@ import {
   productFacets,
   type MerchPageFacet,
 } from "@/src/lib/facets";
+import {
+  SCENT_PROFILE_BANNERS,
+  SCENT_PROFILE_FAMILIES,
+  SCENT_PROFILE_SLUGS,
+  parseScentProfileSlug,
+} from "@/src/lib/scent-profiles";
 import { LOCALES, isLocale, type Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
@@ -20,6 +26,8 @@ import {
   getCollections,
   getMerchPage,
   getProductCardsByCollection,
+  getProductCardsByScentProfile,
+  getScentProfile,
 } from "@/src/services/products";
 import type { Collection } from "@/src/types/catalog";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
@@ -33,7 +41,9 @@ export const revalidate = 600;
  *
  * `getCollections()` rather than `getFragranceCollections()`: body care, home
  * fragrance, discovery sets and gift sets are served from here now too — their
- * former routes redirect in — so all seven need prerendering.
+ * former routes redirect in — so all seven need prerendering. The two
+ * merchandising pages and the five scent profiles are code-owned lists and are
+ * appended from there.
  */
 export async function generateStaticParams() {
   // Slugs only; they are identical in both trees, so the locale is
@@ -43,6 +53,7 @@ export async function generateStaticParams() {
   const slugs = [
     ...collections.map((collection) => collection.slug),
     ...MERCH_PAGE_FACETS,
+    ...SCENT_PROFILE_SLUGS,
   ];
 
   return LOCALES.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
@@ -128,6 +139,25 @@ export async function generateMetadata({
       });
     }
 
+    // Then the five scent profiles, whose stored row is an override of the
+    // dictionary copy — so a rewritten description reaches the search result
+    // as well as the page.
+    const profileSlug = parseScentProfileSlug(slug);
+
+    if (profileSlug) {
+      const copy = dict.collections.scentProfiles[profileSlug];
+      const stored = await getScentProfile(activeLocale, profileSlug);
+
+      return localeMetadata({
+        locale: activeLocale,
+        path: `/collections/${profileSlug}`,
+        title: stored?.name ?? copy.meta.title,
+        description: stored?.description ?? copy.meta.description,
+        ogTitle: copy.meta.ogTitle,
+        ogDescription: stored?.description ?? copy.meta.ogDescription,
+      });
+    }
+
     // A genuinely unknown slug renders the 404 below; its metadata falls back
     // to the overview's rather than echoing the requested segment back into
     // the page.
@@ -166,15 +196,17 @@ export async function generateMetadata({
 /**
  * One collection.
  *
- * Three page shapes behind one URL space. A fragrance collection is a chapter of
+ * Four page shapes behind one URL space. A fragrance collection is a chapter of
  * the perfume library and renders the library's layout; the four category
  * collections keep the editorial pages they had as standalone routes (see
- * `<CategoryView>` for why that is a branch and not a flag); and the two
+ * `<CategoryView>` for why that is a branch and not a flag); the two
  * merchandising cuts are assembled here from the catalogue, because they cannot
- * be rows — see `MERCH_PAGE_FACETS` in `src/lib/facets.ts`.
+ * be rows — see `MERCH_PAGE_FACETS` in `src/lib/facets.ts`; and the five scent
+ * profiles are assembled from the ingredient tables, for the reason
+ * `src/lib/scent-profiles.ts` gives.
  *
  * Seeded collections are resolved first, so no row can ever be shadowed by a
- * merchandising slug.
+ * merchandising or profile slug.
  */
 export default async function CollectionPage({
   params,
@@ -185,7 +217,7 @@ export default async function CollectionPage({
   const activeLocale = isLocale(locale) ? locale : "en";
 
   // The segment is untrusted input: it is matched against seeded slugs, then
-  // against a two-member literal list, and anything else 404s.
+  // against two closed literal lists, and anything else 404s.
   const collection = await getCollectionBySlug(activeLocale, slug);
 
   if (!collection) {
@@ -230,7 +262,7 @@ export default async function CollectionPage({
  */
 async function renderMerchPage(locale: Locale, slug: string) {
   const facet = parseMerchPageFacet(slug);
-  if (!facet) notFound();
+  if (!facet) return renderScentProfile(locale, slug);
 
   const [dict, catalog, stored] = await Promise.all([
     getDictionary(locale),
@@ -261,6 +293,67 @@ async function renderMerchPage(locale: Locale, slug: string) {
         productFacets(product).includes(facet),
       )}
       // Both cuts draw from body care and the sets as well as the perfumes.
+      countsEverything
+    />
+  );
+}
+
+/**
+ * One scent profile, as a collection page.
+ *
+ * The products built on materials of this profile's olfactive families —
+ * `"ScentProfile".families` meets `"Ingredient".families`, and
+ * `"IngredientUsage"` names the perfumes each material is used in. Membership is
+ * derived from that relation and stored nowhere, which is why recataloguing an
+ * ingredient moves every page that depends on it at once. See
+ * `src/lib/scent-profiles.ts`.
+ *
+ * The stored row wins whole or not at all, exactly as it does above: with the
+ * table empty, unparseable, or unreachable, the page renders the dictionary copy
+ * and the banner constant, and the families fall back to
+ * {@link SCENT_PROFILE_FAMILIES} so the grid still fills.
+ *
+ * An empty result renders the hero and the grid's empty state rather than a 404,
+ * for the reason `renderMerchPage()` gives: five menu links point here, and none
+ * of them may break because nothing in the catalogue currently smells of figs.
+ *
+ * This is the last resolution step — an unknown slug 404s from here.
+ */
+async function renderScentProfile(locale: Locale, slug: string) {
+  const profileSlug = parseScentProfileSlug(slug);
+  if (!profileSlug) notFound();
+
+  const [dict, stored] = await Promise.all([
+    getDictionary(locale),
+    getScentProfile(locale, profileSlug),
+  ]);
+
+  const copy = dict.collections.scentProfiles[profileSlug];
+
+  const header: CollectionHeader = stored ?? {
+    slug: profileSlug,
+    name: copy.name,
+    description: copy.description,
+    bannerUrl: SCENT_PROFILE_BANNERS[profileSlug],
+    bannerAlt: copy.bannerAlt,
+  };
+
+  /*
+   * The families come from the row where there is one — an editor who widens
+   * "fresh" to take in herbal materials must be able to do it without a deploy —
+   * and from the constant otherwise. A row with an empty array is treated as
+   * having none, not as missing: emptying the column is a decision.
+   */
+  const families = stored?.families ?? SCENT_PROFILE_FAMILIES[profileSlug];
+
+  const products = await getProductCardsByScentProfile(locale, families);
+
+  return (
+    <CollectionView
+      locale={locale}
+      collection={header}
+      products={products}
+      // A profile crosses the fragrance boundary: a cedar candle is woody too.
       countsEverything
     />
   );

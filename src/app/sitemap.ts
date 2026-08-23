@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
+import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 import { LOCALES, localizePath, type Locale } from "@/src/lib/i18n/config";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { getJournalArticles } from "@/src/services/content";
@@ -156,6 +157,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // see `MERCH_PAGE_FACETS` in `src/lib/facets.ts`.
     ...MERCH_PAGE_FACETS.flatMap((facet) =>
       localizedEntries(`/collections/${facet}`, { priority: 0.8 }),
+    ),
+
+    // And the five scent profiles, which share it on the same terms: pages the
+    // code owns, assembled from the ingredient tables rather than seeded as
+    // rows. See `src/lib/scent-profiles.ts`.
+    ...SCENT_PROFILE_SLUGS.flatMap((profile) =>
+      localizedEntries(`/collections/${profile}`, { priority: 0.8 }),
     ),
 
     // Product detail pages — the deepest and most valuable URLs on the site.

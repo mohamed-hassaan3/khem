@@ -8,11 +8,13 @@ import ProductGallery from "@/src/components/ecommerce/ProductGallery";
 import ProductIngredients from "@/src/components/ecommerce/ProductIngredients";
 import ProductPurchase from "@/src/components/ecommerce/ProductPurchase";
 import ProductPyramid from "@/src/components/ecommerce/ProductPyramid";
+import ProductScentProfile from "@/src/components/ecommerce/ProductScentProfile";
 import ProductStory from "@/src/components/ecommerce/ProductStory";
 import RelatedProducts from "@/src/components/ecommerce/RelatedProducts";
 import { LOCALES, isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
+import { productScentProfiles } from "@/src/lib/scent-profiles";
 import { getIngredientsForProduct } from "@/src/services/content";
 import {
   getCollectionBySlug,
@@ -94,6 +96,12 @@ export default async function PerfumePage({
 
   const gallery = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder);
 
+  // One word for the whole bottle, or two — read off the materials it is built
+  // on. Empty for a fragrance with nothing catalogued, which drops the section.
+  const scentProfiles = productScentProfiles(
+    ingredients.map((ingredient) => ingredient.families),
+  );
+
   const tiers = [
     { label: dict.product.topNotes, notes: product.topNotes },
     { label: dict.product.heartNotes, notes: product.heartNotes },
@@ -131,6 +139,22 @@ export default async function PerfumePage({
           <Reveal>
             <ProductPyramid tiers={tiers} heading={dict.product.pyramidHeading} />
           </Reveal>
+
+          {/*
+           * The pyramid names nine materials; this names the one or two words a
+           * customer would use for the whole thing, and links to the rest of the
+           * house that smells that way. It sits directly under the pyramid
+           * because it is the pyramid's summary, and it self-guards on an
+           * uncatalogued fragrance exactly as the section below does.
+           */}
+          {scentProfiles.length > 0 ? (
+            <Reveal>
+              <ProductScentProfile
+                profiles={scentProfiles}
+                locale={activeLocale}
+              />
+            </Reveal>
+          ) : null}
 
           {/* Guarded here too: an empty <Reveal> would still occupy a gap row. */}
           {ingredients.length > 0 ? (
