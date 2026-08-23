@@ -252,4 +252,17 @@ export type ProductCardData = Pick<
   collectionKind: CollectionKind;
   /** The single `isPrimary` image; a list query never needs the full gallery. */
   primaryImage: ProductImage;
+  /**
+   * The second photograph, which a card cross-fades to on hover.
+   *
+   * `null` for a product whose gallery holds one image only, and the card then
+   * simply does not cross-fade — deliberately *not* {@link PLACEHOLDER_IMAGE},
+   * because a stock crop fading in over a real flacon reads worse than no
+   * effect at all.
+   *
+   * Free to carry: the card query already selects the whole `ProductImage`
+   * relation to find the primary, so this is a row that was being fetched and
+   * discarded rather than a second round trip.
+   */
+  hoverImage: ProductImage | null;
 };

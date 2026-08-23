@@ -5,12 +5,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type {
+  CollectionEntry,
+  CollectionGroupKey,
+  CollectionKey,
+} from "../constants/navigation-pages";
 import {
   world,
   collections,
   quickAccess,
 } from "../constants/navigation-pages";
-import { Search, ShoppingBag, UserRound, X } from "lucide-react";
+import { ChevronDown, Search, ShoppingBag, UserRound, X } from "lucide-react";
 
 import nameLogo from "@/public/logo/name-logo-transparent.svg";
 
@@ -99,6 +104,127 @@ function CartButton({
         </span>
       ) : null}
     </button>
+  );
+}
+
+/**
+ * The "Our Collections" list, shared by the drawer and the desktop mega menu.
+ *
+ * One component rather than the same markup written twice: the two surfaces
+ * differ only in label size (`text-sm` in the drawer, `text-[13px]` in the
+ * menu) and in whether a click has a panel to close, and a group that unfurls
+ * on one surface but not the other would be a bug nobody notices for months.
+ *
+ * The group is a `<button>`, not a link. There is no "Fragrances" page — the
+ * row exists to reveal the three collections underneath it, so a control is
+ * what it is. Its children animate open on a grid-rows tween (the technique
+ * that gets a height transition without a hard-coded height, and so without the
+ * jump a `max-h` guess produces), and are `inert` while collapsed so a keyboard
+ * or screen reader never lands inside a closed group.
+ *
+ * State lives here, one instance per surface. `Nav` remounts these on
+ * navigation, which is what returns a group to collapsed — the same rule the
+ * menus themselves follow.
+ */
+function CollectionsList({
+  entries,
+  labelClass,
+  idPrefix,
+  groupLabels,
+  itemLabels,
+  onNavigate,
+}: {
+  entries: ReadonlyArray<CollectionEntry>;
+  /** Typography for a row's label — the only difference between the surfaces. */
+  labelClass: string;
+  /** Namespaces the `aria-controls` targets, so the two surfaces cannot collide. */
+  idPrefix: string;
+  groupLabels: Record<CollectionGroupKey, string>;
+  itemLabels: Record<CollectionKey, { label: string; desc: string }>;
+  /** Closes the surface, where the surface is one that closes. */
+  onNavigate?: () => void;
+}) {
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+
+  const renderLink = (key: CollectionKey, path: string) => (
+    <LocaleLink
+      key={path}
+      href={path}
+      onClick={onNavigate}
+      className="group block no-underline"
+    >
+      <p
+        className={`mb-1 font-heading ${labelClass} tracking-widest text-ivory transition-colors duration-300 group-hover:text-gold`}
+      >
+        {itemLabels[key].label}
+      </p>
+      <p className="text-[11px] tracking-wider text-ivory/40">
+        {itemLabels[key].desc}
+      </p>
+    </LocaleLink>
+  );
+
+  return (
+    <div className="flex flex-col gap-5">
+      {entries.map((entry) => {
+        if (entry.kind === "link") return renderLink(entry.key, entry.path);
+
+        const isOpen = openGroup === entry.key;
+        const panelId = `${idPrefix}-${entry.key}`;
+
+        return (
+          <div key={entry.key}>
+            <button
+              type="button"
+              onClick={() => setOpenGroup(isOpen ? null : entry.key)}
+              aria-expanded={isOpen}
+              aria-controls={panelId}
+              className={`flex w-full cursor-pointer items-center justify-between gap-3 text-start font-heading ${labelClass} tracking-widest text-ivory transition-colors duration-300 hover:text-gold ${
+                isOpen ? "text-gold" : ""
+              }`}
+            >
+              {groupLabels[entry.key]}
+              <ChevronDown
+                aria-hidden="true"
+                width={15}
+                height={15}
+                strokeWidth={1.25}
+                className={[
+                  "shrink-0 transition-transform duration-400",
+                  "ease-luxury-bezier",
+                  isOpen ? "rotate-180" : "rotate-0",
+                ].join(" ")}
+              />
+            </button>
+
+            <div
+              id={panelId}
+              inert={!isOpen}
+              className={[
+                "grid transition-all duration-400 ease-luxury-bezier",
+                isOpen
+                  ? "mt-5 grid-rows-[1fr] opacity-100"
+                  : "mt-0 grid-rows-[0fr] opacity-0",
+              ].join(" ")}
+            >
+              {/*
+               * `overflow-hidden` is what lets the `0fr` row clip its content;
+               * the border is the indent, drawn rather than only spaced, so the
+               * three read as belonging to the row above them. Logical
+               * properties throughout — the indent mirrors under `dir="rtl"`.
+               */}
+              <div className="overflow-hidden">
+                <div className="flex flex-col gap-5 border-s border-border ps-4">
+                  {entry.children.map((child) =>
+                    renderLink(child.key, child.path),
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -419,23 +545,15 @@ export default function Nav() {
         <div className="flex flex-col gap-10 px-6 pb-14">
           <section>
             <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
-            <div className="flex flex-col gap-5">
-              {collections.map((c) => (
-                <LocaleLink
-                  key={c.path}
-                  href={c.path}
-                  onClick={closeDrawer}
-                  className="group block no-underline"
-                >
-                  <p className="mb-1 font-heading text-sm tracking-widest text-ivory transition-colors duration-300 group-hover:text-gold">
-                    {dict.nav.collectionItems[c.key].label}
-                  </p>
-                  <p className="text-[11px] tracking-wider text-ivory/40">
-                    {dict.nav.collectionItems[c.key].desc}
-                  </p>
-                </LocaleLink>
-              ))}
-            </div>
+            <CollectionsList
+              key={pathname}
+              entries={collections}
+              labelClass="text-sm"
+              idPrefix="drawer-collections"
+              groupLabels={dict.nav.collectionGroups}
+              itemLabels={dict.nav.collectionItems}
+              onNavigate={closeDrawer}
+            />
           </section>
 
           <div className="gold-line" />
@@ -590,22 +708,14 @@ export default function Nav() {
         <div className="mx-auto grid max-w-300 grid-cols-3 gap-12">
           <div>
             <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
-            <div className="flex flex-col gap-5">
-              {collections.map((c) => (
-                <LocaleLink
-                  key={c.path}
-                  href={c.path}
-                  className="group block no-underline"
-                >
-                  <p className="mb-1 font-heading text-[13px] tracking-widest text-ivory transition-colors duration-300 group-hover:text-gold">
-                    {dict.nav.collectionItems[c.key].label}
-                  </p>
-                  <p className="text-[11px] tracking-wider text-ivory/40">
-                    {dict.nav.collectionItems[c.key].desc}
-                  </p>
-                </LocaleLink>
-              ))}
-            </div>
+            <CollectionsList
+              key={pathname}
+              entries={collections}
+              labelClass="text-[13px]"
+              idPrefix="mega-collections"
+              groupLabels={dict.nav.collectionGroups}
+              itemLabels={dict.nav.collectionItems}
+            />
           </div>
           <div>
             <p className="eyebrow mb-6">{dict.nav.featured}</p>

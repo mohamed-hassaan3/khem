@@ -4,7 +4,11 @@ import nameLogo from "@/public/logo/name-logo-transparent.svg";
 import CookieSettingsButton from "@/src/components/consent/CookieSettingsButton";
 import CurrencySwitcher from "@/src/components/i18n/CurrencySwitcher";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import { collections, quickAccess, world } from "@/src/constants/navigation-pages";
+import {
+  collectionLinks as collectionEntries,
+  quickAccess,
+  world,
+} from "@/src/constants/navigation-pages";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
@@ -31,8 +35,13 @@ export default async function Footer({ locale }: { locale: Locale }) {
    * destinations the menu does — the lists cannot drift apart on the next edit
    * because there is only one list.
    */
+  /*
+   * `collectionEntries` is the nav's column with its "Fragrances" group already
+   * flattened away. The group is a disclosure, and a footer sitemap has nothing
+   * to disclose — every collection is simply listed.
+   */
   const collectionLinks = [
-    ...collections.map((c) => ({
+    ...collectionEntries.map((c) => ({
       label: dict.nav.collectionItems[c.key].label,
       path: c.path,
     })),

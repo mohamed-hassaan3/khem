@@ -1,5 +1,8 @@
-import { formatCommentDate } from "@/src/lib/format";
+import CommentLightbox from "@/src/components/ecommerce/CommentLightbox";
+import StarRating from "@/src/components/ecommerce/StarRating";
+import { formatCommentDate, formatRating } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
+import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import type { ProductComment } from "@/src/types/comments";
 
@@ -11,7 +14,13 @@ import type { ProductComment } from "@/src/types/comments";
  * `<CommentForm>` for one the visitor has just posted. Two call sites, one
  * piece of markup, so an optimistic row can never drift from a stored one.
  *
- * It holds no state and calls no hook, which is what makes that dual use legal.
+ * It holds no state and calls no hook, which is what makes that dual use legal
+ * — and why the photographs, which need an open/closed dialog, are delegated
+ * whole to `<CommentLightbox>` rather than half-rendered here.
+ *
+ * A row carries a rating, a body, or both; the database refuses one with
+ * neither. Each part is therefore rendered only if present, and the row never
+ * collapses to nothing.
  *
  * The body is rendered as text — React escapes it. No markdown, no
  * auto-linking, no `dangerouslySetInnerHTML`: this is the one place in the app
@@ -22,20 +31,37 @@ export interface CommentRowProps {
   comment: ProductComment;
   /** Translated fallback shown when the author was not signed in. */
   guestLabel: string;
+  /** Translated "{rating} out of 5", for the star row's accessible name. */
+  ratingOutOfLabel: string;
   locale: Locale;
 }
 
 export default function CommentRow({
   comment,
   guestLabel,
+  ratingOutOfLabel,
   locale,
 }: CommentRowProps) {
+  const authorLabel = comment.authorName ?? guestLabel;
+
   return (
     <article className="border-t border-border py-7">
       <header className="mb-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
-          {comment.authorName ?? guestLabel}
+          {authorLabel}
         </span>
+
+        {comment.rating !== null ? (
+          <StarRating
+            value={comment.rating}
+            label={interpolate(ratingOutOfLabel, {
+              rating: formatRating(comment.rating, locale),
+            })}
+            size={12}
+            className="translate-y-0.5"
+          />
+        ) : null}
+
         <time
           dateTime={comment.createdAt}
           className="text-[11px] tracking-wide text-ivory/35"
@@ -45,9 +71,21 @@ export default function CommentRow({
         </time>
       </header>
 
-      <p className="whitespace-pre-line text-[13px] leading-relaxed text-ivory/70">
-        {comment.body}
-      </p>
+      {comment.body ? (
+        <p className="whitespace-pre-line text-[13px] leading-relaxed text-ivory/70">
+          {comment.body}
+        </p>
+      ) : null}
+
+      {comment.images.length > 0 ? (
+        <CommentLightbox
+          images={comment.images}
+          authorLabel={authorLabel}
+          body={comment.body}
+          createdAt={comment.createdAt}
+          locale={locale}
+        />
+      ) : null}
     </article>
   );
 }

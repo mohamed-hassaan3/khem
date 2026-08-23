@@ -28,7 +28,7 @@ const ingredientFamilySchema = z.enum([
   "Woody Aromas",
   "Floral",
   "Fresh / Citrus",
-  "Fruity",
+  "Gourmand",
   "Oriental Aromas",
   "Aquatic Aromas",
   "Herbal",

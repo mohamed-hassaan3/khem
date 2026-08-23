@@ -34,6 +34,39 @@ const MOVED_CATEGORY_PATHS: ReadonlyArray<readonly [string, string]> = [
   ["/gift-set", "/collections/gift-set"],
 ];
 
+/**
+ * Where visitor photographs live.
+ *
+ * Comment attachments are served from the project's own Supabase Storage
+ * bucket (`supabase/sql/0018_comment_rating_images.sql`), whose host is
+ * project-specific and therefore read from the environment rather than
+ * hard-coded. The `pathname` is pinned to that one public bucket: this entry
+ * must not become a licence for `next/image` to proxy anything else the
+ * project happens to store.
+ *
+ * Returns an empty list when the variable is absent, so a checkout without
+ * Supabase credentials still builds — the same bargain `isSupabaseConfigured()`
+ * strikes at runtime. This cannot import from `src/`: the config is evaluated
+ * before the module graph exists.
+ */
+function commentImagePattern() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  if (url.length === 0) return [];
+
+  try {
+    return [
+      {
+        protocol: "https" as const,
+        hostname: new URL(url).hostname,
+        pathname: "/storage/v1/object/public/comment-images/**",
+      },
+    ];
+  } catch {
+    // A malformed URL is a deployment problem, not a build-breaking one.
+    return [];
+  }
+}
+
 const nextConfig: NextConfig = {
   /**
    * Files the bundler cannot see being read, but that a function needs anyway.
@@ -76,6 +109,7 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
       },
+      ...commentImagePattern(),
       {
         // Clerk-hosted avatars — uploaded pictures and the OAuth provider
         // images Clerk proxies. Only reached by the account identity block,

@@ -423,6 +423,28 @@ export function resolvePrimaryImage(images: readonly ProductImage[]): ProductIma
   return sorted.find((image) => image.isPrimary) ?? sorted[0] ?? PLACEHOLDER_IMAGE;
 }
 
+/**
+ * The second photograph a card cross-fades to on hover — the first of the
+ * gallery, in `sortOrder`, that is not the one already on screen.
+ *
+ * Identity-compared against the resolved primary rather than re-testing
+ * `isPrimary`, so the fallback branches of {@link resolvePrimaryImage} (no
+ * primary flagged at all) cannot leave a card fading an image into itself.
+ *
+ * `null` for a one-image product. No placeholder here on purpose: a card with
+ * nothing to fade to should stay exactly as it is.
+ */
+export function resolveHoverImage(
+  images: readonly ProductImage[],
+  primary: ProductImage,
+): ProductImage | null {
+  return (
+    [...images]
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .find((image) => image !== primary) ?? null
+  );
+}
+
 export function toProduct(row: unknown, locale: Locale): Product | null {
   const parsed = productRowSchema.safeParse(row);
   if (!parsed.success) return null;
@@ -446,12 +468,16 @@ export function toProductCard(row: unknown, locale: Locale): ProductCardData | n
   const { collection, images, ...product } = parsed.data;
   const parent = firstOf(collection);
 
+  const gallery = images.map((image) => toImage(image, locale));
+  const primaryImage = resolvePrimaryImage(gallery);
+
   return {
     ...stripArabicColumns(product),
     ...resolveProductText(parsed.data, locale),
     collectionName: resolveText(parent.name, parent.name_ar, locale),
     collectionKind: parent.kind,
-    primaryImage: resolvePrimaryImage(images.map((image) => toImage(image, locale))),
+    primaryImage,
+    hoverImage: resolveHoverImage(gallery, primaryImage),
   };
 }
 

@@ -161,3 +161,22 @@ export function formatProductType(
   }
   return "";
 }
+
+/**
+ * A star average, to one decimal — "4.3", and "٤٫٣" on the Arabic tree.
+ *
+ * Locale-aware, unlike {@link formatPrice}: a rating is not a catalog record
+ * written in English, it is a number the page is speaking, and it sits in the
+ * same paragraph as {@link formatCommentDate}, which already switches digits.
+ */
+export function formatRating(value: number, locale: Locale): string {
+  return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : LOCALE, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+/** A plain count in the visitor's digits — how many ratings, which photograph. */
+export function formatCount(value: number, locale: Locale): string {
+  return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : LOCALE).format(value);
+}

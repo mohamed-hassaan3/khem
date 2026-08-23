@@ -3,11 +3,18 @@
 import { useUser } from "@clerk/nextjs";
 import { useState, useTransition, type FormEvent } from "react";
 
+import CommentImageUploader from "@/src/components/ecommerce/CommentImageUploader";
 import CommentRow from "@/src/components/ecommerce/CommentRow";
+import StarRatingInput from "@/src/components/ecommerce/StarRatingInput";
 import { postProductComment } from "@/src/actions/comments";
+import { formatRating } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
-import { COMMENT_MAX_LENGTH, COMMENT_MIN_LENGTH } from "@/src/schemas/comments";
+import {
+  COMMENT_MAX_LENGTH,
+  COMMENT_MIN_LENGTH,
+  type CommentImageUpload,
+} from "@/src/schemas/comments";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { ProductComment } from "@/src/types/comments";
 
@@ -20,9 +27,17 @@ import type { ProductComment } from "@/src/types/comments";
  * the server will write, never an input to it. `useUser()` here is cosmetic;
  * if it were wrong, the stored comment would still be right.
  *
- * The length checks are the same UX affordance `ContactForm` makes: the schema
- * re-validates every submission inside the action, and the database carries the
- * same bound as a CHECK.
+ * ## Three ways to say something
+ *
+ * Stars alone, words alone, or both. The rating sits above the textarea because
+ * it is the cheaper act: a visitor who only wants to say "five stars" should
+ * meet that control first and never have to touch the one below it. What the
+ * form refuses is an empty submission — the same rule the schema enforces and
+ * the database carries as `product_comment_has_content`.
+ *
+ * The length and photograph checks are the same UX affordance `ContactForm`
+ * makes: the schema re-validates every submission inside the action, the action
+ * re-sniffs every uploaded byte, and the database carries the same bounds.
  */
 
 const FIELD_CLASS =
@@ -51,6 +66,8 @@ export default function CommentForm({
 
   const { user } = useUser();
   const [body, setBody] = useState("");
+  const [rating, setRating] = useState(0);
+  const [images, setImages] = useState<CommentImageUpload[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSent, setIsSent] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -71,9 +88,13 @@ export default function CommentForm({
 
   /** Error codes the action returns, resolved against the dictionary here. */
   const fieldMessages: Record<string, string> = {
-    bodyRequired: copy.bodyRequired,
     bodyTooShort: copy.bodyTooShort,
     bodyTooLong: copy.bodyTooLong,
+    contentRequired: copy.contentRequired,
+    ratingInvalid: copy.ratingInvalid,
+    imageCount: copy.photoLimit,
+    imageTooLarge: copy.photoTooLarge,
+    imageType: copy.photoType,
     slugInvalid: copy.deliveryError,
   };
 
@@ -81,11 +102,19 @@ export default function CommentForm({
   const pending = posted.filter((comment) => !stored.has(comment.id));
 
   const trimmed = body.trim();
-  const canSubmit = trimmed.length >= COMMENT_MIN_LENGTH && !isPending;
+  const hasBody = trimmed.length >= COMMENT_MIN_LENGTH;
+  const hasRating = rating > 0;
+  const canSubmit = (hasBody || hasRating) && !isPending;
 
   const byline = interpolate(copy.postingAs, {
     name: user?.fullName?.trim() || guestLabel,
   });
+
+  /** Clears the field-level notice the moment the visitor changes anything. */
+  function touch() {
+    if (error) setError(null);
+    if (isSent) setIsSent(false);
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -94,20 +123,25 @@ export default function CommentForm({
     setError(null);
     setIsSent(false);
 
-    if (trimmed.length < COMMENT_MIN_LENGTH) {
-      setError(trimmed.length === 0 ? copy.bodyRequired : copy.bodyTooShort);
+    // Words are optional now, but *something* is not.
+    if (!hasBody && !hasRating) {
+      setError(trimmed.length === 0 ? copy.contentRequired : copy.bodyTooShort);
       return;
     }
 
     startTransition(async () => {
       const result = await postProductComment({
         slug,
-        body: trimmed,
+        body: hasBody ? trimmed : "",
+        rating: hasRating ? rating : undefined,
+        images: images.length > 0 ? images : undefined,
         company,
       });
 
       if (result.ok) {
         setBody("");
+        setRating(0);
+        setImages([]);
         setIsSent(true);
         // `null` is the honeypot branch: nothing was written, and nothing is
         // shown. A human never reaches it.
@@ -133,6 +167,30 @@ export default function CommentForm({
   return (
     <div>
       <form onSubmit={handleSubmit} noValidate className="relative">
+        {/* Stars first: the cheapest way to say something. */}
+        <div className="mb-8">
+          <p className={LABEL_CLASS}>
+            {copy.ratingLabel}
+            <span className="ms-2 text-ivory/20">{copy.ratingOptional}</span>
+          </p>
+
+          <StarRatingInput
+            value={rating}
+            onChange={(next) => {
+              setRating(next);
+              touch();
+            }}
+            label={copy.ratingLabel}
+            optionLabel={(stars) =>
+              interpolate(copy.ratingOutOf, {
+                rating: formatRating(stars, locale),
+              })
+            }
+            clearLabel={copy.ratingClear}
+            disabled={isPending}
+          />
+        </div>
+
         <label htmlFor="comment-body" className={LABEL_CLASS}>
           {byline}
         </label>
@@ -146,8 +204,7 @@ export default function CommentForm({
           placeholder={copy.placeholder}
           onChange={(event) => {
             setBody(event.target.value);
-            if (error) setError(null);
-            if (isSent) setIsSent(false);
+            touch();
           }}
           aria-label={copy.srLabel}
           aria-invalid={error !== null}
@@ -183,8 +240,25 @@ export default function CommentForm({
             aria-busy={isPending}
             className="btn-luxury btn-luxury-fill min-w-50 justify-center disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isPending ? copy.submitting : copy.submit}
+            {isPending
+              ? copy.submitting
+              : hasRating && !hasBody
+                ? copy.submitRating
+                : copy.submit}
           </button>
+
+          <CommentImageUploader
+            images={images}
+            onChange={(next) => {
+              setImages(next);
+              touch();
+            }}
+            onError={(message) => {
+              if (message) setIsSent(false);
+              setError(message);
+            }}
+            disabled={isPending}
+          />
 
           {error ? (
             <p
@@ -213,6 +287,7 @@ export default function CommentForm({
               key={comment.id}
               comment={comment}
               guestLabel={guestLabel}
+              ratingOutOfLabel={copy.ratingOutOf}
               locale={locale}
             />
           ))}

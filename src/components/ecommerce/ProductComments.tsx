@@ -1,10 +1,14 @@
 import Reveal from "@/src/components/animation/Reveal";
 import CommentForm from "@/src/components/ecommerce/CommentForm";
 import CommentRow from "@/src/components/ecommerce/CommentRow";
+import RatingSummary from "@/src/components/ecommerce/RatingSummary";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { isSupabaseConfigured } from "@/src/lib/supabase";
-import { getCommentsForProduct } from "@/src/services/comments";
+import {
+  getCommentsForProduct,
+  getProductRatingSummary,
+} from "@/src/services/comments";
 
 /**
  * Visitor reflections on a fragrance — Server Component.
@@ -20,6 +24,10 @@ import { getCommentsForProduct } from "@/src/services/comments";
  *    block, and no gap where a list would sit. Same discipline as
  *    `<ProductIngredients>`, which returns `null` rather than render a heading
  *    over nothing.
+ * 3. **No empty rating block.** `<RatingSummary>` returns `null` until the
+ *    first star is left, for the same reason — an average of nothing is not a
+ *    thing to show.
+ *
  * 2. **No section at all when the database is unconfigured.** A form that
  *    cannot store anything must never be shown, and a checkout without
  *    Supabase credentials still builds and renders this page exactly as before.
@@ -36,9 +44,10 @@ export default async function ProductComments({
 }: ProductCommentsProps) {
   if (!isSupabaseConfigured()) return null;
 
-  const [dict, comments] = await Promise.all([
+  const [dict, comments, ratings] = await Promise.all([
     getDictionary(locale),
     getCommentsForProduct(slug),
+    getProductRatingSummary(slug),
   ]);
 
   const copy = dict.product.comments;
@@ -52,6 +61,8 @@ export default async function ProductComments({
             {copy.heading}
           </h2>
         </Reveal>
+
+        <RatingSummary summary={ratings} locale={locale} copy={copy} />
 
         <CommentForm
           slug={slug}
@@ -74,6 +85,7 @@ export default async function ProductComments({
                 key={comment.id}
                 comment={comment}
                 guestLabel={copy.guest}
+                ratingOutOfLabel={copy.ratingOutOf}
                 locale={locale}
               />
             ))}

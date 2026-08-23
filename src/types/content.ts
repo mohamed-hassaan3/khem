@@ -46,7 +46,7 @@ export type IngredientFamily =
   | "Woody Aromas"
   | "Floral"
   | "Fresh / Citrus"
-  | "Fruity"
+  | "Gourmand"
   | "Oriental Aromas"
   | "Aquatic Aromas"
   | "Herbal";

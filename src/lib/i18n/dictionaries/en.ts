@@ -89,6 +89,14 @@ export const en = {
         desc: "Scent your sanctuary",
       },
     },
+    /*
+     * The label of the one collection *group* — a disclosure in the menu, not a
+     * destination, so it has no `desc` and no path and cannot be a
+     * `collectionItems` entry.
+     */
+    collectionGroups: {
+      fragrances: "Fragrances",
+    },
     worldItems: {
       heritage: { label: "Our Heritage" },
       craftsmanship: { label: "Craftsmanship" },
@@ -98,15 +106,16 @@ export const en = {
     },
     /*
      * Quick Access, in the order it is printed. The two set categories are
-     * destinations rather than chapters of the library; the two cuts beneath
-     * them cross every collection at once and so have no page of their own —
-     * they address the `?facet=` filter. See `src/lib/facets.ts`.
+     * destinations rather than chapters of the library; Best Sellers crosses
+     * every collection at once and so has no page of its own — it addresses the
+     * `?facet=` filter. See `src/lib/facets.ts`. Key Ingredients is editorial
+     * and leads out of the shop entirely, to `/ingredients`.
      */
     quickAccessItems: {
       discoverySets: "Discovery Sets",
       giftSets: "Gift Sets",
       bestSellers: "Best Sellers",
-      limitedEditions: "Limited Editions",
+      keyIngredients: "Key Ingredients",
     },
   },
 
@@ -614,7 +623,10 @@ export const en = {
     decreaseQuantity: "Decrease quantity",
     increaseQuantity: "Increase quantity",
     addToCart: "Add to Cart",
+    buyNow: "Buy Now",
     added: "Added to Cart",
+    /* Accessible name for the bar that follows the visitor down the page. */
+    stickyBar: "{name} — purchase",
     soldOut: "Sold Out",
     inStock: "In stock — ships within 48 hours",
     lowStock: "Only {count} remaining",
@@ -674,10 +686,39 @@ export const en = {
       submit: "Post Comment",
       submitting: "Posting",
       sent: "Thank you. Your reflection is published.",
-      bodyRequired: "Please write a comment first",
       bodyTooShort: "A little more, please",
       bodyTooLong: "Please keep your comment under 1,200 characters",
       deliveryError: "We could not post your comment. Please try again.",
+      contentRequired: "Leave a rating, or a few words, or both",
+
+      /*
+       * Stars. `ratingOutOf` is the accessible name of every star row —
+       * readonly or interactive — so a screen reader hears a number rather
+       * than five unlabelled controls.
+       */
+      ratingLabel: "Your Rating",
+      ratingOptional: "Optional",
+      ratingOutOf: "{rating} out of 5",
+      ratingClear: "Clear rating",
+      ratingInvalid: "Please choose between one and five stars",
+      ratingSummaryLabel: "Average rating",
+      ratingCount: "{count} ratings",
+      ratingCountOne: "1 rating",
+      submitRating: "Post Rating",
+
+      /* Photographs. */
+      addPhotos: "Add photos",
+      removePhoto: "Remove photo {index}",
+      photoLimit: "Up to 3 photos per comment",
+      photoTooLarge: "Each photo must be under 5 MB",
+      photoType: "Photos must be JPEG, PNG or WebP",
+      photoAlt: "Photo {index} from {name}",
+      viewPhoto: "View photo {index} of {total}",
+      lightboxLabel: "Photos from {name}",
+      photoCounter: "{index} / {total}",
+      photoClose: "Close photos",
+      photoPrevious: "Previous photo",
+      photoNext: "Next photo",
     },
   },
 

@@ -45,7 +45,7 @@
       "label_ar": null
     },
     {
-      "name": "Fruity",
+      "name": "Gourmand",
       "label_ar": null
     },
     {
@@ -365,7 +365,7 @@
       "origin_ar": null,
       "families": [
         "Floral",
-        "Fruity"
+        "Gourmand"
       ],
       "rarity": "Precious",
       "rarity_ar": null,

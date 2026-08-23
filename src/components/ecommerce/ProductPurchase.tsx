@@ -3,7 +3,9 @@
 import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import BuyNowButton from "@/src/components/ecommerce/BuyNowButton";
 import QuantityStepper from "@/src/components/ecommerce/QuantityStepper";
+import StickyPurchaseBar from "@/src/components/ecommerce/StickyPurchaseBar";
 import { quantityCeiling } from "@/src/lib/cart";
 import { BASE_CURRENCY } from "@/src/lib/currency";
 import { formatProductType, formatVolume } from "@/src/lib/format";
@@ -18,6 +20,11 @@ import type { Product } from "@/src/types/catalog";
 
 /**
  * The buy block on a product detail page.
+ *
+ * Two controls, side by side at every width: Add to Cart, and Buy Now — which
+ * adds the same line and goes straight to `/checkout`. Once the pair scrolls
+ * off the top, `<StickyPurchaseBar>` puts it back at the foot of the viewport,
+ * driven by the observer below and carrying the quantity chosen here.
  *
  * There is NO size selector: bottle format is a property of the collection
  * (Signature and Noir at 100 ML, Gemstone at 50 ML), so a fragrance has one
@@ -66,12 +73,40 @@ export default function ProductPurchase({
   const [justAdded, setJustAdded] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  /** The controls row, watched so the sticky bar knows when it is needed. */
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const [isBarVisible, setIsBarVisible] = useState(false);
+
   // Clearing on unmount, and before each restart, keeps a fast double-click
   // from leaving the button stuck in its confirmed state.
   useEffect(() => {
     return () => {
       if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
     };
+  }, []);
+
+  /*
+   * The bar appears only when the real controls have been scrolled *past* —
+   * `isIntersecting` alone would also raise it while the visitor is still above
+   * the block, on the breadcrumb, where nothing has scrolled off anything.
+   * `boundingClientRect.top < 0` is the half that says which side they left by.
+   */
+  useEffect(() => {
+    const node = controlsRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsBarVisible(
+          !entry.isIntersecting && entry.boundingClientRect.top < 0,
+        );
+      },
+      { threshold: 0 },
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
   }, []);
 
   const isSoldOut = product.inventory === 0;
@@ -155,15 +190,18 @@ export default function ProductPurchase({
         />
       </div>
 
-      {/* This used to share its row with a save control. It is the only
-          control here now, so it takes the full width rather than leaving a
-          gap where the other one stood. */}
-      <div>
+      {/*
+        Two equal columns at *every* breakpoint, phone included: these are the
+        two ways to buy the same bottle, and stacking them on a narrow screen
+        would make one of them look like an afterthought. Add to Cart keeps the
+        filled treatment so the primary action still reads as primary.
+      */}
+      <div ref={controlsRef} className="grid grid-cols-2 gap-3">
         <button
           type="button"
           disabled={isSoldOut}
           onClick={handleAddToCart}
-          className="btn-luxury btn-luxury-fill w-full justify-center disabled:pointer-events-none disabled:opacity-40"
+          className="btn-luxury btn-luxury-fill justify-center px-4 text-[10px] tracking-[0.15em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 sm:px-8 sm:text-[11px] sm:tracking-[0.2em]"
         >
           {isSoldOut ? (
             dict.product.soldOut
@@ -176,6 +214,14 @@ export default function ProductPurchase({
             dict.product.addToCart
           )}
         </button>
+
+        <BuyNowButton
+          productId={product.id}
+          quantity={quantity}
+          inventory={product.inventory}
+          locale={locale}
+          className="px-4 text-[10px] tracking-[0.15em] whitespace-nowrap sm:px-8 sm:text-[11px] sm:tracking-[0.2em]"
+        />
       </div>
 
       <p aria-live="polite" className="mt-4 text-[11px] text-ivory/35">
@@ -194,6 +240,18 @@ export default function ProductPurchase({
           </div>
         ))}
       </div>
+
+      <StickyPurchaseBar
+        isVisible={isBarVisible}
+        productId={product.id}
+        name={product.name}
+        priceInCents={product.priceInCents}
+        inventory={product.inventory}
+        quantity={quantity}
+        onAddToCart={handleAddToCart}
+        justAdded={justAdded}
+        locale={locale}
+      />
     </section>
   );
 }

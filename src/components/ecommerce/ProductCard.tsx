@@ -67,25 +67,67 @@ export default async function ProductCard({
    */
   const flag = productFlag(product);
 
+  /*
+   * A product that cannot be bought has no business leading with "Best Seller",
+   * so this takes the corner slot from both the stored badge and the flag —
+   * muted rather than gold, because it is a withdrawal and not a claim.
+   */
+  const isSoldOut = product.inventory === 0;
+
   return (
     <LocaleLink
       href={productHref(product)}
       className="img-zoom group relative block overflow-hidden bg-surface no-underline"
     >
-      {product.badge ? (
+      {isSoldOut ? (
+        <ProductFlag label={dict.product.soldOut} locale={locale} tone="muted" />
+      ) : product.badge ? (
         <ProductFlag label={product.badge} locale={locale} island />
       ) : flag ? (
         <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
       ) : null}
 
-      <div className="relative aspect-3/4 overflow-hidden bg-card">
+      {/*
+        Sold stock is dimmed and drained the way a museum dims a piece that is
+        not currently on show. Only the image: the name, price, and pills below
+        stay at full legibility, because the card is still a link worth reading.
+      */}
+      <div
+        className={`relative aspect-3/4 overflow-hidden bg-card ${
+          isSoldOut ? "opacity-55 grayscale-[0.35]" : ""
+        }`}
+      >
+        {/*
+          The cross-fade. Both frames are `fill` inside one aspect-ratio box, so
+          the swap is opacity alone — the card's height is fixed by the box and
+          nothing in the grid can shift. Graded identically (`brightness-75`) so
+          the transition reads as one continuous image rather than the lights
+          coming up. 700ms sits just inside the 800ms `img-zoom` scale both
+          frames share, so the swap settles while the zoom is still running.
+        */}
         <Image
           src={product.primaryImage.url}
           alt={product.primaryImage.alt}
           fill
           sizes={sizes}
-          className="object-cover brightness-75"
+          className={`object-cover brightness-75 transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            product.hoverImage ? "group-hover:opacity-0" : ""
+          }`}
         />
+        {product.hoverImage ? (
+          /*
+            `alt=""` and aria-hidden: this is the same product from a second
+            angle, and a screen reader must not hear the flacon described twice.
+          */
+          <Image
+            src={product.hoverImage.url}
+            alt=""
+            aria-hidden="true"
+            fill
+            sizes={sizes}
+            className="object-cover opacity-0 brightness-75 transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:opacity-100"
+          />
+        ) : null}
       </div>
 
       <div className="p-6">
