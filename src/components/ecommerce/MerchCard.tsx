@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import AddToBagButton from "@/src/components/ecommerce/AddToBagButton";
 import ProductFlag from "@/src/components/ecommerce/ProductFlag";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { productFlag } from "@/src/lib/facets";
@@ -30,7 +31,8 @@ import type { ProductCardData } from "@/src/types/catalog";
  *
  * A sibling of `<ProductCard>` rather than a wrapper: that one is an async
  * Server Component whose *whole surface* is a link to the detail page, which
- * would swallow the buy button if it were reused here.
+ * would swallow the buy button if it were reused here. What the two do share is
+ * `<AddToBagButton>`, overlaid on the same corner of both.
  */
 
 const CONFIRMATION_MS = 2500;
@@ -86,6 +88,20 @@ export default function MerchCard({
       ) : flag ? (
         <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
       ) : null}
+
+      {/*
+       * The same corner bag the perfume cards carry, so one gesture means the
+       * same thing everywhere in the catalogue. It does not replace the
+       * full-width button below — that one is this card's primary control and
+       * reports its own confirmation — it adds the one-tap path the grids had
+       * and this card did not. The flag sits at `start-5 top-5` and the bag at
+       * `end-5 top-5`, so the two corners never meet, in either direction.
+       */}
+      <AddToBagButton
+        productId={product.id}
+        name={product.name}
+        inventory={product.inventory}
+      />
 
       {/* `tabIndex={-1}` and an empty alt: this is the same destination as the
           name below it, and a screen reader announcing the link twice — once as

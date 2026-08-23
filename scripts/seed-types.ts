@@ -119,7 +119,16 @@ export interface IngredientFamilySeedRow {
   label_ar: string | null;
 }
 
-export type IngredientSeedRow = Omit<Ingredient, "image"> & {
+export type IngredientSeedRow = Omit<Ingredient, "image" | "usedIn"> & {
+  /*
+   * The `"IngredientUsage"` row as stored, not as rendered. `IngredientUsage`
+   * in `types/content.ts` also carries the product's `collectionKind`, which is
+   * what the "Found in" links are built from — it is read through the FK at
+   * query time and lives in `"Collection"`, so dumping it here would write a
+   * derived value into the seed and let it go stale against the table it came
+   * from.
+   */
+  usedIn: { name: string; slug: string }[];
   name_ar: string | null;
   origin_ar: string | null;
   rarity_ar: string | null;

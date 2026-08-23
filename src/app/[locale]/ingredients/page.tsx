@@ -7,10 +7,7 @@ import IngredientExplorer from "@/src/components/ingredients/IngredientExplorer"
 import { isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
-import {
-  getIngredientDetails,
-  getIngredientFamilies,
-} from "@/src/services/content";
+import { getIngredientDetails } from "@/src/services/content";
 
 /** ISR, 1 hour — editorial copy, aligned with the other content routes. */
 export const revalidate = 3600;
@@ -40,10 +37,9 @@ export default async function Ingredients({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, ingredients, families] = await Promise.all([
+  const [{ locale }, ingredients] = await Promise.all([
     params,
     getIngredientDetails(),
-    getIngredientFamilies(),
   ]);
 
   const dict = await getDictionary(isLocale(locale) ? locale : "en");
@@ -79,8 +75,8 @@ export default async function Ingredients({
         </div>
       </section>
 
-      {/* ── FILTER + GRID + DETAIL ──────────────────── */}
-      <IngredientExplorer ingredients={ingredients} families={families} />
+      {/* ── GRID + DETAIL ───────────────────────────── */}
+      <IngredientExplorer ingredients={ingredients} />
 
       {/* ── CTA ─────────────────────────────────────── */}
       <section className="border-t border-border bg-surface px-6 py-24 text-center md:px-20 md:py-30">

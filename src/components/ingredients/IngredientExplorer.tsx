@@ -3,22 +3,28 @@
 import { X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { LOCALE_DIRECTION } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
+import { productHref } from "@/src/lib/routes";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type { Ingredient } from "@/src/types/content";
 
 /**
- * Ingredient catalog with an olfactive-family filter and cards that expand in
- * place.
+ * Ingredient catalog — every catalogued material, as cards that expand in place.
  *
  * The client boundary stops here: the page stays a Server Component and passes
  * already-queried records in, so `src/services/content.ts` is never pulled into
  * the browser bundle.
+ *
+ * The olfactive-family filter bar that used to sit above the grid is gone: the
+ * catalog is short enough to read whole, and a bar that mostly showed "All" was
+ * a control asking to be operated rather than a way in. The families themselves
+ * are untouched — they still badge every card, and they still gather the five
+ * scent profile pages (`src/lib/scent-profiles.ts`).
  *
  * ## Why the detail lives inside the card
  *
@@ -71,35 +77,22 @@ const SIDE_BY_SIDE_COLUMNS = 4;
 
 export interface IngredientExplorerProps {
   ingredients: Ingredient[];
-  /** Filter options, `"All"` first. Derived server-side from the records. */
-  families: string[];
 }
 
 export default function IngredientExplorer({
   ingredients,
-  families,
 }: IngredientExplorerProps) {
   const dict = useDictionary();
   const locale = useLocale();
   const island = ltrIsland(locale);
   const prefersReducedMotion = useReducedMotion();
 
-  const [activeFamily, setActiveFamily] = useState(families[0] ?? "All");
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   /** Resolved after mount; `1` server-side, which is the narrowest layout. */
   const [columns, setColumns] = useState(1);
 
   /** Cards by slug, so a deep link can scroll the one it opened into view. */
   const cardRefs = useRef(new Map<string, HTMLDivElement>());
-
-  const matchesFamily = useCallback(
-    (ingredient: Ingredient, family: string) =>
-      family === families[0] ||
-      ingredient.families.some(
-        (candidate) => candidate.toLowerCase() === family.toLowerCase(),
-      ),
-    [families],
-  );
 
   /**
    * Resolve `?ingredient=` against the records on hand.
@@ -120,11 +113,6 @@ export default function IngredientExplorer({
       }
 
       setActiveSlug(target.slug);
-      // A link may point at an ingredient the current filter hides; the link
-      // wins, so widen the filter rather than open an invisible card.
-      setActiveFamily((current) =>
-        matchesFamily(target, current) ? current : (families[0] ?? "All"),
-      );
 
       // One frame, so the row has expanded before it is centred.
       requestAnimationFrame(() => {
@@ -138,7 +126,7 @@ export default function IngredientExplorer({
     read();
     window.addEventListener("popstate", read);
     return () => window.removeEventListener("popstate", read);
-  }, [families, ingredients, matchesFamily]);
+  }, [ingredients]);
 
   /**
    * How many columns the grid is currently showing.
@@ -173,22 +161,6 @@ export default function IngredientExplorer({
     window.history.replaceState(null, "", url);
   }
 
-  function handleFamilyChange(family: string) {
-    setActiveFamily(family);
-
-    // Drop a selection the new filter would hide, so the grid never keeps a row
-    // open for an ingredient it no longer shows.
-    const stillVisible = ingredients.some(
-      (ingredient) =>
-        ingredient.slug === activeSlug && matchesFamily(ingredient, family),
-    );
-    if (!stillVisible && activeSlug !== null) selectSlug(null);
-  }
-
-  const filtered = ingredients.filter((ingredient) =>
-    matchesFamily(ingredient, activeFamily),
-  );
-
   /**
    * The grid order, with an expanded card lifted to the start of its own row.
    *
@@ -199,15 +171,15 @@ export default function IngredientExplorer({
    * shared that row slide down past it. `layout` on each cell animates the
    * reorder, so nothing jumps.
    */
-  const activeIndex = filtered.findIndex(
+  const activeIndex = ingredients.findIndex(
     (ingredient) => ingredient.slug === activeSlug,
   );
   const rowStart =
     activeIndex < 0 ? -1 : Math.floor(activeIndex / columns) * columns;
 
-  let ordered = filtered;
+  let ordered: Ingredient[] = ingredients;
   if (activeIndex >= 0 && rowStart !== activeIndex) {
-    ordered = [...filtered];
+    ordered = [...ingredients];
     const [active] = ordered.splice(activeIndex, 1);
     if (active) ordered.splice(rowStart, 0, active);
   }
@@ -237,223 +209,201 @@ export default function IngredientExplorer({
   };
 
   return (
-    <>
-      {/* ── FILTER BAR ──────────────────────────────── */}
-      <div className="sticky top-20 z-40 border-b border-border bg-surface/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-350 items-center gap-8 overflow-x-auto px-6 md:px-20">
-          <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-ivory/30">
-            {dict.ingredientsExplorer.filterByFamily}
-          </span>
-          {families.map((family) => (
-            <button
-              key={family}
-              type="button"
-              aria-pressed={activeFamily === family}
-              onClick={() => handleFamilyChange(family)}
-              className={`whitespace-nowrap border-b-2 py-5 font-heading text-[11px] tracking-[0.15em] transition-colors duration-300 ease-out ${
-                activeFamily === family
-                  ? "border-gold text-gold"
-                  : "border-transparent text-ivory/35 hover:text-ivory/70"
+    <section className="bg-background px-6 py-16 md:px-20 md:py-20">
+      <div className="mx-auto grid max-w-350 grid-cols-1 gap-0.5 bg-border sm:grid-cols-2 lg:grid-cols-4">
+        {ordered.map((ingredient) => {
+          const isActive = ingredient.slug === activeSlug;
+          const panelId = `ingredient-detail-${ingredient.slug}`;
+
+          return (
+            <motion.div
+              key={ingredient.slug}
+              layout={prefersReducedMotion ? false : true}
+              transition={transition}
+              ref={(node: HTMLDivElement | null) => {
+                if (node) cardRefs.current.set(ingredient.slug, node);
+                else cardRefs.current.delete(ingredient.slug);
+              }}
+              className={`overflow-hidden border transition-colors duration-500 ease-out ${
+                isActive
+                  ? "border-gold/35 bg-gold/5 sm:col-span-2 lg:col-span-4"
+                  : "border-transparent bg-surface hover:border-gold/20"
               }`}
             >
-              {family}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── GRID WITH IN-PLACE DETAIL ───────────────── */}
-      <section className="bg-background px-6 py-16 md:px-20 md:py-20">
-        <div className="mx-auto grid max-w-350 grid-cols-1 gap-0.5 bg-border sm:grid-cols-2 lg:grid-cols-4">
-          {ordered.map((ingredient) => {
-            const isActive = ingredient.slug === activeSlug;
-            const panelId = `ingredient-detail-${ingredient.slug}`;
-
-            return (
-              <motion.div
-                key={ingredient.slug}
-                layout={prefersReducedMotion ? false : true}
-                transition={transition}
-                ref={(node: HTMLDivElement | null) => {
-                  if (node) cardRefs.current.set(ingredient.slug, node);
-                  else cardRefs.current.delete(ingredient.slug);
-                }}
-                className={`overflow-hidden border transition-colors duration-500 ease-out ${
-                  isActive
-                    ? "border-gold/35 bg-gold/5 sm:col-span-2 lg:col-span-4"
-                    : "border-transparent bg-surface hover:border-gold/20"
-                }`}
+              <div
+                className={
+                  isActive ? "grid grid-cols-1 lg:grid-cols-[25%_1fr]" : ""
+                }
               >
-                <div
-                  className={
-                    isActive ? "grid grid-cols-1 lg:grid-cols-[25%_1fr]" : ""
+                {/* The image never re-mounts between states — same node, same
+                    src — so expanding a card does not re-request or flash it. */}
+                <button
+                  type="button"
+                  aria-expanded={isActive}
+                  aria-controls={panelId}
+                  onClick={() =>
+                    selectSlug(isActive ? null : ingredient.slug)
                   }
+                  className="img-zoom block w-full overflow-hidden text-start"
                 >
-                  {/* The image never re-mounts between states — same node, same
-                      src — so expanding a card does not re-request or flash it. */}
-                  <button
-                    type="button"
-                    aria-expanded={isActive}
-                    aria-controls={panelId}
-                    onClick={() =>
-                      selectSlug(isActive ? null : ingredient.slug)
-                    }
-                    className="img-zoom block w-full overflow-hidden text-start"
+                  <div
+                    className={`relative overflow-hidden bg-card ${
+                      isActive ? "h-65 lg:h-full lg:min-h-120" : "h-65"
+                    }`}
                   >
-                    <div
-                      className={`relative overflow-hidden bg-card ${
-                        isActive ? "h-65 lg:h-full lg:min-h-120" : "h-65"
-                      }`}
-                    >
-                      <Image
-                        src={ingredient.image.url}
-                        alt={ingredient.image.alt}
-                        fill
-                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                        className="object-cover brightness-60 saturate-50"
-                      />
-                    </div>
+                    <Image
+                      src={ingredient.image.url}
+                      alt={ingredient.image.alt}
+                      fill
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover brightness-60 saturate-50"
+                    />
+                  </div>
 
-                    {isActive ? null : (
-                      <div className="px-6 pb-7 pt-6" {...island}>
-                        <h3 className="mb-2 font-heading text-base font-normal tracking-wide text-ivory">
-                          {ingredient.name}
-                        </h3>
-                        <p className="mb-2 text-[10px] italic tracking-[0.12em] text-gold/50">
-                          {ingredient.latinName}
-                        </p>
-                        <p className="mb-3 text-[11px] tracking-wide text-ivory/35">
-                          {interpolate(dict.home.ingredients.from, {
-                            origin: ingredient.origin,
-                          })}
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {ingredient.families.map((family) => (
-                            <span
-                              key={family}
-                              className="border border-gold/15 px-2 py-0.5 text-[9px] tracking-widest text-gold/45"
-                            >
-                              {family}
-                            </span>
-                          ))}
-                        </div>
+                  {isActive ? null : (
+                    <div className="px-6 pb-7 pt-6" {...island}>
+                      <h3 className="mb-2 font-heading text-base font-normal tracking-wide text-ivory">
+                        {ingredient.name}
+                      </h3>
+                      <p className="mb-2 text-[10px] italic tracking-[0.12em] text-gold/50">
+                        {ingredient.latinName}
+                      </p>
+                      <p className="mb-3 text-[11px] tracking-wide text-ivory/35">
+                        {interpolate(dict.home.ingredients.from, {
+                          origin: ingredient.origin,
+                        })}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {ingredient.families.map((family) => (
+                          <span
+                            key={family}
+                            className="border border-gold/15 px-2 py-0.5 text-[9px] tracking-widest text-gold/45"
+                          >
+                            {family}
+                          </span>
+                        ))}
                       </div>
-                    )}
-                  </button>
+                    </div>
+                  )}
+                </button>
 
-                  <AnimatePresence initial={false}>
-                    {isActive ? (
-                      <motion.div
-                        key="detail"
-                        id={panelId}
-                        role="region"
-                        aria-label={ingredient.name}
-                        initial={closed}
-                        animate={open}
-                        exit={closed}
-                        transition={transition}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex flex-col justify-center p-8 md:p-14">
-                          <div className="flex items-start justify-between gap-6">
-                            <div>
-                              <p className="eyebrow mb-2.5">
-                                {ingredient.rarity}
-                              </p>
-                              <h3 className="mb-1 font-heading text-2xl font-normal text-ivory md:text-4xl">
-                                {ingredient.name}
-                              </h3>
-                              <p
-                                {...island}
-                                className="mb-1 text-xs italic tracking-wider text-gold/55"
-                              >
-                                {ingredient.latinName}
-                              </p>
-                              <p className="text-[11px] tracking-widest text-ivory/35">
-                                {interpolate(dict.home.ingredients.from, {
-                                  origin: ingredient.origin,
-                                })}
-                              </p>
-                            </div>
-
-                            <button
-                              type="button"
-                              aria-label={interpolate(
-                                dict.ingredientsExplorer.closeDetails,
-                                { name: ingredient.name },
-                              )}
-                              onClick={() => selectSlug(null)}
-                              className="flex h-9 w-9 flex-none items-center justify-center border border-ivory/12 text-ivory/40 transition-colors duration-300 hover:border-gold hover:text-gold"
+                <AnimatePresence initial={false}>
+                  {isActive ? (
+                    <motion.div
+                      key="detail"
+                      id={panelId}
+                      role="region"
+                      aria-label={ingredient.name}
+                      initial={closed}
+                      animate={open}
+                      exit={closed}
+                      transition={transition}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex flex-col justify-center p-8 md:p-14">
+                        <div className="flex items-start justify-between gap-6">
+                          <div>
+                            <p className="eyebrow mb-2.5">
+                              {ingredient.rarity}
+                            </p>
+                            <h3 className="mb-1 font-heading text-2xl font-normal text-ivory md:text-4xl">
+                              {ingredient.name}
+                            </h3>
+                            <p
+                              {...island}
+                              className="mb-1 text-xs italic tracking-wider text-gold/55"
                             >
-                              <X size={14} strokeWidth={1.25} aria-hidden="true" />
-                            </button>
+                              {ingredient.latinName}
+                            </p>
+                            <p className="text-[11px] tracking-widest text-ivory/35">
+                              {interpolate(dict.home.ingredients.from, {
+                                origin: ingredient.origin,
+                              })}
+                            </p>
                           </div>
 
-                          <div className="gold-line my-6" />
-
-                          <p
-                            dir="auto"
-                            className="mb-8 text-[13px] leading-loose text-ivory/50"
+                          <button
+                            type="button"
+                            aria-label={interpolate(
+                              dict.ingredientsExplorer.closeDetails,
+                              { name: ingredient.name },
+                            )}
+                            onClick={() => selectSlug(null)}
+                            className="flex h-9 w-9 flex-none items-center justify-center border border-ivory/12 text-ivory/40 transition-colors duration-300 hover:border-gold hover:text-gold"
                           >
-                            {ingredient.description}
-                          </p>
+                            <X size={14} strokeWidth={1.25} aria-hidden="true" />
+                          </button>
+                        </div>
 
-                          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-                            <div>
-                              <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/50">
-                                {dict.ingredientsExplorer.foundIn}
-                              </p>
-                              <ul className="flex flex-col gap-2">
-                                {ingredient.usedIn.map((perfume) => (
-                                  <li key={perfume.slug}>
-                                    <LocaleLink
-                                      href={`/perfume/${perfume.slug}`}
-                                      className="flex items-center gap-2 text-xs text-ivory/60 no-underline transition-colors duration-300 hover:text-gold"
-                                    >
-                                      <span
-                                        className="h-px w-4 bg-current"
-                                        aria-hidden="true"
-                                      />
-                                      {perfume.name}
-                                    </LocaleLink>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
+                        <div className="gold-line my-6" />
 
-                            <div>
-                              <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/50">
-                                {dict.ingredientsExplorer.rareFacts}
-                              </p>
-                              <ul className="flex flex-col gap-2">
-                                {ingredient.facts.map((fact) => (
-                                  <li
-                                    key={fact}
-                                    dir="auto"
-                                    className="flex items-start gap-2 text-[11px] leading-relaxed text-ivory/40"
+                        <p
+                          dir="auto"
+                          className="mb-8 text-[13px] leading-loose text-ivory/50"
+                        >
+                          {ingredient.description}
+                        </p>
+
+                        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+                          <div>
+                            <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/50">
+                              {dict.ingredientsExplorer.foundIn}
+                            </p>
+                            <ul className="flex flex-col gap-2">
+                              {ingredient.usedIn.map((product) => (
+                                <li key={product.slug}>
+                                  {/* `productHref()`, never a hardcoded
+                                      `/perfume/…`: a material used in a
+                                      candle or a body oil opens on
+                                      `/ritual/…`, and a set on its category
+                                      page. */}
+                                  <LocaleLink
+                                    href={productHref(product)}
+                                    className="flex items-center gap-2 text-xs text-ivory/60 no-underline transition-colors duration-300 hover:text-gold"
                                   >
                                     <span
-                                      className="flex-none text-gold"
+                                      className="h-px w-4 bg-current"
                                       aria-hidden="true"
-                                    >
-                                      —
-                                    </span>
-                                    {fact}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
+                                    />
+                                    {product.name}
+                                  </LocaleLink>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div>
+                            <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/50">
+                              {dict.ingredientsExplorer.rareFacts}
+                            </p>
+                            <ul className="flex flex-col gap-2">
+                              {ingredient.facts.map((fact) => (
+                                <li
+                                  key={fact}
+                                  dir="auto"
+                                  className="flex items-start gap-2 text-[11px] leading-relaxed text-ivory/40"
+                                >
+                                  <span
+                                    className="flex-none text-gold"
+                                    aria-hidden="true"
+                                  >
+                                    —
+                                  </span>
+                                  {fact}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
                         </div>
-                      </motion.div>
-                    ) : null}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
-    </>
+                      </div>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

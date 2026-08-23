@@ -281,9 +281,19 @@ export default function Nav() {
     setDrawerPath(pathname);
   }, [pathname]);
 
+  /**
+   * Open a mega menu, or close the one that is showing.
+   *
+   * The comparison is against `activeMenu`, never against the raw `menuOpen`.
+   * Navigating from a link *inside* a menu leaves `menuOpen` set while
+   * `menuPath` goes stale, so the menu renders closed with the state still
+   * saying "collections" — toggling that value would spend the first click
+   * closing something the visitor cannot see, and the menu would appear to need
+   * two clicks. Toggling what is rendered cannot drift from what is rendered.
+   */
   const handleMenuToggle = (menu: string) => {
     setMenuPath(pathname);
-    setMenuOpen((prev) => (prev === menu ? null : menu));
+    setMenuOpen(activeMenu === menu ? null : menu);
   };
 
   const handleDrawerToggle = () => {

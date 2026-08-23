@@ -58,12 +58,16 @@ export const en = {
     featuredArticleTitle: "The Alchemy of Ancient Egyptian Perfumery",
     featuredArticleAlt: "Heritage",
     /*
-     * The "Our Collections" column, in the order it is printed: the three
-     * fragrance chapters, the five olfactive cuts, then the two non-perfume
-     * ranges. New Arrival and the sets moved out to Quick Access, which is where
-     * a way *into* the catalogue belongs rather than a chapter of it.
+     * The "Our Collections" column, in the order it is printed: the whole shelf
+     * first, then the three fragrance chapters, the five olfactive cuts, and the
+     * two non-perfume ranges. New Arrival and the sets sit in Quick Access
+     * instead — a way of buying is not a chapter of the library.
      */
     collectionItems: {
+      allProducts: {
+        label: "All Products",
+        desc: "Every fragrance, ritual and set in one place",
+      },
       signature: {
         label: "Signature Collection",
         desc: "Timeless expressions of Egyptian heritage",
@@ -123,14 +127,14 @@ export const en = {
     },
     /*
      * Quick Access, in the order it is printed — the ways in. The newest work
-     * first, then the whole shelf, then the two set categories, which are ways
-     * of buying rather than chapters of the library, and Best Sellers, which
-     * crosses every collection at once. See `src/constants/navigation-pages.ts`
-     * for why Key Ingredients is no longer among them.
+     * first, then the two set categories, which are ways of buying rather than
+     * chapters of the library, and Best Sellers, which crosses every collection
+     * at once. See `src/constants/navigation-pages.ts` for why Key Ingredients
+     * is no longer among them, and why All Products moved up into Our
+     * Collections.
      */
     quickAccessItems: {
       newArrival: "New Arrival",
-      allProducts: "All Products",
       discoverySets: "Discovery Sets",
       giftSets: "Gift Sets",
       bestSellers: "Best Sellers",
@@ -659,7 +663,6 @@ export const en = {
   },
 
   ingredientsExplorer: {
-    filterByFamily: "Filter by Family",
     closeDetails: "Close {name} details",
     foundIn: "Found in",
     rareFacts: "Rare Facts",

@@ -52,15 +52,63 @@ export function toTestimonial(row: unknown): Testimonial | null {
 
 // ── Ingredient ────────────────────────────────────────────────
 
+/**
+ * `usedIn` reaches through two foreign keys rather than one.
+ *
+ * `"IngredientUsage"."productSlug"` references `"Product".slug`
+ * (`supabase/sql/0002_content.sql`), and a product's collection carries the
+ * `kind` that decides which page it opens on. Selecting that one extra column
+ * here is what lets the "Found in" list render through `productHref()` — a
+ * material used in a candle links to `/ritual/…` instead of a `/perfume/…` URL
+ * that would 404. No migration: existing tables, existing grants, one more
+ * column on an embed that was already being made.
+ */
 export const INGREDIENT_COLUMNS =
   "id, name, slug, latinName, origin, families, rarity, priceTier, description, " +
-  "facts, imageUrl, imageAlt, usedIn:IngredientUsage(name, productSlug, sortOrder)";
+  "facts, imageUrl, imageAlt, " +
+  "usedIn:IngredientUsage(name, productSlug, sortOrder, product:Product(collection:Collection(kind)))";
+
+/** Mirrors `CollectionKind` — the same closed vocabulary `catalog.ts` parses. */
+const collectionKindSchema = z.enum([
+  "FRAGRANCE",
+  "BODY",
+  "HOME",
+  "DISCOVERY",
+  "GIFT",
+]);
+
+/*
+ * PostgREST renders a to-one embed as an object on some versions and a
+ * single-element array on others, so both are accepted — the same union
+ * `catalog.ts` uses for `collection:Collection(...)`, and for the same reason:
+ * a shape difference must not blank a section.
+ */
+const embeddedKind = z.object({ kind: collectionKindSchema });
+
+const embeddedProduct = z.object({
+  collection: z.union([embeddedKind, z.array(embeddedKind).min(1)]),
+});
 
 const ingredientUsageRowSchema = z.object({
   name: z.string(),
   productSlug: z.string(),
   sortOrder: z.number().default(0),
+  /*
+   * Nullable and optional on purpose. A product hidden by RLS comes back as
+   * `null`, and a query made before this embed existed carries nothing at all;
+   * either way the usage falls back to `"FRAGRANCE"` below, which is exactly
+   * the behaviour that shipped before — a widened `select` can degrade, but it
+   * can never empty the list.
+   */
+  product: z
+    .union([embeddedProduct, z.array(embeddedProduct).min(1)])
+    .nullable()
+    .default(null),
 });
+
+function first<T>(value: T | T[]): T {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 const ingredientRowSchema = z.object({
   id: z.string(),
@@ -88,7 +136,13 @@ export function toIngredient(row: unknown): Ingredient | null {
     ...ingredient,
     usedIn: [...usedIn]
       .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((usage) => ({ name: usage.name, slug: usage.productSlug })),
+      .map((usage) => ({
+        name: usage.name,
+        slug: usage.productSlug,
+        collectionKind: usage.product
+          ? first(first(usage.product).collection).kind
+          : "FRAGRANCE",
+      })),
     image: { url: imageUrl, alt: imageAlt },
   };
 }

@@ -11,6 +11,8 @@
  * AGENTS.md §6) or a headless CMS. Either way the service layer absorbs it.
  */
 
+import type { CollectionKind } from "@/src/types/catalog";
+
 /** A reusable image reference, matching the `url` + `alt` pair used in catalog images. */
 export interface ContentImage {
   url: string;
@@ -25,19 +27,29 @@ export interface Testimonial {
   authorTitle: string;
 }
 
-/** A perfume this ingredient appears in. Denormalized until a join table exists. */
+/**
+ * A product this ingredient appears in.
+ *
+ * The shape `productHref()` takes, and deliberately so: a material can be used
+ * in a candle or a body oil as easily as in a perfume, and those open on
+ * `/ritual/[slug]` rather than `/perfume/[slug]`. Carrying the kind is what
+ * stopped the "Found in" list from linking every usage into a 404.
+ */
 export interface IngredientUsage {
   name: string;
-  /** Product slug — resolves to `/perfume/[slug]`. */
+  /** Product slug. Where it resolves to is `productHref()`'s to say. */
   slug: string;
+  /** Its collection's kind — the other half of a linkable product. */
+  collectionKind: CollectionKind;
 }
 
 /**
- * The closed olfactive vocabulary used by the `/ingredients` filter bar.
+ * The closed olfactive vocabulary an ingredient is catalogued against.
  *
- * A union rather than free-form strings: the filter chips and the badges on each
- * card read from the same seven labels, so a typo in a record must fail
- * typecheck instead of silently producing an eighth, unfilterable family.
+ * A union rather than free-form strings: the badges on each card and the scent
+ * profile pages (`src/lib/scent-profiles.ts`) read from the same seven labels,
+ * so a typo in a record must fail typecheck instead of silently producing an
+ * eighth family no profile can ever gather.
  *
  * The display order lives in the `"IngredientFamily"` table, whose rows a
  * trigger validates every `Ingredient.families` value against.

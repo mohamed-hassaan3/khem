@@ -137,36 +137,6 @@ export async function getIngredientsForProduct(
   return parseList(data as unknown[] | null, toIngredient);
 }
 
-/**
- * The olfactive filter options for `/ingredients`, in taxonomy order.
- *
- * Read from `"IngredientFamily"` rather than derived from the records: the
- * seven families are a fixed vocabulary the copy is written against, so the bar
- * must not reorder itself — or grow — when a record is added. A trigger on
- * `"Ingredient"` rejects a family that is not in this table, which is what
- * keeps the two in step.
- */
-export async function getIngredientFamilies(): Promise<string[]> {
-  const supabase = getSupabasePublic();
-  if (!supabase) return [ALL_FILTER];
-
-  const { data, error } = await supabase
-    .from("IngredientFamily")
-    .select("name")
-    .order("sortOrder");
-
-  if (error) {
-    logFailure("getIngredientFamilies", error.message);
-    return [ALL_FILTER];
-  }
-
-  const names = (data ?? [])
-    .map((row) => (typeof row.name === "string" ? row.name : null))
-    .filter((name): name is string => name !== null);
-
-  return [ALL_FILTER, ...names];
-}
-
 /** Latest journal articles, newest first. */
 export async function getLatestArticles(limit = 3): Promise<JournalArticle[]> {
   const supabase = getSupabasePublic();

@@ -58,6 +58,10 @@ export const ar: Dictionary = {
     featuredArticleTitle: "كيمياء صناعة العطور في مصر القديمة",
     featuredArticleAlt: "التراث",
     collectionItems: {
+      allProducts: {
+        label: "كل المنتجات",
+        desc: "كل العطور والطقوس والمجموعات في مكان واحد",
+      },
       signature: {
         label: "مجموعة سيغنتشر",
         desc: "تعبيرات خالدة عن التراث المصري",
@@ -112,7 +116,6 @@ export const ar: Dictionary = {
     },
     quickAccessItems: {
       newArrival: "وصل حديثًا",
-      allProducts: "كل المنتجات",
       discoverySets: "علب الاكتشاف",
       giftSets: "علب الهدايا",
       bestSellers: "الأكثر مبيعًا",
@@ -584,7 +587,6 @@ export const ar: Dictionary = {
   },
 
   ingredientsExplorer: {
-    filterByFamily: "تصفية حسب العائلة",
     closeDetails: "إغلاق تفاصيل {name}",
     foundIn: "يدخل في",
     rareFacts: "حقائق نادرة",

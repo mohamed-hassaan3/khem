@@ -42,17 +42,19 @@ export type CollectionEntry =
     };
 
 /**
- * The "Our Collections" column — the library, in two disclosures and two links.
+ * The "Our Collections" column — the library, in three links and two disclosures.
  *
  * Every collection lives under `/collections/[slug]`; body care, home fragrance
  * and the sets used to hold routes of their own, and folding them in removed the
  * second URL for the same goods.
  *
- * The column is now *the shelf*, and nothing else. Signature, Gemstone and Noir
- * sit under `fragrances`; the five olfactive cuts sit under `scentProfiles`; the
- * two non-perfume ranges close it. What was removed is what a shopper reaches
- * for rather than browses — New Arrival and the whole catalogue — which moved to
- * Quick Access below, where a way *in* belongs.
+ * The column is *the shelf*. All Products opens it — a column of chapters needs
+ * a row that means "all of it", and `/collections` is the one screen every
+ * product is reachable from, so it belongs at the top of the shelf rather than
+ * among the ways in. Signature, Gemstone and Noir sit under `fragrances`; the
+ * five olfactive cuts sit under `scentProfiles`; the two non-perfume ranges
+ * close it. What stays out is what a shopper reaches for rather than browses —
+ * New Arrival and the sets — which live in Quick Access below.
  *
  * Both groups are disclosures, not pages: there is nothing at "Fragrances" or at
  * "Scent Profiles" to navigate to that the rows underneath do not say better.
@@ -65,6 +67,7 @@ export type CollectionEntry =
  * `"Ingredient"` → `"IngredientUsage"`; see `src/lib/scent-profiles.ts`.
  */
 export const collections: ReadonlyArray<CollectionEntry> = [
+  { kind: "link", key: "allProducts", path: "/collections" },
   {
     kind: "group",
     key: "fragrances",
@@ -106,8 +109,8 @@ export const collectionLinks: ReadonlyArray<CollectionLink> = collections.flatMa
  * New Arrival opens it: the newest work is what a returning visitor came for,
  * and `/new-arrival` is an editorial showroom with the full story and note
  * pyramid of each release, which the catalogue grid has nowhere to put. All
- * Products is the whole shelf at `/collections`, the one screen every product is
- * reachable from — a column of chapters needs a row that means "all of it".
+ * Products used to sit beneath it and is now the first row of the collections
+ * column above, where the shelf it stands for belongs.
  *
  * Then the two set categories, which are ways of buying rather than chapters of
  * the library, and Best Sellers, which crosses every collection at once and so
@@ -127,7 +130,6 @@ export const quickAccess: ReadonlyArray<{
   path: string;
 }> = [
   { key: "newArrival", path: "/new-arrival" },
-  { key: "allProducts", path: "/collections" },
   { key: "discoverySets", path: "/collections/discovery" },
   { key: "giftSets", path: "/collections/gift-set" },
   { key: "bestSellers", path: "/collections/best-sellers" },
