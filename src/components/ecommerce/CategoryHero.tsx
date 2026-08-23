@@ -52,7 +52,7 @@ export default function CategoryHero({
        */}
       <div className="absolute inset-0 bg-linear-to-e from-background/97 via-background/70 to-background/30" />
 
-      <div className="relative z-1 w-full px-6 md:px-20">
+      <div className="relative z-1 w-full px-4 md:px-20">
         <div className="mx-auto max-w-350">
           <div className="max-w-2xl">
             <p className="eyebrow mb-5">{eyebrow}</p>

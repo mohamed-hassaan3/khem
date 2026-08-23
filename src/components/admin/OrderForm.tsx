@@ -169,7 +169,7 @@ export default function OrderForm({
           Customer
         </h2>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           <AdminInput
             id="customerName"
             label="Name"
@@ -290,7 +290,7 @@ export default function OrderForm({
           Totals
         </h2>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           <AdminInput
             id="shipEgp"
             label="Delivery (EGP)"

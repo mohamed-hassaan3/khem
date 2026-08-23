@@ -141,7 +141,7 @@ export default async function Home({
 
           <div className="mx-auto mb-5 h-px w-12 bg-linear-to-r from-transparent via-gold to-transparent" />
 
-          <p className="mb-14 font-heading text-xs uppercase tracking-[0.4em] text-gold/80 sm:text-sm">
+          <p className="mb-8 md:mb-14 font-heading text-xs uppercase tracking-[0.4em] text-gold/80 sm:text-sm">
             {dict.home.hero.tagline}
           </p>
 
@@ -174,9 +174,9 @@ export default async function Home({
       </section>
 
       {/* ── COLLECTIONS PREVIEW ─────────────────────── */}
-      <section className="bg-background px-6 py-24 md:px-20 md:py-36">
+      <section className="bg-background px-4 py-14 md:px-20 md:py-36">
         <div className="mx-auto max-w-7xl">
-          <Reveal className="mb-20 text-center">
+          <Reveal className="mb-10 md:mb-20 text-center">
             <p className="eyebrow mb-5">{dict.home.collections.eyebrow}</p>
             <h2 className="font-heading text-4xl font-normal text-ivory sm:text-5xl md:text-6xl">
               {dict.home.collections.heading}
@@ -200,9 +200,9 @@ export default async function Home({
       </section>
 
       {/* ── FEATURED FRAGRANCES ─────────────────────── */}
-      <section className="bg-background px-6 py-24 md:px-20 md:py-36">
+      <section className="bg-background px-4 py-14 md:px-20 md:py-36">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-16 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+          <div className="mb-10 md:mb-16 flex flex-col items-start justify-between gap-4 md:gap-6 md:flex-row md:items-end">
             <Reveal>
               <p className="eyebrow mb-4">{dict.home.essences.eyebrow}</p>
               <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl md:text-5xl">
@@ -227,7 +227,7 @@ export default async function Home({
           </div>
 
           {products.length > 0 ? (
-            <div className="grid grid-cols-1 gap-0.5 bg-border sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-0.5 bg-border lg:grid-cols-4">
               {products.map((product, index) => (
                 <Reveal key={product.id} delay={index * STAGGER_STEP}>
                   {/*
@@ -249,7 +249,7 @@ export default async function Home({
               ))}
             </div>
           ) : (
-            <p className="py-16 text-center text-sm text-ivory/40">
+            <p className="py-10 md:py-16 text-center text-sm text-ivory/40">
               {dict.home.essences.empty}
             </p>
           )}
@@ -282,7 +282,7 @@ export default async function Home({
               <p className="mb-6 text-sm leading-relaxed text-ivory/60">
                 {dict.home.story.body1}
               </p>
-              <p className="mb-10 text-sm leading-relaxed text-ivory/60">
+              <p className="mb-6 md:mb-10 text-sm leading-relaxed text-ivory/60">
                 {dict.home.story.body2}
               </p>
               <div>
@@ -299,9 +299,9 @@ export default async function Home({
       </section>
 
       {/* ── CRAFTSMANSHIP ───────────────────────────── */}
-      <section className="border-t border-border bg-background px-6 py-24 md:px-20 md:py-36">
+      <section className="border-t border-border bg-background px-4 py-14 md:px-20 md:py-36">
         <div className="mx-auto max-w-7xl">
-          <Reveal className="mb-24 text-center">
+          <Reveal className="mb-12 md:mb-24 text-center">
             <p className="eyebrow mb-5">{dict.home.craft.eyebrow}</p>
             <h2 className="mb-6 font-heading text-4xl font-normal text-ivory sm:text-5xl md:text-6xl">
               {dict.home.craft.heading}
@@ -315,7 +315,7 @@ export default async function Home({
             {craftPillars.map((pillar, index) => (
               <Reveal
                 key={pillar.id}
-                className="bg-background p-10 md:p-12"
+                className="bg-background p-6 sm:p-10 md:p-12"
                 delay={index * STAGGER_STEP}
               >
                 <p className="mb-8 font-heading text-xs tracking-[0.2em] text-gold/40">
@@ -334,7 +334,7 @@ export default async function Home({
             ))}
           </div>
 
-          <Reveal className="mt-16 text-center">
+          <Reveal className="mt-10 md:mt-16 text-center">
             <LocaleLink
               href="/craftsmanship"
               className="inline-block border border-gold/40 px-8 py-3.5 font-heading text-[11px] uppercase tracking-[0.2em] text-ivory no-underline transition-all duration-300 ease-out hover:border-gold hover:bg-gold/10"
@@ -358,7 +358,7 @@ export default async function Home({
             />
           ) : null}
           <div className="absolute inset-0 bg-linear-to-r from-background/90 via-background/50 to-transparent rtl:bg-linear-to-l" />
-          <div className="absolute inset-0 flex items-center px-6 md:px-20 lg:px-32">
+          <div className="absolute inset-0 flex items-center px-4 md:px-20 lg:px-32">
             <Reveal className="max-w-lg">
               <p className="eyebrow mb-5">{dict.home.featured.eyebrow}</p>
               <h2
@@ -373,7 +373,7 @@ export default async function Home({
               >
                 {featuredProduct.story ?? featuredProduct.description}
               </p>
-              <div className="mb-10 flex flex-wrap gap-4" {...island}>
+              <div className="mb-6 md:mb-10 flex flex-wrap gap-4" {...island}>
                 {featuredNotes.map((note) => (
                   <span
                     key={note}
@@ -397,9 +397,9 @@ export default async function Home({
       ) : null}
 
       {/* ── INGREDIENTS ─────────────────────────────── */}
-      <section className="overflow-hidden border-t border-border bg-background py-24 md:py-36">
-        <div className="mx-auto mb-16 max-w-7xl px-6 md:px-20">
-          <Reveal className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+      <section className="overflow-hidden border-t border-border bg-background py-14 md:py-36">
+        <div className="mx-auto mb-10 md:mb-16 max-w-7xl px-4 md:px-20">
+          <Reveal className="flex flex-col items-start justify-between gap-4 md:gap-6 md:flex-row md:items-end">
             <div>
               <p className="eyebrow mb-4">{dict.home.ingredients.eyebrow}</p>
               <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl md:text-5xl">
@@ -416,7 +416,7 @@ export default async function Home({
         </div>
 
         {/* Horizontal scroll rail */}
-        <div className="flex gap-0.5 overflow-x-auto pb-4 ps-6 md:ps-20">
+        <div className="flex gap-0.5 overflow-x-auto pb-4 ps-4 md:ps-20">
           {ingredients.map((ingredient) => (
             <IngredientCard
               key={ingredient.id}
@@ -428,9 +428,9 @@ export default async function Home({
       </section>
 
       {/* ── JOURNAL PREVIEW ─────────────────────────── */}
-      <section className="border-t border-border bg-surface px-6 py-24 md:px-20 md:py-36">
+      <section className="border-t border-border bg-surface px-4 py-14 md:px-20 md:py-36">
         <div className="mx-auto max-w-7xl">
-          <Reveal className="mb-16 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+          <Reveal className="mb-10 md:mb-16 flex flex-col items-start justify-between gap-4 md:gap-6 md:flex-row md:items-end">
             <div>
               <p className="eyebrow mb-4">{dict.home.journal.eyebrow}</p>
               <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl md:text-5xl">
@@ -456,25 +456,25 @@ export default async function Home({
       </section>
 
       {/* ── TESTIMONIALS ────────────────────────────── */}
-      <section className="border-t border-border bg-background px-6 py-24 md:px-20 md:py-36">
+      <section className="border-t border-border bg-background px-4 py-14 md:px-20 md:py-36">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="gold-line mx-auto mb-12" />
+          <div className="gold-line mx-auto mb-8 md:mb-12" />
           <div {...island}>
             <TestimonialCarousel testimonials={testimonials} />
           </div>
-          <div className="gold-line mx-auto mt-12" />
+          <div className="gold-line mx-auto mt-8 md:mt-12" />
         </div>
       </section>
 
       {/* ── NEWSLETTER ──────────────────────────────── */}
-      <section className="border-y border-gold/10 bg-linear-to-br from-surface to-background px-6 py-24 md:px-20">
+      <section className="border-y border-gold/10 bg-linear-to-br from-surface to-background px-4 py-14 md:py-24 md:px-20">
         <div className="mx-auto max-w-xl text-center">
           <Reveal>
             <p className="eyebrow mb-5">{dict.home.newsletter.eyebrow}</p>
             <h2 className="mb-4 font-heading text-3xl font-normal text-ivory sm:text-4xl">
               {dict.home.newsletter.heading}
             </h2>
-            <p className="mb-12 text-xs leading-relaxed text-ivory/40 sm:text-sm">
+            <p className="mb-8 md:mb-12 text-xs leading-relaxed text-ivory/40 sm:text-sm">
               {dict.home.newsletter.lede}
             </p>
             <NewsletterForm />

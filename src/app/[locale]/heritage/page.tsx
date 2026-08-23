@@ -102,7 +102,7 @@ export default async function Heritage({
         />
         <div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/70 to-background/30 rtl:bg-linear-to-l" />
 
-        <div className="relative z-10 max-w-2xl px-6 md:px-20 lg:px-30">
+        <div className="relative z-10 max-w-2xl px-4 md:px-20 lg:px-30">
           <p className="eyebrow mb-7">{dict.heritage.hero.eyebrow}</p>
           <h1 className="mb-8 font-heading text-5xl font-normal leading-none text-ivory sm:text-6xl md:text-7xl lg:text-8xl">
             {dict.heritage.hero.headingLine1}
@@ -117,15 +117,15 @@ export default async function Heritage({
       </section>
 
       {/* ── PHILOSOPHY ──────────────────────────────── */}
-      <section className="bg-background px-6 py-24 md:px-20 md:py-36">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_2fr] lg:gap-25">
+      <section className="bg-background px-4 py-14 md:px-20 md:py-36">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 md:gap-12 lg:grid-cols-[1fr_2fr] lg:gap-25">
           <Reveal>
             <p className="eyebrow mb-6">{dict.heritage.philosophy.eyebrow}</p>
             <div className="section-divider mx-0 h-25" />
           </Reveal>
 
           <Reveal delay={STAGGER_STEP * 2}>
-            <h2 className="mb-10 font-heading text-2xl font-normal leading-snug text-ivory sm:text-3xl lg:text-5xl">
+            <h2 className="mb-6 md:mb-10 font-heading text-2xl font-normal leading-snug text-ivory sm:text-3xl lg:text-5xl">
               {dict.heritage.philosophy.heading}
             </h2>
             <p className="mb-6 text-sm leading-loose text-ivory/50">
@@ -147,7 +147,7 @@ export default async function Heritage({
           sizes="100vw"
           className="object-cover brightness-40 saturate-60"
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-background/50 px-6 md:px-20">
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50 px-4 md:px-20">
           <Reveal className="text-center">
             <p className="mx-auto max-w-3xl font-heading text-lg leading-relaxed tracking-widest text-ivory sm:text-2xl md:text-4xl">
               {dict.heritage.quoteBand}
@@ -158,9 +158,9 @@ export default async function Heritage({
       </section>
 
       {/* ── TIMELINE ────────────────────────────────── */}
-      <section className="bg-background px-6 py-24 md:px-20 md:py-36">
+      <section className="bg-background px-4 py-14 md:px-20 md:py-36">
         <div className="mx-auto max-w-4xl">
-          <Reveal className="mb-16 text-center md:mb-25">
+          <Reveal className="mb-10 text-center md:mb-25">
             <p className="eyebrow mb-5">{dict.heritage.timeline.eyebrow}</p>
             <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl md:text-5xl">
               {dict.heritage.timeline.heading}
@@ -174,7 +174,7 @@ export default async function Heritage({
               aria-hidden="true"
             />
 
-            <ol className="flex flex-col gap-14 md:gap-20">
+            <ol className="flex flex-col gap-6 md:gap-20">
               {timeline.map((event, index) => {
                 // Even entries put the year before the rail and the copy after;
                 // odd entries mirror it. Below `md` every entry is rail-leading.
@@ -184,7 +184,7 @@ export default async function Heritage({
                   <li key={event.id}>
                     <Reveal
                       delay={(index % 3) * STAGGER_STEP}
-                      className="grid grid-cols-[auto_1fr] items-start gap-6 md:grid-cols-[1fr_60px_1fr] md:gap-8"
+                      className="grid grid-cols-[auto_1fr] items-start gap-4 md:grid-cols-[1fr_60px_1fr] md:gap-8"
                     >
                       {/* Before the rail — desktop only. */}
                       <div className="hidden pt-2 text-end md:block">
@@ -241,9 +241,9 @@ export default async function Heritage({
       </section>
 
       {/* ── VALUES ──────────────────────────────────── */}
-      <section className="border-t border-border bg-surface px-6 py-24 md:px-20 md:py-30">
+      <section className="border-t border-border bg-surface px-4 py-14 md:px-20 md:py-30">
         <div className="mx-auto max-w-350">
-          <Reveal className="mb-16 text-center md:mb-20">
+          <Reveal className="mb-10 text-center md:mb-20">
             <p className="eyebrow mb-5">{dict.heritage.values.eyebrow}</p>
             <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl md:text-5xl">
               {dict.heritage.values.heading}
@@ -274,10 +274,10 @@ export default async function Heritage({
       </section>
 
       {/* ── CTA ─────────────────────────────────────── */}
-      <section className="bg-background px-6 py-24 text-center md:px-20 md:py-30">
+      <section className="bg-background px-4 py-14 text-center md:px-20 md:py-30">
         <Reveal className="mx-auto max-w-xl">
           <p className="eyebrow mb-5">{dict.heritage.cta.eyebrow}</p>
-          <h2 className="mb-10 font-heading text-2xl font-normal text-ivory sm:text-3xl md:text-4xl">
+          <h2 className="mb-6 md:mb-10 font-heading text-2xl font-normal text-ivory sm:text-3xl md:text-4xl">
             {dict.heritage.cta.heading}
           </h2>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">

@@ -27,12 +27,16 @@ import type { ProductCardData } from "@/src/types/catalog";
 export interface ProductCardProps {
   product: ProductCardData;
   locale: Locale;
-  /** Drives the `sizes` hint; the grid is 1 → 2 → 4 columns. */
+  /** Drives the `sizes` hint; the grid is 2 → 2 → 4 columns. */
   sizes?: string;
 }
 
-const DEFAULT_SIZES =
-  "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw";
+/*
+ * Two columns start at the narrowest viewport, so there is no width at which a
+ * card fills the screen — the `100vw` tail this used to carry made every phone
+ * fetch an image at twice the resolution it renders.
+ */
+const DEFAULT_SIZES = "(min-width: 1024px) 25vw, 50vw";
 
 export default async function ProductCard({
   product,
@@ -130,8 +134,8 @@ export default async function ProductCard({
         ) : null}
       </div>
 
-      <div className="p-6">
-        <p className="mb-2 text-[9px] uppercase tracking-[0.2em] text-gold/60">
+      <div className="p-3 sm:p-6">
+        <p className="mb-1.5 text-[9px] uppercase tracking-[0.2em] text-gold/60 sm:mb-2">
           {interpolate(dict.product.collectionLabel, {
             name: product.collectionName,
           })}
@@ -144,17 +148,34 @@ export default async function ProductCard({
         */}
         <h3
           {...ltrIsland(locale)}
-          className="mb-1 font-heading text-base font-normal tracking-wider text-ivory"
+          className="mb-1 font-heading text-[13px] font-normal tracking-wide text-ivory sm:text-base sm:tracking-wider"
         >
           {product.name}
         </h3>
         {product.subtitle ? (
-          <p dir="auto" className="mb-4 text-xs tracking-wide text-ivory/40">
+          /*
+            Hidden on the two-up mobile grid: in a ~170px column the subtitle
+            wraps to three lines and pushes the price below the fold of the
+            card. The name and price are what a phone browser is scanning for.
+          */
+          <p
+            dir="auto"
+            className="mb-4 hidden text-xs tracking-wide text-ivory/40 sm:block"
+          >
             {product.subtitle}
           </p>
         ) : null}
 
-        <div dir="auto" className="mb-4 flex flex-wrap gap-1.5">
+        {/*
+          One pill on a phone, three from `sm` up. Done by hiding the 2nd and
+          3rd children rather than slicing the array, so the markup stays a
+          single row — a `sm:hidden` short row plus a `hidden sm:flex` full one
+          would ship the same notes to the DOM twice.
+        */}
+        <div
+          dir="auto"
+          className="mb-2.5 flex flex-wrap gap-1.5 sm:mb-4 [&>*:nth-child(n+2)]:hidden sm:[&>*:nth-child(n+2)]:inline-block"
+        >
           {pills.map((note) => (
             <span
               key={note}
@@ -168,9 +189,9 @@ export default async function ProductCard({
         <div className="flex items-center justify-between border-t border-border pt-2">
           <Price
             cents={product.priceInCents}
-            className="font-heading text-sm text-gold"
+            className="font-heading text-[13px] text-gold sm:text-sm"
           />
-          <span className="text-[10px] uppercase tracking-[0.15em] text-ivory/40">
+          <span className="text-[9px] uppercase tracking-[0.15em] text-ivory/40 sm:text-[10px]">
             {formatVolume(product.volumeMl)}
           </span>
         </div>

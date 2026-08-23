@@ -43,6 +43,21 @@
     scroll-behavior: smooth;
   }
 
+  /*
+   * `clip`, not `hidden`. `overflow: hidden` on `body` silently promotes the
+   * element to a scroll container, which kills every `position: sticky` child —
+   * and both `<Nav>` and `<StickyPurchaseBar>` depend on sticky. `clip` cuts the
+   * overflow without creating that scroll box.
+   *
+   * This is a floor, not a licence: a section that overflows on a phone is still
+   * a bug to fix at the source. It exists so one stray fixed width can never
+   * leave the whole site panning sideways.
+   */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
   body {
     background: radial-gradient(
       circle at top,
@@ -583,6 +598,58 @@
 
 [lang="ar"] .text-xs:not([dir="ltr"]):not([dir="ltr"] *) {
   font-size: 13px;
+}
+
+/*
+ * ── Mobile density & input sizing ───────────────────────────
+ *
+ * Unlayered, so it outranks Tailwind's `@layer utilities` — the same technique
+ * the `[lang="ar"]` block above uses. Capped at 767px so it stops exactly where
+ * the site's `md:` breakpoint takes over; desktop is untouched.
+ */
+@media (max-width: 767px) {
+  /*
+   * 16px is not a taste decision — it is iOS Safari's threshold. Focusing a
+   * field whose computed font-size is below 16px force-zooms the viewport, and
+   * the page then pans sideways because the layout is wider than the visual
+   * viewport it was zoomed into. The fields are 13–14px by design on desktop
+   * (`FIELD_CLASS` in the checkout, contact, comment, and admin forms), so the
+   * size is lifted here rather than in each component.
+   *
+   * Do not "tidy" this back down to match the desktop field size, and do not
+   * solve it with `maximum-scale=1` on the viewport meta instead — that removes
+   * pinch-zoom for everyone.
+   */
+  input,
+  textarea,
+  select {
+    /*
+     * `!important` earns its place here. The `[lang="ar"]` optical-size block
+     * above rescales the same 13px field classes to 15px, and its selector
+     * (attribute + class + two `:not()`s) outranks a bare element selector — so
+     * without this, Arabic fields stayed one pixel under the threshold and kept
+     * zooming. This is a functional floor, not a stylistic preference.
+     */
+    font-size: 16px !important;
+  }
+
+  /*
+   * The house button, at phone scale. The 36px side padding is a desktop
+   * measure; at 375px two of them in a row overflow. `min-height` holds the
+   * touch target at 44px even though the box is now shorter than the type
+   * would make it.
+   */
+  .btn-luxury {
+    min-height: 44px;
+    padding: 11px 20px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+
+  .note-pill {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
 }
 
 @keyframes pageIn {

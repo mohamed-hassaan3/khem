@@ -104,7 +104,7 @@ export default function CartView({ locale, catalog }: CartViewProps) {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px]">
-        <section className="border-border px-6 py-10 sm:px-8 lg:border-e lg:px-14 lg:py-14 xl:px-20">
+        <section className="border-border px-4 py-10 sm:px-8 lg:border-e lg:px-14 lg:py-14 xl:px-20">
           {resolved.map(({ product, quantity }) => (
             <CartLine
               key={product.id}

@@ -74,8 +74,7 @@ const ALL_HERO_IMAGE =
  */
 const DARK_COLLECTIONS = new Set(["noir"]);
 
-const CARD_SIZES =
-  "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
+const CARD_SIZES = "(min-width: 1024px) 33vw, 50vw";
 
 export default async function CollectionView({
   locale,
@@ -126,7 +125,7 @@ export default async function CollectionView({
         />
         <div className="absolute inset-0 bg-linear-to-t from-background via-background/40 to-transparent" />
 
-        <div className="relative z-1 w-full px-6 pb-14 md:px-20 md:pb-18">
+        <div className="relative z-1 w-full px-4 pb-14 md:px-20 md:pb-18">
           <div className="mx-auto max-w-350">
             {/*
              * A literal "/" separator points the wrong way on the Arabic tree;

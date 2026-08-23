@@ -46,7 +46,7 @@ export default function CollectionSkeleton() {
       <section className="relative flex h-[60vh] min-h-105 items-end overflow-hidden bg-surface">
         <div className="absolute inset-0 bg-linear-to-t from-background via-background/40 to-transparent" />
 
-        <div className="relative z-1 w-full px-6 pb-14 md:px-20 md:pb-18">
+        <div className="relative z-1 w-full px-4 pb-14 md:px-20 md:pb-18">
           <div className="mx-auto max-w-350">
             <Bar className="mb-8 h-3 w-40" />
             <Bar className="mb-4 h-2.5 w-28" />
@@ -56,8 +56,8 @@ export default function CollectionSkeleton() {
       </section>
 
       {/* ── DESCRIPTION + SORT BAR ──────────────────── */}
-      <section className="border-b border-border bg-background px-6 py-10 md:px-20">
-        <div className="mx-auto flex max-w-350 flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      <section className="border-b border-border bg-background px-4 py-10 md:px-20">
+        <div className="mx-auto flex max-w-350 flex-col gap-4 md:gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex w-full max-w-lg flex-col gap-3">
             <Bar className="h-2.5 w-full" />
             <Bar className="h-2.5 w-4/5" />
@@ -69,7 +69,7 @@ export default function CollectionSkeleton() {
 
       {/* ── COLLECTION TABS ─────────────────────────── */}
       <div className="border-b border-border bg-background">
-        <div className="mx-auto flex max-w-350 gap-10 overflow-hidden px-6 py-5 md:px-20">
+        <div className="mx-auto flex max-w-350 gap-5 md:gap-10 overflow-hidden px-4 py-5 md:px-20">
           {TABS.map((width) => (
             <Bar key={width} className={`h-3 shrink-0 ${width}`} />
           ))}
@@ -78,7 +78,7 @@ export default function CollectionSkeleton() {
 
       {/* ── FACET CHIPS ─────────────────────────────── */}
       <div className="border-b border-border bg-surface">
-        <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-hidden px-6 py-4 md:px-20">
+        <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-hidden px-4 py-4 md:px-20">
           {CHIPS.map((width) => (
             <Bar key={width} className={`h-9 shrink-0 ${width}`} />
           ))}
@@ -86,8 +86,8 @@ export default function CollectionSkeleton() {
       </div>
 
       {/* ── PRODUCT GRID ────────────────────────────── */}
-      <section className="bg-background px-6 pb-24 pt-16 md:px-20 md:pb-36">
-        <div className="mx-auto grid max-w-350 grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
+      <section className="bg-background px-4 pb-14 pt-10 md:px-20 md:pb-36">
+        <div className="mx-auto grid max-w-350 grid-cols-2 gap-px bg-border lg:grid-cols-3">
           {CARDS.map((index) => (
             <div key={index} className="bg-surface">
               <Bar className="aspect-3/4 w-full" />

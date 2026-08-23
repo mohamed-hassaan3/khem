@@ -60,7 +60,7 @@ export default async function Journal({
   return (
     <div className="min-h-screen bg-background text-ivory">
       {/* ── HEADER ─────────────────────────────────── */}
-      <section className="bg-background px-6 pt-24 md:px-20 md:pt-32">
+      <section className="bg-background px-4 pt-14 md:px-20 md:pt-32">
         <Reveal className="mx-auto max-w-350 pb-12">
           <p className="eyebrow mb-4">{dict.journal.eyebrow}</p>
           <h1 className="font-heading text-4xl font-normal text-ivory sm:text-6xl md:text-7xl">
@@ -71,7 +71,7 @@ export default async function Journal({
 
       {/* ── FEATURED ARTICLE ────────────────────────── */}
       {featured ? (
-        <section className="bg-background px-6 pb-16 md:px-20">
+        <section className="bg-background px-4 pb-10 md:pb-16 md:px-20">
           <Reveal className="mx-auto max-w-350">
             <LocaleLink
               href={`/journal/${featured.slug}`}

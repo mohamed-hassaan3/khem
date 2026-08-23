@@ -87,7 +87,7 @@ export default async function Stockists({
   return (
     <div className="min-h-screen bg-background text-ivory">
       {/* ── HEADER ─────────────────────────────────── */}
-      <section className="bg-background px-6 pt-24 md:px-20 md:pt-32">
+      <section className="bg-background px-4 pt-14 md:px-20 md:pt-32">
         <Reveal className="mx-auto max-w-350 pb-10">
           <p className="eyebrow mb-4">{dict.stockists.hero.eyebrow}</p>
           <h1 className="font-heading text-4xl font-normal text-ivory sm:text-5xl md:text-7xl">
@@ -104,9 +104,9 @@ export default async function Stockists({
       />
 
       {/* ── PARTNERS ────────────────────────────────── */}
-      <section className="border-t border-border bg-background px-6 py-24 md:px-20 md:py-30">
+      <section className="border-t border-border bg-background px-4 py-14 md:px-20 md:py-30">
         <div className="mx-auto max-w-350">
-          <Reveal className="mb-16">
+          <Reveal className="mb-10 md:mb-16">
             <p className="eyebrow mb-4">{dict.stockists.partners.eyebrow}</p>
             <h2 className="font-heading text-2xl font-normal text-ivory sm:text-3xl md:text-4xl">
               {dict.stockists.partners.heading}
@@ -138,7 +138,7 @@ export default async function Stockists({
       </section>
 
       {/* ── WHOLESALE ENQUIRIES ─────────────────────── */}
-      <section className="border-t border-border bg-surface px-6 py-24 text-center md:px-20 md:py-30">
+      <section className="border-t border-border bg-surface px-4 py-14 text-center md:px-20 md:py-30">
         <Reveal className="mx-auto max-w-xl">
           <p className="eyebrow mb-5">{dict.stockists.wholesale.eyebrow}</p>
           <h2 className="mb-5 font-heading text-2xl font-normal text-ivory sm:text-3xl md:text-4xl">
@@ -184,7 +184,7 @@ function StockistFeature({
         />
       </div>
 
-      <div className="flex flex-col justify-center px-8 py-14 md:px-14">
+      <div className="flex flex-col justify-center px-4 py-14 md:px-14">
         <div className="mb-5">
           <StockistBadge
             label={labels.types[stockist.type]}

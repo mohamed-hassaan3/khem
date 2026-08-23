@@ -51,7 +51,7 @@ export default function NewArrivalHero({
       <div className="absolute inset-0 bg-linear-to-t from-background via-background/35 to-background/65" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,var(--color-background)_100%)] opacity-60" />
 
-      <div className="relative z-1 w-full px-6 text-center md:px-20">
+      <div className="relative z-1 w-full px-4 text-center md:px-20">
         <div className="mx-auto max-w-3xl">
           <p className="eyebrow mb-6">{eyebrow}</p>
 
@@ -67,7 +67,7 @@ export default function NewArrivalHero({
             {description}
           </p>
 
-          <p className="mt-10 font-heading text-[11px] uppercase tracking-[0.3em] text-gold/60">
+          <p className="mt-6 md:mt-10 font-heading text-[11px] uppercase tracking-[0.3em] text-gold/60">
             {count}
           </p>
         </div>

@@ -348,7 +348,7 @@ export default function CheckoutView({
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="px-6 py-10 sm:px-8 lg:px-14 lg:py-12 xl:px-20"
+          className="px-4 py-10 sm:px-8 lg:px-14 lg:py-12 xl:px-20"
         >
           {/*
            * Frozen once an order exists. A `fieldset[disabled]` rather than a
@@ -450,7 +450,7 @@ export default function CheckoutView({
             <button
               type="submit"
               disabled={isPending}
-              className="btn-luxury btn-luxury-fill mt-10 w-full justify-center disabled:cursor-not-allowed disabled:opacity-45"
+              className="btn-luxury btn-luxury-fill mt-6 md:mt-10 w-full justify-center disabled:cursor-not-allowed disabled:opacity-45"
             >
               {isPending
                 ? dict.checkout.submit.working

@@ -64,7 +64,7 @@ export default async function About({
         />
         <div className="absolute inset-0 bg-linear-to-r from-background/90 via-background/60 to-transparent rtl:bg-linear-to-l" />
 
-        <div className="relative z-10 max-w-2xl px-6 md:px-20 lg:px-30">
+        <div className="relative z-10 max-w-2xl px-4 md:px-20 lg:px-30">
           <p className="eyebrow mb-5">{dict.about.hero.eyebrow}</p>
           <h1 className="mb-8 font-heading text-5xl font-normal leading-none text-ivory sm:text-6xl md:text-7xl lg:text-8xl">
             {dict.about.hero.headingLine1}
@@ -79,8 +79,8 @@ export default async function About({
       </section>
 
       {/* ── FOUNDERS ────────────────────────────────── */}
-      <section className="bg-background px-6 py-24 md:px-20 md:py-36">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
+      <section className="bg-background px-4 py-14 md:px-20 md:py-36">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 md:gap-12 lg:grid-cols-2 lg:gap-20">
           <Reveal className="relative aspect-4/5 w-full overflow-hidden">
             <Image
               src="https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=700&h=800&fit=crop&auto=format"
@@ -100,7 +100,7 @@ export default async function About({
             <p className="mb-5 text-sm leading-loose text-ivory/50">
               {dict.about.founders.body1}
             </p>
-            <p className="mb-10 text-sm leading-loose text-ivory/50">
+            <p className="mb-6 md:mb-10 text-sm leading-loose text-ivory/50">
               {dict.about.founders.body2}
             </p>
 
@@ -146,9 +146,9 @@ export default async function About({
       </section>
 
       {/* ── CTA ─────────────────────────────────────── */}
-      <section className="bg-background px-6 py-24 text-center md:px-20 md:py-30">
+      <section className="bg-background px-4 py-14 text-center md:px-20 md:py-30">
         <Reveal className="mx-auto max-w-xl">
-          <h2 className="mb-10 font-heading text-2xl font-normal text-ivory sm:text-3xl md:text-4xl">
+          <h2 className="mb-6 md:mb-10 font-heading text-2xl font-normal text-ivory sm:text-3xl md:text-4xl">
             {dict.about.cta.heading}
           </h2>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">

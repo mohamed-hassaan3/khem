@@ -53,9 +53,9 @@ export default async function ProductComments({
   const copy = dict.product.comments;
 
   return (
-    <section className="border-t border-border px-6 py-24 md:px-20 md:py-32">
+    <section className="border-t border-border px-4 py-14 md:px-20 md:py-32">
       <div className="mx-auto max-w-200">
-        <Reveal className="mb-12">
+        <Reveal className="mb-8 md:mb-12">
           <p className="eyebrow mb-4">{copy.eyebrow}</p>
           <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl">
             {copy.heading}
@@ -79,7 +79,7 @@ export default async function ProductComments({
         />
 
         {comments.length > 0 ? (
-          <div className="mt-14">
+          <div className="mt-8 md:mt-14">
             {comments.map((comment) => (
               <CommentRow
                 key={comment.id}

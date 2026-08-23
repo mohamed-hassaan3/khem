@@ -120,7 +120,7 @@ export default async function PerfumePage({
       <section className="grid grid-cols-1 lg:grid-cols-2">
         <ProductGallery images={gallery} productName={product.name} />
 
-        <div className="flex max-w-2xl flex-col gap-16 px-6 py-14 sm:px-8 lg:px-14 lg:py-20 xl:px-20">
+        <div className="flex max-w-2xl flex-col gap-7 md:gap-16 px-4 py-14 sm:px-8 lg:px-14 lg:py-20 xl:px-20">
           <ProductPurchase
             product={product}
             collectionName={collection?.name ?? "KHEM"}

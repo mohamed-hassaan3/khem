@@ -227,7 +227,7 @@ export default function CookieConsent() {
                 >
                   <div className="mt-7 divide-y divide-white/6 border-y border-white/6">
                     {/* Essential — stated, never offered as a choice. */}
-                    <div className="flex items-start justify-between gap-6 py-4">
+                    <div className="flex items-start justify-between gap-4 md:gap-6 py-4">
                       <div>
                         <p className="font-heading text-[0.72rem] uppercase tracking-[0.18em] text-ivory">
                           {copy.categories.essential.name}
@@ -244,7 +244,7 @@ export default function CookieConsent() {
                     {CONSENT_CATEGORIES.map((category) => (
                       <div
                         key={category}
-                        className="flex items-start justify-between gap-6 py-4"
+                        className="flex items-start justify-between gap-4 md:gap-6 py-4"
                       >
                         <div>
                           <p

@@ -366,7 +366,7 @@ export default function Nav() {
             : "border-b border-transparent bg-transparent",
         ].join(" ")}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-9">
+        <div className="flex min-w-0 flex-1 items-center gap-5 md:gap-9">
           <button
             type="button"
             aria-label={drawerOpen ? dict.nav.closeMenu : dict.nav.openMenu}
@@ -393,7 +393,7 @@ export default function Nav() {
             </span>
           </button>
 
-          <div className="hidden items-center gap-9 lg:flex">
+          <div className="hidden items-center gap-5 md:gap-9 lg:flex">
             <button
               type="button"
               className={`nav-link ${activeMenu === "collections" ? "active" : ""}`}
@@ -552,7 +552,7 @@ export default function Nav() {
           </button>
         </div>
 
-        <div className="flex flex-col gap-10 px-6 pb-14">
+        <div className="flex flex-col gap-5 md:gap-10 px-6 pb-14">
           <section>
             <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
             <CollectionsList
@@ -715,7 +715,7 @@ export default function Nav() {
         className={`mega-menu hidden lg:block ${activeMenu === "collections" ? "open" : ""}`}
         onMouseLeave={closeMenu}
       >
-        <div className="mx-auto grid max-w-300 grid-cols-3 gap-12">
+        <div className="mx-auto grid max-w-300 grid-cols-3 gap-6 md:gap-12">
           <div>
             <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
             <CollectionsList
@@ -772,7 +772,7 @@ export default function Nav() {
         className={`mega-menu hidden lg:block ${activeMenu === "world" ? "open" : ""}`}
         onMouseLeave={closeMenu}
       >
-        <div className="mx-auto grid max-w-300 grid-cols-3 gap-12">
+        <div className="mx-auto grid max-w-300 grid-cols-3 gap-6 md:gap-12">
           <div>
             <p className="eyebrow mb-6">{dict.nav.discover}</p>
             <div className="flex flex-col gap-5">

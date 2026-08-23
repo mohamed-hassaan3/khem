@@ -92,7 +92,7 @@ export default function CartLine({
           {formatVolume(product.volumeMl)}
         </p>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-3">
           <QuantityStepper
             value={quantity}
             max={maxQuantity}

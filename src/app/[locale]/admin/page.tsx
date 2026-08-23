@@ -290,7 +290,7 @@ export default async function AdminDashboardPage({
       ) : null}
 
       {/* ── Catalog ──────────────────────────────────────── */}
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-6 md:mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         <Tile
           label="Collections"
           value={collections.length}

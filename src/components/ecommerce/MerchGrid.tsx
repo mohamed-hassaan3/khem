@@ -71,7 +71,7 @@ export default function MerchGrid({
           aria-label={dict.homeFragrance.filterLabel}
           className="border-b border-border bg-surface"
         >
-          <div className="mx-auto flex max-w-350 gap-9 overflow-x-auto px-6 md:px-20">
+          <div className="mx-auto flex max-w-350 gap-5 md:gap-9 overflow-x-auto px-4 md:px-20">
             <FilterTab
               label={dict.homeFragrance.filterAll}
               isActive={active === ALL}
@@ -91,14 +91,14 @@ export default function MerchGrid({
         </nav>
       ) : null}
 
-      <section className="bg-background px-6 py-20 md:px-20 md:pb-32">
+      <section className="bg-background px-4 py-12 md:px-20 md:pb-32">
         <div className="mx-auto max-w-350">
           {visible.length === 0 ? (
-            <p className="py-24 text-center text-[13px] leading-loose text-ivory/35">
+            <p className="py-14 md:py-24 text-center text-[13px] leading-loose text-ivory/35">
               {emptyLabel}
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-px bg-border lg:grid-cols-3">
               {visible.map((product, index) => (
                 <Reveal key={product.id} delay={(index % 3) * 0.1}>
                   <MerchCard product={product} locale={locale} />

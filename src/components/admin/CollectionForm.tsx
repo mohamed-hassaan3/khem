@@ -126,7 +126,7 @@ export default function CollectionForm({
         <AdminNotice tone={result.ok ? "success" : "error"}>{result.message}</AdminNotice>
       ) : null}
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
         <AdminInput
           id="name"
           label="Name"
@@ -182,7 +182,7 @@ export default function CollectionForm({
           Banner image
         </p>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           <AdminInput
             id="bannerUrl"
             label="Banner URL"
@@ -213,7 +213,7 @@ export default function CollectionForm({
           Card image
         </p>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           <AdminInput
             id="cardUrl"
             label="Card URL"
@@ -235,7 +235,7 @@ export default function CollectionForm({
         </div>
       </fieldset>
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
         <AdminSelect
           id="kind"
           label="Kind"

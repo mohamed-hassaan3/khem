@@ -22,7 +22,7 @@ export function AdminPageHeader({
   action?: ReactNode;
 }) {
   return (
-    <header className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
+    <header className="mb-6 md:mb-10 flex flex-wrap items-end justify-between gap-4 md:gap-6 border-b border-border pb-6">
       {/*
         `min-w-0` so a long order number wraps instead of widening the panel
         past the viewport — the flex item would otherwise take its content's
@@ -172,7 +172,7 @@ export function AdminEmpty({
   action?: ReactNode;
 }) {
   return (
-    <div className="border border-border px-8 py-16 text-center">
+    <div className="border border-border px-4 md:px-8 py-10 md:py-16 text-center">
       <p className="text-[12px] tracking-wide text-ivory/35">{message}</p>
       {action ? <div className="mt-6 flex justify-center">{action}</div> : null}
     </div>

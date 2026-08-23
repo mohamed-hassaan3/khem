@@ -37,7 +37,7 @@ export default function RatingSummary({
 
   return (
     <div
-      className="mb-12 flex items-center gap-5 border-s border-gold/30 ps-5"
+      className="mb-8 md:mb-12 flex items-center gap-5 border-s border-gold/30 ps-5"
       aria-label={copy.ratingSummaryLabel}
     >
       <span className="font-heading text-3xl leading-none tabular-nums text-gold">

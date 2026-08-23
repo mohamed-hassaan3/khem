@@ -31,8 +31,11 @@ export interface DiscoverySetCardProps {
   sizes?: string;
 }
 
-const DEFAULT_SIZES =
-  "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
+/*
+ * Two columns from the narrowest viewport up — no breakpoint renders this card
+ * at full width any more, so the old `100vw` tail only oversized the download.
+ */
+const DEFAULT_SIZES = "(min-width: 1024px) 33vw, 50vw";
 
 export default function DiscoverySetCard({
   product,
@@ -90,23 +93,29 @@ export default function DiscoverySetCard({
         />
       </div>
 
-      <div className="flex flex-1 flex-col p-8">
+      <div className="flex flex-1 flex-col p-3.5 sm:p-8">
         <div {...island} className="flex flex-1 flex-col">
           {product.format ? (
-            <p className="eyebrow mb-3 text-[9px]">{product.format}</p>
+            <p className="eyebrow mb-2 text-[9px] sm:mb-3">{product.format}</p>
           ) : null}
 
-          <h2 className="mb-5 font-heading text-xl font-normal leading-snug text-ivory sm:text-2xl">
+          <h2 className="mb-3 font-heading text-sm font-normal leading-snug text-ivory sm:mb-5 sm:text-xl md:text-2xl">
             {product.name}
           </h2>
 
-          <p className="mb-7 flex-1 text-xs leading-loose text-ivory/45">
+          {/*
+            The contents list below is what sells a boxed set, so on the two-up
+            mobile grid it keeps the space and the prose gives it up. The
+            wrapping div holds `flex-1`, so the price and button still
+            bottom-align across a row.
+          */}
+          <p className="mb-7 hidden flex-1 text-xs leading-loose text-ivory/45 sm:block">
             {product.description}
           </p>
 
           {product.includes.length > 0 ? (
-            <div className="mb-8">
-              <p className="eyebrow mb-3 text-[9px] text-gold/50">
+            <div className="mb-5 sm:mb-8">
+              <p className="eyebrow mb-2 text-[9px] text-gold/50 sm:mb-3">
                 {dict.discovery.includes}
               </p>
 
@@ -114,7 +123,7 @@ export default function DiscoverySetCard({
                 {product.includes.map((entry) => (
                   <li
                     key={entry}
-                    className="mb-2 flex items-center gap-2.5 text-[11px] tracking-wide text-ivory/50"
+                    className="mb-1.5 flex items-center gap-2 text-[10px] tracking-wide text-ivory/50 sm:mb-2 sm:gap-2.5 sm:text-[11px]"
                   >
                     <Check
                       size={12}
@@ -130,7 +139,7 @@ export default function DiscoverySetCard({
           ) : null}
         </div>
 
-        <p className="mb-5 font-heading text-2xl tabular-nums text-gold">
+        <p className="mb-3 font-heading text-base tabular-nums text-gold sm:mb-5 sm:text-2xl">
           {formatPrice(product.priceInCents)}
         </p>
 

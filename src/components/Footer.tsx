@@ -77,8 +77,8 @@ export default async function Footer({ locale }: { locale: Locale }) {
   ];
 
   return (
-    <footer className="border-t border-[var(--color-border)] bg-background pt-20">
-      <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-16 px-6 pb-20 md:px-20 lg:grid-cols-[2fr_1fr_1fr_1fr] lg:gap-16">
+    <footer className="border-t border-[var(--color-border)] bg-background pt-12 md:pt-20">
+      <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-7 md:gap-16 px-4 pb-12 md:pb-20 md:px-20 lg:grid-cols-[2fr_1fr_1fr_1fr] lg:gap-16">
         <div>
           <LocaleLink href="/" className="mb-7 inline-block no-underline">
             {/*
@@ -162,7 +162,7 @@ export default async function Footer({ locale }: { locale: Locale }) {
         <div>
           <p className="eyebrow mb-7">{dict.footer.myAccount}</p>
           <nav
-            className="mb-10 flex flex-col gap-3.5"
+            className="mb-6 md:mb-10 flex flex-col gap-3.5"
             aria-label={dict.footer.myAccount}
           >
             {accountLinks.map((item) => (
@@ -194,11 +194,11 @@ export default async function Footer({ locale }: { locale: Locale }) {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-[1400px] flex-col items-start justify-between gap-4 border-t border-[var(--color-border)] px-6 py-6 md:flex-row md:items-center md:px-20">
+      <div className="mx-auto flex max-w-[1400px] flex-col items-start justify-between gap-4 border-t border-[var(--color-border)] px-4 py-6 md:flex-row md:items-center md:px-20">
         <p className="text-[11px] tracking-[0.1em] text-ivory/25">
           {interpolate(dict.footer.rights, { year })}
         </p>
-        <div className="flex flex-wrap gap-7">
+        <div className="flex flex-wrap gap-4 md:gap-7">
           {legalLinks.map((item) => (
             <LocaleLink
               key={item.href}

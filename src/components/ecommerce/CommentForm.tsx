@@ -233,7 +233,7 @@ export default function CommentForm({
           />
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="mt-5 flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-3">
           <button
             type="submit"
             disabled={!canSubmit}
@@ -281,7 +281,7 @@ export default function CommentForm({
       {/* Only what this visitor just wrote, and only until the server list
           carries it. Nothing renders here on a first visit. */}
       {pending.length > 0 ? (
-        <div className="mt-14">
+        <div className="mt-8 md:mt-14">
           {pending.map((comment) => (
             <CommentRow
               key={comment.id}

@@ -45,7 +45,7 @@ export default function LegalHero({
       />
       <div aria-hidden="true" className="grain absolute inset-0" />
 
-      <Reveal className="relative z-10 max-w-3xl px-6 pb-16 md:px-20 md:pb-20">
+      <Reveal className="relative z-10 max-w-3xl px-4 pb-10 md:px-20 md:pb-20">
         <p className="eyebrow mb-5">{eyebrow}</p>
         <h1 className="mb-6 font-heading text-4xl font-normal leading-tight text-ivory sm:text-5xl md:text-6xl">
           {title}

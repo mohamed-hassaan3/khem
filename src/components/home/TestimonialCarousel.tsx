@@ -89,7 +89,7 @@ export default function TestimonialCarousel({
         })}
       </div>
 
-      <div className="mt-12 flex justify-center gap-2">
+      <div className="mt-8 md:mt-12 flex justify-center gap-2">
         {testimonials.map((testimonial, index) => (
           <button
             key={testimonial.id}

@@ -119,8 +119,8 @@ export default function LegalDocumentBody({
   contactEmail,
 }: LegalDocumentBodyProps) {
   return (
-    <div className="mx-auto max-w-350 px-6 py-20 md:px-20 md:py-28">
-      <div className="grid grid-cols-1 gap-14 lg:grid-cols-[260px_1fr] lg:gap-24">
+    <div className="mx-auto max-w-350 px-4 py-12 md:px-20 md:py-28">
+      <div className="grid grid-cols-1 gap-6 md:gap-14 lg:grid-cols-[260px_1fr] lg:gap-24">
         {/* ── CONTENTS INDEX ──────────────────────── */}
         <nav
           aria-label="Contents"
@@ -152,7 +152,7 @@ export default function LegalDocumentBody({
             <section
               key={section.id}
               id={section.id}
-              className="mb-14 scroll-mt-30 border-t border-border pt-12 first:border-t-0 first:pt-0"
+              className="mb-8 md:mb-14 scroll-mt-30 border-t border-border pt-12 first:border-t-0 first:pt-0"
             >
               <Reveal delay={index * SECTION_STAGGER}>
                 <p className="mb-4 font-heading text-[10px] tracking-[0.25em] text-gold/40">

@@ -43,8 +43,12 @@ export interface MerchCardProps {
   sizes?: string;
 }
 
-const DEFAULT_SIZES =
-  "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
+/*
+ * Two columns from the narrowest viewport up, so no breakpoint renders this
+ * card at full width — the old `100vw` tail had phones fetching an image at
+ * twice the resolution the slot uses.
+ */
+const DEFAULT_SIZES = "(min-width: 1024px) 33vw, 50vw";
 
 export default function MerchCard({
   product,
@@ -121,16 +125,21 @@ export default function MerchCard({
         />
       </LocaleLink>
 
-      <div className="flex flex-1 flex-col p-7">
+      <div className="flex flex-1 flex-col p-3.5 sm:p-7">
         <div dir="auto" className="flex flex-1 flex-col">
-          <p className="eyebrow mb-2.5 text-[9px] text-gold/55">
+          {/* Format plus subtitle runs to three lines in a ~170px column and
+              starts to outweigh the name; two is the cap on phones only. */}
+          <p className="eyebrow mb-1.5 line-clamp-2 text-[9px] text-gold/55 sm:mb-2.5 sm:line-clamp-none">
             {product.format ?? product.collectionName}
             {product.subtitle ? ` · ${product.subtitle}` : ""}
           </p>
 
           {/* Latin proper noun in both trees. The heading carries the link, so
               the photograph above can stay out of the tab order. */}
-          <h3 {...island} className="mb-2.5 font-heading text-lg font-normal">
+          <h3
+            {...island}
+            className="mb-1.5 font-heading text-[13px] font-normal sm:mb-2.5 sm:text-lg"
+          >
             <LocaleLink
               href={href}
               className="text-ivory no-underline transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
@@ -139,16 +148,22 @@ export default function MerchCard({
             </LocaleLink>
           </h3>
 
-          <p className="mb-6 flex-1 text-xs leading-loose text-ivory/40">
+          {/*
+            Hidden on the two-up mobile grid — three lines of prose in a ~170px
+            column would push the buy button off the bottom of the card. The
+            wrapping div keeps `flex-1`, so the button still bottom-aligns
+            across a row of cards with names of different lengths.
+          */}
+          <p className="mb-6 hidden flex-1 text-xs leading-loose text-ivory/40 sm:block">
             {product.description}
           </p>
         </div>
 
-        <div className="mb-5 flex items-center justify-between border-t border-border pt-4">
-          <span className="font-heading text-lg tabular-nums text-gold">
+        <div className="mb-3 flex items-center justify-between border-t border-border pt-3 sm:mb-5 sm:pt-4">
+          <span className="font-heading text-[13px] tabular-nums text-gold sm:text-lg">
             {formatPrice(product.priceInCents)}
           </span>
-          <span className="text-[10px] uppercase tracking-[0.1em] text-ivory/30">
+          <span className="text-[9px] uppercase tracking-[0.1em] text-ivory/30 sm:text-[10px]">
             {formatVolume(product.volumeMl)}
           </span>
         </div>

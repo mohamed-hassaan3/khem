@@ -68,14 +68,14 @@ export default function ArticleBody({ article, locale }: ArticleBodyProps) {
   const firstParagraph = blocks.findIndex((block) => block.kind === "paragraph");
 
   return (
-    <section className="mx-auto max-w-3xl px-6 py-20 md:py-28" {...island}>
+    <section className="mx-auto max-w-3xl px-4 md:px-6 py-12 md:py-28" {...island}>
       {/* ── LEAD ────────────────────────────────────── */}
       <Reveal>
         <p className="font-heading text-lg italic leading-relaxed text-ivory/70 md:text-xl">
           <Inline text={article.excerpt} />
         </p>
         <div
-          className="mt-10 mb-12 h-px w-full bg-linear-to-r from-gold/40 via-border to-transparent rtl:bg-linear-to-l"
+          className="mt-6 md:mt-10 mb-8 md:mb-12 h-px w-full bg-linear-to-r from-gold/40 via-border to-transparent rtl:bg-linear-to-l"
           aria-hidden="true"
         />
       </Reveal>
@@ -90,7 +90,7 @@ export default function ArticleBody({ article, locale }: ArticleBodyProps) {
           return (
             <h2
               key={key}
-              className="mt-16 mb-6 font-heading text-xl font-normal leading-snug text-ivory md:text-2xl"
+              className="mt-10 md:mt-16 mb-6 font-heading text-xl font-normal leading-snug text-ivory md:text-2xl"
             >
               <Inline text={block.text} />
             </h2>
@@ -101,7 +101,7 @@ export default function ArticleBody({ article, locale }: ArticleBodyProps) {
           return (
             <blockquote
               key={key}
-              className="my-14 border-s border-gold/40 ps-8 font-heading text-xl italic leading-relaxed text-champagne md:text-2xl"
+              className="my-8 md:my-14 border-s border-gold/40 ps-8 font-heading text-xl italic leading-relaxed text-champagne md:text-2xl"
             >
               <Inline text={block.text} />
             </blockquote>

@@ -62,13 +62,13 @@ export default async function Contact({
   return (
     <div className="min-h-screen bg-background text-ivory">
       {/* ── HEADER ─────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b border-border px-6 py-24 md:px-20 md:py-30">
+      <section className="relative overflow-hidden border-b border-border px-4 py-14 md:px-20 md:py-30">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,_color-mix(in_srgb,var(--color-gold)_4%,transparent)_0%,_transparent_60%)]"
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto grid max-w-350 grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
+        <div className="relative mx-auto grid max-w-350 grid-cols-1 items-center gap-6 md:gap-12 lg:grid-cols-2 lg:gap-20">
           <Reveal>
             <p className="eyebrow mb-5">{dict.contact.hero.eyebrow}</p>
             <h1 className="mb-7 font-heading text-4xl font-normal leading-tight text-ivory sm:text-5xl md:text-6xl lg:text-7xl">
@@ -86,7 +86,7 @@ export default async function Contact({
 
           <Reveal delay={STAGGER_STEP * 2}>
             {/* Channel labels and values come from the database — English only. */}
-            <dl className="flex flex-col gap-8" {...island}>
+            <dl className="flex flex-col gap-5 md:gap-8" {...island}>
               {channels.map((channel) => (
                 <div
                   key={channel.id}
@@ -117,11 +117,11 @@ export default async function Contact({
       </section>
 
       {/* ── FORM + ASIDE ────────────────────────────── */}
-      <section className="px-6 py-24 md:px-20 md:py-30">
-        <div className="mx-auto grid max-w-350 grid-cols-1 gap-12 lg:grid-cols-[1fr_500px] lg:gap-25">
+      <section className="px-4 py-14 md:px-20 md:py-30">
+        <div className="mx-auto grid max-w-350 grid-cols-1 gap-6 md:gap-12 lg:grid-cols-[1fr_500px] lg:gap-25">
           <Reveal>
             <p className="eyebrow mb-6">{dict.contact.form.eyebrow}</p>
-            <h2 className="mb-12 font-heading text-2xl font-normal leading-snug text-ivory sm:text-3xl md:text-4xl">
+            <h2 className="mb-8 md:mb-12 font-heading text-2xl font-normal leading-snug text-ivory sm:text-3xl md:text-4xl">
               {dict.contact.form.headingLine1}
               <br />
               {dict.contact.form.headingLine2}
@@ -151,7 +151,7 @@ export default async function Contact({
 
             <Reveal
               delay={STAGGER_STEP}
-              className="border border-border bg-surface p-10 md:px-12 md:py-10"
+              className="border border-border bg-surface p-6 md:p-10 md:px-12 md:py-10"
             >
               <p className="eyebrow mb-6">{dict.contact.social.eyebrow}</p>
               <ul className="flex flex-col">

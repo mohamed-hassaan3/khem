@@ -31,7 +31,7 @@ export default function EmptyState({
   href,
 }: EmptyStateProps) {
   return (
-    <section className="flex min-h-[60vh] items-center justify-center px-6 py-24">
+    <section className="flex min-h-[60vh] items-center justify-center px-4 md:px-6 py-14 md:py-24">
       <div className="max-w-md text-center">
         <Icon
           size={64}
@@ -44,7 +44,7 @@ export default function EmptyState({
           {heading}
         </h2>
 
-        <p className="mb-10 text-[13px] leading-loose text-ivory/40">{body}</p>
+        <p className="mb-6 md:mb-10 text-[13px] leading-loose text-ivory/40">{body}</p>
 
         <LocaleLink href={href} className="btn-luxury btn-luxury-fill">
           {cta}

@@ -59,8 +59,8 @@ export default async function Ingredients({
         />
         <div className="absolute inset-0 bg-linear-to-br from-background/95 via-background/70 to-background/40" />
 
-        <div className="relative z-10 max-w-3xl px-6 md:px-20 lg:px-30">
-          <p className="eyebrow mb-12">{dict.ingredients.hero.eyebrow}</p>
+        <div className="relative z-10 max-w-3xl px-4 md:px-20 lg:px-30">
+          <p className="eyebrow mb-8 md:mb-12">{dict.ingredients.hero.eyebrow}</p>
           <h1 className="mb-8 font-heading text-5xl font-normal leading-none text-ivory sm:text-7xl md:text-8xl lg:text-9xl">
             {dict.ingredients.hero.headingLine1}
             <br />
@@ -79,7 +79,7 @@ export default async function Ingredients({
       <IngredientExplorer ingredients={ingredients} />
 
       {/* ── CTA ─────────────────────────────────────── */}
-      <section className="border-t border-border bg-surface px-6 py-24 text-center md:px-20 md:py-30">
+      <section className="border-t border-border bg-surface px-4 py-14 text-center md:px-20 md:py-30">
         <Reveal className="mx-auto max-w-xl">
           <p className="eyebrow mb-5">{dict.ingredients.cta.eyebrow}</p>
           <h2 className="mb-5 font-heading text-2xl font-normal text-ivory sm:text-3xl md:text-4xl">

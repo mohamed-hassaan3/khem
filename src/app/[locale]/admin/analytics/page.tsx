@@ -89,7 +89,7 @@ export default async function AdminAnalyticsPage({
           <SalesChart points={revenuePoints} kind="area" unit="egp" />
         </ChartPanel>
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 xl:grid-cols-2">
           <ChartPanel
             title={`Units sold · last ${range} days`}
             figure={String(totals.units)}
@@ -128,7 +128,7 @@ export default async function AdminAnalyticsPage({
           {channels.length === 0 ? (
             <AdminEmpty message="No orders in this window." />
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
               {channels.map((row) => {
                 const share =
                   totalOrders > 0

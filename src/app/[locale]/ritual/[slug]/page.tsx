@@ -134,7 +134,7 @@ export default async function RitualPage({
       <section className="grid grid-cols-1 lg:grid-cols-2">
         <ProductGallery images={gallery} productName={product.name} />
 
-        <div className="flex max-w-2xl flex-col gap-16 px-6 py-14 sm:px-8 lg:px-14 lg:py-20 xl:px-20">
+        <div className="flex max-w-2xl flex-col gap-7 md:gap-16 px-4 py-14 sm:px-8 lg:px-14 lg:py-20 xl:px-20">
           {/* The one thing this page says that the perfume page does not: which
               of the two ranges the object belongs to. */}
           <p className="eyebrow -mb-10 text-gold/55">

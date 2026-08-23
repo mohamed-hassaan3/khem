@@ -101,7 +101,7 @@ export default async function AdminOrderPage({
         description={`${label(order.channel)} · placed ${stamp(order.placedAt)}`}
       />
 
-      <div className="grid gap-8 xl:grid-cols-[1fr_320px]">
+      <div className="grid gap-5 md:gap-8 xl:grid-cols-[1fr_320px]">
         <div className="space-y-8">
           <AdminTable headers={["Product", "Unit price", "Qty", "Line total"]}>
             {order.lines.map((line) => (

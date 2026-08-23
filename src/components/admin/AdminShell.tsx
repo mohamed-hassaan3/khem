@@ -206,7 +206,7 @@ export default function AdminShell({
           </p>
         </div>
 
-        <nav className="mt-10 flex flex-col gap-1 px-4">
+        <nav className="mt-6 md:mt-10 flex flex-col gap-1 px-4">
           {SECTIONS.map((section) => {
             const active = isActive(section.path);
             const Icon = section.icon;
@@ -231,7 +231,7 @@ export default function AdminShell({
           })}
         </nav>
 
-        <div className="mt-10 border-t border-border px-8 pt-6">
+        <div className="mt-6 md:mt-10 border-t border-border px-8 pt-6">
           <p className="font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/25">
             Signed in as
           </p>
@@ -249,7 +249,7 @@ export default function AdminShell({
         </div>
       </aside>
 
-      <main className="min-w-0 px-5 pb-24 sm:px-8 lg:px-14">
+      <main className="min-w-0 px-5 pb-14 md:pb-24 sm:px-8 lg:px-14">
         {/*
           The toggle lives in the panel rather than in the rail, because a
           control that hides the rail cannot itself live inside the thing it

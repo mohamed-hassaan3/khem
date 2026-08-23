@@ -55,8 +55,8 @@ export default async function ArrivalShowcase({
   ];
 
   return (
-    <section className="border-t border-border bg-background px-6 py-20 md:px-20 md:py-28">
-      <div className="mx-auto grid max-w-350 grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-20">
+    <section className="border-t border-border bg-background px-4 py-12 md:px-20 md:py-28">
+      <div className="mx-auto grid max-w-350 grid-cols-1 items-center gap-6 md:gap-12 lg:grid-cols-12 lg:gap-20">
         {/*
          * `lg:order-*` rather than two markup branches: the reading order in
          * the DOM stays image → copy for every entry, so a screen reader and a
@@ -122,13 +122,13 @@ export default async function ArrivalShowcase({
           {product.story ? (
             <p
               dir="auto"
-              className="mb-10 whitespace-pre-line text-[13px] leading-loose text-ivory/40"
+              className="mb-6 md:mb-10 whitespace-pre-line text-[13px] leading-loose text-ivory/40"
             >
               {product.story}
             </p>
           ) : null}
 
-          <dl className="mb-10 grid grid-cols-1 gap-px bg-border sm:grid-cols-3">
+          <dl className="mb-6 md:mb-10 grid grid-cols-1 gap-px bg-border sm:grid-cols-3">
             {tiers.map((tier) => (
               <div key={tier.label} className="bg-background py-5 pe-4">
                 <dt className="mb-3 font-heading text-[9px] uppercase tracking-[0.25em] text-gold/50">
@@ -141,7 +141,7 @@ export default async function ArrivalShowcase({
             ))}
           </dl>
 
-          <div className="mb-9 flex items-center gap-6 border-t border-border pt-6">
+          <div className="mb-9 flex items-center gap-4 md:gap-6 border-t border-border pt-6">
             <Price
               cents={product.priceInCents}
               className="font-heading text-2xl text-gold"

@@ -43,7 +43,7 @@ export default function OrderReview({ lines, subtotalInCents }: OrderReviewProps
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
   return (
-    <aside className="border-border bg-surface px-6 py-10 sm:px-8 lg:sticky lg:top-20 lg:h-fit lg:border-s lg:px-10 lg:py-14">
+    <aside className="border-border bg-surface px-4 py-10 sm:px-8 lg:sticky lg:top-20 lg:h-fit lg:border-s lg:px-10 lg:py-14">
       <div className="mb-8 flex items-baseline justify-between gap-4">
         <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ivory">
           {copy.heading}

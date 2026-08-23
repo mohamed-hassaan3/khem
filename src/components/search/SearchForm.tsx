@@ -35,7 +35,7 @@ export default function SearchForm({ defaultValue }: SearchFormProps) {
       method="get"
       action={localizePath(locale, "/search")}
       role="search"
-      className="border-b border-border px-6 py-6 sm:px-8 lg:px-14 xl:px-20"
+      className="border-b border-border px-4 py-6 sm:px-8 lg:px-14 xl:px-20"
     >
       <div className="flex items-center gap-4 transition-colors duration-400 ease-luxury-bezier">
         <Search

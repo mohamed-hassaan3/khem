@@ -43,10 +43,10 @@ export default function FeatureTriptych({
 
   if (variant === "steps") {
     return (
-      <section className="border-t border-border bg-surface px-6 py-24 md:px-20 md:py-30">
+      <section className="border-t border-border bg-surface px-4 py-14 md:px-20 md:py-30">
         <div className="mx-auto max-w-350">
           {eyebrow || heading ? (
-            <Reveal className="mb-16 text-center">
+            <Reveal className="mb-10 md:mb-16 text-center">
               {eyebrow ? <p className="eyebrow mb-4">{eyebrow}</p> : null}
               {heading ? (
                 <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl">
@@ -62,7 +62,7 @@ export default function FeatureTriptych({
 
               return (
               <li key={item.title} className="bg-background">
-                <Reveal delay={index * 0.1} className="h-full px-8 py-12 md:px-12 md:py-14">
+                <Reveal delay={index * 0.1} className="h-full px-4 py-12 md:px-12 md:py-14">
                   <p className="mb-7 flex items-center gap-3 font-heading text-[10px] tracking-[0.2em] text-gold/35">
                     <Icon
                       size={16}
@@ -93,8 +93,8 @@ export default function FeatureTriptych({
   }
 
   return (
-    <section className="border-b border-border bg-surface px-6 py-15 md:px-20">
-      <div className="mx-auto grid max-w-350 grid-cols-1 gap-12 md:grid-cols-3">
+    <section className="border-b border-border bg-surface px-4 py-15 md:px-20">
+      <div className="mx-auto grid max-w-350 grid-cols-1 gap-6 md:gap-12 md:grid-cols-3">
         {items.map((item, index) => {
           const Icon = item.icon;
 

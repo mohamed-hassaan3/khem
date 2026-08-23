@@ -86,7 +86,7 @@ export default function MerchPageForm({ page }: { page: AdminMerchPage }) {
         separately and is not edited here.
       </p>
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
         <AdminInput
           id="name"
           label="Name"
@@ -127,7 +127,7 @@ export default function MerchPageForm({ page }: { page: AdminMerchPage }) {
           Banner image
         </p>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           <AdminInput
             id="bannerUrl"
             label="Banner URL"

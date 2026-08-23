@@ -30,8 +30,8 @@ export default function AuthShell({
   children,
 }: AuthShellProps) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-5 pb-24 pt-32 sm:px-8">
-      <header className="mb-10 max-w-md text-center">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-5 pb-14 md:pb-24 pt-16 md:pt-32 sm:px-8">
+      <header className="mb-6 md:mb-10 max-w-md text-center">
         <p className="eyebrow mb-3">{eyebrow}</p>
 
         <h1 className="mb-5 font-heading text-3xl font-normal text-ivory sm:text-4xl">
@@ -50,7 +50,7 @@ export default function AuthShell({
        */}
       <div className="flex w-full justify-center">{children}</div>
 
-      <footer className="mt-14 text-center">
+      <footer className="mt-8 md:mt-14 text-center">
         <p className="mb-4 text-[11px] tracking-[0.08em] text-ivory/30">
           {guest.guestLead}
         </p>

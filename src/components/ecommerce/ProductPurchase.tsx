@@ -177,7 +177,7 @@ export default function ProductPurchase({
             })}
       </p>
 
-      <div className="mb-10">
+      <div className="mb-6 md:mb-10">
         <p className="mb-4 text-[10px] uppercase tracking-[0.25em] text-ivory/40">
           {dict.product.quantity}
         </p>
@@ -228,7 +228,7 @@ export default function ProductPurchase({
         {stockLabel}
       </p>
 
-      <div className="mt-12 grid grid-cols-1 gap-6 border-t border-border pt-7 sm:grid-cols-3">
+      <div className="mt-8 md:mt-12 grid grid-cols-1 gap-4 md:gap-6 border-t border-border pt-7 sm:grid-cols-3">
         {Object.values(dict.product.trust).map((badge) => (
           <div key={badge.title}>
             <p className="mb-1 font-heading text-[10px] tracking-[0.1em] text-gold">

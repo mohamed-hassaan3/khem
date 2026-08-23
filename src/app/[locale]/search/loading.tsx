@@ -23,20 +23,20 @@ export default function Loading() {
       className="min-h-screen bg-background"
     >
       {/* Header — mirrors <PageHeader>'s paddings. */}
-      <div className="border-b border-border px-6 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
+      <div className="border-b border-border px-4 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
         <Bar className="h-2.5 w-20" />
         <Bar className="mt-4 h-9 w-64 sm:h-11 sm:w-80" />
         <Bar className="mt-4 h-2.5 w-24" />
       </div>
 
       {/* Field — mirrors <SearchForm>. */}
-      <div className="border-b border-border px-6 py-6 sm:px-8 lg:px-14 xl:px-20">
+      <div className="border-b border-border px-4 py-6 sm:px-8 lg:px-14 xl:px-20">
         <Bar className="h-7 w-full max-w-md" />
       </div>
 
       {/* Grid — mirrors the results section. */}
-      <div className="mx-auto max-w-350 px-6 py-16 md:px-20">
-        <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto max-w-350 px-4 py-10 md:py-16 md:px-20">
+        <div className="grid gap-x-4 md:gap-x-6 gap-y-6 md:gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
           {CARDS.map((card) => (
             <div key={card}>
               <Bar className="aspect-3/4 w-full" />

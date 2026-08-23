@@ -26,7 +26,7 @@ import { searchCatalog } from "@/src/services/search";
 
 const PATH = "/search";
 
-const CARD_SIZES = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
+const CARD_SIZES = "(min-width: 1024px) 33vw, 50vw";
 
 /** `?q=a&q=b` is a crafted URL, not a use case — the first value wins. */
 function firstValue(value: string | string[] | undefined): string {
@@ -114,8 +114,8 @@ export default async function Search({
       <SearchForm defaultValue={query} />
 
       {count > 0 ? (
-        <section className="mx-auto max-w-350 px-6 py-16 md:px-20">
-          <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mx-auto max-w-350 px-4 py-10 md:py-16 md:px-20">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-6 sm:gap-y-14 lg:grid-cols-3">
             {products.map((product) => (
               <ProductCard
                 key={product.id}
@@ -127,7 +127,7 @@ export default async function Search({
           </div>
         </section>
       ) : (
-        <section className="px-6 pb-24 pt-4">
+        <section className="px-4 md:px-6 pb-14 md:pb-24 pt-4">
           <EmptyState
             icon={SearchX}
             heading={

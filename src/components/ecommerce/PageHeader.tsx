@@ -34,7 +34,7 @@ export default function PageHeader({
   headingDir,
 }: PageHeaderProps) {
   return (
-    <header className="border-b border-border px-6 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
+    <header className="border-b border-border px-4 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
       <p className="eyebrow mb-3">{eyebrow}</p>
 
       <h1

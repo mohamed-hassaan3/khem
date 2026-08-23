@@ -122,7 +122,7 @@ export default async function JournalArticlePage({
       <ArticleBody article={article} locale={activeLocale} />
 
       {/* ── BACK TO THE JOURNAL ─────────────────────── */}
-      <div className="mx-auto max-w-3xl px-6 pb-24 md:pb-32">
+      <div className="mx-auto max-w-3xl px-4 md:px-6 pb-14 md:pb-32">
         <Reveal>
           <LocaleLink
             href="/journal"

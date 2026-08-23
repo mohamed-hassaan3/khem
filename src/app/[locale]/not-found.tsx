@@ -27,7 +27,7 @@ export default function NotFound() {
       </div>
 
       <div className="relative z-10">
-        <div className="mb-10 flex justify-center opacity-40">
+        <div className="mb-6 md:mb-10 flex justify-center opacity-40">
           <Image src={logo} width={40} height={40} alt="" aria-hidden="true" />
         </div>
 
@@ -44,7 +44,7 @@ export default function NotFound() {
 
         <div className="gold-line mx-auto mb-7" />
 
-        <p className="mx-auto mb-12 max-w-100 text-sm leading-loose text-ivory/40">
+        <p className="mx-auto mb-8 md:mb-12 max-w-100 text-sm leading-loose text-ivory/40">
           The page you are seeking has slipped beyond our grasp — like perfume
           dispersing into warm air.
         </p>

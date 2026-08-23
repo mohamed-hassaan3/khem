@@ -53,7 +53,7 @@ export default async function ArticleHero({
         aria-hidden="true"
       />
 
-      <div className="absolute inset-x-0 bottom-0 px-6 pb-16 md:px-20 md:pb-24">
+      <div className="absolute inset-x-0 bottom-0 px-4 pb-10 md:px-20 md:pb-24">
         <Reveal className="mx-auto max-w-350">
           <div className="max-w-4xl">
             {/* ── BREADCRUMB ──────────────────────────── */}

@@ -199,8 +199,8 @@ export default function CollectionGrid({
   return (
     <>
       {/* ── DESCRIPTION + SORT BAR ──────────────────── */}
-      <section className="border-b border-border bg-background px-6 py-10 md:px-20">
-        <div className="mx-auto flex max-w-350 flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      <section className="border-b border-border bg-background px-4 py-10 md:px-20">
+        <div className="mx-auto flex max-w-350 flex-col gap-4 md:gap-6 md:flex-row md:items-center md:justify-between">
           {description}
 
           {showSort ? (
@@ -258,7 +258,7 @@ export default function CollectionGrid({
           className="sticky top-20 z-30 border-b border-border bg-[color-mix(in_srgb,var(--color-surface)_96%,transparent)] backdrop-blur-xl"
         >
           {/* One scrolling strip at every width — never a second line. */}
-          <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-x-auto px-6 py-4 md:px-20">
+          <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-x-auto px-4 py-4 md:px-20">
             <FilterChip
               label={dict.collections.tabAll}
               isActive={facet === null}
@@ -278,7 +278,7 @@ export default function CollectionGrid({
       ) : null}
 
       {/* ── PRODUCT GRID ────────────────────────────── */}
-      <section className="bg-background px-6 pb-24 pt-16 md:px-20 md:pb-36">
+      <section className="bg-background px-4 pb-14 pt-10 md:px-20 md:pb-36">
         {/*
          * What the visitor is looking at, in words.
          *
@@ -294,7 +294,7 @@ export default function CollectionGrid({
          * for one result.
          */}
         {showFacets && (isFiltered || isSorted) ? (
-          <div className="mx-auto mb-10 flex max-w-350 flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-wide text-ivory/40">
+          <div className="mx-auto mb-6 md:mb-10 flex max-w-350 flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-wide text-ivory/40">
             {isFiltered ? (
               <span>
                 {interpolate(dict.collections.activeState.filteredBy, {
@@ -347,7 +347,7 @@ export default function CollectionGrid({
            */
           <div
             key={`${facet ?? "all"}-${sort}`}
-            className="khem-fade mx-auto grid max-w-350 grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3"
+            className="khem-fade mx-auto grid max-w-350 grid-cols-2 gap-px bg-border lg:grid-cols-3"
           >
             {sorted.map((item) => (
               <div key={item.id} className="relative">
@@ -362,7 +362,7 @@ export default function CollectionGrid({
             ))}
           </div>
         ) : (
-          <p className="py-16 text-center text-sm text-ivory/40">
+          <p className="py-10 md:py-16 text-center text-sm text-ivory/40">
             {dict.collections.empty}
           </p>
         )}

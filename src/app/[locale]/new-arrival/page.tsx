@@ -87,7 +87,7 @@ export default async function NewArrivalPage({
       />
 
       {arrivals.length === 0 ? (
-        <p className="px-6 py-32 text-center text-[13px] leading-loose text-ivory/35">
+        <p className="px-4 md:px-6 py-16 md:py-32 text-center text-[13px] leading-loose text-ivory/35">
           {dict.newArrival.empty}
         </p>
       ) : (
@@ -103,7 +103,7 @@ export default async function NewArrivalPage({
       )}
 
       {/* ── CLOSING BAND ────────────────────────────── */}
-      <section className="border-t border-border bg-surface px-6 py-24 md:px-20 md:py-30">
+      <section className="border-t border-border bg-surface px-4 py-14 md:px-20 md:py-30">
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="eyebrow mb-5">{dict.newArrival.closing.eyebrow}</p>
 
@@ -113,7 +113,7 @@ export default async function NewArrivalPage({
 
           <div className="gold-line mx-auto my-8 w-16" />
 
-          <p className="mb-10 text-[13px] leading-loose text-ivory/40">
+          <p className="mb-6 md:mb-10 text-[13px] leading-loose text-ivory/40">
             {dict.newArrival.closing.body}
           </p>
 

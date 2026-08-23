@@ -209,7 +209,7 @@ export default function IngredientExplorer({
   };
 
   return (
-    <section className="bg-background px-6 py-16 md:px-20 md:py-20">
+    <section className="bg-background px-4 py-10 md:px-20 md:py-20">
       <div className="mx-auto grid max-w-350 grid-cols-1 gap-0.5 bg-border sm:grid-cols-2 lg:grid-cols-4">
         {ordered.map((ingredient) => {
           const isActive = ingredient.slug === activeSlug;
@@ -301,7 +301,7 @@ export default function IngredientExplorer({
                       className="overflow-hidden"
                     >
                       <div className="flex flex-col justify-center p-8 md:p-14">
-                        <div className="flex items-start justify-between gap-6">
+                        <div className="flex items-start justify-between gap-4 md:gap-6">
                           <div>
                             <p className="eyebrow mb-2.5">
                               {ingredient.rarity}
@@ -344,7 +344,7 @@ export default function IngredientExplorer({
                           {ingredient.description}
                         </p>
 
-                        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-5 md:gap-8 sm:grid-cols-2">
                           <div>
                             <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/50">
                               {dict.ingredientsExplorer.foundIn}

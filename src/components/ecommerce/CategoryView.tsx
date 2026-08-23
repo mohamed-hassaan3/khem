@@ -220,14 +220,14 @@ function SetGrid({
   emptyLabel: string;
 }) {
   return (
-    <section className="bg-background px-6 py-24 md:px-20 md:py-30">
+    <section className="bg-background px-4 py-14 md:px-20 md:py-30">
       <div className="mx-auto max-w-350">
         {sets.length === 0 ? (
-          <p className="py-24 text-center text-[13px] leading-loose text-ivory/35">
+          <p className="py-14 md:py-24 text-center text-[13px] leading-loose text-ivory/35">
             {emptyLabel}
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-px bg-border lg:grid-cols-3">
             {sets.map((set, index) => (
               <Reveal key={set.id} delay={(index % 3) * 0.1}>
                 <DiscoverySetCard product={set} locale={locale} />

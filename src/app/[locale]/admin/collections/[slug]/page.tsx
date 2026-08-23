@@ -59,7 +59,7 @@ export default async function EditCollectionPage({
 
       <CollectionForm collection={collection} locale={activeLocale} />
 
-      <section className="mt-16 max-w-3xl border-t border-border pt-8">
+      <section className="mt-10 md:mt-16 max-w-3xl border-t border-border pt-8">
         <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-danger/70">
           Danger zone
         </h2>

@@ -347,7 +347,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         ].join(" ")}
       >
         {/* Header */}
-        <div className="flex h-20 shrink-0 items-center justify-between px-6 md:px-12">
+        <div className="flex h-20 shrink-0 items-center justify-between px-4 md:px-12">
           <p className="eyebrow">{dict.search.eyebrow}</p>
 
           <button
@@ -367,7 +367,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         </div>
 
         {/* Field */}
-        <div className="shrink-0 px-6 md:px-12">
+        <div className="shrink-0 px-4 md:px-12">
           <div className="flex items-center gap-4 border-b border-border pb-5 transition-colors duration-400 ease-luxury-bezier focus-within:border-gold">
             <Search
               width={20}
@@ -418,7 +418,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         </div>
 
         {/* Body */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-10 md:px-12">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-10 md:px-12">
           <p aria-live="polite" className="sr-only">
             {countLabel}
           </p>
@@ -466,7 +466,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 
               {current !== null && current.collections.length > 0 ? (
                 <>
-                  <p className="eyebrow mb-6 mt-12">{dict.search.collections}</p>
+                  <p className="eyebrow mb-6 mt-8 md:mt-12">{dict.search.collections}</p>
                   <div className="flex flex-col">
                     {suggestions.map((suggestion, index) => {
                       if (suggestion.kind === "product") return null;
@@ -499,7 +499,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                 {dict.search.noResultsHint}
               </p>
 
-              <p className="eyebrow mb-5 mt-12">{dict.search.popular}</p>
+              <p className="eyebrow mb-5 mt-8 md:mt-12">{dict.search.popular}</p>
               <TermChips
                 terms={dict.search.popularTerms}
                 onPick={(value) => {
@@ -512,7 +512,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         </div>
 
         {/* Footer hint */}
-        <div className="flex shrink-0 items-center justify-between gap-4 border-t border-border px-6 py-5 md:px-12">
+        <div className="flex shrink-0 items-center justify-between gap-4 border-t border-border px-4 py-5 md:px-12">
           <button
             type="button"
             onClick={() => submit(query)}
@@ -556,7 +556,7 @@ function IdleState({
   const dict = useDictionary();
 
   return (
-    <div className="grid gap-12 lg:grid-cols-[1fr_1fr_1.1fr] lg:gap-16">
+    <div className="grid gap-6 md:gap-12 lg:grid-cols-[1fr_1fr_1.1fr] lg:gap-16">
       {recent.length > 0 ? (
         <section>
           <div className="mb-5 flex items-baseline justify-between gap-4">

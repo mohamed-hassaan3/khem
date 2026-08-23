@@ -59,7 +59,7 @@ export default function OrderCard({
 
   return (
     <article id={order.orderNumber} className="scroll-mt-32 bg-surface p-8">
-      <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-[1fr_auto]">
+      <div className="grid grid-cols-1 items-start gap-4 md:gap-6 sm:grid-cols-[1fr_auto]">
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-4">
             <span

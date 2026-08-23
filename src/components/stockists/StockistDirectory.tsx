@@ -117,7 +117,7 @@ export default function StockistDirectory({
         aria-label={dict.stockists.filterLabel}
         className="border-b border-border bg-background"
       >
-        <div className="mx-auto flex max-w-350 gap-9 overflow-x-auto px-6 md:px-20">
+        <div className="mx-auto flex max-w-350 gap-5 md:gap-9 overflow-x-auto px-4 md:px-20">
           <RegionTab
             label={dict.stockists.regionAll}
             isActive={activeRegion === null}
@@ -227,7 +227,7 @@ export default function StockistDirectory({
               />
             ))
           ) : (
-            <p className="px-6 py-16 text-center text-sm text-ivory/40">
+            <p className="px-4 md:px-6 py-10 md:py-16 text-center text-sm text-ivory/40">
               {dict.stockists.empty}
             </p>
           )}
@@ -319,7 +319,7 @@ function StockistRow({
   if (isComingSoon) {
     return (
       <div className="border-b border-s-3 border-border border-s-transparent">
-        <div className="flex items-start justify-between gap-4 px-6 py-7 md:px-9">
+        <div className="flex items-start justify-between gap-4 px-4 py-7 md:px-9">
           {heading}
           <span className="shrink-0 whitespace-nowrap border border-dashed border-gold/25 px-2.5 py-1 font-heading text-[9px] tracking-[0.15em] text-gold/50">
             {labels.comingSoon}
@@ -340,7 +340,7 @@ function StockistRow({
         aria-expanded={isSelected}
         aria-controls={detailId}
         onClick={onToggle}
-        className="flex w-full cursor-pointer items-start justify-between gap-4 px-6 py-7 text-start focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold md:px-9"
+        className="flex w-full cursor-pointer items-start justify-between gap-4 px-4 py-7 text-start focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold md:px-9"
       >
         {heading}
 
@@ -363,7 +363,7 @@ function StockistRow({
       {isSelected ? (
         <div
           id={detailId}
-          className="border-t border-border px-6 pb-7 pt-5 md:px-9"
+          className="border-t border-border px-4 pb-7 pt-5 md:px-9"
         >
           <StockistDetails stockist={stockist} island={island} labels={labels} />
         </div>

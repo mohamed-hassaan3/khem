@@ -75,7 +75,7 @@ export default function OrderCelebration({
   const isCash = order.paymentMethod === "CASH";
 
   return (
-    <section className="relative flex min-h-[80vh] flex-col items-center justify-center overflow-hidden px-6 py-24">
+    <section className="relative flex min-h-[80vh] flex-col items-center justify-center overflow-hidden px-4 md:px-6 py-14 md:py-24">
       {/*
        * The bloom. `pointer-events-none` and behind everything, sized in `vmin`
        * so it stays circular and proportionate from a 360px phone to a desktop.
@@ -89,11 +89,11 @@ export default function OrderCelebration({
         {/* 1. The hairline. */}
         <span
           aria-hidden="true"
-          className="khem-rule-draw mb-10 block h-px bg-gold"
+          className="khem-rule-draw mb-6 md:mb-10 block h-px bg-gold"
         />
 
         {/* 2. The seal. */}
-        <div className="khem-seal-settle mb-10">
+        <div className="khem-seal-settle mb-6 md:mb-10">
           <Image
             src="/email/khem-logo.png"
             alt=""
@@ -117,7 +117,7 @@ export default function OrderCelebration({
         </h1>
 
         <p
-          className="khem-rise mb-10 max-w-md text-[13px] leading-loose text-ivory/45"
+          className="khem-rise mb-6 md:mb-10 max-w-md text-[13px] leading-loose text-ivory/45"
           style={{ animationDelay: "1340ms" }}
         >
           {isCash
@@ -129,7 +129,7 @@ export default function OrderCelebration({
 
         {/* 4. The card. */}
         <div
-          className="khem-rise w-full border border-border bg-surface px-6 py-8 sm:px-9"
+          className="khem-rise w-full border border-border bg-surface px-4 py-8 sm:px-9"
           style={{ animationDelay: "1800ms" }}
         >
           <p className="mb-1.5 text-[10px] uppercase tracking-[0.24em] text-gold/60">
@@ -182,7 +182,7 @@ export default function OrderCelebration({
 
         {/* 5. The way onward. */}
         <div
-          className="khem-rise mt-10 flex w-full flex-col items-center gap-4"
+          className="khem-rise mt-6 md:mt-10 flex w-full flex-col items-center gap-4"
           style={{ animationDelay: "2100ms" }}
         >
           <LocaleLink

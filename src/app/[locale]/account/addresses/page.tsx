@@ -67,7 +67,7 @@ export default async function AddressesPage({
     <div>
       <p className="eyebrow mb-3">{dict.account.addresses.eyebrow}</p>
 
-      <h1 className="mb-12 font-heading text-3xl font-normal text-ivory sm:text-4xl">
+      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ivory sm:text-4xl">
         {dict.account.addresses.heading}
       </h1>
 

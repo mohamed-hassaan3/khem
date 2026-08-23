@@ -193,7 +193,7 @@ export default function ProductForm({
           Identity
         </h2>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           <AdminInput
             id="name"
             label="Name"
@@ -279,7 +279,7 @@ export default function ProductForm({
           Character
         </h2>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           <AdminSelect
             id="concentration"
             label="Concentration"
@@ -345,7 +345,7 @@ export default function ProductForm({
           Commerce
         </h2>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           <AdminInput
             id="priceEgp"
             label="Price (EGP)"

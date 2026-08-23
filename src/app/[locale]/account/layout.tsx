@@ -61,12 +61,12 @@ export default async function AccountLayout({
         <AccountSidebar />
       </aside>
 
-      <main className="px-5 pb-30 pt-10 sm:px-8 lg:px-20 lg:pt-15">
+      <main className="px-5 pb-14 pt-10 sm:px-8 lg:px-20 lg:pt-15">
         {children}
 
         {/* The rail's sign-out sits in the desktop column; on mobile the
             strip has no room for it, so it closes the panel instead. */}
-        <div className="mt-16 border-t border-border pt-8 lg:hidden">
+        <div className="mt-10 md:mt-16 border-t border-border pt-8 lg:hidden">
           <SignOutButton />
         </div>
       </main>

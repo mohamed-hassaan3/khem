@@ -119,7 +119,7 @@ export default function ArticleForm({
         <AdminNotice tone={result.ok ? "success" : "error"}>{result.message}</AdminNotice>
       ) : null}
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
         <AdminInput
           id="title"
           label="Title"
@@ -193,7 +193,7 @@ export default function ArticleForm({
         onChange={setBody}
       />
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
         <AdminInput
           id="publishedAt"
           label="Display date"

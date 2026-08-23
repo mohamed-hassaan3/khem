@@ -25,7 +25,7 @@ export default function ProductPyramid({
     <section>
       <h2 className="eyebrow mb-7">{heading}</h2>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 sm:grid-cols-3">
         {tiers.map((tier) => (
           <div key={tier.label} className="border border-border bg-surface p-7">
             <p className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/60">

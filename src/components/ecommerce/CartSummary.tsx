@@ -38,7 +38,7 @@ export default function CartSummary({ subtotalInCents }: CartSummaryProps) {
   const remaining = amountToFreeShippingInCents(subtotalInCents);
 
   return (
-    <aside className="bg-surface px-6 py-12 sm:px-8 lg:sticky lg:top-20 lg:h-fit lg:px-10 lg:py-14">
+    <aside className="bg-surface px-4 py-12 sm:px-8 lg:sticky lg:top-20 lg:h-fit lg:px-10 lg:py-14">
       <h2 className="mb-9 font-heading text-lg font-normal tracking-[0.1em] text-ivory">
         {dict.cart.summary}
       </h2>
@@ -118,7 +118,7 @@ export default function CartSummary({ subtotalInCents }: CartSummaryProps) {
         {dict.cart.continueShopping}
       </LocaleLink>
 
-      <ul className="mt-10 flex flex-col gap-3 border-t border-border pt-8">
+      <ul className="mt-6 md:mt-10 flex flex-col gap-3 border-t border-border pt-8">
         {Object.values(dict.product.trust).map((badge) => (
           <li key={badge.title} className="flex items-center gap-2.5">
             <Check
