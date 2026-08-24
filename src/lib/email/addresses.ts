@@ -32,14 +32,22 @@ export function fromAddress(): string {
  * wrong here. An acknowledgement that invites a reply must come from an address
  * that reads mail, or the invitation is a lie the first time someone accepts it.
  *
- * Anchored to `HOUSE_EMAIL`, **not** to `inboxAddress()`. They are usually the
+ * That address is `HOUSE_EMAIL` — `info@khemperfumes.com`, the address printed
+ * on the contact page and in the signature of every letter. A house of this
+ * kind writes to its customers from the address it publishes; a machine name in
+ * the From line is the one detail that makes a confirmation feel issued rather
+ * than sent.
+ *
+ * Anchored to the constant, **not** to `inboxAddress()`. They are usually the
  * same address, but `CONTACT_INBOX_EMAIL` may point somewhere off-domain (a
  * Gmail account, while a spam filter is being sorted out) — and Resend can only
  * send as a domain it has verified. Deriving the sender from the recipient
  * would turn that redirect into a hard delivery failure.
  */
+const DEFAULT_HOUSE_FROM = `KHEM <${HOUSE_EMAIL}>`;
+
 export function houseFromAddress(): string {
-  return process.env.RESEND_HOUSE_FROM_EMAIL ?? `KHEM <${HOUSE_EMAIL}>`;
+  return process.env.RESEND_HOUSE_FROM_EMAIL ?? DEFAULT_HOUSE_FROM;
 }
 
 /**
@@ -67,15 +75,17 @@ export async function inboxAddress(): Promise<string> {
  *    and dispatch a parcel. It is fulfilment, not correspondence, and it is
  *    routinely a different person or a different account entirely.
  *
- * Defaults to `orders@khemperfumes.com`, the house operations mailbox.
- * `ORDER_NOTIFICATION_EMAIL` overrides it, which makes redirecting fulfilment
- * mail a dashboard edit rather than a deploy.
+ * Defaults to `orders@khemperfumes.com`, the mailbox the team opens to pick and
+ * pack. `ORDER_NOTIFICATION_EMAIL` overrides it, which makes redirecting
+ * fulfilment mail a dashboard edit rather than a deploy. It was
+ * `khem.official@outlook.com` — the Outlook account directly — until the house
+ * moved fulfilment onto its own domain.
  *
- * It was `khem.official@outlook.com` — the Outlook account directly — until the
- * house moved fulfilment onto its own domain. On-domain is the better default
- * for the reason the whole deliverability pass exists: a recipient on a mailbox
- * we control can be whitelisted, filtered and forwarded by us, and an address
- * on the sending domain is one fewer hop for a spam filter to be suspicious of.
+ * Note which direction this is. `info@` is what the house **sends** as; this is
+ * what the team **receives** at. They must stay different addresses: a
+ * notification sent from `orders@` to `orders@` is a mailbox writing to itself,
+ * which scores worse with exactly the junk filter this arrangement exists to
+ * satisfy. {@link sameMailbox} enforces that at send time.
  *
  * A hardcoded default rather than a database read, unlike `inboxAddress()`:
  * this address is never published to anybody, so there is no page for it to
@@ -101,17 +111,26 @@ export async function orderInboxAddress(): Promise<string> {
  * to Safe Senders once and never thinks about again — and it cannot be dragged
  * back into Junk by whatever else `noreply@` sends.
  *
- * `notifications@` and **not** `orders@`, deliberately: `orders@` is where the
- * notification *lands* now that `ORDER_NOTIFICATION_EMAIL` points there, and a
- * mailbox that sends to itself is the exact arrangement {@link fromAddress}
- * warns about — worse spam scoring, and a threading mess in the one inbox that
- * has to stay readable. {@link sameMailbox} enforces the separation at send
- * time, in case an env var ever collapses the two again.
+ * `info@` — the house's own address, the same one {@link houseFromAddress}
+ * writes to customers from, rather than a machine address invented for this one
+ * message. Two reasons, and neither is aesthetic:
  *
- * On the same verified domain as everything else, so nothing new has to be
- * proven to Resend. `RESEND_ORDER_FROM_EMAIL` overrides it.
+ *  - **Reputation is per sender.** `info@` is an established mailbox that
+ *    people already correspond with; a brand-new local part starts with none,
+ *    and a cold sender writing to a mailbox on its own domain is precisely the
+ *    shape a junk filter is unsure about.
+ *  - **One address to whitelist.** The `orders@` mailbox marks `info@` as safe
+ *    once and every order mail there is — the picking slip and, if it is ever
+ *    CC'd, anything else — is covered.
+ *
+ * Deliberately not `orders@`: that is the *destination*, and a sender must
+ * never be its own recipient. {@link sameMailbox} checks that at send time in
+ * case an env var ever collapses the two.
+ *
+ * `RESEND_ORDER_FROM_EMAIL` overrides it — point it at a machine address if the
+ * house ever wants order notifications to look distinct in the inbox.
  */
-const DEFAULT_ORDER_FROM = "KHEM Orders <notifications@khemperfumes.com>";
+const DEFAULT_ORDER_FROM = `KHEM Orders <${HOUSE_EMAIL}>`;
 
 export function orderFromAddress(): string {
   return process.env.RESEND_ORDER_FROM_EMAIL ?? DEFAULT_ORDER_FROM;

@@ -62,8 +62,9 @@ function logFailure(context: string, orderNumber: string, cause: unknown): void 
 /**
  * Tell the house an order has arrived.
  *
- * It goes to `orderInboxAddress()` — orders@khemperfumes.com, the operations
- * mailbox — and **not** to the contact page's published address. Fulfilment mail
+ * It goes to `orderInboxAddress()` — orders@khemperfumes.com, the mailbox the
+ * team opens to pick and pack — and **not** to the contact page's published
+ * address. Fulfilment mail
  * and correspondence are different jobs, often different people. Override with
  * `ORDER_NOTIFICATION_EMAIL`.
  *
@@ -78,20 +79,19 @@ function logFailure(context: string, orderNumber: string, cause: unknown): void 
  *    stranger's gmail. It is gone. Nothing is lost that the message does not
  *    already carry: the customer's address and phone number are a row in the
  *    slip, and answering means a new message rather than a reply.
- *  - **The sender was the shared `noreply@`.** Outlook's verdict is learned per
- *    sender, so a dedicated `notifications@` (see `orderFromAddress()`) is an
- *    identity a person can mark "not junk" *once*, and one that cannot be
- *    dragged back into the folder by anything else the site sends. It is
- *    deliberately not `orders@`: that is now the *destination*, and the sender
- *    must never be the recipient — see the guard below.
+ *  - **The sender was the shared `noreply@`.** A junk verdict is learned per
+ *    sender, and `noreply@` carries whatever every other automated message on
+ *    the site has earned. `orderFromAddress()` sends as `info@` instead — an
+ *    established mailbox that people already correspond with, and one address
+ *    the `orders@` mailbox marks safe once and for good.
  *
  * `X-Entity-Ref-ID` carries the order number so two notifications never collapse
  * into one thread — a picking slip that hides behind "show trimmed content" is a
  * parcel nobody packs.
  *
  * None of this can override a filter that has already made its mind up: the
- * mailbox still needs `notifications@khemperfumes.com` in Safe Senders, and the
- * domain still needs its SPF, DKIM and DMARC records standing. That is operations, not
+ * `orders@` mailbox still needs `info@khemperfumes.com` in Safe Senders, and
+ * the domain still needs its SPF, DKIM and DMARC records standing. That is operations, not
  * code, and it is written down in
  * `prompts/order-mail-deliverability-feedback-and-egypt-only-checkout.md`.
  */
@@ -115,9 +115,8 @@ export async function notifyHouseOfOrder(order: OrderMailRecord): Promise<void> 
      *
      * `ORDER_NOTIFICATION_EMAIL` and `RESEND_ORDER_FROM_EMAIL` are edited
      * independently, and pointing both at `orders@` is an easy thing to do by
-     * accident — it happened the day the operations mailbox moved onto the
-     * domain. Self-addressed mail scores worse with exactly the filter this
-     * whole arrangement exists to satisfy, so the send falls back to the
+     * accident — it has already happened once. Self-addressed mail scores worse with exactly the filter
+     * this whole arrangement exists to satisfy, so the send falls back to the
      * website's general sender rather than going out mis-shaped.
      */
     const configured = orderFromAddress();

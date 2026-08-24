@@ -6,7 +6,11 @@
  * Postgres, read through `src/services/contact.ts`. These two survived the move
  * because they are load-bearing at module scope, where an `await` cannot reach:
  *
- *   {@link HOUSE_EMAIL}      builds the `From:` header in `src/lib/email/addresses.ts`.
+ *   {@link HOUSE_EMAIL}      is the published address — the contact page, the
+ *                            signature in every letter, the fallback for the
+ *                            `"BoutiqueSetting"` concierge row, and the `From:`
+ *                            on everything a customer receives. See
+ *                            `src/lib/email/addresses.ts`.
  *   {@link ENQUIRY_SUBJECTS} is the allow-list `src/schemas/contact.ts` validates against.
  *
  * The second one is a security boundary as much as a convenience. A submitted
