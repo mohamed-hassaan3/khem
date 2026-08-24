@@ -14,21 +14,27 @@
  * dependency, and no client API: a browser prompt for location on a checkout
  * screen is both slower and more alarming than the header we already have.
  *
- * ## The header decides refusals, never approvals on its own
+ * ## The header suggests; the chosen country decides
  *
- * Off Vercel — a self-hosted preview, a proxy in front, `curl` — the header is
- * whatever the sender says it is. So it is used two ways only:
+ * Detection picks the country for the visitor, and where that is not Egypt the
+ * checkout closes itself and says why. What it does **not** do is overrule
+ * them: the field is a dropdown of every country, and choosing Egypt reopens
+ * the order.
  *
- *  - **Present and not `EG`** → refuse. Spoofing this to *deny yourself*
- *    checkout is not an attack.
- *  - **Absent** → do not refuse, and let {@link isEgypt} judge the typed value.
- *    A missing header is the normal state of `npm run dev`, and a checkout that
- *    refuses every local order would be a checkout nobody could test.
+ * That is deliberate, and it is the only workable reading of a header that is
+ * routinely wrong about people who are standing in Cairo — a VPN, a corporate
+ * proxy, a mobile carrier homed abroad, an IP block reassigned last month. A
+ * gate that a misplaced customer cannot talk their way past is a gate that
+ * loses real orders to protect against a fictional one; the parcel is going to
+ * whatever address is typed below regardless, and *that* is what fulfilment
+ * reads.
  *
- * Both halves run again on the server in `src/actions/checkout.ts`. What the
- * form does with them is a courtesy.
+ * So the authority is {@link isEgypt} over the submitted country, enforced by
+ * `checkoutSchema` on the server where a form cannot reach it. The header only
+ * decides what the field starts as.
  */
 
+import { COUNTRY_CODES } from "@/src/constants/countries";
 import type { Locale } from "@/src/lib/i18n/config";
 
 /** ISO-3166 alpha-2 for the one country the house delivers to. */
@@ -95,4 +101,69 @@ export function countryName(code: string, locale: Locale): string {
   } catch {
     return code;
   }
+}
+
+/**
+ * The country as it should be written down — the value that reaches
+ * `"Order"."shipCountry"` and the picking slip.
+ *
+ * Egypt gets the house spelling for the locale rather than the CLDR one, so an
+ * Arabic order records "مصر" and an English one "Egypt". Everywhere else is
+ * whatever `Intl` calls it in that language, which is more than good enough for
+ * a country the house does not ship to.
+ */
+export function countryLabel(code: string, locale: Locale): string {
+  return code === SHIPPING_COUNTRY
+    ? SHIPPING_COUNTRY_NAME[locale]
+    : countryName(code, locale);
+}
+
+export interface CountryOption {
+  code: string;
+  name: string;
+}
+
+/**
+ * Every country, named in the reader's language, in that language's order.
+ *
+ * Sorted with `Intl.Collator` rather than by code or by English name: an
+ * Arabic-speaking visitor scanning for مصر should find it where Arabic
+ * alphabetical order puts it, not where "Egypt" would have fallen.
+ *
+ * Called from a Client Component, and only ever in the browser — the checkout
+ * form does not render until the cart has hydrated — so both the names and the
+ * ordering come from one ICU implementation and cannot disagree with a server
+ * render.
+ */
+export function countryOptions(locale: Locale): CountryOption[] {
+  const collator = new Intl.Collator(locale);
+
+  return COUNTRY_CODES.map((code) => ({
+    code,
+    name: countryLabel(code, locale),
+  })).sort((a, b) => collator.compare(a.name, b.name));
+}
+
+/**
+ * The detected country, but only if the dropdown actually holds it.
+ *
+ * Vercel's header is not always an ISO country: Tor exits arrive as `T1`, and
+ * unresolvable traffic as `XX`. Selecting a value no `<option>` carries leaves
+ * a native `<select>` showing an empty box — the one state the field must never
+ * be in, since it is pre-answered by design.
+ *
+ * An unknown code therefore falls back to {@link SHIPPING_COUNTRY} and is
+ * reported as *not detected*, so the field neither claims to know where the
+ * visitor is nor blocks them: Egypt is selected, the checkout is open, and the
+ * dropdown is right there if that is wrong.
+ */
+export function selectableCountry(code: string | null): {
+  code: string;
+  detected: boolean;
+} {
+  if (code !== null && COUNTRY_CODES.includes(code)) {
+    return { code, detected: true };
+  }
+
+  return { code: SHIPPING_COUNTRY, detected: false };
 }

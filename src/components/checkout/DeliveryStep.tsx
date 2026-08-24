@@ -29,10 +29,13 @@
  * and nothing else changes.
  */
 
-import { HOUSE_EMAIL } from "@/src/constants/contact";
-import { useDictionary } from "@/src/providers/i18n-provider";
+import { useMemo } from "react";
 
-import { CheckoutField, CheckoutSection } from "./CheckoutField";
+import { HOUSE_EMAIL } from "@/src/constants/contact";
+import { countryOptions } from "@/src/lib/shipping";
+import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
+
+import { CheckoutField, CheckoutSection, CheckoutSelect } from "./CheckoutField";
 
 export type DeliveryField =
   | "line1"
@@ -51,11 +54,11 @@ export interface DeliveryStepProps {
   /**
    * True once the edge has told us where the request came from.
    *
-   * It only decides whether the field explains itself — the value arrives
-   * pre-filled, with a line underneath saying where it came from. The field
-   * stays **editable** either way: detection is a convenience, and a visitor
-   * whose IP is routed through the wrong country (a VPN, a mobile carrier
-   * homed abroad) must still be able to write their own address.
+   * It decides only whether the field explains itself. The country arrives
+   * chosen, with a line underneath saying where that came from — and the
+   * visitor can choose another, which is the whole point: detection is often
+   * wrong about somebody standing in Cairo behind a VPN, and being wrong must
+   * not be final.
    */
   countryDetected: boolean;
   /** False only when the detected country is one the house does not deliver to. */
@@ -71,7 +74,22 @@ export default function DeliveryStep({
   shipsHere,
 }: DeliveryStepProps) {
   const dict = useDictionary();
+  const locale = useLocale();
   const copy = dict.checkout.delivery;
+
+  /*
+   * Two hundred and fifty names, sorted for this language. Built once per
+   * locale rather than on every keystroke in the address fields above — the
+   * list is the same for the life of the form.
+   */
+  const countries = useMemo(
+    () =>
+      countryOptions(locale).map(({ code, name }) => ({
+        value: code,
+        label: name,
+      })),
+    [locale],
+  );
 
   return (
     <CheckoutSection index="02" title={dict.checkout.steps.delivery} complete={complete}>
@@ -128,15 +146,15 @@ export default function DeliveryStep({
         autoComplete="postal-code"
       />
 
-      <CheckoutField
+      <CheckoutSelect
         id="checkout-country"
         label={copy.country}
         value={values.country}
         onChange={(value) => onChange("country", value)}
+        options={countries}
         error={errors.country}
         hint={countryDetected ? copy.countryDetected : undefined}
-        autoComplete="country-name"
-        required
+        autoComplete="country"
       />
 
       {/*

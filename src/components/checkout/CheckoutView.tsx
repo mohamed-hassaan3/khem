@@ -48,8 +48,8 @@ import { formatPrice } from "@/src/lib/format";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
 import {
   SHIPPING_COUNTRY,
-  SHIPPING_COUNTRY_NAME,
-  countryName,
+  countryLabel,
+  selectableCountry,
 } from "@/src/lib/shipping";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
@@ -97,6 +97,14 @@ export default function CheckoutView({
   const router = useRouter();
   const { lines, isHydrated, clear } = useCart();
 
+  /*
+   * Where the edge says the visitor is, reduced to something the dropdown can
+   * actually show. A code outside the list — `T1` from a Tor exit, `XX` from
+   * traffic the edge could not place — is treated as no answer rather than
+   * selecting an option that does not exist.
+   */
+  const detected = selectableCountry(detectedCountry);
+
   const [customerName, setCustomerName] = useState(viewer?.fullName ?? "");
   const [customerEmail, setCustomerEmail] = useState(viewer?.primaryEmail ?? "");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -108,16 +116,16 @@ export default function CheckoutView({
     state: "",
     postalCode: "",
     /*
-     * Detected rather than typed, whenever the edge could tell us. Stored as a
-     * display name — that is what goes on the picking slip and into
-     * `"Order"."shipCountry"` — and in the house language for Egypt itself, so
-     * an Arabic order does not print "Egypt" and an English one "مصر".
+     * An ISO-3166 code here, not a name — this one field is a chooser rather
+     * than a text box, and a code is what a chooser has stable values for.
+     * `countryLabel()` turns it into the words that reach
+     * `"Order"."shipCountry"` at submit, in the order's own language.
+     *
+     * Starts wherever the edge says the visitor is, and at Egypt when it cannot
+     * say. Either way it is a starting point: the dropdown holds every country
+     * and choosing one is what actually decides the order.
      */
-    country: detectedCountry
-      ? detectedCountry === SHIPPING_COUNTRY
-        ? SHIPPING_COUNTRY_NAME[locale]
-        : countryName(detectedCountry, locale)
-      : SHIPPING_COUNTRY_NAME[locale],
+    country: detected.code,
     note: "",
   });
 
@@ -185,14 +193,17 @@ export default function CheckoutView({
     address.country.trim().length >= 2;
 
   /*
-   * Whether this visitor can be delivered to at all.
+   * Whether this order can be delivered at all.
    *
-   * Unknown counts as yes — see the prop's own note. Everything downstream of
-   * this flag is presentation: the real refusal happens in
-   * `placeCustomerOrder`, which reads the same header for itself.
+   * Read from the **chosen** country, not from the header. Detection decided
+   * what that choice started as; a visitor the edge placed in the wrong country
+   * picks Egypt from the dropdown and the checkout reopens, which is the only
+   * behaviour that survives contact with VPNs and mobile carriers.
+   *
+   * Presentation only. `checkoutSchema` refuses a non-Egyptian country on the
+   * server, where a disabled button cannot be re-enabled from a console.
    */
-  const shipsHere =
-    detectedCountry === null || detectedCountry === SHIPPING_COUNTRY;
+  const shipsHere = address.country === SHIPPING_COUNTRY;
 
   function clearFieldError(field: string) {
     setFieldErrors((current) => {
@@ -268,7 +279,9 @@ export default function CheckoutView({
         city: address.city,
         state: address.state,
         postalCode: address.postalCode,
-        country: address.country,
+        // The code becomes words here, once, on its way to the database: a
+        // picking slip reads "Egypt", not "EG".
+        country: countryLabel(address.country, locale),
         note: address.note,
         company,
         items: lines.map((line) => ({
@@ -412,7 +425,7 @@ export default function CheckoutView({
               // Detection pre-fills the field and says so underneath; it never
               // takes it away. A visitor behind a VPN, or one the edge places
               // in the wrong country, has to be able to correct it.
-              countryDetected={detectedCountry !== null}
+              countryDetected={detected.detected}
               shipsHere={shipsHere}
             />
           </fieldset>

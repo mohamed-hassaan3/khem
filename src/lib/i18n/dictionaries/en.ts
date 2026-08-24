@@ -1109,10 +1109,10 @@ export const en = {
       postalCodePlaceholder: "Optional",
       country: "Country",
       /** Under the country field once it has been resolved from the request. */
-      countryDetected: "Detected from your location — change it if that is not right.",
+      countryDetected: "Chosen from your location — change it if that is not right.",
       outsideEgyptTitle: "We deliver within Egypt",
       outsideEgyptBody:
-        "It looks as though you are outside Egypt, and the house does not ship there yet, so this order cannot be completed. Write to us and we will tell you the moment that changes.",
+        "The country above is one the house does not ship to yet, so this order cannot be completed. If you are in Egypt, choose it from the list and you may carry on — otherwise write to us and we will tell you the moment that changes.",
       note: "Delivery Instructions",
       notePlaceholder: "Optional — a gate code, a preferred hour",
     },
@@ -1179,7 +1179,7 @@ export const en = {
       country: "Please enter the country.",
       countryLong: "That country name is too long.",
       outsideEgypt:
-        "KHEM delivers within Egypt only. This order cannot be completed from your location.",
+        "KHEM delivers within Egypt only. Choose Egypt as your country to continue.",
       noteLong: "Please keep delivery instructions under 500 characters.",
       quantity: "One of the quantities is not valid.",
       paymentMethod: "Please choose how you would like to pay.",

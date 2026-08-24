@@ -22,7 +22,7 @@
  * every label, every error, and the section numerals all mirror.
  */
 
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
 
 export interface CheckoutSectionProps {
@@ -168,6 +168,114 @@ export function CheckoutField({
           className={FIELD_CLASS}
         />
       )}
+
+      {error ? (
+        <p id={errorId} className="mt-2 text-[11px] tracking-wide text-danger">
+          {error}
+        </p>
+      ) : hint ? (
+        <p id={hintId} className="mt-2 text-[11px] leading-relaxed text-ivory/25">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+export interface CheckoutSelectOption {
+  value: string;
+  label: string;
+}
+
+export interface CheckoutSelectProps {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly CheckoutSelectOption[];
+  /** Resolved error text, already translated. `undefined` when valid. */
+  error?: string;
+  /** A quiet line under the field — where the value came from. */
+  hint?: string;
+  /** Full width in the two-column grid. */
+  wide?: boolean;
+  autoComplete?: string;
+}
+
+/**
+ * The field treatment, as a chooser.
+ *
+ * A native `<select>` rather than a custom listbox, and that is a decision
+ * rather than a shortcut. Two hundred and fifty options is exactly the case
+ * where the platform wins: a phone renders it as its own wheel, a desktop
+ * browser lets somebody type "eg" to jump, keyboard and screen-reader behaviour
+ * are correct without a line of code, and none of that has to be re-earned.
+ *
+ * What it costs is the option list's own styling, which belongs to the OS. So
+ * the *closed* control is dressed to match `<CheckoutField>` exactly —
+ * `appearance-none`, the same hairline, the same gold focus glow — and the
+ * chevron is drawn on top with the field's own icon weight. The open list looks
+ * like the operating system, which is what a visitor expects it to look like.
+ *
+ * `bg-surface` on the options is load-bearing on the desktop browsers that do
+ * honour it: without it a dark page renders black text on a black list.
+ */
+export function CheckoutSelect({
+  id,
+  label,
+  value,
+  onChange,
+  options,
+  error,
+  hint,
+  wide = false,
+  autoComplete,
+}: CheckoutSelectProps) {
+  const errorId = `${id}-error`;
+  const hintId = `${id}-hint`;
+  const describedBy =
+    [error ? errorId : null, hint ? hintId : null].filter(Boolean).join(" ") ||
+    undefined;
+
+  return (
+    <div className={wide ? "sm:col-span-2" : undefined}>
+      <label
+        htmlFor={id}
+        className="mb-2 block font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70"
+      >
+        {label}
+      </label>
+
+      <div className="relative">
+        <select
+          id={id}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          autoComplete={autoComplete}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
+          className={`${FIELD_CLASS} cursor-pointer appearance-none pe-7`}
+        >
+          {options.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+              className="bg-surface text-ivory"
+            >
+              {option.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Decorative: the control it belongs to is already labelled, and a
+            pointer-transparent icon keeps the whole field clickable. */}
+        <ChevronDown
+          size={14}
+          strokeWidth={1.25}
+          aria-hidden="true"
+          className="pointer-events-none absolute end-0 top-1/2 -translate-y-1/2 text-gold/50"
+        />
+      </div>
 
       {error ? (
         <p id={errorId} className="mt-2 text-[11px] tracking-wide text-danger">
