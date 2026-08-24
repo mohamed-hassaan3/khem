@@ -51,11 +51,13 @@ export interface DeliveryStepProps {
   /**
    * True once the edge has told us where the request came from.
    *
-   * The country then stops being a question and becomes a statement: read-only,
-   * with a line underneath saying where it came from. Editable again whenever
-   * detection was unavailable, which is every local run.
+   * It only decides whether the field explains itself — the value arrives
+   * pre-filled, with a line underneath saying where it came from. The field
+   * stays **editable** either way: detection is a convenience, and a visitor
+   * whose IP is routed through the wrong country (a VPN, a mobile carrier
+   * homed abroad) must still be able to write their own address.
    */
-  countryLocked: boolean;
+  countryDetected: boolean;
   /** False only when the detected country is one the house does not deliver to. */
   shipsHere: boolean;
 }
@@ -65,7 +67,7 @@ export default function DeliveryStep({
   onChange,
   errors,
   complete,
-  countryLocked,
+  countryDetected,
   shipsHere,
 }: DeliveryStepProps) {
   const dict = useDictionary();
@@ -132,9 +134,8 @@ export default function DeliveryStep({
         value={values.country}
         onChange={(value) => onChange("country", value)}
         error={errors.country}
-        hint={countryLocked ? copy.countryDetected : undefined}
+        hint={countryDetected ? copy.countryDetected : undefined}
         autoComplete="country-name"
-        readOnly={countryLocked}
         required
       />
 

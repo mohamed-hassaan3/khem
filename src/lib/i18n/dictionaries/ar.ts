@@ -973,7 +973,7 @@ export const ar: Dictionary = {
       postalCode: "الرمز البريدي",
       postalCodePlaceholder: "اختياري",
       country: "الدولة",
-      countryDetected: "تم تحديدها من موقعك.",
+      countryDetected: "تم تحديدها من موقعك — يمكنك تغييرها إن لم تكن صحيحة.",
       outsideEgyptTitle: "نوصل داخل مصر",
       outsideEgyptBody:
         "يبدو أنك خارج مصر، والدار لا تشحن إلى هناك بعد، لذا لا يمكن إتمام هذا الطلب. اكتب إلينا وسنخبرك فور تغيّر ذلك.",

@@ -1109,7 +1109,7 @@ export const en = {
       postalCodePlaceholder: "Optional",
       country: "Country",
       /** Under the country field once it has been resolved from the request. */
-      countryDetected: "Detected from your location.",
+      countryDetected: "Detected from your location — change it if that is not right.",
       outsideEgyptTitle: "We deliver within Egypt",
       outsideEgyptBody:
         "It looks as though you are outside Egypt, and the house does not ship there yet, so this order cannot be completed. Write to us and we will tell you the moment that changes.",

@@ -99,15 +99,6 @@ export interface CheckoutFieldProps {
   /** Renders a `<textarea>` instead. Used once, for delivery instructions. */
   multiline?: boolean;
   required?: boolean;
-  /**
-   * Shown, not asked.
-   *
-   * Used for the country once the edge has told us where the visitor is: the
-   * value is a fact about the request rather than something to type, and a
-   * disabled input would drop it out of the tab order and mute its contrast
-   * just as the page is explaining why the order cannot proceed.
-   */
-  readOnly?: boolean;
 }
 
 const FIELD_CLASS =
@@ -131,7 +122,6 @@ export function CheckoutField({
   autoComplete,
   multiline = false,
   required = false,
-  readOnly = false,
 }: CheckoutFieldProps) {
   // Wired to `aria-describedby` so a screen reader hears the error and the
   // hint, rather than only sighted users seeing them.
@@ -173,10 +163,9 @@ export function CheckoutField({
           placeholder={placeholder}
           autoComplete={autoComplete}
           required={required}
-          readOnly={readOnly}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={`${FIELD_CLASS}${readOnly ? " cursor-default text-ivory/70 hover:border-border focus:border-gold/40 focus:shadow-none" : ""}`}
+          className={FIELD_CLASS}
         />
       )}
 

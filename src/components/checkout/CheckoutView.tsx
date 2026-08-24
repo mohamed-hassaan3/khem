@@ -409,10 +409,10 @@ export default function CheckoutView({
               onChange={handleDeliveryChange}
               errors={fieldErrors}
               complete={deliveryComplete}
-              // A detected country is not a field the visitor fills in — it is
-              // a fact the page is telling them. Editable only when detection
-              // was unavailable.
-              countryLocked={detectedCountry !== null}
+              // Detection pre-fills the field and says so underneath; it never
+              // takes it away. A visitor behind a VPN, or one the edge places
+              // in the wrong country, has to be able to correct it.
+              countryDetected={detectedCountry !== null}
               shipsHere={shipsHere}
             />
           </fieldset>
