@@ -215,11 +215,10 @@
       "format_ar": null,
       "includes": [],
       "includes_ar": [],
-      "badge": "New · Limited",
-      "badge_ar": "جديد · إصدار محدود",
+      "badge": "New",
+      "badge_ar": "جديد",
       "tags": [
-        "NEW_ARRIVAL",
-        "LIMITED_EDITION"
+        "NEW_ARRIVAL"
       ],
       "topNotes": [
         "Night Iris",
@@ -724,9 +723,7 @@
       "includes_ar": [],
       "badge": null,
       "badge_ar": null,
-      "tags": [
-        "LIMITED_EDITION"
-      ],
+      "tags": [],
       "topNotes": [
         "Black Iris",
         "Incense Smoke",
@@ -810,9 +807,7 @@
       "includes_ar": [],
       "badge": null,
       "badge_ar": null,
-      "tags": [
-        "LIMITED_EDITION"
-      ],
+      "tags": [],
       "topNotes": [
         "Papyrus",
         "Aquatic Accord",
@@ -1064,9 +1059,7 @@
       "includes_ar": [],
       "badge": null,
       "badge_ar": null,
-      "tags": [
-        "LIMITED_EDITION"
-      ],
+      "tags": [],
       "topNotes": [
         "Galbanum",
         "Fig Leaf",
@@ -1860,11 +1853,9 @@
         "Mendesian 10 مل",
         "كُتيّب حكاية KHEM"
       ],
-      "badge": "Limited",
-      "badge_ar": "إصدار محدود",
-      "tags": [
-        "LIMITED_EDITION"
-      ],
+      "badge": null,
+      "badge_ar": null,
+      "tags": [],
       "topNotes": [],
       "topNotes_ar": [],
       "heartNotes": [],
@@ -2024,11 +2015,9 @@
         "علبة موزونة بختم من الشمع الأسود",
         "شهادة مرقّمة"
       ],
-      "badge": "Limited",
-      "badge_ar": "إصدار محدود",
-      "tags": [
-        "LIMITED_EDITION"
-      ],
+      "badge": null,
+      "badge_ar": null,
+      "tags": [],
       "topNotes": [],
       "topNotes_ar": [],
       "heartNotes": [],

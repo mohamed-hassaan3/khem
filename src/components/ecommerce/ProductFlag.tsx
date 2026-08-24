@@ -11,8 +11,14 @@ import { ltrIsland } from "@/src/lib/i18n/rtl";
  * component decides nothing about what a card says, only how it looks saying it.
  *
  * Placement is the inline-**start** corner across all three cards, because
- * `<ProductCard>` spends the end corner on the add-to-bag control. Both insets
- * are logical, so the pair swaps sides together in Arabic and never collides.
+ * every card spends the end corner on the add-to-bag control. Both insets are
+ * logical, so the pair swaps sides together in Arabic and never collides.
+ *
+ * On phones the pill sits flush against that edge (`start-0`) and drops a type
+ * size: at 375px the grid is two-up, a card is ~170px wide, and an inset pill
+ * at desktop size ate the corner of the photograph it was meant to annotate.
+ * Its own `px-3` keeps the text off the edge. From `sm` up the original inset
+ * and size return.
  */
 /**
  * Gold is the affirmative accent — a price, a call to action, a merchandiser's
@@ -46,7 +52,7 @@ export default function ProductFlag({
   return (
     <p
       {...(island ? ltrIsland(locale) : { dir: "auto" as const })}
-      className={`absolute start-5 top-5 z-2 px-3 py-1.5 font-heading text-[9px] font-semibold tracking-[0.2em] ${TONES[tone]}`}
+      className={`absolute start-0 top-4 z-2 px-3 py-1.5 font-heading text-[8px] font-semibold tracking-[0.2em] sm:start-5 sm:top-5 sm:text-[9px] ${TONES[tone]}`}
     >
       {label}
     </p>

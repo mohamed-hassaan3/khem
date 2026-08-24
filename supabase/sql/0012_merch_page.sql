@@ -4,36 +4,40 @@
 --
 -- ## What this is
 --
--- `/collections/best-sellers` and `/collections/limited-edition` have been real
--- pages since the merchandising round, but their name, description and hero
--- photograph lived in `src/lib/i18n/dictionaries/*` and a `MERCH_PAGE_BANNERS`
--- constant in the route. That made the one thing an editor most wants to change
--- — the hero — a deploy. This table is that copy, and nothing else.
+-- `/collections/best-sellers` has been a real page since the merchandising
+-- round, but its name, description and hero photograph lived in
+-- `src/lib/i18n/dictionaries/*` and a `MERCH_PAGE_BANNERS` constant in the
+-- route. That made the one thing an editor most wants to change — the hero — a
+-- deploy. This table is that copy, and nothing else.
+--
+-- `/collections/limited-edition` was the second such page. The cut has been
+-- withdrawn from the catalogue entirely; `0021_retire_limited_edition.sql`
+-- removes its row and narrows the check constraint below on a database that
+-- already has them.
 --
 -- ## Why this is not a `Collection`
 --
 -- A product points at exactly one collection (`"Product"."collectionSlug"`,
 -- `0001_catalog.sql`), so seeding "best sellers" as a collection would take
 -- those fragrances out of Signature and Noir. Membership stays *derived* —
--- `productFacets()` in `src/lib/facets.ts` reads `"isBestseller"` and the
--- `LIMITED_EDITION` tag — and this table stores only how the page presents
--- itself.
+-- `productFacets()` in `src/lib/facets.ts` reads `"isBestseller"` — and this
+-- table stores only how the page presents itself.
 --
 -- ## Why the slug is a closed set
 --
--- These pages exist because `MERCH_PAGE_FACETS` routes them. A third row would
+-- These pages exist because `MERCH_PAGE_FACETS` routes them. An extra row would
 -- be a page with no route; a deleted row would be a live URL with no copy. So
 -- the code is the authority on *which* pages exist and this table on what they
 -- say, and the check constraint keeps the two from drifting. The dashboard
 -- offers no create and no delete for the same reason.
 --
 -- The storefront treats a row as an override, never a dependency: with the
--- table empty, both pages still render from the dictionary and the constants.
+-- table empty, the page still renders from the dictionary and the constants.
 
 create table if not exists public."MerchPage" (
   slug            text primary key
     constraint merch_page_known_slug
-    check (slug in ('best-sellers', 'limited-edition')),
+    check (slug in ('best-sellers')),
 
   name            text not null,
   description     text not null,
@@ -51,8 +55,8 @@ create table if not exists public."MerchPage" (
 
 -- ── Seed ────────────────────────────────────────────────────
 --
--- Exactly the copy and the photographs the two pages render today, so applying
--- this migration changes nothing a visitor sees. `do nothing` rather than
+-- Exactly the copy and the photograph the page renders today, so applying this
+-- migration changes nothing a visitor sees. `do nothing` rather than
 -- `do update`: on a database where an editor has already changed the hero, a
 -- re-run must not put the Unsplash placeholder back.
 
@@ -68,16 +72,6 @@ values
     'الأكثر مبيعًا',
     'القطع التي لا تبقى على الرفّ طويلًا — اختارها عملاؤنا لا نحن، وهي مستقاة من كل مجموعة نصنعها.',
     'رخام أسود يضيئه ضوء جانبي، تتخلله عروق ذهبية شاحبة'
-  ),
-  (
-    'limited-edition',
-    'Limited Edition',
-    'Small runs, made once. Rare materials and short harvests decide how many bottles exist, and when they are gone the composition is retired.',
-    'https://images.unsplash.com/photo-1709662217788-6a8a1b31562a?w=1800&h=900&fit=crop&auto=format',
-    'A single flacon in low light, gold leaf catching the edge',
-    'إصدار محدود',
-    'إصدارات صغيرة تُصنع مرّة واحدة. ندرة المواد وقِصَر موسم الحصاد هما ما يحدّد عدد الزجاجات، وحين تنفد يُطوى العطر.',
-    'زجاجة واحدة في ضوء خافت، تلتمع حوافها بورق الذهب'
   )
 on conflict (slug) do nothing;
 

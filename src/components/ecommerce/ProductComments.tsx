@@ -53,7 +53,16 @@ export default async function ProductComments({
   const copy = dict.product.comments;
 
   return (
-    <section className="border-t border-border px-4 py-14 md:px-20 md:py-32">
+    /*
+     * `id="comments"` is a real destination, not decoration: the day-after
+     * feedback email links one line per purchased item straight here, and the
+     * scroll margin is what keeps the fixed header from sitting over the
+     * heading when the browser jumps.
+     */
+    <section
+      id="comments"
+      className="scroll-mt-24 border-t border-border px-4 py-14 md:scroll-mt-32 md:px-20 md:py-32"
+    >
       <div className="mx-auto max-w-200">
         <Reveal className="mb-8 md:mb-12">
           <p className="eyebrow mb-4">{copy.eyebrow}</p>

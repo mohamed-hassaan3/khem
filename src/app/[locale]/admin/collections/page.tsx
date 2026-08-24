@@ -41,9 +41,9 @@ export default async function AdminCollectionsPage({
   );
 
   /*
-   * The merchandising pages sit in the same table because that is where an
-   * editor looks for "the pages under /collections". They are not collections:
-   * no product belongs to one, so they have no kind, no featured flag and no
+   * The merchandising page sits in the same table because that is where an
+   * editor looks for "the pages under /collections". It is not a collection:
+   * no product belongs to it, so it has no kind, no featured flag and no
    * running order — hence the em dashes rather than invented values.
    */
   const merchPages = allMerchPages.filter((page) =>
@@ -56,7 +56,7 @@ export default async function AdminCollectionsPage({
     <>
       <AdminPageHeader
         title="Collections"
-        description="A collection decides where its products are sold: fragrances get their own detail pages, everything else sells from a category grid. The last two are merchandising pages — cuts across the whole catalogue rather than somewhere a product belongs."
+        description="A collection decides where its products are sold: fragrances get their own detail pages, everything else sells from a category grid. The last row is a merchandising page — a cut across the whole catalogue rather than somewhere a product belongs."
         action={
           <AdminLinkButton href={localizePath(activeLocale, "/admin/collections/new")}>
             <Plus size={13} strokeWidth={1.25} />

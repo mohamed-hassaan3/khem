@@ -1,20 +1,19 @@
 "use client";
 
 /**
- * Edit one of the two merchandising pages.
+ * Edit a merchandising page.
  *
  * A narrower sibling of `<CollectionForm>`: same local state, same
  * `useTransition`, same inline result — four fields instead of ten, and no
- * create or delete path at all. `/collections/best-sellers` and
- * `/collections/limited-edition` exist because `MERCH_PAGE_FACETS` routes them,
- * so the only thing an editor can change here is how the page introduces
- * itself.
+ * create or delete path at all. `/collections/best-sellers` exists because
+ * `MERCH_PAGE_FACETS` routes it, so the only thing an editor can change here is
+ * how the page introduces itself.
  *
  * The note above the fields is the important part of this screen. Everything a
  * form usually implies — that what you type decides what appears — is untrue
- * here: membership comes from each product's own Bestseller toggle and Limited
- * edition tag, and an editor who does not know that will look for a product
- * picker that has deliberately never existed.
+ * here: membership comes from each product's own Bestseller toggle, and an
+ * editor who does not know that will look for a product picker that has
+ * deliberately never existed.
  */
 
 import { useRouter } from "next/navigation";
@@ -34,8 +33,6 @@ import type { AdminMerchPage } from "@/src/schemas/db/admin";
 const MEMBERSHIP_HINT: Record<AdminMerchPage["slug"], string> = {
   "best-sellers":
     "Products appear here when their Bestseller toggle is on — set it on the product, not on this page.",
-  "limited-edition":
-    "Products appear here when they carry the Limited edition tag — set it on the product, not on this page.",
 };
 
 export default function MerchPageForm({ page }: { page: AdminMerchPage }) {

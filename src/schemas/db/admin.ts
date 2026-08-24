@@ -41,7 +41,7 @@ const concentrationSchema = z.enum([
   "ATTAR_OIL",
 ]);
 
-const productTagSchema = z.enum(["NEW_ARRIVAL", "LIMITED_EDITION"]);
+const productTagSchema = z.enum(["NEW_ARRIVAL"]);
 
 // ── Collection ────────────────────────────────────────────────
 

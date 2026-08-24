@@ -3,7 +3,7 @@
  *
  * One row of chips, one parameter. A facet is either a **collection** (the
  * seven the house ships) or a **merchandising cut** that runs across all of
- * them (new arrivals, best sellers, limited editions). Both kinds share one
+ * them (new arrivals, best sellers). Both kinds share one
  * union because they share one control: from the visitor's side "Noir" and
  * "Best Sellers" are the same gesture, and giving them two rows and two
  * parameters was two names for one idea.
@@ -18,8 +18,8 @@
  * `null` and shows the whole catalogue rather than an empty grid.
  *
  * A facet is derived, never stored twice: the collection cuts read
- * `collectionSlug`, and the three merchandising cuts read the `NEW_ARRIVAL` /
- * `LIMITED_EDITION` tags and the `isBestseller` column that already existed.
+ * `collectionSlug`, and the two merchandising cuts read the `NEW_ARRIVAL` tag
+ * and the `isBestseller` column that already existed.
  * Combining them happens here and nowhere else — adding a cut is an edit to
  * {@link FACET_ORDER} and a label in the two dictionaries; nothing in the grid
  * changes.
@@ -38,18 +38,15 @@ export type CollectionFacet =
   | "gift-set";
 
 /** A cut that crosses collections — no `collectionSlug` can express it. */
-export type MerchandisingFacet =
-  | "new-arrivals"
-  | "best-sellers"
-  | "limited-edition";
+export type MerchandisingFacet = "new-arrivals" | "best-sellers";
 
 export type ProductFacet = CollectionFacet | MerchandisingFacet;
 
 /**
  * The valid values, in the order their chips are printed.
  *
- * Editorial, not alphabetical: the newest goods open the row and the two
- * merchandising cuts close it, with the collections themselves in between in
+ * Editorial, not alphabetical: the newest goods open the row and best sellers
+ * close it, with the collections themselves in between in
  * catalogue order. `parseFacet()` narrows untrusted input against this list, and
  * the dictionary's `collections.facets` is keyed by the same strings — one
  * spelling for the URL value, the chip label, and the match.
@@ -64,7 +61,6 @@ export const FACET_ORDER: readonly ProductFacet[] = [
   "discovery",
   "gift-set",
   "best-sellers",
-  "limited-edition",
 ];
 
 /** The query parameter the cut is carried in, so a filtered view is linkable. */
@@ -84,8 +80,6 @@ export function productFacets(product: ProductCardData): ProductFacet[] {
         return product.tags.includes("NEW_ARRIVAL");
       case "best-sellers":
         return product.isBestseller;
-      case "limited-edition":
-        return product.tags.includes("LIMITED_EDITION");
       default:
         return product.collectionSlug === facet;
     }
@@ -104,12 +98,18 @@ export function parseFacet(
  * The merchandising cuts that also have a **page** of their own, at
  * `/collections/<facet>`.
  *
- * Best sellers and limited editions are what the Nav and the Footer link to, and
- * a link out of a menu should land somewhere that looks like a destination —
- * a hero, a name, a count — rather than on the catalogue with a filter silently
- * applied. So they are pages, assembled in `/collections/[slug]` from this list.
+ * Best sellers is what the Nav and the Footer link to, and a link out of a menu
+ * should land somewhere that looks like a destination — a hero, a name, a
+ * count — rather than on the catalogue with a filter silently applied. So it is
+ * a page, assembled in `/collections/[slug]` from this list.
  *
- * They cannot be `Collection` rows: a product points at exactly one collection
+ * A list of one, and deliberately still a list: `limited-edition` was the other
+ * member until the cut was withdrawn from the catalogue entirely, and the
+ * routing, revalidation, sitemap and dashboard machinery around this constant is
+ * indifferent to how many entries it holds. Adding a cut back is an entry here,
+ * a `MerchPage` row, and a label in the two dictionaries.
+ *
+ * It cannot be a `Collection` row: a product points at exactly one collection
  * (`"Product"."collectionSlug"`, `supabase/sql/0001_catalog.sql`), so seeding
  * "best sellers" would take those fragrances out of Signature and Noir. The
  * membership rule is `productFacets()` above, which is where it already was.
@@ -118,7 +118,7 @@ export function parseFacet(
  * showroom that prints each release's story and note pyramid in full, which is
  * more than a grid of cards.
  */
-export const MERCH_PAGE_FACETS = ["best-sellers", "limited-edition"] as const;
+export const MERCH_PAGE_FACETS = ["best-sellers"] as const;
 
 export type MerchPageFacet = (typeof MERCH_PAGE_FACETS)[number];
 
@@ -135,18 +135,16 @@ export function parseMerchPageFacet(slug: string): MerchPageFacet | null {
 /**
  * The one merchandising flag a card prints, or `null`.
  *
- * A limited run outranks volume: "Limited Edition" is a fact about scarcity
- * that changes whether somebody buys today, and a best seller that is also a
- * limited edition is far better described by the rarer of the two. Only one is
- * ever shown — two pills stacked in one corner of a card is not a design, and
- * a product's free-text `badge` outranks both at the call site, because a
- * merchandiser who typed "Most Popular" meant it to be the badge.
+ * A product's free-text `badge` outranks this at the call site, because a
+ * merchandiser who typed "Most Popular" meant it to be the badge; sold-out
+ * stock outranks both, because a card nobody can buy from should not lead with
+ * a claim. Only ever one pill — two stacked in one corner of a card is not a
+ * design.
  *
  * Deliberately narrower than {@link productFacets}: `new-arrivals` has its own
  * showroom at `/new-arrival` and is announced there rather than on a pill.
  */
 export function productFlag(product: ProductCardData): MerchPageFacet | null {
-  if (product.tags.includes("LIMITED_EDITION")) return "limited-edition";
   if (product.isBestseller) return "best-sellers";
   return null;
 }

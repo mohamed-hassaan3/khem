@@ -41,8 +41,8 @@ export const revalidate = 600;
  *
  * `getCollections()` rather than `getFragranceCollections()`: body care, home
  * fragrance, discovery sets and gift sets are served from here now too — their
- * former routes redirect in — so all seven need prerendering. The two
- * merchandising pages and the five scent profiles are code-owned lists and are
+ * former routes redirect in — so all seven need prerendering. The
+ * merchandising page and the five scent profiles are code-owned lists and are
  * appended from there.
  */
 export async function generateStaticParams() {
@@ -60,20 +60,18 @@ export async function generateStaticParams() {
 }
 
 /**
- * The hero photographs of last resort.
+ * The hero photograph of last resort.
  *
- * `"MerchPage"` (`supabase/sql/0012_merch_page.sql`) is where these now live,
- * editable from the dashboard, and it is seeded with exactly these two URLs.
- * They stay here as the floor under {@link getMerchPage}: with no row, an
- * unparseable row, or the database unreachable, the page renders what it
- * rendered before the table existed rather than failing. Both hosts are already
- * in `next.config.ts`.
+ * `"MerchPage"` (`supabase/sql/0012_merch_page.sql`) is where this now lives,
+ * editable from the dashboard, and it is seeded with exactly this URL. It stays
+ * here as the floor under {@link getMerchPage}: with no row, an unparseable
+ * row, or the database unreachable, the page renders what it rendered before
+ * the table existed rather than failing. The host is already in
+ * `next.config.ts`.
  */
 const MERCH_PAGE_BANNERS: Record<MerchPageFacet, string> = {
   "best-sellers":
     "https://images.unsplash.com/photo-1738664926458-d8ca7f56549f?w=1800&h=900&fit=crop&auto=format",
-  "limited-edition":
-    "https://images.unsplash.com/photo-1709662217788-6a8a1b31562a?w=1800&h=900&fit=crop&auto=format",
 };
 
 type RouteParams = { locale: string; slug: string };
@@ -122,8 +120,8 @@ export async function generateMetadata({
   ]);
 
   if (!collection) {
-    // No row, but the slug may still be one of the merchandising pages, which
-    // carry their copy in the dictionary rather than in the database.
+    // No row, but the slug may still be the merchandising page, which carries
+    // its copy in the dictionary rather than in the database.
     const facet = parseMerchPageFacet(slug);
 
     if (facet) {
@@ -199,10 +197,10 @@ export async function generateMetadata({
  * Four page shapes behind one URL space. A fragrance collection is a chapter of
  * the perfume library and renders the library's layout; the four category
  * collections keep the editorial pages they had as standalone routes (see
- * `<CategoryView>` for why that is a branch and not a flag); the two
- * merchandising cuts are assembled here from the catalogue, because they cannot
- * be rows — see `MERCH_PAGE_FACETS` in `src/lib/facets.ts`; and the five scent
- * profiles are assembled from the ingredient tables, for the reason
+ * `<CategoryView>` for why that is a branch and not a flag); the merchandising
+ * cut is assembled here from the catalogue, because it cannot be a row — see
+ * `MERCH_PAGE_FACETS` in `src/lib/facets.ts`; and the five scent profiles are
+ * assembled from the ingredient tables, for the reason
  * `src/lib/scent-profiles.ts` gives.
  *
  * Seeded collections are resolved first, so no row can ever be shadowed by a
@@ -249,16 +247,16 @@ export default async function CollectionPage({
 }
 
 /**
- * Best sellers and limited editions, as a collection page.
+ * Best sellers, as a collection page.
  *
  * The whole catalogue narrowed by `productFacets()` — the same rule the chips on
  * `/collections` apply, so the page and the chip can never disagree about what
  * a best seller is.
  *
  * An empty result renders the hero and the grid's empty state rather than a 404:
- * the page exists whether or not the house currently has anything in a numbered
- * run, and a link in the menu must never lead to a missing page because of a
- * merchandising decision.
+ * the page exists whether or not anything is currently selling, and a link in
+ * the menu must never lead to a missing page because of a merchandising
+ * decision.
  */
 async function renderMerchPage(locale: Locale, slug: string) {
   const facet = parseMerchPageFacet(slug);
@@ -292,7 +290,7 @@ async function renderMerchPage(locale: Locale, slug: string) {
       products={catalog.filter((product) =>
         productFacets(product).includes(facet),
       )}
-      // Both cuts draw from body care and the sets as well as the perfumes.
+      // The cut draws from body care and the sets as well as the perfumes.
       countsEverything
     />
   );

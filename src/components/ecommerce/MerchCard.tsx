@@ -1,8 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 
 import AddToBagButton from "@/src/components/ecommerce/AddToBagButton";
 import ProductFlag from "@/src/components/ecommerce/ProductFlag";
@@ -12,30 +10,25 @@ import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { productHref } from "@/src/lib/routes";
-import { useCart } from "@/src/providers/cart-provider";
 import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { ProductCardData } from "@/src/types/catalog";
 
 /**
- * A body-care or home-fragrance product, sold straight from the card.
+ * A body-care or home-fragrance product, as a card.
  *
- * The card still carries the buy control itself, as the original design did:
- * these goods now *have* a detail page (`/ritual/[slug]`), but reaching it
- * should be an offer, not a toll on the way to the bag. So the photograph and
- * the name are links and everything else is unchanged — one click still adds.
- *
- * Cart writes go to the `localStorage`-backed store, which persists a product
- * id and a quantity: when the bag moves to Supabase the handler becomes a
- * Server Action call and this markup is unchanged.
+ * One buy control, in the corner, exactly as the perfume cards have: the
+ * full-width button this card used to carry said the same thing twice and said
+ * it differently on two halves of the same catalogue. The photograph and the
+ * name are links to the detail page (`/ritual/[slug]`); the bag adds without
+ * leaving the grid.
  *
  * A sibling of `<ProductCard>` rather than a wrapper: that one is an async
  * Server Component whose *whole surface* is a link to the detail page, which
- * would swallow the buy button if it were reused here. What the two do share is
- * `<AddToBagButton>`, overlaid on the same corner of both.
+ * this card's format filter and its own layout do not want. What the two share
+ * is `<AddToBagButton>` and `<ProductFlag>`, overlaid on the same two corners
+ * of both, resolved in the same order.
  */
-
-const CONFIRMATION_MS = 2500;
 
 export interface MerchCardProps {
   product: ProductCardData;
@@ -57,37 +50,27 @@ export default function MerchCard({
 }: MerchCardProps) {
   const dict = useDictionary();
   const formatPrice = useFormatPrice();
-  const { addLine } = useCart();
   // Product copy comes from the database — English in both trees.
   const island = ltrIsland(locale);
 
-  const [justAdded, setJustAdded] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Clearing on unmount, and before each restart, keeps a fast double-click
-  // from leaving the button stuck in its confirmed state.
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
-    };
-  }, []);
-
+  /*
+   * A product that cannot be bought has no business leading with "Best Seller",
+   * so this takes the corner slot from both the stored badge and the flag —
+   * muted rather than gold, because it is a withdrawal and not a claim. It is
+   * also now the only place this card says so: the button that used to report
+   * it is gone.
+   */
   const isSoldOut = product.inventory === 0;
 
   // Same order as every other card: the stored `badge` overrides the flag.
   const flag = productFlag(product);
   const href = productHref(product);
 
-  const handleAddToCart = () => {
-    addLine(product.id, 1, product.inventory);
-    if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
-    setJustAdded(true);
-    timeoutRef.current = setTimeout(() => setJustAdded(false), CONFIRMATION_MS);
-  };
-
   return (
     <article className="img-zoom relative flex flex-col bg-surface">
-      {product.badge ? (
+      {isSoldOut ? (
+        <ProductFlag label={dict.product.soldOut} locale={locale} tone="muted" />
+      ) : product.badge ? (
         <ProductFlag label={product.badge} locale={locale} island />
       ) : flag ? (
         <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
@@ -95,11 +78,9 @@ export default function MerchCard({
 
       {/*
        * The same corner bag the perfume cards carry, so one gesture means the
-       * same thing everywhere in the catalogue. It does not replace the
-       * full-width button below — that one is this card's primary control and
-       * reports its own confirmation — it adds the one-tap path the grids had
-       * and this card did not. The flag sits at `start-5 top-5` and the bag at
-       * `end-5 top-5`, so the two corners never meet, in either direction.
+       * same thing everywhere in the catalogue. The flag sits at the inline
+       * start and the bag at the inline end, so the two corners never meet, in
+       * either direction.
        */}
       <AddToBagButton
         productId={product.id}
@@ -150,16 +131,16 @@ export default function MerchCard({
 
           {/*
             Hidden on the two-up mobile grid — three lines of prose in a ~170px
-            column would push the buy button off the bottom of the card. The
-            wrapping div keeps `flex-1`, so the button still bottom-aligns
-            across a row of cards with names of different lengths.
+            column would leave nothing else on the card visible above the fold.
+            The wrapping div keeps `flex-1`, so the price row still
+            bottom-aligns across a row of cards with names of different lengths.
           */}
           <p className="mb-6 hidden flex-1 text-xs leading-loose text-ivory/40 sm:block">
             {product.description}
           </p>
         </div>
 
-        <div className="mb-3 flex items-center justify-between border-t border-border pt-3 sm:mb-5 sm:pt-4">
+        <div className="flex items-center justify-between border-t border-border pt-3 sm:pt-4">
           <span className="font-heading text-[13px] tabular-nums text-gold sm:text-lg">
             {formatPrice(product.priceInCents)}
           </span>
@@ -167,24 +148,6 @@ export default function MerchCard({
             {formatVolume(product.volumeMl)}
           </span>
         </div>
-
-        <button
-          type="button"
-          disabled={isSoldOut}
-          onClick={handleAddToCart}
-          className="btn-luxury w-full justify-center disabled:pointer-events-none disabled:opacity-40"
-        >
-          {isSoldOut ? (
-            dict.product.soldOut
-          ) : justAdded ? (
-            <>
-              <Check size={14} strokeWidth={1.25} aria-hidden="true" />
-              {dict.product.added}
-            </>
-          ) : (
-            dict.product.addToCart
-          )}
-        </button>
       </div>
     </article>
   );

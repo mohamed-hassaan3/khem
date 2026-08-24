@@ -39,7 +39,11 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 
 do $$ begin
-  create type public."ProductTag" as enum ('NEW_ARRIVAL', 'LIMITED_EDITION');
+  -- A one-value enum: 'LIMITED_EDITION' was the other until the cut was
+  -- withdrawn from the catalogue. On a database created before that,
+  -- `0021_retire_limited_edition.sql` recreates the type without it — this
+  -- statement's `duplicate_object` guard means it cannot do the job here.
+  create type public."ProductTag" as enum ('NEW_ARRIVAL');
 exception when duplicate_object then null; end $$;
 
 -- ── Collection ──────────────────────────────────────────────

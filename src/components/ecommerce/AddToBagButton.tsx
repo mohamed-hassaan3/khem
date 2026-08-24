@@ -19,8 +19,9 @@ import { useDictionary } from "@/src/providers/i18n-provider";
  * controls doing the same thing.
  *
  * Adding opens the cart panel: the confirmation *is* the panel, which is why
- * there is no transient "Added" state here the way `<MerchCard>` has one — that
- * card sells from a full-width button with nowhere else to report.
+ * there is no transient "Added" state here. `<MerchCard>` used to carry one, on
+ * a full-width button that had nowhere else to report; that button is gone and
+ * this control is now the only way to buy from any card in the catalogue.
  */
 
 export interface AddToBagButtonProps {

@@ -151,7 +151,7 @@ const concentrationField = z.enum([
   "ATTAR_OIL",
 ]);
 
-const productTagField = z.enum(["NEW_ARRIVAL", "LIMITED_EDITION"]);
+const productTagField = z.enum(["NEW_ARRIVAL"]);
 
 /** Empty string from a `<select>`/`<input>` means "not set", never "". */
 const optionalText = (max: number) =>
@@ -251,7 +251,7 @@ export type UpdateCollectionInput = z.input<typeof updateCollectionSchema>;
 // ── MerchPage ─────────────────────────────────────────────────
 
 /**
- * Editing one of the two merchandising pages.
+ * Editing a merchandising page.
  *
  * There is no create and no delete schema, and the slug is a `z.enum` rather
  * than `slugField`: which merchandising pages exist is decided by

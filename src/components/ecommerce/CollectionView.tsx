@@ -36,10 +36,9 @@ import type { ProductCardData } from "@/src/types/catalog";
  * What the hero needs, and no more.
  *
  * A `Collection` row satisfies this structurally, and so does a page assembled
- * in code — which is how `/collections/best-sellers` and
- * `/collections/limited-edition` render as collection pages without being
- * `Collection` rows they cannot be (see `MERCH_PAGE_FACETS` in
- * `src/lib/facets.ts`). Narrowing the prop is what saved a second page
+ * in code — which is how `/collections/best-sellers` renders as a collection
+ * page without being a `Collection` row it cannot be (see `MERCH_PAGE_FACETS`
+ * in `src/lib/facets.ts`). Narrowing the prop is what saved a second page
  * component: nothing here ever read `kind`, `id` or the card crop.
  */
 export interface CollectionHeader {

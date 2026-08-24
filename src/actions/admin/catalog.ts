@@ -271,17 +271,16 @@ export async function deleteCollection(
 // ── Merchandising pages ───────────────────────────────────────
 
 /**
- * Edit the copy and the hero of `/collections/best-sellers` or
- * `/collections/limited-edition`.
+ * Edit the copy and the hero of `/collections/best-sellers`.
  *
- * Update only. These two pages exist because `MERCH_PAGE_FACETS` routes them,
- * so there is nothing to create and nothing that may be deleted — a missing row
- * would leave the route rendering its dictionary fallback, and a third row
- * would be a page with no URL. The schema and a check constraint both say so.
+ * Update only. The page exists because `MERCH_PAGE_FACETS` routes it, so there
+ * is nothing to create and nothing that may be deleted — a missing row would
+ * leave the route rendering its dictionary fallback, and an unrouted row would
+ * be a page with no URL. The schema and a check constraint both say so.
  *
  * What is *in* the page is not edited here: membership follows each product's
- * own Bestseller toggle and Limited edition tag, which is why the form says so
- * and why this action revalidates one path rather than a catalogue's worth.
+ * own Bestseller toggle, which is why the form says so and why this action
+ * revalidates one path rather than a catalogue's worth.
  */
 export async function updateMerchPage(
   input: unknown,

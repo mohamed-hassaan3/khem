@@ -72,6 +72,10 @@ export interface OrderLabelCopy {
   /** Supports `{code}`. */
   trackingCode: string;
   yourNote: string;
+  /** Feedback letter: the heading above the linked item list. */
+  shareYourThoughts: string;
+  /** Feedback letter: the link beside each item. */
+  leaveAComment: string;
 }
 
 export const ORDER_LABELS: Record<Locale, OrderLabelCopy> = {
@@ -93,6 +97,8 @@ export const ORDER_LABELS: Record<Locale, OrderLabelCopy> = {
     tracking: "Tracking",
     trackingCode: "Your tracking reference is {code}.",
     yourNote: "Your Note",
+    shareYourThoughts: "What You Chose",
+    leaveAComment: "Share your thoughts",
   },
   ar: {
     orderNumber: "الطلب",
@@ -112,6 +118,8 @@ export const ORDER_LABELS: Record<Locale, OrderLabelCopy> = {
     tracking: "التتبع",
     trackingCode: "رقم تتبع شحنتك هو {code}.",
     yourNote: "ملاحظتك",
+    shareYourThoughts: "ما اخترته",
+    leaveAComment: "شاركنا رأيك",
   },
 };
 
@@ -238,5 +246,48 @@ export const ORDER_COPY: Record<Locale, Record<OrderMailKind, OrderMessageCopy>>
       cta: "العودة إلى الدار",
       signoff: "مع شكرنا لسعة صدرك،",
     },
+  },
+};
+
+/**
+ * The letter that arrives a day after the parcel did.
+ *
+ * A sixth message, and deliberately **not** a member of {@link OrderMailKind}.
+ * That union is the status mapping — `mailKindForStatus()` switches over it
+ * exhaustively so that adding an `OrderStatus` fails to compile — and a member
+ * that no status maps to would quietly weaken the one guarantee it gives.
+ *
+ * It reuses {@link OrderMessageCopy} because the shape is genuinely the same:
+ * an eyebrow, a headline addressed by first name, prose, one operational
+ * sentence, a button. What differs is that the body between them is a list of
+ * what the reader bought, each line linking to that product's comment area.
+ *
+ * `detail` is where the honesty lives: a comment is public, and somebody about
+ * to write one should know that before they write it, not after.
+ */
+export const FEEDBACK_COPY: Record<Locale, OrderMessageCopy> = {
+  en: {
+    subject: "How are you finding your KHEM order {orderNumber}?",
+    preheader: "A day with your fragrance — we would love to hear how it wears.",
+    eyebrow: "A Day Later",
+    headline: "How is it wearing, {name}?",
+    intro:
+      "A fragrance tells the truth on the second day, not the first — after it has met your skin, your rooms and your hours. Now that yours has had a day, we would be glad to know what you found.",
+    detail:
+      "Choose any piece below to leave a note and a rating on its page. What you write appears publicly beside it, under your name or as a guest, and it helps the next person choose.",
+    cta: "Explore The Collections",
+    signoff: "With warm regards,",
+  },
+  ar: {
+    subject: "كيف تجد طلبك {orderNumber} من كيم؟",
+    preheader: "يوم واحد مع عطرك — يسعدنا أن نعرف كيف وجدته.",
+    eyebrow: "بعد يوم",
+    headline: "كيف وجدته، {name}؟",
+    intro:
+      "العطر يصدق في يومه الثاني لا الأول — بعد أن يلتقي ببشرتك وغرفك وساعات يومك. وقد مضى على عطرك يوم، فيسعدنا أن نعرف ما وجدت.",
+    detail:
+      "اختر أي قطعة أدناه لتترك ملاحظتك وتقييمك على صفحتها. ما تكتبه يظهر علنًا بجوارها، باسمك أو كضيف، ويساعد من يأتي بعدك على الاختيار.",
+    cta: "استكشف المجموعات",
+    signoff: "مع أطيب التحيات،",
   },
 };

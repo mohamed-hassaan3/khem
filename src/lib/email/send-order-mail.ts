@@ -28,20 +28,25 @@ import "server-only";
  */
 
 import { getSocialProfiles } from "@/src/services/contact";
-import type { OrderMailRecord } from "@/src/services/orders";
+import type { OrderFeedbackRecord, OrderMailRecord } from "@/src/services/orders";
 
 import {
   fromAddress,
   houseFromAddress,
   inboxAddress,
+  orderFromAddress,
   orderInboxAddress,
+  sameMailbox,
 } from "./addresses";
 import { getEmailClient } from "./client";
-import { stripHeaderBreaks } from "./escape";
 import { AUTO_REPLY_HEADERS } from "./headers";
 import { logoAttachment, logoSrc } from "./logo";
 import type { OrderMailKind } from "./order-copy";
-import { customerOrderEmail, newOrderNotificationEmail } from "./order-templates";
+import {
+  customerFeedbackEmail,
+  customerOrderEmail,
+  newOrderNotificationEmail,
+} from "./order-templates";
 
 function logFailure(context: string, orderNumber: string, cause: unknown): void {
   const message =
@@ -57,15 +62,38 @@ function logFailure(context: string, orderNumber: string, cause: unknown): void 
 /**
  * Tell the house an order has arrived.
  *
- * `Reply-To` is the customer, so answering "when will this ship?" is one click
- * from the notification. `From` is `noreply@` — the same reasoning
- * `addresses.ts` gives, that a mailbox sending to itself scores worse with spam
- * filters.
- *
- * It goes to `orderInboxAddress()` — khem.official@outlook.com, the operations
- * account — and **not** to the contact page's published address. Fulfilment mail
+ * It goes to `orderInboxAddress()` — orders@khemperfumes.com, the operations
+ * mailbox — and **not** to the contact page's published address. Fulfilment mail
  * and correspondence are different jobs, often different people. Override with
  * `ORDER_NOTIFICATION_EMAIL`.
+ *
+ * ## Why this one is shaped for a junk filter
+ *
+ * The house mailbox is Outlook, and order notifications were landing in Junk.
+ * Two things about the message were feeding that, and both are fixed here:
+ *
+ *  - **`Reply-To` pointed at the customer.** A reply-to address on a domain the
+ *    sender does not control is one of the oldest phishing shapes there is, and
+ *    Outlook scores it accordingly — every order replied-to a different
+ *    stranger's gmail. It is gone. Nothing is lost that the message does not
+ *    already carry: the customer's address and phone number are a row in the
+ *    slip, and answering means a new message rather than a reply.
+ *  - **The sender was the shared `noreply@`.** Outlook's verdict is learned per
+ *    sender, so a dedicated `notifications@` (see `orderFromAddress()`) is an
+ *    identity a person can mark "not junk" *once*, and one that cannot be
+ *    dragged back into the folder by anything else the site sends. It is
+ *    deliberately not `orders@`: that is now the *destination*, and the sender
+ *    must never be the recipient — see the guard below.
+ *
+ * `X-Entity-Ref-ID` carries the order number so two notifications never collapse
+ * into one thread — a picking slip that hides behind "show trimmed content" is a
+ * parcel nobody packs.
+ *
+ * None of this can override a filter that has already made its mind up: the
+ * mailbox still needs `notifications@khemperfumes.com` in Safe Senders, and the
+ * domain still needs its SPF, DKIM and DMARC records standing. That is operations, not
+ * code, and it is written down in
+ * `prompts/order-mail-deliverability-feedback-and-egypt-only-checkout.md`.
  */
 export async function notifyHouseOfOrder(order: OrderMailRecord): Promise<void> {
   const resend = getEmailClient();
@@ -80,18 +108,36 @@ export async function notifyHouseOfOrder(order: OrderMailRecord): Promise<void> 
   try {
     const payload = newOrderNotificationEmail(order);
 
+    const to = await orderInboxAddress();
+
+    /*
+     * A mailbox must not send to itself.
+     *
+     * `ORDER_NOTIFICATION_EMAIL` and `RESEND_ORDER_FROM_EMAIL` are edited
+     * independently, and pointing both at `orders@` is an easy thing to do by
+     * accident — it happened the day the operations mailbox moved onto the
+     * domain. Self-addressed mail scores worse with exactly the filter this
+     * whole arrangement exists to satisfy, so the send falls back to the
+     * website's general sender rather than going out mis-shaped.
+     */
+    const configured = orderFromAddress();
+    const from = sameMailbox(configured, to) ? fromAddress() : configured;
+
+    if (from !== configured) {
+      console.warn(
+        "[order-mail] RESEND_ORDER_FROM_EMAIL names the order inbox; sending as the website address instead.",
+      );
+    }
+
     const { error } = await resend.emails.send({
-      from: fromAddress(),
-      to: await orderInboxAddress(),
-      // Validated by `checkoutSchema` before it ever reached the database, and
-      // stripped again here: a header is the one place a newline is an attack
-      // rather than a typo.
-      replyTo: order.customerEmail
-        ? stripHeaderBreaks(order.customerEmail)
-        : undefined,
+      from,
+      to,
       subject: payload.subject,
       html: payload.html,
       text: payload.text,
+      // The order number, not an address: this header exists only to keep two
+      // notifications from being threaded together.
+      headers: { "X-Entity-Ref-ID": order.orderNumber },
     });
 
     // Resend answers `{ data, error }` rather than throwing. Not reading this
@@ -170,6 +216,74 @@ export async function notifyCustomerOfOrder(
     if (error) logFailure(`${kind} rejected`, order.orderNumber, error.message);
   } catch (cause) {
     logFailure(`${kind} threw`, order.orderNumber, cause);
+  }
+}
+
+/**
+ * Ask a customer what they thought, a day after the parcel arrived.
+ *
+ * Sent by `src/app/api/cron/order-feedback/route.ts`, never by a status change:
+ * nothing happens to an order at the twenty-four hour mark, which is precisely
+ * why this one needs a clock rather than a trigger.
+ *
+ * Best-effort like everything else here, and *deliberately* so even though this
+ * one runs unattended: the caller has already stamped
+ * `"Order"."feedbackRequestedAt"` before calling, so a throw would earn no
+ * second attempt anyway — it would only turn one unsent letter into a failed
+ * cron run and a red mark on a dashboard.
+ *
+ * Written in `order.locale`, carrying the same mark, shell and signature as the
+ * five status letters. It is a letter from the house, not a survey.
+ */
+export async function notifyCustomerOfFeedbackRequest(
+  order: OrderFeedbackRecord,
+): Promise<void> {
+  const resend = getEmailClient();
+
+  if (!resend) {
+    console.warn(
+      `[order-mail] RESEND_API_KEY is not set; ${order.orderNumber} feedback not sent.`,
+    );
+    return;
+  }
+
+  if (!order.customerEmail) return;
+
+  try {
+    const [socials, attachment] = await Promise.all([
+      getSocialProfiles(),
+      logoAttachment(),
+    ]);
+
+    const payload = customerFeedbackEmail({
+      order,
+      socials,
+      logoSrc: logoSrc(attachment),
+    });
+
+    const { error } = await resend.emails.send({
+      from: houseFromAddress(),
+      to: order.customerEmail,
+      replyTo: await inboxAddress(),
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
+      headers: AUTO_REPLY_HEADERS,
+      attachments: attachment
+        ? [
+            {
+              filename: attachment.filename,
+              content: attachment.content,
+              contentType: attachment.contentType,
+              contentId: attachment.contentId,
+            },
+          ]
+        : undefined,
+    });
+
+    if (error) logFailure("feedback rejected", order.orderNumber, error.message);
+  } catch (cause) {
+    logFailure("feedback threw", order.orderNumber, cause);
   }
 }
 

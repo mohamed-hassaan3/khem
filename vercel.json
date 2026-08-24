@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/sweep-unpaid-orders",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/order-feedback",
+      "schedule": "0 9 * * *"
     }
   ]
 }

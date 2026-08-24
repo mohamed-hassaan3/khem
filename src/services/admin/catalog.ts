@@ -116,12 +116,12 @@ export async function countProductsInCollection(slug: string): Promise<number> {
 }
 
 /**
- * The two merchandising pages.
+ * The merchandising pages.
  *
  * Ordered by {@link MERCH_PAGE_FACETS} rather than by a `sortOrder` column: the
- * table has no such column because the running order of two fixed pages is not
- * a merchandising decision, and the list they appear in is the same list that
- * routes them.
+ * table has no such column because the running order of a fixed set of pages is
+ * not a merchandising decision, and the list they appear in is the same list
+ * that routes them.
  */
 export async function listAdminMerchPages(): Promise<AdminMerchPage[]> {
   const supabase = getSupabaseAdmin();
@@ -166,8 +166,8 @@ export async function getAdminMerchPage(
 /**
  * How many live products each merchandising cut currently holds.
  *
- * The same rule `productFacets()` applies on the storefront, expressed as two
- * count queries rather than by pulling the catalogue into memory: the dashboard
+ * The same rule `productFacets()` applies on the storefront, expressed as a
+ * count query rather than by pulling the catalogue into memory: the dashboard
  * only ever prints the number. Archived and soft-deleted rows are excluded
  * because the storefront pages exclude them — a tile that disagreed with the
  * page it links to would be worse than no tile.
@@ -176,31 +176,20 @@ export async function countMerchPageProducts(): Promise<
   Record<MerchPageFacet, number>
 > {
   const supabase = getSupabaseAdmin();
-  if (!supabase) return { "best-sellers": 0, "limited-edition": 0 };
+  if (!supabase) return { "best-sellers": 0 };
 
-  const live = () =>
-    supabase
-      .from("Product")
-      .select("slug", { count: "exact", head: true })
-      .eq("isArchived", false)
-      .is("deletedAt", null);
-
-  const [bestSellers, limited] = await Promise.all([
-    live().eq("isBestseller", true),
-    live().contains("tags", ["LIMITED_EDITION"]),
-  ]);
+  const bestSellers = await supabase
+    .from("Product")
+    .select("slug", { count: "exact", head: true })
+    .eq("isArchived", false)
+    .is("deletedAt", null)
+    .eq("isBestseller", true);
 
   if (bestSellers.error) {
     logFailure("countMerchPageProducts(best-sellers)", bestSellers.error.message);
   }
-  if (limited.error) {
-    logFailure("countMerchPageProducts(limited-edition)", limited.error.message);
-  }
 
-  return {
-    "best-sellers": bestSellers.count ?? 0,
-    "limited-edition": limited.count ?? 0,
-  };
+  return { "best-sellers": bestSellers.count ?? 0 };
 }
 
 /** The full product list, archived rows included, newest edits first. */

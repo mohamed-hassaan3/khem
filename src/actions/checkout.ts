@@ -53,10 +53,16 @@
  * stricter than it was, not looser.
  */
 
+import { headers } from "next/headers";
+
 import { getUserId } from "@/src/lib/auth";
 import { shippingInCents } from "@/src/lib/cart";
 import { clientKey, isRateLimited } from "@/src/lib/email/rate-limit";
 import { announceOrder } from "@/src/lib/email/send-order-mail";
+import {
+  SHIPPING_COUNTRY,
+  detectedCountryCode,
+} from "@/src/lib/shipping";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { checkoutFieldErrors, checkoutSchema } from "@/src/schemas/checkout";
 import { getOrderForMailByNumber, resolveCartToLines } from "@/src/services/orders";
@@ -176,7 +182,32 @@ export async function placeCustomerOrder(
     return { ok: false, formError: "rateLimited" };
   }
 
-  // 3. Authoritative validation. The form checked the same rules; that was an
+  /*
+   * 3. Where the order is being placed from.
+   *
+   * The house delivers within Egypt. The form knows that and disables its own
+   * button, but a Server Action is a public HTTP endpoint and the button is
+   * not the gate — this is.
+   *
+   * Read from `x-vercel-ip-country`, the same header `src/proxy.ts` already
+   * trusts to choose a display currency. A **missing** header is not a refusal:
+   * off Vercel it is simply absent, and refusing every local order would make
+   * the checkout untestable. The typed country is judged separately by
+   * `checkoutSchema` a few lines below, so an absent header still cannot let a
+   * French address through.
+   */
+  const country = detectedCountryCode(
+    (await headers()).get("x-vercel-ip-country"),
+  );
+
+  if (country !== null && country !== SHIPPING_COUNTRY) {
+    // The code, never the IP. Where somebody is shopping from is not something
+    // this log needs to keep.
+    console.info(`[checkout] refused an order from ${country}.`);
+    return { ok: false, formError: "outsideEgypt" };
+  }
+
+  // 4. Authoritative validation. The form checked the same rules; that was an
   //    affordance, this is the boundary.
   const parsed = checkoutSchema.safeParse(input);
 
@@ -194,7 +225,7 @@ export async function placeCustomerOrder(
     return { ok: false, formError: "unconfigured" };
   }
 
-  // 4. Ids → slugs and prices. The slugs are what `place_order()` takes; the
+  // 5. Ids → slugs and prices. The slugs are what `place_order()` takes; the
   //    subtotal exists only to compute the delivery fee below.
   const resolution = await resolveCartToLines(parsed.data.items);
 
@@ -206,16 +237,16 @@ export async function placeCustomerOrder(
     };
   }
 
-  // 5. The one figure the database cannot derive. Same function the cart page
+  // 6. The one figure the database cannot derive. Same function the cart page
   //    used to quote it, so the total shown and the total charged come from one
   //    implementation — which is the promise `src/lib/cart.ts` opens with.
   const shipInCents = shippingInCents(resolution.subtotalInCents);
 
-  // 6. Free anything abandoned before asking for stock, so a bottle held by a
+  // 7. Free anything abandoned before asking for stock, so a bottle held by a
   //    basket nobody paid for is available to the person standing here now.
   await sweepStaleHolds(supabase);
 
-  // 7. Identity from the session, never from the body. A guest gets null here
+  // 8. Identity from the session, never from the body. A guest gets null here
   //    and their order correctly never appears in anybody's portal.
   const clerkUserId = await getUserId();
 

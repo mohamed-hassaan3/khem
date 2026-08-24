@@ -67,9 +67,15 @@ export async function inboxAddress(): Promise<string> {
  *    and dispatch a parcel. It is fulfilment, not correspondence, and it is
  *    routinely a different person or a different account entirely.
  *
- * Defaults to `khem.official@outlook.com`, the house operations account.
+ * Defaults to `orders@khemperfumes.com`, the house operations mailbox.
  * `ORDER_NOTIFICATION_EMAIL` overrides it, which makes redirecting fulfilment
  * mail a dashboard edit rather than a deploy.
+ *
+ * It was `khem.official@outlook.com` — the Outlook account directly — until the
+ * house moved fulfilment onto its own domain. On-domain is the better default
+ * for the reason the whole deliverability pass exists: a recipient on a mailbox
+ * we control can be whitelisted, filtered and forwarded by us, and an address
+ * on the sending domain is one fewer hop for a spam filter to be suspicious of.
  *
  * A hardcoded default rather than a database read, unlike `inboxAddress()`:
  * this address is never published to anybody, so there is no page for it to
@@ -80,8 +86,58 @@ export async function inboxAddress(): Promise<string> {
  * it to a `"BoutiqueSetting"` row later is a change of body, not of every
  * caller.
  */
-const DEFAULT_ORDER_INBOX = "khem.official@outlook.com";
+const DEFAULT_ORDER_INBOX = "orders@khemperfumes.com";
 
 export async function orderInboxAddress(): Promise<string> {
   return process.env.ORDER_NOTIFICATION_EMAIL ?? DEFAULT_ORDER_INBOX;
+}
+
+/**
+ * Sender for the new-order notification.
+ *
+ * Its own identity rather than {@link fromAddress}, for one reason: the house
+ * mailbox is Outlook behind the domain, and Outlook's junk verdict is learned
+ * per *sender*, not per domain. A dedicated address is one thing a person adds
+ * to Safe Senders once and never thinks about again — and it cannot be dragged
+ * back into Junk by whatever else `noreply@` sends.
+ *
+ * `notifications@` and **not** `orders@`, deliberately: `orders@` is where the
+ * notification *lands* now that `ORDER_NOTIFICATION_EMAIL` points there, and a
+ * mailbox that sends to itself is the exact arrangement {@link fromAddress}
+ * warns about — worse spam scoring, and a threading mess in the one inbox that
+ * has to stay readable. {@link sameMailbox} enforces the separation at send
+ * time, in case an env var ever collapses the two again.
+ *
+ * On the same verified domain as everything else, so nothing new has to be
+ * proven to Resend. `RESEND_ORDER_FROM_EMAIL` overrides it.
+ */
+const DEFAULT_ORDER_FROM = "KHEM Orders <notifications@khemperfumes.com>";
+
+export function orderFromAddress(): string {
+  return process.env.RESEND_ORDER_FROM_EMAIL ?? DEFAULT_ORDER_FROM;
+}
+
+/**
+ * The bare address inside a `Name <local@domain>` header, lowercased.
+ *
+ * Both forms are legal in every env var here, so a comparison that did not
+ * unwrap the display name would call `"KHEM Orders <orders@…>"` and
+ * `"orders@…"` different mailboxes when they are the same one.
+ */
+function mailboxOf(address: string): string {
+  const angled = address.match(/<([^>]+)>/);
+  return (angled ? angled[1] : address).trim().toLowerCase();
+}
+
+/**
+ * True when two headers name the same mailbox.
+ *
+ * Used once, by `notifyHouseOfOrder`, to keep a notification from being
+ * addressed from and to the same account after somebody edits an env var. It is
+ * a guard rather than a rule, because the two values are configuration and the
+ * failure it prevents is silent: mail that sends, arrives, and quietly scores
+ * worse every time.
+ */
+export function sameMailbox(a: string, b: string): boolean {
+  return mailboxOf(a) === mailboxOf(b);
 }

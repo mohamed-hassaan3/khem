@@ -26,6 +26,7 @@
 import { z } from "zod";
 
 import { MAX_QUANTITY_PER_LINE } from "@/src/lib/cart";
+import { isEgypt } from "@/src/lib/shipping";
 import { LOCALES } from "@/src/lib/i18n/config";
 
 /**
@@ -71,7 +72,19 @@ export const checkoutSchema = z.object({
   // Optional on purpose. Egyptian addresses frequently carry no postal code,
   // and demanding one is how a checkout loses a domestic sale.
   postalCode: z.string().trim().max(20, "postalCodeLong").default(""),
-  country: z.string().trim().min(2, "country").max(80, "countryLong"),
+  /*
+   * Egypt, and only Egypt. The house delivers nowhere else, and a checkout that
+   * takes the money first and discovers the address on a picking slip has
+   * already failed the customer. `isEgypt` is a small allowlist rather than a
+   * country parser — see `src/lib/shipping.ts` for why generosity here would be
+   * a hole rather than a kindness.
+   */
+  country: z
+    .string()
+    .trim()
+    .min(2, "country")
+    .max(80, "countryLong")
+    .refine(isEgypt, "outsideEgypt"),
 
   /** Delivery instructions from the customer. Distinct from the desk's `note`. */
   note: z.string().trim().max(500, "noteLong").default(""),

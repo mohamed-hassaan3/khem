@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 import CheckoutView from "@/src/components/checkout/CheckoutView";
 import { getViewer } from "@/src/lib/auth";
 import { isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
+import { detectedCountryCode } from "@/src/lib/shipping";
 import { isCardPaymentAvailable } from "@/src/lib/stripe/server";
 import { getProductCardsByCollection } from "@/src/services/products";
 
@@ -68,10 +70,24 @@ export default async function CheckoutPage({
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  const [viewer, catalog] = await Promise.all([
+  const [viewer, catalog, requestHeaders] = await Promise.all([
     getViewer(),
     getProductCardsByCollection(activeLocale),
+    headers(),
   ]);
+
+  /*
+   * Where the visitor is, as Vercel's edge sees it — the same header
+   * `src/proxy.ts` reads to pick a display currency. Null off Vercel, and the
+   * form treats null as *unknown* rather than as *elsewhere*; see
+   * `src/lib/shipping.ts`.
+   *
+   * Free to read here: this route is already `force-dynamic` for the session,
+   * so nothing is opted out of caching that was not already.
+   */
+  const detectedCountry = detectedCountryCode(
+    requestHeaders.get("x-vercel-ip-country"),
+  );
 
   return (
     <CheckoutView
@@ -89,6 +105,10 @@ export default async function CheckoutPage({
       // Decided on the server: `STRIPE_SECRET_KEY` is not visible to the
       // browser, so the client cannot answer this question for itself.
       cardAvailable={isCardPaymentAvailable()}
+      // Prefills the country and, when it is not Egypt, closes the checkout.
+      // The refusal is enforced again in `placeCustomerOrder` — this prop only
+      // decides what the visitor sees before they press anything.
+      detectedCountry={detectedCountry}
     />
   );
 }

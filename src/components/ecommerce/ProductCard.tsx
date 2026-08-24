@@ -66,8 +66,7 @@ export default async function ProductCard({
   /*
    * One badge, resolved in the same order on all three card types: the stored
    * free-text `badge` is a merchandiser's deliberate override and wins, then
-   * the merchandising flag. `productFlag()` decides between Limited Edition and
-   * Best Seller, so a card never has to.
+   * the merchandising flag `productFlag()` resolves, so a card never has to.
    */
   const flag = productFlag(product);
 

@@ -56,7 +56,7 @@ const collectionKindSchema = z.enum([
   "GIFT",
 ]);
 
-const productTagSchema = z.enum(["NEW_ARRIVAL", "LIMITED_EDITION"]);
+const productTagSchema = z.enum(["NEW_ARRIVAL"]);
 
 /** The `"Collection"` columns, as selected. */
 export const collectionRowSchema = z.object({
@@ -127,8 +127,7 @@ export function toCollection(row: unknown, locale: Locale): Collection | null {
 // ── MerchPage ─────────────────────────────────────────────────
 
 /**
- * `"MerchPage"` — how `/collections/best-sellers` and
- * `/collections/limited-edition` introduce themselves.
+ * `"MerchPage"` — how `/collections/best-sellers` introduces itself.
  *
  * `slug` is validated against {@link MERCH_PAGE_FACETS} rather than accepted as
  * a string: the table has a check constraint saying the same thing, and parsing

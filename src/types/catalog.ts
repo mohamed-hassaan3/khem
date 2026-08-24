@@ -46,13 +46,14 @@ export type CollectionKind =
  *
  * Only what cannot be derived from a column that already exists: "best seller"
  * is `Product.isBestseller` (AGENTS.md §9) and every category facet is the
- * parent collection's {@link CollectionKind}. Combining the three into the
- * filter chips on `/collections` happens in exactly one place —
- * `productFacets()` in `src/lib/facets.ts`.
+ * parent collection's {@link CollectionKind}. Combining them into the filter
+ * chips on `/collections` happens in exactly one place — `productFacets()` in
+ * `src/lib/facets.ts`.
  *
- * Becomes a Postgres enum array, stored like `topNotes`.
+ * A union of one since the Limited Edition cut was withdrawn. Becomes a
+ * Postgres enum array, stored like `topNotes`.
  */
-export type ProductTag = "NEW_ARRIVAL" | "LIMITED_EDITION";
+export type ProductTag = "NEW_ARRIVAL";
 
 /** Mirrors the `ProductImage` model. */
 export interface ProductImage {
@@ -99,8 +100,7 @@ export interface Collection {
 }
 
 /**
- * The presentation of a merchandising page — `/collections/best-sellers` and
- * `/collections/limited-edition`.
+ * The presentation of a merchandising page — `/collections/best-sellers`.
  *
  * Mirrors `"MerchPage"` (`supabase/sql/0012_merch_page.sql`), which stores how
  * such a page introduces itself and nothing about what is *in* it: membership
@@ -108,7 +108,7 @@ export interface Collection {
  * already points at exactly one collection and these cuts run across all of
  * them.
  *
- * `slug` is typed as a plain string here even though only two values exist.
+ * `slug` is typed as a plain string here even though the set is closed.
  * The narrow union lives in `src/lib/facets.ts`, and importing it back into
  * this module would close a cycle — `facets.ts` already reads
  * {@link ProductCardData} from here — which is not a style objection: an
@@ -184,14 +184,14 @@ export interface Product {
    * sellable SKU, so there is nothing to point at.
    */
   includes: string[];
-  /** Merchandising flag — "Most Popular", "Limited", "Exclusive". */
+  /** Merchandising flag — "Most Popular", "New", "Exclusive". */
   badge: string | null;
   /**
    * Merchandising tags — see {@link ProductTag}. Empty for most of the catalog.
    *
    * A displayed `badge` is free editorial text; these are the machine-readable
    * flags the `/collections` filter and `/new-arrival` query on, which is why a
-   * set can read "Limited" on its card and still be absent from the limited
+   * set can read "New" on its card and still be absent from the New Arrival
    * facet unless it is tagged.
    */
   tags: ProductTag[];
@@ -264,7 +264,7 @@ export type ProductCardData = Pick<
   | "badge"
   /*
    * The merchandising flags the `/collections` `?facet=` cuts filter on — the
-   * best-sellers and limited-edition views the Nav and Footer link to. Carried
+   * best-sellers view the Nav and Footer link to. Carried
    * on the card projection because the filter runs over the cards already in
    * hand — a list query selects the column rather than the grid re-fetching.
    */

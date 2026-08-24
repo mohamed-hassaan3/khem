@@ -29,6 +29,7 @@
  * and nothing else changes.
  */
 
+import { HOUSE_EMAIL } from "@/src/constants/contact";
 import { useDictionary } from "@/src/providers/i18n-provider";
 
 import { CheckoutField, CheckoutSection } from "./CheckoutField";
@@ -47,6 +48,16 @@ export interface DeliveryStepProps {
   onChange: (field: DeliveryField, value: string) => void;
   errors: Record<string, string | undefined>;
   complete: boolean;
+  /**
+   * True once the edge has told us where the request came from.
+   *
+   * The country then stops being a question and becomes a statement: read-only,
+   * with a line underneath saying where it came from. Editable again whenever
+   * detection was unavailable, which is every local run.
+   */
+  countryLocked: boolean;
+  /** False only when the detected country is one the house does not deliver to. */
+  shipsHere: boolean;
 }
 
 export default function DeliveryStep({
@@ -54,6 +65,8 @@ export default function DeliveryStep({
   onChange,
   errors,
   complete,
+  countryLocked,
+  shipsHere,
 }: DeliveryStepProps) {
   const dict = useDictionary();
   const copy = dict.checkout.delivery;
@@ -119,9 +132,39 @@ export default function DeliveryStep({
         value={values.country}
         onChange={(value) => onChange("country", value)}
         error={errors.country}
+        hint={countryLocked ? copy.countryDetected : undefined}
         autoComplete="country-name"
+        readOnly={countryLocked}
         required
       />
+
+      {/*
+       * Shown instead of a field error, and deliberately: nothing the visitor
+       * typed is wrong. It is a fact about where they are, so it reads as an
+       * apology with a way to reach a person, not as a validation failure.
+       *
+       * `role="note"` rather than `alert`: it is present from first paint
+       * rather than announced in response to an action.
+       */}
+      {!shipsHere ? (
+        <div
+          role="note"
+          className="border border-gold/30 bg-gold/5 px-5 py-4 sm:col-span-2"
+        >
+          <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+            {copy.outsideEgyptTitle}
+          </p>
+          <p className="mt-2 text-[12px] leading-relaxed text-ivory/60">
+            {copy.outsideEgyptBody}
+          </p>
+          <a
+            href={`mailto:${HOUSE_EMAIL}`}
+            className="mt-3 inline-block text-[12px] tracking-wide text-gold underline-offset-4 hover:underline"
+          >
+            {HOUSE_EMAIL}
+          </a>
+        </div>
+      ) : null}
 
       <CheckoutField
         id="checkout-note"

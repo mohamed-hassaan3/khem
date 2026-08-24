@@ -79,12 +79,11 @@ export default async function EditCollectionPage({
 }
 
 /**
- * The edit screen for `/collections/best-sellers` or
- * `/collections/limited-edition`.
+ * The edit screen for `/collections/best-sellers`.
  *
- * No danger zone: these two pages are routed by `MERCH_PAGE_FACETS`, so
- * deleting the row would leave a live URL rendering its dictionary fallback
- * rather than removing anything. There is nothing here to destroy.
+ * No danger zone: the page is routed by `MERCH_PAGE_FACETS`, so deleting the
+ * row would leave a live URL rendering its dictionary fallback rather than
+ * removing anything. There is nothing here to destroy.
  *
  * A slug that is a merchandising page but has no row means the migration has
  * not been applied; that 404s rather than rendering an empty form over a table

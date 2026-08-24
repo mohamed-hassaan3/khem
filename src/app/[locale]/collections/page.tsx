@@ -46,7 +46,7 @@ export async function generateMetadata({
  *
  * It offers one filter row and one parameter. Every chip writes `?facet=`,
  * whether it names a collection or a merchandising cut that crosses all of them
- * (best sellers, limited editions, new arrivals): from the visitor's side those
+ * (best sellers, new arrivals): from the visitor's side those
  * are one gesture, so they are one vocabulary. See `src/lib/facets.ts`.
  */
 export default async function Collections({

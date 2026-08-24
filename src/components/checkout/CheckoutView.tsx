@@ -46,6 +46,11 @@ import { placeCustomerOrder } from "@/src/actions/checkout";
 import { cartSubtotalInCents, cartTotalInCents } from "@/src/lib/cart";
 import { formatPrice } from "@/src/lib/format";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
+import {
+  SHIPPING_COUNTRY,
+  SHIPPING_COUNTRY_NAME,
+  countryName,
+} from "@/src/lib/shipping";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
@@ -66,10 +71,15 @@ export interface CheckoutViewProps {
   viewer: { fullName: string | null; primaryEmail: string | null } | null;
   /** Whether both Stripe keys are present. Decided on the server. */
   cardAvailable: boolean;
+  /**
+   * ISO-3166 alpha-2 for where the request came from, or null off Vercel.
+   *
+   * Null means *unknown*, never *elsewhere*: the country field stays editable
+   * and the order goes through, exactly as it did before detection existed.
+   * See `src/lib/shipping.ts`.
+   */
+  detectedCountry: string | null;
 }
-
-/** What a shopper in Egypt would otherwise have to type every time. */
-const DEFAULT_COUNTRY = "Egypt";
 
 interface PlacedOrder {
   orderId: string;
@@ -81,6 +91,7 @@ export default function CheckoutView({
   catalog,
   viewer,
   cardAvailable,
+  detectedCountry,
 }: CheckoutViewProps) {
   const dict = useDictionary();
   const router = useRouter();
@@ -96,7 +107,17 @@ export default function CheckoutView({
     city: "",
     state: "",
     postalCode: "",
-    country: DEFAULT_COUNTRY,
+    /*
+     * Detected rather than typed, whenever the edge could tell us. Stored as a
+     * display name — that is what goes on the picking slip and into
+     * `"Order"."shipCountry"` — and in the house language for Egypt itself, so
+     * an Arabic order does not print "Egypt" and an English one "مصر".
+     */
+    country: detectedCountry
+      ? detectedCountry === SHIPPING_COUNTRY
+        ? SHIPPING_COUNTRY_NAME[locale]
+        : countryName(detectedCountry, locale)
+      : SHIPPING_COUNTRY_NAME[locale],
     note: "",
   });
 
@@ -163,6 +184,16 @@ export default function CheckoutView({
     address.state.trim().length >= 2 &&
     address.country.trim().length >= 2;
 
+  /*
+   * Whether this visitor can be delivered to at all.
+   *
+   * Unknown counts as yes — see the prop's own note. Everything downstream of
+   * this flag is presentation: the real refusal happens in
+   * `placeCustomerOrder`, which reads the same header for itself.
+   */
+  const shipsHere =
+    detectedCountry === null || detectedCountry === SHIPPING_COUNTRY;
+
   function clearFieldError(field: string) {
     setFieldErrors((current) => {
       if (!current[field]) return current;
@@ -213,6 +244,13 @@ export default function CheckoutView({
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isPending || placedOrder !== null) return;
+
+    // The button is already disabled; this catches the Enter key and anything
+    // that re-enables it from a console. The action refuses regardless.
+    if (!shipsHere) {
+      showFailure("outsideEgypt");
+      return;
+    }
 
     setFormError(null);
     setErrorDetail(null);
@@ -371,6 +409,11 @@ export default function CheckoutView({
               onChange={handleDeliveryChange}
               errors={fieldErrors}
               complete={deliveryComplete}
+              // A detected country is not a field the visitor fills in — it is
+              // a fact the page is telling them. Editable only when detection
+              // was unavailable.
+              countryLocked={detectedCountry !== null}
+              shipsHere={shipsHere}
             />
           </fieldset>
 
@@ -449,7 +492,7 @@ export default function CheckoutView({
           {!awaitingPayment ? (
             <button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || !shipsHere}
               className="btn-luxury btn-luxury-fill mt-6 md:mt-10 w-full justify-center disabled:cursor-not-allowed disabled:opacity-45"
             >
               {isPending

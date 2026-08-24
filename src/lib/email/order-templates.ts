@@ -37,8 +37,9 @@ import {
 } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
-import { ACCOUNT_PATHS } from "@/src/lib/routes";
-import type { OrderMailRecord } from "@/src/services/orders";
+import { ACCOUNT_PATHS, productHref } from "@/src/lib/routes";
+import type { OrderFeedbackRecord, OrderMailRecord } from "@/src/services/orders";
+import type { CollectionKind } from "@/src/types/catalog";
 import type { SocialProfile } from "@/src/types/contact";
 
 import { escapeHtml } from "./escape";
@@ -50,7 +51,12 @@ import {
   signoff,
   spacer,
 } from "./layout";
-import { ORDER_COPY, ORDER_LABELS, type OrderMailKind } from "./order-copy";
+import {
+  FEEDBACK_COPY,
+  ORDER_COPY,
+  ORDER_LABELS,
+  type OrderMailKind,
+} from "./order-copy";
 import { type EmailPayload, internalRow, internalShell } from "./templates";
 
 const BACKGROUND = "#0d0d0d";
@@ -220,15 +226,35 @@ function addressBlock(order: OrderMailRecord, locale: Locale): string {
     </table>`;
 }
 
-/** Payment method, and for cash the amount to have ready at the door. */
-function paymentBlock(order: OrderMailRecord, locale: Locale): string {
+/**
+ * Payment method, and — only where money is still owed — the amount to have
+ * ready at the door.
+ *
+ * The `kind` is what makes the second half conditional. A delivered parcel has
+ * already been paid for at that door, and telling somebody to "have EGP 2,400
+ * ready for the courier" *after* they handed it over reads as a second demand
+ * for money they have already given. So the instruction is printed on the two
+ * messages where it is still true — the confirmation and the shipping notice —
+ * and on no other.
+ *
+ * The method line itself stays on every message that shows this block: "Cash on
+ * delivery" is a fact about the order, and a receipt that omits how it was
+ * settled is a worse receipt.
+ */
+function paymentBlock(
+  order: OrderMailRecord,
+  locale: Locale,
+  kind: OrderMailKind,
+): string {
   const labels = ORDER_LABELS[locale];
   const align = alignFor(locale);
 
   const method = order.paymentMethod === "CARD" ? labels.card : labels.cash;
 
+  const owing = kind === "confirmation" || kind === "shipped";
+
   const instruction =
-    order.paymentMethod === "CASH"
+    order.paymentMethod === "CASH" && owing
       ? `<p style="margin:8px 0 0 0;font-family:${SANS};font-size:13px;line-height:1.8;color:${CHAMPAGNE};">${escapeHtml(
           interpolate(labels.cashInstruction, {
             amount: formatPrice(order.totalInCents),
@@ -345,7 +371,7 @@ export function customerOrderEmail({
     paragraph(copy.intro, align),
     orderNumberBlock(labels.orderNumber, order.orderNumber),
     receiptTable(order, locale),
-    isOpen ? paymentBlock(order, locale) : "",
+    isOpen ? paymentBlock(order, locale, kind) : "",
     isOpen ? addressBlock(order, locale) : "",
     mutedParagraph(copy.detail, align),
     tracking,
@@ -513,4 +539,164 @@ export function newOrderNotificationEmail(order: OrderMailRecord): EmailPayload 
     html,
     text,
   };
+}
+
+
+// ── The day-after letter ──────────────────────────────────────
+
+/**
+ * Where a customer goes to say what they thought of one purchase.
+ *
+ * `#comments` is the anchor on `<ProductComments>`, which carries a scroll
+ * margin so the sticky header does not sit over the heading. `localizePath`
+ * keeps the reader in the language the order was placed in — a link that
+ * switches somebody back to English on click is the same bug as an
+ * untranslated subject line.
+ */
+function commentHref(
+  slug: string,
+  collectionKind: CollectionKind,
+  locale: Locale,
+): string {
+  const path = productHref({ slug, collectionKind });
+  return `${SITE_URL}${localizePath(locale, path)}#comments`;
+}
+
+/**
+ * The list of what they bought, each line an invitation.
+ *
+ * A line whose product no longer resolves to a page — archived, deleted, or a
+ * set that never had one — is printed as plain text. That is deliberate: the
+ * point of the letter is to reach the comment area, and a gold link that lands
+ * on a 404 costs more trust than a name with no link costs interest.
+ */
+function feedbackItemRows(order: OrderFeedbackRecord, locale: Locale): string {
+  const labels = ORDER_LABELS[locale];
+  const align = alignFor(locale);
+
+  return order.items
+    .map((item) => {
+      const kind = order.linkable[item.productSlug];
+
+      const action = kind
+        ? `<p style="margin:6px 0 0 0;font-family:${SANS};font-size:11px;letter-spacing:0.18em;text-transform:uppercase;"><a href="${commentHref(
+            item.productSlug,
+            kind,
+            locale,
+          )}" style="color:${GOLD};text-decoration:none;border-bottom:1px solid ${GOLD};">${escapeHtml(
+            labels.leaveAComment,
+          )}</a></p>`
+        : "";
+
+      return `
+    <tr>
+      <td style="padding:0 0 20px 0;text-align:${align};" valign="top">
+        <p style="margin:0;font-family:${SERIF};font-size:16px;line-height:1.5;color:${IVORY};">${escapeHtml(item.productName)}</p>
+        <p style="margin:4px 0 0 0;font-family:${SANS};font-size:11px;letter-spacing:0.1em;color:${MUTED};">&times;&nbsp;${item.quantity}</p>
+        ${action}
+      </td>
+    </tr>`;
+    })
+    .join("");
+}
+
+/** The framed list, under its own gold caption. */
+function feedbackItemTable(order: OrderFeedbackRecord, locale: Locale): string {
+  const labels = ORDER_LABELS[locale];
+  const align = alignFor(locale);
+
+  return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${BORDER};background-color:${BACKGROUND};margin:0 0 26px 0;">
+      <tr>
+        <td style="padding:24px 26px;">
+          <p style="margin:0 0 18px 0;font-family:${SANS};font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:${GOLD};text-align:${align};">${escapeHtml(labels.shareYourThoughts)}</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${feedbackItemRows(order, locale)}</table>
+        </td>
+      </tr>
+    </table>`;
+}
+
+export interface CustomerFeedbackEmailInput {
+  order: OrderFeedbackRecord;
+  socials: readonly SocialProfile[];
+  logoSrc?: string;
+}
+
+/**
+ * The letter that arrives a day after the parcel did.
+ *
+ * Same shell, same signature, same mark as the five status letters — a reader
+ * should not be able to tell that a different function built it. What it does
+ * not carry is a receipt: the money is settled, the address is behind them, and
+ * repeating either would make this look like a sixth notification instead of a
+ * question.
+ *
+ * No prices anywhere, for the same reason. The subject of this letter is what
+ * the fragrance is like, not what it cost.
+ */
+export function customerFeedbackEmail({
+  order,
+  socials,
+  logoSrc,
+}: CustomerFeedbackEmailInput): EmailPayload {
+  const locale = order.locale;
+  const copy = FEEDBACK_COPY[locale];
+  const align = alignFor(locale);
+
+  const firstName = order.customerName.trim().split(/\s+/)[0] ?? "";
+
+  const subject = interpolate(copy.subject, { orderNumber: order.orderNumber });
+  const headline = interpolate(copy.headline, { name: firstName });
+
+  const ctaHref = `${SITE_URL}${localizePath(locale, "/collections")}`;
+
+  const body = [
+    paragraph(copy.intro, align),
+    feedbackItemTable(order, locale),
+    mutedParagraph(copy.detail, align),
+    spacer(8),
+    ctaButton(copy.cta, ctaHref),
+    spacer(30),
+    signoff(copy.signoff, align),
+  ].join("");
+
+  const html = luxuryShell({
+    locale,
+    preheaderText: copy.preheader,
+    eyebrow: copy.eyebrow,
+    headline,
+    body,
+    socials,
+    logoSrc,
+  });
+
+  const labels = ORDER_LABELS[locale];
+
+  const lines = order.items.map((item) => {
+    const kind = order.linkable[item.productSlug];
+    return kind
+      ? `  ${item.productName} — ${commentHref(item.productSlug, kind, locale)}`
+      : `  ${item.productName}`;
+  });
+
+  const text = [
+    headline,
+    "",
+    copy.intro,
+    "",
+    `${labels.shareYourThoughts}:`,
+    ...lines,
+    "",
+    copy.detail,
+    "",
+    `${copy.cta}: ${ctaHref}`,
+    "",
+    copy.signoff,
+    "KHEM Perfumes — Essence of Heritage",
+    SITE_URL,
+  ]
+    .filter((line) => line !== "")
+    .join("\n");
+
+  return { subject, html, text };
 }

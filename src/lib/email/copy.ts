@@ -95,7 +95,7 @@ export const WELCOME_COPY: Record<Locale, WelcomeCopy> = {
     intro:
       "Thank you for joining the Inner Circle. You now sit closest to the house — where each composition is announced before it reaches the boutique.",
     benefits: [
-      "First word on new compositions and limited releases",
+      "First word on new compositions and house releases",
       "Invitations to private consultations and boutique evenings",
       "Notes from the perfumer on rare botanicals and their sourcing",
     ],
@@ -114,7 +114,7 @@ export const WELCOME_COPY: Record<Locale, WelcomeCopy> = {
     intro:
       "شكرًا لانضمامك إلى الدائرة الخاصة. أنت الآن الأقرب إلى الدار، حيث يُعلَن عن كل تركيبة قبل وصولها إلى البوتيك.",
     benefits: [
-      "أول من يعلم بالتركيبات الجديدة والإصدارات المحدودة",
+      "أول من يعلم بالتركيبات الجديدة وإصدارات الدار",
       "دعوات إلى الاستشارات الخاصة وأمسيات البوتيك",
       "رسائل من صانع العطر عن النباتات النادرة ومصادرها",
     ],

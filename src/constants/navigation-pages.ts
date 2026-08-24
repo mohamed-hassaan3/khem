@@ -122,8 +122,8 @@ export const collectionLinks: ReadonlyArray<CollectionLink> = collections.flatMa
  * Key Ingredients is no longer here: the olfactive cuts it stood in for are now
  * pages of their own under Scent Profiles above. `/ingredients` was not
  * withdrawn — it keeps its row in `world` below, which is where an editorial
- * page belongs. `/collections/limited-edition` likewise still serves anyone
- * arriving by link.
+ * page belongs. Limited Editions is gone for the opposite reason: the cut
+ * itself was withdrawn from the catalogue, so there is no page left to link to.
  */
 export const quickAccess: ReadonlyArray<{
   key: QuickAccessKey;

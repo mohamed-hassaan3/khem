@@ -229,7 +229,7 @@ export const en = {
     newsletter: {
       eyebrow: "Private Access",
       heading: "Join the Inner Circle",
-      lede: "Receive exclusive previews of new fragrances, early access to limited editions, and intimate stories from the KHEM atelier.",
+      lede: "Receive exclusive previews of new fragrances, early access to each release, and intimate stories from the KHEM atelier.",
     },
   },
 
@@ -269,7 +269,6 @@ export const en = {
       discovery: "Discovery Sets",
       "gift-set": "Gift Sets",
       "best-sellers": "Best Sellers",
-      "limited-edition": "Limited Edition",
     },
     /*
      * The state line above the grid on `/collections`. Both the filter and the
@@ -283,7 +282,7 @@ export const en = {
       clear: "Clear",
     },
     /*
-     * The two merchandising cuts that have a page of their own — see
+     * The merchandising cut that has a page of its own — see
      * `MERCH_PAGE_FACETS` in `src/lib/facets.ts`. Keyed by facet, like
      * `facets` above, and carrying what a `Collection` row would have supplied
      * for a seeded collection: a name, a description, and the alt text of a
@@ -302,20 +301,6 @@ export const en = {
           ogTitle: "Best Sellers | KHEM",
           ogDescription:
             "What our customers reach for most, drawn from every KHEM collection.",
-        },
-      },
-      "limited-edition": {
-        name: "Limited Edition",
-        description:
-          "Small runs, made once. Rare materials and short harvests decide how many bottles exist, and when they are gone the composition is retired.",
-        bannerAlt: "A single flacon in low light, gold leaf catching the edge",
-        meta: {
-          title: "Limited Edition",
-          description:
-            "KHEM compositions released in numbered runs — rare materials, short harvests, and no second pressing.",
-          ogTitle: "Limited Edition | KHEM",
-          ogDescription:
-            "Numbered runs from the Cairo atelier. Once they are gone, the composition is retired.",
         },
       },
     },
@@ -1123,6 +1108,11 @@ export const en = {
       postalCode: "Postal Code",
       postalCodePlaceholder: "Optional",
       country: "Country",
+      /** Under the country field once it has been resolved from the request. */
+      countryDetected: "Detected from your location.",
+      outsideEgyptTitle: "We deliver within Egypt",
+      outsideEgyptBody:
+        "It looks as though you are outside Egypt, and the house does not ship there yet, so this order cannot be completed. Write to us and we will tell you the moment that changes.",
       note: "Delivery Instructions",
       notePlaceholder: "Optional — a gate code, a preferred hour",
     },
@@ -1188,6 +1178,8 @@ export const en = {
       postalCodeLong: "That postal code is too long.",
       country: "Please enter the country.",
       countryLong: "That country name is too long.",
+      outsideEgypt:
+        "KHEM delivers within Egypt only. This order cannot be completed from your location.",
       noteLong: "Please keep delivery instructions under 500 characters.",
       quantity: "One of the quantities is not valid.",
       paymentMethod: "Please choose how you would like to pay.",

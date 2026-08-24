@@ -19,8 +19,11 @@ import "server-only";
  * the public roles nothing at all on `"Order"`.
  */
 
+import { hasDetailPage } from "@/src/lib/routes";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
+import { toDetailPageTarget } from "@/src/schemas/db/catalog";
 import { orderStatusSchema, parseList } from "@/src/schemas/db/orders";
+import type { CollectionKind } from "@/src/types/catalog";
 import type { OrderConfirmation } from "@/src/types/checkout";
 import { z } from "zod";
 
@@ -250,6 +253,14 @@ const mailRowSchema = z.object({
         productName: z.string(),
         quantity: z.number(),
         priceInCents: z.number(),
+        /*
+         * Carried for one reason: the feedback letter links each line to that
+         * product's comment area. Selected on every mail read rather than only
+         * that one, because it is a column on a row already being fetched and
+         * two projections of the same table that differ by one string is a
+         * drift waiting to happen.
+         */
+        productSlug: z.string(),
       }),
     )
     .default([]),
@@ -283,7 +294,7 @@ export async function getOrderForMail(
         "paymentMethod, paymentStatus, locale, subtotalInCents, shipInCents, " +
         "totalInCents, trackingCode, shipLine1, shipLine2, shipCity, shipState, " +
         "shipPostalCode, shipCountry, note, placedAt, " +
-        "items:OrderItem(productName, quantity, priceInCents)",
+        "items:OrderItem(productName, quantity, priceInCents, productSlug)",
     )
     .eq("id", orderId)
     .maybeSingle();
@@ -316,4 +327,128 @@ export async function getOrderForMailByNumber(
   }
 
   return getOrderForMail(data.id);
+}
+
+// ── Feedback ──────────────────────────────────────────────────
+
+/**
+ * The order as the feedback letter needs it: the mail record, plus the answer
+ * to "which of these lines can be linked to a page?".
+ *
+ * `"OrderItem"` stores a slug and a name, not a route. Two of the five
+ * `CollectionKind`s — DISCOVERY and GIFT — have no detail page at all, and a
+ * product may have been archived or deleted in the day since it was delivered.
+ * Both cases must degrade to plain text rather than to a link that 404s, so the
+ * map holds *only* the slugs that resolve, and the template treats an absence
+ * as "print the name".
+ */
+export interface OrderFeedbackRecord extends OrderMailRecord {
+  linkable: Readonly<Record<string, CollectionKind>>;
+}
+
+/**
+ * Orders delivered long enough ago to be worth asking about.
+ *
+ * The selection is `orders_awaiting_feedback()` — one call, decided inside
+ * Postgres against `"OrderStatusEvent"`, for the same reason
+ * `expire_unpaid_orders()` exists: a reader that fetched candidates, decided in
+ * TypeScript, and wrote back would leave a gap two runs could both walk
+ * through. See `supabase/sql/0022_order_feedback.sql`.
+ *
+ * Returns ids only. Nothing about who the order belongs to leaves this call.
+ */
+export async function listOrdersAwaitingFeedback(
+  olderThanHours: number,
+  maxRows: number,
+): Promise<string[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.rpc("orders_awaiting_feedback", {
+    older_than_hours: olderThanHours,
+    max_rows: maxRows,
+  });
+
+  if (error) {
+    logFailure("listOrdersAwaitingFeedback", error.message);
+    return [];
+  }
+
+  const parsed = z.array(z.string()).safeParse(data);
+  return parsed.success ? parsed.data : [];
+}
+
+/**
+ * Stamp `"feedbackRequestedAt"`, and say whether this call is the one that did.
+ *
+ * `false` means somebody else got there first — a second cron instance, a
+ * manual re-run — and the caller must not send. The claim is made **before**
+ * the letter goes out: a customer who receives no letter is a missed
+ * opportunity, and one who receives the same letter twice is a nuisance, and
+ * between those two the choice is not close.
+ */
+export async function markFeedbackRequested(orderId: string): Promise<boolean> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return false;
+
+  const { data, error } = await supabase.rpc("mark_feedback_requested", {
+    order_id: orderId,
+  });
+
+  if (error) {
+    logFailure("markFeedbackRequested", error.message);
+    return false;
+  }
+
+  return data === true;
+}
+
+/**
+ * The mail record, widened with the link targets for its lines.
+ *
+ * A second query rather than a nested embed: the join runs from
+ * `"OrderItem"."productSlug"` through `"Product"` to `"Collection"."kind"`, and
+ * asking PostgREST to walk two relationships to fetch one enum per line is both
+ * slower and more fragile than one `in (…)` over the handful of slugs an order
+ * actually holds.
+ *
+ * Archived and soft-deleted products are excluded here, exactly as
+ * `getDetailPageTarget()` excludes them: a page that no longer exists is not a
+ * page to invite somebody onto.
+ */
+export async function getOrderForFeedback(
+  orderId: string,
+): Promise<OrderFeedbackRecord | null> {
+  const order = await getOrderForMail(orderId);
+  if (!order) return null;
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return { ...order, linkable: {} };
+
+  const slugs = [...new Set(order.items.map((item) => item.productSlug))];
+  if (slugs.length === 0) return { ...order, linkable: {} };
+
+  const { data, error } = await supabase
+    .from("Product")
+    .select("slug, collection:Collection!inner(kind)")
+    .in("slug", slugs)
+    .eq("isArchived", false)
+    .is("deletedAt", null);
+
+  if (error) {
+    // A letter with unlinked names is still a letter worth sending.
+    logFailure("getOrderForFeedback", error.message);
+    return { ...order, linkable: {} };
+  }
+
+  const linkable: Record<string, CollectionKind> = {};
+
+  for (const row of Array.isArray(data) ? data : []) {
+    const target = toDetailPageTarget(row);
+    if (target && hasDetailPage(target)) {
+      linkable[target.slug] = target.collectionKind;
+    }
+  }
+
+  return { ...order, linkable };
 }

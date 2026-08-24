@@ -49,7 +49,6 @@ const CONCENTRATION_OPTIONS = [
 
 const TAG_OPTIONS = [
   { value: "NEW_ARRIVAL", label: "New arrival", hint: "Appears on /new-arrival." },
-  { value: "LIMITED_EDITION", label: "Limited edition", hint: "Filterable on /collections." },
 ] as const;
 
 function slugify(value: string): string {
