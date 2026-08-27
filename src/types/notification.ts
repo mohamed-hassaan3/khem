@@ -42,3 +42,29 @@ export interface LowStockItem {
   name: string;
   inventory: number;
 }
+
+/**
+ * The three things the house tells a customer about.
+ *
+ * Mirrors `customer_notification_feed()` in
+ * `supabase/sql/0032_customer_notifications.sql`. Like the desk's feed, none of
+ * it is stored: an order's progress is already `"OrderStatusEvent"`, a credit is
+ * already `customer_credits`, a voucher is already `discount_grants`.
+ */
+export type CustomerNotificationKind =
+  /** A parcel reached a station. One per station, never rewritten in place. */
+  | "ORDER_STATUS"
+  | "CREDIT_EARNED"
+  | "VOUCHER_GRANTED";
+
+export interface CustomerNotification {
+  kind: CustomerNotificationKind;
+  entityId: string;
+  /** The order number, or the voucher code. Always the customer's own. */
+  label: string;
+  /** For an order event, the `OrderStatus` it reached. */
+  detail: string | null;
+  amountInCents: number | null;
+  occurredAt: string;
+  isRead: boolean;
+}

@@ -7,6 +7,8 @@ import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
+import MarketingPreference from "@/src/components/account/MarketingPreference";
+import { marketingOptInForUser } from "@/src/services/notifications";
 
 /**
  * Preferences — the panel before the feature.
@@ -59,7 +61,11 @@ export default async function PreferencesPage({
   if (viewer === null)
     redirect(signInPathWithReturn(activeLocale, localizePath(activeLocale, PATH)));
 
-  const dict = await getDictionary(activeLocale);
+  const [dict, marketingOptIn] = await Promise.all([
+    getDictionary(activeLocale),
+    marketingOptInForUser(viewer.id),
+  ]);
+
   const copy = dict.account.preferences;
 
   return (
@@ -70,15 +76,24 @@ export default async function PreferencesPage({
         {copy.heading}
       </h1>
 
-      <section className="border border-gold/15 bg-gold/6 px-8 py-8">
-        <p className="mb-2 font-heading text-[14px] tracking-[0.06em] text-gold">
-          {copy.emptyHeading}
-        </p>
+      <div className="flex flex-col gap-6">
+        <MarketingPreference initial={marketingOptIn} copy={copy.marketing} />
 
-        <p className="max-w-prose text-[12px] leading-loose text-ivory/40">
-          {copy.emptyBody}
-        </p>
-      </section>
+        {/*
+          * Language and currency are not settings this page owns — they are
+          * chosen from the footer and follow the visitor everywhere. Saying so
+          * is better than a second control that would have to stay in step
+          * with the first.
+          */}
+        <section className="border border-border bg-surface/60 px-6 py-6 sm:px-8 sm:py-7">
+          <p className="mb-1.5 font-heading text-[13px] tracking-[0.08em] text-ivory">
+            {copy.language.heading}
+          </p>
+          <p className="max-w-prose text-[12px] leading-loose text-ivory/40">
+            {copy.language.body}
+          </p>
+        </section>
+      </div>
     </div>
   );
 }

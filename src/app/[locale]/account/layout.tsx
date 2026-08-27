@@ -6,6 +6,7 @@ import SignOutButton from "@/src/components/account/SignOutButton";
 import { getViewer } from "@/src/lib/auth";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { AUTH_PATHS } from "@/src/lib/routes";
+import { unreadNotificationCount } from "@/src/services/notifications";
 
 /**
  * The customer portal shell — identity block, navigation rail, panel slot.
@@ -46,6 +47,17 @@ export default async function AccountLayout({
    */
   if (viewer === null) redirect(localizePath(activeLocale, AUTH_PATHS.signIn));
 
+  /*
+   * The rail's unread numeral. Read here rather than in the sidebar because the
+   * sidebar is a Client Component and this is a secret-key query — and read
+   * after the gate, never beside it, so it cannot run for a request that is
+   * about to be redirected away.
+   */
+  const unreadCount = await unreadNotificationCount({
+    clerkUserId: viewer.id,
+    email: viewer.primaryEmail,
+  });
+
   return (
     <div className="min-h-screen bg-background pt-20 text-ivory lg:grid lg:grid-cols-[280px_1fr]">
       {/*
@@ -58,7 +70,7 @@ export default async function AccountLayout({
           <AccountIdentity viewer={viewer} locale={activeLocale} />
         </div>
 
-        <AccountSidebar />
+        <AccountSidebar unreadCount={unreadCount} />
       </aside>
 
       <main className="px-5 pb-14 pt-10 sm:px-8 lg:px-20 lg:pt-15">

@@ -20,7 +20,19 @@ import { ACCOUNT_PATHS } from "@/src/lib/routes";
  *
  */
 
-export default function AccountSidebar() {
+export default function AccountSidebar({
+  unreadCount = 0,
+}: {
+  /**
+   * How many notifications are new.
+   *
+   * A quiet numeral beside one rail entry, and the *only* place a count appears
+   * anywhere on the storefront: §16 asks for optional and non-intrusive, so
+   * there is no bell over the shop and no badge in the header. Somebody who has
+   * come to their account sees it; somebody browsing fragrances does not.
+   */
+  unreadCount?: number;
+}) {
   const dict = useDictionary();
   const pathname = usePathname();
 
@@ -57,6 +69,8 @@ export default function AccountSidebar() {
         {links.map((link) => {
           // Exact match only: `/account` must not light up on `/account/orders`.
           const isActive = path === link.href;
+          const showCount =
+            link.href === ACCOUNT_PATHS.notifications && unreadCount > 0;
 
           return (
             <LocaleLink
@@ -73,6 +87,12 @@ export default function AccountSidebar() {
               ].join(" ")}
             >
               {link.label}
+
+              {showCount ? (
+                <span className="ms-2 font-heading text-[10px] tabular-nums text-gold">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              ) : null}
             </LocaleLink>
           );
         })}

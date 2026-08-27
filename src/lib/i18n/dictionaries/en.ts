@@ -1558,9 +1558,35 @@ export const en = {
       },
       eyebrow: "Word From the House",
       heading: "Notifications",
+      markAll: "Mark all as read",
+      markOne: "Mark as read",
+      unread: "{count} new",
+      unreadOne: "1 new",
+      /* Keyed by `CustomerNotificationKind` — a fourth kind is a compile error. */
+      kind: {
+        ORDER_STATUS: "Your order",
+        CREDIT_EARNED: "KHEM Credit",
+        VOUCHER_GRANTED: "A privilege for you",
+      },
+      /*
+       * Worded as stops on a journey rather than as states, matching the order
+       * tracker: a customer reads "on its way", never "SHIPPED".
+       */
+      status: {
+        PROCESSING: "{order} is being prepared.",
+        SHIPPED: "{order} is on its way to you.",
+        DELIVERED: "{order} has been delivered.",
+        CANCELLED: "{order} was cancelled.",
+        REFUNDED: "{order} has been refunded.",
+        PENDING: "{order} has been placed.",
+      },
+      creditEarned: "You earned KHEM Credit with {order}.",
+      creditEarnedPlain: "You earned KHEM Credit.",
+      voucherGranted: "{code} is waiting in your account.",
+      view: "View",
       emptyHeading: "Nothing to read yet",
       emptyBody:
-        "Order updates, credits and private offers will gather here. Until then, the house writes to you by email — every confirmation, dispatch and delivery note reaches your inbox.",
+        "Order updates, credits and private offers gather here. The house also writes to you by email — every confirmation, dispatch and delivery note reaches your inbox.",
     },
 
     preferences: {
@@ -1570,9 +1596,21 @@ export const en = {
       },
       eyebrow: "Your Choices",
       heading: "Preferences",
-      emptyHeading: "Nothing to set yet",
-      emptyBody:
-        "What the house may write to you about will be settled from this page. For now, language and currency are chosen from the foot of any page, and every letter we send carries a way to stop it.",
+      marketing: {
+        heading: "The Inner Circle",
+        body: "News of new compositions, private offers and early access to what the house releases next.",
+        label: "Write to me with news and private offers",
+        /* The line that stops a customer fearing they will lose their receipts. */
+        transactional:
+          "Letters about your orders and your account are sent either way — confirmations, dispatch notes and delivery updates are never marketing.",
+        saving: "Saving",
+        saved: "Your preference has been saved.",
+        failed: "That could not be saved. Please try again.",
+      },
+      language: {
+        heading: "Language & Currency",
+        body: "Both are chosen from the foot of any page, and follow you across the house.",
+      },
     },
   },
 

@@ -77,8 +77,13 @@ interface TextProps {
   placeholder?: string;
   required?: boolean;
   readOnly?: boolean;
-  /** `email` gives a phone keyboard the @ key; the validation is still Zod's. */
-  type?: "text" | "number" | "date" | "url" | "email";
+  /**
+   * `email` gives a phone keyboard the @ key; the validation is still Zod's.
+   *
+   * `datetime-local` is here for scheduling a campaign — the one field in this
+   * dashboard that needs an hour as well as a day.
+   */
+  type?: "text" | "number" | "date" | "datetime-local" | "url" | "email";
   step?: string;
   min?: number;
 }

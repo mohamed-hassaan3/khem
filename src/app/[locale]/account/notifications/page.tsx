@@ -7,24 +7,28 @@ import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
+import NotificationList from "@/src/components/account/NotificationList";
+import EmptyState from "@/src/components/ecommerce/EmptyState";
+import { notificationsForUser } from "@/src/services/notifications";
+import { BellRing } from "lucide-react";
 
 /**
- * Notifications — the panel before the feature.
+ * Notifications — what the house has told this customer.
  *
- * The dashboard's navigation was specified in full while the customer
- * notification centre belongs to a later phase, and a rail with a link that
- * 404s is worse than either. So the route exists and says plainly that there is
- * nothing here yet, and — the part that matters — where the house *does* write
- * to the customer in the meantime.
+ * The panel this replaces was an honest placeholder, and its promise was that
+ * "when the notification store exists, this file gains a query". There is no
+ * store: `customer_notification_feed()` derives the list from the order events,
+ * credits and grants that already exist, and only read-state was added. So the
+ * file gained a query and nothing else in the house had to grow a second record
+ * of anything.
  *
- * **There are no invented notifications and no dummy toggles on this page.** A
- * placeholder that fakes its own feature is a lie the next engineer has to
- * discover, and a customer who reads it will wait for updates that were never
- * going to arrive. When the notification store exists, this file gains a query
- * and loses this comment.
+ * **Nothing about this is intrusive.** There is no bell over the shop and no
+ * badge in the storefront header — §16 asks for optional and non-intrusive, and
+ * a notification count in the header of a perfume boutique is neither. It lives
+ * here, where somebody has come to look at their account.
  *
- * `force-dynamic` and the session gate stay, so the route behaves exactly like
- * its neighbours from the day it holds real rows.
+ * `force-dynamic` and the session gate, like every panel beside it: everything
+ * on this page belongs to one visitor, and the owner is the id from the session.
  */
 export const dynamic = "force-dynamic";
 
@@ -61,7 +65,16 @@ export default async function NotificationsPage({
   if (viewer === null)
     redirect(signInPathWithReturn(activeLocale, localizePath(activeLocale, PATH)));
 
-  const dict = await getDictionary(activeLocale);
+  const [dict, notifications] = await Promise.all([
+    getDictionary(activeLocale),
+    // The owner and the address both come from the session — a grant may have
+    // been issued to the address before the account existed.
+    notificationsForUser({
+      clerkUserId: viewer.id,
+      email: viewer.primaryEmail,
+    }),
+  ]);
+
   const copy = dict.account.notifications;
 
   return (
@@ -72,15 +85,21 @@ export default async function NotificationsPage({
         {copy.heading}
       </h1>
 
-      <section className="border border-gold/15 bg-gold/6 px-8 py-8">
-        <p className="mb-2 font-heading text-[14px] tracking-[0.06em] text-gold">
-          {copy.emptyHeading}
-        </p>
-
-        <p className="max-w-prose text-[12px] leading-loose text-ivory/40">
-          {copy.emptyBody}
-        </p>
-      </section>
+      {notifications.length === 0 ? (
+        <EmptyState
+          icon={BellRing}
+          heading={copy.emptyHeading}
+          body={copy.emptyBody}
+          cta={dict.account.orders.empty.cta}
+          href="/collections"
+        />
+      ) : (
+        <NotificationList
+          notifications={notifications}
+          locale={activeLocale}
+          copy={copy}
+        />
+      )}
     </div>
   );
 }
