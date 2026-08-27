@@ -50,6 +50,15 @@ export interface AdminOrderSummary {
   totalInCents: number;
   placedAt: string;
   itemCount: number;
+  /**
+   * When somebody at the desk first opened this order's own screen. `null`
+   * means nobody has — which is what the order book marks "New".
+   *
+   * Deliberately not a status: `status` records what has been *done* to an
+   * order, and an untouched PENDING order and a much-discussed one are
+   * otherwise the same row. See `supabase/sql/0023_order_opened.sql`.
+   */
+  firstOpenedAt: string | null;
 }
 
 /**
@@ -91,6 +100,24 @@ export interface AdminOrderDetail extends AdminOrderSummary {
   paidAt: string | null;
   /** Set once the parcel is with the courier. */
   trackingCode: string | null;
+  /** The Discovery Credit spent on this order, if one was. */
+  creditId: string | null;
+  /**
+   * What that credit took off the total.
+   *
+   * Distinct from the credit's face value: a credit larger than the subtotal is
+   * capped here and forfeits the difference. Zero on every order that spent none.
+   */
+  creditAppliedInCents: number;
+  /** The discount code spent on this order, if one was. */
+  discountId: string | null;
+  /**
+   * The code **as it was at the time**, snapshotted like `OrderItem.productName`
+   * — a code renamed or deleted later must still print correctly here.
+   */
+  discountCode: string | null;
+  /** What that code took off. Zero on every order that used none. */
+  discountInCents: number;
   lines: readonly AdminOrderLine[];
 }
 
@@ -131,6 +158,13 @@ export interface SalesTotals {
   units: number;
   /** `PENDING` + `PROCESSING` — what the desk still owes somebody. */
   awaitingFulfilment: number;
+  /**
+   * Orders nobody has opened yet. A state rather than a window, exactly like
+   * {@link SalesTotals.awaitingFulfilment}: it counts every unopened order
+   * however old, because an order forgotten three weeks ago is the one that
+   * most needs saying out loud.
+   */
+  unopened: number;
 }
 
 /** A row of the inventory screen: what is on the shelf, and how fast it leaves. */

@@ -91,7 +91,7 @@ export default async function PerfumePage({
     getDictionary(activeLocale),
     getCollectionBySlug(activeLocale, product.collectionSlug),
     getRelatedProductCards(activeLocale, product.slug),
-    getIngredientsForProduct(product.slug),
+    getIngredientsForProduct(product.slug, activeLocale),
   ]);
 
   const gallery = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder);

@@ -109,7 +109,7 @@ export default async function RitualPage({
      * module constant, never anything derived from the request.
      */
     getRelatedProductCards(activeLocale, product.slug, 3, RITUAL_RELATED_KINDS),
-    getIngredientsForProduct(product.slug),
+    getIngredientsForProduct(product.slug, activeLocale),
   ]);
 
   const gallery = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder);

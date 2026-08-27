@@ -1136,6 +1136,27 @@ export const en = {
       securedBy: "Secured by Stripe",
     },
 
+    discount: {
+      heading: "Discount Code",
+      lede: "If the house has given you a code, enter it here. It is applied when your order is placed.",
+      placeholder: "Enter your code",
+      applied: "Discount",
+      blockedByCredit:
+        "A discount code cannot be combined with a Discovery Credit. Remove the credit above to use one.",
+    },
+
+    credit: {
+      heading: "Discovery Credit",
+      lede: "You have credit from a Discovery Set. It pays for one full-size fragrance and is used in full.",
+      none: "Do not use a credit",
+      use: "Apply {amount}",
+      applied: "Discovery Credit",
+      expires: "Expires {date}",
+      forfeitNotice:
+        "This credit is worth more than your bag. The difference is not carried over.",
+      deliveryStillCharged: "Delivery is not covered by a credit.",
+    },
+
     review: {
       heading: "Your Order",
       edit: "Edit bag",
@@ -1193,6 +1214,8 @@ export const en = {
       outOfStock:
         "One of your fragrances is no longer available in that quantity.",
       unavailable: "One of your fragrances is no longer available.",
+      creditRejected: "Your Discovery Credit could not be applied.",
+      discountRejected: "That discount code could not be applied.",
       cartChanged:
         "Your bag no longer matches our catalogue. Please review it and try again.",
       rateLimited: "Too many attempts. Please wait a few minutes and try again.",
@@ -1366,6 +1389,29 @@ export const en = {
   newsletter: {
     successHeading: "Welcome to the Circle",
     successBody: "You will receive a confirmation shortly.",
+  },
+
+  unsubscribe: {
+    meta: {
+      title: "Leave the Inner Circle",
+      description: "Manage your KHEM Inner Circle subscription.",
+    },
+    eyebrow: "The Inner Circle",
+    confirmHeading: "Leave the Inner Circle?",
+    confirmBody:
+      "You will stop receiving word of new compositions, private consultations, and notes from the perfumer. Your orders and account are untouched.",
+    confirmButton: "Unsubscribe",
+    working: "One moment",
+    doneHeading: "You have been removed.",
+    doneBody:
+      "We will not write to you again. If it was a mistake, you are welcome back at any time from the foot of any page.",
+    alreadyHeading: "You are already unsubscribed.",
+    alreadyBody: "There is nothing further to do — the house is not writing to you.",
+    invalidHeading: "That link is not valid.",
+    invalidBody:
+      "It may have already been used, or been altered in transit. Write to the house and a person will help.",
+    failedBody: "Something went wrong. Please try that link once more.",
+    home: "Return to the house",
   },
 
   forms: {

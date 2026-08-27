@@ -31,15 +31,27 @@ export interface ReviewLine {
 export interface OrderReviewProps {
   lines: readonly ReviewLine[];
   subtotalInCents: number;
+  /**
+   * What a selected Discovery Credit would take off. Zero when none is chosen.
+   *
+   * An estimate computed with the same rule the server applies — the order row
+   * is what the customer is actually charged. See `CreditStep`.
+   */
+  creditAppliedInCents?: number;
 }
 
-export default function OrderReview({ lines, subtotalInCents }: OrderReviewProps) {
+export default function OrderReview({
+  lines,
+  subtotalInCents,
+  creditAppliedInCents = 0,
+}: OrderReviewProps) {
   const dict = useDictionary();
   const formatPrice = useFormatPrice();
   const copy = dict.checkout.review;
 
   const shipping = shippingInCents(subtotalInCents);
-  const total = cartTotalInCents(subtotalInCents);
+  // Never below the delivery fee: a credit pays for merchandise, not the courier.
+  const total = cartTotalInCents(subtotalInCents) - creditAppliedInCents;
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
   return (
@@ -111,6 +123,16 @@ export default function OrderReview({ lines, subtotalInCents }: OrderReviewProps
             )
           }
         />
+        {creditAppliedInCents > 0 ? (
+          <Row
+            label={dict.checkout.credit.applied}
+            value={
+              <span className="text-gold">
+                −{formatPrice(creditAppliedInCents)}
+              </span>
+            }
+          />
+        ) : null}
       </div>
 
       <div className="mt-6 border-t border-border pt-6">

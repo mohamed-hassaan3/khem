@@ -77,7 +77,8 @@ interface TextProps {
   placeholder?: string;
   required?: boolean;
   readOnly?: boolean;
-  type?: "text" | "number" | "date" | "url";
+  /** `email` gives a phone keyboard the @ key; the validation is still Zod's. */
+  type?: "text" | "number" | "date" | "url" | "email";
   step?: string;
   min?: number;
 }

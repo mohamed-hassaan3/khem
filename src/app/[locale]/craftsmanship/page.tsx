@@ -45,14 +45,16 @@ export default async function Craftsmanship({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, steps, stats, quote] = await Promise.all([
-    params,
-    getCraftSteps(),
-    getCraftStats(),
-    getMasterPerfumerQuote(),
-  ]);
-
+  // The locale is resolved before the content is fetched, because the steps,
+  // stats and quote are now read in the visitor's language.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  const [steps, stats, quote] = await Promise.all([
+    getCraftSteps(activeLocale),
+    getCraftStats(activeLocale),
+    getMasterPerfumerQuote(activeLocale),
+  ]);
   const dict = await getDictionary(activeLocale);
   const island = ltrIsland(activeLocale);
 

@@ -12,7 +12,11 @@ import {
 import FilterChips from "@/src/components/admin/FilterChips";
 import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
-import { listAdminOrders } from "@/src/services/admin/orders";
+import {
+  countUnopenedOrders,
+  listAdminOrders,
+  type OrderSeenFilter,
+} from "@/src/services/admin/orders";
 import type { OrderStatus } from "@/src/types/account";
 import type { OrderChannel } from "@/src/types/order";
 
@@ -41,6 +45,15 @@ const STATUSES: readonly OrderStatus[] = [
 ];
 
 const CHANNELS: readonly OrderChannel[] = ["OFFLINE", "ONLINE"];
+
+/**
+ * Whether anybody has looked at the order yet.
+ *
+ * A third axis rather than a seventh status, because it is not one: an order
+ * can be shipped and still never have been read on this screen. See
+ * `supabase/sql/0023_order_opened.sql`.
+ */
+const SEEN: readonly OrderSeenFilter[] = ["new", "opened"];
 
 function readParam(value: string | string[] | undefined): string {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -73,13 +86,22 @@ export default async function AdminOrdersPage({
 
   const statusParam = readParam(query.status);
   const channelParam = readParam(query.channel);
+  const seenParam = readParam(query.seen);
 
   // An unknown value in the URL filters by nothing rather than throwing — a
   // hand-edited address should degrade to the full list.
   const status = STATUSES.find((value) => value === statusParam);
   const channel = CHANNELS.find((value) => value === channelParam);
+  const seen = SEEN.find((value) => value === seenParam);
 
-  const orders = await listAdminOrders({ status, channel });
+  // The count is deliberately unfiltered: the chip says how much unopened work
+  // exists in total, which is the figure the dashboard tile prints. A number
+  // that shrank as somebody narrowed by status would answer a question nobody
+  // asked.
+  const [orders, unopened] = await Promise.all([
+    listAdminOrders({ status, channel, seen }),
+    countUnopenedOrders(),
+  ]);
 
   const basePath = localizePath(activeLocale, "/admin/orders");
 
@@ -118,15 +140,27 @@ export default async function AdminOrdersPage({
         ]}
       />
 
+      <FilterChips
+        basePath={basePath}
+        param="seen"
+        active={seen ?? ""}
+        query={query}
+        chips={[
+          { value: "", label: "Opened or not" },
+          { value: "new", label: "New", count: unopened },
+          { value: "opened", label: "Opened" },
+        ]}
+      />
+
       {orders.length === 0 ? (
         <AdminEmpty
           message={
-            status || channel
+            status || channel || seen
               ? "No orders match that filter."
               : "No orders yet. Record the first sale and the charts on the dashboard start filling in."
           }
           action={
-            status || channel ? undefined : (
+            status || channel || seen ? undefined : (
               <AdminLinkButton href={`${basePath}/new`}>
                 Record the first order
               </AdminLinkButton>
@@ -155,6 +189,19 @@ export default async function AdminOrdersPage({
                 <span className="mt-1 block text-[10px] tracking-wide text-ivory/25">
                   {order.channel.toLowerCase()}
                 </span>
+                {/*
+                  Marked beside the number rather than in the Status column, so
+                  it cannot be read as a seventh status — it is a fact about the
+                  desk, not about the order.
+                */}
+                {order.firstOpenedAt === null ? (
+                  <span
+                    title="Nobody at the desk has opened this order yet"
+                    className="mt-2 inline-block border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-gold"
+                  >
+                    New
+                  </span>
+                ) : null}
               </AdminCell>
               <AdminCell>{order.customerName}</AdminCell>
               <AdminCell muted>{placedOn(order.placedAt)}</AdminCell>

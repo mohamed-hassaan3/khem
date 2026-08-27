@@ -9,6 +9,7 @@
 
 import "server-only";
 
+import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { parseList } from "@/src/schemas/db/catalog";
 import {
@@ -87,8 +88,10 @@ export async function getTestimonials(): Promise<Testimonial[]> {
   return list("getTestimonials", "Testimonial", TESTIMONIAL_COLUMNS, toTestimonial);
 }
 
-export async function getIngredients(): Promise<Ingredient[]> {
-  return list("getIngredients", "Ingredient", INGREDIENT_COLUMNS, toIngredient);
+export async function getIngredients(locale: Locale): Promise<Ingredient[]> {
+  return list("getIngredients", "Ingredient", INGREDIENT_COLUMNS, (row) =>
+    toIngredient(row, locale),
+  );
 }
 
 /**
@@ -99,8 +102,10 @@ export async function getIngredients(): Promise<Ingredient[]> {
  * two call sites with different needs should not share one column list by
  * accident.
  */
-export async function getIngredientDetails(): Promise<Ingredient[]> {
-  return getIngredients();
+export async function getIngredientDetails(
+  locale: Locale,
+): Promise<Ingredient[]> {
+  return getIngredients(locale);
 }
 
 /**
@@ -116,6 +121,7 @@ export async function getIngredientDetails(): Promise<Ingredient[]> {
  */
 export async function getIngredientsForProduct(
   productSlug: string,
+  locale: Locale,
 ): Promise<Ingredient[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
@@ -134,7 +140,7 @@ export async function getIngredientsForProduct(
     return [];
   }
 
-  return parseList(data as unknown[] | null, toIngredient);
+  return parseList(data as unknown[] | null, (row) => toIngredient(row, locale));
 }
 
 /** Latest journal articles, newest first. */
@@ -314,24 +320,32 @@ export async function getJournalCategories(): Promise<string[]> {
   );
 }
 
-export async function getCraftPillars(): Promise<CraftPillar[]> {
-  return list("getCraftPillars", "CraftPillar", CRAFT_PILLAR_COLUMNS, toCraftPillar);
+export async function getCraftPillars(locale: Locale): Promise<CraftPillar[]> {
+  return list("getCraftPillars", "CraftPillar", CRAFT_PILLAR_COLUMNS, (row) =>
+    toCraftPillar(row, locale),
+  );
 }
 
 /** The six atelier stages for `/craftsmanship`, in process order. */
-export async function getCraftSteps(): Promise<CraftStep[]> {
-  return list("getCraftSteps", "CraftStep", CRAFT_STEP_COLUMNS, toCraftStep);
+export async function getCraftSteps(locale: Locale): Promise<CraftStep[]> {
+  return list("getCraftSteps", "CraftStep", CRAFT_STEP_COLUMNS, (row) =>
+    toCraftStep(row, locale),
+  );
 }
 
-export async function getCraftStats(): Promise<CraftStat[]> {
-  return list("getCraftStats", "CraftStat", CRAFT_STAT_COLUMNS, toCraftStat);
+export async function getCraftStats(locale: Locale): Promise<CraftStat[]> {
+  return list("getCraftStats", "CraftStat", CRAFT_STAT_COLUMNS, (row) =>
+    toCraftStat(row, locale),
+  );
 }
 
 /**
  * The head perfumer's house statement. Nullable so the section can be dropped
  * entirely when no quote is published.
  */
-export async function getMasterPerfumerQuote(): Promise<CraftQuote | null> {
+export async function getMasterPerfumerQuote(
+  locale: Locale,
+): Promise<CraftQuote | null> {
   const supabase = getSupabasePublic();
   if (!supabase) return null;
 
@@ -347,22 +361,28 @@ export async function getMasterPerfumerQuote(): Promise<CraftQuote | null> {
     return null;
   }
 
-  return toCraftQuote(data);
+  return toCraftQuote(data, locale);
 }
 
-export async function getTimeline(): Promise<TimelineEvent[]> {
-  return list("getTimeline", "TimelineEvent", TIMELINE_COLUMNS, toTimelineEvent);
+export async function getTimeline(locale: Locale): Promise<TimelineEvent[]> {
+  return list("getTimeline", "TimelineEvent", TIMELINE_COLUMNS, (row) =>
+    toTimelineEvent(row, locale),
+  );
 }
 
-export async function getBrandValues(): Promise<BrandValue[]> {
-  return list("getBrandValues", "BrandValue", BRAND_VALUE_COLUMNS, toBrandValue);
+export async function getBrandValues(locale: Locale): Promise<BrandValue[]> {
+  return list("getBrandValues", "BrandValue", BRAND_VALUE_COLUMNS, (row) =>
+    toBrandValue(row, locale),
+  );
 }
 
-export async function getMissionStatements(): Promise<MissionStatement[]> {
+export async function getMissionStatements(
+  locale: Locale,
+): Promise<MissionStatement[]> {
   return list(
     "getMissionStatements",
     "MissionStatement",
     MISSION_STATEMENT_COLUMNS,
-    toMissionStatement,
+    (row) => toMissionStatement(row, locale),
   );
 }

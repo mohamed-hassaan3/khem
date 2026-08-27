@@ -60,6 +60,8 @@ import type { ProductCardData } from "@/src/types/catalog";
 import CardPaymentForm from "./CardPaymentForm";
 import ContactStep from "./ContactStep";
 import DeliveryStep, { type DeliveryField } from "./DeliveryStep";
+import CreditStep, { type SpendableCredit } from "./CreditStep";
+import DiscountStep from "./DiscountStep";
 import OrderReview from "./OrderReview";
 import PaymentStep from "./PaymentStep";
 
@@ -79,6 +81,13 @@ export interface CheckoutViewProps {
    * See `src/lib/shipping.ts`.
    */
   detectedCountry: string | null;
+  /**
+   * Discovery Credits this customer could spend. Empty for a guest.
+   *
+   * A **suggestion list**, not a permission: `place_order()` re-reads the
+   * credit under a row lock and decides for itself. See `CreditStep`.
+   */
+  credits: readonly SpendableCredit[];
 }
 
 interface PlacedOrder {
@@ -92,6 +101,7 @@ export default function CheckoutView({
   viewer,
   cardAvailable,
   detectedCountry,
+  credits,
 }: CheckoutViewProps) {
   const dict = useDictionary();
   const router = useRouter();
@@ -108,6 +118,17 @@ export default function CheckoutView({
   const [customerName, setCustomerName] = useState(viewer?.fullName ?? "");
   const [customerEmail, setCustomerEmail] = useState(viewer?.primaryEmail ?? "");
   const [customerPhone, setCustomerPhone] = useState("");
+
+  /** Empty means "no credit". The server treats it the same way. */
+  const [creditId, setCreditId] = useState("");
+
+  /**
+   * Empty means "no code". Never validated here — see `DiscountStep`.
+   *
+   * The two are mutually exclusive, so selecting a credit clears any code and
+   * the code field disables itself; the database refuses both regardless.
+   */
+  const [discountCode, setDiscountCode] = useState("");
 
   const [address, setAddress] = useState<Record<DeliveryField, string>>({
     line1: "",
@@ -174,7 +195,21 @@ export default function CheckoutView({
     })),
   );
 
-  const totalInCents = cartTotalInCents(subtotalInCents);
+  /*
+   * What the selected credit would take off, by the same `min(credit, subtotal)`
+   * rule `place_order()` applies. An **estimate**: the server recomputes it
+   * against the order it writes, and what the customer is charged is what the
+   * order row says. The card path proves that — `/api/checkout/intent` reads
+   * `totalInCents` off the row and refuses to be told an amount.
+   *
+   * Applied against merchandise only, so delivery is still charged.
+   */
+  const selectedCredit = credits.find((credit) => credit.id === creditId) ?? null;
+  const creditAppliedInCents = selectedCredit
+    ? Math.min(selectedCredit.balanceInCents, subtotalInCents)
+    : 0;
+
+  const totalInCents = cartTotalInCents(subtotalInCents) - creditAppliedInCents;
 
   /*
    * Purely visual: the gold tick on a completed section. Not validation — the
@@ -284,6 +319,9 @@ export default function CheckoutView({
         country: countryLabel(address.country, locale),
         note: address.note,
         company,
+        creditId,
+        // Sent as typed. The server uppercases, resolves and prices it.
+        discountCode,
         items: lines.map((line) => ({
           productId: line.productId,
           quantity: line.quantity,
@@ -430,6 +468,30 @@ export default function CheckoutView({
             />
           </fieldset>
 
+          <DiscountStep
+            code={discountCode}
+            onChange={(next) => {
+              if (!awaitingPayment) setDiscountCode(next);
+            }}
+            disabledByCredit={creditId !== ""}
+          />
+
+          <CreditStep
+            credits={credits}
+            selectedId={creditId}
+            onSelect={(next) => {
+              // Inert once a card order exists: the row already carries the
+              // credit it was written with, and the intent charges that row.
+              if (awaitingPayment) return;
+              setCreditId(next);
+              // The two cannot combine, and the database says so. Clearing the
+              // code here means the customer is never told that after the fact.
+              if (next !== "") setDiscountCode("");
+            }}
+            subtotalInCents={subtotalInCents}
+            locale={locale}
+          />
+
           <PaymentStep
             method={method}
             onMethodChange={(next) => {
@@ -519,7 +581,11 @@ export default function CheckoutView({
           ) : null}
         </form>
 
-        <OrderReview lines={resolved} subtotalInCents={subtotalInCents} />
+        <OrderReview
+          lines={resolved}
+          subtotalInCents={subtotalInCents}
+          creditAppliedInCents={creditAppliedInCents}
+        />
       </div>
     </div>
   );

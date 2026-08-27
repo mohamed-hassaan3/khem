@@ -59,13 +59,15 @@ export const paymentMethodSchema = z.enum(["CARD", "CASH"]).catch("CASH");
  */
 export const ORDER_SUMMARY_COLUMNS =
   'id, orderNumber, customerName, status, paymentStatus, channel, ' +
-  'totalInCents, placedAt, items:OrderItem(quantity)';
+  'totalInCents, placedAt, firstOpenedAt, items:OrderItem(quantity)';
 
 export const ORDER_DETAIL_COLUMNS =
   'id, orderNumber, customerName, customerEmail, customerPhone, note, ' +
   'status, paymentStatus, paymentMethod, channel, locale, ' +
   'subtotalInCents, shipInCents, totalInCents, stockReleasedAt, placedAt, ' +
+  'firstOpenedAt, ' +
   'trackingCode, stripePaymentIntentId, paidAt, ' +
+  'creditId, creditAppliedInCents, discountId, discountCode, discountInCents, ' +
   'shipLine1, shipLine2, shipCity, shipState, shipPostalCode, shipCountry, ' +
   'items:OrderItem(id, productSlug, productName, quantity, priceInCents)';
 
@@ -94,6 +96,14 @@ const orderSummaryRowSchema = z.object({
   channel: orderChannelSchema,
   totalInCents: z.number(),
   placedAt: z.string(),
+  /*
+   * `.default(null)` is not decoration. A deployment running *ahead* of
+   * `supabase/sql/0023_order_opened.sql` gets no such key back from PostgREST,
+   * and the house rule is one malformed row dropped rather than a blanked
+   * screen. Degrading to "nobody has opened it" is the safe direction: it
+   * over-reports work to do instead of hiding an order.
+   */
+  firstOpenedAt: z.string().nullable().default(null),
   items: z.array(z.object({ quantity: z.number() })).default([]),
 });
 
@@ -114,6 +124,13 @@ const orderDetailRowSchema = orderSummaryRowSchema
     trackingCode: z.string().nullable().default(null),
     stripePaymentIntentId: z.string().nullable().default(null),
     paidAt: z.string().nullable().default(null),
+    creditId: z.string().nullable().default(null),
+    // `.default(0)` rather than required: a deployment running ahead of
+    // `0027_credit_redemption.sql` must not blank the order screen.
+    creditAppliedInCents: z.coerce.number().default(0),
+    discountId: z.string().nullable().default(null),
+    discountCode: z.string().nullable().default(null),
+    discountInCents: z.coerce.number().default(0),
     shipLine1: z.string().nullable().default(null),
     shipLine2: z.string().nullable().default(null),
     shipCity: z.string().nullable().default(null),

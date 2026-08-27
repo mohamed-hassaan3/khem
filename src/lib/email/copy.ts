@@ -41,7 +41,10 @@ export interface WelcomeCopy {
   benefits: string[];
   cta: string;
   signoff: string;
+  /** Sentence introducing the unsubscribe link. The link text is separate. */
   unsubscribe: string;
+  /** The anchor's own words, so the URL never appears as bare text. */
+  unsubscribeLink: string;
 }
 
 export interface SignatureCopy {
@@ -101,10 +104,12 @@ export const WELCOME_COPY: Record<Locale, WelcomeCopy> = {
     ],
     cta: "Discover The House",
     signoff: "With warm regards,",
-    // Honest about the fact that removal is a human action today — a one-click
-    // link that quietly does nothing would be worse than none at all.
-    unsubscribe:
-      "Wish to step away? Reply to this message, or write to info@khemperfumes.com, and we will remove you promptly.",
+    // The link is now real — `supabase/sql/0025_newsletter.sql` gave every
+    // subscriber a token and `/unsubscribe` honours it. Until this phase
+    // removal was a human action, and the copy said so rather than offering a
+    // one-click link that quietly did nothing.
+    unsubscribe: "Wish to step away? You can leave the Inner Circle at any time:",
+    unsubscribeLink: "Unsubscribe",
   },
   ar: {
     subject: "أهلًا بك في الدائرة الخاصة — كيم",
@@ -120,8 +125,8 @@ export const WELCOME_COPY: Record<Locale, WelcomeCopy> = {
     ],
     cta: "تعرّف على الدار",
     signoff: "مع أطيب التحيات،",
-    unsubscribe:
-      "ترغب في إلغاء الاشتراك؟ ردّ على هذه الرسالة أو راسلنا على info@khemperfumes.com وسنزيل بريدك فورًا.",
+    unsubscribe: "ترغب في إلغاء الاشتراك؟ يمكنك مغادرة الدائرة الخاصة في أي وقت:",
+    unsubscribeLink: "إلغاء الاشتراك",
   },
 };
 

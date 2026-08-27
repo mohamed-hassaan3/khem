@@ -37,9 +37,18 @@ function logFailure(query: string, message: string): void {
 /** Statuses the desk still owes something on. */
 export const OPEN_STATUSES: readonly OrderStatus[] = ["PENDING", "PROCESSING"];
 
+/**
+ * Whether the desk has opened the order yet.
+ *
+ * Not a status and not stored as one — see
+ * `supabase/sql/0023_order_opened.sql` for why the two are kept apart.
+ */
+export type OrderSeenFilter = "new" | "opened";
+
 export interface OrderListFilter {
   status?: OrderStatus;
   channel?: OrderChannel;
+  seen?: OrderSeenFilter;
   /** Newest first, capped. A desk screen is not a data export. */
   limit?: number;
 }
@@ -69,6 +78,11 @@ export async function listAdminOrders(
   // validated before they arrive here.
   if (filter.status) query = query.eq("status", filter.status);
   if (filter.channel) query = query.eq("channel", filter.channel);
+
+  // Null-ness, so `.is` / `.not(..., "is", null)` rather than a comparison —
+  // `= null` is never true in SQL and would silently return nothing.
+  if (filter.seen === "new") query = query.is("firstOpenedAt", null);
+  if (filter.seen === "opened") query = query.not("firstOpenedAt", "is", null);
 
   const { data, error } = await query;
 
@@ -144,6 +158,34 @@ export async function countOpenOrders(): Promise<number> {
 
   if (error) {
     logFailure("countOpenOrders", error.message);
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
+/**
+ * How many orders nobody at the desk has opened yet.
+ *
+ * The count the dashboard tile and the order book's "New" chip both print, so
+ * the two cannot disagree. Backed by the partial index in
+ * `supabase/sql/0023_order_opened.sql`, which carries only these rows.
+ *
+ * Fails the way every read in this module fails: log the provider's message,
+ * return a figure the screen can render. Zero under-reports rather than
+ * blanking the desk, and the rows themselves still show their own markers.
+ */
+export async function countUnopenedOrders(): Promise<number> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return 0;
+
+  const { count, error } = await supabase
+    .from("Order")
+    .select("id", { count: "exact", head: true })
+    .is("firstOpenedAt", null);
+
+  if (error) {
+    logFailure("countUnopenedOrders", error.message);
     return 0;
   }
 

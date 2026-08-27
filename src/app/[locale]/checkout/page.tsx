@@ -8,6 +8,7 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { detectedCountryCode } from "@/src/lib/shipping";
 import { isCardPaymentAvailable } from "@/src/lib/stripe/server";
+import { spendableCreditsForUser } from "@/src/services/credits";
 import { getProductCardsByCollection } from "@/src/services/products";
 
 /**
@@ -77,6 +78,24 @@ export default async function CheckoutPage({
   ]);
 
   /*
+   * The credits this customer could spend, read **after** the session, because
+   * they are keyed by it. A guest has none — a credit belongs to an account and
+   * is not transferable — so the step is absent rather than empty.
+   *
+   * Only the three fields the selector renders cross into the bundle. The owner
+   * is not among them: the server compares it against the session, and a value
+   * the client could echo back would be an identity it could name.
+   */
+  const credits = viewer
+    ? (await spendableCreditsForUser(viewer.id)).map((credit) => ({
+        id: credit.id,
+        amountInCents: credit.amountInCents,
+        balanceInCents: credit.balanceInCents,
+        expiresAt: credit.expiresAt,
+      }))
+    : [];
+
+  /*
    * Where the visitor is, as Vercel's edge sees it — the same header
    * `src/proxy.ts` reads to pick a display currency. Null off Vercel, and the
    * form treats null as *unknown* rather than as *elsewhere*; see
@@ -109,6 +128,9 @@ export default async function CheckoutPage({
       // The refusal is enforced again in `placeCustomerOrder` — this prop only
       // decides what the visitor sees before they press anything.
       detectedCountry={detectedCountry}
+      // Suggestions only. Which credit may actually be spent, and for how much,
+      // is decided inside `place_order()` — see `0027_credit_redemption.sql`.
+      credits={credits}
     />
   );
 }

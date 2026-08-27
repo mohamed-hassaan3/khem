@@ -311,6 +311,22 @@ export function mutedParagraph(text: string, align: "left" | "right"): string {
  * are one of the least consistent things across mail clients, and in RTL they
  * land on the wrong side more often than not.
  */
+/**
+ * A muted anchor, for the one link that is not a call to action.
+ *
+ * Underlined and gold rather than a button: leaving a list should be plainly
+ * available, not styled to compete with the invitation above it — and not
+ * styled to be missed either, which is the failure mode that turns an
+ * unsubscribe link into a spam complaint.
+ */
+export function mutedLink(
+  label: string,
+  href: string,
+  align: "left" | "right",
+): string {
+  return `<p style="margin:0 0 18px 0;font-family:${SANS};font-size:13px;line-height:1.85;text-align:${align};"><a href="${escapeHtml(href)}" style="color:${GOLD};text-decoration:underline;">${escapeHtml(label)}</a></p>`;
+}
+
 export function markedList(items: string[], align: "left" | "right"): string {
   const rows = items
     .map(

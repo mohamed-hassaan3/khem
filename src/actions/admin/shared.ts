@@ -37,7 +37,8 @@ export type AdminEntity =
   | "merchandising page"
   | "product"
   | "article"
-  | "image";
+  | "image"
+  | "stockist";
 
 /**
  * Returned when `SUPABASE_SECRET_KEY` is absent.
@@ -90,11 +91,17 @@ function uniqueViolation(
   }
 
   if (text.includes("_slug_key") || text.includes("_pkey")) {
+    // A stockist is keyed by `id` rather than `slug` — its primary key is the
+    // hand-typed short name — so the message has to land on the field the form
+    // actually renders, or the editor sees a form-level sentence with no
+    // highlighted input to fix.
+    const field = entity === "stockist" ? "id" : "slug";
+
     return {
       ok: false,
       message: "Some fields need attention.",
       fieldErrors: {
-        slug: `That slug is already taken by another ${entity}. Pick a different one.`,
+        [field]: `That ${field} is already taken by another ${entity}. Pick a different one.`,
       },
     };
   }
@@ -139,6 +146,33 @@ export function postgresFailure(
           };
 
     case "23514":
+      /*
+       * The two stockist constraints. `src/schemas/stockists.ts` restates both
+       * and should catch them first — these are the backstop for a write that
+       * reached the database anyway, and they say what the constraint means
+       * rather than naming it.
+       */
+      if (error.message.includes("stockist_coming_soon_has_no_details")) {
+        return {
+          ok: false,
+          message: "Some fields need attention.",
+          fieldErrors: {
+            status:
+              "An announced location publishes no address, phone, hours or map link. Clear them, or set the status to open.",
+          },
+        };
+      }
+
+      if (error.message.includes("stockist_open_has_address")) {
+        return {
+          ok: false,
+          message: "Some fields need attention.",
+          fieldErrors: {
+            address: "An open location needs an address people can visit.",
+          },
+        };
+      }
+
       if (error.message.includes("product_strength_or_format")) {
         return {
           ok: false,

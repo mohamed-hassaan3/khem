@@ -77,13 +77,15 @@ export default async function Heritage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, timeline, values] = await Promise.all([
-    params,
-    getTimeline(),
-    getBrandValues(),
-  ]);
-
+  // The locale is resolved before the content is fetched, because the timeline
+  // is now read in the visitor's language — the same ordering `/stockists` uses.
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  const [timeline, values] = await Promise.all([
+    getTimeline(activeLocale),
+    getBrandValues(activeLocale),
+  ]);
   const dict = await getDictionary(activeLocale);
   const island = ltrIsland(activeLocale);
 

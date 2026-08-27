@@ -44,6 +44,7 @@ import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
   canTransition,
   createOrderSchema,
+  markOrderOpenedSchema,
   updateOrderStatusSchema,
   updatePaymentStatusSchema,
   type AdminActionResult,
@@ -216,6 +217,59 @@ export async function updateOrderStatus(input: unknown): Promise<AdminActionResu
       ? `Order ${order.orderNumber} is now ${parsed.data.status.toLowerCase()}. The customer has been notified.`
       : `Order ${order.orderNumber} is now ${parsed.data.status.toLowerCase()}.`,
   };
+}
+
+/**
+ * Record that somebody at the desk has looked at this order.
+ *
+ * Desk telemetry, not order state: it moves no stock, changes no status, sends
+ * no email, and is invisible to the customer. What it buys is the one question
+ * the order book could not answer — whether an order has been read at all.
+ *
+ * The claim happens in `mark_order_opened()`, which updates only where the
+ * stamp is still null, so the first admin through the door owns it and a second
+ * open (or a second tab) changes nothing. The boolean it returns says whether
+ * *this* call was the one that claimed it; it decides only whether a log line
+ * is worth writing, because the outcome is the same either way.
+ *
+ * There is no `revalidatePath`: every screen under `/admin` is `force-dynamic`,
+ * so the next render already reads the new value.
+ */
+export async function markOrderOpened(input: unknown): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = markOrderOpenedSchema.safeParse(input);
+  if (!parsed.success) {
+    // No field errors: there is no form behind this, only a mounted component.
+    return { ok: false, message: "That order could not be marked as opened." };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  const { data, error } = await supabase.rpc("mark_order_opened", {
+    order_id: parsed.data.orderId,
+    // The Clerk user id, taken from the verified session — never from the
+    // caller. A request that could name its own reader could forge a receipt.
+    opened_by: actor.id,
+  });
+
+  if (error) {
+    console.error(`[admin] markOrderOpened failed: ${error.message}`);
+    return postgresFailure(error, "product");
+  }
+
+  // Only the call that actually claimed the order says so. Logging every render
+  // would bury the one line that carries information.
+  if (data === true) {
+    console.info(`[admin] ${actor.email} opened order ${parsed.data.orderId}`);
+  }
+
+  // `slug` on a success is "which row was written". The sibling actions put the
+  // order *number* there because a form redirects to it; nothing redirects here,
+  // and reading the row back to fetch a string no caller uses would be a second
+  // round trip for nothing. The id identifies the same order.
+  return { ok: true, slug: parsed.data.orderId, message: "Marked as opened." };
 }
 
 /** Payment state only — it moves no stock, so there is no function behind it. */

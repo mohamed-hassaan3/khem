@@ -7,12 +7,12 @@
  * Supabase query it will become. Migrating means replacing a function body
  * here — never a component, never a page.
  *
- * **Nothing in this file returns fabricated data.** There is no `Order` and no
- * `Address` table yet (AGENTS.md §9 defines both; `prisma/` holds no schema),
- * so orders and addresses are empty and the panels render their empty states.
- * That is the honest rendering of "no store yet" — the page this replaced
- * shipped three invented orders and two invented Cairo addresses, which is
- * exactly what AGENTS.md's "UI must display stored data only" rule forbids.
+ * **Nothing in this file returns fabricated data.** `"Order"` arrived in
+ * `supabase/sql/0015_orders.sql` and `"Address"` in `0024_customers.sql`, so
+ * both panels now render stored rows; a customer with neither still gets the
+ * empty state rather than an invention. The page this replaced shipped three
+ * invented orders and two invented Cairo addresses, which is exactly what
+ * AGENTS.md's "UI must display stored data only" rule forbids.
  *
  * Every function takes `userId` — the Clerk user id, which is the `clerkId`
  * column of the §9 `User` model. It always arrives from `await auth()` on the
@@ -23,6 +23,7 @@ import "server-only";
 
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { parseList } from "@/src/schemas/db/catalog";
+import { savedAddressSchema } from "@/src/schemas/db/customers";
 import { customerOrderSchema } from "@/src/schemas/db/orders";
 import type {
   AccountSummary,
@@ -118,24 +119,45 @@ function firstVisitPerStatus(
 /**
  * A customer's saved addresses, default first.
  *
- * Becomes:
+ * Reads with the secret key for the same reason `getOrdersForUser` does, and
+ * with the same obligation attached: `supabase/sql/0024_customers.sql` grants
+ * the public roles nothing on `"Address"`, so **the `clerkId` filter is the
+ * access control**. `userId` must arrive from `await auth()` on the server —
+ * never a route param, never a search param, never a form field.
  *
- * ```ts
- * const { data, error } = await supabase
- *   .from("Address")
- *   .select("id, label, recipient, line1, line2, city, state, postalCode, country, isDefault")
- *   .eq("user.clerkId", userId)
- *   .order("isDefault", { ascending: false });
- * ```
+ * The join through `"User"` is what keeps that true. Addresses are keyed by the
+ * `"User"` row id, and resolving the session's Clerk id to that row here means
+ * no caller ever gets to name the row id itself.
  *
- * `Address` in §9 has no `label` or `recipient` column yet — both are added in
- * the same migration, since an address book with neither is unusable.
+ * A customer whose Clerk webhook has not landed yet simply has no row, and
+ * therefore no addresses, which is the honest answer rather than an error.
  */
 export async function getAddressesForUser(
   userId: string,
 ): Promise<readonly SavedAddress[]> {
-  void userId;
-  return [];
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Address")
+    .select(
+      "id, label, recipient, line1, line2, city, state, postalCode, " +
+        "country, isDefault, user:User!inner(clerkId, deletedAt)",
+    )
+    .eq("user.clerkId", userId)
+    .is("user.deletedAt", null)
+    .order("isDefault", { ascending: false })
+    .order("createdAt", { ascending: true });
+
+  if (error) {
+    console.error(`[account] getAddressesForUser failed: ${error.message}`);
+    return [];
+  }
+
+  return parseList(data, (row) => {
+    const parsed = savedAddressSchema.safeParse(row);
+    return parsed.success ? parsed.data : null;
+  });
 }
 
 /**
@@ -165,37 +187,6 @@ export async function getAccountSummary(
   };
 }
 
-/*
- * NEXT STEP — marketing opt-in → the admin dashboard.
- *
- * `/sign-up` writes the "Email me with news and offers" checkbox to the Clerk
- * user's `unsafeMetadata.marketingOptIn` at creation (see
- * `src/components/auth/SignUpForm.tsx`). It is *not* read anywhere yet.
- *
- * When the `User` table lands it becomes a column on that row, written by the
- * same `user.created` / `user.updated` webhook that syncs the rest:
- *
- * ```ts
- * await supabase.from("User").upsert(
- *   { clerkId: userId, email, marketingOptIn: Boolean(unsafeMetadata.marketingOptIn) },
- *   { onConflict: "clerkId" },
- * );
- * ```
- *
- * Two things to carry across, because both are easy to lose between here and
- * there:
- *
- *  - **`unsafeMetadata` is writable by the user it belongs to.** That is
- *    correct for a preference they own, and it means the webhook must treat
- *    the value as untrusted input — coerce it to a boolean, never read
- *    anything else out of that object, and never let it influence a role or a
- *    price.
- *  - **Consent needs a timestamp to be worth anything.** Store
- *    `marketingOptInAt` alongside the flag; a bare boolean cannot answer "when
- *    did they agree?", which is the only question that matters if the opt-in
- *    is ever challenged. The unsubscribe path writes `false` and a new
- *    timestamp rather than deleting the row.
- */
 
 /*
  * NEXT STEP — `syncUser(userId)`.

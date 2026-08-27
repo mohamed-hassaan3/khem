@@ -60,6 +60,33 @@ export const checkoutSchema = z.object({
 
   paymentMethod: z.enum(["CARD", "CASH"], { error: "paymentMethod" }),
 
+  /*
+   * A Discovery Credit to spend, or nothing.
+   *
+   * An **id only** — never an amount, never an owner, never a verdict on
+   * whether it may be used. Everything that decides those is read from the
+   * database inside `place_order()`, under a row lock, in the same transaction
+   * that writes the order. See `supabase/sql/0027_credit_redemption.sql`.
+   *
+   * Shape-checked here and nothing more: an id that does not exist, belongs to
+   * somebody else, or has already been spent is refused there, because that is
+   * the only place the answer cannot go stale between the check and the write.
+   */
+  creditId: z.string().trim().max(64, "credit").default(""),
+
+  /*
+   * A discount code, or nothing.
+   *
+   * A **string only** — never a percentage, an amount, or a verdict. What it is
+   * worth and whether it applies at all are decided by `resolve_discount()`
+   * inside the order transaction, which is what `supabase/AGENTS.md` §12's
+   * "never calculate final order prices on the client" actually requires.
+   *
+   * Shape-checked here and nothing more. Uppercasing happens in SQL, so the
+   * customer may type it however they like.
+   */
+  discountCode: z.string().trim().max(40, "discount").default(""),
+
   // Validated rather than trusted: it decides which language every future email
   // about this order is written in, and it arrives from the client.
   locale: z.enum(LOCALES, { error: "locale" }),

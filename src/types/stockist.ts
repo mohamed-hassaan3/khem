@@ -90,3 +90,44 @@ export interface Stockist {
   mapsUrl: string | null;
   image: ContentImage;
 }
+
+/**
+ * A stockist as the **dashboard** edits it.
+ *
+ * Deliberately not {@link Stockist}. That shape is what a *visitor* sees: one
+ * language, already resolved by `toStockist()`, with the image folded into a
+ * `ContentImage`. An editor needs the opposite — both languages side by side,
+ * because the Arabic column is the thing they came to fill in, and a resolved
+ * value would show them the English fallback and let them "save" it back over
+ * an empty Arabic field.
+ *
+ * It also carries the two columns the public projection has no use for:
+ * `isPublished` (the public read never sees an unpublished row at all — RLS
+ * hides it) and `sortOrder`.
+ */
+export interface AdminStockist {
+  id: string;
+  name: string;
+  name_ar: string | null;
+  city: string;
+  city_ar: string | null;
+  country: string;
+  country_ar: string | null;
+  region: StockistRegion;
+  type: StockistType;
+  status: StockistStatus;
+  address: string | null;
+  address_ar: string | null;
+  /** Display form. Latin in both trees — never localized. */
+  phone: string | null;
+  /** `tel:` target. A link target, not display text. */
+  phoneHref: string | null;
+  hours: string | null;
+  hours_ar: string | null;
+  mapsUrl: string | null;
+  imageUrl: string;
+  imageAlt: string;
+  imageAlt_ar: string | null;
+  isPublished: boolean;
+  sortOrder: number;
+}

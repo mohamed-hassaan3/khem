@@ -37,7 +37,7 @@ import type {
   SalesTotals,
 } from "@/src/types/order";
 
-import { countOpenOrders } from "./orders";
+import { countOpenOrders, countUnopenedOrders } from "./orders";
 
 function logFailure(query: string, message: string): void {
   console.error(`[admin] ${query} failed: ${message}`);
@@ -110,13 +110,16 @@ export async function getSalesSeries(days: SalesRange): Promise<SalesPoint[]> {
  *
  * Derived from the same series the chart draws, so a tile and the curve beside
  * it can never disagree — the alternative is a second query with a second
- * definition of "the last 30 days". `awaitingFulfilment` is the exception: it
- * is a state, not a window, and counts open orders however old they are.
+ * definition of "the last 30 days". `awaitingFulfilment` and `unopened` are the
+ * exceptions: both are states rather than windows, and count every order in
+ * them however old it is. An order forgotten three weeks ago is precisely the
+ * one a thirty-day window would stop mentioning.
  */
 export async function getSalesTotals(days: SalesRange): Promise<SalesTotals> {
-  const [series, awaitingFulfilment] = await Promise.all([
+  const [series, awaitingFulfilment, unopened] = await Promise.all([
     getSalesSeries(days),
     countOpenOrders(),
+    countUnopenedOrders(),
   ]);
 
   return {
@@ -124,6 +127,7 @@ export async function getSalesTotals(days: SalesRange): Promise<SalesTotals> {
     orderCount: series.reduce((sum, point) => sum + point.orderCount, 0),
     units: series.reduce((sum, point) => sum + point.units, 0),
     awaitingFulfilment,
+    unopened,
   };
 }
 

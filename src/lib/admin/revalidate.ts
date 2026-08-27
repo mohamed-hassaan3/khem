@@ -157,3 +157,101 @@ export function revalidateArticle(slug?: string): void {
 
   revalidateSitemap();
 }
+
+/**
+ * After a stockist is created, edited, published or removed.
+ *
+ * `/stockists` is ISR at one hour, which is exactly long enough for an editor
+ * to add a boutique, reload the public page, see nothing, and conclude the save
+ * failed. The home page is not on this list: nothing on it quotes the
+ * directory.
+ */
+export function revalidateStockists(): void {
+  revalidateAllLocales("/stockists");
+}
+
+/**
+ * After a house setting, contact channel or social profile is changed.
+ *
+ * Three surfaces, and each is on the list for a specific reason:
+ *
+ *  - **the home page** carries the featured fragrance, which is the one
+ *    merchandising decision stored in `"BoutiqueSetting"`;
+ *  - **`/contact`** renders the channels and the social profiles, and is ISR at
+ *    an hour;
+ *  - **`/stockists`** quotes `wholesaleEmail` for partnership enquiries.
+ *
+ * The email signatures that also read `"SocialProfile"` are composed per send,
+ * so they need nothing here — they are already reading the current row.
+ */
+export function revalidateSettings(): void {
+  revalidateAllLocales(HOME);
+  revalidateAllLocales("/contact");
+  revalidateAllLocales("/stockists");
+}
+
+/**
+ * After a heritage timeline entry changes.
+ *
+ * `/heritage` only — the timeline appears nowhere else, and both locales are
+ * separate cache entries of rows that now differ by language.
+ */
+export function revalidateHeritage(): void {
+  revalidateAllLocales("/heritage");
+}
+
+/**
+ * After a craft pillar changes.
+ *
+ * The **home page**, not `/craftsmanship`: the pillars are the home page's
+ * four-item summary. `/craftsmanship` renders `"CraftStep"`, which is a
+ * different table and gets its own call when its editor lands.
+ */
+export function revalidateCraftPillars(): void {
+  revalidateAllLocales(HOME);
+}
+
+/**
+ * After a brand value changes. `/heritage`, beside the timeline.
+ */
+export function revalidateBrandValues(): void {
+  revalidateAllLocales("/heritage");
+}
+
+/** After a mission statement changes. `/about` is the only page that reads them. */
+export function revalidateAbout(): void {
+  revalidateAllLocales("/about");
+}
+
+/**
+ * After a craft step, stat or quote changes.
+ *
+ * `/craftsmanship` only — the craft **pillars** are the home page's summary and
+ * live in `revalidateCraftPillars()`. The two are different tables and different
+ * pages, which is exactly the confusion worth naming here.
+ */
+export function revalidateCraftsmanship(): void {
+  revalidateAllLocales("/craftsmanship");
+}
+
+/**
+ * After a material is created, edited, removed, or re-linked to a perfume.
+ *
+ * Three surfaces, and the third is the one easy to forget: a material is
+ * printed on the detail page of every product it is used in, so changing its
+ * name or its photograph makes those pages stale too.
+ *
+ * Both `/perfume/[slug]` and `/ritual/[slug]` are revalidated for each slug
+ * without checking which kind of product it is. Revalidating a path that was
+ * never rendered is a no-op, and the alternative — looking up each collection's
+ * kind — is a query per product to save nothing.
+ */
+export function revalidateIngredients(productSlugs: readonly string[] = []): void {
+  revalidateAllLocales(HOME);
+  revalidateAllLocales("/ingredients");
+
+  for (const slug of new Set(productSlugs)) {
+    revalidateAllLocales(`/perfume/${slug}`);
+    revalidateAllLocales(`/ritual/${slug}`);
+  }
+}

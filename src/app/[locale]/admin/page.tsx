@@ -24,6 +24,8 @@ import {
   listAdminCollections,
   listAdminProducts,
 } from "@/src/services/admin/catalog";
+import { getCreditTotals } from "@/src/services/admin/credits";
+import { countCustomers } from "@/src/services/admin/customers";
 import { listAdminArticles } from "@/src/services/admin/journal";
 import { listAdminOrders } from "@/src/services/admin/orders";
 
@@ -104,6 +106,8 @@ export default async function AdminDashboardPage({
     products,
     articles,
     missingEmbeddings,
+    customerCount,
+    creditTotals,
     totals,
     series,
     inventory,
@@ -113,6 +117,8 @@ export default async function AdminDashboardPage({
     listAdminProducts(),
     listAdminArticles(),
     countProductsMissingEmbedding(),
+    countCustomers(),
+    getCreditTotals(),
     getSalesTotals(range),
     getSalesSeries(range),
     listInventoryRows(range),
@@ -147,7 +153,7 @@ export default async function AdminDashboardPage({
       />
 
       {/* ── Trade ────────────────────────────────────────── */}
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-5">
         <Tile
           label={`Revenue · ${range}d`}
           value={egpCompact(totals.revenueInCents)}
@@ -169,6 +175,16 @@ export default async function AdminDashboardPage({
               : "Nothing outstanding"
           }
           href={`${ordersPath}?status=PENDING`}
+        />
+        <Tile
+          label="New · unopened"
+          value={totals.unopened}
+          note={
+            totals.unopened > 0
+              ? "Nobody has opened these yet"
+              : "Every order seen"
+          }
+          href={`${ordersPath}?seen=new`}
         />
         <Tile
           label="Needs stock"
@@ -231,6 +247,16 @@ export default async function AdminDashboardPage({
                   <span className="font-heading text-[11px] tracking-[0.1em]">
                     {order.orderNumber}
                   </span>
+                  {/* Same marker as the order book, so the tile above, this
+                      table and that screen all agree at a glance. */}
+                  {order.firstOpenedAt === null ? (
+                    <span
+                      title="Nobody at the desk has opened this order yet"
+                      className="mt-2 block w-fit border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-gold"
+                    >
+                      New
+                    </span>
+                  ) : null}
                 </AdminCell>
                 <AdminCell muted>{order.customerName}</AdminCell>
                 <AdminCell muted>{placedOn(order.placedAt)}</AdminCell>
@@ -291,6 +317,28 @@ export default async function AdminDashboardPage({
 
       {/* ── Catalog ──────────────────────────────────────── */}
       <div className="mt-6 md:mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <Tile
+          label="Customers"
+          value={customerCount}
+          note="Registered and walk-in"
+          href={localizePath(activeLocale, "/admin/customers")}
+        />
+        <Tile
+          label="Credits issued"
+          value={creditTotals.issuedCount}
+          note={
+            creditTotals.pendingDeliveryCount > 0
+              ? `${creditTotals.pendingDeliveryCount} awaiting delivery`
+              : `${creditTotals.availableCount} available`
+          }
+          href={localizePath(activeLocale, "/admin/credits")}
+        />
+        <Tile
+          label="Credits redeemed"
+          value={creditTotals.redeemedCount}
+          note={egp(creditTotals.redeemedInCents)}
+          href={`${localizePath(activeLocale, "/admin/credits")}?status=REDEEMED`}
+        />
         <Tile
           label="Collections"
           value={collections.length}

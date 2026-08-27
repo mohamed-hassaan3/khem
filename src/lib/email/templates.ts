@@ -27,6 +27,7 @@ import {
   ctaButton,
   luxuryShell,
   markedList,
+  mutedLink,
   mutedParagraph,
   paragraph,
   quoteBlock,
@@ -232,9 +233,16 @@ export function enquiryAcknowledgementEmail(
 }
 
 /** Welcome sent to a new Inner Circle subscriber. */
+/**
+ * @param unsubscribeUrl Carries the subscriber's own token. Rendered as an
+ *   anchor rather than as bare text so the token is not left lying in the
+ *   visible body of the letter, and appended to the plain-text part where a
+ *   URL has nowhere else to go.
+ */
 export function newsletterWelcomeEmail(
   locale: Locale,
   socials: readonly SocialProfile[],
+  unsubscribeUrl: string,
 ): EmailPayload {
   const copy = WELCOME_COPY[locale];
   const align = LOCALE_DIRECTION[locale] === "rtl" ? "right" : "left";
@@ -248,6 +256,7 @@ export function newsletterWelcomeEmail(
     signoff(copy.signoff, align),
     spacer(10),
     mutedParagraph(copy.unsubscribe, align),
+    mutedLink(copy.unsubscribeLink, unsubscribeUrl, align),
   ].join("");
 
   const html = luxuryShell({
@@ -267,6 +276,7 @@ export function newsletterWelcomeEmail(
     ...copy.benefits.map((benefit) => `- ${benefit}`),
     "",
     copy.unsubscribe,
+    unsubscribeUrl,
     "",
     "—",
     "KHEM Perfumes · Essence of Heritage",
@@ -286,7 +296,7 @@ export function newsletterEmail(email: string): EmailPayload {
       row("Email", escapeHtml(email)),
       row(
         "Note",
-        "Added from the home page form. No list subscription happened — add this address to the mailing list manually.",
+        "Added from the home page form and recorded on the Inner Circle list. Nothing to do by hand — see Newsletter in the dashboard.",
       ),
     ].join(""),
   );
@@ -296,7 +306,7 @@ export function newsletterEmail(email: string): EmailPayload {
     "",
     `Email: ${email}`,
     "",
-    "No list subscription happened. Add this address to the mailing list manually.",
+    "Recorded on the Inner Circle list. Nothing to do by hand.",
   ].join("\n");
 
   return { subject: "KHEM — New Inner Circle Signup", html, text };

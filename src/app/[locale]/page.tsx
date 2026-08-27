@@ -75,8 +75,8 @@ export default async function Home({
     getFeaturedCollections(activeLocale),
     getFeaturedProducts(activeLocale),
     getFeaturedProduct(activeLocale),
-    getCraftPillars(),
-    getIngredients(),
+    getCraftPillars(activeLocale),
+    getIngredients(activeLocale),
     getLatestArticles(),
     getTestimonials(),
   ]);

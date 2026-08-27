@@ -37,12 +37,15 @@ export default async function Ingredients({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, ingredients] = await Promise.all([
-    params,
-    getIngredientDetails(),
-  ]);
+  // The locale is resolved before the materials are fetched, because they are
+  // now read in the visitor's language.
+  const { locale } = await params;
+  const activeLocale = isLocale(locale) ? locale : "en";
 
-  const dict = await getDictionary(isLocale(locale) ? locale : "en");
+  const [ingredients, dict] = await Promise.all([
+    getIngredientDetails(activeLocale),
+    getDictionary(activeLocale),
+  ]);
 
   return (
     <div className="min-h-screen bg-background text-ivory">

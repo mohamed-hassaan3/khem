@@ -40,12 +40,10 @@ export default async function About({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, missionStatements] = await Promise.all([
-    params,
-    getMissionStatements(),
-  ]);
-
+  const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
+
+  const missionStatements = await getMissionStatements(activeLocale);
   const dict = await getDictionary(activeLocale);
   const island = ltrIsland(activeLocale);
 

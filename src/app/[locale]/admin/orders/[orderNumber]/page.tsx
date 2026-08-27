@@ -8,6 +8,7 @@ import {
   AdminRow,
   AdminTable,
 } from "@/src/components/admin/AdminTable";
+import MarkOrderOpened from "@/src/components/admin/MarkOrderOpened";
 import OrderStatusControl from "@/src/components/admin/OrderStatusControl";
 import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
@@ -96,6 +97,15 @@ export default async function AdminOrderPage({
         All orders
       </Link>
 
+      {/*
+        Reaching this screen is what "opened" means, so the claim is made here
+        and nowhere else. It renders nothing and cannot fail visibly.
+      */}
+      <MarkOrderOpened
+        orderId={order.id}
+        alreadyOpened={order.firstOpenedAt !== null}
+      />
+
       <AdminPageHeader
         title={order.orderNumber}
         description={`${label(order.channel)} · placed ${stamp(order.placedAt)}`}
@@ -133,6 +143,49 @@ export default async function AdminOrderPage({
               <dt className="text-ivory/35">Delivery</dt>
               <dd className="text-ivory/70">{egp(order.shipInCents)}</dd>
             </div>
+            {order.discountInCents > 0 ? (
+              <div className="flex justify-between py-1">
+                <dt className="text-ivory/35">
+                  Discount
+                  {order.discountCode ? (
+                    <span className="ms-2 text-ivory/25">{order.discountCode}</span>
+                  ) : null}
+                </dt>
+                <dd className="text-gold">
+                  −{egp(order.discountInCents)}
+                  {order.discountCode ? (
+                    <Link
+                      href={localizePath(
+                        activeLocale,
+                        `/admin/discounts/${order.discountCode}`,
+                      )}
+                      className="ms-3 font-heading text-[9px] uppercase tracking-[0.2em] text-gold/60 transition-colors duration-300 hover:text-gold"
+                    >
+                      Code
+                    </Link>
+                  ) : null}
+                </dd>
+              </div>
+            ) : null}
+            {order.creditAppliedInCents > 0 ? (
+              <div className="flex justify-between py-1">
+                <dt className="text-ivory/35">Discovery credit</dt>
+                <dd className="text-gold">
+                  −{egp(order.creditAppliedInCents)}
+                  {order.creditId ? (
+                    <Link
+                      href={localizePath(
+                        activeLocale,
+                        `/admin/credits/${order.creditId}`,
+                      )}
+                      className="ms-3 font-heading text-[9px] uppercase tracking-[0.2em] text-gold/60 transition-colors duration-300 hover:text-gold"
+                    >
+                      Ledger
+                    </Link>
+                  ) : null}
+                </dd>
+              </div>
+            ) : null}
             <div className="mt-3 flex justify-between border-t border-border pt-3">
               <dt className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
                 Total

@@ -36,12 +36,19 @@ import {
   Boxes,
   ExternalLink,
   FileText,
+  LayoutList,
   LayoutGrid,
   Package,
   PanelLeft,
   PanelLeftClose,
+  Mail,
+  MapPin,
+  Tag,
+  Ticket,
   Receipt,
+  Settings,
   Sparkles,
+  Users,
 } from "lucide-react";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
@@ -57,11 +64,18 @@ import { localizePath, type Locale } from "@/src/lib/i18n/config";
 const SECTIONS = [
   { path: "/admin", label: "Dashboard", icon: LayoutGrid },
   { path: "/admin/orders", label: "Orders", icon: Receipt },
+  { path: "/admin/customers", label: "Customers", icon: Users },
+  { path: "/admin/credits", label: "Credits", icon: Ticket },
+  { path: "/admin/discounts", label: "Discounts", icon: Tag },
+  { path: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { path: "/admin/inventory", label: "Inventory", icon: Boxes },
   { path: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { path: "/admin/collections", label: "Collections", icon: Sparkles },
   { path: "/admin/products", label: "Products", icon: Package },
   { path: "/admin/journal", label: "Journal", icon: FileText },
+  { path: "/admin/content", label: "Content", icon: LayoutList },
+  { path: "/admin/stockists", label: "Stockists", icon: MapPin },
+  { path: "/admin/settings", label: "Settings", icon: Settings },
 ] as const;
 
 /** A single UI boolean. Never an identifier, never anything about an order. */

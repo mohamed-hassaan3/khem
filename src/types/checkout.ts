@@ -41,6 +41,21 @@ export interface CheckoutFormInput {
   country: string;
   note: string;
   company: string;
+  /**
+   * A Discovery Credit to spend, or `""` for none.
+   *
+   * An **id only**. The amount, the owner and whether it may be used at all are
+   * decided server-side inside `place_order()` — see
+   * `supabase/sql/0027_credit_redemption.sql`.
+   */
+  creditId: string;
+  /**
+   * A discount code, or `""` for none.
+   *
+   * A **string only**. Its value and eligibility are computed server-side — see
+   * `supabase/sql/0028_discounts.sql`.
+   */
+  discountCode: string;
   items: readonly { productId: string; quantity: number }[];
 }
 

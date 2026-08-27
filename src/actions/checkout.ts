@@ -152,6 +152,31 @@ function placementFailure(message: string): CheckoutResult {
     return { ok: false, formError: "unavailable", detail: message };
   }
 
+  /*
+   * A refused Discovery Credit. `place_order()` raises a different sentence for
+   * each reason — not yet delivered, expired, cancelled, already spent, wrong
+   * account, no fragrance in the bag — and each is written for the customer,
+   * so it is passed through as `detail` beneath the translated heading.
+   *
+   * English-only, like the stock message above it and for the same reason: the
+   * server names a condition it could not have known in advance. The heading
+   * the customer reads first is translated.
+   */
+  if (message.includes("Discovery Credit") || message.includes("credit")) {
+    return { ok: false, formError: "creditRejected", detail: message };
+  }
+
+  /*
+   * A refused discount code. `resolve_discount()` returns a different sentence
+   * for each reason — unrecognised, inactive, not started, expired, below the
+   * minimum, capped, already used, nothing eligible in the bag — and every one
+   * is written for the customer, so it is passed through beneath the translated
+   * heading rather than flattened into "something went wrong".
+   */
+  if (message.includes("code")) {
+    return { ok: false, formError: "discountRejected", detail: message };
+  }
+
   return { ok: false, formError: "server" };
 }
 
@@ -253,6 +278,23 @@ export async function placeCustomerOrder(
       shipPostalCode: parsed.data.postalCode,
       shipCountry: parsed.data.country,
       shipInCents,
+      /*
+       * The credit id, passed straight through. Nothing here checks whether it
+       * may be used: the owner is compared against `clerkUserId` above — which
+       * came from `getUserId()`, a verified session — and the balance,
+       * eligibility and expiry are read inside `place_order()` under a row
+       * lock. Validating here as well would be a check that can go stale
+       * between this line and the write.
+       */
+      creditId: parsed.data.creditId,
+      /*
+       * Forwarded unexamined, for the same reason as the credit id above: every
+       * question about it — is it real, active, in date, within its caps, does
+       * it apply to anything in this bag — is answered by `resolve_discount()`
+       * against the order being written, under a lock. A check here could go
+       * stale between this line and that one.
+       */
+      discountCode: parsed.data.discountCode,
       items: resolution.lines.map((line) => ({
         slug: line.slug,
         quantity: line.quantity,

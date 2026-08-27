@@ -100,6 +100,17 @@ export const updateOrderStatusSchema = z.object({
   status: z.enum(orderStatusValues),
 });
 
+/**
+ * Claiming an order as opened.
+ *
+ * One field, because there is nothing to decide: the actor comes from
+ * `requireAdmin()` on the server and the timestamp from `now()` in the
+ * database. A request that could name either could forge a read receipt.
+ */
+export const markOrderOpenedSchema = z.object({
+  orderId: z.string().min(1, "Which order?"),
+});
+
 export const updatePaymentStatusSchema = z.object({
   orderId: z.string().min(1, "Which order?"),
   paymentStatus: z.enum(paymentStatusValues),

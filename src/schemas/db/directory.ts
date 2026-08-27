@@ -18,7 +18,7 @@ import { resolveOptionalText, resolveText } from "@/src/lib/i18n/resolve";
 
 import type { ContactChannel, SocialProfile } from "@/src/types/contact";
 import type { LegalDocument } from "@/src/types/legal";
-import type { Stockist } from "@/src/types/stockist";
+import type { AdminStockist, Stockist } from "@/src/types/stockist";
 
 // ── Stockist ──────────────────────────────────────────────────
 
@@ -81,6 +81,29 @@ export function toStockist(row: unknown, locale: Locale): Stockist | null {
   };
 }
 
+/**
+ * The dashboard's projection — both languages, plus the two columns the public
+ * one omits.
+ *
+ * Read with the secret key. `supabase/sql/0003_directory.sql` publishes rows
+ * through an RLS policy gated on `isPublished`, so an editor fixing an
+ * unpublished location could not see it at all through the publishable key —
+ * the same reason `services/admin/catalog.ts` reads archived products that way.
+ */
+export const ADMIN_STOCKIST_COLUMNS = `${STOCKIST_COLUMNS}, isPublished, sortOrder`;
+
+const adminStockistRowSchema = stockistRowSchema.extend({
+  isPublished: z.boolean().default(true),
+  sortOrder: z.coerce.number().default(0),
+});
+
+export function toAdminStockist(row: unknown): AdminStockist | null {
+  const parsed = adminStockistRowSchema.safeParse(row);
+  // Returned exactly as stored: no `resolveText`, because an editor must see
+  // the empty Arabic field rather than the English it would fall back to.
+  return parsed.success ? parsed.data : null;
+}
+
 // ── Contact ───────────────────────────────────────────────────
 
 export const CONTACT_CHANNEL_COLUMNS =
@@ -113,6 +136,27 @@ export function toContactChannel(
   };
 }
 
+/**
+ * The dashboard's projection of a contact channel — both languages, plus the
+ * sort order the public read has no use for.
+ *
+ * Same reasoning as `ADMIN_STOCKIST_COLUMNS`: an editor must see the empty
+ * Arabic field rather than the English `resolveText()` would fall back to,
+ * because that field is the thing they opened the screen to fill in.
+ */
+export const ADMIN_CONTACT_CHANNEL_COLUMNS = `${CONTACT_CHANNEL_COLUMNS}, sortOrder`;
+
+const adminContactChannelRowSchema = contactChannelRowSchema.extend({
+  sortOrder: z.coerce.number().default(0),
+});
+
+export type AdminContactChannel = z.infer<typeof adminContactChannelRowSchema>;
+
+export function toAdminContactChannel(row: unknown): AdminContactChannel | null {
+  const parsed = adminContactChannelRowSchema.safeParse(row);
+  return parsed.success ? parsed.data : null;
+}
+
 export const SOCIAL_PROFILE_COLUMNS = "id, platform, handle, url";
 
 const socialProfileRowSchema = z.object({
@@ -124,6 +168,20 @@ const socialProfileRowSchema = z.object({
 
 export function toSocialProfile(row: unknown): SocialProfile | null {
   const parsed = socialProfileRowSchema.safeParse(row);
+  return parsed.success ? parsed.data : null;
+}
+
+/** The dashboard's projection — the public one omits only the sort order. */
+export const ADMIN_SOCIAL_PROFILE_COLUMNS = `${SOCIAL_PROFILE_COLUMNS}, sortOrder`;
+
+const adminSocialProfileRowSchema = socialProfileRowSchema.extend({
+  sortOrder: z.coerce.number().default(0),
+});
+
+export type AdminSocialProfile = z.infer<typeof adminSocialProfileRowSchema>;
+
+export function toAdminSocialProfile(row: unknown): AdminSocialProfile | null {
+  const parsed = adminSocialProfileRowSchema.safeParse(row);
   return parsed.success ? parsed.data : null;
 }
 
