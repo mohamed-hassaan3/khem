@@ -23,6 +23,7 @@ import {
   AdminNotice,
   AdminTextarea,
 } from "@/src/components/admin/fields";
+import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 
 export default function CreditAdjustForm({ creditId }: { creditId: string }) {
@@ -30,6 +31,8 @@ export default function CreditAdjustForm({ creditId }: { creditId: string }) {
 
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const { toast } = useAdminToast();
+
   const [result, setResult] = useState<AdminActionResult | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -45,7 +48,9 @@ export default function CreditAdjustForm({ creditId }: { creditId: string }) {
         note,
       });
 
-      setResult(outcome);
+      // Successes leave, failures stay — see `admin-toast-provider.tsx`.
+      if (outcome.ok) toast(outcome.message);
+      setResult(outcome.ok ? null : outcome);
 
       if (outcome.ok) {
         setAmount("");

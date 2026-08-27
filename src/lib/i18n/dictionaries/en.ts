@@ -47,6 +47,10 @@ export const en = {
     account: "Account",
     /** Accessible label for the avatar button once a session exists. */
     accountMenu: "Account menu",
+    /** The account menu's destination for every customer. */
+    dashboard: "Dashboard",
+    /** Drawn only for a session the server confirms is an administrator. */
+    adminDashboard: "Admin Dashboard",
     signIn: "Sign In",
     signOut: "Sign Out",
     openMenu: "Open menu",
@@ -1138,11 +1142,60 @@ export const en = {
 
     discount: {
       heading: "Discount Code",
-      lede: "If the house has given you a code, enter it here. It is applied when your order is placed.",
+      lede: "If the house has given you a code, enter it here and apply it before you pay.",
       placeholder: "Enter your code",
       applied: "Discount",
+      apply: "Apply",
+      applying: "Checking",
+      remove: "Remove",
+      /** The confirmed state, above the saving. */
+      appliedCode: "{code} applied",
+      saved: "You saved",
+      /*
+       * Shown when the bag, the email, or the credit selection has moved since
+       * the code was checked — the estimate no longer describes the order that
+       * would be placed, so it is dropped rather than quietly kept.
+       */
+      stale: "Your order changed. Apply your code again to use it.",
       blockedByCredit:
         "A discount code cannot be combined with a Discovery Credit. Remove the credit above to use one.",
+
+      /*
+       * Keyed by the `DiscountRefusalCode` union, which
+       * `supabase/sql/0029_discount_preview.sql` returns beside its English
+       * sentence. A refusal this build cannot name falls back to that sentence
+       * rather than to a generic apology — see `DiscountStep`.
+       */
+      reason: {
+        NO_CODE: "Enter a code first.",
+        NOT_RECOGNISED: "That code is not recognised.",
+        INACTIVE: "That code is no longer active.",
+        NOT_STARTED: "That code is not available yet.",
+        EXPIRED: "That code has expired.",
+        BELOW_MINIMUM: "That code needs a larger order.",
+        NOT_GRANTED: "That code is not available on this order.",
+        ALREADY_USED: "That code has already been used.",
+        FULLY_REDEEMED: "That code has been fully redeemed.",
+        CUSTOMER_LIMIT: "You have already used that code.",
+        NOTHING_ELIGIBLE: "That code does not apply to anything in your bag.",
+        ZERO_AMOUNT: "That code takes nothing off this order.",
+      },
+
+      /** The signed-in customer's own vouchers, offered instead of remembered. */
+      vouchers: {
+        show: "View my available vouchers",
+        hide: "Hide my vouchers",
+        heading: "Your Vouchers",
+        use: "Use this code",
+        minimum: "Minimum order",
+        expires: "Expires {date}",
+        /*
+         * A grant is addressed to an email, and the order's address is what the
+         * database matches. Saying so beforehand is kinder than the refusal.
+         */
+        mismatch:
+          "Issued to {email}. Use that address above, or this code will be refused.",
+      },
     },
 
     credit: {
@@ -1163,6 +1216,7 @@ export const en = {
       itemCountOne: "1 item",
       itemCount: "{count} items",
       subtotal: "Subtotal",
+      discount: "Discount",
       delivery: "Delivery",
       complimentary: "Complimentary",
       total: "Total",
@@ -1216,6 +1270,9 @@ export const en = {
       unavailable: "One of your fragrances is no longer available.",
       creditRejected: "Your Discovery Credit could not be applied.",
       discountRejected: "That discount code could not be applied.",
+      /* Typed but never applied — see `handleSubmit` in `CheckoutView`. */
+      discountNotApplied:
+        "Apply your discount code before placing the order, or clear the field.",
       cartChanged:
         "Your bag no longer matches our catalogue. Please review it and try again.",
       rateLimited: "Too many attempts. Please wait a few minutes and try again.",
@@ -1301,9 +1358,12 @@ export const en = {
     nav: {
       label: "Account sections",
       overview: "Overview",
+      profile: "Profile",
       orders: "My Orders",
       addresses: "Addresses",
-      profile: "Profile",
+      vouchers: "Vouchers & Credits",
+      notifications: "Notifications",
+      preferences: "Preferences",
     },
     stats: {
       orders: "Total Orders",
@@ -1379,6 +1439,140 @@ export const en = {
       },
       eyebrow: "Your Details",
       heading: "Profile",
+    },
+
+    /*
+     * Vouchers & Credits.
+     *
+     * Two instruments, deliberately worded as two. A KHEM Credit is earned by a
+     * Discovery Set and spent whole against one fragrance; a voucher is a
+     * privilege addressed to one person. Copy that blurred them into a single
+     * "balance" would misdescribe both.
+     */
+    vouchers: {
+      meta: {
+        title: "Vouchers & Credits",
+        description: "Your KHEM credits and vouchers.",
+      },
+      eyebrow: "Your Privileges",
+      heading: "Vouchers & Credits",
+
+      credit: {
+        heading: "KHEM Credit",
+        available: "Available to spend",
+        /** The instrument's terms, in one line. Policy 4–6 of the ledger. */
+        terms:
+          "Each credit is spent whole against one full-size fragrance. It cannot be combined with a discount, and it has no cash value.",
+        countOne: "1 credit",
+        count: "{count} credits",
+        fromOrder: "Earned with order {order}",
+        expires: "Available until {date}",
+        awaitingDelivery: "Available once your Discovery Set is delivered",
+        emptyHeading: "No credit yet",
+        emptyBody:
+          "A Discovery Set returns its full price to you as credit towards a full-size fragrance — yours for sixty days from the day the Set arrives.",
+        emptyCta: "Explore the Discovery Sets",
+        /* Keyed by the `CreditStatus` union, so a sixth state is a compile error. */
+        status: {
+          PENDING_DELIVERY: "Awaiting Delivery",
+          AVAILABLE: "Available",
+          REDEEMED: "Redeemed",
+          EXPIRED: "Expired",
+          CANCELLED: "Cancelled",
+        },
+      },
+
+      ledger: {
+        heading: "Credit Activity",
+        date: "Date",
+        description: "Description",
+        type: "Type",
+        amount: "Amount",
+        empty: "Nothing has moved on your credit yet.",
+        /* Keyed by the `CreditTransactionKind` union. */
+        kind: {
+          EARNED: "Earned",
+          USED: "Used",
+          REFUNDED: "Refunded",
+          EXPIRED: "Expired",
+          ADJUSTED: "Adjusted",
+        },
+        /*
+         * What each movement means, in plain words. `{order}` is filled where
+         * the movement names one; the `…Plain` variant is what prints when it
+         * does not, which is why both exist for every kind that can go either
+         * way.
+         */
+        reason: {
+          EARNED: "Credit earned with order {order}",
+          EARNEDPlain: "Credit earned",
+          USED: "Applied to order {order}",
+          USEDPlain: "Applied to an order",
+          REFUNDED: "Returned from order {order}",
+          REFUNDEDPlain: "Credit returned",
+          EXPIRED: "Credit lapsed",
+          EXPIREDPlain: "Credit lapsed",
+          ADJUSTED: "Adjusted by the house",
+          ADJUSTEDPlain: "Adjusted by the house",
+        },
+      },
+
+      list: {
+        heading: "My Vouchers",
+        percentOff: "{value}% OFF",
+        off: "OFF",
+        minimum: "Minimum order",
+        expires: "Expires {date}",
+        expired: "Expired {date}",
+        opens: "Available from {date}",
+        used: "Used {date}",
+        noExpiry: "No expiry",
+        scope: {
+          ALL: "Valid across the house",
+          PRODUCTS: "Valid on selected pieces",
+          COLLECTIONS: "Valid on selected collections",
+        },
+        /* Keyed by the `VoucherStatus` union. */
+        status: {
+          AVAILABLE: "Available",
+          SCHEDULED: "Not Yet Active",
+          UNAVAILABLE: "Unavailable",
+          EXPIRED: "Expired",
+          USED: "Used",
+        },
+        copy: "Copy Code",
+        copyLabel: "Copy voucher code {code}",
+        copied: "Voucher code copied.",
+        copyFailed: "Could not copy. Select the code and copy it by hand.",
+        emptyHeading: "No vouchers yet",
+        emptyBody:
+          "Privileges the house extends to you — a welcome offer, a private code — will be kept here, ready to use at checkout.",
+        emptyCta: "Explore Collections",
+      },
+    },
+
+    notifications: {
+      meta: {
+        title: "Notifications",
+        description: "Word from KHEM House.",
+      },
+      eyebrow: "Word From the House",
+      heading: "Notifications",
+      emptyHeading: "Nothing to read yet",
+      emptyBody:
+        "Order updates, credits and private offers will gather here. Until then, the house writes to you by email — every confirmation, dispatch and delivery note reaches your inbox.",
+    },
+
+    preferences: {
+      meta: {
+        title: "Preferences",
+        description: "How KHEM House speaks to you.",
+      },
+      eyebrow: "Your Choices",
+      heading: "Preferences",
+      emptyHeading: "Nothing to set yet",
+      emptyBody:
+        "What the house may write to you about will be settled from this page. For now, language and currency are chosen from the foot of any page, and every letter we send carries a way to stop it.",
     },
   },
 

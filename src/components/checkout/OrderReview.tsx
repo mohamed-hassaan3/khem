@@ -38,20 +38,39 @@ export interface OrderReviewProps {
    * is what the customer is actually charged. See `CreditStep`.
    */
   creditAppliedInCents?: number;
+  /**
+   * What an applied discount code would take off. Zero when none is applied.
+   *
+   * Also an estimate, and one the client never computes: it is the figure
+   * `resolve_discount()` returned for this exact bag. The two are mutually
+   * exclusive — `place_order()` refuses an order carrying both — so in practice
+   * only one of these rows is ever non-zero.
+   */
+  discountInCents?: number;
 }
 
 export default function OrderReview({
   lines,
   subtotalInCents,
   creditAppliedInCents = 0,
+  discountInCents = 0,
 }: OrderReviewProps) {
   const dict = useDictionary();
   const formatPrice = useFormatPrice();
   const copy = dict.checkout.review;
 
+  /*
+   * Delivery is charged on the **undiscounted** subtotal, deliberately: the
+   * free-delivery threshold in `src/lib/cart.ts` is a rule about what the
+   * customer bought, and `place_order()` is handed this same fee computed the
+   * same way. A discount that also bought free delivery would put two rules in
+   * charge of one number — which is the reason `0028` gives for never
+   * discounting delivery at all.
+   */
   const shipping = shippingInCents(subtotalInCents);
-  // Never below the delivery fee: a credit pays for merchandise, not the courier.
-  const total = cartTotalInCents(subtotalInCents) - creditAppliedInCents;
+  // Never below the delivery fee: neither instrument pays the courier.
+  const total =
+    cartTotalInCents(subtotalInCents) - discountInCents - creditAppliedInCents;
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
   return (
@@ -113,6 +132,14 @@ export default function OrderReview({
 
       <div className="flex flex-col gap-4">
         <Row label={copy.subtotal} value={formatPrice(subtotalInCents)} />
+        {discountInCents > 0 ? (
+          <Row
+            label={copy.discount}
+            value={
+              <span className="text-gold">−{formatPrice(discountInCents)}</span>
+            }
+          />
+        ) : null}
         <Row
           label={copy.delivery}
           value={

@@ -28,11 +28,19 @@ export default function AccountSidebar() {
   // it is stripped back to the locale-agnostic form the link table holds.
   const { path } = stripLocale(pathname);
 
+  /*
+   * The dashboard's sections, in the order the customer is likely to want
+   * them: who they are, what they have bought, where it goes, what the house
+   * owes them, then the two settings panels.
+   */
   const links = [
     { href: ACCOUNT_PATHS.overview, label: dict.account.nav.overview },
+    { href: ACCOUNT_PATHS.profile, label: dict.account.nav.profile },
     { href: ACCOUNT_PATHS.orders, label: dict.account.nav.orders },
     { href: ACCOUNT_PATHS.addresses, label: dict.account.nav.addresses },
-    { href: ACCOUNT_PATHS.profile, label: dict.account.nav.profile },
+    { href: ACCOUNT_PATHS.vouchers, label: dict.account.nav.vouchers },
+    { href: ACCOUNT_PATHS.notifications, label: dict.account.nav.notifications },
+    { href: ACCOUNT_PATHS.preferences, label: dict.account.nav.preferences },
   ] as const;
 
   return (

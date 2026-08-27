@@ -47,6 +47,8 @@ export const ar: Dictionary = {
     cartCountOne: "حقيبة التسوّق، عنصر واحد",
     account: "الحساب",
     accountMenu: "قائمة الحساب",
+    dashboard: "لوحة حسابك",
+    adminDashboard: "لوحة الإدارة",
     signIn: "تسجيل الدخول",
     signOut: "تسجيل الخروج",
     openMenu: "فتح القائمة",
@@ -1001,11 +1003,43 @@ export const ar: Dictionary = {
 
     discount: {
       heading: "كود الخصم",
-      lede: "إن كانت الدار قد منحتك كودًا، أدخله هنا. يُطبَّق عند إتمام الطلب.",
+      lede: "إن كانت الدار قد منحتك كودًا، أدخله هنا وطبّقه قبل الدفع.",
       placeholder: "أدخل الكود",
       applied: "الخصم",
+      apply: "تطبيق",
+      applying: "جارٍ التحقق",
+      remove: "إزالة",
+      appliedCode: "تم تطبيق {code}",
+      saved: "وفّرت",
+      stale: "تغيّر طلبك. طبّق الكود مرة أخرى لاستخدامه.",
       blockedByCredit:
         "لا يمكن الجمع بين كود الخصم ورصيد الاكتشاف. أزل الرصيد أعلاه لاستخدام كود.",
+
+      reason: {
+        NO_CODE: "أدخل الكود أولًا.",
+        NOT_RECOGNISED: "هذا الكود غير معروف.",
+        INACTIVE: "لم يعد هذا الكود ساريًا.",
+        NOT_STARTED: "لم يبدأ العمل بهذا الكود بعد.",
+        EXPIRED: "انتهت صلاحية هذا الكود.",
+        BELOW_MINIMUM: "يتطلب هذا الكود طلبًا بقيمة أكبر.",
+        NOT_GRANTED: "هذا الكود غير متاح لهذا الطلب.",
+        ALREADY_USED: "سبق استخدام هذا الكود.",
+        FULLY_REDEEMED: "استُنفد هذا الكود بالكامل.",
+        CUSTOMER_LIMIT: "سبق أن استخدمت هذا الكود.",
+        NOTHING_ELIGIBLE: "لا ينطبق هذا الكود على أي شيء في حقيبتك.",
+        ZERO_AMOUNT: "لا يخصم هذا الكود شيئًا من هذا الطلب.",
+      },
+
+      vouchers: {
+        show: "عرض قسائمي المتاحة",
+        hide: "إخفاء قسائمي",
+        heading: "قسائمك",
+        use: "استخدام هذا الكود",
+        minimum: "الحد الأدنى للطلب",
+        expires: "تنتهي في {date}",
+        mismatch:
+          "صادرة لـ {email}. استخدم هذا البريد أعلاه، وإلا سيُرفض الكود.",
+      },
     },
 
     credit: {
@@ -1025,6 +1059,7 @@ export const ar: Dictionary = {
       itemCountOne: "عنصر واحد",
       itemCount: "{count} عناصر",
       subtotal: "المجموع الفرعي",
+      discount: "الخصم",
       delivery: "التوصيل",
       complimentary: "مجاني",
       total: "الإجمالي",
@@ -1073,6 +1108,8 @@ export const ar: Dictionary = {
       unavailable: "أحد عطورك لم يعد متاحًا.",
       creditRejected: "تعذّر تطبيق رصيد الاكتشاف الخاص بك.",
       discountRejected: "تعذّر تطبيق كود الخصم.",
+      discountNotApplied:
+        "طبّق كود الخصم قبل إتمام الطلب، أو امسح الحقل.",
       cartChanged:
         "لم تعد حقيبتك مطابقة لكتالوجنا. من فضلك راجعها ثم حاول مجددًا.",
       rateLimited: "محاولات كثيرة. انتظر بضع دقائق ثم حاول مجددًا.",
@@ -1152,9 +1189,12 @@ export const ar: Dictionary = {
     nav: {
       label: "أقسام الحساب",
       overview: "نظرة عامة",
+      profile: "الملف الشخصي",
       orders: "طلباتي",
       addresses: "العناوين",
-      profile: "الملف الشخصي",
+      vouchers: "القسائم والرصيد",
+      notifications: "الإشعارات",
+      preferences: "التفضيلات",
     },
     stats: {
       orders: "إجمالي الطلبات",
@@ -1223,6 +1263,122 @@ export const ar: Dictionary = {
       },
       eyebrow: "بياناتك",
       heading: "الملف الشخصي",
+    },
+
+    vouchers: {
+      meta: {
+        title: "القسائم والرصيد",
+        description: "رصيدك وقسائمك في كيم.",
+      },
+      eyebrow: "امتيازاتك",
+      heading: "القسائم والرصيد",
+
+      credit: {
+        heading: "رصيد كيم",
+        available: "متاح للاستخدام",
+        terms:
+          "يُستخدم كل رصيد بكامله على عطر واحد بالحجم الكامل، ولا يُجمع مع أي خصم، ولا قيمة نقدية له.",
+        countOne: "رصيد واحد",
+        count: "{count} أرصدة",
+        fromOrder: "من الطلب {order}",
+        expires: "متاح حتى {date}",
+        awaitingDelivery: "يصبح متاحًا فور تسليم صندوق الاكتشاف",
+        emptyHeading: "لا يوجد رصيد بعد",
+        emptyBody:
+          "يعيد إليك صندوق الاكتشاف قيمته كاملةً رصيدًا لعطر بالحجم الكامل، صالحًا ستين يومًا من يوم وصول الصندوق إليك.",
+        emptyCta: "استكشف صناديق الاكتشاف",
+        status: {
+          PENDING_DELIVERY: "في انتظار التسليم",
+          AVAILABLE: "متاح",
+          REDEEMED: "مستخدم",
+          EXPIRED: "منتهي",
+          CANCELLED: "ملغى",
+        },
+      },
+
+      ledger: {
+        heading: "حركة الرصيد",
+        date: "التاريخ",
+        description: "البيان",
+        type: "النوع",
+        amount: "المبلغ",
+        empty: "لم تُسجَّل أي حركة على رصيدك بعد.",
+        kind: {
+          EARNED: "مكتسب",
+          USED: "مستخدم",
+          REFUNDED: "مُعاد",
+          EXPIRED: "منتهٍ",
+          ADJUSTED: "مُعدَّل",
+        },
+        reason: {
+          EARNED: "رصيد مكتسب من الطلب {order}",
+          EARNEDPlain: "رصيد مكتسب",
+          USED: "استُخدم في الطلب {order}",
+          USEDPlain: "استُخدم في أحد الطلبات",
+          REFUNDED: "أُعيد من الطلب {order}",
+          REFUNDEDPlain: "رصيد مُعاد",
+          EXPIRED: "انتهت صلاحية الرصيد",
+          EXPIREDPlain: "انتهت صلاحية الرصيد",
+          ADJUSTED: "تعديل من الدار",
+          ADJUSTEDPlain: "تعديل من الدار",
+        },
+      },
+
+      list: {
+        heading: "قسائمي",
+        percentOff: "خصم {value}%",
+        off: "خصم",
+        minimum: "الحد الأدنى للطلب",
+        expires: "تنتهي في {date}",
+        expired: "انتهت في {date}",
+        opens: "متاحة من {date}",
+        used: "استُخدمت في {date}",
+        noExpiry: "بلا تاريخ انتهاء",
+        scope: {
+          ALL: "صالحة على كل منتجات الدار",
+          PRODUCTS: "صالحة على قطع مختارة",
+          COLLECTIONS: "صالحة على مجموعات مختارة",
+        },
+        status: {
+          AVAILABLE: "متاحة",
+          SCHEDULED: "لم تبدأ بعد",
+          UNAVAILABLE: "غير متاحة",
+          EXPIRED: "منتهية",
+          USED: "مستخدمة",
+        },
+        copy: "نسخ الرمز",
+        copyLabel: "نسخ رمز القسيمة {code}",
+        copied: "تم نسخ رمز القسيمة.",
+        copyFailed: "تعذّر النسخ. حدّد الرمز وانسخه يدويًا.",
+        emptyHeading: "لا توجد قسائم بعد",
+        emptyBody:
+          "ستُحفظ هنا الامتيازات التي تمنحها لك الدار — عرض ترحيبي أو رمز خاص — جاهزةً للاستخدام عند إتمام الطلب.",
+        emptyCta: "استكشف المجموعات",
+      },
+    },
+
+    notifications: {
+      meta: {
+        title: "الإشعارات",
+        description: "رسائل من دار كيم.",
+      },
+      eyebrow: "من الدار إليك",
+      heading: "الإشعارات",
+      emptyHeading: "لا جديد بعد",
+      emptyBody:
+        "ستتجمّع هنا تحديثات الطلبات والأرصدة والعروض الخاصة. وحتى ذلك الحين، تصلك رسائل الدار عبر البريد: كل تأكيد وكل شحنة وكل إشعار تسليم.",
+    },
+
+    preferences: {
+      meta: {
+        title: "التفضيلات",
+        description: "كيف تخاطبك دار كيم.",
+      },
+      eyebrow: "اختياراتك",
+      heading: "التفضيلات",
+      emptyHeading: "لا شيء لضبطه بعد",
+      emptyBody:
+        "ستُضبط من هذه الصفحة الرسائل التي تسمح للدار بإرسالها إليك. أما اللغة والعملة فتُختاران من أسفل أي صفحة، وكل رسالة نرسلها تحمل وسيلة لإيقافها.",
     },
   },
 

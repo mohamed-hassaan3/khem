@@ -43,6 +43,7 @@ import { useMemo, useRef, useState, useTransition } from "react";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
 import PageHeader from "@/src/components/ecommerce/PageHeader";
 import { placeCustomerOrder } from "@/src/actions/checkout";
+import { previewDiscount } from "@/src/actions/discounts";
 import { cartSubtotalInCents, cartTotalInCents } from "@/src/lib/cart";
 import { formatPrice } from "@/src/lib/format";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
@@ -56,12 +57,14 @@ import { useCart } from "@/src/providers/cart-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { PaymentMethod } from "@/src/types/checkout";
 import type { ProductCardData } from "@/src/types/catalog";
+import type { DiscountPreview } from "@/src/types/discount";
 
 import CardPaymentForm from "./CardPaymentForm";
 import ContactStep from "./ContactStep";
 import DeliveryStep, { type DeliveryField } from "./DeliveryStep";
 import CreditStep, { type SpendableCredit } from "./CreditStep";
-import DiscountStep from "./DiscountStep";
+import DiscountStep, { type AppliedDiscount } from "./DiscountStep";
+import type { CheckoutVoucher } from "./VoucherPicker";
 import OrderReview from "./OrderReview";
 import PaymentStep from "./PaymentStep";
 
@@ -88,6 +91,14 @@ export interface CheckoutViewProps {
    * credit under a row lock and decides for itself. See `CreditStep`.
    */
   credits: readonly SpendableCredit[];
+  /**
+   * Vouchers granted to this customer that are usable today. Empty for a guest.
+   *
+   * Also a suggestion list. Choosing one only fills the field; it is then
+   * checked and later redeemed through exactly the same path a typed code
+   * takes, so nothing here is a shortcut past `resolve_discount()`.
+   */
+  vouchers: readonly CheckoutVoucher[];
 }
 
 interface PlacedOrder {
@@ -102,6 +113,7 @@ export default function CheckoutView({
   cardAvailable,
   detectedCountry,
   credits,
+  vouchers,
 }: CheckoutViewProps) {
   const dict = useDictionary();
   const router = useRouter();
@@ -123,12 +135,35 @@ export default function CheckoutView({
   const [creditId, setCreditId] = useState("");
 
   /**
-   * Empty means "no code". Never validated here — see `DiscountStep`.
+   * Empty means "no code". Checked before payment, never priced here — the
+   * amount comes from `resolve_discount()` through `previewDiscount`.
    *
    * The two are mutually exclusive, so selecting a credit clears any code and
    * the code field disables itself; the database refuses both regardless.
    */
   const [discountCode, setDiscountCode] = useState("");
+
+  /**
+   * A code the server has priced, **stamped with the order it was priced for**.
+   *
+   * The stamp is what makes the applied state safe to hold in state at all. A
+   * discount is an estimate against one particular bag, email and credit
+   * selection; the moment any of those moves, the estimate describes an order
+   * nobody is about to place. Rather than watching for that in an effect and
+   * clearing it — a cascading render, and one the linter rightly refuses — the
+   * signature is compared during render and a stale estimate simply stops
+   * counting. See `activeDiscount` below.
+   */
+  const [applied, setApplied] = useState<
+    (AppliedDiscount & { signature: string }) | null
+  >(null);
+
+  /** The last refusal from the server, shown at the field. */
+  const [discountRefusal, setDiscountRefusal] = useState<
+    Extract<DiscountPreview, { ok: false }> | null
+  >(null);
+
+  const [checkingDiscount, startDiscountCheck] = useTransition();
 
   const [address, setAddress] = useState<Record<DeliveryField, string>>({
     line1: "",
@@ -209,7 +244,32 @@ export default function CheckoutView({
     ? Math.min(selectedCredit.balanceInCents, subtotalInCents)
     : 0;
 
-  const totalInCents = cartTotalInCents(subtotalInCents) - creditAppliedInCents;
+  /*
+   * What the applied code was priced against. Any change to the bag, the
+   * address the grant gate reads, or the credit selection produces a different
+   * signature — and a different signature means the estimate is no longer about
+   * this order.
+   */
+  const discountSignature = [
+    lines
+      .map((line) => `${line.productId}:${line.quantity}`)
+      .sort()
+      .join(","),
+    customerEmail.trim().toLowerCase(),
+    creditId,
+  ].join("|");
+
+  /** The discount that actually counts — never a stale one. */
+  const activeDiscount =
+    applied !== null && applied.signature === discountSignature ? applied : null;
+
+  /** A code was applied and then the order moved beneath it. */
+  const discountStale = applied !== null && activeDiscount === null;
+
+  const discountInCents = activeDiscount?.amountInCents ?? 0;
+
+  const totalInCents =
+    cartTotalInCents(subtotalInCents) - discountInCents - creditAppliedInCents;
 
   /*
    * Purely visual: the gold tick on a completed section. Not validation — the
@@ -280,6 +340,57 @@ export default function CheckoutView({
     );
   }
 
+  /**
+   * Ask the server what this code is worth against the bag as it stands.
+   *
+   * `override` exists for the voucher picker: it fills the field and applies in
+   * one gesture, and `setDiscountCode` has not settled by the time its click
+   * handler runs.
+   *
+   * The result is stamped with `discountSignature`, so it stops counting by
+   * itself if the order moves underneath it.
+   */
+  function applyDiscount(override?: string) {
+    if (awaitingPayment) return;
+
+    const code = (override ?? discountCode).trim();
+    if (code === "" || checkingDiscount) return;
+
+    setDiscountRefusal(null);
+
+    startDiscountCheck(async () => {
+      const result = await previewDiscount({
+        code,
+        // The address the order will carry — what the grant gate matches on.
+        customerEmail,
+        items: lines.map((line) => ({
+          productId: line.productId,
+          quantity: line.quantity,
+        })),
+      });
+
+      if (!result.ok) {
+        setApplied(null);
+        setDiscountRefusal(result);
+        return;
+      }
+
+      // Stored as the server returned it: uppercase, and priced by SQL.
+      setApplied({
+        code: result.code,
+        amountInCents: result.amountInCents,
+        signature: discountSignature,
+      });
+      setDiscountCode(result.code);
+    });
+  }
+
+  function removeDiscount() {
+    setApplied(null);
+    setDiscountRefusal(null);
+    setDiscountCode("");
+  }
+
   function goToConfirmation(orderNumber: string) {
     clear();
     router.push(
@@ -295,6 +406,17 @@ export default function CheckoutView({
     // that re-enables it from a console. The action refuses regardless.
     if (!shipsHere) {
       showFailure("outsideEgypt");
+      return;
+    }
+
+    /*
+     * A code typed but never applied. Sending it anyway would either discount
+     * an order the customer was never shown a discount for, or fail the whole
+     * placement on a code they had not committed to — so they are asked to
+     * apply it or clear it. Nothing is guessed on their behalf.
+     */
+    if (discountCode.trim() !== "" && activeDiscount === null) {
+      showFailure("discountNotApplied");
       return;
     }
 
@@ -320,8 +442,13 @@ export default function CheckoutView({
         note: address.note,
         company,
         creditId,
-        // Sent as typed. The server uppercases, resolves and prices it.
-        discountCode,
+        /*
+         * Only a code the server has already priced against this exact bag.
+         * `place_order()` resolves it again under a lock and may still refuse
+         * it — a cap can fill in the seconds between — but the customer is
+         * never charged for a code they were not shown applied.
+         */
+        discountCode: activeDiscount?.code ?? "",
         items: lines.map((line) => ({
           productId: line.productId,
           quantity: line.quantity,
@@ -471,9 +598,22 @@ export default function CheckoutView({
           <DiscountStep
             code={discountCode}
             onChange={(next) => {
-              if (!awaitingPayment) setDiscountCode(next);
+              if (awaitingPayment) return;
+              setDiscountCode(next);
+              // Editing the code retracts the refusal it earned; the customer
+              // is already acting on it.
+              setDiscountRefusal(null);
             }}
             disabledByCredit={creditId !== ""}
+            onApply={applyDiscount}
+            onRemove={removeDiscount}
+            pending={checkingDiscount}
+            applied={activeDiscount}
+            refusal={discountRefusal}
+            stale={discountStale}
+            vouchers={vouchers}
+            email={customerEmail}
+            locale={locale}
           />
 
           <CreditStep
@@ -486,7 +626,14 @@ export default function CheckoutView({
               setCreditId(next);
               // The two cannot combine, and the database says so. Clearing the
               // code here means the customer is never told that after the fact.
-              if (next !== "") setDiscountCode("");
+              // The applied estimate goes with it — its signature carries the
+              // credit selection, so it would stop counting anyway; dropping it
+              // outright is what keeps the field's state honest.
+              if (next !== "") {
+                setDiscountCode("");
+                setApplied(null);
+                setDiscountRefusal(null);
+              }
             }}
             subtotalInCents={subtotalInCents}
             locale={locale}
@@ -585,6 +732,7 @@ export default function CheckoutView({
           lines={resolved}
           subtotalInCents={subtotalInCents}
           creditAppliedInCents={creditAppliedInCents}
+          discountInCents={discountInCents}
         />
       </div>
     </div>

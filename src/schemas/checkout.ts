@@ -126,6 +126,31 @@ export const checkoutSchema = z.object({
     ),
 });
 
+/**
+ * Checking a code before paying.
+ *
+ * The same `items` shape as the order above, and for the same reason: the bag is
+ * described by identity, never by price. What is *absent* is the whole point —
+ * no subtotal, no amount, no verdict. `resolve_discount()` prices the bag from
+ * `"Product"` rows and decides everything else.
+ *
+ * `customerEmail` is here because the grant gate keys on the address the order
+ * will carry. It is optional: a guest early in the form has not typed one yet,
+ * and a grant-gated code simply refuses until they do.
+ */
+export const discountPreviewSchema = z.object({
+  code: z.string().trim().min(1, "discount").max(40, "discount"),
+  // Not `z.email()`: a half-typed address should produce a refusal from the
+  // grant gate, not a validation error on a field the customer is not editing.
+  customerEmail: z.string().trim().max(200, "email").default(""),
+  items: z
+    .array(checkoutItemSchema)
+    .min(1, "emptyCart")
+    .max(50, "tooManyLines"),
+});
+
+export type DiscountPreviewInput = z.input<typeof discountPreviewSchema>;
+
 export type CheckoutInput = z.input<typeof checkoutSchema>;
 export type CheckoutData = z.output<typeof checkoutSchema>;
 

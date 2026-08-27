@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 import AdminShell from "@/src/components/admin/AdminShell";
 import { requireAdmin } from "@/src/lib/admin/auth";
 import { isLocale } from "@/src/lib/i18n/config";
+import {
+  listAdminNotifications,
+  listLowStock,
+} from "@/src/services/admin/notifications";
 
 /**
  * The dashboard shell — and the gate.
@@ -43,11 +47,29 @@ export default async function AdminLayout({
 }) {
   const [{ locale }, actor] = await Promise.all([params, requireAdmin()]);
 
+  /*
+   * The bell's contents, read after the gate rather than beside it: both are
+   * secret-key reads of rows that name customers, and neither may run for a
+   * request `requireAdmin()` is about to refuse.
+   *
+   * This layout is already `force-dynamic`, so nothing is opted out of caching
+   * that was not already.
+   */
+  const [notifications, lowStock] = await Promise.all([
+    listAdminNotifications(),
+    listLowStock(),
+  ]);
+
   // The parent layout has already rejected any segment that is not a locale.
   const activeLocale = isLocale(locale) ? locale : "en";
 
   return (
-    <AdminShell locale={activeLocale} actorEmail={actor.email}>
+    <AdminShell
+      locale={activeLocale}
+      actorEmail={actor.email}
+      notifications={notifications}
+      lowStock={lowStock}
+    >
       {children}
     </AdminShell>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { UserButton, useAuth } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,14 +19,13 @@ import { ChevronDown, Search, ShoppingBag, UserRound, X } from "lucide-react";
 
 import nameLogo from "@/public/logo/name-logo-transparent.svg";
 
+import AccountMenu from "./account/AccountMenu";
 import SignOutButton from "./account/SignOutButton";
 import LanguageSwitcher from "./i18n/LanguageSwitcher";
 import LocaleLink from "./i18n/LocaleLink";
 import SearchOverlay from "./search/SearchOverlay";
 import { signInPathWithReturn } from "@/src/lib/auth-redirect";
-import { localizePath } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
-import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { useCart } from "@/src/providers/cart-provider";
 import { useCartDrawer } from "@/src/providers/cart-drawer-provider";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
@@ -476,8 +475,8 @@ export default function Nav() {
            * `/account` and let the proxy bounce it, which meant someone who
            * clicked it halfway down a product page was deposited in the
            * portal after signing in and had to find their way back. Signed
-           * in, it becomes Clerk's avatar menu, themed by the provider's
-           * appearance, with sign-out inside it.
+           * in, it becomes `<AccountMenu>` — the house's own popover, which
+           * replaced Clerk's `<UserButton>`; that component's header says why.
            *
            * `useAuth()` rather than the `<Show>` control component: the root
            * `Show` export in `@clerk/nextjs` is the App Router *server*
@@ -488,18 +487,7 @@ export default function Nav() {
            * avatar occupy the same 26px box.
            */}
           {isSignedIn ? (
-            <span
-              className="flex shrink-0 items-center"
-              aria-label={dict.nav.accountMenu}
-            >
-              <UserButton
-                userProfileMode="navigation"
-                userProfileUrl={localizePath(locale, ACCOUNT_PATHS.profile)}
-                appearance={{
-                  elements: { avatarBox: { width: 26, height: 26 } },
-                }}
-              />
-            </span>
+            <AccountMenu />
           ) : (
             /*
              * A plain `<Link>`, not `<LocaleLink>`: `signInPathWithReturn`

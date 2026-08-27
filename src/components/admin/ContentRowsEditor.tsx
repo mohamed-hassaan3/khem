@@ -46,6 +46,8 @@ import {
   AdminTextarea,
   AdminToggle,
 } from "@/src/components/admin/fields";
+import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
+import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 
 /**
@@ -141,17 +143,51 @@ function RowCard({
     }
   }
 
-  function save() {
+  /*
+   * `values` is already this row's payload — it is what the action receives —
+   * so the guard watches it directly rather than assembling a copy that could
+   * fall out of step with it.
+   */
+  const { toast } = useAdminToast();
+
+  const { markSaved } = useUnsavedGuard({
+    payload: values,
+    save: () => persist(),
+    pending: isPending,
+  });
+
+  /** Saves and reports whether it worked. Awaited by the leave-page dialog. */
+  async function persist(): Promise<boolean> {
     setResult(null);
 
-    startTransition(async () => {
-      const outcome = isNew ? await onCreate(values) : await onUpdate(values);
-      setResult(outcome);
+    const outcome = isNew ? await onCreate(values) : await onUpdate(values);
+    /*
+     * Successes leave, failures stay. A receipt has done its job the moment it
+     * is read; a refusal names a field and has to be acted on, so it keeps its
+     * place above the form. See `admin-toast-provider.tsx`.
+     */
+    if (outcome.ok) toast(outcome.message);
+    setResult(outcome.ok ? null : outcome);
 
-      if (outcome.ok) {
-        router.refresh();
-        if (isNew) onDone();
-      }
+    if (outcome.ok) {
+      router.refresh();
+      if (isNew) onDone();
+    }
+
+    // This row now matches the record, so leaving is no longer losing anything.
+    if (outcome.ok) markSaved();
+    return outcome.ok;
+  }
+
+  function save() {
+    /*
+     * The callback stays `async` and awaits: React 19 keeps `isPending` true for
+     * the life of an async transition, and a synchronous callback that merely
+     * *starts* the promise would drop the flag immediately — the save button
+     * would stop saying "Saving" the instant it was pressed.
+     */
+    startTransition(async () => {
+      await persist();
     });
   }
 

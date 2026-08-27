@@ -26,6 +26,8 @@ import {
 } from "@/src/components/admin/fields";
 import { createCollection, updateCollection } from "@/src/actions/admin/catalog";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
+import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
+import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import type { AdminCollection } from "@/src/schemas/db/admin";
 
@@ -79,38 +81,73 @@ export default function CollectionForm({
 
   const fieldErrors = result && !result.ok ? (result.fieldErrors ?? {}) : {};
 
-  function submit() {
+  /*
+   * Hoisted out of `submit()` so it can be compared as well as posted: this
+   * one object is both what the action receives and what `useUnsavedGuard`
+   * watches, so a field that reaches the server necessarily reaches the
+   * comparison too.
+   */
+  const payload = {
+    slug,
+    name,
+    description,
+    bannerUrl,
+    bannerAlt,
+    cardUrl,
+    cardAlt,
+    kind,
+    isFeatured,
+    sortOrder,
+  };
+
+  const { toast } = useAdminToast();
+
+  const { markSaved } = useUnsavedGuard({
+    payload,
+    save: () => persist(),
+    pending: isPending,
+  });
+
+  /** Saves and reports whether it worked. Awaited by the leave-page dialog. */
+  async function persist(): Promise<boolean> {
     setResult(null);
 
+    const outcome = isEdit
+      ? await updateCollection(payload)
+      : await createCollection(payload);
+
+    /*
+     * Successes leave, failures stay. A receipt has done its job the moment it
+     * is read; a refusal names a field and has to be acted on, so it keeps its
+     * place above the form. See `admin-toast-provider.tsx`.
+     */
+    if (outcome.ok) toast(outcome.message);
+    setResult(outcome.ok ? null : outcome);
+
+    if (outcome.ok && !isEdit) {
+      // Straight into the edit screen for the row just made, so the next
+      // thing an editor does — adding products to it — starts from a page
+      // that knows the collection exists.
+      router.push(localizePath(locale, `/admin/collections/${outcome.slug}`));
+      router.refresh();
+    } else if (outcome.ok) {
+      router.refresh();
+    }
+
+    // The form now matches the row, so leaving it is no longer losing anything.
+    if (outcome.ok) markSaved();
+    return outcome.ok;
+  }
+
+  function submit() {
+    /*
+     * The callback stays `async` and awaits: React 19 keeps `isPending` true for
+     * the life of an async transition, and a synchronous callback that merely
+     * *starts* the promise would drop the flag immediately — the save button
+     * would stop saying "Saving" the instant it was pressed.
+     */
     startTransition(async () => {
-      const payload = {
-        slug,
-        name,
-        description,
-        bannerUrl,
-        bannerAlt,
-        cardUrl,
-        cardAlt,
-        kind,
-        isFeatured,
-        sortOrder,
-      };
-
-      const outcome = isEdit
-        ? await updateCollection(payload)
-        : await createCollection(payload);
-
-      setResult(outcome);
-
-      if (outcome.ok && !isEdit) {
-        // Straight into the edit screen for the row just made, so the next
-        // thing an editor does — adding products to it — starts from a page
-        // that knows the collection exists.
-        router.push(localizePath(locale, `/admin/collections/${outcome.slug}`));
-        router.refresh();
-      } else if (outcome.ok) {
-        router.refresh();
-      }
+      await persist();
     });
   }
 

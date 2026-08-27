@@ -9,6 +9,7 @@ import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { detectedCountryCode } from "@/src/lib/shipping";
 import { isCardPaymentAvailable } from "@/src/lib/stripe/server";
 import { spendableCreditsForUser } from "@/src/services/credits";
+import { vouchersForUser } from "@/src/services/vouchers";
 import { getProductCardsByCollection } from "@/src/services/products";
 
 /**
@@ -96,6 +97,41 @@ export default async function CheckoutPage({
     : [];
 
   /*
+   * The vouchers this customer holds and could use today — so they can pick one
+   * instead of remembering a code (§5.5 of the plan).
+   *
+   * Grants only, keyed by the session: a public campaign code is not a personal
+   * privilege, and listing every active one to every signed-in visitor would
+   * publish the house's marketing calendar. A guest holds none, so the picker
+   * is absent rather than empty.
+   *
+   * Four fields cross into the bundle. The grant id is not among them: choosing
+   * a voucher only fills the code field, and the code is then checked and
+   * redeemed through the same path a typed one takes — there is no privileged
+   * route that a grant id could unlock.
+   */
+  const vouchers = viewer
+    ? (
+        await vouchersForUser({
+          clerkUserId: viewer.id,
+          email: viewer.primaryEmail,
+        })
+      )
+        .filter((voucher) => voucher.status === "AVAILABLE")
+        .map((voucher) => ({
+          code: voucher.code,
+          kind: voucher.kind,
+          value: voucher.value,
+          minimumOrderInCents: voucher.minimumOrderInCents,
+          expiresAt: voucher.expiresAt,
+          // The grant's *own* address, not the session's: a grant matched by
+          // Clerk id may be addressed to another of this customer's addresses,
+          // and the form warns against the one the database will match on.
+          grantedTo: voucher.grantedTo,
+        }))
+    : [];
+
+  /*
    * Where the visitor is, as Vercel's edge sees it — the same header
    * `src/proxy.ts` reads to pick a display currency. Null off Vercel, and the
    * form treats null as *unknown* rather than as *elsewhere*; see
@@ -131,6 +167,9 @@ export default async function CheckoutPage({
       // Suggestions only. Which credit may actually be spent, and for how much,
       // is decided inside `place_order()` — see `0027_credit_redemption.sql`.
       credits={credits}
+      // Also suggestions. `resolve_discount()` decides, twice: once when the
+      // customer presses Apply, and again inside the order transaction.
+      vouchers={vouchers}
     />
   );
 }

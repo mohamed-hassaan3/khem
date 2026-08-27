@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import AdminSearch from "@/src/components/admin/AdminSearch";
+import InviteCustomerForm from "@/src/components/admin/InviteCustomerForm";
 import {
   AdminCell,
   AdminEmpty,
@@ -112,6 +113,13 @@ export default async function AdminCustomersPage({
         title="Customers"
         description="Everybody who has bought something, whether they registered or were served at the counter. Spend excludes cancelled and refunded orders — it is what the house actually kept."
       />
+
+      {/*
+        * Above the directory rather than below it: inviting somebody is the one
+        * thing on this screen that adds a customer, and it belongs beside the
+        * list it will eventually appear in.
+        */}
+      <InviteCustomerForm />
 
       <AdminSearch placeholder="Search by name, email or phone" />
 

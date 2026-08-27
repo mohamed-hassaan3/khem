@@ -26,6 +26,8 @@ import {
   AdminNotice,
   AdminTextarea,
 } from "@/src/components/admin/fields";
+import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
+import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import type { AdminMerchPage } from "@/src/schemas/db/admin";
 
@@ -48,20 +50,57 @@ export default function MerchPageForm({ page }: { page: AdminMerchPage }) {
 
   const fieldErrors = result && !result.ok ? (result.fieldErrors ?? {}) : {};
 
-  function submit() {
+  /*
+   * Hoisted out of the save so it can be compared as well as posted: this one
+   * object is both what the action receives and what `useUnsavedGuard` watches,
+   * so a field that reaches the server necessarily reaches the comparison too.
+   */
+  const payload = {
+    slug: page.slug,
+    name,
+    description,
+    bannerUrl,
+    bannerAlt,
+  };
+
+  const { toast } = useAdminToast();
+
+  const { markSaved } = useUnsavedGuard({
+    payload,
+    save: () => persist(),
+    pending: isPending,
+  });
+
+  /** Saves and reports whether it worked. Awaited by the leave-page dialog. */
+  async function persist(): Promise<boolean> {
     setResult(null);
 
-    startTransition(async () => {
-      const outcome = await updateMerchPage({
-        slug: page.slug,
-        name,
-        description,
-        bannerUrl,
-        bannerAlt,
-      });
+    const outcome = await updateMerchPage(payload);
 
-      setResult(outcome);
-      if (outcome.ok) router.refresh();
+    /*
+     * Successes leave, failures stay. A receipt has done its job the moment it
+     * is read; a refusal names a field and has to be acted on, so it keeps its
+     * place above the form. See `admin-toast-provider.tsx`.
+     */
+    if (outcome.ok) toast(outcome.message);
+    setResult(outcome.ok ? null : outcome);
+    if (!outcome.ok) return false;
+
+    // The form now matches the row, so leaving is no longer losing anything.
+    markSaved();
+    router.refresh();
+    return true;
+  }
+
+  function submit() {
+    /*
+     * The callback stays `async` and awaits: React 19 keeps `isPending` true for
+     * the life of an async transition, and a synchronous callback that merely
+     * *starts* the promise would drop the flag immediately — the save button
+     * would stop saying "Saving" the instant it was pressed.
+     */
+    startTransition(async () => {
+      await persist();
     });
   }
 

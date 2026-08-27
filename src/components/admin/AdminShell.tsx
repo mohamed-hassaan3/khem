@@ -30,7 +30,6 @@
  */
 
 import { usePathname } from "next/navigation";
-import Link from "next/link";
 import {
   BarChart3,
   Boxes,
@@ -52,7 +51,14 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
+import AdminLink from "@/src/components/admin/AdminLink";
+import AdminToaster from "@/src/components/admin/AdminToaster";
+import NotificationBell from "@/src/components/admin/NotificationBell";
+import UnsavedChangesDialog from "@/src/components/admin/UnsavedChangesDialog";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
+import { AdminToastProvider } from "@/src/providers/admin-toast-provider";
+import { UnsavedChangesProvider } from "@/src/providers/unsaved-changes-provider";
+import type { AdminNotification, LowStockItem } from "@/src/types/notification";
 
 /**
  * Trade first, then the catalog behind it.
@@ -101,10 +107,20 @@ function readStored(): boolean | null {
 export default function AdminShell({
   locale,
   actorEmail,
+  notifications,
+  lowStock,
   children,
 }: {
   locale: Locale;
   actorEmail: string;
+  /**
+   * The bell's contents, read by the layout on every admin render.
+   *
+   * Passed down rather than fetched here: this is a Client Component, and the
+   * feed is a secret-key read that must not be reachable from a browser.
+   */
+  notifications: readonly AdminNotification[];
+  lowStock: readonly LowStockItem[];
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -190,6 +206,19 @@ export default function AdminShell({
       : "-translate-x-full rtl:translate-x-full lg:hidden";
 
   return (
+    /*
+     * The guard wraps the whole shell, not the panel: the links it protects are
+     * in the rail, which is a sibling of the panel the editor renders into.
+     *
+     * The dialog is injected rather than imported by the provider, which knows
+     * nothing about how the house looks — see that file's header.
+     */
+    <AdminToastProvider>
+    <UnsavedChangesProvider
+      renderDialog={(pending, close) => (
+        <UnsavedChangesDialog pending={pending} onClose={close} />
+      )}
+    >
     <div
       className={`min-h-screen bg-background pt-20 text-ivory lg:grid ${
         !resolved || open ? "lg:grid-cols-[260px_1fr]" : "lg:grid-cols-[1fr]"
@@ -226,7 +255,7 @@ export default function AdminShell({
             const Icon = section.icon;
 
             return (
-              <Link
+              <AdminLink
                 key={section.path}
                 href={localizePath(locale, section.path)}
                 aria-current={active ? "page" : undefined}
@@ -240,7 +269,7 @@ export default function AdminShell({
               >
                 <Icon size={14} strokeWidth={1.25} />
                 {section.label}
-              </Link>
+              </AdminLink>
             );
           })}
         </nav>
@@ -251,7 +280,7 @@ export default function AdminShell({
           </p>
           <p className="mt-1 break-all text-[11px] text-ivory/50">{actorEmail}</p>
 
-          <Link
+          <AdminLink
             href={localizePath(locale, "/")}
             tabIndex={resolved && !open ? -1 : undefined}
             onClick={closeOnMobile}
@@ -259,7 +288,7 @@ export default function AdminShell({
           >
             <ExternalLink size={12} strokeWidth={1.25} />
             View storefront
-          </Link>
+          </AdminLink>
         </div>
       </aside>
 
@@ -291,10 +320,22 @@ export default function AdminShell({
           <p className="font-heading text-[10px] uppercase tracking-[0.25em] text-ivory/30">
             Boutique Desk
           </p>
+
+          {/* Pushed to the trailing edge, opposite the rail toggle. */}
+          <div className="ms-auto">
+            <NotificationBell
+              notifications={notifications}
+              lowStock={lowStock}
+              locale={locale}
+            />
+          </div>
         </div>
 
         <div className="pt-2">{children}</div>
       </main>
     </div>
+    <AdminToaster />
+    </UnsavedChangesProvider>
+    </AdminToastProvider>
   );
 }

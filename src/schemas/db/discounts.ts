@@ -23,7 +23,7 @@ export const discountScopeSchema = z.enum(["ALL", "PRODUCTS", "COLLECTIONS"]);
 export const DISCOUNT_COLUMNS =
   "id, code, kind, value, isActive, startsAt, endsAt, totalUseLimit, " +
   "perCustomerLimit, minimumOrderInCents, appliesTo, requiresGrant, " +
-  "description, createdAt";
+  "isWelcome, description, createdAt";
 
 const discountRowSchema = z.object({
   id: z.string(),
@@ -38,6 +38,7 @@ const discountRowSchema = z.object({
   minimumOrderInCents: z.coerce.number().default(0),
   appliesTo: discountScopeSchema.catch("ALL"),
   requiresGrant: z.boolean().default(false),
+  isWelcome: z.boolean().default(false),
   description: z.string().nullable().default(null),
   createdAt: z.string(),
 });

@@ -23,6 +23,15 @@
  * `src/proxy.ts` excludes `api` from its matcher, so nothing here is touched by
  * the locale rewrite and no middleware gate needs relaxing.
  *
+ * ## The welcome letter
+ *
+ * `user.created` also welcomes the account, exactly once. The once-only part is
+ * not a check in this file — it is a claim taken by `claim_welcome()` in
+ * `supabase/sql/0030_welcome.sql`, which also writes the welcome voucher's
+ * grant in the same transaction so the code in the letter is one the checkout
+ * will honour. A letter that cannot be sent releases its claim and answers 500,
+ * so Clerk's retry sends it rather than the customer losing it.
+ *
  * ## Idempotency
  *
  * Clerk retries until it gets a 2xx and may deliver the same event twice even
@@ -48,8 +57,12 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { isEmailConfigured } from "@/src/lib/email/client";
+import { sendWelcomeMail } from "@/src/lib/email/send-welcome-mail";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/src/lib/i18n/config";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { subscribe, unsubscribeByClerkUser } from "@/src/services/newsletter";
+import { claimWelcome, releaseWelcome } from "@/src/services/welcome";
 
 /** Node, not Edge: the signature check needs Node's crypto. */
 export const runtime = "nodejs";
@@ -77,6 +90,8 @@ interface ClerkUserData {
   primary_phone_number_id?: unknown;
   phone_numbers?: unknown;
   unsafe_metadata?: unknown;
+  /** Set by the house — through an invitation — and not writable by the user. */
+  public_metadata?: unknown;
 }
 
 function text(value: unknown): string | null {
@@ -132,6 +147,29 @@ function marketingOptIn(data: ClerkUserData): boolean {
 
   const value = (data.unsafe_metadata as Record<string, unknown>).marketingOptIn;
   return value === true || value === "true";
+}
+
+/**
+ * The language to write to this person in.
+ *
+ * Clerk carries no locale of its own, so it is put there by us:
+ * `SignUpForm` writes one into `unsafeMetadata` beside the marketing flag, and
+ * an invitation carries one in `publicMetadata` that lands on the user when
+ * they accept. Public is preferred — the house set it, the user cannot.
+ *
+ * Both are untrusted, and both are checked against the `LOCALES` allowlist. The
+ * worst a forged value can do is pick the other supported language, which is
+ * the point of validating against a closed set rather than sanitising a string.
+ */
+function localeFrom(data: ClerkUserData): Locale {
+  for (const source of [data.public_metadata, data.unsafe_metadata]) {
+    if (typeof source !== "object" || source === null) continue;
+
+    const value = (source as Record<string, unknown>).locale;
+    if (typeof value === "string" && isLocale(value)) return value;
+  }
+
+  return DEFAULT_LOCALE;
 }
 
 function payloadFrom(data: ClerkUserData): UserPayload | null {
@@ -228,6 +266,61 @@ export async function POST(request: NextRequest): Promise<Response> {
       });
     } else {
       await unsubscribeByClerkUser(payload.clerkId);
+    }
+
+    /*
+     * ── The welcome letter ──────────────────────────────────
+     *
+     * `user.created` only. It is the single activation signal for both paths
+     * §8 describes: somebody who registers themselves, and somebody who accepts
+     * an invitation, each produce exactly one of these. One trigger, one letter,
+     * and no second code path to keep in step.
+     *
+     * **Transactional (§9.1).** It is about the account this person just
+     * created, so it is sent whatever `marketingOptIn` says — the newsletter
+     * reconciliation immediately above is the only thing consent governs.
+     *
+     * The claim is what makes it once-only: `claim_welcome()` takes it with a
+     * conditional update and writes the voucher grant in the same transaction,
+     * so a Clerk redelivery claims nothing and sends nothing, and the code in
+     * the letter is one the checkout will honour.
+     *
+     * An unconfigured mailer does **not** claim. A claim taken where no letter
+     * can be sent would silently burn this account's one chance to be welcomed.
+     */
+    if (event.type === "user.created" && isEmailConfigured()) {
+      const claim = await claimWelcome(payload.clerkId);
+
+      if (claim.claimed) {
+        const sent = await sendWelcomeMail({
+          to: claim.email,
+          locale: localeFrom(event.data as ClerkUserData),
+          firstName: claim.firstName,
+          code: claim.code,
+          expiresAt: claim.expiresAt,
+        });
+
+        if (!sent) {
+          /*
+           * Give the claim back and let Clerk retry the whole event. Everything
+           * it does is idempotent — the sync upserts, the list reconciles, and
+           * `claim_welcome()` reuses the grant it already wrote — so a retry
+           * costs nothing and is the difference between a customer eventually
+           * being welcomed and never being welcomed at all.
+           *
+           * Bounded by Clerk's own retry schedule, not by a loop here.
+           */
+          await releaseWelcome(payload.clerkId);
+          console.error(`[clerk] welcome not sent for ${payload.clerkId}; released`);
+          return NextResponse.json({ error: "Welcome not sent." }, { status: 500 });
+        }
+
+        // The id, and whether a privilege rode along. Never the address, the
+        // name, or the code.
+        console.info(
+          `[clerk] welcomed ${payload.clerkId} (voucher: ${claim.code !== null})`,
+        );
+      }
     }
 
     console.info(`[clerk] ${event.type} synced ${payload.clerkId}`);

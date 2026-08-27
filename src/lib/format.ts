@@ -135,6 +135,27 @@ export function formatCommentDate(isoDate: string, locale: Locale): string {
   }).format(new Date(isoDate));
 }
 
+/**
+ * Formats a date inside the customer portal, e.g. "20 August 2026".
+ *
+ * Locale-aware for the same reason `formatCommentDate` is: the portal is fully
+ * translated chrome, and Latin numerals under Arabic headings read as a page
+ * half-finished.
+ *
+ * `timeZone: "UTC"` because these are the moments the ledger recorded. A credit
+ * that expires at midnight UTC must not appear to expire a day earlier for a
+ * visitor west of Greenwich, and the same row must not be dated differently on
+ * the server and after hydration.
+ */
+export function formatAccountDate(isoDate: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : LOCALE, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(isoDate));
+}
+
 /** Volume label for a product, e.g. 100 → "100 ML". */
 export function formatVolume(volumeMl: number): string {
   return `${volumeMl} ML`;

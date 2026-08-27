@@ -81,6 +81,20 @@ const discountFields = z.object({
     (value) => (typeof value === "boolean" ? value : value === "true"),
   ),
 
+  /**
+   * Whether this is *the* welcome offer.
+   *
+   * At most one campaign may hold it, and that is enforced in the database
+   * rather than here: a partial unique index refuses a second, and a trigger
+   * clears the previous holder in the same statement. So this field needs no
+   * cross-row validation — a schema cannot see the other rows anyway, and one
+   * that pretended to would be a check that goes stale between here and the
+   * write. See `supabase/sql/0030_welcome.sql`.
+   */
+  isWelcome: z.union([z.boolean(), z.string()]).transform(
+    (value) => (typeof value === "boolean" ? value : value === "true"),
+  ),
+
   description: z
     .string()
     .trim()

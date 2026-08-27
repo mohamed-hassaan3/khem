@@ -34,6 +34,8 @@ import {
   AdminSelect,
   AdminTextarea,
 } from "@/src/components/admin/fields";
+import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
+import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import { egp } from "@/src/lib/admin/money";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
 import { stockState } from "@/src/lib/inventory";
@@ -117,30 +119,67 @@ export default function OrderForm({
     );
   }
 
-  function submit() {
+  /*
+   * Hoisted out of `submit()` so it can be compared as well as posted: this
+   * one object is both what the action receives and what `useUnsavedGuard`
+   * watches, so a field that reaches the server necessarily reaches the
+   * comparison too.
+   */
+  const payload = {
+    customerName,
+    customerEmail,
+    customerPhone,
+    channel,
+    note,
+    shipInCents,
+    items: lines
+      .filter((line) => line.slug.length > 0)
+      .map((line) => ({ slug: line.slug, quantity: line.quantity })),
+  };
+
+  const { toast } = useAdminToast();
+
+  const { markSaved } = useUnsavedGuard({
+    payload,
+    save: () => persist(),
+    pending: isPending,
+  });
+
+  /** Saves and reports whether it worked. Awaited by the leave-page dialog. */
+  async function persist(): Promise<boolean> {
     setResult(null);
 
+    const outcome = await createOrder(payload);
+
+    /*
+     * Successes leave, failures stay. A receipt has done its job the moment it
+     * is read; a refusal names a field and has to be acted on, so it keeps its
+     * place above the form. See `admin-toast-provider.tsx`.
+     */
+    if (outcome.ok) toast(outcome.message);
+    setResult(outcome.ok ? null : outcome);
+
+    if (outcome.ok) {
+      // Straight to the order that was just created: the next thing a desk
+      // does is mark it paid or print it, and both live there.
+      router.push(localizePath(locale, `/admin/orders/${outcome.slug}`));
+      router.refresh();
+    }
+
+    // The form now matches the row, so leaving it is no longer losing anything.
+    if (outcome.ok) markSaved();
+    return outcome.ok;
+  }
+
+  function submit() {
+    /*
+     * The callback stays `async` and awaits: React 19 keeps `isPending` true for
+     * the life of an async transition, and a synchronous callback that merely
+     * *starts* the promise would drop the flag immediately — the save button
+     * would stop saying "Saving" the instant it was pressed.
+     */
     startTransition(async () => {
-      const outcome = await createOrder({
-        customerName,
-        customerEmail,
-        customerPhone,
-        channel,
-        note,
-        shipInCents,
-        items: lines
-          .filter((line) => line.slug.length > 0)
-          .map((line) => ({ slug: line.slug, quantity: line.quantity })),
-      });
-
-      setResult(outcome);
-
-      if (outcome.ok) {
-        // Straight to the order that was just created: the next thing a desk
-        // does is mark it paid or print it, and both live there.
-        router.push(localizePath(locale, `/admin/orders/${outcome.slug}`));
-        router.refresh();
-      }
+      await persist();
     });
   }
 

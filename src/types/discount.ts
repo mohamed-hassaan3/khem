@@ -44,6 +44,14 @@ export interface Discount {
    * permanent public discount.
    */
   requiresGrant: boolean;
+  /**
+   * The welcome offer, granted to every new account by `claim_welcome()`.
+   *
+   * At most one row may carry it — a partial unique index and a trigger in
+   * `supabase/sql/0030_welcome.sql` see to that, so nothing in TypeScript has to
+   * remember the rule.
+   */
+  isWelcome: boolean;
   description: string | null;
   createdAt: string;
 }
@@ -96,3 +104,54 @@ export interface DiscountDetail extends DiscountWithUsage {
   grants: readonly DiscountGrant[];
   redemptions: readonly DiscountRedemption[];
 }
+
+/**
+ * Why `resolve_discount()` refused a code, as something a bilingual client can
+ * translate.
+ *
+ * The sentences that function returns are English and are written for the
+ * customer — which is enough at the desk and not enough on a storefront that
+ * ships in two languages. `src/actions/checkout.ts` states the rule this
+ * follows: a checkout that guesses at the shape of an error string shows the
+ * wrong one. So `supabase/sql/0029_discount_preview.sql` names each refusal, the
+ * client looks the name up, and the English sentence remains the fallback for a
+ * name this build has not seen.
+ */
+export type DiscountRefusalCode =
+  | "NO_CODE"
+  | "NOT_RECOGNISED"
+  | "INACTIVE"
+  | "NOT_STARTED"
+  | "EXPIRED"
+  | "BELOW_MINIMUM"
+  /** Grant-gated, and this address holds no grant for it. */
+  | "NOT_GRANTED"
+  | "ALREADY_USED"
+  | "FULLY_REDEEMED"
+  | "CUSTOMER_LIMIT"
+  | "NOTHING_ELIGIBLE"
+  | "ZERO_AMOUNT";
+
+/**
+ * What a code would be worth against the bag as it stands.
+ *
+ * **An estimate, and never a permission.** It is resolved without a lock and
+ * binds nothing: `place_order()` resolves the same code again, under a lock,
+ * inside the transaction that writes the order, and what that decides is what
+ * the customer is charged. The estimate exists so a refusal arrives at the
+ * field instead of at the payment button.
+ */
+export type DiscountPreview =
+  | {
+      ok: true;
+      /** As stored — uppercase — not as typed. */
+      code: string;
+      /** What it would take off this bag, in piastres. */
+      amountInCents: number;
+    }
+  | {
+      ok: false;
+      reasonCode: DiscountRefusalCode | "UNKNOWN";
+      /** The English sentence, for a `reasonCode` the client cannot name. */
+      reason: string;
+    };

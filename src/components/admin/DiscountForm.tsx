@@ -41,6 +41,8 @@ import {
   AdminToggle,
 } from "@/src/components/admin/fields";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
+import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
+import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import type { DiscountDetail } from "@/src/types/discount";
 
@@ -138,6 +140,7 @@ export default function DiscountForm({
   );
   const [appliesTo, setAppliesTo] = useState<string>(discount?.appliesTo ?? "ALL");
   const [requiresGrant, setRequiresGrant] = useState(discount?.requiresGrant ?? false);
+  const [isWelcome, setIsWelcome] = useState(discount?.isWelcome ?? false);
   const [description, setDescription] = useState(discount?.description ?? "");
   const [productSlugs, setProductSlugs] = useState<string[]>([
     ...(discount?.restrictions.productSlugs ?? []),
@@ -156,42 +159,78 @@ export default function DiscountForm({
     set(list.includes(slug) ? list.filter((s) => s !== slug) : [...list, slug]);
   }
 
-  function submit() {
+  /*
+   * Hoisted out of `submit()` so it can be compared as well as posted: this
+   * one object is both what the action receives and what `useUnsavedGuard`
+   * watches, so a field that reaches the server necessarily reaches the
+   * comparison too.
+   */
+  const payload = {
+    id: discount?.id ?? "",
+    code,
+    kind,
+    value,
+    isActive,
+    // A `datetime-local` value has no zone; the browser's offset is applied
+    // by `new Date()` here so the stored instant is the one the editor meant.
+    startsAt: startsAt ? new Date(startsAt).toISOString() : "",
+    endsAt: endsAt ? new Date(endsAt).toISOString() : "",
+    totalUseLimit,
+    perCustomerLimit,
+    minimumOrderInCents,
+    appliesTo,
+    requiresGrant,
+    isWelcome,
+    description,
+    productSlugs,
+    collectionSlugs,
+  };
+
+  const { toast } = useAdminToast();
+
+  const { markSaved } = useUnsavedGuard({
+    payload,
+    save: () => persist(),
+    pending: isPending,
+  });
+
+  /** Saves and reports whether it worked. Awaited by the leave-page dialog. */
+  async function persist(): Promise<boolean> {
     setResult(null);
 
+    const outcome = isEdit
+      ? await updateDiscount(payload)
+      : await createDiscount(payload);
+
+    /*
+     * Successes leave, failures stay. A receipt has done its job the moment it
+     * is read; a refusal names a field and has to be acted on, so it keeps its
+     * place above the form. See `admin-toast-provider.tsx`.
+     */
+    if (outcome.ok) toast(outcome.message);
+    setResult(outcome.ok ? null : outcome);
+
+    if (outcome.ok && !isEdit) {
+      router.push(localizePath(locale, `/admin/discounts/${outcome.slug}`));
+      router.refresh();
+    } else if (outcome.ok) {
+      router.refresh();
+    }
+
+    // The form now matches the row, so leaving it is no longer losing anything.
+    if (outcome.ok) markSaved();
+    return outcome.ok;
+  }
+
+  function submit() {
+    /*
+     * The callback stays `async` and awaits: React 19 keeps `isPending` true for
+     * the life of an async transition, and a synchronous callback that merely
+     * *starts* the promise would drop the flag immediately — the save button
+     * would stop saying "Saving" the instant it was pressed.
+     */
     startTransition(async () => {
-      const payload = {
-        id: discount?.id ?? "",
-        code,
-        kind,
-        value,
-        isActive,
-        // A `datetime-local` value has no zone; the browser's offset is applied
-        // by `new Date()` here so the stored instant is the one the editor meant.
-        startsAt: startsAt ? new Date(startsAt).toISOString() : "",
-        endsAt: endsAt ? new Date(endsAt).toISOString() : "",
-        totalUseLimit,
-        perCustomerLimit,
-        minimumOrderInCents,
-        appliesTo,
-        requiresGrant,
-        description,
-        productSlugs,
-        collectionSlugs,
-      };
-
-      const outcome = isEdit
-        ? await updateDiscount(payload)
-        : await createDiscount(payload);
-
-      setResult(outcome);
-
-      if (outcome.ok && !isEdit) {
-        router.push(localizePath(locale, `/admin/discounts/${outcome.slug}`));
-        router.refresh();
-      } else if (outcome.ok) {
-        router.refresh();
-      }
+      await persist();
     });
   }
 
@@ -337,6 +376,14 @@ export default function DiscountForm({
           description="Only customers issued a grant may redeem it — how the welcome offer shares one code string without it leaking."
           checked={requiresGrant}
           onChange={setRequiresGrant}
+        />
+
+        <AdminToggle
+          id="isWelcome"
+          label="Use as the welcome offer"
+          description="Every new account is granted this code and told about it in their welcome letter. Only one campaign can hold this — ticking it here releases whichever held it before. Pair it with “By invitation only”."
+          checked={isWelcome}
+          onChange={setIsWelcome}
         />
       </section>
 

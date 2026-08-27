@@ -87,9 +87,12 @@ export function hasDetailPage(product: LinkableProduct): boolean {
  */
 export const ACCOUNT_PATHS = {
   overview: "/account",
+  profile: "/account/profile",
   orders: "/account/orders",
   addresses: "/account/addresses",
-  profile: "/account/profile",
+  vouchers: "/account/vouchers",
+  notifications: "/account/notifications",
+  preferences: "/account/preferences",
 } as const;
 
 /**

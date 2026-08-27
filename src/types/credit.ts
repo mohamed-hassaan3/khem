@@ -106,3 +106,53 @@ export interface CreditTotals {
   cancelledCount: number;
   pendingDeliveryCount: number;
 }
+
+/**
+ * A credit as its owner sees it.
+ *
+ * The row plus the order number that earned it. `customer_credits` stores a
+ * uuid for that order, and "KHEM-2026-1042" is the only form of it the customer
+ * has ever been shown.
+ */
+export interface CustomerCredit extends Credit {
+  sourceOrderNumber: string | null;
+}
+
+/**
+ * One movement, as the customer's own ledger prints it.
+ *
+ * `CreditTransaction` plus the human order number, which the row itself cannot
+ * carry: `credit_transactions.orderId` is a uuid, and "Order KHEM-2026-1042" is
+ * the only form of it a customer has ever seen.
+ *
+ * `actor` is deliberately not carried across. It names the member of the house
+ * behind a manual adjustment, which is the desk's business and not the
+ * customer's.
+ */
+export interface CreditLedgerEntry {
+  id: string;
+  creditId: string;
+  kind: CreditTransactionKind;
+  /** Signed: EARNED and REFUNDED add, USED and EXPIRED subtract. */
+  amountInCents: number;
+  /** The order that spent or restored it, in its `KHEM-YYYY-NNNN` form. */
+  orderNumber: string | null;
+  note: string | null;
+  occurredAt: string;
+}
+
+/**
+ * Everything the Vouchers & Credits panel needs about credits, in one read.
+ *
+ * Assembled server-side so the panel makes one call rather than three, and so
+ * the "available" total is summed where the rows are — a component adding up
+ * money is a second place for the definition to live.
+ */
+export interface CustomerCreditLedger {
+  credits: readonly CustomerCredit[];
+  /** Newest first. Every movement on every credit the customer holds. */
+  entries: readonly CreditLedgerEntry[];
+  /** The face value of the credits that could be spent right now. */
+  availableInCents: number;
+  availableCount: number;
+}

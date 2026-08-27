@@ -53,7 +53,14 @@ export default function SignUpForm({ locale }: { locale: Locale }) {
       <SignUp
         signInUrl={signInPathWithReturn(locale, returnTo)}
         fallbackRedirectUrl={localizePath(locale, ACCOUNT_PATHS.overview)}
-        unsafeMetadata={{ marketingOptIn }}
+        /*
+         * `locale` rides along beside the marketing flag because Clerk carries
+         * no language of its own, and the welcome letter — sent from the
+         * `user.created` webhook, long after this page is gone — has no other
+         * way to know which one to write in. Untrusted like everything in this
+         * object, and checked against the `LOCALES` allowlist where it is read.
+         */
+        unsafeMetadata={{ marketingOptIn, locale }}
       />
 
       {/*
