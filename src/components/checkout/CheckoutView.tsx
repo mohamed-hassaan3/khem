@@ -44,7 +44,8 @@ import EmptyState from "@/src/components/ecommerce/EmptyState";
 import PageHeader from "@/src/components/ecommerce/PageHeader";
 import { placeCustomerOrder } from "@/src/actions/checkout";
 import { previewDiscount } from "@/src/actions/discounts";
-import { cartSubtotalInCents, cartTotalInCents } from "@/src/lib/cart";
+import { cartTotalInCents } from "@/src/lib/cart";
+import { cartPricing } from "@/src/lib/pricing";
 import { formatPrice } from "@/src/lib/format";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
 import {
@@ -223,12 +224,14 @@ export default function CheckoutView({
     [lines, productsById],
   );
 
-  const subtotalInCents = cartSubtotalInCents(
-    resolved.map(({ product, quantity }) => ({
-      priceInCents: product.priceInCents,
-      quantity,
-    })),
-  );
+  /*
+   * The same breakdown the bag page shows, from the same function. `subtotal`
+   * below is the promoted figure — what the merchandise actually costs — and is
+   * what every calculation on this screen uses: the delivery fee, the credit
+   * cap, the discount preview, and the total.
+   */
+  const pricing = cartPricing(resolved);
+  const subtotalInCents = pricing.subtotalInCents;
 
   /*
    * What the selected credit would take off, by the same `min(credit, subtotal)`
@@ -730,7 +733,7 @@ export default function CheckoutView({
 
         <OrderReview
           lines={resolved}
-          subtotalInCents={subtotalInCents}
+          pricing={pricing}
           creditAppliedInCents={creditAppliedInCents}
           discountInCents={discountInCents}
         />

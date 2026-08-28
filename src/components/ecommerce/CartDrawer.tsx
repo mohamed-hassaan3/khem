@@ -13,7 +13,7 @@ import {
 
 import CartDrawerLine from "@/src/components/ecommerce/CartDrawerLine";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import { cartSubtotalInCents } from "@/src/lib/cart";
+import { cartPricing } from "@/src/lib/pricing";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
 import { useCartDrawer } from "@/src/providers/cart-drawer-provider";
@@ -203,12 +203,13 @@ export default function CartDrawer() {
     [lines, productsById],
   );
 
-  const subtotal = cartSubtotalInCents(
-    resolved.map(({ product, quantity }) => ({
-      priceInCents: product.priceInCents,
-      quantity,
-    })),
-  );
+  /*
+   * The same breakdown `<CartSummary>` prints, from the same function — the
+   * panel and the page must never disagree about what the bag is worth, and the
+   * surest way to guarantee that is for neither to do the sum itself.
+   */
+  const pricing = cartPricing(resolved);
+  const subtotal = pricing.subtotalInCents;
 
   const itemCount = resolved.reduce((sum, line) => sum + line.quantity, 0);
 
@@ -383,6 +384,23 @@ export default function CartDrawer() {
         {/* ── FOOTER ─────────────────────────────── */}
         {resolved.length > 0 && !isLoading && !hasFailed ? (
           <div className="shrink-0 border-t border-border px-7 py-7">
+            {/*
+              The campaign, when one is running. Printed above the subtotal
+              rather than folded into it, so the panel says the same thing the
+              bag page does — a drawer that quietly nets the reduction away
+              would make the two screens disagree.
+            */}
+            {pricing.promotionSavingsInCents > 0 ? (
+              <div className="mb-1.5 flex items-baseline justify-between">
+                <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ivory/50">
+                  {dict.cart.promotion}
+                </span>
+                <span className="font-heading text-[13px] tabular-nums text-gold">
+                  −{formatPrice(pricing.promotionSavingsInCents)}
+                </span>
+              </div>
+            ) : null}
+
             <div className="mb-1.5 flex items-baseline justify-between">
               <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ivory/50">
                 {dict.cart.subtotal}

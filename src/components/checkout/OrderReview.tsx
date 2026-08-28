@@ -18,6 +18,7 @@ import Image from "next/image";
 
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { cartTotalInCents, shippingInCents } from "@/src/lib/cart";
+import { unitPriceInCents, type CartPricing } from "@/src/lib/pricing";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
@@ -30,7 +31,15 @@ export interface ReviewLine {
 
 export interface OrderReviewProps {
   lines: readonly ReviewLine[];
-  subtotalInCents: number;
+  /**
+   * The bag's breakdown — list worth, campaign reduction, and what that leaves.
+   *
+   * The same `cartPricing()` result the bag page prints, so the two screens
+   * cannot describe one bag two ways. Everything that computes — delivery, the
+   * credit cap, the total — uses `pricing.subtotalInCents`; the list figure is
+   * printed so the reductions beneath it have something to subtract from.
+   */
+  pricing: CartPricing;
   /**
    * What a selected Discovery Credit would take off. Zero when none is chosen.
    *
@@ -51,10 +60,11 @@ export interface OrderReviewProps {
 
 export default function OrderReview({
   lines,
-  subtotalInCents,
+  pricing,
   creditAppliedInCents = 0,
   discountInCents = 0,
 }: OrderReviewProps) {
+  const subtotalInCents = pricing.subtotalInCents;
   const dict = useDictionary();
   const formatPrice = useFormatPrice();
   const copy = dict.checkout.review;
@@ -123,7 +133,7 @@ export default function OrderReview({
                 {product.name}
               </p>
               <p className="text-[11px] tabular-nums text-ivory/35">
-                {formatPrice(product.priceInCents * quantity)}
+                {formatPrice(unitPriceInCents(product) * quantity)}
               </p>
             </div>
           </li>
@@ -131,7 +141,29 @@ export default function OrderReview({
       </ul>
 
       <div className="flex flex-col gap-4">
-        <Row label={copy.subtotal} value={formatPrice(subtotalInCents)} />
+        <Row
+          label={copy.subtotal}
+          value={formatPrice(pricing.listSubtotalInCents)}
+        />
+
+        {/*
+          Three reductions can apply to one order and each gets its own line:
+          the campaign that repriced the goods, a code the customer entered, and
+          a Discovery Credit. Collapsing them into one "Discount" row would hide
+          which of the three is doing the work — and they are governed by
+          different rules, so a customer who loses one needs to know which.
+        */}
+        {pricing.promotionSavingsInCents > 0 ? (
+          <Row
+            label={dict.cart.promotion}
+            value={
+              <span className="text-gold">
+                −{formatPrice(pricing.promotionSavingsInCents)}
+              </span>
+            }
+          />
+        ) : null}
+
         {discountInCents > 0 ? (
           <Row
             label={copy.discount}

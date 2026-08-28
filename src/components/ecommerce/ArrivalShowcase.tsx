@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import Reveal from "@/src/components/animation/Reveal";
-import Price from "@/src/components/ecommerce/Price";
+import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
@@ -142,8 +142,9 @@ export default async function ArrivalShowcase({
           </dl>
 
           <div className="mb-9 flex items-center gap-4 md:gap-6 border-t border-border pt-6">
-            <Price
-              cents={product.priceInCents}
+            <ProductPrice
+              priceInCents={product.priceInCents}
+              promotion={product.promotion}
               className="font-heading text-2xl text-gold"
             />
             <span className="text-[10px] uppercase tracking-[0.2em] text-ivory/35">

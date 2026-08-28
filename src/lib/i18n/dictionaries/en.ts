@@ -238,6 +238,13 @@ export const en = {
   },
 
   collections: {
+    /*
+     * The campaign line under a collection hero. Two forms because "1 pieces"
+     * is a bug the interpolation cannot hide, and Arabic needs the singular for
+     * a different reason than English does.
+     */
+    campaign: "{count} pieces at a reduced price.",
+    campaignOne: "One piece at a reduced price.",
     meta: {
       title: "Collections",
       description:
@@ -708,6 +715,15 @@ export const en = {
 
   product: {
     collectionLabel: "{name} Collection",
+    /*
+     * The offer line under the price on a product page. Two figures rather than
+     * one because they answer different questions — "how much less do I pay"
+     * and "how deep is the cut" — and a shopper comparing houses reads the
+     * second while a shopper comparing bottles reads the first.
+     */
+    promotion: {
+      saving: "Save {amount} · {percent}% off",
+    },
     home: "Home",
     collections: "Collections",
     quantity: "Quantity",
@@ -1031,6 +1047,14 @@ export const en = {
     itemCountOne: "1 item",
     itemCount: "{count} items",
     summary: "Order Summary",
+    /*
+     * The campaign line in the bag and the review panel.
+     *
+     * "Promotion", not "Discount": a code entered at checkout already owns that
+     * word one row below, and two rows reading "Discount" would leave the
+     * customer unable to tell which reduction is which.
+     */
+    promotion: "Promotion",
     subtotal: "Subtotal",
     shipping: "Shipping",
     complimentary: "Complimentary",
@@ -1621,6 +1645,44 @@ export const en = {
   newsletter: {
     successHeading: "Welcome to the Circle",
     successBody: "You will receive a confirmation shortly.",
+  },
+
+  /**
+   * The strip above the header. `label` names the region for a screen reader,
+   * which is the whole of its accessibility: the messages themselves are
+   * ordinary prose and the rotation is announced politely, never assertively.
+   */
+  announcementBar: {
+    label: "Announcements",
+    previous: "Previous announcement",
+    next: "Next announcement",
+  },
+
+  /**
+   * The subscribe-and-earn popup.
+   *
+   * Three different offer sentences because the welcome campaign may be a
+   * percentage, a fixed amount, or absent entirely — and a popup that promised
+   * "10% off" while the house was running "EGP 200 off" would be advertising a
+   * campaign the checkout does not honour. The percentage is never written into
+   * this file; it is interpolated from the live discount row.
+   */
+  offerPopup: {
+    close: "Close",
+    eyebrow: "An Invitation",
+    percentOffer: "Subscribe and receive {percent}% off your first order.",
+    amountOffer: "Subscribe and receive {amount} off your first order.",
+    plainOffer:
+      "Private word of new compositions, before they reach the boutique.",
+    emailLabel: "Email address",
+    emailPlaceholder: "Your email address",
+    submit: "Join KHEM",
+    submitting: "One moment",
+    successHeading: "Welcome to the Circle",
+    successBody: "Look for our letter — it carries your welcome offer.",
+    successCode: "Your code is {code}. Enter it at checkout.",
+    alreadyBody: "You are already with us — nothing has changed.",
+    disclaimer: "One letter a month. Leave whenever you wish.",
   },
 
   unsubscribe: {

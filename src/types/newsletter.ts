@@ -16,7 +16,12 @@ export type NewsletterStatus = "SUBSCRIBED" | "UNSUBSCRIBED";
  * person filled in, a box they ticked while making an account, and somebody at
  * the desk typing it in.
  */
-export type NewsletterSource = "HOME_FORM" | "SIGN_UP" | "ADMIN";
+export type NewsletterSource =
+  | "HOME_FORM"
+  | "SIGN_UP"
+  | "ADMIN"
+  /** The offer popup — see `supabase/sql/0035_marketing.sql`. */
+  | "POPUP";
 
 /** One subscriber, as the dashboard lists them. */
 export interface NewsletterSubscriber {

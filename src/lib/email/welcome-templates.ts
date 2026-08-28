@@ -60,8 +60,18 @@ const SANS = "'Helvetica Neue', Helvetica, Arial, sans-serif";
  * Centred in both trees, unlike the prose around it: the code is a monument in
  * the middle of the letter rather than a line of running text, and centring is
  * what makes it read as one in either direction.
+ *
+ * Exported so the Inner Circle welcome can print the same frame when somebody
+ * subscribes through the offer popup and earns the same grant. One block, so
+ * the two letters cannot drift into two different-looking vouchers for one
+ * entitlement. `templates.ts` only imports this function; the type edge back the
+ * other way is `import type`, so there is no runtime cycle.
  */
-function privilegeBlock(label: string, code: string, terms: string): string {
+export function privilegeBlock(
+  label: string,
+  code: string,
+  terms: string,
+): string {
   return `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${GOLD};background-color:${BACKGROUND};">
       <tr>

@@ -127,7 +127,25 @@ export default async function AdminOrderPage({
                     {line.productName}
                   </Link>
                 </AdminCell>
-                <AdminCell muted>{egp(line.priceInCents)}</AdminCell>
+                <AdminCell muted>
+                  {/*
+                    The campaign, as the order recorded it. Printed from the
+                    line's own snapshot rather than from whatever promotion is
+                    running today — a sale that ended in December must not change
+                    what a November invoice says it charged.
+                  */}
+                  {line.listPriceInCents !== null &&
+                  line.listPriceInCents > line.priceInCents ? (
+                    <span className="inline-flex items-baseline gap-2">
+                      <span className="text-ivory/25 line-through">
+                        {egp(line.listPriceInCents)}
+                      </span>
+                      <span className="text-gold/80">{egp(line.priceInCents)}</span>
+                    </span>
+                  ) : (
+                    egp(line.priceInCents)
+                  )}
+                </AdminCell>
                 <AdminCell muted>{line.quantity}</AdminCell>
                 <AdminCell>{egp(line.priceInCents * line.quantity)}</AdminCell>
               </AdminRow>

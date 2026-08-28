@@ -48,6 +48,74 @@ const CLIENT_OPTIONS = {
 } as const;
 
 /**
+ * How long a **read** may take before it is abandoned.
+ *
+ * ## Why this exists
+ *
+ * Supabase's REST endpoint occasionally accepts a request and then never
+ * answers — not slowly, but never. Measured on this project against a trivial
+ * `select slug from "Collection" limit 1`: the same query over a direct SQL
+ * connection returned in 194–249ms eight times out of eight, while the REST path
+ * stalled indefinitely on roughly one request in five. It is not a query, a
+ * policy, or a table: it is the HTTP path in front of them.
+ *
+ * Without a bound, one such stall does not slow a page down — it stops it
+ * existing. The render never resolves, `loading.tsx` stays on screen, and
+ * because these routes are cached the stalled render can be the one every later
+ * visitor is waiting behind. That is the "infinite loading" this constant exists
+ * to end.
+ *
+ * Ten seconds is far beyond any healthy query here (the slowest measured is
+ * about a second) and well short of a visitor's patience. When it fires,
+ * supabase-js reports a normal `error`, which every function in `src/services/`
+ * already turns into `[]` or `null` — so a stalled read degrades a page to the
+ * empty state it was always written to handle, exactly as this module's header
+ * promises for a missing key. The failure becomes the one the code was designed
+ * for instead of one nothing anticipated.
+ */
+const READ_TIMEOUT_MS = 10_000;
+
+/**
+ * `fetch` with a deadline, for the read client only.
+ *
+ * A caller's own `signal` is honoured alongside the deadline — `AbortSignal.any`
+ * aborts on whichever fires first — so this adds a limit without taking one
+ * away.
+ *
+ * ## Not during `next build`
+ *
+ * Degrading to an empty state is the right answer for **one visitor's request**
+ * and the wrong one for a prerender: a page built from a stalled read would bake
+ * an empty grid into static HTML and serve it to everybody for the length of its
+ * revalidate window. Next already handles a hung build page correctly — it times
+ * it out and retries it up to three times — so during the build the deadline is
+ * removed and that retry is allowed to do its job.
+ *
+ * ⚠ Deliberately **not** applied to the privileged client at all. That one
+ * places orders, redeems credits and issues grants; aborting a write
+ * client-side while the transaction commits server-side would leave the caller
+ * believing an order failed that in fact exists. A write that is slow must be
+ * waited for.
+ */
+function timeoutFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<Response> {
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return fetch(input, init);
+  }
+
+  const deadline = AbortSignal.timeout(READ_TIMEOUT_MS);
+
+  return fetch(input, {
+    ...init,
+    signal: init?.signal
+      ? AbortSignal.any([init.signal, deadline])
+      : deadline,
+  });
+}
+
+/**
  * Whether the database is reachable for reads at all.
  *
  * Callers use this to disappear rather than to fail: an unconfigured checkout
@@ -91,7 +159,10 @@ export function getSupabasePublic(): SupabaseClient | null {
   publicClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
-    CLIENT_OPTIONS,
+    // The deadline is attached here, at the one place every storefront read
+    // passes through, rather than at each of the forty-odd call sites — a bound
+    // a service can forget to apply is a bound that will be forgotten.
+    { ...CLIENT_OPTIONS, global: { fetch: timeoutFetch } },
   );
 
   return publicClient;

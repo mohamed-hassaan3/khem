@@ -31,6 +31,7 @@
 
 import { usePathname } from "next/navigation";
 import {
+  BadgePercent,
   BarChart3,
   Boxes,
   ExternalLink,
@@ -42,6 +43,7 @@ import {
   PanelLeftClose,
   Mail,
   MapPin,
+  Megaphone,
   Tag,
   Ticket,
   Receipt,
@@ -74,6 +76,14 @@ const SECTIONS = [
   { path: "/admin/customers", label: "Customers", icon: Users },
   { path: "/admin/credits", label: "Credits", icon: Ticket },
   { path: "/admin/discounts", label: "Discounts", icon: Tag },
+  /*
+   * Promotions sit beside Discounts, not inside them: one is a price the
+   * catalogue carries and the other is a string somebody types. Neighbours on
+   * the rail because a desk running a sale reaches for both in the same hour;
+   * separate rows because they are separate systems with separate records.
+   */
+  { path: "/admin/promotions", label: "Promotions", icon: BadgePercent },
+  { path: "/admin/announcements", label: "Announcements", icon: Megaphone },
   { path: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { path: "/admin/campaigns", label: "Campaigns", icon: Send },
   { path: "/admin/inventory", label: "Inventory", icon: Boxes },

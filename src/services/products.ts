@@ -25,6 +25,7 @@ import "server-only";
 
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
+import { getProductPromotions } from "@/src/services/marketing";
 import type { MerchPageFacet } from "@/src/lib/facets";
 import type { ScentProfileSlug } from "@/src/lib/scent-profiles";
 import type { LinkableProduct } from "@/src/lib/routes";
@@ -352,18 +353,28 @@ function cardQuery() {
     .is("deletedAt", null);
 }
 
-/** Shared tail: log a failure as `[]`, parse a success into cards. */
-function toCards(
+/**
+ * Shared tail: log a failure as `[]`, parse a success into cards.
+ *
+ * Every card projection in this module funnels through here, which is why the
+ * promotion map is fetched *here* rather than in each of the five callers — a
+ * grid that forgot to ask would print list prices beside a checkout charging
+ * campaign ones, and there is now no place to forget. `getProductPromotions()`
+ * is request-memoised, so five grids on one page are one query.
+ */
+async function toCards(
   locale: Locale,
   label: string,
   result: { data: unknown[] | null; error: { message: string } | null },
-): ProductCardData[] {
+): Promise<ProductCardData[]> {
   if (result.error) {
     logFailure(label, result.error.message);
     return [];
   }
 
-  return parseList(result.data, (row) => toProductCard(row, locale));
+  const promotions = await getProductPromotions(locale);
+
+  return parseList(result.data, (row) => toProductCard(row, locale, promotions));
 }
 
 /**
@@ -442,7 +453,11 @@ export async function getNewArrivals(locale: Locale): Promise<Product[]> {
     return [];
   }
 
-  return parseList(data, (row) => toProduct(row, locale));
+  const promotions = await getProductPromotions(locale);
+
+  return parseList(data, (row) =>
+    toProduct(row, locale, promotions),
+  );
 }
 
 /**
@@ -498,7 +513,7 @@ export async function getProductBySlug(
     return null;
   }
 
-  return toProduct(data, locale);
+  return toProduct(data, locale, await getProductPromotions(locale));
 }
 
 /**
@@ -538,7 +553,7 @@ export async function getRitualProductBySlug(
     return null;
   }
 
-  return toProduct(data, locale);
+  return toProduct(data, locale, await getProductPromotions(locale));
 }
 
 /**

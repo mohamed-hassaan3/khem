@@ -43,6 +43,7 @@ const STATUSES: readonly NewsletterStatus[] = ["SUBSCRIBED", "UNSUBSCRIBED"];
 /** Where an address came from — different evidence of consent in each case. */
 const SOURCE_LABELS: Record<string, string> = {
   HOME_FORM: "Home form",
+  POPUP: "Offer popup",
   SIGN_UP: "Sign-up",
   ADMIN: "Desk",
 };

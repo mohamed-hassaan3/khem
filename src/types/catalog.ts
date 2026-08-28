@@ -16,6 +16,8 @@
  *    are omitted because nothing in the UI reads them.
  */
 
+import type { ProductPromotion } from "./marketing";
+
 /** Mirrors the `Concentration` enum in AGENTS.md §9. */
 export type Concentration =
   | "PARFUM"
@@ -219,6 +221,20 @@ export interface Product {
   isBestseller: boolean;
   collectionSlug: string;
   images: ProductImage[];
+  /**
+   * The campaign currently reducing this product, or `null`.
+   *
+   * Never a second price column: `priceInCents` above stays the **list** price
+   * in every state, and this carries what a running promotion has made of it.
+   * `src/lib/pricing.ts` owns the arithmetic, and no component compares the two
+   * itself.
+   *
+   * Attached by `src/services/products.ts` from `active_product_promotions`
+   * (`supabase/sql/0035_marketing.sql`) — the same view `place_order()` prices
+   * an order from, so what a card shows and what a card is charged are one rule
+   * read at two moments.
+   */
+  promotion: ProductPromotion | null;
 }
 
 /**
@@ -270,6 +286,13 @@ export type ProductCardData = Pick<
    */
   | "isBestseller"
   | "tags"
+  /*
+   * The running campaign, if any. On the card projection because a grid prints
+   * the reduced price and the struck-through original, and because the bag
+   * resolves its stored ids against exactly this projection — a line priced from
+   * a card that did not carry its promotion would disagree with the checkout.
+   */
+  | "promotion"
 > & {
   /** Resolved display name of the parent collection (a join in SQL terms). */
   collectionName: string;

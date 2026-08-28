@@ -48,6 +48,7 @@ import { rankLexical } from "@/src/lib/search/lexical";
 import { embedQuery } from "@/src/lib/search/semantic";
 import { fold, isSearchable, normalizeQuery, queryTerms } from "@/src/lib/search/text";
 import { PRODUCT_CARD_COLUMNS, parseList, toProductCard } from "@/src/schemas/db/catalog";
+import { getProductPromotions } from "@/src/services/marketing";
 import {
   getCatalogProductCards,
   getFragranceCollections,
@@ -147,8 +148,17 @@ export async function searchCatalog(
     return fallbackSearch(locale, normalized, limit);
   }
 
+  const promotions = await getProductPromotions(locale);
+
+  /*
+   * Promotions are attached here as well as in `src/services/products.ts`,
+   * because this query bypasses that module entirely — it projects
+   * `PRODUCT_CARD_COLUMNS` straight off an RPC. A result page that quoted list
+   * prices while the collection grid beside it quoted campaign ones would look
+   * like two different catalogues.
+   */
   const products = parseList(data as unknown[] | null, (row) =>
-    toProductCard(row, locale),
+    toProductCard(row, locale, promotions),
   );
 
   /*

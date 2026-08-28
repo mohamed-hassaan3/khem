@@ -6,6 +6,7 @@ import Image from "next/image";
 import QuantityStepper from "@/src/components/ecommerce/QuantityStepper";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { lineTotalInCents, quantityCeiling } from "@/src/lib/cart";
+import { unitPriceInCents } from "@/src/lib/pricing";
 import { formatProductType, formatVolume } from "@/src/lib/format";
 import { productHref } from "@/src/lib/routes";
 import type { Locale } from "@/src/lib/i18n/config";
@@ -81,7 +82,12 @@ export default function CartLine({
           </div>
 
           <span className="font-heading text-base tabular-nums text-gold sm:text-lg" {...island}>
-            {formatPrice(lineTotalInCents({ priceInCents: product.priceInCents, quantity }))}
+            {formatPrice(
+              lineTotalInCents({
+                priceInCents: unitPriceInCents(product),
+                quantity,
+              }),
+            )}
           </span>
         </div>
 

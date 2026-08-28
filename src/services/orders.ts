@@ -21,6 +21,7 @@ import "server-only";
 
 import { hasDetailPage } from "@/src/lib/routes";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
+import { promotionalPricesBySlug } from "@/src/services/marketing";
 import { toDetailPageTarget } from "@/src/schemas/db/catalog";
 import { orderStatusSchema, parseList } from "@/src/schemas/db/orders";
 import type { CollectionKind } from "@/src/types/catalog";
@@ -175,6 +176,13 @@ export async function resolveCartToLines(
     return { ok: false, reason: "unavailable" };
   }
 
+  /*
+   * The campaigns in force, as one query keyed by slug. Read through the
+   * **secret** client like everything else in this function: it is pricing a
+   * bag on the way to an order, not rendering a page.
+   */
+  const promotions = await promotionalPricesBySlug();
+
   const products = new Map(
     parseList(data, (row) => {
       const parsed = cartProductRowSchema.safeParse(row);
@@ -204,7 +212,14 @@ export async function resolveCartToLines(
       slug: product.slug,
       name: product.name,
       quantity: item.quantity,
-      priceInCents: product.priceInCents,
+      /*
+       * The promoted price where a campaign is running. This subtotal decides
+       * the **delivery fee** and nothing else — `place_order()` re-derives the
+       * merchandise total from the same view under a row lock — but it has to
+       * use the same figure, or a bag that crosses the free-delivery threshold
+       * on promoted prices would be charged for delivery anyway.
+       */
+      priceInCents: promotions.get(product.slug) ?? product.priceInCents,
     });
   }
 

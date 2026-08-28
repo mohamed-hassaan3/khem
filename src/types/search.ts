@@ -7,6 +7,7 @@
  * server.
  */
 
+import type { ProductPromotion } from "./marketing";
 import type {
   CollectionKind,
   Concentration,
@@ -40,7 +41,16 @@ export interface ProductSuggestion {
    */
   concentration: Concentration | null;
   format: string | null;
+  /** The list price, always. */
   priceInCents: number;
+  /**
+   * The running campaign, if any.
+   *
+   * Carried across the wire so a suggestion row prints the same pair the grid
+   * behind it prints. A panel quoting list prices over a catalogue on sale would
+   * be the one surface in the site disagreeing with every other.
+   */
+  promotion: ProductPromotion | null;
   image: ProductImage;
 }
 

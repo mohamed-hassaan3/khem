@@ -7,6 +7,7 @@ import CollectionGrid, {
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { productFacets } from "@/src/lib/facets";
+import { unitPriceInCents } from "@/src/lib/pricing";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
@@ -92,7 +93,9 @@ export default async function CollectionView({
   const items: CollectionGridItem[] = products.map((product) => ({
     id: product.id,
     name: product.name,
-    priceInCents: product.priceInCents,
+    // What the grid's price sort orders on. The promoted figure, so a bag that
+    // says "low to high" agrees with the numbers printed on the cards.
+    priceInCents: unitPriceInCents(product),
     inventory: product.inventory,
     facets: productFacets(product),
     card: (
@@ -106,6 +109,30 @@ export default async function CollectionView({
    * cannot fill, so a collection with nothing live in it takes its chip with it.
    */
   const isOverview = collection === null;
+
+  /*
+   * The one campaign labelling this page, if there is exactly one.
+   *
+   * Derived from the products already in hand rather than queried: the page has
+   * their promotions attached, so counting them is free, and a line derived from
+   * what is actually on screen cannot advertise a campaign whose products are
+   * all out of stock and filtered away.
+   */
+  const labels = new Map<string, number>();
+
+  for (const product of products) {
+    const label = product.promotion?.label;
+    if (!label) continue;
+    labels.set(label, (labels.get(label) ?? 0) + 1);
+  }
+
+  const campaign =
+    labels.size === 1
+      ? (() => {
+          const [[label, count]] = [...labels];
+          return { label, count };
+        })()
+      : null;
 
   return (
     <div className="min-h-screen bg-background text-ivory">
@@ -177,6 +204,35 @@ export default async function CollectionView({
             >
               {title}
             </h1>
+
+            {/*
+              The campaign line.
+              
+              Printed only when **one** campaign labels everything reduced on
+              this page. Two overlapping campaigns produce no line rather than a
+              list of them: a hero is not a noticeboard, and naming one of two
+              would be arbitrary. The count is what the sentence is actually
+              about — "some of these are reduced" is worth saying, "there is a
+              sale on" is not.
+            */}
+            {campaign ? (
+              <p
+                dir="auto"
+                className="mt-6 inline-flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-[0.08em] text-champagne/70"
+              >
+                <span className="border border-gold/40 px-2.5 py-1 font-heading text-[9px] uppercase tracking-[0.2em] text-gold">
+                  {campaign.label}
+                </span>
+                <span>
+                  {interpolate(
+                    campaign.count === 1
+                      ? dict.collections.campaignOne
+                      : dict.collections.campaign,
+                    { count: campaign.count },
+                  )}
+                </span>
+              </p>
+            ) : null}
           </div>
         </div>
       </section>

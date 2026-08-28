@@ -8,6 +8,8 @@ import Footer from "@/src/components/Footer";
 import Nav from "@/src/components/Nav";
 import CookieConsent from "@/src/components/consent/CookieConsent";
 import CartDrawer from "@/src/components/ecommerce/CartDrawer";
+import AnnouncementBar from "@/src/components/marketing/AnnouncementBar";
+import OfferPopup from "@/src/components/marketing/OfferPopup";
 import { khemClerkAppearance } from "@/src/lib/clerk-appearance";
 import { getFontVariables } from "@/src/lib/fonts";
 import {
@@ -24,6 +26,11 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 // which is how the root layout and every page's canonical could have come to
 // disagree about which domain KHEM lives on.
 import { SITE_URL } from "@/src/lib/i18n/metadata";
+import {
+  getLiveAnnouncements,
+  getMarketingSettings,
+  getWelcomeOffer,
+} from "@/src/services/marketing";
 import { CartDrawerProvider } from "@/src/providers/cart-drawer-provider";
 import { CartProvider } from "@/src/providers/cart-provider";
 import { ConsentProvider } from "@/src/providers/consent-provider";
@@ -224,6 +231,28 @@ export default async function RootLayout({
 
   const dictionary = await getDictionary(locale);
 
+  /*
+   * The two marketing surfaces, resolved on the server.
+   *
+   * Read here rather than inside the components because both are Client
+   * Components and neither may hold a Supabase key — and because the *presence*
+   * of a bar has to be known before the first paint, so `data-announcement`
+   * below can size the header stack in the same HTML the bar arrives in. That is
+   * what keeps this feature free of layout shift.
+   *
+   * All three reads are memoised per request and none of them uses a dynamic
+   * API, so this layout stays prerenderable exactly as it was; an admin write
+   * revalidates it through `revalidateMarketing()`.
+   */
+  const [marketing, announcements, welcomeOffer] = await Promise.all([
+    getMarketingSettings(locale),
+    getLiveAnnouncements(locale),
+    getWelcomeOffer(),
+  ]);
+
+  const showAnnouncements =
+    marketing.announcementsEnabled && announcements.length > 0;
+
   return (
     /*
      * `data-scroll-behavior="smooth"` is required, not decorative.
@@ -244,6 +273,13 @@ export default async function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body
+        /*
+         * Sizes `--announcement-h` (see `globals.css`), which `<Nav>`'s `top`
+         * and the page wrapper below both read. An attribute rather than an
+         * inline style so the two breakpoint values live in the stylesheet
+         * beside the bar they describe.
+         */
+        data-announcement={showAnnouncements ? "on" : undefined}
         className={`${getFontVariables(locale)} bg-background font-body text-ivory antialiased`}
       >
         {/*
@@ -310,8 +346,22 @@ export default async function RootLayout({
                    * control on every product card.
                    */}
                   <CartDrawerProvider>
+                    {showAnnouncements ? (
+                      <AnnouncementBar
+                        announcements={announcements}
+                        mode={marketing.announcementMode}
+                        intervalMs={marketing.announcementIntervalMs}
+                      />
+                    ) : null}
                     <Nav />
-                    {children}
+                    {/*
+                     * The offset for the fixed header stack. `--announcement-h`
+                     * is `0px` when there is no bar, so this wrapper is inert on
+                     * every page that has none — and every page's own `pt-20`
+                     * keeps meaning "below the header" rather than "below the
+                     * top of the document".
+                     */}
+                    <div className="pt-[var(--announcement-h)]">{children}</div>
                     <Footer locale={locale} />
                     {/*
                      * Mounted once here rather than inside `<Nav>`: it is a
@@ -324,6 +374,14 @@ export default async function RootLayout({
                      * in document flow and cannot contribute to CLS.
                      */}
                     <CookieConsent />
+                    {/*
+                     * After the cookie banner in the tree, and gated on it
+                     * having been answered — see `OfferPopup.tsx`. Two modals
+                     * arriving together is the aggression the brief rules out.
+                     */}
+                    {marketing.offerPopupEnabled ? (
+                      <OfferPopup settings={marketing} offer={welcomeOffer} />
+                    ) : null}
                   </CartDrawerProvider>
                 </CartProvider>
               </CurrencyProvider>

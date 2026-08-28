@@ -126,6 +126,7 @@ export async function GET(request: NextRequest) {
         concentration: product.concentration,
         format: product.format,
         priceInCents: product.priceInCents,
+        promotion: product.promotion,
         image: product.primaryImage,
       })),
       collections: collections.slice(0, COLLECTION_SUGGESTION_LIMIT).map((collection) => ({

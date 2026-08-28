@@ -358,7 +358,17 @@ export default function Nav() {
     <>
       <nav
         className={[
-          "fixed inset-x-0 top-0 z-1000 flex h-20 items-center justify-between px-5 transition-all duration-500 sm:px-8 lg:px-12",
+          /*
+           * `top` is the announcement bar's height, not zero.
+           *
+           * `--announcement-h` is `0px` unless the layout rendered a bar (see
+           * `globals.css`), so this collapses to the original `top-0` on every
+           * page that has none. Doing it here rather than by wrapping the header
+           * is what keeps `<Nav>` a single fixed element — the mega-menu and the
+           * mobile drawer are positioned against it, and a wrapper would have
+           * become their containing block.
+           */
+          "fixed inset-x-0 top-[var(--announcement-h)] z-1000 flex h-20 items-center justify-between px-5 transition-all duration-500 sm:px-8 lg:px-12",
           "ease-luxury-bezier",
           navSolid
             ? "border-b border-border bg-[color-mix(in_srgb,var(--color-background)_96%,transparent)] backdrop-blur-xl"

@@ -255,3 +255,52 @@ export function revalidateIngredients(productSlugs: readonly string[] = []): voi
     revalidateAllLocales(`/ritual/${slug}`);
   }
 }
+
+/**
+ * After an announcement, the announcement-bar settings, or the offer popup
+ * changes.
+ *
+ * **Every page, both locales.** The bar and the popup are rendered by the root
+ * layout, so unlike a product edit there is no subset of routes that could be
+ * stale — a campaign line added to the header is added to all thirty pages at
+ * once, and revalidating only the home page would leave the bar missing
+ * everywhere a visitor actually browses.
+ *
+ * `revalidatePath(path, "layout")` is what makes that one call rather than
+ * thirty: it invalidates the layout and everything nested under it.
+ */
+export function revalidateMarketing(): void {
+  revalidateWholeTree();
+}
+
+/**
+ * Every route under the locale layout, both trees.
+ *
+ * The one blunt instrument in this file, and the two callers below say why they
+ * need it. `revalidatePath(path, "layout")` invalidates the layout and
+ * everything nested under it, so this is two calls rather than sixty.
+ */
+function revalidateWholeTree(): void {
+  for (const locale of LOCALES) {
+    revalidatePath(`/${locale}`, "layout");
+  }
+}
+
+/**
+ * After a promotion is created, edited, activated or deleted.
+ *
+ * A campaign changes a **price**, and a price is quoted on more surfaces than
+ * any other field in the catalog: every grid, every detail page, the bag, the
+ * drawer and the checkout review. Rather than deriving the affected paths from
+ * the promotion's selections — which would miss the products it stops repricing,
+ * exactly the case `revalidateMerchPages()` warns about — this invalidates the
+ * whole locale tree.
+ *
+ * That is deliberate bluntness. A promotion is an occasional, deliberate act by
+ * the desk, not a per-row edit, so the cost is a handful of re-renders on a day
+ * somebody starts a sale — against the alternative of one grid quietly showing
+ * last week's prices.
+ */
+export function revalidatePromotions(): void {
+  revalidateWholeTree();
+}

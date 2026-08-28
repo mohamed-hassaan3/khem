@@ -25,6 +25,18 @@ import type {
   ProductImage,
   ScentProfile,
 } from "@/src/types/catalog";
+import type { ProductPromotion } from "@/src/types/marketing";
+
+/**
+ * The promotions in force, keyed by product slug.
+ *
+ * Threaded through the two product mappers rather than merged in afterwards, so
+ * there is no window in which a `Product` exists without its campaign attached —
+ * a projection that could be built either way is one somebody will build the
+ * wrong way. `null` means "not asked for" and is the correct answer for the
+ * dashboard, which prices nothing.
+ */
+export type PromotionMap = ReadonlyMap<string, ProductPromotion> | null;
 
 /**
  * Every mapper below takes the active locale and returns the *resolved*
@@ -490,7 +502,11 @@ export function resolveHoverImage(
   );
 }
 
-export function toProduct(row: unknown, locale: Locale): Product | null {
+export function toProduct(
+  row: unknown,
+  locale: Locale,
+  promotions: PromotionMap = null,
+): Product | null {
   const parsed = productRowSchema.safeParse(row);
   if (!parsed.success) return null;
 
@@ -503,10 +519,15 @@ export function toProduct(row: unknown, locale: Locale): Product | null {
     images: data.images
       .map((image) => toImage(image, locale))
       .sort((a, b) => a.sortOrder - b.sortOrder),
+    promotion: promotions?.get(data.slug) ?? null,
   };
 }
 
-export function toProductCard(row: unknown, locale: Locale): ProductCardData | null {
+export function toProductCard(
+  row: unknown,
+  locale: Locale,
+  promotions: PromotionMap = null,
+): ProductCardData | null {
   const parsed = productCardRowSchema.safeParse(row);
   if (!parsed.success) return null;
 
@@ -523,6 +544,7 @@ export function toProductCard(row: unknown, locale: Locale): ProductCardData | n
     collectionKind: parent.kind,
     primaryImage,
     hoverImage: resolveHoverImage(gallery, primaryImage),
+    promotion: promotions?.get(product.slug) ?? null,
   };
 }
 

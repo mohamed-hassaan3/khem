@@ -21,6 +21,7 @@ import type { SocialProfile } from "@/src/types/contact";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 
+import { CAMPAIGN_FRAME_COPY } from "./campaign-copy";
 import { ACKNOWLEDGEMENT_COPY, WELCOME_COPY } from "./copy";
 import { escapeHtml, escapeMultiline, stripHeaderBreaks } from "./escape";
 import {
@@ -34,6 +35,7 @@ import {
   signoff,
   spacer,
 } from "./layout";
+import { privilegeBlock } from "./welcome-templates";
 
 export interface EmailPayload {
   subject: string;
@@ -243,14 +245,28 @@ export function newsletterWelcomeEmail(
   locale: Locale,
   socials: readonly SocialProfile[],
   unsubscribeUrl: string,
+  /**
+   * The welcome entitlement, when this subscription earned one.
+   *
+   * Optional, and `null` for an ordinary home-page signup while no welcome
+   * campaign is running. When it is present, `claim_subscriber_offer()` wrote
+   * the grant in the same request that produced this letter — so the code
+   * printed here is one the checkout will honour, which is the same guarantee
+   * `claim_welcome()` gives the account welcome.
+   */
+  offer: { code: string; expiresAt: string | null } | null = null,
 ): EmailPayload {
   const copy = WELCOME_COPY[locale];
   const align = LOCALE_DIRECTION[locale] === "rtl" ? "right" : "left";
+  const frame = CAMPAIGN_FRAME_COPY[locale];
 
   const body = [
     paragraph(copy.intro, align),
     spacer(6),
     markedList(copy.benefits, align),
+    ...(offer
+      ? [spacer(20), privilegeBlock(frame.voucherLabel, offer.code, frame.voucherHow), spacer(20)]
+      : []),
     ctaButton(copy.cta, `${SITE_URL}/heritage`),
     spacer(30),
     signoff(copy.signoff, align),
@@ -275,6 +291,7 @@ export function newsletterWelcomeEmail(
     "",
     ...copy.benefits.map((benefit) => `- ${benefit}`),
     "",
+    ...(offer ? [`${frame.voucherLabel}: ${offer.code}`, frame.voucherHow, ""] : []),
     copy.unsubscribe,
     unsubscribeUrl,
     "",

@@ -14,6 +14,18 @@
  * themselves. Nothing here computes a price: they describe a rule, and
  * `resolve_discount()` applies it inside the order transaction.
  *
+ * ## Why these revalidate the storefront
+ *
+ * A code is validated at checkout, which is dynamic, so until the offer popup
+ * landed nothing here needed to re-render a page. It does now: the popup prints
+ * what the **welcome** offer is worth, read from `discounts."isWelcome"` by the
+ * prerendered root layout. Editing that campaign — its percentage, its window,
+ * its switch, or moving the flag to another code — changes a sentence on every
+ * page, so every write here calls `revalidateMarketing()`. Doing it
+ * unconditionally rather than only for the welcome row is deliberate: the flag
+ * moves between rows by trigger (`0030`), so "did this edit touch the welcome
+ * offer" is not a question this file can answer correctly.
+ *
  * ## Deactivating is not deleting
  *
  * Deactivating is the reversible way to stop a code — the row, its restrictions
@@ -25,6 +37,7 @@
  */
 
 import { requireAdmin } from "@/src/lib/admin/auth";
+import { revalidateMarketing } from "@/src/lib/admin/revalidate";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import {
@@ -144,6 +157,7 @@ export async function createDiscount(input: unknown): Promise<AdminActionResult>
     };
   }
 
+  revalidateMarketing();
   console.info(`[admin] discount created by ${actor.email} → ${String(data.code)}`);
 
   return {
@@ -199,6 +213,7 @@ export async function updateDiscount(input: unknown): Promise<AdminActionResult>
     return { ok: false, message: "The restrictions could not be saved." };
   }
 
+  revalidateMarketing();
   console.info(`[admin] discount updated by ${actor.email} → ${String(data.code)}`);
 
   return { ok: true, slug: String(data.code), message: `${String(data.code)} saved.` };
@@ -228,6 +243,7 @@ export async function setDiscountActive(input: unknown): Promise<AdminActionResu
 
   if (!data) return { ok: false, message: "That discount no longer exists." };
 
+  revalidateMarketing();
   console.info(
     `[admin] ${actor.email} ${parsed.data.isActive ? "activated" : "deactivated"} ${String(data.code)}`,
   );
@@ -264,6 +280,7 @@ export async function deleteDiscount(input: unknown): Promise<AdminActionResult>
 
   if (!data) return { ok: false, message: "That discount no longer exists." };
 
+  revalidateMarketing();
   console.info(`[admin] discount deleted by ${actor.email} → ${String(data.code)}`);
 
   return { ok: true, slug: String(data.code), message: "Discount removed." };

@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import AddToBagButton from "@/src/components/ecommerce/AddToBagButton";
+import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import ProductFlag from "@/src/components/ecommerce/ProductFlag";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { productFlag } from "@/src/lib/facets";
@@ -10,7 +11,6 @@ import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { productHref } from "@/src/lib/routes";
-import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { ProductCardData } from "@/src/types/catalog";
 
@@ -49,7 +49,6 @@ export default function MerchCard({
   sizes = DEFAULT_SIZES,
 }: MerchCardProps) {
   const dict = useDictionary();
-  const formatPrice = useFormatPrice();
   // Product copy comes from the database — English in both trees.
   const island = ltrIsland(locale);
 
@@ -141,9 +140,12 @@ export default function MerchCard({
         </div>
 
         <div className="flex items-center justify-between border-t border-border pt-3 sm:pt-4">
-          <span className="font-heading text-[13px] tabular-nums text-gold sm:text-lg">
-            {formatPrice(product.priceInCents)}
-          </span>
+          <ProductPrice
+            priceInCents={product.priceInCents}
+            promotion={product.promotion}
+            showPercent
+            className="font-heading text-[13px] text-gold sm:text-lg"
+          />
           <span className="text-[9px] uppercase tracking-[0.1em] text-ivory/30 sm:text-[10px]">
             {formatVolume(product.volumeMl)}
           </span>

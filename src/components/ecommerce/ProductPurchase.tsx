@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import BuyNowButton from "@/src/components/ecommerce/BuyNowButton";
 import QuantityStepper from "@/src/components/ecommerce/QuantityStepper";
 import StickyPurchaseBar from "@/src/components/ecommerce/StickyPurchaseBar";
+import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import { quantityCeiling } from "@/src/lib/cart";
 import { BASE_CURRENCY } from "@/src/lib/currency";
 import { formatProductType, formatVolume } from "@/src/lib/format";
@@ -48,6 +49,7 @@ export type PurchasableProduct = Pick<
   | "volumeMl"
   | "priceInCents"
   | "inventory"
+  | "promotion"
 >;
 
 export interface ProductPurchaseProps {
@@ -150,14 +152,53 @@ export default function ProductPurchase({
 
       {/* Price and bottle format. The format is a spec, not a choice. */}
       <div className="mb-3 flex flex-wrap items-baseline gap-4">
-        <span className="font-heading text-3xl tabular-nums text-gold">
-          {formatPrice(product.priceInCents)}
-        </span>
+        {/*
+          No percentage badge here, unlike the grid: the two figures are already
+          side by side at 30px and a third element saying the same thing in
+          smaller type is the marketplace treatment the brief rules out. The
+          campaign line below names the offer instead.
+        */}
+        <ProductPrice
+          priceInCents={product.priceInCents}
+          promotion={product.promotion}
+          className="font-heading text-3xl text-gold"
+        />
         <span className="text-xs tracking-[0.1em] text-ivory/35">
           {formatVolume(product.volumeMl)} ·{" "}
           {formatProductType(product, dict.product.concentrations)}
         </span>
       </div>
+
+      {/*
+        The offer, stated once and quietly.
+        
+        Only when the campaign carries a label or an end date — a promotion the
+        house set without naming is a price change, and announcing "20% off" for
+        it would put words in the merchandiser's mouth. The saving is stated in
+        the visitor's own display currency, because a figure they cannot convert
+        is not a saving they can feel.
+      */}
+      {product.promotion !== null ? (
+        <p
+          dir="auto"
+          className="-mt-1 mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] tracking-[0.08em] text-champagne/70"
+        >
+          {product.promotion.label ? (
+            <span className="border border-gold/30 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-gold">
+              {product.promotion.label}
+            </span>
+          ) : null}
+          <span>
+            {interpolate(dict.product.promotion.saving, {
+              amount: formatPrice(
+                product.promotion.listPriceInCents -
+                  product.promotion.priceInCents,
+              ),
+              percent: String(product.promotion.percentOff),
+            })}
+          </span>
+        </p>
+      ) : null}
 
       {/*
        * A converted price says what the bottle costs, not what the card is
@@ -246,6 +287,7 @@ export default function ProductPurchase({
         productId={product.id}
         name={product.name}
         priceInCents={product.priceInCents}
+        promotion={product.promotion}
         inventory={product.inventory}
         quantity={quantity}
         onAddToCart={handleAddToCart}

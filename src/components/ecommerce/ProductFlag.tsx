@@ -29,6 +29,19 @@ import { ltrIsland } from "@/src/lib/i18n/rtl";
 const TONES = {
   gold: "bg-gold text-background",
   muted: "border border-white/10 bg-background/85 text-ivory/70 backdrop-blur-sm",
+  /*
+   * A running campaign — "BLACK FRIDAY", "RAMADAN OFFER".
+   *
+   * Deliberately neither of the other two. Solid gold is the merchandiser's
+   * claim about the product itself ("Most Popular"), and a sale is a claim about
+   * the *price*; printing it in the same fill would make a discount read as an
+   * endorsement and would put two solid gold pills on the same shelf. Obsidian
+   * behind a gold hairline is the house's quieter register — the same treatment
+   * the cart drawer and the modals use — and keeps the identical footprint, so
+   * a card does not re-flow when a campaign starts.
+   */
+  campaign:
+    "border border-gold/40 bg-background/85 text-gold backdrop-blur-sm",
 } as const;
 
 export default function ProductFlag({

@@ -6,6 +6,7 @@ import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
+import { unitPriceInCents } from "@/src/lib/pricing";
 import type { ProductCardData } from "@/src/types/catalog";
 
 /**
@@ -93,7 +94,11 @@ export default async function DiscoveryComparison({
       label: dict.discovery.compare.rows.price,
       cells: sets.map((set) => ({
         kind: "price" as const,
-        value: set.priceInCents,
+        // What the set actually costs today. A comparison table is the one
+        // surface where a stale figure is worst: it exists to be read against
+        // the cards beside it, and a row quoting list prices under a campaign
+        // would rank the sets in the wrong order.
+        value: unitPriceInCents(set),
       })),
     },
   ];

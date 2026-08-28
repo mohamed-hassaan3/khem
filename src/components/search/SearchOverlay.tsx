@@ -19,6 +19,7 @@ import {
   clearRecentSearches,
   useRecentSearches,
 } from "./recent-searches";
+import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { formatProductType } from "@/src/lib/format";
 import { localizePath } from "@/src/lib/i18n/config";
@@ -30,7 +31,6 @@ import {
   queryTerms,
   searchHref,
 } from "@/src/lib/search/text";
-import { useFormatPrice } from "@/src/providers/currency-provider";
 import { LOCALE_PARAM } from "@/src/lib/search/config";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type {
@@ -688,8 +688,6 @@ function ProductRow({
   onSelect: () => void;
   typeLabel: string;
 }) {
-  const formatPrice = useFormatPrice();
-
   return (
     <button
       type="button"
@@ -724,8 +722,19 @@ function ProductRow({
         </span>
       </span>
 
-      <span className="shrink-0 font-heading text-[13px] tabular-nums text-gold/80">
-        {formatPrice(product.priceInCents)}
+      {/*
+        Stacked rather than inline: the row is already three columns wide at
+        360px, and a second figure beside the first would push the name into an
+        ellipsis. No percentage badge here — a suggestion row is a shortcut, not
+        a shelf.
+      */}
+      <span className="shrink-0 font-heading text-[13px] text-gold/80">
+        <ProductPrice
+          priceInCents={product.priceInCents}
+          promotion={product.promotion}
+          stacked
+          className="text-[13px] text-gold/80"
+        />
       </span>
     </button>
   );

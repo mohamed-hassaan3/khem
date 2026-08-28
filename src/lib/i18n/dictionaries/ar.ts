@@ -212,6 +212,9 @@ export const ar: Dictionary = {
   },
 
   collections: {
+    /* انظر التعليق في النسخة الإنجليزية. */
+    campaign: "{count} قطع بسعر مخفّض.",
+    campaignOne: "قطعة واحدة بسعر مخفّض.",
     meta: {
       title: "المجموعات",
       description:
@@ -629,6 +632,10 @@ export const ar: Dictionary = {
   },
 
   product: {
+    /* انظر التعليق في النسخة الإنجليزية: مبلغ التوفير ونسبته معًا. */
+    promotion: {
+      saving: "وفّر {amount} · خصم {percent}%",
+    },
     collectionLabel: "مجموعة {name}",
     home: "الرئيسية",
     collections: "المجموعات",
@@ -913,6 +920,8 @@ export const ar: Dictionary = {
     itemCount: "{count} عناصر",
     summary: "ملخّص الطلب",
     subtotal: "المجموع الفرعي",
+    /* انظر التعليق في النسخة الإنجليزية: تخفيض الحملة، لا رمز الخصم. */
+    promotion: "عرض ترويجي",
     shipping: "الشحن",
     complimentary: "مجاني",
     freeShippingNudge: "أضف {amount} للحصول على شحن مجاني.",
@@ -1421,6 +1430,31 @@ export const ar: Dictionary = {
   newsletter: {
     successHeading: "أهلًا بك في الدائرة",
     successBody: "ستصلك رسالة تأكيد قريبًا.",
+  },
+
+  /** انظر التعليق في النسخة الإنجليزية. */
+  announcementBar: {
+    label: "إعلانات",
+    previous: "الإعلان السابق",
+    next: "الإعلان التالي",
+  },
+
+  /** انظر التعليق في النسخة الإنجليزية: ثلاث صيغ لعرض ترحيبي واحد. */
+  offerPopup: {
+    close: "إغلاق",
+    eyebrow: "دعوة خاصة",
+    percentOffer: "اشترك واحصل على خصم {percent}% على طلبك الأول.",
+    amountOffer: "اشترك واحصل على خصم {amount} على طلبك الأول.",
+    plainOffer: "أخبار خاصة عن التركيبات الجديدة قبل وصولها إلى البوتيك.",
+    emailLabel: "البريد الإلكتروني",
+    emailPlaceholder: "بريدك الإلكتروني",
+    submit: "انضم إلى كيم",
+    submitting: "لحظة من فضلك",
+    successHeading: "أهلًا بك في الدائرة",
+    successBody: "ترقّب رسالتنا — تحمل لك عرض الترحيب.",
+    successCode: "رمزك هو {code}. أدخله عند إتمام الطلب.",
+    alreadyBody: "أنت معنا بالفعل — لم يتغيّر شيء.",
+    disclaimer: "رسالة واحدة شهريًا. يمكنك المغادرة متى شئت.",
   },
 
   unsubscribe: {

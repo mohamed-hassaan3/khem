@@ -36,7 +36,17 @@ export interface AdminOrderLine {
   productSlug: string;
   productName: string;
   quantity: number;
+  /** The unit price actually charged — the promotional one where a campaign ran. */
   priceInCents: number;
+  /**
+   * What it would have cost without a campaign, when one applied — `null`
+   * otherwise.
+   *
+   * A snapshot like `productName`, and for the same reason: a promotion deleted
+   * next spring must not change what this order says it charged, or what it says
+   * it took off. See `supabase/sql/0035_marketing.sql`.
+   */
+  listPriceInCents: number | null;
 }
 
 /** An order in the dashboard's list. No lines: a list does not read them. */

@@ -5,11 +5,11 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import ProductFlag from "@/src/components/ecommerce/ProductFlag";
+import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import { productFlag } from "@/src/lib/facets";
 import type { Locale } from "@/src/lib/i18n/config";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { useCart } from "@/src/providers/cart-provider";
-import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { ProductCardData } from "@/src/types/catalog";
 
@@ -43,7 +43,6 @@ export default function DiscoverySetCard({
   sizes = DEFAULT_SIZES,
 }: DiscoverySetCardProps) {
   const dict = useDictionary();
-  const formatPrice = useFormatPrice();
   const { addLine } = useCart();
   // Set names and contents come from the database — English in both trees.
   const island = ltrIsland(locale);
@@ -139,9 +138,13 @@ export default function DiscoverySetCard({
           ) : null}
         </div>
 
-        <p className="mb-3 font-heading text-base tabular-nums text-gold sm:mb-5 sm:text-2xl">
-          {formatPrice(product.priceInCents)}
-        </p>
+        <div className="mb-3 sm:mb-5">
+          <ProductPrice
+            priceInCents={product.priceInCents}
+            promotion={product.promotion}
+            className="font-heading text-base text-gold sm:text-2xl"
+          />
+        </div>
 
         <button
           type="button"

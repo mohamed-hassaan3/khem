@@ -8,6 +8,7 @@ import {
   cartTotalInCents,
   shippingInCents,
 } from "@/src/lib/cart";
+import type { CartPricing } from "@/src/lib/pricing";
 import { BASE_CURRENCY } from "@/src/lib/currency";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCurrency } from "@/src/providers/currency-provider";
@@ -20,22 +21,38 @@ import { useDictionary } from "@/src/providers/i18n-provider";
  * the same module `src/actions/checkout.ts` prices the real order with, which is
  * what keeps the total quoted here and the total charged from ever disagreeing.
  *
- * No promo-code field: there is no `Discount` model and no endpoint behind it,
- * and a field that silently does nothing is worse than its absence
- * (AGENTS.md §1.4). It returns with the schema.
+ * No promo-code field: a code is validated by `resolve_discount()` against the
+ * order being written, and the bag is not that order — the field lives one
+ * screen later, in `<DiscountStep>`, where the answer can be a real one.
+ *
+ * ## Why "Subtotal" is the list price here
+ *
+ * When a campaign is running, this prints the bag at its **undiscounted** worth
+ * and shows the reduction on its own line beneath. The alternative — a subtotal
+ * already net of the campaign — is arithmetically identical and tells the
+ * customer nothing: they see a total, not a saving. Everything that *computes*
+ * still uses `pricing.subtotalInCents` (the delivery threshold, the total), so
+ * the presentation changes and the money does not.
  */
 
 export interface CartSummaryProps {
-  subtotalInCents: number;
+  /** The whole breakdown, from `cartPricing()` — never a bare number. */
+  pricing: CartPricing;
 }
 
-export default function CartSummary({ subtotalInCents }: CartSummaryProps) {
+export default function CartSummary({ pricing }: CartSummaryProps) {
   const dict = useDictionary();
   const { currency, formatPrice } = useCurrency();
 
-  const shipping = shippingInCents(subtotalInCents);
-  const total = cartTotalInCents(subtotalInCents);
-  const remaining = amountToFreeShippingInCents(subtotalInCents);
+  /*
+   * Delivery, the nudge and the total are all judged on what the merchandise
+   * actually costs — the promoted subtotal — not on the list figure printed in
+   * the first row. A threshold measured against list prices would promise
+   * complimentary delivery on a bag that never reaches it at the till.
+   */
+  const shipping = shippingInCents(pricing.subtotalInCents);
+  const total = cartTotalInCents(pricing.subtotalInCents);
+  const remaining = amountToFreeShippingInCents(pricing.subtotalInCents);
 
   return (
     <aside className="bg-surface px-4 py-12 sm:px-8 lg:sticky lg:top-20 lg:h-fit lg:px-10 lg:py-14">
@@ -44,7 +61,26 @@ export default function CartSummary({ subtotalInCents }: CartSummaryProps) {
       </h2>
 
       <div className="mb-8 flex flex-col gap-4">
-        <Row label={dict.cart.subtotal} value={formatPrice(subtotalInCents)} />
+        <Row
+          label={dict.cart.subtotal}
+          value={formatPrice(pricing.listSubtotalInCents)}
+        />
+
+        {/*
+          The campaign, as a negative line. Gold rather than the ivory of the
+          rows around it: this is the one figure on the panel that is in the
+          customer's favour, and the minus sign alone is easy to skim past.
+        */}
+        {pricing.promotionSavingsInCents > 0 ? (
+          <Row
+            label={dict.cart.promotion}
+            value={
+              <span className="text-gold">
+                −{formatPrice(pricing.promotionSavingsInCents)}
+              </span>
+            }
+          />
+        ) : null}
 
         <Row
           label={dict.cart.shipping}

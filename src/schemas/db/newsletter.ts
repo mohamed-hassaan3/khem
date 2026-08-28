@@ -26,7 +26,7 @@ export const newsletterStatusSchema = z.enum(["SUBSCRIBED", "UNSUBSCRIBED"]);
  * source must not blank the whole list over one unrecognised value.
  */
 export const newsletterSourceSchema = z
-  .enum(["HOME_FORM", "SIGN_UP", "ADMIN"])
+  .enum(["HOME_FORM", "SIGN_UP", "ADMIN", "POPUP"])
   .catch("HOME_FORM");
 
 const subscriberRowSchema = z.object({

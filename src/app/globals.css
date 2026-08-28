@@ -700,3 +700,101 @@
     transform: translateY(0);
   }
 }
+
+/*
+ * ── The announcement bar ─────────────────────────────────────
+ *
+ * Its height is a variable rather than a class, because three things have to
+ * agree on it and only one of them is the bar: the bar itself, `<Nav>`'s `top`,
+ * and the padding on the page wrapper in `layout.tsx`. Written once here, the
+ * whole header stack moves together — and every page's existing `pt-20` keeps
+ * meaning "80px below the header" rather than "80px from the top of the
+ * document", which is what it would silently become if the bar were simply
+ * inserted above.
+ *
+ * `0px` when no bar is rendered, so the offsets collapse to exactly what they
+ * were before this feature existed. The attribute is written on `<body>` by the
+ * server, so the value is correct in the first paint and no layout shift is
+ * possible.
+ */
+:root {
+  --announcement-h: 0px;
+}
+
+body[data-announcement="on"] {
+  /* One line of 10px caps with room to breathe. */
+  --announcement-h: 34px;
+}
+
+@media (min-width: 640px) {
+  body[data-announcement="on"] {
+    --announcement-h: 38px;
+  }
+}
+
+/*
+ * The marquee track.
+ *
+ * Travels exactly half its width: the list is rendered twice, so at -50% the
+ * second copy sits precisely where the first began and the loop is seamless.
+ * The duration is set inline, from the number of announcements, so adding a
+ * fifth message slows the track rather than speeding every message past.
+ *
+ * `khem-marquee-rtl` is not decoration. Under `dir="rtl"` the track is laid out
+ * right-to-left, so travelling in the negative direction would move it *away*
+ * from the reader — into the space it has already vacated — and the bar would
+ * appear empty half the time.
+ */
+@keyframes khem-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes khem-marquee-rtl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(50%);
+  }
+}
+
+.khem-marquee {
+  animation-name: khem-marquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+[dir="rtl"] .khem-marquee {
+  animation-name: khem-marquee-rtl;
+}
+
+/* The carousel's cross-fade — opacity only, no travel. */
+.khem-announcement-fade {
+  animation: khem-fade-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * The track stops where it started. The bar's `overflow: hidden` means the
+   * first copy of the list is what shows, so a reduced-motion visitor reads a
+   * static bar rather than a stalled one — and this holds before hydration,
+   * because no JavaScript is involved in honouring the preference.
+   */
+  .khem-marquee {
+    animation: none;
+  }
+
+  /*
+   * The rotation itself is kept: it is a content change, not motion, and
+   * stopping it would leave a reduced-motion visitor able to read only the
+   * first of several announcements. Only the fade goes.
+   */
+  .khem-announcement-fade {
+    animation: none;
+  }
+}

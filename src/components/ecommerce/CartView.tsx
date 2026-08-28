@@ -7,7 +7,7 @@ import CartLine from "@/src/components/ecommerce/CartLine";
 import CartSummary from "@/src/components/ecommerce/CartSummary";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
 import PageHeader from "@/src/components/ecommerce/PageHeader";
-import { cartSubtotalInCents } from "@/src/lib/cart";
+import { cartPricing } from "@/src/lib/pricing";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
@@ -53,12 +53,15 @@ export default function CartView({ locale, catalog }: CartViewProps) {
     [lines, productsById],
   );
 
-  const subtotal = cartSubtotalInCents(
-    resolved.map(({ product, quantity }) => ({
-      priceInCents: product.priceInCents,
-      quantity,
-    })),
-  );
+  /*
+   * One breakdown for the whole screen: what the bag lists at, what campaigns
+   * take off, and what that leaves. `<CartSummary>` prints all three; everything
+   * that computes uses the third. `place_order()` sums the same rule from the
+   * same view, so the figure here and the figure charged differ only in
+   * freshness.
+   */
+  const pricing = cartPricing(resolved);
+  const subtotal = pricing.subtotalInCents;
 
   const itemCount = resolved.reduce((sum, line) => sum + line.quantity, 0);
 
@@ -128,7 +131,7 @@ export default function CartView({ locale, catalog }: CartViewProps) {
           </p>
         </section>
 
-        <CartSummary subtotalInCents={subtotal} />
+        <CartSummary pricing={pricing} />
       </div>
     </div>
   );

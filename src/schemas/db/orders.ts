@@ -69,7 +69,7 @@ export const ORDER_DETAIL_COLUMNS =
   'trackingCode, stripePaymentIntentId, paidAt, ' +
   'creditId, creditAppliedInCents, discountId, discountCode, discountInCents, ' +
   'shipLine1, shipLine2, shipCity, shipState, shipPostalCode, shipCountry, ' +
-  'items:OrderItem(id, productSlug, productName, quantity, priceInCents)';
+  'items:OrderItem(id, productSlug, productName, quantity, priceInCents, listPriceInCents)';
 
 const orderLineRowSchema = z.object({
   id: z.string(),
@@ -77,6 +77,10 @@ const orderLineRowSchema = z.object({
   productName: z.string(),
   quantity: z.number(),
   priceInCents: z.number(),
+  // Nullable *and* defaulted: every line written before
+  // `supabase/sql/0035_marketing.sql` has no such column value, and a schema
+  // that rejected that would drop the whole order off its own screen.
+  listPriceInCents: z.number().nullable().default(null),
 });
 
 /**

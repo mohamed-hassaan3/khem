@@ -67,7 +67,14 @@ export interface ProductImageSeedRow {
   sortOrder: number;
 }
 
-export type ProductSeedRow = Omit<Product, "images"> & {
+/*
+ * `promotion` is omitted along with `images`: it is not a column on `"Product"`
+ * at all but a join onto `active_product_promotions`, attached at read time by
+ * `src/services/products.ts`. A campaign is not seed data — it is something the
+ * desk starts and stops — so a dump that carried one would restore last
+ * November's prices onto a fresh database.
+ */
+export type ProductSeedRow = Omit<Product, "images" | "promotion"> & {
   subtitle_ar: string | null;
   description_ar: string | null;
   story_ar: string | null;

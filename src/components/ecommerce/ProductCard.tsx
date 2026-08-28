@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import Price from "@/src/components/ecommerce/Price";
+import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import ProductFlag from "@/src/components/ecommerce/ProductFlag";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { productFlag } from "@/src/lib/facets";
@@ -84,6 +84,14 @@ export default async function ProductCard({
     >
       {isSoldOut ? (
         <ProductFlag label={dict.product.soldOut} locale={locale} tone="muted" />
+      ) : /*
+           A running campaign outranks both the stored badge and the facet flag,
+           and only when it carries a label: a promotion the house set without
+           naming is a quiet price change, and inventing "SALE" for it would be
+           the card saying something the merchandiser deliberately did not.
+         */
+      product.promotion?.label ? (
+        <ProductFlag label={product.promotion.label} locale={locale} tone="campaign" />
       ) : product.badge ? (
         <ProductFlag label={product.badge} locale={locale} island />
       ) : flag ? (
@@ -186,8 +194,10 @@ export default async function ProductCard({
         </div>
 
         <div className="flex items-center justify-between border-t border-border pt-2">
-          <Price
-            cents={product.priceInCents}
+          <ProductPrice
+            priceInCents={product.priceInCents}
+            promotion={product.promotion}
+            showPercent
             className="font-heading text-[13px] text-gold sm:text-sm"
           />
           <span className="text-[9px] uppercase tracking-[0.15em] text-ivory/40 sm:text-[10px]">

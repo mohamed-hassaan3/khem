@@ -3,11 +3,12 @@
 import { Check } from "lucide-react";
 
 import BuyNowButton from "@/src/components/ecommerce/BuyNowButton";
+import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
-import { useCurrency } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
+import type { ProductPromotion } from "@/src/types/marketing";
 
 /**
  * The buy controls, following the visitor down the page.
@@ -37,7 +38,10 @@ export interface StickyPurchaseBarProps {
   isVisible: boolean;
   productId: string;
   name: string;
+  /** The list price, always. */
   priceInCents: number;
+  /** The running campaign, if any — the bar prints the same pair the block does. */
+  promotion: ProductPromotion | null;
   inventory: number;
   quantity: number;
   onAddToCart: () => void;
@@ -51,6 +55,7 @@ export default function StickyPurchaseBar({
   productId,
   name,
   priceInCents,
+  promotion,
   inventory,
   quantity,
   onAddToCart,
@@ -58,7 +63,6 @@ export default function StickyPurchaseBar({
   locale,
 }: StickyPurchaseBarProps) {
   const dict = useDictionary();
-  const { formatPrice } = useCurrency();
 
   const isSoldOut = inventory === 0;
 
@@ -89,15 +93,22 @@ export default function StickyPurchaseBar({
           <p className="truncate font-heading text-[13px] tracking-wide text-ivory">
             {name}
           </p>
-          <p className="mt-0.5 text-[12px] tabular-nums text-gold">
-            {formatPrice(priceInCents)}
-          </p>
+          <ProductPrice
+            priceInCents={priceInCents}
+            promotion={promotion}
+            className="mt-0.5 text-[12px] text-gold"
+          />
         </div>
 
         {/* Below `sm` the price stands alone, ahead of the controls. */}
-        <p className="text-[13px] tabular-nums text-gold sm:hidden">
-          {formatPrice(priceInCents)}
-        </p>
+        <div className="text-[13px] text-gold sm:hidden">
+          <ProductPrice
+            priceInCents={priceInCents}
+            promotion={promotion}
+            stacked
+            className="text-[13px] text-gold"
+          />
+        </div>
 
         {/* Side by side at every width, including the narrowest phone. */}
         <div className="flex flex-1 items-stretch gap-2 sm:flex-none sm:gap-3">
