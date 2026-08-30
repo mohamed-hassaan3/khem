@@ -48,16 +48,16 @@ export function CheckoutSection({
   children,
 }: CheckoutSectionProps) {
   return (
-    <section className="border-b border-border py-10 first:pt-0 last:border-b-0 lg:py-12">
+    <section className="border-b border-ground-border py-10 first:pt-0 last:border-b-0 lg:py-12">
       <header className="mb-8 flex items-center gap-4">
         <span
           aria-hidden="true"
-          className="font-heading text-[11px] tabular-nums tracking-[0.2em] text-gold/40"
+          className="font-heading text-[11px] tabular-nums tracking-[0.2em] text-ground-accent/40"
         >
           {index}
         </span>
 
-        <h2 className="font-heading text-sm font-normal uppercase tracking-[0.15em] text-ivory">
+        <h2 className="font-heading text-sm font-normal uppercase tracking-[0.15em] text-ground">
           {title}
         </h2>
 
@@ -69,7 +69,7 @@ export function CheckoutSection({
               size={14}
               strokeWidth={1.25}
               aria-hidden="true"
-              className="text-gold"
+              className="text-ground-accent"
             />
           ) : null}
         </span>
@@ -101,13 +101,16 @@ export interface CheckoutFieldProps {
   required?: boolean;
 }
 
-const FIELD_CLASS =
-  "w-full border-0 border-b border-border bg-transparent px-0 py-3 text-[14px] tracking-wide text-ivory " +
-  "transition-[border-color,box-shadow] duration-300 ease-out " +
-  "placeholder:text-ivory/20 " +
-  "hover:border-gold/40 " +
-  "focus:border-gold focus:shadow-[0_1px_0_0_rgba(200,169,106,0.35)] focus:outline-none " +
-  "aria-[invalid=true]:border-danger";
+/*
+ * The checkout keeps its underline shape — a rule under the text rather than a
+ * box — because a column of boxed fields is the visual register of a form, and
+ * this one is meant to read as a series of statements. That is a composition,
+ * not drift, so it survives as a modifier on the shared field.
+ *
+ * The invalid state is no longer declared here: `.field[aria-invalid="true"]`
+ * covers it for every field on the site.
+ */
+const FIELD_CLASS = "field field-underline hover:border-ground-accent/40";
 
 export function CheckoutField({
   id,
@@ -135,7 +138,7 @@ export function CheckoutField({
     <div className={wide ? "sm:col-span-2" : undefined}>
       <label
         htmlFor={id}
-        className="mb-2 block font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70"
+        className="mb-2 block font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/70"
       >
         {label}
         {/* Optional fields say so in their placeholder; a sea of asterisks on
@@ -174,7 +177,7 @@ export function CheckoutField({
           {error}
         </p>
       ) : hint ? (
-        <p id={hintId} className="mt-2 text-[11px] leading-relaxed text-ivory/25">
+        <p id={hintId} className="mt-2 text-[11px] leading-relaxed text-ground-muted/70">
           {hint}
         </p>
       ) : null}
@@ -217,7 +220,7 @@ export interface CheckoutSelectProps {
  * chevron is drawn on top with the field's own icon weight. The open list looks
  * like the operating system, which is what a visitor expects it to look like.
  *
- * `bg-surface` on the options is load-bearing on the desktop browsers that do
+ * `bg-ivory` on the options is load-bearing on the desktop browsers that do
  * honour it: without it a dark page renders black text on a black list.
  */
 export function CheckoutSelect({
@@ -241,7 +244,7 @@ export function CheckoutSelect({
     <div className={wide ? "sm:col-span-2" : undefined}>
       <label
         htmlFor={id}
-        className="mb-2 block font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70"
+        className="mb-2 block font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/70"
       >
         {label}
       </label>
@@ -260,7 +263,7 @@ export function CheckoutSelect({
             <option
               key={option.value}
               value={option.value}
-              className="bg-surface text-ivory"
+              className="bg-ivory text-ink"
             >
               {option.label}
             </option>
@@ -273,7 +276,7 @@ export function CheckoutSelect({
           size={14}
           strokeWidth={1.25}
           aria-hidden="true"
-          className="pointer-events-none absolute end-0 top-1/2 -translate-y-1/2 text-gold/50"
+          className="pointer-events-none absolute end-0 top-1/2 -translate-y-1/2 text-ground-accent/50"
         />
       </div>
 
@@ -282,7 +285,7 @@ export function CheckoutSelect({
           {error}
         </p>
       ) : hint ? (
-        <p id={hintId} className="mt-2 text-[11px] leading-relaxed text-ivory/25">
+        <p id={hintId} className="mt-2 text-[11px] leading-relaxed text-ground-muted/70">
           {hint}
         </p>
       ) : null}

@@ -77,7 +77,7 @@ export default async function AdminJournalPage({
             <AdminRow key={article.slug}>
               <AdminCell>
                 <span className="block">{article.title}</span>
-                <span className="mt-1 block text-[10px] tracking-wide text-ivory/25">
+                <span className="mt-1 block text-[10px] tracking-wide text-ground-subtle">
                   {article.slug}
                   {article.isFeatured ? " · featured" : ""}
                 </span>
@@ -105,7 +105,7 @@ export default async function AdminJournalPage({
               <AdminCell>
                 <Link
                   href={localizePath(activeLocale, `/admin/journal/${article.slug}`)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Edit
                 </Link>

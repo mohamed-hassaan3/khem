@@ -29,8 +29,8 @@ export default function StockistBadge({
     <span
       className={`shrink-0 whitespace-nowrap border px-2.5 py-1 font-heading tracking-[0.15em] ${className} ${
         isFlagship
-          ? "border-gold/40 text-gold"
-          : "border-white/8 text-ivory/30"
+          ? "border-ground-accent/40 text-ground-accent"
+          : "border-ground-border text-ground-muted"
       }`}
     >
       {label}

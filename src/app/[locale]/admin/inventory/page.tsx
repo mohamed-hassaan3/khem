@@ -114,11 +114,11 @@ export default async function AdminInventoryPage({
               <AdminCell>
                 <Link
                   href={localizePath(activeLocale, `/admin/products/${row.slug}`)}
-                  className="block transition-colors duration-300 hover:text-gold"
+                  className="block transition-colors duration-300 hover:text-ground-accent"
                 >
                   {row.name}
                 </Link>
-                <span className="mt-1 block text-[10px] tracking-wide text-ivory/25">
+                <span className="mt-1 block text-[10px] tracking-wide text-ground-subtle">
                   {row.collectionSlug}
                 </span>
               </AdminCell>

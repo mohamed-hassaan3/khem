@@ -28,16 +28,16 @@ export default function AdminToaster() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="pointer-events-auto flex items-start gap-3 border border-gold/30 bg-surface/95 px-4 py-3 shadow-[var(--shadow-luxury)] backdrop-blur-md"
+          className="pointer-events-auto flex items-start gap-3 border border-gold/30 bg-ivory px-4 py-3 shadow-3"
         >
           <Check
             size={14}
             strokeWidth={1.5}
             aria-hidden="true"
-            className="mt-0.5 shrink-0 text-gold"
+            className="mt-0.5 shrink-0 text-ground-accent"
           />
 
-          <p className="min-w-0 flex-1 text-[12px] leading-relaxed text-ivory/70">
+          <p className="min-w-0 flex-1 text-[12px] leading-relaxed text-ground">
             {toast.message}
           </p>
 
@@ -45,7 +45,7 @@ export default function AdminToaster() {
             type="button"
             onClick={() => dismiss(toast.id)}
             aria-label="Dismiss"
-            className="-me-1 shrink-0 cursor-pointer p-1 text-ivory/30 transition-colors duration-300 hover:text-gold"
+            className="-me-1 shrink-0 cursor-pointer p-1 text-ground-muted transition-colors duration-300 hover:text-ground-accent"
           >
             <X size={13} strokeWidth={1.5} />
           </button>

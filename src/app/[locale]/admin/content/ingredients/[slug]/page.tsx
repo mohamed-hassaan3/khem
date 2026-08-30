@@ -47,7 +47,7 @@ export default async function EditIngredientPage({
     <>
       <Link
         href={localizePath(activeLocale, "/admin/content/ingredients")}
-        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35 transition-colors duration-300 hover:text-gold"
+        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
       >
         <ArrowLeft size={13} strokeWidth={1.25} />
         All ingredients
@@ -62,10 +62,10 @@ export default async function EditIngredientPage({
 
       <section className="mt-12 max-w-3xl space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Printed on
           </h2>
-          <p className="mt-2 text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 text-[12px] leading-relaxed text-ground-muted">
             The perfumes whose detail page lists this material under Key
             Ingredients. Saved separately from the record above.
           </p>

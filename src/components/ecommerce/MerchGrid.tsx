@@ -69,9 +69,9 @@ export default function MerchGrid({
       {showBar ? (
         <nav
           aria-label={dict.homeFragrance.filterLabel}
-          className="border-b border-border bg-surface"
+          className="border-b border-ground-border"
         >
-          <div className="mx-auto flex max-w-350 gap-5 md:gap-9 overflow-x-auto px-4 md:px-20">
+          <div className="mx-auto flex max-w-350 gap-5 md:gap-9 overflow-x-auto px-4 sm:px-6 md:px-10 lg:px-12 xl:px-16">
             <FilterTab
               label={dict.homeFragrance.filterAll}
               isActive={active === ALL}
@@ -91,16 +91,16 @@ export default function MerchGrid({
         </nav>
       ) : null}
 
-      <section className="bg-background px-4 py-12 md:px-20 md:pb-32">
+      <section className="px-4 py-12 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pb-32">
         <div className="mx-auto max-w-350">
           {visible.length === 0 ? (
-            <p className="py-14 md:py-24 text-center text-[13px] leading-loose text-ivory/35">
+            <p className="py-14 md:py-24 text-center text-[13px] leading-loose text-ground-muted">
               {emptyLabel}
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-px bg-border lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
               {visible.map((product, index) => (
-                <Reveal key={product.id} delay={(index % 3) * 0.1}>
+                <Reveal key={product.id} delay={(index % 4) * 0.1} className="h-full">
                   <MerchCard product={product} locale={locale} />
                 </Reveal>
               ))}
@@ -129,10 +129,10 @@ function FilterTab({
       type="button"
       onClick={onSelect}
       aria-pressed={isActive}
-      className={`whitespace-nowrap border-b-2 py-5 font-heading text-[11px] tracking-[0.2em] transition-colors duration-300 ease-out focus-visible:text-gold focus-visible:outline-none ${
+      className={`whitespace-nowrap border-b-2 py-5 font-heading text-[11px] tracking-[0.2em] transition-colors duration-300 ease-out focus-visible:text-ground-accent focus-visible:outline-none ${
         isActive
-          ? "border-gold text-gold"
-          : "border-transparent text-ivory/40 hover:text-ivory/70"
+          ? "border-gold text-ground-accent"
+          : "border-transparent text-ground-muted hover:text-ground-muted"
       }`}
       {...island}
     >

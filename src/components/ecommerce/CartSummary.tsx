@@ -55,8 +55,8 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
   const remaining = amountToFreeShippingInCents(pricing.subtotalInCents);
 
   return (
-    <aside className="bg-surface px-4 py-12 sm:px-8 lg:sticky lg:top-20 lg:h-fit lg:px-10 lg:py-14">
-      <h2 className="mb-9 font-heading text-lg font-normal tracking-[0.1em] text-ivory">
+    <aside className="ground-sand px-4 py-12 sm:px-8 lg:sticky lg:top-[var(--header-h)] lg:h-fit lg:px-10 lg:py-14">
+      <h2 className="mb-9 font-heading text-lg font-normal tracking-[0.1em] text-ground">
         {dict.cart.summary}
       </h2>
 
@@ -75,7 +75,7 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
           <Row
             label={dict.cart.promotion}
             value={
-              <span className="text-gold">
+              <span className="text-ground-accent">
                 −{formatPrice(pricing.promotionSavingsInCents)}
               </span>
             }
@@ -86,7 +86,7 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
           label={dict.cart.shipping}
           value={
             shipping === 0 ? (
-              <span className="inline-flex items-center gap-1.5 text-gold">
+              <span className="inline-flex items-center gap-1.5 text-ground-accent">
                 <Truck size={12} strokeWidth={1.25} aria-hidden="true" />
                 {dict.cart.complimentary}
               </span>
@@ -97,7 +97,7 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
         />
 
         {remaining > 0 ? (
-          <p className="text-[11px] leading-relaxed text-gold/50">
+          <p className="text-[11px] leading-relaxed text-ground-accent/50">
             {interpolate(dict.cart.freeShippingNudge, {
               amount: formatPrice(remaining),
             })}
@@ -105,16 +105,16 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
         ) : null}
       </div>
 
-      <div className="mb-9 border-t border-border pt-6">
+      <div className="mb-9 border-t border-ground-border pt-6">
         <div className="flex items-center justify-between">
-          <span className="font-heading text-sm tracking-[0.1em] text-ivory">
+          <span className="font-heading text-sm tracking-[0.1em] text-ground">
             {dict.cart.total}
           </span>
-          <span className="font-heading text-xl tabular-nums text-gold">
+          <span className="font-heading text-xl tabular-nums text-ground-accent">
             {formatPrice(total)}
           </span>
         </div>
-        <p className="mt-2 text-[10px] tracking-[0.05em] text-ivory/25">
+        <p className="mt-2 text-[10px] tracking-[0.05em] text-ground-muted/70">
           {dict.cart.taxNote}
         </p>
 
@@ -124,7 +124,7 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
          * misleading, and this is the last screen before it happens.
          */}
         {currency !== BASE_CURRENCY ? (
-          <p className="mt-1.5 text-[10px] tracking-[0.05em] text-ivory/25">
+          <p className="mt-1.5 text-[10px] tracking-[0.05em] text-ground-muted/70">
             {interpolate(dict.currencySwitcher.conversionNote, {
               currency: dict.currencySwitcher.names[currency],
             })}
@@ -142,28 +142,28 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
        */}
       <LocaleLink
         href="/checkout"
-        className="btn-luxury btn-luxury-fill mb-6 w-full justify-center"
+        className="btn btn-primary mb-6 w-full justify-center"
       >
         {dict.cart.checkout}
       </LocaleLink>
 
       <LocaleLink
         href="/collections"
-        className="block text-center font-heading text-[11px] tracking-[0.15em] text-ivory/30 no-underline transition-colors duration-300 ease-out hover:text-ivory/60 focus-visible:text-gold focus-visible:outline-none"
+        className="block text-center font-heading text-[11px] tracking-[0.15em] text-ground-muted/70 no-underline transition-colors duration-300 ease-out hover:text-ground-muted focus-visible:text-ground-accent focus-visible:outline-none"
       >
         {dict.cart.continueShopping}
       </LocaleLink>
 
-      <ul className="mt-6 md:mt-10 flex flex-col gap-3 border-t border-border pt-8">
+      <ul className="mt-6 md:mt-10 flex flex-col gap-3 border-t border-ground-border pt-8">
         {Object.values(dict.product.trust).map((badge) => (
           <li key={badge.title} className="flex items-center gap-2.5">
             <Check
               size={12}
               strokeWidth={1.25}
               aria-hidden="true"
-              className="shrink-0 text-gold"
+              className="shrink-0 text-ground-accent"
             />
-            <span className="text-[11px] tracking-[0.04em] text-ivory/35">
+            <span className="text-[11px] tracking-[0.04em] text-ground-muted">
               {badge.title} — {badge.desc}
             </span>
           </li>
@@ -182,8 +182,8 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <span className="text-xs tracking-[0.08em] text-ivory/40">{label}</span>
-      <span className="font-heading text-[13px] tabular-nums text-ivory">{value}</span>
+      <span className="text-xs tracking-[0.08em] text-ground-muted">{label}</span>
+      <span className="font-heading text-[13px] tabular-nums text-ground">{value}</span>
     </div>
   );
 }

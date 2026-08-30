@@ -23,7 +23,7 @@ export default async function IngredientCard({
   return (
     <LocaleLink
       href={`/ingredients?ingredient=${ingredient.slug}`}
-      className="img-zoom group relative w-[260px] flex-none overflow-hidden bg-surface no-underline sm:w-[300px]"
+      className="img-zoom group relative w-[260px] flex-none overflow-hidden bg-[var(--card-bg)] no-underline sm:w-[300px]"
     >
       <div className="relative h-[380px] overflow-hidden">
         <Image
@@ -31,17 +31,17 @@ export default async function IngredientCard({
           alt={ingredient.image.alt}
           fill
           sizes="(min-width: 640px) 300px, 260px"
-          className="object-cover brightness-50 saturate-[0.7]"
+          className="object-cover"
         />
       </div>
-      <div className="border-t border-border p-6">
+      <div className="border-t border-ground-border p-6">
         {/* Ingredient name and origin come from the database — English only. */}
         <div {...ltrIsland(locale)}>
-          <h3 className="mb-1 font-heading text-base font-normal text-ivory">
+          <h3 className="mb-1 font-heading text-base font-normal text-ground">
             {ingredient.name}
           </h3>
         </div>
-        <p className="text-xs tracking-wider text-gold/60">
+        <p className="text-xs tracking-wider text-ground-accent/60">
           {interpolate(dict.home.ingredients.from, {
             origin: ingredient.origin,
           })}

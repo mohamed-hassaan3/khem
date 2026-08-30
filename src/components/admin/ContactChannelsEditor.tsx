@@ -163,7 +163,7 @@ function ChannelCard({
   }
 
   return (
-    <div className="border border-border p-5 sm:p-6">
+    <div className="border border-ground-border p-5 sm:p-6">
       <div className="space-y-4 md:space-y-6">
         {result ? (
           <AdminNotice tone={result.ok ? "success" : "error"}>
@@ -272,7 +272,7 @@ export default function ContactChannelsEditor({
   return (
     <div className="space-y-5">
       {channels.length === 0 && !adding ? (
-        <p className="border border-border px-5 py-10 text-center text-[12px] leading-relaxed text-ivory/35">
+        <p className="border border-ground-border px-5 py-10 text-center text-[12px] leading-relaxed text-ground-muted">
           No contact channels. The contact page renders its panel empty until
           one is added.
         </p>

@@ -219,7 +219,7 @@ export default function IngredientForm({
 
       {/* ── The material ─────────────────────────────────── */}
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           The material
         </h2>
 
@@ -330,8 +330,8 @@ export default function IngredientForm({
                   onClick={() => toggleFamily(family)}
                   className={`border px-4 py-2 font-heading text-[9px] uppercase tracking-[0.2em] transition-colors duration-300 ${
                     active
-                      ? "border-gold/50 bg-gold/10 text-gold"
-                      : "border-border text-ivory/35 hover:border-gold/30 hover:text-ivory"
+                      ? "border-gold/50 bg-gold/10 text-ground-accent"
+                      : "border-ground-border text-ground-muted hover:border-gold/30 hover:text-ground"
                   }`}
                 >
                   {family}
@@ -361,7 +361,7 @@ export default function IngredientForm({
 
       {/* ── Provenance notes ─────────────────────────────── */}
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           Provenance notes
         </h2>
 
@@ -394,7 +394,7 @@ export default function IngredientForm({
 
       {/* ── Photograph ───────────────────────────────────── */}
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           Photograph
         </h2>
 
@@ -440,7 +440,7 @@ export default function IngredientForm({
       </div>
 
       {armed ? (
-        <p className="text-[11px] leading-relaxed text-ivory/35">
+        <p className="text-[11px] leading-relaxed text-ground-muted">
           Removing deletes the material and unlinks it from every perfume it is
           printed on.
         </p>

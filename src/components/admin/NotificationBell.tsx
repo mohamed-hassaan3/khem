@@ -153,7 +153,7 @@ export default function NotificationBell({
             : "Notifications"
         }
         onClick={() => setOpen((current) => !current)}
-        className="relative inline-flex items-center justify-center border border-border px-3 py-2 text-ivory/45 transition-colors duration-300 hover:border-gold/40 hover:text-gold"
+        className="relative inline-flex items-center justify-center border border-ground-border px-3 py-2 text-ground-muted transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent"
       >
         <Bell size={15} strokeWidth={1.25} />
 
@@ -170,15 +170,15 @@ export default function NotificationBell({
         inert={!open}
         className={[
           "absolute end-0 top-[calc(100%+10px)] z-1001 w-[min(92vw,24rem)]",
-          "border border-border bg-surface/97 backdrop-blur-xl shadow-[var(--shadow-luxury)]",
+          "border border-ground-border bg-ivory shadow-3",
           "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
           open
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-1 opacity-0",
         ].join(" ")}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-          <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold">
+        <div className="flex items-center justify-between gap-3 border-b border-ground-border px-4 py-3">
+          <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent">
             Notifications
           </p>
 
@@ -187,7 +187,7 @@ export default function NotificationBell({
               type="button"
               disabled={isPending}
               onClick={() => markRead(unread)}
-              className="cursor-pointer bg-transparent p-0 font-heading text-[9px] uppercase tracking-[0.16em] text-ivory/35 underline-offset-4 transition-colors duration-300 hover:text-gold hover:underline disabled:opacity-40"
+              className="cursor-pointer bg-transparent p-0 font-heading text-[9px] uppercase tracking-[0.16em] text-ground-muted underline-offset-4 transition-colors duration-300 hover:text-ground-accent hover:underline disabled:opacity-40"
             >
               Mark all as read
             </button>
@@ -196,7 +196,7 @@ export default function NotificationBell({
 
         <div className="max-h-[26rem] overflow-y-auto">
           {notifications.length === 0 ? (
-            <p className="px-4 py-6 text-[11px] text-ivory/30">
+            <p className="px-4 py-6 text-[11px] text-ground-muted">
               Nothing yet. Orders, accounts and redemptions appear here as they
               happen.
             </p>
@@ -208,7 +208,7 @@ export default function NotificationBell({
                 return (
                   <li
                     key={`${item.kind}:${item.entityId}`}
-                    className={`border-b border-border last:border-b-0 ${
+                    className={`border-b border-ground-border last:border-b-0 ${
                       item.isRead ? "" : "bg-gold/4"
                     }`}
                   >
@@ -218,7 +218,7 @@ export default function NotificationBell({
                         strokeWidth={1.25}
                         aria-hidden="true"
                         className={`mt-0.5 shrink-0 ${
-                          item.isRead ? "text-ivory/25" : "text-gold"
+                          item.isRead ? "text-ground-subtle" : "text-ground-accent"
                         }`}
                       />
 
@@ -228,27 +228,27 @@ export default function NotificationBell({
                           onClick={() => setOpen(false)}
                           className="block no-underline"
                         >
-                          <span className="block font-heading text-[10px] uppercase tracking-[0.16em] text-ivory/40">
+                          <span className="block font-heading text-[10px] uppercase tracking-[0.16em] text-ground-muted">
                             {KIND_LABEL[item.kind]}
                           </span>
-                          <span className="mt-0.5 block truncate text-[12px] text-ivory">
+                          <span className="mt-0.5 block truncate text-[12px] text-ground">
                             {item.label}
                             {item.amountInCents !== null ? (
-                              <span className="text-ivory/40">
+                              <span className="text-ground-muted">
                                 {" · "}
                                 {egp(item.amountInCents)}
                               </span>
                             ) : null}
                           </span>
                           {item.detail ? (
-                            <span className="mt-0.5 block truncate text-[11px] text-ivory/30">
+                            <span className="mt-0.5 block truncate text-[11px] text-ground-muted">
                               {item.detail}
                             </span>
                           ) : null}
                         </AdminLink>
 
                         <div className="mt-1.5 flex items-center gap-3">
-                          <span className="text-[10px] text-ivory/25">
+                          <span className="text-[10px] text-ground-subtle">
                             {ago(item.occurredAt)}
                           </span>
 
@@ -257,7 +257,7 @@ export default function NotificationBell({
                               type="button"
                               disabled={isPending}
                               onClick={() => markRead([item])}
-                              className="cursor-pointer bg-transparent p-0 text-[10px] tracking-wide text-ivory/30 underline-offset-4 transition-colors duration-300 hover:text-gold hover:underline disabled:opacity-40"
+                              className="cursor-pointer bg-transparent p-0 text-[10px] tracking-wide text-ground-muted underline-offset-4 transition-colors duration-300 hover:text-ground-accent hover:underline disabled:opacity-40"
                             >
                               Mark as read
                             </button>
@@ -277,7 +277,7 @@ export default function NotificationBell({
           * control, no timestamp. It is true until the shelf says otherwise.
           */}
         {lowStock.length > 0 ? (
-          <div className="border-t border-border bg-background/40 px-4 py-3">
+          <div className="border-t border-ground-border bg-ivory/40 px-4 py-3">
             <p className="mb-2 flex items-center gap-2 font-heading text-[9px] uppercase tracking-[0.18em] text-warning">
               <PackageX size={12} strokeWidth={1.25} aria-hidden="true" />
               Running low
@@ -289,10 +289,10 @@ export default function NotificationBell({
                   <AdminLink
                     href={localizePath(locale, `/admin/products/${item.slug}`)}
                     onClick={() => setOpen(false)}
-                    className="flex items-baseline justify-between gap-3 text-[11px] text-ivory/50 no-underline transition-colors duration-300 hover:text-gold"
+                    className="flex items-baseline justify-between gap-3 text-[11px] text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
                   >
                     <span className="truncate">{item.name}</span>
-                    <span className="shrink-0 tabular-nums text-ivory/30">
+                    <span className="shrink-0 tabular-nums text-ground-muted">
                       {item.inventory} left
                     </span>
                   </AdminLink>

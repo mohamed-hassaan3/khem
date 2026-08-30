@@ -87,17 +87,17 @@ export default function UnsavedChangesDialog({
         event.preventDefault();
         if (!busy) onClose();
       }}
-      className="m-auto w-[min(92vw,26rem)] border border-gold/25 bg-surface p-0 text-ivory backdrop:bg-black/70 backdrop:backdrop-blur-md"
+      className="m-auto w-[min(92vw,26rem)] border border-gold/25 bg-ivory p-0 text-ground shadow-3 backdrop:bg-ink/55"
     >
       <div className="px-7 py-7">
         <h2
           id="unsaved-title"
-          className="font-heading text-[13px] uppercase tracking-[0.2em] text-gold"
+          className="font-heading text-[13px] uppercase tracking-[0.2em] text-ground-accent"
         >
           Unsaved changes
         </h2>
 
-        <p className="mt-3 text-[12px] leading-relaxed text-ivory/50">
+        <p className="mt-3 text-[12px] leading-relaxed text-ground-muted">
           You have changes that have not been saved. Would you like to save them
           before leaving?
         </p>

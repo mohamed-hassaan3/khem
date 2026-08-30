@@ -81,7 +81,7 @@ export default async function NotificationsPage({
     <div>
       <p className="eyebrow mb-3">{copy.eyebrow}</p>
 
-      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ivory sm:text-4xl">
+      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ground sm:text-4xl">
         {copy.heading}
       </h1>
 

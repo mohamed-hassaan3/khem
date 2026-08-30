@@ -1,3 +1,4 @@
+import NavGround from "@/src/components/NavGround";
 import { redirect } from "next/navigation";
 
 import AccountIdentity from "@/src/components/account/AccountIdentity";
@@ -59,13 +60,15 @@ export default async function AccountLayout({
   });
 
   return (
-    <div className="min-h-screen bg-background pt-20 text-ivory lg:grid lg:grid-cols-[280px_1fr]">
+    <div className="ground-ivory min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
+      {/* §17: usability over drama. The portal opens on a rule, not an image. */}
+      <NavGround ground="ivory" />
       {/*
        * Below `lg` the rail is a sticky strip beneath the nav rather than a
        * column; the original page kept a fixed 280px sidebar at every width,
        * which left the panels unusable on a phone.
        */}
-      <aside className="sticky top-20 z-10 flex flex-col border-b border-border bg-surface/60 backdrop-blur-md lg:top-20 lg:h-[calc(100vh-5rem)] lg:overflow-y-auto lg:border-b-0 lg:border-e lg:border-border lg:bg-surface lg:py-15 lg:backdrop-blur-none">
+      <aside className="sticky top-[var(--header-h)] z-10 flex flex-col border-b border-ground-border bg-[var(--card-bg)] lg:top-[var(--header-h)] lg:h-[calc(100svh-var(--header-h))] lg:overflow-y-auto lg:border-b-0 lg:border-e lg:border-ground-border lg:bg-[var(--card-bg)] lg:py-15">
         <div className="hidden lg:mb-5 lg:block">
           <AccountIdentity viewer={viewer} locale={activeLocale} />
         </div>
@@ -78,7 +81,7 @@ export default async function AccountLayout({
 
         {/* The rail's sign-out sits in the desktop column; on mobile the
             strip has no room for it, so it closes the panel instead. */}
-        <div className="mt-10 md:mt-16 border-t border-border pt-8 lg:hidden">
+        <div className="mt-10 md:mt-16 border-t border-ground-border pt-8 lg:hidden">
           <SignOutButton />
         </div>
       </main>

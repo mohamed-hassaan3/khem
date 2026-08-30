@@ -50,7 +50,7 @@ export default function ArticleCard({
   return (
     <LocaleLink
       href={`/journal/${article.slug}`}
-      className="img-zoom group block bg-surface no-underline"
+      className="card img-zoom group block overflow-hidden no-underline"
     >
       <div className="relative h-60 overflow-hidden">
         <Image
@@ -58,32 +58,32 @@ export default function ArticleCard({
           alt={article.image.alt}
           fill
           sizes={sizes}
-          className="object-cover brightness-55 saturate-60"
+          className="object-cover"
         />
       </div>
 
       <div className="px-7 pb-9 pt-7" {...island}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <span className="eyebrow text-[9px]">{article.category}</span>
-          <span className="text-[10px] tracking-wide text-ivory/25">
+          <span className="text-[10px] tracking-wide text-ground-muted/70">
             {interpolate(labels.minRead, { minutes: article.readTimeMinutes })}
           </span>
         </div>
 
-        <h3 className="mb-3 font-heading text-[17px] font-normal leading-snug tracking-wide text-ivory">
+        <h3 className="mb-3 font-heading text-[17px] font-normal leading-snug tracking-wide text-ground">
           {article.title}
         </h3>
-        <p className="mb-6 text-xs leading-relaxed text-ivory/40">
+        <p className="mb-6 text-xs leading-relaxed text-ground-muted">
           {article.excerpt}
         </p>
 
         <div className="flex items-center justify-between gap-3">
-          <span className="font-heading text-[10px] tracking-[0.15em] text-gold transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
+          <span className="font-heading text-[10px] tracking-[0.15em] text-ground-accent transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
             {labels.read} {readingArrow(locale)}
           </span>
           <time
             dateTime={article.publishedAt}
-            className="text-[10px] tracking-wide text-ivory/25"
+            className="text-[10px] tracking-wide text-ground-muted/70"
           >
             {formatArticleDate(article.publishedAt)}
           </time>

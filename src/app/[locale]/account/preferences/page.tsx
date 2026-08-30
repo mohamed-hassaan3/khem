@@ -72,7 +72,7 @@ export default async function PreferencesPage({
     <div>
       <p className="eyebrow mb-3">{copy.eyebrow}</p>
 
-      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ivory sm:text-4xl">
+      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ground sm:text-4xl">
         {copy.heading}
       </h1>
 
@@ -85,11 +85,11 @@ export default async function PreferencesPage({
           * is better than a second control that would have to stay in step
           * with the first.
           */}
-        <section className="border border-border bg-surface/60 px-6 py-6 sm:px-8 sm:py-7">
-          <p className="mb-1.5 font-heading text-[13px] tracking-[0.08em] text-ivory">
+        <section className="card px-6 py-6 sm:px-8 sm:py-7">
+          <p className="mb-1.5 font-heading text-[13px] tracking-[0.08em] text-ground">
             {copy.language.heading}
           </p>
-          <p className="max-w-prose text-[12px] leading-loose text-ivory/40">
+          <p className="max-w-prose text-[12px] leading-loose text-ground-muted">
             {copy.language.body}
           </p>
         </section>

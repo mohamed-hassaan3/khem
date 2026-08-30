@@ -25,10 +25,32 @@ import { ltrIsland } from "@/src/lib/i18n/rtl";
  * claim. `"muted"` exists for the one label that is the opposite of a claim:
  * "Sold Out". Same geometry, same type, so the two pills occupy an identical
  * footprint and a card does not re-flow when a product runs out.
+ *
+ * ## Why these are not ground-relative
+ *
+ * Every other component on a card moved onto the `--ground-*` variables when
+ * the light half of the system landed. This one deliberately did not.
+ *
+ * A flag does not sit on the card's ground — it sits on the *photograph*, in
+ * the corner of the image, and a photograph is not one of the five grounds. It
+ * can be a pale flacon on stone or a black bottle on charcoal within the same
+ * grid. Resolving these against the card's ground would tie the pill's colour
+ * to a surface it never touches, and would make it illegible on exactly the
+ * images that contrast most with their card.
+ *
+ * So the veil stays a fixed near-obsidian with a fixed blur, on every ground. It is legible over any image, which is the only requirement that
+ * matters here.
+ *
+ * These values are deliberately *not* `--ground-*` and must not be "tidied"
+ * into them. A mechanical sweep did exactly that once and had to be reverted:
+ * on the ivory shop grid every muted flag became near-black text on a
+ * near-black veil. That risk is higher now, not lower: the grid is ivory
+ * everywhere.
  */
 const TONES = {
   gold: "bg-gold text-background",
-  muted: "border border-white/10 bg-background/85 text-ivory/70 backdrop-blur-sm",
+  muted:
+    "border border-white/12 bg-background/85 text-ivory/70 backdrop-blur-sm",
   /*
    * A running campaign — "BLACK FRIDAY", "RAMADAN OFFER".
    *

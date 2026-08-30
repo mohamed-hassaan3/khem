@@ -94,13 +94,13 @@ export default async function VouchersPage({
     <div>
       <p className="eyebrow mb-3">{copy.eyebrow}</p>
 
-      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ivory sm:text-4xl">
+      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ground sm:text-4xl">
         {copy.heading}
       </h1>
 
       {/* ── KHEM Credit ─────────────────────────────── */}
       <section className="mb-12 md:mb-16">
-        <h2 className="mb-6 font-heading text-base text-ivory">
+        <h2 className="mb-6 font-heading text-base text-ground">
           {copy.credit.heading}
         </h2>
 
@@ -125,7 +125,7 @@ export default async function VouchersPage({
               ))}
             </div>
 
-            <h2 className="mb-6 font-heading text-base text-ivory">
+            <h2 className="mb-6 font-heading text-base text-ground">
               {copy.ledger.heading}
             </h2>
 
@@ -153,7 +153,7 @@ export default async function VouchersPage({
 
       {/* ── Vouchers ────────────────────────────────── */}
       <section>
-        <h2 className="mb-6 font-heading text-base text-ivory">
+        <h2 className="mb-6 font-heading text-base text-ground">
           {copy.list.heading}
         </h2>
 

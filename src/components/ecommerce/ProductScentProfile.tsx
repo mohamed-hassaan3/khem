@@ -57,7 +57,7 @@ export default async function ProductScentProfile({
              * visitor arriving at `/collections/woody` from here should
              * recognise the chip they pressed.
              */
-            className="border border-gold/30 px-4 py-2 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/80 no-underline transition-colors duration-300 ease-out hover:border-gold/70 hover:bg-gold/10 hover:text-gold focus-visible:border-gold focus-visible:text-gold focus-visible:outline-none"
+            className="border border-ground-accent/30 px-4 py-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/80 no-underline transition-colors duration-300 ease-out hover:border-gold/70 hover:bg-gold/10 hover:text-ground-accent focus-visible:border-gold focus-visible:text-ground-accent focus-visible:outline-none"
             dir="auto"
           >
             {dict.collections.scentProfiles[profile].name}

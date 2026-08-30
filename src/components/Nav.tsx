@@ -17,7 +17,24 @@ import {
 } from "../constants/navigation-pages";
 import { ChevronDown, Search, ShoppingBag, UserRound, X } from "lucide-react";
 
-import nameLogo from "@/public/logo/name-logo-transparent.svg";
+/*
+ * The `.webp` mark, not the `.svg`.
+ *
+ * `name-logo-transparent.svg` is 425 KB and `logo-transparent.svg` is 442 KB —
+ * both are traced bitmaps carrying seven decimal places per path coordinate.
+ * `next/image` passes SVG through untouched, so the larger of the two was the
+ * single biggest asset on every page of the site, ahead of every photograph
+ * and every JavaScript chunk.
+ *
+ * A vector earns its size when it is going to be scaled. This mark renders at
+ * 40-56 CSS pixels tall and never scales past it, so that precision was paying
+ * for resolution nobody can resolve. Through the optimizer the same artwork is
+ * a few kilobytes of AVIF at the size it is actually drawn.
+ *
+ * The SVGs stay in `public/logo/` for print and for anything that genuinely
+ * needs to scale. They are simply off the critical path now.
+ */
+import nameLogo from "@/public/logo/name-logo-transparent.webp";
 
 import AccountMenu from "./account/AccountMenu";
 import SignOutButton from "./account/SignOutButton";
@@ -29,6 +46,7 @@ import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
 import { useCartDrawer } from "@/src/providers/cart-drawer-provider";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
+import { useNavGround } from "@/src/providers/nav-ground-provider";
 
 /** Breakpoint (px) where the drawer gives way to the desktop mega menus. */
 const DESKTOP_BREAKPOINT = 1024;
@@ -41,7 +59,22 @@ const DESKTOP_BREAKPOINT = 1024;
  * still be indistinguishable to the eye.
  */
 const BOUTIQUE_ROW =
-  "group flex items-center gap-3 text-xs tracking-widest text-ivory/50 no-underline transition-colors duration-300 hover:text-gold";
+  "group flex items-center gap-3 text-xs tracking-widest text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent";
+
+/**
+ * The 44px hit area every header icon carries.
+ *
+ * The icons themselves stay 17px — this is padding around them, not a bigger
+ * glyph. They were bare `nav-link` buttons with `padding: 0`, so their entire
+ * tappable area was the 17x17 icon: a quarter of the 44px minimum, on the
+ * three controls a phone actually needs (search, bag, account).
+ *
+ * It matters more now than it did. The bar is 56px tall on a phone, so there
+ * is no longer any incidental slack around a bare icon for a thumb to land in;
+ * the target has to be declared. The negative margin on the last control pulls
+ * the extra box back to the bar's own padding so the row still ends flush.
+ */
+const ICON_HIT = "flex h-11 w-11 items-center justify-center";
 
 function SearchIcon() {
   return <Search width={17} height={17} />;
@@ -81,7 +114,7 @@ function CartButton({
     <button
       type="button"
       onClick={open}
-      className="nav-link relative shrink-0 cursor-pointer"
+      className={`nav-link relative shrink-0 cursor-pointer ${ICON_HIT}`}
       aria-haspopup="dialog"
       aria-expanded={isOpen}
       aria-controls="cart-drawer"
@@ -97,7 +130,13 @@ function CartButton({
       {showCount ? (
         <span
           aria-hidden="true"
-          className="absolute -end-1.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-gold px-1 font-body text-[9px] leading-4 text-background"
+          /*
+             The count reads against the header's ground, not against obsidian.
+             A gold pill on an ivory bar is the 5% accent budget spent on a
+             notification badge; the deep gold `--ground-accent` resolves to on
+             light grounds keeps it legible without shouting.
+          */
+          className="absolute end-1.5 top-1.5 grid min-w-4 place-items-center rounded-full bg-ground-accent px-1 font-body text-[9px] leading-4 text-ground-bg"
         >
           {count}
         </span>
@@ -153,11 +192,11 @@ function CollectionsList({
       className="group block no-underline"
     >
       <p
-        className={`mb-1 font-heading ${labelClass} tracking-widest text-ivory transition-colors duration-300 group-hover:text-gold`}
+        className={`mb-1 font-heading ${labelClass} tracking-widest text-ground transition-colors duration-300 group-hover:text-ground-accent`}
       >
         {itemLabels[key].label}
       </p>
-      <p className="text-[11px] tracking-wider text-ivory/40">
+      <p className="text-[11px] tracking-wider text-ground-muted">
         {itemLabels[key].desc}
       </p>
     </LocaleLink>
@@ -178,8 +217,8 @@ function CollectionsList({
               onClick={() => setOpenGroup(isOpen ? null : entry.key)}
               aria-expanded={isOpen}
               aria-controls={panelId}
-              className={`flex w-full cursor-pointer items-center justify-between gap-3 text-start font-heading ${labelClass} tracking-widest text-ivory transition-colors duration-300 hover:text-gold ${
-                isOpen ? "text-gold" : ""
+              className={`flex w-full cursor-pointer items-center justify-between gap-3 text-start font-heading ${labelClass} tracking-widest text-ground transition-colors duration-300 hover:text-ground-accent ${
+                isOpen ? "text-ground-accent" : ""
               }`}
             >
               {groupLabels[entry.key]}
@@ -213,7 +252,7 @@ function CollectionsList({
                * properties throughout — the indent mirrors under `dir="rtl"`.
                */}
               <div className="overflow-hidden">
-                <div className="flex flex-col gap-5 border-s border-border ps-4">
+                <div className="flex flex-col gap-5 border-s border-ground-border ps-4">
                   {entry.children.map((child) =>
                     renderLink(child.key, child.path),
                   )}
@@ -241,7 +280,6 @@ export default function Nav() {
    * column to put Quick Access in.
    */
 
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [menuPath, setMenuPath] = useState<string | null>(null);
   const [drawerRequested, setDrawerRequested] = useState(false);
@@ -262,13 +300,14 @@ export default function Nav() {
   const drawerOpen = drawerPath === pathname && drawerRequested;
   // The same derivation for the search panel: a result link closes it.
   const searchOpen = searchPath === pathname && searchRequested;
-  const navSolid = scrolled || activeMenu !== null || drawerOpen;
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  /*
+   * What the header is sitting on, as declared by the page (`<NavGround>`).
+   *
+   * This decides the *colour* of the bar's wash and its links, and nothing
+   * else — there is no second state for it to switch between. Ivory on every
+   * route today, which resolves to charcoal links.
+   */
+  const { ground } = useNavGround();
 
   const closeMenu = useCallback(() => {
     setMenuOpen(null);
@@ -368,11 +407,45 @@ export default function Nav() {
            * mobile drawer are positioned against it, and a wrapper would have
            * become their containing block.
            */
-          "fixed inset-x-0 top-[var(--announcement-h)] z-1000 flex h-20 items-center justify-between px-5 transition-all duration-500 sm:px-8 lg:px-12",
-          "ease-luxury-bezier",
-          navSolid
-            ? "border-b border-border bg-[color-mix(in_srgb,var(--color-background)_96%,transparent)] backdrop-blur-xl"
-            : "border-b border-transparent bg-transparent",
+          /*
+           * `top` is the announcement bar's height, not zero — see the note
+           * above. `nav-bar` carries the whole appearance, which is one state:
+           * translucent with a subtle blur, identical at every scroll
+           * position on every route. See `globals.css` for the wash values and
+           * what the blur costs.
+           */
+          /*
+           * `h-14` on a phone, `h-20` from `md` up — the same two values
+           * `--nav-h` carries in `globals.css`, which is what the page wrapper
+           * and every sticky offset read. The two must agree: this class is
+           * what the bar *is*, and the variable is what everything else
+           * *reserves* for it.
+           *
+           * The controls inside are unchanged at 44px — the 24px comes off the
+           * padding around them, not off the touch targets.
+           */
+          "fixed inset-x-0 top-[var(--announcement-h)] z-1000 flex h-14 items-center justify-between px-5 sm:px-8 md:h-20 lg:px-12",
+          "nav-bar",
+          /*
+           * **The same ground in both states.**
+           *
+           * This used to branch — the page's ground when solid, `obsidian`
+           * when transparent — because a transparent header floated over a
+           * photograph that had been darkened to a third of its luminance, and
+           * needed ivory type to survive it.
+           *
+           * No banner on the site is dark any more. They run at their own
+           * luminance under a bounded ivory scrim and set their type in
+           * charcoal, so the header floating over one needs *charcoal* type
+           * too, which is the page's own ground. Branching to obsidian here
+           * would now paint ivory links onto a pale limestone photograph —
+           * the invisible header this whole mechanism exists to prevent, just
+           * inverted from the direction it used to fail in.
+           *
+           * The legibility that used to come from darkening the image comes
+           * from `.nav-bar`'s veil gradient instead.
+           */
+          `ground-${ground}`,
         ].join(" ")}
       >
         <div className="flex min-w-0 flex-1 items-center gap-5 md:gap-9">
@@ -382,7 +455,7 @@ export default function Nav() {
             aria-expanded={drawerOpen}
             aria-controls="mobile-nav-drawer"
             onClick={handleDrawerToggle}
-            className="-ms-2.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center text-ivory/70 transition-colors duration-300 hover:text-ivory lg:hidden"
+            className="-ms-2.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center text-ground-muted transition-colors duration-300 hover:text-ground lg:hidden"
           >
             <span className="relative block h-3 w-5" aria-hidden="true">
               <span
@@ -444,6 +517,7 @@ export default function Nav() {
             src={nameLogo}
             alt="KHEM Perfumes"
             priority
+            sizes="(min-width: 1024px) 132px, (min-width: 640px) 113px, 94px"
             className="h-10 w-auto sm:h-12 lg:h-14"
           />
         </LocaleLink>
@@ -453,7 +527,7 @@ export default function Nav() {
          * the rails are `flex-1`, so on a 320px screen the row needs to tighten
          * rather than push its last icons past the edge.
          */}
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-4 sm:gap-5 lg:gap-7">
+        <div className="-me-2.5 flex min-w-0 flex-1 items-center justify-end gap-0.5 sm:gap-1.5 lg:gap-3">
           <div className="hidden sm:block">
             <LanguageSwitcher />
           </div>
@@ -465,7 +539,7 @@ export default function Nav() {
           <button
             ref={searchButtonRef}
             type="button"
-            className="nav-link shrink-0"
+            className={`nav-link shrink-0 ${ICON_HIT}`}
             aria-label={dict.nav.search}
             aria-haspopup="dialog"
             aria-expanded={searchOpen}
@@ -511,7 +585,7 @@ export default function Nav() {
              */
             <Link
               href={signInPathWithReturn(locale, pathname)}
-              className="nav-link shrink-0"
+              className={`nav-link shrink-0 ${ICON_HIT}`}
               aria-label={dict.nav.account}
             >
               <AccountIcon />
@@ -529,8 +603,25 @@ export default function Nav() {
         aria-hidden={!drawerOpen}
         inert={!drawerOpen}
         className={[
-          "fixed inset-y-0 start-0 z-1001 flex w-[85%] max-w-sm flex-col overflow-y-auto",
-          "border-e border-border bg-[color-mix(in_srgb,var(--color-background)_97%,transparent)] backdrop-blur-xl",
+          /*
+           * `ground-ivory`, explicitly, even though the `<nav>` above is now
+           * ground-aware — *because* it is. The drawer is a child of the
+           * header, and the header's ground follows the page; a drawer that
+           * inherited it would change colour depending on which route the
+           * visitor happened to open the menu from. An overlay is its own
+           * surface (§20) and states it.
+           *
+           * Ivory, not the full-screen black panel this was. §20 is explicit:
+           * the mobile menu belongs to the same environment as the site.
+           *
+           * `nav-drawer` gives it the bar's treatment — a translucent wash over
+           * a blur — rather than a flat fill, so the two read as one piece of
+           * chrome. It can carry a heavier wash and a wider radius than the bar
+           * because the document behind it is scroll-locked while it is open,
+           * so this blur is never recomputed frame after frame.
+           */
+          "ground-ivory nav-drawer fixed inset-y-0 start-0 z-1001 flex w-[85%] max-w-sm flex-col overflow-y-auto",
+          "border-e border-ground-border shadow-3",
           "transition-transform duration-500 ease-luxury-bezier lg:hidden",
           // Transforms are not mirrored by `dir`, so the RTL offset is explicit.
           drawerOpen
@@ -538,13 +629,13 @@ export default function Nav() {
             : "-translate-x-full rtl:translate-x-full",
         ].join(" ")}
       >
-        <div className="flex h-20 shrink-0 items-center justify-between px-6">
+        <div className="flex h-14 shrink-0 items-center justify-between px-6 md:h-20">
           <p className="eyebrow">{dict.nav.menu}</p>
           <button
             type="button"
             aria-label={dict.nav.closeMenu}
             onClick={closeDrawer}
-            className="-me-2.5 flex h-11 w-11 cursor-pointer items-center justify-center text-ivory/70 transition-colors duration-300 hover:text-gold"
+            className="-me-2.5 flex h-11 w-11 cursor-pointer items-center justify-center text-ground-muted transition-colors duration-300 hover:text-ground-accent"
           >
             <X />
           </button>
@@ -574,7 +665,7 @@ export default function Nav() {
                   key={item.path}
                   href={item.path}
                   onClick={closeDrawer}
-                  className="group flex items-center gap-3 text-xs tracking-widest text-ivory/50 no-underline transition-colors duration-300 hover:text-gold"
+                  className="group flex items-center gap-3 text-xs tracking-widest text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
                 >
                   <span className="inline-block h-px w-5 bg-current" />
                   {dict.nav.quickAccessItems[item.key]}
@@ -593,7 +684,7 @@ export default function Nav() {
                   key={w.path}
                   href={w.path}
                   onClick={closeDrawer}
-                  className="font-heading text-sm tracking-widest text-ivory no-underline transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-sm tracking-widest text-ground no-underline transition-colors duration-300 hover:text-ground-accent"
                 >
                   {dict.nav.worldItems[w.key].label}
                 </LocaleLink>
@@ -617,7 +708,7 @@ export default function Nav() {
                   closeDrawer();
                   openSearch();
                 }}
-                className="group flex cursor-pointer items-center gap-3 text-start text-xs tracking-widest text-ivory/50 transition-colors duration-300 hover:text-gold"
+                className="group flex cursor-pointer items-center gap-3 text-start text-xs tracking-widest text-ground-muted transition-colors duration-300 hover:text-ground-accent"
               >
                 <span
                   aria-hidden="true"
@@ -680,12 +771,12 @@ export default function Nav() {
                * it would be a control with nothing to end.
                */}
               {isSignedIn ? (
-                <span className="flex items-center gap-3 text-ivory/50">
+                <span className="flex items-center gap-3 text-ground-muted">
                   <span
                     aria-hidden="true"
                     className="inline-block h-px w-5 bg-current"
                   />
-                  <SignOutButton className="text-xs tracking-widest text-ivory/50 hover:text-gold" />
+                  <SignOutButton className="text-xs tracking-widest text-ground-muted hover:text-ground-accent" />
                 </span>
               ) : null}
             </div>
@@ -704,13 +795,30 @@ export default function Nav() {
         <button
           type="button"
           aria-label={dict.nav.closeMenu}
-          className="fixed inset-0 z-1000 cursor-default bg-black/60 lg:hidden"
+          className="fixed inset-0 z-1000 cursor-default bg-ink/45 lg:hidden"
           onClick={closeDrawer}
         />
       )}
 
+      {/*
+       * Mounted only while open.
+       *
+       * Both panels used to be in the DOM permanently at `opacity: 0`, each
+       * `position: fixed`, full-width, and carrying `backdrop-filter:
+       * blur(20px)` from `.mega-menu`. A hidden blur layer is not a free one:
+       * the compositor kept two of them live for the whole session, over the
+       * whole viewport, on every desktop page. Rendering them conditionally is
+       * what actually removes that cost — restyling `.mega-menu` alone would
+       * have left two invisible fixed layers behind.
+       *
+       * The opacity/transform transition is preserved: the element still
+       * mounts in its closed state and `.open` is applied by the same class
+       * toggle, so the entry animation is unchanged. Only the *closed* case
+       * costs nothing now.
+       */}
+      {activeMenu === "collections" && (
       <div
-        className={`mega-menu hidden lg:block ${activeMenu === "collections" ? "open" : ""}`}
+        className="mega-menu ground-ivory open hidden lg:block"
         onMouseLeave={closeMenu}
       >
         <div className="mx-auto grid max-w-300 grid-cols-3 gap-6 md:gap-12">
@@ -733,16 +841,27 @@ export default function Nav() {
               href="/new-arrival"
               className="relative block overflow-hidden rounded-sm no-underline"
             >
+              {/*
+                No `brightness-[0.7]`. The tile sits inside an ivory panel and
+                its caption is charcoal, so dimming the photograph made the
+                words *less* readable, not more — it was tuned for the ivory
+                caption this menu carried while the panel was obsidian.
+              */}
               <Image
                 src="https://images.unsplash.com/photo-1709662217788-6a8a1b31562a?w=400&h=240&fit=crop&auto=format"
                 alt={dict.nav.featuredCollectionAlt}
                 width={400}
                 height={200}
-                className="block h-50 w-full object-cover brightness-[0.7]"
+                className="block h-50 w-full object-cover"
+              />
+              {/* An ivory field under the caption, bounded to the lower third. */}
+              <div
+                aria-hidden="true"
+                className="banner-scrim banner-scrim-base"
               />
               <div className="absolute bottom-4 start-4">
                 <p className="eyebrow">{dict.nav.newArrival}</p>
-                <p className="mt-1 font-heading text-sm text-ivory">
+                <p className="mt-1 font-heading text-sm text-ground">
                   {dict.nav.featuredProduct}
                 </p>
               </div>
@@ -755,7 +874,7 @@ export default function Nav() {
                 <LocaleLink
                   key={item.path}
                   href={item.path}
-                  className="group flex items-center gap-3 text-xs tracking-widest text-ivory/50 no-underline transition-colors duration-300 hover:text-gold"
+                  className="group flex items-center gap-3 text-xs tracking-widest text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
                 >
                   <span className="inline-block h-px w-5 bg-current" />
                   {dict.nav.quickAccessItems[item.key]}
@@ -765,9 +884,11 @@ export default function Nav() {
           </div>
         </div>
       </div>
+      )}
 
+      {activeMenu === "world" && (
       <div
-        className={`mega-menu hidden lg:block ${activeMenu === "world" ? "open" : ""}`}
+        className="mega-menu ground-ivory open hidden lg:block"
         onMouseLeave={closeMenu}
       >
         <div className="mx-auto grid max-w-300 grid-cols-3 gap-6 md:gap-12">
@@ -780,7 +901,7 @@ export default function Nav() {
                   href={w.path}
                   className="group no-underline"
                 >
-                  <p className="font-heading text-[13px] tracking-widest text-ivory transition-colors duration-300 group-hover:text-gold">
+                  <p className="font-heading text-[13px] tracking-widest text-ground transition-colors duration-300 group-hover:text-ground-accent">
                     {dict.nav.worldItems[w.key].label}
                   </p>
                 </LocaleLink>
@@ -798,11 +919,15 @@ export default function Nav() {
                 alt={dict.nav.featuredArticleAlt}
                 width={700}
                 height={180}
-                className="block h-45 w-full object-cover brightness-[0.55]"
+                className="block h-45 w-full object-cover"
+              />
+              <div
+                aria-hidden="true"
+                className="banner-scrim banner-scrim-base"
               />
               <div className="absolute inset-0 flex flex-col justify-end px-6 py-5">
                 <p className="eyebrow">{dict.nav.journalLabel}</p>
-                <p className="mt-1.5 font-heading text-base text-ivory">
+                <p className="mt-1.5 font-heading text-base text-ground">
                   {dict.nav.featuredArticleTitle}
                 </p>
               </div>
@@ -810,12 +935,13 @@ export default function Nav() {
           </div>
         </div>
       </div>
+      )}
 
       {activeMenu && (
         <button
           type="button"
           aria-label={dict.nav.closeMenu}
-          className="fixed inset-0 z-998 hidden bg-black/50 lg:block"
+          className="fixed inset-0 z-998 hidden bg-ink/35 lg:block"
           onClick={closeMenu}
         />
       )}

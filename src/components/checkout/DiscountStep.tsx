@@ -110,19 +110,19 @@ export default function DiscountStep({
 
   return (
     <section className="mt-12">
-      <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ivory">
+      <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ground">
         {copy.heading}
       </h2>
 
       {disabledByCredit ? (
-        <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-ivory/45">
+        <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-ground-muted">
           {copy.blockedByCredit}
         </p>
       ) : applied ? (
         /* ── Applied ───────────────────────────────────── */
-        <div className="mt-5 flex max-w-xl flex-wrap items-center justify-between gap-4 border border-gold/30 bg-gold/6 px-5 py-4">
+        <div className="mt-5 flex max-w-xl flex-wrap items-center justify-between gap-4 border border-ground-accent/30 bg-gold/6 px-5 py-4">
           <div className="min-w-0">
-            <p className="flex items-center gap-2 font-heading text-[13px] tracking-[0.1em] text-gold">
+            <p className="flex items-center gap-2 font-heading text-[13px] tracking-[0.1em] text-ground-accent">
               <Check size={14} strokeWidth={1.5} aria-hidden="true" />
               <span {...ltrIsland(locale)}>
                 {interpolate(copy.appliedCode, { code: applied.code })}
@@ -130,16 +130,16 @@ export default function DiscountStep({
             </p>
 
             {/* The saving, as a figure rather than a claim about the rule. */}
-            <p className="mt-1.5 flex flex-wrap items-baseline gap-1.5 text-[12px] text-ivory/50">
+            <p className="mt-1.5 flex flex-wrap items-baseline gap-1.5 text-[12px] text-ground-muted">
               {copy.saved}
-              <Price cents={applied.amountInCents} className="text-ivory/70" />
+              <Price cents={applied.amountInCents} className="text-ground-muted" />
             </p>
           </div>
 
           <button
             type="button"
             onClick={onRemove}
-            className="shrink-0 cursor-pointer bg-transparent p-0 font-heading text-[10px] uppercase tracking-[0.18em] text-ivory/40 underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-gold hover:underline"
+            className="shrink-0 cursor-pointer bg-transparent p-0 font-heading text-[10px] uppercase tracking-[0.18em] text-ground-muted underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline"
           >
             {copy.remove}
           </button>
@@ -147,7 +147,7 @@ export default function DiscountStep({
       ) : (
         /* ── Entering ──────────────────────────────────── */
         <>
-          <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-ivory/45">
+          <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-ground-muted">
             {copy.lede}
           </p>
 
@@ -173,14 +173,14 @@ export default function DiscountStep({
                 event.preventDefault();
                 if (!pending && code.trim() !== "") onApply();
               }}
-              className="min-w-0 flex-1 border border-border bg-ivory/3 px-4 py-3 font-heading text-[13px] uppercase tracking-[0.15em] text-ivory transition-colors duration-300 placeholder:tracking-normal placeholder:text-ivory/25 focus:border-gold/40 focus:outline-none disabled:opacity-50"
+              className="field min-w-0 flex-1 font-heading uppercase tracking-[0.15em] placeholder:tracking-normal disabled:opacity-50"
             />
 
             <button
               type="button"
               onClick={() => onApply()}
               disabled={pending || code.trim() === ""}
-              className="shrink-0 cursor-pointer border border-gold/40 px-6 py-3 font-heading text-[10px] uppercase tracking-[0.2em] text-gold transition-all duration-500 ease-luxury-bezier hover:border-gold hover:bg-gold/8 disabled:cursor-not-allowed disabled:border-border disabled:text-ivory/20"
+              className="shrink-0 cursor-pointer border border-ground-accent/40 px-6 py-3 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-all duration-500 ease-luxury-bezier hover:border-gold hover:bg-gold/8 disabled:cursor-not-allowed disabled:border-ground-border disabled:text-ground-muted/60"
             >
               {pending ? copy.applying : copy.apply}
             </button>

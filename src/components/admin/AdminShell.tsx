@@ -231,8 +231,17 @@ export default function AdminShell({
         <UnsavedChangesDialog pending={pending} onClose={close} />
       )}
     >
+    {/*
+      The dashboard ground.
+
+      `ground-ivory` rather than a bare `bg-ivory`, so the panels, fields,
+      cards and buttons inside it resolve their surface variables from a
+      declared ground instead of from whatever `body` happens to be — the same
+      contract every storefront section signs. §31: the dashboard is the same
+      visual system as the shop, held to productivity rather than to cinema.
+    */}
     <div
-      className={`min-h-screen bg-background pt-20 text-ivory lg:grid ${
+      className={`ground-ivory min-h-screen lg:grid ${
         !resolved || open ? "lg:grid-cols-[260px_1fr]" : "lg:grid-cols-[1fr]"
       }`}
     >
@@ -240,7 +249,7 @@ export default function AdminShell({
       <div
         onClick={() => setOpen(false)}
         aria-hidden="true"
-        className={`fixed inset-0 top-20 z-30 bg-black/60 backdrop-blur-md transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden ${
+        className={`fixed inset-0 top-[var(--header-h)] z-30 bg-ink/45 transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden ${
           showScrim ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
@@ -250,13 +259,13 @@ export default function AdminShell({
         aria-hidden={resolved && !open ? true : undefined}
         // `start-0` rather than `left-0`: the inline offset and the transform
         // must agree on which edge is home, or the RTL drawer parks mid-screen.
-        className={`fixed bottom-0 start-0 top-20 z-40 w-[280px] overflow-y-auto border-e border-border bg-surface py-8 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:sticky lg:bottom-auto lg:h-[calc(100vh-5rem)] lg:w-auto lg:py-12 lg:transition-none ${railPosition}`}
+        className={`ground-stone fixed bottom-0 start-0 top-[var(--header-h)] z-40 w-[280px] overflow-y-auto border-e border-ground-border py-8 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:sticky lg:bottom-auto lg:h-[calc(100svh-var(--header-h))] lg:w-auto lg:py-12 lg:transition-none ${railPosition}`}
       >
         <div className="px-8">
-          <p className="font-heading text-[11px] uppercase tracking-[0.3em] text-gold">
+          <p className="font-heading text-[11px] uppercase tracking-[0.3em] text-ground-accent">
             KHEM
           </p>
-          <p className="mt-1 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/30">
+          <p className="mt-1 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Boutique Desk
           </p>
         </div>
@@ -275,8 +284,8 @@ export default function AdminShell({
                 onClick={closeOnMobile}
                 className={`flex shrink-0 items-center gap-3 border-s-2 px-4 py-3 font-heading text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 ${
                   active
-                    ? "border-gold bg-gold/5 text-gold"
-                    : "border-transparent text-ivory/40 hover:text-ivory"
+                    ? "border-ground-accent bg-ivory text-ground"
+                    : "border-transparent text-ground-muted hover:text-ground"
                 }`}
               >
                 <Icon size={14} strokeWidth={1.25} />
@@ -286,17 +295,17 @@ export default function AdminShell({
           })}
         </nav>
 
-        <div className="mt-6 md:mt-10 border-t border-border px-8 pt-6">
-          <p className="font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/25">
+        <div className="mt-6 md:mt-10 border-t border-ground-border px-8 pt-6">
+          <p className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
             Signed in as
           </p>
-          <p className="mt-1 break-all text-[11px] text-ivory/50">{actorEmail}</p>
+          <p className="mt-1 break-all text-[11px] text-ground-muted">{actorEmail}</p>
 
           <AdminLink
             href={localizePath(locale, "/")}
             tabIndex={resolved && !open ? -1 : undefined}
             onClick={closeOnMobile}
-            className="mt-5 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-ivory/35 transition-colors duration-300 hover:text-gold"
+            className="mt-5 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
           >
             <ExternalLink size={12} strokeWidth={1.25} />
             View storefront
@@ -311,13 +320,13 @@ export default function AdminShell({
           hides. Sticky beneath the storefront nav so it is reachable from the
           bottom of a long order list.
         */}
-        <div className="sticky top-20 z-20 -mx-5 mb-8 flex items-center gap-4 border-b border-border bg-background/90 px-5 py-3 backdrop-blur-md sm:-mx-8 sm:px-8 lg:-mx-14 lg:px-14">
+        <div className="sticky top-[var(--header-h)] z-20 -mx-5 mb-8 flex items-center gap-4 border-b border-ground-border bg-ground-bg px-5 py-3 sm:-mx-8 sm:px-8 lg:-mx-14 lg:px-14">
           <button
             type="button"
             onClick={toggle}
             aria-expanded={shown}
             aria-controls={RAIL_ID}
-            className="inline-flex items-center gap-3 border border-border px-3 py-2 text-ivory/45 transition-colors duration-300 hover:border-gold/40 hover:text-gold"
+            className="inline-flex items-center gap-3 border border-ground-border px-3 py-2 text-ground-muted transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent"
           >
             {shown ? (
               <PanelLeftClose size={15} strokeWidth={1.25} />
@@ -329,7 +338,7 @@ export default function AdminShell({
             </span>
           </button>
 
-          <p className="font-heading text-[10px] uppercase tracking-[0.25em] text-ivory/30">
+          <p className="font-heading text-[10px] uppercase tracking-[0.25em] text-ground-muted">
             Boutique Desk
           </p>
 

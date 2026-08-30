@@ -43,7 +43,7 @@ const SIZES = "(min-width: 1024px) 50vw, 100vw";
 const VISIBLE_THRESHOLD = 0.6;
 
 const ARROW_CLASS =
-  "absolute top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center border border-border-gold bg-background/60 text-ivory backdrop-blur-md transition-all duration-500 ease-out hover:border-gold hover:text-gold hover:shadow-[0_0_20px_rgba(200,169,106,0.25)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:opacity-40 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100";
+  "absolute top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center border border-border-gold bg-ivory/85 text-ink transition-all duration-500 ease-out hover:border-gold hover:text-ground-accent hover:shadow-[0_0_20px_rgba(200,169,106,0.25)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:opacity-40 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100";
 
 export default function ProductGallery({
   images,
@@ -120,7 +120,19 @@ export default function ProductGallery({
   const NextIcon = dir === "rtl" ? ChevronLeft : ChevronRight;
 
   return (
-    <div className="flex w-full flex-col overflow-hidden bg-card lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)]">
+    <div /*
+        `ground-stone`: the gallery is a stage the product stands on, one step
+        up from the ivory page around it so the bottle has a surface rather
+        than floating in the document.
+
+        It was `ground-obsidian` over `bg-card` — a charcoal well, which is how
+        you light a dark product page and exactly what §25 rules out: the
+        product environment is ivory, and the photograph is given room by
+        negative space rather than by dropping the lights around it. The arrows
+        and caption below now resolve to charcoal-on-stone, which is legible
+        without needing the well.
+      */
+      className="ground-stone flex w-full flex-col overflow-hidden lg:sticky lg:top-[var(--header-h)] lg:h-[calc(100svh-var(--header-h))]">
       <div className="group relative aspect-4/5 w-full overflow-hidden lg:aspect-auto lg:flex-1">
         <ul
           ref={trackRef}
@@ -188,14 +200,14 @@ export default function ProductGallery({
       {hasCaptions ? (
         <p
           dir="auto"
-          className="min-h-16 border-t border-border bg-background px-6 py-4 text-xs leading-loose text-ivory/40"
+          className="min-h-16 border-t border-ground-border bg-ground-bg px-6 py-4 text-xs leading-loose text-ground-muted"
         >
           {images[activeIndex]?.caption ?? ""}
         </p>
       ) : null}
 
       {hasMultiple ? (
-        <div className="flex gap-px bg-background p-px">
+        <div className="flex gap-px bg-ground-border p-px">
           {images.map((image, index) => (
             <button
               key={image.url}

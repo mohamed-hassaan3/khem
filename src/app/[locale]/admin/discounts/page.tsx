@@ -112,7 +112,7 @@ export default async function AdminDiscountsPage({
                   {discount.requiresGrant ? (
                     <span
                       title="Only customers issued a grant may redeem this code"
-                      className="mt-2 inline-block border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-gold"
+                      className="mt-2 inline-block border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent"
                     >
                       By invitation
                     </span>
@@ -150,7 +150,7 @@ export default async function AdminDiscountsPage({
                         ? "border-success/40 text-success"
                         : shown.tone === "warning"
                           ? "border-warning/40 text-warning"
-                          : "border-border text-ivory/30"
+                          : "border-ground-border text-ground-muted"
                     }`}
                     title={
                       discount.endsAt ? `Ends ${stamp(discount.endsAt)}` : undefined
@@ -163,7 +163,7 @@ export default async function AdminDiscountsPage({
                 <AdminCell>
                   <Link
                     href={`${basePath}/${discount.code}`}
-                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                   >
                     Edit
                   </Link>

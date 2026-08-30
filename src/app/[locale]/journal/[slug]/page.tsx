@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import ArticleBody from "@/src/components/journal/ArticleBody";
@@ -111,7 +112,9 @@ export default async function JournalArticlePage({
   };
 
   return (
-    <div className="min-h-screen bg-background text-ivory">
+    <div className="ground-ivory min-h-screen">
+      {/* §20: the article hero may run dark; the body is read on ivory. */}
+      <NavGround ground="ivory" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -126,7 +129,7 @@ export default async function JournalArticlePage({
         <Reveal>
           <LocaleLink
             href="/journal"
-            className="group inline-flex items-center gap-3 font-heading text-[11px] uppercase tracking-[0.2em] text-gold no-underline"
+            className="group inline-flex items-center gap-3 font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent no-underline"
           >
             <span
               className="inline-block transition-transform duration-300 ease-out group-hover:-translate-x-1 rtl:group-hover:translate-x-1"

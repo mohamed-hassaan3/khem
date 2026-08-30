@@ -70,11 +70,11 @@ function addressLines(address: CustomerAddress): string[] {
 
 function Detail({ term, children }: { term: string; children: React.ReactNode }) {
   return (
-    <div className="border-b border-border py-3 last:border-b-0">
-      <dt className="font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/25">
+    <div className="border-b border-ground-border py-3 last:border-b-0">
+      <dt className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
         {term}
       </dt>
-      <dd className="mt-1.5 text-[12px] tracking-wide text-ivory/70">{children}</dd>
+      <dd className="mt-1.5 text-[12px] tracking-wide text-ground">{children}</dd>
     </div>
   );
 }
@@ -98,7 +98,7 @@ export default async function AdminCustomerPage({
     <>
       <Link
         href={listPath}
-        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35 transition-colors duration-300 hover:text-gold"
+        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
       >
         <ArrowLeft size={13} strokeWidth={1.25} />
         All customers
@@ -117,13 +117,13 @@ export default async function AdminCustomerPage({
         <div className="space-y-8">
           {/* ── Orders ─────────────────────────────────── */}
           <section>
-            <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+            <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               Orders
             </h2>
 
             {customer.orders.length === 0 ? (
-              <div className="border border-border px-5 py-12 text-center sm:px-8">
-                <p className="text-[12px] leading-relaxed text-ivory/35">
+              <div className="border border-ground-border px-5 py-12 text-center sm:px-8">
+                <p className="text-[12px] leading-relaxed text-ground-muted">
                   This customer has an account but has not ordered yet.
                 </p>
               </div>
@@ -144,13 +144,13 @@ export default async function AdminCustomerPage({
                       <span className="block font-heading text-[11px] tracking-[0.1em]">
                         {order.orderNumber}
                       </span>
-                      <span className="mt-1 block text-[10px] tracking-wide text-ivory/25">
+                      <span className="mt-1 block text-[10px] tracking-wide text-ground-subtle">
                         {order.channel.toLowerCase()}
                       </span>
                       {order.firstOpenedAt === null ? (
                         <span
                           title="Nobody at the desk has opened this order yet"
-                          className="mt-2 inline-block border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-gold"
+                          className="mt-2 inline-block border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent"
                         >
                           New
                         </span>
@@ -167,7 +167,7 @@ export default async function AdminCustomerPage({
                             ? "text-success"
                             : order.paymentStatus === "FAILED"
                               ? "text-danger"
-                              : "text-ivory/35"
+                              : "text-ground-muted"
                         }
                       >
                         {label(order.paymentStatus)}
@@ -178,10 +178,10 @@ export default async function AdminCustomerPage({
                       <span
                         className={`inline-block border px-3 py-1 font-heading text-[9px] uppercase tracking-[0.2em] ${
                           order.status === "CANCELLED" || order.status === "REFUNDED"
-                            ? "border-border text-ivory/30"
+                            ? "border-ground-border text-ground-muted"
                             : order.status === "DELIVERED"
                               ? "border-success/40 text-success"
-                              : "border-gold/40 text-gold"
+                              : "border-gold/40 text-ground-accent"
                         }`}
                       >
                         {label(order.status)}
@@ -191,7 +191,7 @@ export default async function AdminCustomerPage({
                     <AdminCell>
                       <Link
                         href={`${ordersPath}/${order.orderNumber}`}
-                        className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                        className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                       >
                         Open
                       </Link>
@@ -205,13 +205,13 @@ export default async function AdminCustomerPage({
           {/* ── Discovery credits ──────────────────────── */}
           {customer.hasAccount ? (
             <section>
-              <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+              <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
                 Discovery credits
               </h2>
 
               {customer.credits.length === 0 ? (
-                <div className="border border-border px-5 py-10 text-center sm:px-8">
-                  <p className="text-[12px] leading-relaxed text-ivory/35">
+                <div className="border border-ground-border px-5 py-10 text-center sm:px-8">
+                  <p className="text-[12px] leading-relaxed text-ground-muted">
                     No credits. One is earned the moment a Discovery Set on this
                     account is paid for.
                   </p>
@@ -237,7 +237,7 @@ export default async function AdminCustomerPage({
                               ? "border-success/40 text-success"
                               : credit.status === "PENDING_DELIVERY"
                                 ? "border-warning/40 text-warning"
-                                : "border-border text-ivory/30"
+                                : "border-ground-border text-ground-muted"
                           }`}
                         >
                           {credit.status.replace("_", " ").toLowerCase()}
@@ -247,7 +247,7 @@ export default async function AdminCustomerPage({
                       <AdminCell>
                         <Link
                           href={`${creditsPath}/${credit.id}`}
-                          className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                          className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                         >
                           Open
                         </Link>
@@ -262,13 +262,13 @@ export default async function AdminCustomerPage({
           {/* ── Address book ───────────────────────────── */}
           {customer.hasAccount ? (
             <section>
-              <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+              <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
                 Saved addresses
               </h2>
 
               {customer.addresses.length === 0 ? (
-                <div className="border border-border px-5 py-10 text-center sm:px-8">
-                  <p className="text-[12px] leading-relaxed text-ivory/35">
+                <div className="border border-ground-border px-5 py-10 text-center sm:px-8">
+                  <p className="text-[12px] leading-relaxed text-ground-muted">
                     No saved addresses. The customer adds these themselves in
                     their account.
                   </p>
@@ -276,14 +276,14 @@ export default async function AdminCustomerPage({
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {customer.addresses.map((address) => (
-                    <div key={address.id} className="border border-border p-5">
-                      <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70">
+                    <div key={address.id} className="border border-ground-border p-5">
+                      <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent">
                         {address.label}
                         {address.isDefault ? (
-                          <span className="ms-2 text-ivory/25">· default</span>
+                          <span className="ms-2 text-ground-subtle">· default</span>
                         ) : null}
                       </p>
-                      <address className="mt-3 space-y-1 text-[12px] not-italic leading-relaxed tracking-wide text-ivory/60">
+                      <address className="mt-3 space-y-1 text-[12px] not-italic leading-relaxed tracking-wide text-ground-muted">
                         {addressLines(address).map((line) => (
                           <span key={line} className="block">
                             {line}
@@ -300,27 +300,27 @@ export default async function AdminCustomerPage({
 
         {/* ── The record ───────────────────────────────── */}
         <aside className="space-y-8">
-          <div className="border border-border p-5 sm:p-6">
-            <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <div className="border border-ground-border p-5 sm:p-6">
+            <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               Standing
             </h2>
             <dl>
               <Detail term="Lifetime spend">
-                <span className="font-heading text-lg tracking-[0.1em] text-gold">
+                <span className="font-heading text-lg tracking-[0.1em] text-ground-accent">
                   {egp(customer.lifetimeSpendInCents)}
                 </span>
               </Detail>
               <Detail term="Orders placed">{customer.orderCount}</Detail>
               <Detail term="Last order">{stamp(customer.lastOrderAt)}</Detail>
             </dl>
-            <p className="mt-4 text-[11px] leading-relaxed text-ivory/25">
+            <p className="mt-4 text-[11px] leading-relaxed text-ground-subtle">
               Spend excludes cancelled and refunded orders. Those still count as
               orders placed, because they were.
             </p>
           </div>
 
-          <div className="border border-border p-5 sm:p-6">
-            <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <div className="border border-ground-border p-5 sm:p-6">
+            <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               Contact
             </h2>
             <dl>
@@ -330,21 +330,21 @@ export default async function AdminCustomerPage({
                 {customer.hasAccount ? "Registered with Clerk" : "No account"}
               </Detail>
             </dl>
-            <p className="mt-4 text-[11px] leading-relaxed text-ivory/25">
+            <p className="mt-4 text-[11px] leading-relaxed text-ground-subtle">
               Identity is held by Clerk and mirrored here. Edits belong in Clerk
               or in the customer&rsquo;s own account, not on this screen.
             </p>
           </div>
 
-          <div className="border border-border p-5 sm:p-6">
-            <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <div className="border border-ground-border p-5 sm:p-6">
+            <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               Marketing
             </h2>
             <dl>
               <Detail term="Consent">
                 <span
                   className={
-                    customer.marketingOptIn ? "text-success" : "text-ivory/35"
+                    customer.marketingOptIn ? "text-success" : "text-ground-muted"
                   }
                 >
                   {customer.marketingOptIn ? "Opted in" : "Not opted in"}
@@ -354,7 +354,7 @@ export default async function AdminCustomerPage({
                 {stamp(customer.marketingOptInAt, true)}
               </Detail>
             </dl>
-            <p className="mt-4 text-[11px] leading-relaxed text-ivory/25">
+            <p className="mt-4 text-[11px] leading-relaxed text-ground-subtle">
               The date moves only when the answer changes, in either direction —
               a withdrawal needs a date as much as an agreement does.
             </p>

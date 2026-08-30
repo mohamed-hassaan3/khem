@@ -34,7 +34,7 @@ export default async function EditArticlePage({
           article.isPublished ? (
             <Link
               href={localizePath(activeLocale, "/journal")}
-              className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/40 transition-colors duration-300 hover:text-gold"
+              className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
             >
               View journal ↗
             </Link>

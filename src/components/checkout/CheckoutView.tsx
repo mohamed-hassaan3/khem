@@ -40,6 +40,7 @@ import { ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, useTransition } from "react";
 
+import NavGround from "@/src/components/NavGround";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
 import PageHeader from "@/src/components/ecommerce/PageHeader";
 import { placeCustomerOrder } from "@/src/actions/checkout";
@@ -524,7 +525,9 @@ export default function CheckoutView({
    */
   if (!isHydrated) {
     return (
-      <div className="min-h-screen bg-background pt-20 text-ivory">
+      <div className="ground-ivory min-h-screen">
+      {/* §16: trust, clarity, readability. No hero, so the header is solid. */}
+      <NavGround ground="ivory" />
         <PageHeader
           eyebrow={dict.checkout.eyebrow}
           heading={dict.checkout.heading}
@@ -538,7 +541,7 @@ export default function CheckoutView({
   // it — which it does not today, but would the moment `clear()` moves earlier.
   if (resolved.length === 0 && placedOrder === null) {
     return (
-      <div className="min-h-screen bg-background pt-20 text-ivory">
+      <div className="ground-ivory min-h-screen">
         <PageHeader
           eyebrow={dict.checkout.eyebrow}
           heading={dict.checkout.heading}
@@ -557,7 +560,7 @@ export default function CheckoutView({
   const awaitingPayment = placedOrder !== null;
 
   return (
-    <div className="min-h-screen bg-background pt-20 text-ivory">
+    <div className="ground-ivory min-h-screen">
       <PageHeader
         eyebrow={dict.checkout.eyebrow}
         heading={dict.checkout.heading}
@@ -661,7 +664,7 @@ export default function CheckoutView({
                 onSucceeded={() => goToConfirmation(placedOrder.orderNumber)}
               />
             ) : awaitingPayment ? (
-              <p className="text-[12px] tracking-wide text-ivory/40">
+              <p className="text-[12px] tracking-wide text-ground-muted">
                 {dict.checkout.submit.preparing}
               </p>
             ) : null}
@@ -701,7 +704,7 @@ export default function CheckoutView({
               >
                 <p className="text-[12px] tracking-wide text-danger">{formError}</p>
                 {errorDetail ? (
-                  <p className="mt-1.5 text-[11px] leading-relaxed text-ivory/40">
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-ground-muted">
                     {errorDetail}
                   </p>
                 ) : null}
@@ -718,7 +721,7 @@ export default function CheckoutView({
             <button
               type="submit"
               disabled={isPending || !shipsHere}
-              className="btn-luxury btn-luxury-fill mt-6 md:mt-10 w-full justify-center disabled:cursor-not-allowed disabled:opacity-45"
+              className="btn btn-primary mt-6 md:mt-10 w-full justify-center disabled:cursor-not-allowed disabled:opacity-45"
             >
               {isPending
                 ? dict.checkout.submit.working

@@ -62,13 +62,13 @@ export default function InviteCustomerForm() {
         event.preventDefault();
         submit();
       }}
-      className="mb-8 max-w-xl space-y-4 border border-border bg-surface/60 px-5 py-5 md:px-6 md:py-6"
+      className="mb-8 max-w-xl space-y-4 border border-ground-border bg-stone/60 px-5 py-5 md:px-6 md:py-6"
     >
       <div>
-        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
           Invite a customer
         </p>
-        <p className="mt-1.5 text-[11px] leading-relaxed text-ivory/35">
+        <p className="mt-1.5 text-[11px] leading-relaxed text-ground-muted">
           They receive KHEM&rsquo;s own invitation letter. Accepting it opens their
           account and sends the welcome — with the welcome voucher, if one is running.
         </p>

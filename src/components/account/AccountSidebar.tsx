@@ -82,14 +82,14 @@ export default function AccountSidebar({
                 "border-b-2 lg:border-b-0 lg:border-s-2",
                 "transition-colors duration-300 ease-luxury-bezier",
                 isActive
-                  ? "border-gold bg-gold/8 text-gold"
-                  : "border-transparent text-ivory/45 hover:text-ivory/80",
+                  ? "border-gold bg-gold/8 text-ground-accent"
+                  : "border-transparent text-ground-muted hover:text-ground",
               ].join(" ")}
             >
               {link.label}
 
               {showCount ? (
-                <span className="ms-2 font-heading text-[10px] tabular-nums text-gold">
+                <span className="ms-2 font-heading text-[10px] tabular-nums text-ground-accent">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               ) : null}
@@ -98,7 +98,7 @@ export default function AccountSidebar({
         })}
       </nav>
 
-      <div className="mt-auto hidden border-t border-border px-9 py-5 lg:block">
+      <div className="mt-auto hidden border-t border-ground-border px-9 py-5 lg:block">
         <SignOutButton />
       </div>
     </>

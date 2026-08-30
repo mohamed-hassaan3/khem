@@ -1,6 +1,7 @@
 import Image from "next/image";
 
-import nameLogo from "@/public/logo/name-logo-transparent.svg";
+import nameLogo from "@/public/logo/name-logo-transparent.webp";
+import FooterGroup from "@/src/components/FooterGroup";
 import CookieSettingsButton from "@/src/components/consent/CookieSettingsButton";
 import CurrencySwitcher from "@/src/components/i18n/CurrencySwitcher";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
@@ -13,14 +14,27 @@ import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 
+/*
+ * Ground-relative, even though the footer is charcoal on every page and §21
+ * says it stays that way. The colours are written against `--ground-*` so the
+ * footer carries its ground *explicitly* (`.ground-charcoal` on the element)
+ * rather than by inheriting whatever `body` happens to be — which is the exact
+ * assumption that made the rest of the site dark-only.
+ *
+ * Charcoal, not the obsidian this was. Obsidian is #0d0d0d and belonged to a
+ * site that was dark all the way up; against an ivory page it reads as a hole
+ * cut in the document. `--color-ink` is the same charcoal the type on every
+ * light section is set in, so the footer lands as the palette's structural
+ * colour filling the frame — a deliberate ending rather than a change of mode.
+ */
 const footerLinkClass =
-  "text-xs tracking-[0.05em] text-ivory/40 no-underline transition-colors duration-300 hover:text-gold";
+  "text-xs tracking-[0.05em] text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent";
 
 const socialLinkClass =
-  "text-[10px] tracking-[0.15em] text-ivory/35 no-underline transition-colors duration-300 hover:text-gold";
+  "text-[10px] tracking-[0.15em] text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent";
 
 const legalLinkClass =
-  "text-[11px] tracking-[0.08em] text-ivory/25 no-underline transition-colors duration-300 hover:text-ivory/60";
+  "text-[11px] tracking-[0.08em] text-ground-muted/70 no-underline transition-colors duration-300 hover:text-ground";
 
 /** Platform names are proper nouns — the same in both locales. */
 const socialLinks = ["Instagram", "Facebook", "Pinterest"] as const;
@@ -77,8 +91,13 @@ export default async function Footer({ locale }: { locale: Locale }) {
   ];
 
   return (
-    <footer className="border-t border-[var(--color-border)] bg-background pt-12 md:pt-20">
-      <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-7 md:gap-16 px-4 pb-12 md:pb-20 md:px-20 lg:grid-cols-[2fr_1fr_1fr_1fr] lg:gap-16">
+    <footer className="ground-charcoal border-t border-ground-border pt-12 md:pt-20">
+      {/*
+        `gap-0` below `md`: the groups are accordion rows there and each draws
+        its own bottom rule, so a gap would break the run of dividers into
+        floating segments. The column gap returns with the columns.
+      */}
+      <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-0 px-4 pb-12 sm:px-6 md:gap-16 md:px-10 md:pb-20 lg:grid-cols-[2fr_1fr_1fr_1fr] lg:gap-16 lg:px-12 xl:px-16">
         <div>
           <LocaleLink href="/" className="mb-7 inline-block no-underline">
             {/*
@@ -91,10 +110,11 @@ export default async function Footer({ locale }: { locale: Locale }) {
             <Image
               src={nameLogo}
               alt={dict.footer.logoAlt}
+              sizes="151px"
               className="h-16 w-auto"
             />
           </LocaleLink>
-          <p className="mb-8 max-w-[300px] text-[13px] leading-[1.9] text-ivory/40">
+          <p className="mb-8 max-w-[300px] text-[13px] leading-[1.9] text-ground-muted">
             {dict.footer.brandBlurb}
           </p>
           {/*
@@ -123,8 +143,7 @@ export default async function Footer({ locale }: { locale: Locale }) {
           </div>
         </div>
 
-        <div>
-          <p className="eyebrow mb-7">{dict.footer.collections}</p>
+        <FooterGroup title={dict.footer.collections}>
           <nav
             className="flex flex-col gap-3.5"
             aria-label={dict.footer.collections}
@@ -139,10 +158,9 @@ export default async function Footer({ locale }: { locale: Locale }) {
               </LocaleLink>
             ))}
           </nav>
-        </div>
+        </FooterGroup>
 
-        <div>
-          <p className="eyebrow mb-7">{dict.footer.worldOfKhem}</p>
+        <FooterGroup title={dict.footer.worldOfKhem}>
           <nav
             className="flex flex-col gap-3.5"
             aria-label={dict.footer.worldOfKhem}
@@ -157,10 +175,9 @@ export default async function Footer({ locale }: { locale: Locale }) {
               </LocaleLink>
             ))}
           </nav>
-        </div>
+        </FooterGroup>
 
-        <div>
-          <p className="eyebrow mb-7">{dict.footer.myAccount}</p>
+        <FooterGroup title={dict.footer.myAccount}>
           <nav
             className="mb-6 md:mb-10 flex flex-col gap-3.5"
             aria-label={dict.footer.myAccount}
@@ -176,26 +193,26 @@ export default async function Footer({ locale }: { locale: Locale }) {
             ))}
           </nav>
           <div>
-            <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-ivory/25">
+            <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-ground-muted/70">
               {dict.footer.boutique}
             </p>
-            <p className="whitespace-pre-line text-xs leading-[1.8] text-ivory/40">
+            <p className="whitespace-pre-line text-xs leading-[1.8] text-ground-muted">
               {dict.footer.boutiqueAddress}
             </p>
             <p className="text-xs leading-[1.8]">
               <a
                 // href="tel:+20000000000"
-                className="text-gold/70 no-underline transition-colors hover:text-gold"
+                className="text-ground-accent/80 no-underline transition-colors hover:text-ground-accent"
               >
                 {/* +20 00 000 0000 */} {dict.common.comingSoon}
               </a>
             </p>
           </div>
-        </div>
+        </FooterGroup>
       </div>
 
-      <div className="mx-auto flex max-w-[1400px] flex-col items-start justify-between gap-4 border-t border-[var(--color-border)] px-4 py-6 md:flex-row md:items-center md:px-20">
-        <p className="text-[11px] tracking-[0.1em] text-ivory/25">
+      <div className="mx-auto flex max-w-[1400px] flex-col items-start justify-between gap-4 border-t border-ground-border px-4 py-6 sm:px-6 md:flex-row md:items-center md:px-10 lg:px-12 xl:px-16">
+        <p className="text-[11px] tracking-[0.1em] text-ground-muted/70">
           {interpolate(dict.footer.rights, { year })}
         </p>
         <div className="flex flex-wrap gap-4 md:gap-7">
@@ -224,7 +241,7 @@ export default async function Footer({ locale }: { locale: Locale }) {
          */}
         <div className="flex items-center gap-5">
           <CurrencySwitcher />
-          <p className="text-[11px] tracking-[0.08em] text-ivory/20">
+          <p className="text-[11px] tracking-[0.08em] text-ground-muted/60">
             {dict.footer.craftedIn}
           </p>
         </div>

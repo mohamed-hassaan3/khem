@@ -174,7 +174,7 @@ export default function CampaignForm({
 
       <fieldset disabled={frozen} className="space-y-8 disabled:opacity-70">
         <section className="space-y-4 md:space-y-6">
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             The campaign
           </h2>
 
@@ -211,7 +211,7 @@ export default function CampaignForm({
         </section>
 
         <section className="space-y-4 md:space-y-6">
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             The letter
           </h2>
 
@@ -246,7 +246,7 @@ export default function CampaignForm({
         </section>
 
         <section className="space-y-4 md:space-y-6">
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Image, button and voucher
           </h2>
 

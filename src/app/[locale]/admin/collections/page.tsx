@@ -112,7 +112,7 @@ export default async function AdminCollectionsPage({
                     activeLocale,
                     `/admin/collections/${collection.slug}`,
                   )}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Edit
                 </Link>
@@ -130,7 +130,7 @@ export default async function AdminCollectionsPage({
               <AdminCell>
                 <Link
                   href={localizePath(activeLocale, `/admin/collections/${page.slug}`)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Edit
                 </Link>

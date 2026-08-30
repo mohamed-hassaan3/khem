@@ -62,7 +62,7 @@ export default function PaymentStep({
   return (
     <CheckoutSection index="03" title={dict.checkout.steps.payment}>
       <fieldset className="sm:col-span-2">
-        <legend className="mb-6 font-heading text-[13px] tracking-[0.08em] text-ivory/60">
+        <legend className="mb-6 font-heading text-[13px] tracking-[0.08em] text-ground-muted">
           {copy.heading}
         </legend>
 
@@ -81,7 +81,7 @@ export default function PaymentStep({
             // Stated rather than silently absent. A checkout that offers one
             // option with no explanation looks broken; one that says the card
             // rail is down looks maintained.
-            <p className="flex items-center border border-border bg-background/60 px-6 py-7 text-[12px] leading-relaxed text-ivory/30">
+            <p className="flex items-center border border-ground-border bg-stone px-6 py-7 text-[12px] leading-relaxed text-ground-muted/70">
               {copy.cardUnavailable}
             </p>
           )}
@@ -100,7 +100,7 @@ export default function PaymentStep({
 
       <div className="sm:col-span-2">
         {method === "CASH" ? (
-          <p className="border-s-2 border-gold/30 ps-4 text-[12px] leading-relaxed text-champagne/70">
+          <p className="border-s-2 border-ground-accent/30 ps-4 text-[12px] leading-relaxed text-gold-soft/70">
             {copy.cashNotice}
           </p>
         ) : (
@@ -108,7 +108,7 @@ export default function PaymentStep({
             {/* The Elements form, or the "preparing" placeholder. */}
             {children}
 
-            <p className="mt-6 flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-ivory/25">
+            <p className="mt-6 flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-ground-muted/70">
               <Lock size={11} strokeWidth={1.25} aria-hidden="true" />
               {copy.securedBy}
             </p>
@@ -120,7 +120,7 @@ export default function PaymentStep({
          * no warning that they will be charged in EGP.
          */}
         {currency !== BASE_CURRENCY ? (
-          <p className="mt-4 text-[10px] leading-relaxed tracking-[0.05em] text-ivory/25">
+          <p className="mt-4 text-[10px] leading-relaxed tracking-[0.05em] text-ground-muted/70">
             {interpolate(copy.settlement, {
               amount: formatPrice(totalInCents, BASE_CURRENCY),
             })}
@@ -166,8 +166,8 @@ function MethodPanel({
         "transition-[border-color,box-shadow] duration-500 ease-out " +
         "has-[:focus-visible]:border-gold has-[:focus-visible]:shadow-[0_0_0_1px_rgba(200,169,106,0.5)] " +
         (checked
-          ? "border-gold bg-background shadow-[0_0_30px_rgba(200,169,106,0.15)]"
-          : "border-border bg-background/60 hover:border-gold/40")
+          ? "border-gold bg-ivory shadow-2"
+          : "border-ground-border bg-stone hover:border-ground-accent/40")
       }
     >
       <input
@@ -186,17 +186,17 @@ function MethodPanel({
       <span
         className={
           "transition-colors duration-500 ease-out " +
-          (checked ? "text-gold" : "text-ivory/40 group-hover:text-gold/70")
+          (checked ? "text-ground-accent" : "text-ground-muted group-hover:text-ground-accent/70")
         }
       >
         {icon}
       </span>
 
-      <span className="font-heading text-[13px] tracking-[0.1em] text-ivory">
+      <span className="font-heading text-[13px] tracking-[0.1em] text-ground">
         {title}
       </span>
 
-      <span className="text-[11px] leading-relaxed text-ivory/35">{body}</span>
+      <span className="text-[11px] leading-relaxed text-ground-muted">{body}</span>
     </label>
   );
 }

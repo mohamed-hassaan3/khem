@@ -106,13 +106,13 @@ export default async function AdminPromotionsPage({
                     {promotion.name}
                   </span>
                   {promotion.label ? (
-                    <span className="mt-2 inline-block border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-gold">
+                    <span className="mt-2 inline-block border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent">
                       {promotion.label}
                     </span>
                   ) : (
                     <span
                       title="No campaign label, so cards carry no banner — a quiet reduction"
-                      className="mt-2 inline-block text-[10px] tracking-wide text-ivory/25"
+                      className="mt-2 inline-block text-[10px] tracking-wide text-ground-subtle"
                     >
                       Unlabelled
                     </span>
@@ -154,7 +154,7 @@ export default async function AdminPromotionsPage({
                         ? "border-success/40 text-success"
                         : shown.tone === "warning"
                           ? "border-warning/40 text-warning"
-                          : "border-border text-ivory/30"
+                          : "border-ground-border text-ground-muted"
                     }`}
                     title={
                       promotion.endsAt ? `Ends ${stamp(promotion.endsAt)}` : undefined
@@ -167,7 +167,7 @@ export default async function AdminPromotionsPage({
                 <AdminCell>
                   <Link
                     href={`${basePath}/${promotion.id}`}
-                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                   >
                     Edit
                   </Link>

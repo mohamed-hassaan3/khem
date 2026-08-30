@@ -68,15 +68,15 @@ function Tile({
   return (
     <Link
       href={href}
-      className="block border border-border bg-ivory/2 p-6 transition-colors sm:p-8 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/30"
+      className="block border border-ground-border bg-ivory/2 p-6 transition-colors sm:p-8 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/30"
     >
-      <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+      <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
         {label}
       </p>
-      <p className="mt-4 font-heading text-3xl tracking-[0.1em] text-gold sm:text-4xl">
+      <p className="mt-4 font-heading text-3xl tracking-[0.1em] text-ground-accent sm:text-4xl">
         {value}
       </p>
-      {note ? <p className="mt-3 text-[11px] text-ivory/30">{note}</p> : null}
+      {note ? <p className="mt-3 text-[11px] text-ground-muted">{note}</p> : null}
     </Link>
   );
 }
@@ -216,22 +216,22 @@ export default async function AdminDashboardPage({
       {/* ── Recent orders ────────────────────────────────── */}
       <section className="mt-6">
         <div className="mb-5 flex items-end justify-between gap-4">
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Latest orders
           </h2>
           <Link
             href={ordersPath}
-            className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+            className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
           >
             The whole book
           </Link>
         </div>
 
         {recentOrders.length === 0 ? (
-          <div className="border border-border px-5 py-12 text-center sm:px-8">
-            <p className="text-[12px] leading-relaxed text-ivory/35">
+          <div className="border border-ground-border px-5 py-12 text-center sm:px-8">
+            <p className="text-[12px] leading-relaxed text-ground-muted">
               No orders yet. A sale recorded at{" "}
-              <Link href={`${ordersPath}/new`} className="text-gold/80 hover:text-gold">
+              <Link href={`${ordersPath}/new`} className="text-ground-accent hover:text-ground-accent">
                 Orders → Record order
               </Link>{" "}
               takes its units out of stock and appears on the charts above.
@@ -252,7 +252,7 @@ export default async function AdminDashboardPage({
                   {order.firstOpenedAt === null ? (
                     <span
                       title="Nobody at the desk has opened this order yet"
-                      className="mt-2 block w-fit border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-gold"
+                      className="mt-2 block w-fit border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent"
                     >
                       New
                     </span>
@@ -267,7 +267,7 @@ export default async function AdminDashboardPage({
                 <AdminCell>
                   <Link
                     href={`${ordersPath}/${order.orderNumber}`}
-                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                   >
                     Open
                   </Link>
@@ -284,7 +284,7 @@ export default async function AdminDashboardPage({
           <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-warning">
             Running out
           </p>
-          <p className="mt-3 max-w-2xl text-[12px] leading-relaxed text-ivory/50">
+          <p className="mt-3 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             These products are below {LOW_STOCK_THRESHOLD} on the website. The
             storefront has already stopped saying &ldquo;in stock&rdquo; on them
             and is naming the remaining count instead.
@@ -295,7 +295,7 @@ export default async function AdminDashboardPage({
               <li key={row.slug} className="flex items-center justify-between gap-4">
                 <Link
                   href={localizePath(activeLocale, `/admin/products/${row.slug}`)}
-                  className="text-[12px] tracking-wide text-ivory/70 transition-colors duration-300 hover:text-gold"
+                  className="text-[12px] tracking-wide text-ground transition-colors duration-300 hover:text-ground-accent"
                 >
                   {row.name}
                 </Link>
@@ -307,7 +307,7 @@ export default async function AdminDashboardPage({
           {needsStock.length > 6 ? (
             <Link
               href={localizePath(activeLocale, "/admin/inventory")}
-              className="mt-5 inline-block font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+              className="mt-5 inline-block font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
             >
               {needsStock.length - 6} more in inventory
             </Link>
@@ -367,11 +367,11 @@ export default async function AdminDashboardPage({
           <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-warning">
             Search vectors
           </p>
-          <p className="mt-3 max-w-2xl text-[12px] leading-relaxed text-ivory/50">
+          <p className="mt-3 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             {missingEmbeddings} live product{missingEmbeddings === 1 ? " has" : "s have"} no
             embedding. Those products are still searchable by keyword, but not by
             meaning, and they will not appear in the &ldquo;you may also love&rdquo;
-            rail. Run <code className="text-champagne">npm run embed</code> to fill
+            rail. Run <code className="text-ground-accent-soft">npm run embed</code> to fill
             them in.
           </p>
         </div>

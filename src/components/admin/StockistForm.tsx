@@ -257,7 +257,7 @@ export default function StockistForm({
 
       {/* ── Identity ─────────────────────────────────────── */}
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           The location
         </h2>
 
@@ -357,7 +357,7 @@ export default function StockistForm({
 
       {/* ── Status and details ───────────────────────────── */}
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           Visiting
         </h2>
 
@@ -371,7 +371,7 @@ export default function StockistForm({
         />
 
         {announced ? (
-          <p className="border border-border bg-ivory/2 px-4 py-3 text-[12px] leading-relaxed tracking-wide text-ivory/45">
+          <p className="border border-ground-border bg-ivory/2 px-4 py-3 text-[12px] leading-relaxed tracking-wide text-ground-muted">
             An announced location is an announcement, not a destination. It
             publishes no address, phone, hours or map link — the database
             refuses a row that carries them.
@@ -441,7 +441,7 @@ export default function StockistForm({
 
       {/* ── Photograph ───────────────────────────────────── */}
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           Photograph
         </h2>
 
@@ -497,7 +497,7 @@ export default function StockistForm({
       </div>
 
       {armed ? (
-        <p className="text-[11px] leading-relaxed text-ivory/35">
+        <p className="text-[11px] leading-relaxed text-ground-muted">
           Removing deletes the row and both languages of its copy. To take a
           location off the public site and keep it, switch off &ldquo;On the
           public directory&rdquo; instead.

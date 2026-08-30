@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 
+import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import JournalGrid from "@/src/components/journal/JournalGrid";
@@ -58,12 +59,13 @@ export default async function Journal({
   const rest = articles.filter((article) => article.id !== featured?.id);
 
   return (
-    <div className="min-h-screen bg-background text-ivory">
+    <div className="ground-ivory min-h-screen">
+      <NavGround ground="ivory" />
       {/* ── HEADER ─────────────────────────────────── */}
-      <section className="bg-background px-4 pt-14 md:px-20 md:pt-32">
+      <section className="px-4 pt-14 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pt-32">
         <Reveal className="mx-auto max-w-350 pb-12">
           <p className="eyebrow mb-4">{dict.journal.eyebrow}</p>
-          <h1 className="font-heading text-4xl font-normal text-ivory sm:text-6xl md:text-7xl">
+          <h1 className="font-heading text-4xl font-normal text-ground sm:text-6xl md:text-7xl">
             {dict.journal.heading}
           </h1>
         </Reveal>
@@ -71,11 +73,11 @@ export default async function Journal({
 
       {/* ── FEATURED ARTICLE ────────────────────────── */}
       {featured ? (
-        <section className="bg-background px-4 pb-10 md:pb-16 md:px-20">
+        <section className="px-4 pb-10 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pb-16">
           <Reveal className="mx-auto max-w-350">
             <LocaleLink
               href={`/journal/${featured.slug}`}
-              className="img-zoom group grid grid-cols-1 gap-0.5 bg-surface no-underline lg:grid-cols-2"
+              className="card img-zoom group grid grid-cols-1 overflow-hidden no-underline lg:grid-cols-2"
             >
               <div className="relative h-75 overflow-hidden lg:h-125">
                 <Image
@@ -84,7 +86,7 @@ export default async function Journal({
                   fill
                   priority
                   sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="object-cover brightness-60 saturate-70"
+                  className="object-cover"
                 />
               </div>
 
@@ -93,7 +95,7 @@ export default async function Journal({
                 <div className="mb-7 flex flex-wrap items-center gap-4" {...island}>
                   <span className="eyebrow">{featured.category}</span>
                   <span className="h-3 w-px bg-ivory/15" aria-hidden="true" />
-                  <span className="text-[10px] tracking-widest text-ivory/30">
+                  <span className="text-[10px] tracking-widest text-ground-muted/70">
                     {interpolate(dict.common.minRead, {
                       minutes: featured.readTimeMinutes,
                     })}
@@ -101,26 +103,26 @@ export default async function Journal({
                   <span className="h-3 w-px bg-ivory/15" aria-hidden="true" />
                   <time
                     dateTime={featured.publishedAt}
-                    className="text-[10px] tracking-wide text-ivory/30"
+                    className="text-[10px] tracking-wide text-ground-muted/70"
                   >
                     {formatArticleDate(featured.publishedAt)}
                   </time>
                 </div>
 
-                <span className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/60">
+                <span className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/60">
                   <span aria-hidden="true">✦</span> {dict.journal.featured}
                 </span>
 
                 <div {...island}>
-                  <h2 className="mb-6 font-heading text-xl font-normal leading-snug text-ivory sm:text-2xl md:text-3xl">
+                  <h2 className="mb-6 font-heading text-xl font-normal leading-snug text-ground sm:text-2xl md:text-3xl">
                     {featured.title}
                   </h2>
-                  <p className="mb-9 text-sm leading-loose text-ivory/50">
+                  <p className="mb-9 text-sm leading-loose text-ground-muted">
                     {featured.excerpt}
                   </p>
                 </div>
 
-                <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
+                <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
                   {dict.journal.readArticle} {readingArrow(activeLocale)}
                 </span>
               </div>

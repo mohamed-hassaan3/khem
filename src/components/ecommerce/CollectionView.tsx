@@ -1,6 +1,8 @@
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 
+import NavGround from "@/src/components/NavGround";
+
 import CollectionGrid, {
   type CollectionGridItem,
 } from "@/src/components/ecommerce/CollectionGrid";
@@ -134,10 +136,38 @@ export default async function CollectionView({
         })()
       : null;
 
+  /*
+   * The visitor is shopping, so the page is ivory — banner included. The hero
+   * used to keep its own obsidian ground because its photograph was darkened
+   * to make ivory type legible; now the photograph runs at its own luminance
+   * and the type is charcoal, so the banner belongs to the page.
+   */
   return (
-    <div className="min-h-screen bg-background text-ivory">
+    <div className="ground-ivory min-h-screen">
+      {/*
+        `hero`: the header floats transparently over the banner until the
+        visitor scrolls past it.
+
+        This is safe here only because the transparent state takes the *page's*
+        ground rather than obsidian — the banner is light and its type is
+        charcoal, so the header's links are charcoal too. An earlier version of
+        this pass had the header keeping ivory links in that state, which
+        painted an invisible header onto a pale limestone photograph.
+      */}
+      <NavGround ground="ivory" />
       {/* ── HERO ───────────────────────────────────── */}
-      <section className="relative flex h-[60vh] min-h-105 items-end overflow-hidden">
+      {/*
+        ── COLLECTION BANNER ─── §14 ────────────────
+
+        Charcoal type on the photograph, not ivory type on a darkened one.
+
+        This is the shape §14 names for a collection banner: the imagery, and
+        the collection's name set in the structural colour. It reads as an
+        editorial cover rather than as the same dark strip every page used to
+        open with, and it lets the photography carry its own light — which is
+        the entire argument for having commissioned it.
+      */}
+      <section className="ground-ivory relative flex h-[60vh] min-h-105 items-end overflow-hidden">
         <Image
           src={heroImage}
           alt={heroAlt}
@@ -145,11 +175,35 @@ export default async function CollectionView({
           priority
           quality={85}
           sizes="100vw"
-          className={`object-cover saturate-60 ${
-            isDark ? "brightness-30" : "brightness-45"
-          }`}
+          /*
+            A far lighter hand than the `brightness-30`/`brightness-45` this
+            was. §13 is explicit that a dark overlay must not be the automatic
+            answer for every hero — crushing a photograph to a third of its
+            luminance is what turned every collection into the same dark
+            banner, and it threw away the photography the page is built on.
+
+            The image now keeps most of its own contrast; a gradient scrim
+            below carries the type instead, so only the strip under the words
+            is darkened rather than the whole picture.
+          */
+          /*
+            `brightness-105` on the collections whose photography is dark, so
+            they lift toward the rest rather than reading as the one page that
+            still dims. Everything else runs untouched.
+
+            The old values were `brightness-30`/`brightness-45` — a blanket
+            filter that crushed every banner to a third of its luminance and
+            made the photograph indistinguishable from a black rectangle. §13
+            rules that out explicitly as the automatic answer.
+          */
+          className={`object-cover ${isDark ? "brightness-105" : ""}`}
         />
-        <div className="absolute inset-0 bg-linear-to-t from-background via-background/40 to-transparent" />
+        {/*
+          The house banner scrim, base anchor — the type sits on the bottom
+          edge. Opaque ivory at the very bottom makes the seam into the grid
+          below disappear: the banner ends in the colour the page starts in.
+        */}
+        <div aria-hidden="true" className="banner-scrim banner-scrim-base" />
 
         <div className="relative z-1 w-full px-4 pb-14 md:px-20 md:pb-18">
           <div className="mx-auto max-w-350">
@@ -163,7 +217,7 @@ export default async function CollectionView({
             >
               <LocaleLink
                 href="/"
-                className="text-[11px] tracking-wide text-ivory/35 no-underline transition-colors duration-300 ease-out hover:text-ivory/70"
+                className="text-[11px] tracking-wide text-ground-muted no-underline transition-colors duration-300 ease-out hover:text-ground-muted"
               >
                 {dict.collections.home}
               </LocaleLink>
@@ -172,12 +226,12 @@ export default async function CollectionView({
                 size={12}
                 strokeWidth={1.25}
                 aria-hidden="true"
-                className="text-ivory/20 rtl:rotate-180"
+                className="text-ground-muted rtl:rotate-180"
               />
 
               <span
                 aria-current="page"
-                className="text-[11px] tracking-wide text-gold/70"
+                className="text-[11px] tracking-wide text-ground"
                 dir="auto"
               >
                 {title}
@@ -199,7 +253,7 @@ export default async function CollectionView({
             </p>
 
             <h1
-              className="font-heading text-4xl font-normal text-ivory sm:text-6xl md:text-7xl"
+              className="font-heading text-4xl font-normal text-ground sm:text-6xl md:text-7xl"
               dir="auto"
             >
               {title}
@@ -218,9 +272,9 @@ export default async function CollectionView({
             {campaign ? (
               <p
                 dir="auto"
-                className="mt-6 inline-flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-[0.08em] text-champagne/70"
+                className="mt-6 inline-flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-[0.08em] text-gold-soft/70"
               >
-                <span className="border border-gold/40 px-2.5 py-1 font-heading text-[9px] uppercase tracking-[0.2em] text-gold">
+                <span className="border border-ground-accent/40 px-2.5 py-1 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent">
                   {campaign.label}
                 </span>
                 <span>
@@ -250,7 +304,7 @@ export default async function CollectionView({
            * resolves direction from the text that actually rendered.
            */
           <p
-            className="max-w-lg text-[13px] leading-loose text-ivory/40"
+            className="max-w-lg text-[13px] leading-loose text-ground-muted"
             dir="auto"
           >
             {description}

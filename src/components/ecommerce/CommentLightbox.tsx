@@ -54,7 +54,7 @@ const FOCUSABLE =
 const VISIBLE_THRESHOLD = 0.6;
 
 const ARROW_CLASS =
-  "absolute top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center border border-border-gold bg-background/60 text-ivory backdrop-blur-md transition-all duration-500 ease-out hover:border-gold hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:opacity-40";
+  "absolute top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center border border-border-gold bg-background/60 text-ground backdrop-blur-md transition-all duration-500 ease-out hover:border-gold hover:text-ground-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:opacity-40";
 
 export interface CommentLightboxProps {
   images: ProductCommentImage[];
@@ -244,7 +244,7 @@ export default function CommentLightbox({
               index: formatCount(index + 1, locale),
               total: formatCount(images.length, locale),
             })}
-            className="relative size-20 overflow-hidden border border-border transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none"
+            className="relative size-20 overflow-hidden border border-ground-border transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none"
           >
             <Image
               src={image.url}
@@ -267,7 +267,7 @@ export default function CommentLightbox({
             inert={!isOpen}
             onClick={close}
             className={[
-              "fixed inset-0 z-1060 cursor-default bg-background/85 backdrop-blur-md",
+              "ground-obsidian fixed inset-0 z-1060 cursor-default bg-background/85 backdrop-blur-md",
               "transition-opacity duration-400 ease-luxury-bezier",
               isOpen ? "opacity-100" : "pointer-events-none opacity-0",
             ].join(" ")}
@@ -290,7 +290,7 @@ export default function CommentLightbox({
             <div className="flex shrink-0 items-start justify-between px-5 pt-5 sm:px-8 sm:pt-7">
               <h2
                 id={headingId}
-                className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold"
+                className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent"
               >
                 {interpolate(copy.lightboxLabel, { name: authorLabel })}
               </h2>
@@ -300,7 +300,7 @@ export default function CommentLightbox({
                 type="button"
                 onClick={close}
                 aria-label={copy.photoClose}
-                className="-me-2.5 grid size-11 cursor-pointer place-items-center text-ivory/50 transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
+                className="-me-2.5 grid size-11 cursor-pointer place-items-center text-ground-muted transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-none"
               >
                 <X size={18} strokeWidth={1.25} aria-hidden="true" />
               </button>
@@ -359,12 +359,12 @@ export default function CommentLightbox({
 
             {/* ── THE COMMENT, UNDER ITS PHOTOGRAPH ──── */}
             <div className="shrink-0 px-5 pb-7 text-center sm:px-8">
-              <p className="mb-2 font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+              <p className="mb-2 font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
                 {authorLabel}
-                <span className="mx-3 text-ivory/20">·</span>
+                <span className="mx-3 text-ground-muted/60">·</span>
                 <time
                   dateTime={createdAt}
-                  className="tracking-wide text-ivory/35"
+                  className="tracking-wide text-ground-muted"
                   {...ltrIsland(locale)}
                 >
                   {formatCommentDate(createdAt, locale)}
@@ -372,14 +372,14 @@ export default function CommentLightbox({
               </p>
 
               {body ? (
-                <p className="mx-auto max-w-2xl whitespace-pre-line text-[13px] leading-relaxed text-ivory/70">
+                <p className="mx-auto max-w-2xl whitespace-pre-line text-[13px] leading-relaxed text-ground-muted">
                   {body}
                 </p>
               ) : null}
 
               {hasMultiple ? (
                 <p
-                  className="mt-4 text-[11px] tabular-nums tracking-[0.2em] text-ivory/30"
+                  className="mt-4 text-[11px] tabular-nums tracking-[0.2em] text-ground-muted/70"
                   {...ltrIsland(locale)}
                 >
                   {interpolate(copy.photoCounter, {

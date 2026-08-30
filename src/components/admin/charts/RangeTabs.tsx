@@ -36,7 +36,7 @@ export default function RangeTabs({
   }
 
   return (
-    <div className="inline-flex border border-border">
+    <div className="inline-flex border border-ground-border">
       {SALES_RANGES.map((range) => {
         const isActive = range === active;
 
@@ -45,10 +45,10 @@ export default function RangeTabs({
             key={range}
             href={hrefFor(range)}
             aria-current={isActive ? "true" : undefined}
-            className={`border-e border-border px-4 py-2 font-heading text-[9px] uppercase tracking-[0.2em] transition-colors duration-300 last:border-e-0 ${
+            className={`border-e border-ground-border px-4 py-2 font-heading text-[9px] uppercase tracking-[0.2em] transition-colors duration-300 last:border-e-0 ${
               isActive
-                ? "bg-gold/10 text-gold"
-                : "text-ivory/35 hover:text-ivory"
+                ? "bg-gold/10 text-ground-accent"
+                : "text-ground-muted hover:text-ground"
             }`}
           >
             {range}d

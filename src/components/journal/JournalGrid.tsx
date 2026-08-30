@@ -35,7 +35,7 @@ export default function JournalGrid({ articles, categories }: JournalGridProps) 
   return (
     <>
       {/* ── CATEGORY TABS ───────────────────────────── */}
-      <div className="border-b border-border">
+      <div className="border-b border-ground-border">
         <div className="mx-auto flex max-w-350 gap-5 md:gap-9 overflow-x-auto px-4 md:px-20">
           {categories.map((category) => (
             <button
@@ -45,8 +45,8 @@ export default function JournalGrid({ articles, categories }: JournalGridProps) 
               onClick={() => setActiveCategory(category)}
               className={`whitespace-nowrap border-b-2 py-5 font-heading text-[11px] tracking-[0.2em] transition-colors duration-300 ease-out ${
                 activeCategory === category
-                  ? "border-gold text-gold"
-                  : "border-transparent text-ivory/40 hover:text-ivory/70"
+                  ? "border-gold text-ground-accent"
+                  : "border-transparent text-ground-muted hover:text-ground-muted"
               }`}
             >
               {category}
@@ -56,7 +56,7 @@ export default function JournalGrid({ articles, categories }: JournalGridProps) 
       </div>
 
       {/* ── ARTICLE GRID ────────────────────────────── */}
-      <section className="bg-background px-4 pb-14 pt-10 md:px-20 md:pb-36">
+      <section className="px-4 pb-14 pt-10 sm:px-6 md:px-10 md:pb-36 lg:px-12 xl:px-16">
         {visible.length > 0 ? (
           <div className="mx-auto grid max-w-350 grid-cols-1 gap-0.5 bg-border sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((article) => (
@@ -72,7 +72,7 @@ export default function JournalGrid({ articles, categories }: JournalGridProps) 
             ))}
           </div>
         ) : (
-          <p className="py-10 md:py-16 text-center text-sm text-ivory/40">
+          <p className="py-10 md:py-16 text-center text-sm text-ground-muted">
             {dict.journal.empty}
           </p>
         )}

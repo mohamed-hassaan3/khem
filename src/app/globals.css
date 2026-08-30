@@ -1,35 +1,215 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colors */
+  /*
+   * ── Grounds ───────────────────────────────────────────────
+   *
+   * KHEM is one light environment, not a dark site with light sections in it.
+   * The hierarchy is three warm neutrals deep, with charcoal for structure and
+   * gold for jewellery — see `src/docs/khem-ui-design-system.md`.
+   *
+   *   IVORY  #f7f5f0   the environment. Nearly every page.
+   *   STONE  #efebe4   the surface level above it: cards, panels, fields.
+   *   SAND   #e8e1d5   warmth and rhythm: heritage, notes, editorial breaks.
+   *   CHARCOAL #242321 structure: type, buttons, icons, the footer.
+   *   GOLD   #b08d57   accent, roughly 5% of any view.
+   *
+   * ## Why the dark values survive at all
+   *
+   * They are no longer *page* grounds — nothing routes to obsidian any more.
+   * What is left needs them: the footer is charcoal by design (§21 of the
+   * brief), NOIR frames its photography in charcoal (§17), and image overlays
+   * need a real black to mix toward. Keeping the tokens and retiring the
+   * *usage* is what stops someone reaching for `#000` and inventing a sixth
+   * neutral when they need one of these three things.
+   */
   --color-background: #0d0d0d;
   --color-surface: #1a1a1a;
   --color-card: #242424;
   --color-black: #000000;
 
-  --color-gold: #c8a96a;
-  --color-gold-dark: #a67c2d;
-  --color-champagne: #e6d6a8;
-  --color-ivory: #f7f4ec;
+  /* The environment. Everything sits on this unless it says otherwise. */
+  --color-ivory: #f7f5f0;
+  /*
+   * One step above ivory. A card lifted off the ground without spending a
+   * shadow on it; also the field fill and the dashboard panel.
+   *
+   * This replaces the old `--color-cream` (#fbfaf7), which was a near-white
+   * *fourth* neutral in a system that has room for three. Cream was chosen
+   * while ivory sections were islands in a dark site and needed to read as
+   * lifted against obsidian; on an ivory ground it is indistinguishable from
+   * the ground itself, so a card drawn in it had no surface of its own.
+   */
+  --color-stone: #efebe4;
+  /* Heritage, olfactory notes, the warm editorial break in a run of ivory. */
+  --color-sand: #e8e1d5;
+
+  /*
+   * ── Accent ────────────────────────────────────────────────
+   *
+   * Gold is jewellery: rare, intentional, and worth something because it is
+   * not everywhere. Target is roughly 5% of the visible surface.
+   */
+  --color-gold: #b08d57;
+  --color-gold-soft: #d4b77a;
+  /*
+   * The gold that survives as *text on a light ground*. `--color-gold` on
+   * `--color-ivory` is about 2.6:1 and fails at body size; this is about 4.9:1.
+   *
+   * Not a decorative variant — using the wrong one of these two is an
+   * accessibility bug, not a shade preference. Gold on dark takes
+   * `--color-gold`; gold on light takes this.
+   */
+  --color-gold-deep: #8a6a3f;
+
+  /*
+   * ── Type ──────────────────────────────────────────────────
+   *
+   * Named by the ground they sit on rather than by role, because the mistake
+   * this system makes possible is using a dark-ground colour on a light one.
+   * `text-ivory` on ivory is invisible; `text-ink` on obsidian is invisible.
+   *
+   * `--color-ink` is #242321 rather than the #151515 it was: on a dark site the
+   * near-black was one of a family of blacks, but as the *only* structural
+   * colour on an ivory page it needs to read as warm charcoal and not as a
+   * pure-black hole. It carries the same warm cast as the neutrals above it,
+   * which is what keeps the palette one family. Contrast on ivory is 13.4:1.
+   */
+  --color-ink: #242321;
+  /* Descriptions, metadata, supporting copy. 6.2:1 on ivory. */
+  --color-ink-muted: #625f58;
+  /*
+   * The quietest legible step. 3.6:1 on ivory — above the 3:1 floor for large
+   * text and UI, below the 4.5:1 body floor, so it is for chrome and metadata
+   * and never for a paragraph someone has to read.
+   */
+  --color-ink-subtle: #8b867d;
+  /* Secondary text on the charcoal footer. Replaces the `text-ivory/40` idiom,
+     which produced a different grey on every ground it was used over. */
+  --color-dim: #b8b3aa;
 
   --color-success: #4caf50;
   --color-warning: #e8a317;
   --color-danger: #c0392b;
   --color-info: #3498db;
 
-  --color-border: rgba(255, 255, 255, 0.08);
+  /*
+   * ── Lines ─────────────────────────────────────────────────
+   *
+   * `--color-border-light` is now the default hairline, because the default
+   * ground is ivory. `--color-border` is what the charcoal footer and the dark
+   * framing surfaces use.
+   *
+   * The light hairline is a solid warm neutral rather than the black-at-10%
+   * it was. An alpha hairline takes its hue from whatever it lands on, so the
+   * same border read cool over ivory and muddy over sand; #d8d3ca is one line
+   * colour that belongs to this palette on all three light grounds.
+   */
+  --color-border: rgba(247, 245, 240, 0.12);
+  --color-border-light: #d8d3ca;
   --color-border-gold: color-mix(in srgb, var(--color-gold) 35%, transparent);
+
+  /*
+   * ── Ground-relative colours ───────────────────────────────
+   *
+   * Declared here rather than as hand-written `@layer components` classes so
+   * that Tailwind generates real utilities from them — which is what makes
+   * `text-ground-muted`, `border-ground-border`, `group-hover:text-ground-accent`
+   * and every *variant* work. A bare component class gets no `hover:`, no
+   * `group-hover:`, no `md:`, and no `/70` opacity modifier.
+   *
+   * ## These are the ivory defaults, and every `.ground-*` restates them
+   *
+   * The obvious implementation is an indirection — `--color-ground:
+   * var(--ground-fg)` here, with each ground setting only `--ground-fg`. **That
+   * silently does not work**, and it fails in the one direction that hides it:
+   * everything looks correct while the whole site is dark.
+   *
+   * Custom properties inherit as *computed* values. `--color-ground:
+   * var(--ground-fg)` is resolved once, at `:root`, against `:root`'s
+   * `--ground-fg` — and the resulting colour is what inherits down the tree.
+   * Redefining `--ground-fg` on a descendant does not re-resolve it, because
+   * there is nothing left to resolve: the child inherits ivory, not the
+   * expression that produced ivory.
+   *
+   * So `.ground-ivory` must set `--color-ground` itself, to a literal. Each
+   * ground block below does exactly that, which is why the two families of
+   * variable look redundant and are not.
+   *
+   * Use these instead of `text-ivory/40` and friends. That idiom is what made
+   * the site dark-only: an opacity of a fixed colour cannot be right on more
+   * than one ground.
+   */
+  --color-ground: var(--color-ink);
+  --color-ground-muted: var(--color-ink-muted);
+  --color-ground-subtle: var(--color-ink-subtle);
+  --color-ground-accent: var(--color-gold-deep);
+  --color-ground-bg: var(--color-ivory);
+  --color-ground-border: var(--color-border-light);
+
+  /*
+   * ── Semantic aliases ──────────────────────────────────────
+   *
+   * The names the brief asks components to think in (§49–§50): a component
+   * needs "a primary action", not "charcoal". These are a *vocabulary over*
+   * the ground machinery, not a second copy of it — the action and surface
+   * names resolve through `--ground-*`, so they follow whichever ground they
+   * are used inside, exactly as `--color-ground` does.
+   *
+   * The three background levels are the fixed rungs of the hierarchy and are
+   * deliberately *not* ground-relative: `--background-secondary` means stone
+   * everywhere, which is what makes "one level up from the page" a portable
+   * instruction rather than a per-section negotiation.
+   */
+  --color-background-primary: var(--color-ivory);
+  --color-background-secondary: var(--color-stone);
+  --color-background-tertiary: var(--color-sand);
+
+  --color-surface-primary: var(--color-stone);
+  --color-surface-secondary: var(--color-sand);
+
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-ink-muted);
+  --color-text-muted: var(--color-ink-subtle);
+
+  --color-border-default: var(--color-border-light);
+
+  --color-accent-gold: var(--color-gold-deep);
+
+  --color-action-primary: var(--color-ink);
+  --color-action-primary-hover: var(--color-black);
 
   /* Fonts */
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
 
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /*
+   * ── Geometry ──────────────────────────────────────────────
+   *
+   * Near-square. 6/8/12px belonged to the dark-only system, where a soft corner
+   * was invisible; on ivory it reads as a SaaS card. 2px is the amount that
+   * stops an edge looking like a rendering artefact without becoming a style.
+   * Modals get 4px because they float and need the extra definition.
+   */
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
 
-  /* Shadows */
+  /*
+   * ── Elevation ─────────────────────────────────────────────
+   *
+   * Four steps, all restrained, all tuned for a *light* ground — a shadow on
+   * obsidian is invisible, which is why the site has never needed a scale
+   * before. Luxury reads as a crisp edge; these exist to separate a floating
+   * surface from the ground beneath it and nothing more.
+   *
+   * 3 is for modals and drawers only. A card that reaches for it is wrong.
+   */
+  --shadow-1: 0 1px 2px rgba(21, 21, 21, 0.04);
+  --shadow-2: 0 8px 24px -12px rgba(21, 21, 21, 0.16);
+  --shadow-3: 0 24px 64px -24px rgba(21, 21, 21, 0.28);
+
+  /* The two dark-ground shadows, unchanged. */
   --shadow-luxury: 0 10px 40px rgba(0, 0, 0, 0.45);
   --shadow-gold: 0 0 30px color-mix(in srgb, var(--color-gold) 25%, transparent);
 
@@ -39,6 +219,35 @@
 }
 
 @layer base {
+  /*
+   * The default ground, for anything not inside an explicit `.ground-*`.
+   *
+   * These mirror `.ground-ivory`, because that is what `body` is now. This is
+   * the single change that makes the site light-first: fifty-odd routes —
+   * every admin page, the cart, the checkout, the collections index, the auth
+   * pages — declare no ground at all and take whatever is here. They were dark
+   * for exactly that reason and are now ivory for exactly that reason.
+   *
+   * Every one of these is overridden the moment an ancestor declares a ground,
+   * so the fallbacks matter only at the document root.
+   */
+  :root {
+    --ground-bg: var(--color-ivory);
+    --ground-fg: var(--color-ink);
+    --ground-muted: var(--color-ink-muted);
+    --ground-subtle: var(--color-ink-subtle);
+    --ground-accent: var(--color-gold-deep);
+    --ground-border: var(--color-border-light);
+
+    --btn-primary-bg: var(--color-ink);
+    --btn-primary-fg: var(--color-ivory);
+    --btn-primary-hover-bg: var(--color-black);
+    --field-bg: var(--color-stone);
+    --card-bg: var(--color-stone);
+    --card-shadow: var(--shadow-1);
+    --card-shadow-hover: var(--shadow-2);
+  }
+
   html {
     scroll-behavior: smooth;
   }
@@ -58,15 +267,21 @@
     overflow-x: clip;
   }
 
+  /*
+   * The document ground.
+   *
+   * Flat ivory. No vignette, no gradient: a decision about a *page* does not
+   * belong in the stylesheet, and the radial wash this used to paint would sit
+   * behind every section as a halo the page did not ask for.
+   *
+   * The colour is written literally as well as through the ground variables so
+   * that the ground the browser paints before any stylesheet cascade resolves
+   * is already the right one — a dark flash on first paint is the single most
+   * visible way a light-first site can betray its dark past.
+   */
   body {
-    background: radial-gradient(
-      circle at top,
-      var(--color-surface) 0%,
-      var(--color-background) 45%,
-      var(--color-black) 100%
-    );
-
-    color: var(--color-ivory);
+    background: var(--color-ivory);
+    color: var(--color-ink);
     font-family: var(--font-body);
   }
 
@@ -79,46 +294,315 @@
     font-family: var(--font-heading);
   }
 
+  /*
+   * The default hairline, now ground-relative.
+   *
+   * `--ground-border` inherits, so an element inside `.ground-ivory` gets the
+   * dark-on-light hairline and one inside `.ground-obsidian` gets the
+   * light-on-dark one — without either of them saying so. The fallback is the
+   * dark-ground value, which is what every existing `border` in the codebase
+   * already means, so nothing outside a ground changes.
+   */
   * {
-    border-color: var(--color-border);
+    border-color: var(--ground-border, var(--color-border));
   }
 
+  /*
+   * Charcoal on gold rather than black on gold: the accent is unchanged, but
+   * the type it carries has to be the palette's structural colour now that
+   * pure black is no longer part of the vocabulary.
+   */
   ::selection {
     background: var(--color-gold);
-    color: var(--color-black);
+    color: var(--color-ivory);
   }
 
   ::-webkit-scrollbar {
     width: 4px;
   }
 
+  /*
+   * The track follows the document, which is ivory. A dark track down the edge
+   * of a light page is the kind of leftover that makes a redesign feel
+   * half-finished — it is small, permanent, and on every single view.
+   */
   ::-webkit-scrollbar-track {
-    background: var(--color-background);
+    background: var(--color-stone);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--color-gold) 30%, transparent);
+    background: color-mix(in srgb, var(--color-ink) 22%, transparent);
     border-radius: 2px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in srgb, var(--color-gold) 60%, transparent);
+    background: color-mix(in srgb, var(--color-ink) 42%, transparent);
   }
 }
 
 @layer components {
-  /* Reveal animation */
+  /*
+   * ── Grounds ─────────────────────────────────────────────────
+   *
+   * A section states which of the four grounds it is on, and gets the
+   * background, the body text colour, and the correct hairline together.
+   *
+   * The point is that those three cannot be set independently and drift. The
+   * failure this replaces is real and was everywhere in the dark-only system:
+   * a component wrote `bg-surface` and inherited `text-ivory` from `body`,
+   * which worked only because every ancestor happened to be dark. The first
+   * ivory section under it would have rendered ivory text on ivory.
+   *
+   * So: never write `bg-ivory` and hope. Write `ground-ivory` and the type
+   * comes with it. A component *inside* a ground still overrides individual
+   * colours freely — this only settles the default.
+   *
+   * `--ground-border` is what card and divider rules read, so a hairline is
+   * correct on whichever ground it lands on without the component knowing.
+   */
+  .ground-obsidian,
+  .ground-charcoal,
+  .ground-ivory,
+  .ground-stone,
+  .ground-sand {
+    background: var(--ground-bg);
+    color: var(--ground-fg);
+    border-color: var(--ground-border);
+    /*
+     * The light defaults, shared by all five.
+     *
+     * Three of the five grounds are light and take these unchanged; the two
+     * dark ones override them below. Writing the *majority* case here is the
+     * inversion that mattered — the block used to state the dark surface
+     * variables and have every light ground undo them.
+     *
+     * See `.ground-obsidian` for why these live on the ground at all.
+     */
+    --btn-primary-bg: var(--color-ink);
+    --btn-primary-fg: var(--color-ivory);
+    --btn-primary-hover-bg: var(--color-black);
+    --field-bg: var(--color-ivory);
+    --card-bg: var(--color-stone);
+    --card-shadow: var(--shadow-1);
+    --card-shadow-hover: var(--shadow-2);
+
+    /* The Tailwind-facing names, restated. See the note in `@theme`. */
+    --color-ground: var(--color-ink);
+    --color-ground-muted: var(--color-ink-muted);
+    --color-ground-subtle: var(--color-ink-subtle);
+    --color-ground-accent: var(--color-gold-deep);
+    --color-ground-bg: var(--color-ivory);
+    --color-ground-border: var(--color-border-light);
+  }
+
+  /*
+   * ── Ivory: the environment ──────────────────────────────────
+   *
+   * The ground of the site. If a section has no reason to be anything else,
+   * it is this, and most sections have no reason to be anything else.
+   */
+  .ground-ivory {
+    --ground-bg: var(--color-ivory);
+    --ground-fg: var(--color-ink);
+    --ground-muted: var(--color-ink-muted);
+    --ground-subtle: var(--color-ink-subtle);
+    /* The legible gold. See `--color-gold-deep`. */
+    --ground-accent: var(--color-gold-deep);
+    --ground-border: var(--color-border-light);
+    /*
+     * Surface variables the primitives below read. They live on the ground
+     * rather than on the component so that `.btn-primary` means "the primary
+     * action here" on every ground, instead of every call site having to know
+     * what colour the section around it is and pick a variant accordingly.
+     * That choice is the ground's to make, not the button's.
+     */
+    --btn-primary-bg: var(--color-ink);
+    --btn-primary-fg: var(--color-ivory);
+    --btn-primary-hover-bg: var(--color-black);
+    /* A field and a card both step *up* to stone against ivory. */
+    --field-bg: var(--color-stone);
+    --card-bg: var(--color-stone);
+    --card-shadow: var(--shadow-1);
+    --card-shadow-hover: var(--shadow-2);
+
+    /* The Tailwind-facing names, restated. See the note in `@theme`. */
+    --color-ground: var(--color-ink);
+    --color-ground-muted: var(--color-ink-muted);
+    --color-ground-subtle: var(--color-ink-subtle);
+    --color-ground-accent: var(--color-gold-deep);
+    --color-ground-bg: var(--color-ivory);
+    --color-ground-border: var(--color-border-light);
+  }
+
+  /*
+   * ── Stone: the surface above the environment ────────────────
+   *
+   * Panels, form areas, dashboard surfaces, skeletons — anywhere a region has
+   * to read as *on* the page rather than as the page. Replaces `.ground-cream`.
+   *
+   * Cards inside it invert direction and go to ivory: on stone, lifting means
+   * getting lighter, and a stone card on a stone panel is not a card.
+   */
+  .ground-stone {
+    --ground-bg: var(--color-stone);
+    --ground-fg: var(--color-ink);
+    --ground-muted: var(--color-ink-muted);
+    --ground-subtle: var(--color-ink-subtle);
+    --ground-accent: var(--color-gold-deep);
+    --ground-border: var(--color-border-light);
+    --btn-primary-bg: var(--color-ink);
+    --btn-primary-fg: var(--color-ivory);
+    --btn-primary-hover-bg: var(--color-black);
+    --field-bg: var(--color-ivory);
+    --card-bg: var(--color-ivory);
+    --card-shadow: var(--shadow-1);
+    --card-shadow-hover: var(--shadow-2);
+
+    /* The Tailwind-facing names, restated. See the note in `@theme`. */
+    --color-ground: var(--color-ink);
+    --color-ground-muted: var(--color-ink-muted);
+    --color-ground-subtle: var(--color-ink-subtle);
+    --color-ground-accent: var(--color-gold-deep);
+    --color-ground-bg: var(--color-stone);
+    --color-ground-border: var(--color-border-light);
+  }
+
+  /*
+   * ── Sand: warmth and rhythm ─────────────────────────────────
+   *
+   * The heritage ground. Used to break a long run of ivory, to carry olfactory
+   * notes and editorial passages, and to introduce a collection.
+   *
+   * It is a *punctuation* ground, not an alternating one: two sand sections
+   * with one ivory section between them reads as stripes, which is the
+   * dark/light switching problem in warmer clothes.
+   */
+  .ground-sand {
+    --ground-bg: var(--color-sand);
+    --ground-fg: var(--color-ink);
+    --ground-muted: var(--color-ink-muted);
+    --ground-subtle: var(--color-ink-subtle);
+    --ground-accent: var(--color-gold-deep);
+    --ground-border: var(--color-border-light);
+    --btn-primary-bg: var(--color-ink);
+    --btn-primary-fg: var(--color-ivory);
+    --btn-primary-hover-bg: var(--color-black);
+    --field-bg: var(--color-ivory);
+    --card-bg: var(--color-ivory);
+    --card-shadow: var(--shadow-1);
+    --card-shadow-hover: var(--shadow-2);
+
+    /* The Tailwind-facing names, restated. See the note in `@theme`. */
+    --color-ground: var(--color-ink);
+    --color-ground-muted: var(--color-ink-muted);
+    --color-ground-subtle: var(--color-ink-subtle);
+    --color-ground-accent: var(--color-gold-deep);
+    --color-ground-bg: var(--color-sand);
+    --color-ground-border: var(--color-border-light);
+  }
+
+  /*
+   * ── Charcoal: structure ─────────────────────────────────────
+   *
+   * The footer, and nothing else that spans the page. §21 of the brief keeps a
+   * charcoal footer deliberately — a document needs an ending — and the value
+   * is `--color-ink`, the same charcoal the type on every light page is drawn
+   * in. That identity is the point: the footer is the palette's structural
+   * colour filling the frame, not a different mode the site drops into.
+   *
+   * It was `--color-surface` (#1a1a1a), which belonged to the dark system and
+   * carried none of the warmth the neutrals above it have.
+   */
+  .ground-charcoal {
+    --ground-bg: var(--color-ink);
+    --ground-fg: var(--color-ivory);
+    --ground-muted: var(--color-dim);
+    --ground-subtle: var(--color-dim);
+    --ground-accent: var(--color-gold);
+    --ground-border: var(--color-border);
+    --btn-primary-bg: var(--color-ivory);
+    --btn-primary-fg: var(--color-ink);
+    --btn-primary-hover-bg: var(--color-gold-soft);
+    --field-bg: color-mix(in srgb, var(--color-ivory) 6%, transparent);
+    --card-bg: color-mix(in srgb, var(--color-ivory) 4%, transparent);
+    --card-shadow: none;
+    --card-shadow-hover: none;
+
+    /* The Tailwind-facing names, restated. See the note in `@theme`. */
+    --color-ground: var(--color-ivory);
+    --color-ground-muted: var(--color-dim);
+    --color-ground-subtle: var(--color-dim);
+    --color-ground-accent: var(--color-gold);
+    --color-ground-bg: var(--color-ink);
+    --color-ground-border: var(--color-border);
+  }
+
+  /*
+   * ── Obsidian: framing only ──────────────────────────────────
+   *
+   * **Not a page ground.** No route renders on this, and adding one would
+   * reintroduce the dark/light switching the whole redesign removed.
+   *
+   * What it is still for: the inside of a full-bleed image frame, a lightbox
+   * scrim, a product gallery well where a photographed bottle needs a dark
+   * surround to sit in. In every one of those the dark area is bounded by an
+   * image, not by the page.
+   *
+   * If you are reaching for this to make a *section* dramatic, the answer the
+   * system wants is photography, charcoal detail and composition — see the
+   * NOIR treatment.
+   */
+  .ground-obsidian {
+    --ground-bg: var(--color-background);
+    --ground-fg: var(--color-ivory);
+    --ground-muted: var(--color-dim);
+    --ground-subtle: var(--color-dim);
+    --ground-accent: var(--color-gold);
+    --ground-border: var(--color-border);
+    --btn-primary-bg: var(--color-ivory);
+    --btn-primary-fg: var(--color-background);
+    --btn-primary-hover-bg: var(--color-gold-soft);
+    --field-bg: color-mix(in srgb, var(--color-ivory) 4%, transparent);
+    --card-bg: var(--color-surface);
+    --card-shadow: none;
+    --card-shadow-hover: none;
+
+    /* The Tailwind-facing names, restated. See the note in `@theme`. */
+    --color-ground: var(--color-ivory);
+    --color-ground-muted: var(--color-dim);
+    --color-ground-subtle: var(--color-dim);
+    --color-ground-accent: var(--color-gold);
+    --color-ground-bg: var(--color-background);
+    --color-ground-border: var(--color-border);
+  }
+
+  /*
+   * ── Scroll reveal ───────────────────────────────────────────
+   *
+   * `.reveal` is on every element `<Reveal>` renders and carries the
+   * transition. `.reveal-pending` is added only while an element is waiting
+   * below the fold — see `components/animation/Reveal.tsx` for why the
+   * *hidden* state has to be the opt-in one rather than the default.
+   *
+   * The transition lives on `.reveal` rather than on `.reveal-pending` so it
+   * survives the class being removed. Put it on the pending class and the
+   * element simply snaps to its resting state, because the rule that described
+   * how to get there went away in the same frame.
+   *
+   * A transition rather than an `@keyframes` animation, for the same reason:
+   * an animation needs its `from` state painted before it can run, which is
+   * the server-rendered `opacity: 0` this whole component exists to remove.
+   */
   .reveal {
-    opacity: 0;
-    transform: translateY(40px);
+    opacity: 1;
+    transform: translateY(0);
     transition:
       opacity 0.9s var(--ease-luxury-bezier),
       transform 0.9s var(--ease-luxury-bezier);
   }
 
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
+  .reveal-pending {
+    opacity: 0;
   }
 
   .reveal-delay-1 {
@@ -137,14 +621,21 @@
     transition-delay: 0.5s;
   }
 
-  /* Gold shimmer line */
+  /*
+   * Gold shimmer line.
+   *
+   * Ground-relative: `--color-gold` is nearly invisible against sand and only
+   * just readable against ivory, so on light grounds the rule draws itself in
+   * the deep gold instead. The fallback keeps every existing dark-ground use
+   * pixel-identical.
+   */
   .gold-line {
     width: 60px;
     height: 1px;
     background: linear-gradient(
       90deg,
       transparent,
-      var(--color-gold),
+      var(--ground-accent, var(--color-gold)),
       transparent
     );
   }
@@ -156,40 +647,249 @@
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
-    opacity: 0.6;
-    mix-blend-mode: overlay;
+    /*
+     * `multiply` at a low opacity, not `overlay` at 0.6.
+     *
+     * `overlay` lightens as much as it darkens, which is how you get a paper
+     * texture on a dark ground; on ivory it blows the noise out into a grey
+     * haze that reads as a rendering fault. `multiply` only darkens, so the
+     * grain sits *in* the paper — which is the material this ground is
+     * imitating in the first place.
+     */
+    opacity: 0.35;
+    mix-blend-mode: multiply;
   }
 
-  /* Luxury button base */
-  .btn-luxury {
+  /*
+   * ── Button ──────────────────────────────────────────────────
+   *
+   * Replaces `.btn-luxury`, which was a gold hairline on transparent with a
+   * gold fill for its emphatic variant. Gold is no longer what a primary action
+   * looks like (§2.5, §13): it is jewellery, and spending it on every "Add to
+   * bag" is why the old system had no accent left for the things that are
+   * actually rare.
+   *
+   * ## Why the variants read ground variables
+   *
+   * `.btn-primary` is ivory-on-obsidian on a dark ground and obsidian-on-ivory
+   * on a light one — the *same* role, resolved against wherever it landed. The
+   * alternative was a `primary` and an `inverse` variant with every call site
+   * choosing, which makes each of ~30 buttons responsible for knowing what
+   * colour the section around it is. They get that wrong the first time a
+   * section changes ground, and the failure mode is an invisible button.
+   *
+   * A CSS component rather than a React one, deliberately. These are applied to
+   * `<button>`, `<a>`, `<Link>` and `<LocaleLink>` across the codebase; a
+   * component would need a `Slot` polyfill to stay polymorphic and would earn
+   * nothing for it, since every call site already composes extra Tailwind
+   * (`w-full`, `justify-center`, `disabled:*`) onto the class string.
+   */
+  .btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
-    padding: 14px 36px;
-    border: 1px solid var(--color-gold);
-    color: var(--color-gold);
+    /* Never below the 44px touch target, even when the type would allow it. */
+    min-height: 44px;
+    padding: 13px 30px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
     font-family: var(--font-heading);
     font-size: 11px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
+    text-decoration: none;
     cursor: pointer;
     background: transparent;
-    transition: all 0.4s var(--ease-luxury-bezier);
-    text-decoration: none;
+    transition:
+      background 0.24s var(--ease-luxury-bezier),
+      color 0.24s var(--ease-luxury-bezier),
+      border-color 0.24s var(--ease-luxury-bezier);
   }
 
-  .btn-luxury:hover {
+  /*
+   * `:focus-visible`, and on every variant. `.btn-luxury` had no focus style at
+   * all beyond the browser default it suppressed elsewhere — a keyboard visitor
+   * tabbing the checkout could not see where they were.
+   */
+  .btn:focus-visible {
+    outline: 2px solid var(--ground-accent, var(--color-gold));
+    outline-offset: 3px;
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  /* The action the page wants taken. One per view, ideally. */
+  .btn-primary {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-fg);
+    border-color: var(--btn-primary-bg);
+  }
+
+  .btn-primary:hover {
+    background: var(--btn-primary-hover-bg);
+    border-color: var(--btn-primary-hover-bg);
+  }
+
+  /* Everything alongside the primary. Inherits the ground's own foreground. */
+  .btn-outline {
+    color: var(--ground-fg, var(--color-ivory));
+    border-color: var(--ground-border, var(--color-border));
+  }
+
+  .btn-outline:hover {
+    color: var(--ground-accent, var(--color-gold));
+    border-color: var(--ground-accent, var(--color-gold));
+  }
+
+  /* Tertiary — "continue shopping", "discard". Carries no box until hovered. */
+  .btn-ghost {
+    padding-inline: 14px;
+    color: var(--ground-muted, var(--color-dim));
+  }
+
+  .btn-ghost:hover {
+    color: var(--ground-fg, var(--color-ivory));
+  }
+
+  /*
+   * Gold, as a fill.
+   *
+   * Reserved for the house speaking about itself — a membership invitation, a
+   * limited release. Not for commerce. If this appears on a product page next
+   * to a price, it is being misused; `.btn-primary` is the buy button.
+   */
+  .btn-gold {
     background: var(--color-gold);
     color: var(--color-background);
+    border-color: var(--color-gold);
   }
 
-  .btn-luxury-fill {
-    background: var(--color-gold);
-    color: var(--color-background);
+  .btn-gold:hover {
+    background: var(--color-gold-soft);
+    border-color: var(--color-gold-soft);
   }
 
-  .btn-luxury-fill:hover {
-    background: var(--color-champagne);
+  .btn-sm {
+    min-height: 36px;
+    padding: 9px 18px;
+    font-size: 10px;
+  }
+
+  /*
+   * ── Field ───────────────────────────────────────────────────
+   *
+   * One definition, replacing four near-identical `FIELD_CLASS` constants that
+   * had drifted apart in padding (px-4/px-5), size (13px/14px) and focus
+   * treatment. `<CheckoutField>`'s underline shape survives as a modifier,
+   * because that one is a deliberate composition and not drift.
+   *
+   * 16px is not a taste decision — see the mobile block near the end of this
+   * file. Declared here at every width so the field is correct before that
+   * override has to rescue it.
+   */
+  .field {
+    display: block;
+    width: 100%;
+    background: var(--field-bg);
+    border: 1px solid var(--ground-border, var(--color-border));
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 16px;
+    letter-spacing: 0.01em;
+    color: var(--ground-fg, var(--color-ivory));
+    transition:
+      border-color 0.24s var(--ease-luxury-bezier),
+      box-shadow 0.24s var(--ease-luxury-bezier);
+  }
+
+  .field::placeholder {
+    color: var(--ground-muted, var(--color-dim));
+    opacity: 0.6;
+  }
+
+  /*
+   * A ring rather than a border colour alone: at 1px, a border that only
+   * changes hue is nearly invisible against a dark ground, which is how the
+   * old `focus:border-gold/40` managed to be technically present and
+   * practically undetectable.
+   */
+  .field:focus {
+    outline: none;
+    border-color: var(--color-gold);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-gold) 16%, transparent);
+  }
+
+  .field[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+
+  /* The checkout's shape: a rule under the text, no box. */
+  .field-underline {
+    border-width: 0 0 1px;
+    border-radius: 0;
+    background: transparent;
+    padding-inline: 0;
+  }
+
+  .field-underline:focus {
+    box-shadow: 0 1px 0 0 color-mix(in srgb, var(--color-gold) 35%, transparent);
+  }
+
+  .label {
+    display: block;
+    margin-bottom: 8px;
+    font-family: var(--font-heading);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ground-muted, var(--color-dim));
+  }
+
+  .field-error {
+    margin-top: 8px;
+    font-size: 11px;
+    letter-spacing: 0.01em;
+    color: var(--color-danger);
+  }
+
+  .field-hint {
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+    color: var(--ground-muted, var(--color-dim));
+  }
+
+  /*
+   * ── Card ────────────────────────────────────────────────────
+   *
+   * The one card in the system — product, collection, journal, admin,
+   * analytics (§31). Same radius, same hairline, same elevation on every one of
+   * them; only the contents differ.
+   *
+   * The shadow is a ground variable and resolves to `none` on dark grounds,
+   * where a shadow is invisible anyway. That is why this is safe to apply
+   * everywhere at once: on obsidian it is a hairline and a background, which is
+   * what the dark cards already were.
+   */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--ground-border, var(--color-border));
+    border-radius: var(--radius-sm);
+    box-shadow: var(--card-shadow);
+    transition:
+      border-color 0.62s var(--ease-luxury-bezier),
+      box-shadow 0.62s var(--ease-luxury-bezier);
+  }
+
+  .card:hover {
+    border-color: var(--color-border-gold);
+    box-shadow: var(--card-shadow-hover);
   }
 
   /* Eyebrow label */
@@ -199,7 +899,28 @@
     font-weight: 500;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: var(--color-gold);
+    color: var(--ground-accent, var(--color-gold));
+  }
+
+  /*
+   * A horizontal scroll track whose scrollbar is hidden.
+   *
+   * The bar is suppressed rather than styled because the track already says it
+   * scrolls in two stronger ways — the next card is visibly cut off at the
+   * edge, and there are arrows. A 4px gold scrollbar under a row of editorial
+   * photographs is the one piece of chrome the composition cannot absorb.
+   *
+   * The content stays reachable by every other means: touch, trackpad, arrow
+   * keys on the focused region, and the buttons. Hiding the bar removes an
+   * indicator, not a capability.
+   */
+  .khem-scroll-track {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .khem-scroll-track::-webkit-scrollbar {
+    display: none;
   }
 
   /* Card hover lift */
@@ -220,14 +941,235 @@
     transform: scale(1.04);
   }
 
-  /* Mega menu overlay */
+  /*
+   * ── The header bar ──────────────────────────────────────────
+   *
+   * One state. The bar looks identical at the top of a page and at the bottom
+   * of it, and nothing about it is derived from scroll position.
+   *
+   * The page runs underneath it: banners begin at the very top of the viewport
+   * and their photography continues behind the bar, which floats over the
+   * document rather than occupying a strip reserved for it. That is why there
+   * is no bottom border — a hairline is what turns a floating bar back into a
+   * header area with an edge, which is the thing this replaces.
+   *
+   * ## The two layers, and why both are needed
+   *
+   * `background-color` is a flat 55% wash of the ground. `background-image` is
+   * a second, stronger wash that is heaviest at the very top and gone by the
+   * bottom edge. Together they give roughly 68% coverage where the links
+   * actually sit and 55% at the lower edge, which does two things at once: the
+   * type gets the contrast it needs, and the bar dissolves into the page
+   * instead of ending on a line.
+   *
+   * The numbers are a legibility floor, not a taste setting. Ivory at 68% over
+   * a black photograph resolves to about #a8a6a1, and charcoal on that is
+   * ~4.9:1 — above the 4.5:1 body threshold, which is what "readable
+   * regardless of the underlying banner" has to mean in practice. Thinning
+   * these will break the darkest banner first and silently.
+   *
+   * ## The blur, and what it costs
+   *
+   * `blur(14px)` on a `position: fixed` element means the compositor re-blurs
+   * the strip behind the bar on every scrolled frame. That is a real GPU cost
+   * and it is now unconditional, where the previous revision paid it only
+   * while scrolled. It is accepted deliberately as the price of the effect.
+   *
+   * What keeps it affordable is that it is the *only* one: every other
+   * `backdrop-filter` on a fixed or sticky element was removed in the
+   * performance pass, and the ones that remain belong to modal scrims that
+   * exist only while their overlay is open. One blurred 80px strip is a cost
+   * this page budget can carry; the six that were here before were not.
+   *
+   * `saturate(1.05)` is a hair of warmth so a photograph reads through the
+   * wash as colour rather than as grey. Free — the same filter pass.
+   */
+  .nav-bar {
+    background-color: color-mix(in srgb, var(--ground-bg) 55%, transparent);
+    background-image: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--ground-bg) 30%, transparent),
+      transparent
+    );
+    -webkit-backdrop-filter: blur(14px) saturate(1.05);
+    backdrop-filter: blur(14px) saturate(1.05);
+  }
+
+  /*
+   * The mobile drawer shares the bar's language rather than being an opaque
+   * panel that happens to be the same colour.
+   *
+   * It can afford a heavier wash and a wider radius than the bar: it is opened
+   * deliberately, it is short-lived, and the document behind it is scroll-
+   * locked while it is out — so unlike the bar, this blur is never recomputed
+   * frame after frame. 88% is the floor for a panel carrying four sections of
+   * small type over an arbitrary page.
+   */
+  .nav-drawer {
+    background-color: color-mix(in srgb, var(--ground-bg) 88%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(1.05);
+    backdrop-filter: blur(20px) saturate(1.05);
+  }
+
+  /*
+   * ── The banner scrim ────────────────────────────────────────
+   *
+   * One treatment, three anchors, every banner on the site.
+   *
+   * §14 asks for a flexible banner *system* and explicitly rules out one
+   * identical banner component per page — so this is a shared **treatment**
+   * rather than a shared component. Each banner keeps its own layout, height
+   * and composition, and declares which anchor its type sits on.
+   *
+   * ## What it replaces
+   *
+   * Five hand-written treatments doing one job: a bottom-anchored wash on the
+   * collection, journal and legal banners; a horizontal one on the category,
+   * heritage and about banners; a diagonal on ingredients; a
+   * vertical-from-both-ends on craftsmanship; and a two-layer radial on the new
+   * arrival hero. They disagreed on direction, on strength, and on whether they
+   * had a floor.
+   *
+   * The horizontal ones are why this exists. A directional wash alone only
+   * works if the photograph happens to be light where the wash has faded out —
+   * and on `/collections/body-care` it had faded to nothing exactly where the
+   * eyebrow and the lede sit, over a dark vase. Charcoal type on a dark
+   * photograph, on four category pages.
+   *
+   * ## The rule every variant obeys
+   *
+   * **The reading area is never below ~70% ivory, whatever the photograph does
+   * there.** Ivory at 70% over a black photograph resolves to about #adaba6,
+   * and charcoal on that is ~4.6:1 — clear of the 4.5:1 body threshold, which
+   * is what "readable on any banner" has to mean for a 10px eyebrow. Display
+   * type only needs 3:1 and has margin to spare; the small type is the binding
+   * constraint and these numbers are set by it.
+   *
+   * That floor is why the column variant carries *two* layers. The directional
+   * wash gives the composition; the bottom layer is the guarantee. Thinning
+   * either will break the darkest photography first, and silently.
+   *
+   * The scrim is also the reason no banner needs a `brightness` filter any
+   * more: contrast is added under the type instead of taken out of the whole
+   * picture (§13).
+   */
+  .banner-scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /*
+   * Type on the bottom edge — collection, journal and legal banners.
+   * Opaque at the very bottom so the banner resolves into the page below it
+   * with no seam.
+   */
+  .banner-scrim-base {
+    background: linear-gradient(
+      to top,
+      var(--color-ivory) 0%,
+      color-mix(in srgb, var(--color-ivory) 82%, transparent) 30%,
+      transparent 64%
+    );
+  }
+
+  /*
+   * Type in a reading column on the leading edge — the category mastheads and
+   * the editorial pages.
+   *
+   * Two layers, and both are load-bearing: the horizontal one shapes the
+   * composition and lets the picture come through on the trailing side, the
+   * bottom one is the floor that stops a dark photograph from swallowing the
+   * lede where the horizontal wash has run out.
+   *
+   * `--banner-dir` rather than a duplicated RTL rule: the reading column swaps
+   * sides with the document, and a wash that stayed on the left would leave
+   * Arabic type stranded over the busy half of the frame.
+   */
+  .banner-scrim-column {
+    --banner-dir: to right;
+    background:
+      linear-gradient(
+        to top,
+        color-mix(in srgb, var(--color-ivory) 72%, transparent) 0%,
+        color-mix(in srgb, var(--color-ivory) 30%, transparent) 42%,
+        transparent 70%
+      ),
+      linear-gradient(
+        var(--banner-dir),
+        var(--color-ivory) 0%,
+        color-mix(in srgb, var(--color-ivory) 88%, transparent) 34%,
+        transparent 78%
+      );
+  }
+
+  [dir="rtl"] .banner-scrim-column {
+    --banner-dir: to left;
+  }
+
+  /*
+   * Type centred over the frame — the new-arrival hero.
+   *
+   * A radial pool rather than a directional wash, because centred type has no
+   * edge to anchor to. The vertical layer under it seats the section on the
+   * page above and below, so the banner does not end on a hard line.
+   */
+  .banner-scrim-center {
+    background:
+      linear-gradient(
+        to top,
+        color-mix(in srgb, var(--color-ivory) 78%, transparent) 0%,
+        color-mix(in srgb, var(--color-ivory) 28%, transparent) 45%,
+        color-mix(in srgb, var(--color-ivory) 55%, transparent) 100%
+      ),
+      radial-gradient(
+        ellipse at center,
+        color-mix(in srgb, var(--color-ivory) 82%, transparent) 0%,
+        color-mix(in srgb, var(--color-ivory) 45%, transparent) 42%,
+        transparent 72%
+      );
+  }
+
+  /*
+   * ── Mega menu overlay ───────────────────────────────────────
+   *
+   * Ivory, opaque, and unblurred — three changes, each with a reason.
+   *
+   * **Ivory** because a black panel unrolling out of a light header is the
+   * dark/light switch this redesign removes, in the one piece of chrome the
+   * visitor sees on every page.
+   *
+   * **Opaque** because the panel was already 97% opaque. At that coverage a
+   * 20px blur is invisible: it was paying the full cost of the effect for
+   * three percent of it.
+   *
+   * **Unblurred** because `backdrop-filter` on a `position: fixed` element
+   * makes the compositor re-blur the region behind it on every frame the page
+   * scrolls — and both of these panels are mounted for the whole session, not
+   * only while open. Two full-width live blur layers over the viewport was the
+   * largest single source of the sustained GPU load this pass set out to find.
+   *
+   * `<Nav>` now also unmounts the panels while they are closed, so this rule
+   * only ever applies to a panel that is actually on screen. The two fixes are
+   * belt and braces on purpose: either alone would leave the other's cost.
+   */
   .mega-menu {
     position: fixed;
-    top: 80px;
+    /*
+     * Below the *whole* header stack, not 80px from the top of the viewport.
+     *
+     * The bar sits at `top: var(--announcement-h)` and is `--nav-h` tall, so
+     * the panel opens at the sum of the two. Hard-coding 80px here meant the
+     * panel slid under the header whenever an announcement bar was running —
+     * survivable while the bar was opaque, and not once it became translucent
+     * and the panel's edge showed through it. Reading `--header-h` also means
+     * the panel follows the bar's responsive height for free.
+     */
+    top: var(--header-h);
     inset-inline: 0;
-    background: color-mix(in srgb, var(--color-background) 97%, transparent);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--color-border);
+    background: var(--color-ivory);
+    border-bottom: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-2);
     z-index: 999;
     padding: 48px 80px;
     opacity: 0;
@@ -251,7 +1193,17 @@
     font-size: 11px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-ivory) 70%, transparent);
+    /*
+     * Ground-relative. `color-mix` of a *fixed* ivory was the whole problem —
+     * 70% ivory is a readable grey on obsidian and invisible on ivory. Mixing
+     * the ground's own foreground into its own background instead gives the
+     * same recessive weight on all five.
+     */
+    color: color-mix(
+      in srgb,
+      var(--ground-fg, var(--color-ivory)) 70%,
+      var(--ground-bg, var(--color-background))
+    );
     text-decoration: none;
     transition: color 0.3s;
     cursor: pointer;
@@ -267,12 +1219,12 @@
     inset-inline-start: 0;
     width: 0;
     height: 1px;
-    background: var(--color-gold);
+    background: var(--ground-accent, var(--color-gold));
     transition: width 0.4s var(--ease-luxury-bezier);
   }
 
   .nav-link:hover {
-    color: var(--color-ivory);
+    color: var(--ground-fg, var(--color-ivory));
   }
 
   .nav-link:hover::after {
@@ -280,7 +1232,7 @@
   }
 
   .nav-link.active {
-    color: var(--color-gold);
+    color: var(--ground-accent, var(--color-gold));
   }
 
   /* Section divider */
@@ -290,13 +1242,21 @@
     background: linear-gradient(
       to bottom,
       transparent,
-      var(--color-gold),
+      var(--ground-accent, var(--color-gold)),
       transparent
     );
     margin: 0 auto;
   }
 
-  /* Fragrance note pill */
+  /*
+   * Fragrance note pill.
+   *
+   * Was `--color-gold-soft` on a gold hairline — a pale gold that existed to
+   * glow against obsidian and is close to unreadable on ivory (about 1.9:1).
+   * The pill now takes the ground's own foreground for the note name and
+   * spends its gold on the hairline only, which is where §9 wants it: the
+   * accent marks the object, it does not draw the words.
+   */
   .note-pill {
     display: inline-flex;
     align-items: center;
@@ -305,15 +1265,15 @@
     border: 1px solid var(--color-border-gold);
     font-size: 12px;
     letter-spacing: 0.1em;
-    color: var(--color-champagne);
+    color: var(--ground-fg, var(--color-ink));
     transition:
       border-color 0.3s,
       background 0.3s;
   }
 
   .note-pill:hover {
-    border-color: var(--color-gold);
-    background: color-mix(in srgb, var(--color-gold) 6%, transparent);
+    border-color: var(--ground-accent, var(--color-gold-deep));
+    background: color-mix(in srgb, var(--color-gold) 8%, transparent);
   }
 
   /* Page transition */
@@ -334,14 +1294,18 @@
   }
 
   /*
-   * Gold at 7%, not white: a white sweep over obsidian reads as a generic SaaS
-   * placeholder, which is exactly the register this brand avoids.
+   * The sweep across a skeleton.
+   *
+   * Gold rather than white, still — a white sweep is the generic SaaS
+   * placeholder this brand avoids. The mix rises from 7% to 14% because the
+   * skeletons are stone now, not obsidian: a 7% gold that read clearly against
+   * near-black is below the noise floor against a warm light grey.
    */
   .khem-shimmer {
     background-image: linear-gradient(
       90deg,
       transparent 0%,
-      color-mix(in srgb, var(--color-gold) 7%, transparent) 50%,
+      color-mix(in srgb, var(--color-gold) 14%, transparent) 50%,
       transparent 100%
     );
     background-size: 200% 100%;
@@ -572,7 +1536,7 @@
   font-size: 13px;
 }
 
-[lang="ar"] .btn-luxury {
+[lang="ar"] .btn {
   font-size: 12px;
 }
 
@@ -609,38 +1573,43 @@
  */
 @media (max-width: 767px) {
   /*
-   * 16px is not a taste decision — it is iOS Safari's threshold. Focusing a
-   * field whose computed font-size is below 16px force-zooms the viewport, and
-   * the page then pans sideways because the layout is wider than the visual
-   * viewport it was zoomed into. The fields are 13–14px by design on desktop
-   * (`FIELD_CLASS` in the checkout, contact, comment, and admin forms), so the
-   * size is lifted here rather than in each component.
+   * ── The iOS focus-zoom floor ────────────────────────────
    *
-   * Do not "tidy" this back down to match the desktop field size, and do not
-   * solve it with `maximum-scale=1` on the viewport meta instead — that removes
-   * pinch-zoom for everyone.
+   * Focusing a text field whose computed `font-size` is below 16px makes iOS
+   * Safari zoom the viewport, and the page then pans sideways because the
+   * layout is wider than the visual viewport it was zoomed into.
+   *
+   * `.field` now declares 16px at every width, so every control that uses the
+   * shared primitive is already correct and this rule has nothing to do for
+   * them. It stays as a **floor** for anything that is added later without
+   * reaching for the primitive — that is the failure this catches, and it is
+   * invisible on a desktop browser.
+   *
+   * ## Two changes from the version this replaces
+   *
+   * `<select>` is no longer included. iOS opens a native picker for a select
+   * rather than an inline caret, and never zooms for one — so forcing 16px on
+   * them was doing nothing for accessibility and was overriding the deliberate
+   * 11px on the currency and sort controls, both of which are chrome and not
+   * form fields.
+   *
+   * And `!important` is gone. It was there because the four `FIELD_CLASS`
+   * constants declared 13px through a Tailwind utility that outranked a bare
+   * element selector. Those constants are `.field` now, which declares 16px
+   * itself and agrees with this rule instead of fighting it.
    */
-  input,
-  textarea,
-  select {
-    /*
-     * `!important` earns its place here. The `[lang="ar"]` optical-size block
-     * above rescales the same 13px field classes to 15px, and its selector
-     * (attribute + class + two `:not()`s) outranks a bare element selector — so
-     * without this, Arabic fields stayed one pixel under the threshold and kept
-     * zooming. This is a functional floor, not a stylistic preference.
-     */
-    font-size: 16px !important;
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea {
+    font-size: 16px;
   }
 
   /*
-   * The house button, at phone scale. The 36px side padding is a desktop
-   * measure; at 375px two of them in a row overflow. `min-height` holds the
-   * touch target at 44px even though the box is now shorter than the type
-   * would make it.
+   * The house button, at phone scale. The 30px side padding is a desktop
+   * measure; at 375px two of them in a row overflow. `min-height` is restated
+   * rather than inherited so the touch target holds at 44px even though the box
+   * is now shorter than the type would make it.
    */
-  .btn-luxury {
-    min-height: 44px;
+  .btn {
     padding: 11px 20px;
     font-size: 10px;
     letter-spacing: 0.16em;
@@ -702,23 +1671,57 @@
 }
 
 /*
- * ── The announcement bar ─────────────────────────────────────
+ * ── The header stack ─────────────────────────────────────────
  *
- * Its height is a variable rather than a class, because three things have to
- * agree on it and only one of them is the bar: the bar itself, `<Nav>`'s `top`,
- * and the padding on the page wrapper in `layout.tsx`. Written once here, the
- * whole header stack moves together — and every page's existing `pt-20` keeps
- * meaning "80px below the header" rather than "80px from the top of the
- * document", which is what it would silently become if the bar were simply
- * inserted above.
+ * Three numbers, declared once, that everything else reads:
  *
- * `0px` when no bar is rendered, so the offsets collapse to exactly what they
- * were before this feature existed. The attribute is written on `<body>` by the
- * server, so the value is correct in the first paint and no layout shift is
- * possible.
+ *   --announcement-h  the promo bar, or 0px when none is rendered
+ *   --nav-h           the header bar: 56px on a phone, 80px from `md` up
+ *   --header-h        the sum — how much vertical space the chrome occupies
+ *
+ * They are variables rather than classes because far more than the header
+ * depends on them: the page wrapper's top padding in `layout.tsx`, the
+ * mega-menu's `top`, every sticky sidebar and filter bar, the loading spacer,
+ * and the `100vh` maths on the full-height panels. Written once here, the whole
+ * stack moves together; written per component, one of them is always left
+ * behind after a height change and nobody notices until it clips something.
+ *
+ * ## Why `--header-h` is declared on `body` and not on `:root`
+ *
+ * Custom properties substitute at computed-value time on the element that
+ * declares them. `--header-h: calc(var(--announcement-h) + var(--nav-h))` on
+ * `:root` would resolve against `:root`'s `--announcement-h`, which is always
+ * `0px` — and the *result* is what inherits, so `body[data-announcement="on"]`
+ * raising the bar's height afterwards would not move it. Declaring it on
+ * `body`, the same element the announcement height is set on, is what makes
+ * the sum re-resolve. (`globals.css` has the same trap documented for
+ * `--color-ground`; it is the same mechanism.)
+ *
+ * `--announcement-h` is `0px` when no bar is rendered, so the offsets collapse
+ * to the header alone. The attribute is written on `<body>` by the server, so
+ * the value is correct in the first paint and no layout shift is possible.
  */
 :root {
   --announcement-h: 0px;
+  /*
+   * 56px on a phone.
+   *
+   * The bar is chrome, and on a 667px-tall screen an 80px bar is 12% of the
+   * viewport spent on it before any content. The controls inside keep their
+   * 44px touch targets — the height comes off the padding around them, not off
+   * the buttons, which is the difference between compact and cramped.
+   */
+  --nav-h: 56px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --nav-h: 80px;
+  }
+}
+
+body {
+  --header-h: calc(var(--announcement-h) + var(--nav-h));
 }
 
 body[data-announcement="on"] {

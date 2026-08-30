@@ -168,7 +168,7 @@ export default function AccountMenu() {
   const initial = (fullName ?? email ?? "K").charAt(0).toUpperCase();
 
   return (
-    <div ref={containerRef} className="relative flex shrink-0 items-center">
+    <div ref={containerRef} className="relative flex h-11 w-11 shrink-0 items-center justify-center">
       <button
         ref={triggerRef}
         type="button"
@@ -178,7 +178,7 @@ export default function AccountMenu() {
         aria-controls="account-menu"
         onClick={toggle}
         onKeyDown={onKeyDown}
-        className="flex h-[26px] w-[26px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-gold/30 bg-gold/10 transition-colors duration-300 ease-luxury-bezier hover:border-gold/70"
+        className="flex h-[26px] w-[26px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-ground-accent/30 bg-gold/10 transition-colors duration-300 ease-luxury-bezier hover:border-gold/70"
       >
         {user?.hasImage && user.imageUrl ? (
           <Image
@@ -191,7 +191,7 @@ export default function AccountMenu() {
         ) : (
           <span
             aria-hidden="true"
-            className="font-heading text-[11px] font-semibold text-gold"
+            className="font-heading text-[11px] font-semibold text-ground-accent"
           >
             {initial}
           </span>
@@ -214,17 +214,29 @@ export default function AccountMenu() {
         onKeyDown={onKeyDown}
         className={[
           "absolute end-0 top-[calc(100%+18px)] z-1002 w-64 origin-top",
-          "border border-border bg-[color-mix(in_srgb,var(--color-surface)_96%,transparent)] backdrop-blur-xl",
-          "rounded-[2px] shadow-[var(--shadow-luxury)]",
+          /*
+            `ground-ivory`, declared: this popover hangs off the header, and
+            the header's ground follows the page — a menu that inherited it
+            would change colour depending on which route it was opened from.
+            An overlay is its own surface and states it.
+
+            Opaque, and no `backdrop-filter`. It was 96% charcoal over a
+            `blur(24px)`, which is a dark panel on an ivory bar, and the blur
+            was live for as long as the element existed in the DOM rather than
+            only while it was open — this component is mounted in the header on
+            every route for every signed-in visitor.
+          */
+          "ground-ivory border border-ground-border bg-ground-bg",
+          "rounded-[2px] shadow-3",
           "transition-all duration-400 ease-luxury-bezier",
           open
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-0.5 opacity-0",
         ].join(" ")}
       >
-        <div className="border-b border-border px-5 py-4">
+        <div className="border-b border-ground-border px-5 py-4">
           {fullName ? (
-            <p className="mb-1 font-heading text-[13px] font-normal text-ivory">
+            <p className="mb-1 font-heading text-[13px] font-normal text-ground">
               {fullName}
             </p>
           ) : null}
@@ -233,7 +245,7 @@ export default function AccountMenu() {
           {email ? (
             <p
               {...ltrIsland(locale)}
-              className="truncate text-[11px] tracking-[0.05em] text-ivory/35"
+              className="truncate text-[11px] tracking-[0.05em] text-ground-muted"
             >
               {email}
             </p>
@@ -249,7 +261,7 @@ export default function AccountMenu() {
               itemRefs.current[index] = node;
             }}
             onClick={() => close()}
-            className="block border-b border-border px-5 py-4 font-heading text-[11px] tracking-[0.12em] text-ivory/70 no-underline transition-colors duration-300 ease-luxury-bezier hover:bg-gold/6 hover:text-gold focus-visible:bg-gold/6 focus-visible:text-gold"
+            className="block border-b border-ground-border px-5 py-4 font-heading text-[11px] tracking-[0.12em] text-ground-muted no-underline transition-colors duration-300 ease-luxury-bezier hover:bg-gold/6 hover:text-ground-accent focus-visible:bg-gold/6 focus-visible:text-ground-accent"
           >
             {row.label}
           </LocaleLink>
@@ -271,7 +283,7 @@ export default function AccountMenu() {
             // string, so it cannot become an open redirect.
             void signOut({ redirectUrl: localizePath(locale, "/") });
           }}
-          className="block w-full cursor-pointer bg-transparent px-5 py-4 text-start font-heading text-[11px] tracking-[0.12em] text-ivory/40 transition-colors duration-300 ease-luxury-bezier hover:bg-gold/6 hover:text-gold focus-visible:bg-gold/6 focus-visible:text-gold"
+          className="block w-full cursor-pointer bg-transparent px-5 py-4 text-start font-heading text-[11px] tracking-[0.12em] text-ground-muted transition-colors duration-300 ease-luxury-bezier hover:bg-gold/6 hover:text-ground-accent focus-visible:bg-gold/6 focus-visible:text-ground-accent"
         >
           {dict.nav.signOut}
         </button>

@@ -1,0 +1,404 @@
+@import "tailwindcss";
+
+/*
+ * The preview compiles its **own** Tailwind entry rather than importing
+ * `../globals.css`. Two reasons: the production sheet paints `body` with a
+ * dark radial gradient unconditionally, which would sit behind every light
+ * specimen on this page; and its `@theme` block is the *current* token set,
+ * which is precisely the thing this page exists to propose replacing. Keeping
+ * the two sheets apart means the preview can be wrong about a colour without
+ * the storefront being wrong about it.
+ */
+
+@theme {
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+}
+
+/*
+ * ── PROPOSED design tokens — preview only ────────────────────
+ *
+ * The token set described in `src/docs/khem-ui-design-system.md`, declared
+ * here and *nowhere else*. Everything is scoped to `.khem-preview`, so no
+ * production surface can see any of it: `globals.css` and its `@theme` block
+ * are untouched, and deleting the `design-preview/` folder deletes the entire
+ * proposal with it.
+ *
+ * The prefix is `--k-`, deliberately different from the live `--color-*`
+ * names, so that when this direction is approved the migration is a rename
+ * with a visible diff rather than a silent redefinition of colours the whole
+ * site already depends on.
+ */
+
+.khem-preview {
+  /* ── Grounds ─────────────────────────────────────── */
+  /* Dark: emotion. */
+  --k-obsidian: #0d0d0d;
+  --k-charcoal: #1a1a1a;
+  /* Light: shopping. */
+  --k-ivory: #f7f5f0;
+  /* One step brighter than ivory — a card lifted off the ivory ground
+     without resorting to a shadow. Pure white is never a ground. */
+  --k-cream: #fbfaf7;
+  /* Heritage. */
+  --k-sand: #e8e1d5;
+
+  /* ── Accent ──────────────────────────────────────── */
+  --k-gold: #b08d57;
+  --k-gold-soft: #d4b77a;
+  /* The gold that is actually legible as text on ivory: #b08d57 on #f7f5f0 is
+     ~2.6:1 and fails at body size. This is ~4.9:1. Gold-on-light copy uses
+     this; gold-on-dark copy uses --k-gold. */
+  --k-gold-deep: #8a6a3f;
+
+  /* ── Type on dark ────────────────────────────────── */
+  --k-on-dark: #f7f5f0;
+  --k-on-dark-muted: #b8b3aa;
+  --k-on-dark-accent: #b08d57;
+
+  /* ── Type on light ───────────────────────────────── */
+  --k-on-light: #151515;
+  --k-on-light-muted: #5f5a52;
+  --k-on-light-accent: #8a6a3f;
+
+  /* ── Lines ───────────────────────────────────────── */
+  --k-line-dark: rgba(247, 245, 240, 0.12);
+  --k-line-light: rgba(21, 21, 21, 0.1);
+  --k-line-gold: rgba(176, 141, 87, 0.38);
+
+  /* ── Elevation ───────────────────────────────────── */
+  /* Three steps, all of them restrained. Luxury reads as a crisp edge, not a
+     drop shadow; these exist to separate a floating surface from the ground
+     beneath it, nothing more. */
+  --k-shadow-0: none;
+  --k-shadow-1: 0 1px 2px rgba(21, 21, 21, 0.04);
+  --k-shadow-2: 0 8px 24px -12px rgba(21, 21, 21, 0.16);
+  --k-shadow-3: 0 24px 64px -24px rgba(21, 21, 21, 0.28);
+
+  /* ── Geometry ────────────────────────────────────── */
+  /* Near-square. The house has no rounded corners; 2px is the amount that
+     stops an edge looking like a rendering artefact. */
+  --k-radius: 2px;
+  --k-radius-lg: 4px;
+
+  /* ── Motion ──────────────────────────────────────── */
+  --k-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --k-fast: 240ms;
+  --k-slow: 620ms;
+
+  background: var(--k-ivory);
+  color: var(--k-on-light);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* ── Ground helpers ────────────────────────────────────────── */
+
+.k-dark {
+  background: var(--k-obsidian);
+  color: var(--k-on-dark);
+}
+.k-charcoal {
+  background: var(--k-charcoal);
+  color: var(--k-on-dark);
+}
+.k-light {
+  background: var(--k-ivory);
+  color: var(--k-on-light);
+}
+.k-cream {
+  background: var(--k-cream);
+  color: var(--k-on-light);
+}
+.k-sand {
+  background: var(--k-sand);
+  color: var(--k-on-light);
+}
+
+/* ── Type ──────────────────────────────────────────────────── */
+
+.khem-preview h1,
+.khem-preview h2,
+.khem-preview h3,
+.khem-preview h4 {
+  font-family: var(--font-heading), Georgia, serif;
+  font-weight: 400;
+}
+
+/* The eyebrow, restated in preview tokens. On light grounds it takes the deep
+   gold; on dark it takes the accent gold. */
+.k-eyebrow {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--k-on-light-accent);
+}
+.k-dark .k-eyebrow,
+.k-charcoal .k-eyebrow {
+  color: var(--k-on-dark-accent);
+}
+
+.k-rule {
+  height: 1px;
+  width: 48px;
+  background: var(--k-gold);
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+
+.k-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 13px 30px;
+  border: 1px solid transparent;
+  border-radius: var(--k-radius);
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background var(--k-fast) var(--k-ease),
+    color var(--k-fast) var(--k-ease),
+    border-color var(--k-fast) var(--k-ease);
+}
+
+.k-btn:focus-visible {
+  outline: 2px solid var(--k-gold);
+  outline-offset: 3px;
+}
+
+.k-btn[disabled] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/*
+ * Primary is obsidian, not gold. This is the single largest departure from the
+ * live system, and it is the doc's §13 instruction: gold is jewellery, and a
+ * gold fill on every buy button spends the accent everywhere. The gold arrives
+ * on hover instead — a hairline, not a fill.
+ */
+.k-btn-primary {
+  background: var(--k-obsidian);
+  color: var(--k-ivory);
+  border-color: var(--k-obsidian);
+}
+.k-btn-primary:hover {
+  background: #000;
+  border-color: var(--k-gold);
+}
+
+/* The same button on a dark ground: the grounds swap, the logic does not. */
+.k-btn-inverse {
+  background: var(--k-ivory);
+  color: var(--k-obsidian);
+  border-color: var(--k-ivory);
+}
+.k-btn-inverse:hover {
+  background: var(--k-gold-soft);
+  border-color: var(--k-gold-soft);
+}
+
+/* Reserved for the rare moment that is actually about the house: a membership
+   invitation, a limited release. Not for "Add to bag". */
+.k-btn-gold {
+  background: var(--k-gold);
+  color: var(--k-obsidian);
+  border-color: var(--k-gold);
+}
+.k-btn-gold:hover {
+  background: var(--k-gold-soft);
+  border-color: var(--k-gold-soft);
+}
+
+.k-btn-outline {
+  background: transparent;
+  color: var(--k-on-light);
+  border-color: var(--k-line-light);
+}
+.k-btn-outline:hover {
+  border-color: var(--k-gold);
+  color: var(--k-on-light-accent);
+}
+.k-dark .k-btn-outline,
+.k-charcoal .k-btn-outline {
+  color: var(--k-on-dark);
+  border-color: var(--k-line-dark);
+}
+.k-dark .k-btn-outline:hover,
+.k-charcoal .k-btn-outline:hover {
+  border-color: var(--k-gold);
+  color: var(--k-gold);
+}
+
+.k-btn-ghost {
+  background: transparent;
+  color: var(--k-on-light-muted);
+  border-color: transparent;
+  padding-inline: 14px;
+}
+.k-btn-ghost:hover {
+  color: var(--k-on-light);
+}
+
+.k-btn-sm {
+  min-height: 36px;
+  padding: 9px 18px;
+  font-size: 10px;
+}
+
+/* ── Fields ────────────────────────────────────────────────── */
+
+.k-field {
+  display: block;
+  width: 100%;
+  background: var(--k-cream);
+  border: 1px solid var(--k-line-light);
+  border-radius: var(--k-radius);
+  padding: 12px 14px;
+  /* 16px, not 14px: below 16 iOS Safari force-zooms on focus and the page then
+     pans sideways. Same reason the live `globals.css` lifts every field to 16px
+     under 768px — here it is simply the default, at every width. */
+  font-size: 16px;
+  color: var(--k-on-light);
+  transition:
+    border-color var(--k-fast) var(--k-ease),
+    box-shadow var(--k-fast) var(--k-ease);
+}
+
+.k-field::placeholder {
+  color: var(--k-on-light-muted);
+  opacity: 0.6;
+}
+
+.k-field:focus {
+  outline: none;
+  border-color: var(--k-gold);
+  box-shadow: 0 0 0 3px rgba(176, 141, 87, 0.16);
+}
+
+.k-field-error {
+  border-color: #b3261e;
+}
+
+.k-dark .k-field,
+.k-charcoal .k-field {
+  background: rgba(247, 245, 240, 0.04);
+  border-color: var(--k-line-dark);
+  color: var(--k-on-dark);
+}
+.k-dark .k-field::placeholder,
+.k-charcoal .k-field::placeholder {
+  color: var(--k-on-dark-muted);
+  opacity: 0.6;
+}
+
+.k-label {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--k-on-light-muted);
+}
+.k-dark .k-label,
+.k-charcoal .k-label {
+  color: var(--k-on-dark-muted);
+}
+
+/* ── Cards ─────────────────────────────────────────────────── */
+
+/*
+ * One card, everywhere. §31: same radius, same border, same padding rhythm,
+ * for product / collection / journal / admin / analytics. The only thing that
+ * differs between them is what goes inside.
+ */
+.k-card {
+  background: var(--k-cream);
+  border: 1px solid var(--k-line-light);
+  border-radius: var(--k-radius);
+  box-shadow: var(--k-shadow-1);
+  transition:
+    box-shadow var(--k-slow) var(--k-ease),
+    border-color var(--k-slow) var(--k-ease);
+}
+.k-card:hover {
+  box-shadow: var(--k-shadow-2);
+  border-color: var(--k-line-gold);
+}
+.k-dark .k-card,
+.k-charcoal .k-card {
+  background: var(--k-charcoal);
+  border-color: var(--k-line-dark);
+  box-shadow: none;
+}
+.k-dark .k-card:hover,
+.k-charcoal .k-card:hover {
+  border-color: var(--k-line-gold);
+}
+
+/* ── Product image zoom ────────────────────────────────────── */
+
+.k-zoom {
+  overflow: hidden;
+}
+.k-zoom .k-zoom-target {
+  transition: transform 800ms var(--k-ease);
+}
+.k-card:hover .k-zoom-target {
+  transform: scale(1.04);
+}
+
+/* Line clamps — §8's "long text must not make a card taller". */
+.k-clamp-1,
+.k-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.k-clamp-1 {
+  -webkit-line-clamp: 1;
+}
+.k-clamp-2 {
+  -webkit-line-clamp: 2;
+}
+
+/* ── Marquee (announcement bar specimen) ───────────────────── */
+
+@keyframes k-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.k-marquee {
+  animation: k-marquee 22s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k-marquee {
+    animation: none;
+  }
+  .khem-preview * {
+    transition-duration: 1ms !important;
+  }
+}
+
+/* ── Font helpers ──────────────────────────────────────────── */
+
+.k-serif {
+  font-family: var(--font-heading), Georgia, serif;
+}
+.k-sans {
+  font-family: var(--font-body), system-ui, sans-serif;
+}

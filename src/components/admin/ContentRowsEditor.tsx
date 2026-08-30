@@ -215,17 +215,17 @@ function RowCard({
   const hasTranslations = translations.length > 0;
 
   return (
-    <div className="border border-border p-5 sm:p-6">
+    <div className="border border-ground-border p-5 sm:p-6">
       <div className="space-y-4 md:space-y-6">
         {!isNew ? (
           <div className="flex flex-wrap items-center gap-3">
-            <span className="font-heading text-[11px] tracking-[0.1em] text-ivory/70">
+            <span className="font-heading text-[11px] tracking-[0.1em] text-ground">
               {values[headingField] || values.id}
             </span>
             {hasTranslations && untranslated ? (
               <span
                 title="No Arabic — the Arabic page falls back to the English text"
-                className="inline-block border border-border px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/30"
+                className="inline-block border border-ground-border px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-muted"
               >
                 No Arabic
               </span>
@@ -361,7 +361,7 @@ export default function ContentRowsEditor({
   return (
     <div className="space-y-5">
       {rows.length === 0 && !adding ? (
-        <p className="border border-border px-5 py-10 text-center text-[12px] leading-relaxed text-ivory/35">
+        <p className="border border-ground-border px-5 py-10 text-center text-[12px] leading-relaxed text-ground-muted">
           {emptyMessage}
         </p>
       ) : null}

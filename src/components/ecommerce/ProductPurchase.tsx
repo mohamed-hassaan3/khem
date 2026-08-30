@@ -138,11 +138,11 @@ export default function ProductPurchase({
       </p>
 
       <div {...island}>
-        <h1 className="mb-3 font-heading text-4xl font-normal text-ivory sm:text-5xl lg:text-6xl">
+        <h1 className="mb-3 font-heading text-4xl font-normal text-ground sm:text-5xl lg:text-6xl">
           {product.name}
         </h1>
         {product.subtitle ? (
-          <p className="text-[15px] italic tracking-wide text-gold/70">
+          <p className="text-[15px] italic tracking-wide text-ground-accent/70">
             {product.subtitle}
           </p>
         ) : null}
@@ -161,9 +161,9 @@ export default function ProductPurchase({
         <ProductPrice
           priceInCents={product.priceInCents}
           promotion={product.promotion}
-          className="font-heading text-3xl text-gold"
+          className="font-heading text-3xl text-ground-accent"
         />
-        <span className="text-xs tracking-[0.1em] text-ivory/35">
+        <span className="text-xs tracking-[0.1em] text-ground-muted">
           {formatVolume(product.volumeMl)} ·{" "}
           {formatProductType(product, dict.product.concentrations)}
         </span>
@@ -181,10 +181,10 @@ export default function ProductPurchase({
       {product.promotion !== null ? (
         <p
           dir="auto"
-          className="-mt-1 mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] tracking-[0.08em] text-champagne/70"
+          className="-mt-1 mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] tracking-[0.08em] text-gold-soft/70"
         >
           {product.promotion.label ? (
-            <span className="border border-gold/30 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-gold">
+            <span className="border border-ground-accent/30 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent">
               {product.promotion.label}
             </span>
           ) : null}
@@ -210,7 +210,7 @@ export default function ProductPurchase({
        * and put a CLS penalty on the product page (AGENTS.md §12). Reserving
        * one line costs a few pixels of extra breathing room in USD.
        */}
-      <p className="mb-7 min-h-3.5 text-[10px] tracking-[0.05em] text-ivory/25">
+      <p className="mb-7 min-h-3.5 text-[10px] tracking-[0.05em] text-ground-muted/70">
         {currency === BASE_CURRENCY
           ? null
           : interpolate(dict.currencySwitcher.conversionNote, {
@@ -219,7 +219,7 @@ export default function ProductPurchase({
       </p>
 
       <div className="mb-6 md:mb-10">
-        <p className="mb-4 text-[10px] uppercase tracking-[0.25em] text-ivory/40">
+        <p className="mb-4 text-[10px] uppercase tracking-[0.25em] text-ground-muted">
           {dict.product.quantity}
         </p>
         <QuantityStepper
@@ -242,7 +242,7 @@ export default function ProductPurchase({
           type="button"
           disabled={isSoldOut}
           onClick={handleAddToCart}
-          className="btn-luxury btn-luxury-fill justify-center px-4 text-[10px] tracking-[0.15em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 sm:px-8 sm:text-[11px] sm:tracking-[0.2em]"
+          className="btn btn-primary justify-center px-4 text-[10px] tracking-[0.15em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 sm:px-8 sm:text-[11px] sm:tracking-[0.2em]"
         >
           {isSoldOut ? (
             dict.product.soldOut
@@ -265,17 +265,17 @@ export default function ProductPurchase({
         />
       </div>
 
-      <p aria-live="polite" className="mt-4 text-[11px] text-ivory/35">
+      <p aria-live="polite" className="mt-4 text-[11px] text-ground-muted">
         {stockLabel}
       </p>
 
-      <div className="mt-8 md:mt-12 grid grid-cols-1 gap-4 md:gap-6 border-t border-border pt-7 sm:grid-cols-3">
+      <div className="mt-8 md:mt-12 grid grid-cols-1 gap-4 md:gap-6 border-t border-ground-border pt-7 sm:grid-cols-3">
         {Object.values(dict.product.trust).map((badge) => (
           <div key={badge.title}>
-            <p className="mb-1 font-heading text-[10px] tracking-[0.1em] text-gold">
+            <p className="mb-1 font-heading text-[10px] tracking-[0.1em] text-ground-accent">
               {badge.title}
             </p>
-            <p className="text-[10px] leading-relaxed text-ivory/35">
+            <p className="text-[10px] leading-relaxed text-ground-muted">
               {badge.desc}
             </p>
           </div>

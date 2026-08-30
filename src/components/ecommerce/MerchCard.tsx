@@ -23,11 +23,17 @@ import type { ProductCardData } from "@/src/types/catalog";
  * name are links to the detail page (`/ritual/[slug]`); the bag adds without
  * leaving the grid.
  *
- * A sibling of `<ProductCard>` rather than a wrapper: that one is an async
- * Server Component whose *whole surface* is a link to the detail page, which
- * this card's format filter and its own layout do not want. What the two share
- * is `<AddToBagButton>` and `<ProductFlag>`, overlaid on the same two corners
- * of both, resolved in the same order.
+ * A sibling of `<ProductCard>` rather than a wrapper, because that one is an
+ * async Server Component and this one needs the dictionary on the client. What
+ * they now share is their *structure*: an `<article>` with a stretched link, the
+ * bag as a real sibling of that anchor in the price row, one clamped line of
+ * name and two of copy, and `mt-auto` bottom-aligning the price. A shopper
+ * moving between `/collections` and `/collections/body-care` should not be able
+ * to tell that two components are involved.
+ *
+ * The photograph is no longer a separate `tabIndex={-1}` link: the stretched
+ * anchor covers it, so there is exactly one link per card and nothing to
+ * announce twice.
  */
 
 export interface MerchCardProps {
@@ -36,12 +42,9 @@ export interface MerchCardProps {
   sizes?: string;
 }
 
-/*
- * Two columns from the narrowest viewport up, so no breakpoint renders this
- * card at full width — the old `100vw` tail had phones fetching an image at
- * twice the resolution the slot uses.
- */
-const DEFAULT_SIZES = "(min-width: 1024px) 33vw, 50vw";
+/* Matched to the 2 / 3 / 4 grid. See `<ProductCard>` for the reasoning. */
+const DEFAULT_SIZES =
+  "(min-width: 1400px) 350px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw";
 
 export default function MerchCard({
   product,
@@ -66,7 +69,7 @@ export default function MerchCard({
   const href = productHref(product);
 
   return (
-    <article className="img-zoom relative flex flex-col bg-surface">
+    <article className="card img-zoom group relative flex h-full flex-col overflow-hidden">
       {isSoldOut ? (
         <ProductFlag label={dict.product.soldOut} locale={locale} tone="muted" />
       ) : product.badge ? (
@@ -75,82 +78,81 @@ export default function MerchCard({
         <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
       ) : null}
 
-      {/*
-       * The same corner bag the perfume cards carry, so one gesture means the
-       * same thing everywhere in the catalogue. The flag sits at the inline
-       * start and the bag at the inline end, so the two corners never meet, in
-       * either direction.
-       */}
-      <AddToBagButton
-        productId={product.id}
-        name={product.name}
-        inventory={product.inventory}
-      />
-
-      {/* `tabIndex={-1}` and an empty alt: this is the same destination as the
-          name below it, and a screen reader announcing the link twice — once as
-          the photograph, once as the heading — is noise, not navigation. */}
-      <LocaleLink
-        href={href}
-        tabIndex={-1}
-        aria-hidden="true"
-        className="relative block aspect-3/4 overflow-hidden bg-card"
+      <div
+        className={`relative aspect-4/5 overflow-hidden bg-[var(--card-bg)] ${
+          isSoldOut ? "opacity-55 grayscale-[0.35]" : ""
+        }`}
       >
         <Image
           src={product.primaryImage.url}
-          alt=""
+          alt={product.primaryImage.alt}
           fill
           sizes={sizes}
-          className="object-cover brightness-65 saturate-60"
+          className="object-cover"
         />
-      </LocaleLink>
+      </div>
 
-      <div className="flex flex-1 flex-col p-3.5 sm:p-7">
-        <div dir="auto" className="flex flex-1 flex-col">
-          {/* Format plus subtitle runs to three lines in a ~170px column and
-              starts to outweigh the name; two is the cap on phones only. */}
-          <p className="eyebrow mb-1.5 line-clamp-2 text-[9px] text-gold/55 sm:mb-2.5 sm:line-clamp-none">
-            {product.format ?? product.collectionName}
-            {product.subtitle ? ` · ${product.subtitle}` : ""}
-          </p>
+      <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
+        {/* Format plus subtitle runs to three lines in a ~170px column and
+            starts to outweigh the name; clamped on both grounds. */}
+        <p
+          dir="auto"
+          className="eyebrow mb-1 line-clamp-1 text-[9px] sm:mb-1.5"
+        >
+          {product.format ?? product.collectionName}
+          {product.subtitle ? ` · ${product.subtitle}` : ""}
+        </p>
 
-          {/* Latin proper noun in both trees. The heading carries the link, so
-              the photograph above can stay out of the tab order. */}
-          <h3
-            {...island}
-            className="mb-1.5 font-heading text-[13px] font-normal sm:mb-2.5 sm:text-lg"
-          >
-            <LocaleLink
-              href={href}
-              className="text-ivory no-underline transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
-            >
-              {product.name}
-            </LocaleLink>
-          </h3>
+        {/* Latin proper noun in both trees. The stretched anchor below carries
+            the destination, so this is plain text and not a second link. */}
+        <h3
+          {...island}
+          className="mb-1 line-clamp-1 font-heading text-[13px] font-normal tracking-wide text-ground sm:text-base sm:tracking-wider"
+        >
+          {product.name}
+        </h3>
 
-          {/*
-            Hidden on the two-up mobile grid — three lines of prose in a ~170px
-            column would leave nothing else on the card visible above the fold.
-            The wrapping div keeps `flex-1`, so the price row still
-            bottom-aligns across a row of cards with names of different lengths.
-          */}
-          <p className="mb-6 hidden flex-1 text-xs leading-loose text-ivory/40 sm:block">
-            {product.description}
-          </p>
-        </div>
+        {/*
+          Hidden on the two-up mobile grid — three lines of prose in a ~170px
+          column would leave nothing else on the card visible above the fold.
+        */}
+        <p
+          dir="auto"
+          className="mb-2.5 hidden line-clamp-2 text-xs leading-relaxed tracking-wide text-ground-muted sm:block"
+        >
+          {product.description}
+        </p>
 
-        <div className="flex items-center justify-between border-t border-border pt-3 sm:pt-4">
-          <ProductPrice
-            priceInCents={product.priceInCents}
-            promotion={product.promotion}
-            showPercent
-            className="font-heading text-[13px] text-gold sm:text-lg"
-          />
-          <span className="text-[9px] uppercase tracking-[0.1em] text-ivory/30 sm:text-[10px]">
-            {formatVolume(product.volumeMl)}
+        <div className="mt-auto" />
+
+        <div className="flex items-end justify-between gap-2 border-t border-ground-border pt-2.5">
+          <div className="min-w-0">
+            <ProductPrice
+              priceInCents={product.priceInCents}
+              promotion={product.promotion}
+              showPercent
+              className="font-heading text-[13px] text-ground sm:text-sm"
+            />
+            <p className="mt-1 text-[9px] uppercase tracking-[0.15em] text-ground-muted sm:text-[10px]">
+              {formatVolume(product.volumeMl)}
+            </p>
+          </div>
+
+          <span className="relative z-2">
+            <AddToBagButton
+              productId={product.id}
+              name={product.name}
+              inventory={product.inventory}
+            />
           </span>
         </div>
       </div>
+
+      <LocaleLink
+        href={href}
+        aria-label={product.name}
+        className="absolute inset-0 z-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+      />
     </article>
   );
 }

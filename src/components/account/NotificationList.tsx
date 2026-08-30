@@ -116,7 +116,7 @@ export default function NotificationList({
     <div>
       {unread.length > 0 ? (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <p className="font-heading text-[11px] tracking-[0.14em] text-gold">
+          <p className="font-heading text-[11px] tracking-[0.14em] text-ground-accent">
             {unread.length === 1
               ? copy.unreadOne
               : interpolate(copy.unread, { count: String(unread.length) })}
@@ -126,7 +126,7 @@ export default function NotificationList({
             type="button"
             disabled={isPending}
             onClick={() => markRead(unread)}
-            className="cursor-pointer bg-transparent p-0 font-heading text-[10px] uppercase tracking-[0.16em] text-ivory/35 underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-gold hover:underline disabled:opacity-40"
+            className="cursor-pointer bg-transparent p-0 font-heading text-[10px] uppercase tracking-[0.16em] text-ground-muted underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline disabled:opacity-40"
           >
             {copy.markAll}
           </button>
@@ -142,7 +142,7 @@ export default function NotificationList({
               key={`${item.kind}:${item.entityId}`}
               className={`flex items-start gap-4 border-s-2 px-5 py-5 transition-colors duration-500 ease-luxury-bezier ${
                 item.isRead
-                  ? "border-transparent bg-surface/40"
+                  ? "border-transparent bg-stone"
                   : "border-gold bg-gold/6"
               }`}
             >
@@ -151,12 +151,12 @@ export default function NotificationList({
                 strokeWidth={1.25}
                 aria-hidden="true"
                 className={`mt-0.5 shrink-0 ${
-                  item.isRead ? "text-ivory/25" : "text-gold"
+                  item.isRead ? "text-ground-muted/70" : "text-ground-accent"
                 }`}
               />
 
               <div className="min-w-0 flex-1">
-                <p className="mb-1 font-heading text-[10px] uppercase tracking-[0.18em] text-ivory/35">
+                <p className="mb-1 font-heading text-[10px] uppercase tracking-[0.18em] text-ground-muted">
                   {copy.kind[item.kind]}
                 </p>
 
@@ -165,12 +165,12 @@ export default function NotificationList({
                   * with a Latin order number inside it takes its base direction
                   * from the prose while the number keeps its own run.
                   */}
-                <p className="text-[13px] leading-relaxed text-ivory" dir="auto">
+                <p className="text-[13px] leading-relaxed text-ground" dir="auto">
                   {sentence(item, copy)}
                 </p>
 
                 {item.amountInCents !== null ? (
-                  <p className="mt-1 font-heading text-[13px] text-gold">
+                  <p className="mt-1 font-heading text-[13px] text-ground-accent">
                     <Price cents={item.amountInCents} />
                   </p>
                 ) : null}
@@ -178,14 +178,14 @@ export default function NotificationList({
                 <div className="mt-2.5 flex flex-wrap items-center gap-4">
                   <span
                     {...ltrIsland(locale)}
-                    className="text-[11px] text-ivory/25"
+                    className="text-[11px] text-ground-muted/70"
                   >
                     {formatAccountDate(item.occurredAt, locale)}
                   </span>
 
                   <LocaleLink
                     href={hrefFor(item)}
-                    className="font-heading text-[10px] uppercase tracking-[0.16em] text-gold/70 no-underline underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-gold hover:underline"
+                    className="font-heading text-[10px] uppercase tracking-[0.16em] text-ground-accent/70 no-underline underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline"
                   >
                     {copy.view}
                   </LocaleLink>
@@ -195,7 +195,7 @@ export default function NotificationList({
                       type="button"
                       disabled={isPending}
                       onClick={() => markRead([item])}
-                      className="cursor-pointer bg-transparent p-0 text-[10px] tracking-wide text-ivory/30 underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-gold hover:underline disabled:opacity-40"
+                      className="cursor-pointer bg-transparent p-0 text-[10px] tracking-wide text-ground-muted/70 underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline disabled:opacity-40"
                     >
                       {copy.markOne}
                     </button>

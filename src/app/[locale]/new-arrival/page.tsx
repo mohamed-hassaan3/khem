@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
 import ArrivalShowcase from "@/src/components/ecommerce/ArrivalShowcase";
 import NewArrivalHero from "@/src/components/ecommerce/NewArrivalHero";
@@ -75,7 +76,8 @@ export default async function NewArrivalPage({
       : interpolate(dict.newArrival.count, { count: arrivals.length });
 
   return (
-    <div className="min-h-screen bg-background text-ivory">
+    <div className="ground-ivory min-h-screen">
+      <NavGround ground="ivory" />
       <NewArrivalHero
         eyebrow={dict.newArrival.eyebrow}
         titleLead={dict.newArrival.titleLead}
@@ -87,7 +89,7 @@ export default async function NewArrivalPage({
       />
 
       {arrivals.length === 0 ? (
-        <p className="px-4 md:px-6 py-16 md:py-32 text-center text-[13px] leading-loose text-ivory/35">
+        <p className="px-4 md:px-6 py-16 md:py-32 text-center text-[13px] leading-loose text-ground-muted">
           {dict.newArrival.empty}
         </p>
       ) : (
@@ -103,24 +105,24 @@ export default async function NewArrivalPage({
       )}
 
       {/* ── CLOSING BAND ────────────────────────────── */}
-      <section className="border-t border-border bg-surface px-4 py-14 md:px-20 md:py-30">
+      <section className="ground-sand border-t border-ground-border px-4 py-14 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:py-30">
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="eyebrow mb-5">{dict.newArrival.closing.eyebrow}</p>
 
-          <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl">
+          <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl">
             {dict.newArrival.closing.heading}
           </h2>
 
           <div className="gold-line mx-auto my-8 w-16" />
 
-          <p className="mb-6 md:mb-10 text-[13px] leading-loose text-ivory/40">
+          <p className="mb-6 md:mb-10 text-[13px] leading-loose text-ground-muted">
             {dict.newArrival.closing.body}
           </p>
 
           {/* The whole catalogue, unfiltered — the band offers what this page
               is *not* showing, so filtering it to these same two products
               would be a link back to where the visitor already is. */}
-          <LocaleLink href="/collections" className="btn-luxury">
+          <LocaleLink href="/collections" className="btn btn-outline">
             {dict.newArrival.closing.cta}
           </LocaleLink>
         </Reveal>

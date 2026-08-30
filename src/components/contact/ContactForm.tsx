@@ -25,13 +25,12 @@ const MESSAGE_MIN_LENGTH = 10;
 
 type Field = "name" | "email" | "message";
 
-const FIELD_CLASS =
-  "w-full border border-border bg-ivory/3 px-5 py-4 text-[13px] tracking-wide text-ivory transition-colors duration-300 placeholder:text-ivory/25 focus:border-gold/40 focus:outline-none";
+/* The shared primitives. See `globals.css` — `.field`, `.label`, `.field-error`. */
+const FIELD_CLASS = "field";
 
-const LABEL_CLASS =
-  "mb-2.5 block font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35";
+const LABEL_CLASS = "label";
 
-const ERROR_CLASS = "mt-2 text-[11px] tracking-wide text-danger";
+const ERROR_CLASS = "field-error";
 
 export interface ContactFormProps {
   /** Subject options, queried server-side. */
@@ -167,9 +166,9 @@ export default function ContactForm({ subjects }: ContactFormProps) {
     return (
       <div
         role="status"
-        className="border border-gold/20 bg-gold/5 p-10 text-center md:p-12"
+        className="border border-ground-accent/20 bg-gold/5 p-10 text-center md:p-12"
       >
-        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-gold text-gold">
+        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-gold text-ground-accent">
           <svg
             width="20"
             height="20"
@@ -182,10 +181,10 @@ export default function ContactForm({ subjects }: ContactFormProps) {
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <p className="mb-2.5 font-heading text-base tracking-widest text-gold">
+        <p className="mb-2.5 font-heading text-base tracking-widest text-ground-accent">
           {dict.contactForm.successHeading}
         </p>
-        <p className="text-[13px] leading-loose text-ivory/45">
+        <p className="text-[13px] leading-loose text-ground-muted">
           {dict.contactForm.successBody}
         </p>
       </div>
@@ -263,7 +262,7 @@ export default function ContactForm({ subjects }: ContactFormProps) {
           className={`${FIELD_CLASS} cursor-pointer appearance-none`}
         >
           {subjects.map((option) => (
-            <option key={option} value={option} className="bg-surface">
+            <option key={option} value={option} className="card">
               {option}
             </option>
           ))}
@@ -329,7 +328,7 @@ export default function ContactForm({ subjects }: ContactFormProps) {
         type="submit"
         disabled={isPending}
         aria-busy={isPending}
-        className="btn-luxury btn-luxury-fill min-w-50 justify-center self-start disabled:cursor-not-allowed disabled:opacity-50"
+        className="btn btn-primary min-w-50 justify-center self-start disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? dict.forms.sending : dict.forms.send}
       </button>

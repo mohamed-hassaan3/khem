@@ -55,7 +55,7 @@ export default function CartDrawerLine({
   const maxQuantity = quantityCeiling(product.inventory);
 
   return (
-    <article className="grid grid-cols-[72px_1fr] items-start gap-4 border-b border-border py-6 last:border-b-0">
+    <article className="grid grid-cols-[72px_1fr] items-start gap-4 border-b border-ground-border py-6 last:border-b-0">
       {/* `tabIndex={-1}` and an empty alt: the name below is the same
           destination, and a panel this narrow cannot afford to announce it
           twice. */}
@@ -64,7 +64,7 @@ export default function CartDrawerLine({
         tabIndex={-1}
         aria-hidden="true"
         onClick={onNavigate}
-        className="relative block aspect-3/4 overflow-hidden bg-card"
+        className="relative block aspect-3/4 overflow-hidden bg-[var(--card-bg)]"
       >
         <Image
           src={product.primaryImage.url}
@@ -78,12 +78,12 @@ export default function CartDrawerLine({
       <div className="min-w-0">
         <h3
           {...island}
-          className="mb-1 truncate font-heading text-sm font-normal tracking-wide text-ivory"
+          className="mb-1 truncate font-heading text-sm font-normal tracking-wide text-ground"
         >
           <LocaleLink
             href={productHref(product)}
             onClick={onNavigate}
-            className="transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
+            className="transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-none"
           >
             {product.name}
           </LocaleLink>
@@ -91,7 +91,7 @@ export default function CartDrawerLine({
 
         {/* Translated in both trees, so no LTR island — the bidi algorithm
             places the Latin volume token correctly inside the Arabic run. */}
-        <p className="mb-4 text-[10px] tracking-[0.1em] text-ivory/35">
+        <p className="mb-4 text-[10px] tracking-[0.1em] text-ground-muted">
           {formatProductType(product, dict.product.concentrations)} ·{" "}
           {formatVolume(product.volumeMl)}
         </p>
@@ -107,7 +107,7 @@ export default function CartDrawerLine({
 
           <span
             {...island}
-            className="font-heading text-sm tabular-nums text-gold"
+            className="font-heading text-sm tabular-nums text-ground-accent"
           >
             {formatPrice(
               lineTotalInCents({
@@ -128,7 +128,7 @@ export default function CartDrawerLine({
           type="button"
           onClick={onRemove}
           aria-label={interpolate(dict.cart.remove, { name: product.name })}
-          className="mt-3 cursor-pointer font-heading text-[10px] uppercase tracking-[0.15em] text-ivory/25 transition-colors duration-300 ease-out hover:text-ivory/60 focus-visible:text-gold focus-visible:outline-none"
+          className="mt-3 cursor-pointer font-heading text-[10px] uppercase tracking-[0.15em] text-ground-muted/70 transition-colors duration-300 ease-out hover:text-ground-muted focus-visible:text-ground-accent focus-visible:outline-none"
         >
           {dict.cart.removeLabel}
         </button>

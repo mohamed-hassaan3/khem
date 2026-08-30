@@ -46,7 +46,7 @@ export default function ConsentToggle({
         "transition-colors duration-500 ease-luxury-bezier",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold/60",
         "focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
-        checked ? "border-gold/60 bg-gold/25" : "border-white/12 bg-white/6",
+        checked ? "border-gold/60 bg-gold/25" : "border-ground-border bg-stone",
         disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
       ].join(" ")}
     >

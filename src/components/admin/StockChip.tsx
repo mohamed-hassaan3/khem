@@ -28,5 +28,5 @@ export default function StockChip({ inventory }: { inventory: number }) {
     );
   }
 
-  return <span className="text-[12px] tracking-wide text-ivory/60">{inventory}</span>;
+  return <span className="text-[12px] tracking-wide text-ground-muted">{inventory}</span>;
 }

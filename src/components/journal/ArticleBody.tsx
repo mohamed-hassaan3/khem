@@ -32,9 +32,9 @@ export interface ArticleBodyProps {
 const DROP_CAP =
   "first-letter:float-left first-letter:me-3 first-letter:mt-1 " +
   "first-letter:font-heading first-letter:text-6xl first-letter:leading-none " +
-  "first-letter:text-gold rtl:first-letter:float-right";
+  "first-letter:text-ground-accent rtl:first-letter:float-right";
 
-const PARAGRAPH = "mb-8 text-[15px] leading-[2] text-ivory/60";
+const PARAGRAPH = "mb-8 text-[15px] leading-[2] text-ground-muted";
 
 /**
  * A block's text, with `*emphasis*` turned into `<em>`.
@@ -48,7 +48,7 @@ function Inline({ text }: { text: string }) {
     <>
       {parseInline(text).map((segment, index) =>
         segment.emphasis ? (
-          <em key={index} className="italic text-ivory/75">
+          <em key={index} className="italic text-ground">
             {segment.text}
           </em>
         ) : (
@@ -71,7 +71,7 @@ export default function ArticleBody({ article, locale }: ArticleBodyProps) {
     <section className="mx-auto max-w-3xl px-4 md:px-6 py-12 md:py-28" {...island}>
       {/* ── LEAD ────────────────────────────────────── */}
       <Reveal>
-        <p className="font-heading text-lg italic leading-relaxed text-ivory/70 md:text-xl">
+        <p className="font-heading text-lg italic leading-relaxed text-ground-muted md:text-xl">
           <Inline text={article.excerpt} />
         </p>
         <div
@@ -90,7 +90,7 @@ export default function ArticleBody({ article, locale }: ArticleBodyProps) {
           return (
             <h2
               key={key}
-              className="mt-10 md:mt-16 mb-6 font-heading text-xl font-normal leading-snug text-ivory md:text-2xl"
+              className="mt-10 md:mt-16 mb-6 font-heading text-xl font-normal leading-snug text-ground md:text-2xl"
             >
               <Inline text={block.text} />
             </h2>
@@ -101,7 +101,7 @@ export default function ArticleBody({ article, locale }: ArticleBodyProps) {
           return (
             <blockquote
               key={key}
-              className="my-8 md:my-14 border-s border-gold/40 ps-8 font-heading text-xl italic leading-relaxed text-champagne md:text-2xl"
+              className="my-8 md:my-14 border-s border-ground-accent/40 ps-8 font-heading text-xl italic leading-relaxed text-gold-soft md:text-2xl"
             >
               <Inline text={block.text} />
             </blockquote>

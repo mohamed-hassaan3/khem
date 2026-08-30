@@ -27,8 +27,8 @@ export default function ProductPyramid({
 
       <div className="grid grid-cols-1 gap-4 md:gap-6 sm:grid-cols-3">
         {tiers.map((tier) => (
-          <div key={tier.label} className="border border-border bg-surface p-7">
-            <p className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/60">
+          <div key={tier.label} className="ground-sand border border-ground-border p-7">
+            <p className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/60">
               {tier.label}
             </p>
 
@@ -37,7 +37,7 @@ export default function ProductPyramid({
               {tier.notes.map((note) => (
                 <li
                   key={note}
-                  className="flex items-center gap-2.5 text-xs text-ivory/70"
+                  className="flex items-center gap-2.5 text-xs text-ground-muted"
                 >
                   <span
                     aria-hidden="true"

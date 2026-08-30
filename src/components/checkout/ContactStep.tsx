@@ -54,7 +54,7 @@ export default function ContactStep({
        * header rather than beside a field, where it would read as that field's
        * hint.
        */}
-      <p className="text-[11px] leading-relaxed tracking-wide text-ivory/30 sm:col-span-2">
+      <p className="text-[11px] leading-relaxed tracking-wide text-ground-muted/70 sm:col-span-2">
         {sessionEmail
           ? interpolate(copy.signedInAs, { email: sessionEmail })
           : copy.guestNote}

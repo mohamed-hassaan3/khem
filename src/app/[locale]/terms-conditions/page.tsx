@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import NavGround from "@/src/components/NavGround";
 import LegalDocumentBody from "@/src/components/legal/LegalDocumentBody";
 import LegalHero from "@/src/components/legal/LegalHero";
 import { isLocale } from "@/src/lib/i18n/config";
@@ -49,7 +50,9 @@ export default async function TermsConditions({
   const doc = await getLegalDocument(activeLocale, "terms-conditions");
 
   return (
-    <div className="min-h-screen bg-background text-ivory">
+    <div className="ground-ivory min-h-screen">
+      {/* Long-form legal copy is read, not admired. Ivory (§20's reasoning). */}
+      <NavGround ground="ivory" />
       <div dir="auto">
         <LegalHero
           eyebrow={doc.eyebrow}

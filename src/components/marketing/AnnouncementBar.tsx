@@ -106,7 +106,19 @@ export default function AnnouncementBar({
       onMouseLeave={() => setIsPaused(false)}
       onFocusCapture={() => setIsPaused(true)}
       onBlurCapture={() => setIsPaused(false)}
-      className="fixed inset-x-0 top-0 z-997 flex h-[var(--announcement-h)] items-center overflow-hidden border-b border-gold/15 bg-black text-ivory/75"
+      /*
+        `ground-charcoal`: the bar sits above the header and is the same colour
+        on every page, so it declares its ground rather than inheriting the one
+        beneath the header.
+
+        Charcoal rather than the pure black this was. It is the only band of
+        dark above the fold, and it earns that by being the house speaking —
+        but at #000 it read as a system notification bar bolted onto the top of
+        the page. In charcoal it matches the footer, so the document is
+        bracketed by the same colour top and bottom instead of opening on a
+        colour that appears nowhere else.
+      */
+      className="ground-charcoal fixed inset-x-0 top-0 z-997 flex h-[var(--announcement-h)] items-center overflow-hidden border-b border-ground-accent/15 bg-ground-bg text-ground-muted"
     >
       {effectiveMode === "MARQUEE" ? (
         <div
@@ -162,7 +174,7 @@ function MarqueeRun({
             <Message announcement={announcement} />
           </span>
           {/* A hairline diamond between messages, not a bullet. */}
-          <span aria-hidden className="text-gold/30">
+          <span aria-hidden className="text-ground-accent/30">
             ◆
           </span>
         </span>
@@ -189,7 +201,7 @@ function Message({
     <>
       <span className="truncate">{announcement.message}</span>
       {announcement.ctaLabel ? (
-        <span className="ms-2 shrink-0 border-b border-gold/40 pb-px text-gold">
+        <span className="ms-2 shrink-0 border-b border-ground-accent/40 pb-px text-ground-accent">
           {announcement.ctaLabel}
         </span>
       ) : null}
@@ -208,7 +220,7 @@ function Message({
       <LocaleLink
         href={announcement.href}
         dir="auto"
-        className={`${className} text-inherit no-underline transition-colors duration-300 hover:text-ivory`}
+        className={`${className} text-inherit no-underline transition-colors duration-300 hover:text-ground`}
       >
         {body}
       </LocaleLink>

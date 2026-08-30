@@ -70,8 +70,8 @@ export default function VoucherCard({ voucher, locale, dict }: VoucherCardProps)
         "flex flex-col gap-6 border px-6 py-7 sm:px-8 sm:py-8",
         "transition-colors duration-500 ease-luxury-bezier",
         isAvailable
-          ? "border-gold/25 bg-gold/6"
-          : "border-border bg-surface/60",
+          ? "border-ground-accent/25 bg-gold/6"
+          : "border-ground-border bg-stone",
         isSpent ? "opacity-55" : "",
       ].join(" ")}
     >
@@ -81,13 +81,13 @@ export default function VoucherCard({ voucher, locale, dict }: VoucherCardProps)
             {...ltrIsland(locale)}
             className={[
               "mb-2 font-heading text-xl tracking-[0.18em] sm:text-2xl",
-              isAvailable ? "text-gold" : "text-ivory/60",
+              isAvailable ? "text-ground-accent" : "text-ground-muted",
             ].join(" ")}
           >
             {voucher.code}
           </p>
 
-          <p className="flex flex-wrap items-baseline gap-1.5 font-heading text-sm text-ivory">
+          <p className="flex flex-wrap items-baseline gap-1.5 font-heading text-sm text-ground">
             {voucher.kind === "PERCENTAGE" ? (
               interpolate(dict.percentOff, { value: String(voucher.value) })
             ) : (
@@ -103,17 +103,17 @@ export default function VoucherCard({ voucher, locale, dict }: VoucherCardProps)
           className={[
             "shrink-0 border px-3 py-1.5 font-heading text-[10px] uppercase tracking-[0.16em]",
             isAvailable
-              ? "border-gold/40 text-gold"
-              : "border-border text-ivory/35",
+              ? "border-ground-accent/40 text-ground-accent"
+              : "border-ground-border text-ground-muted",
           ].join(" ")}
         >
           {dict.status[voucher.status]}
         </span>
       </div>
 
-      <div className="flex flex-col gap-1.5 text-[12px] leading-relaxed text-ivory/40">
+      <div className="flex flex-col gap-1.5 text-[12px] leading-relaxed text-ground-muted">
         {voucher.description ? (
-          <p className="text-ivory/55" dir="auto">
+          <p className="text-ground-muted" dir="auto">
             {voucher.description}
           </p>
         ) : null}
@@ -123,7 +123,7 @@ export default function VoucherCard({ voucher, locale, dict }: VoucherCardProps)
         {voucher.minimumOrderInCents > 0 ? (
           <p className="flex flex-wrap items-baseline gap-1.5">
             <span>{dict.minimum}</span>
-            <Price cents={voucher.minimumOrderInCents} className="text-ivory/60" />
+            <Price cents={voucher.minimumOrderInCents} className="text-ground-muted" />
           </p>
         ) : null}
 

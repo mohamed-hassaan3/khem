@@ -85,7 +85,7 @@ export default function StarRatingInput({
                 strokeWidth={1.25}
                 aria-hidden="true"
                 className={`transition-colors duration-300 ease-out peer-focus-visible:drop-shadow-[0_0_6px_color-mix(in_srgb,var(--color-gold)_60%,transparent)] ${
-                  isFilled ? "fill-gold text-gold" : "fill-none text-ivory/25"
+                  isFilled ? "fill-gold text-ground-accent" : "fill-none text-ground-muted/70"
                 }`}
               />
             </label>
@@ -104,7 +104,7 @@ export default function StarRatingInput({
             onChange(0);
             setPreview(0);
           }}
-          className="cursor-pointer font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/30 transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
+          className="cursor-pointer font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted/70 transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-none"
         >
           {clearLabel}
         </button>

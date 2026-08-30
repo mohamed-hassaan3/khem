@@ -41,7 +41,7 @@ export default async function ArticleHero({
         fill
         priority
         sizes="100vw"
-        className="scale-105 object-cover brightness-60 saturate-75"
+        className="scale-105 object-cover"
       />
 
       {/* One gradient, weighted to the bottom: it dissolves the lower edge into
@@ -49,7 +49,7 @@ export default async function ArticleHero({
           photograph keeps the brightness the journal index gives it rather than
           being flattened by a second flat wash. */}
       <div
-        className="absolute inset-0 bg-linear-to-t from-background via-background/75 to-black/20"
+        className="banner-scrim banner-scrim-base"
         aria-hidden="true"
       />
 
@@ -59,15 +59,15 @@ export default async function ArticleHero({
             {/* ── BREADCRUMB ──────────────────────────── */}
             <nav
               aria-label={dict.journal.article.breadcrumbLabel}
-              className="mb-6 font-heading text-[10px] uppercase tracking-[0.25em] text-ivory/40"
+              className="mb-6 font-heading text-[10px] uppercase tracking-[0.25em] text-ground-muted"
             >
               <LocaleLink
                 href="/journal"
-                className="no-underline transition-colors duration-300 ease-out hover:text-gold"
+                className="no-underline transition-colors duration-300 ease-out hover:text-ground-accent"
               >
                 {dict.journal.article.journal}
               </LocaleLink>
-              <span className="mx-3 text-ivory/20" aria-hidden="true">
+              <span className="mx-3 text-ground-muted" aria-hidden="true">
                 /
               </span>
               <span {...island}>{article.category}</span>
@@ -76,7 +76,7 @@ export default async function ArticleHero({
             <div {...island}>
               <p className="eyebrow mb-5">{article.category}</p>
 
-              <h1 className="font-heading text-3xl font-normal leading-tight text-balance text-ivory sm:text-5xl md:text-6xl">
+              <h1 className="font-heading text-3xl font-normal leading-tight text-balance text-ground sm:text-5xl md:text-6xl">
                 {article.title}
               </h1>
             </div>
@@ -88,7 +88,7 @@ export default async function ArticleHero({
 
             {/* ── META ────────────────────────────────── */}
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <span className="text-[10px] tracking-widest text-ivory/40">
+              <span className="text-[10px] tracking-widest text-ground-muted">
                 {interpolate(dict.common.minRead, {
                   minutes: article.readTimeMinutes,
                 })}
@@ -96,7 +96,7 @@ export default async function ArticleHero({
               <span className="h-3 w-px bg-ivory/15" aria-hidden="true" />
               <time
                 dateTime={article.publishedAt}
-                className="text-[10px] tracking-wide text-ivory/40"
+                className="text-[10px] tracking-wide text-ground-muted"
               >
                 {formatArticleDate(article.publishedAt)}
               </time>

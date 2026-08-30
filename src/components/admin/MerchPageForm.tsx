@@ -116,7 +116,7 @@ export default function MerchPageForm({ page }: { page: AdminMerchPage }) {
         <AdminNotice tone={result.ok ? "success" : "error"}>{result.message}</AdminNotice>
       ) : null}
 
-      <p className="max-w-xl text-[11px] leading-relaxed text-ivory/30">
+      <p className="max-w-xl text-[11px] leading-relaxed text-ground-muted">
         {MEMBERSHIP_HINT[page.slug]} This screen sets the page&rsquo;s heading,
         its opening paragraph and its hero photograph. The Arabic wording is held
         separately and is not edited here.
@@ -156,10 +156,10 @@ export default function MerchPageForm({ page }: { page: AdminMerchPage }) {
         onChange={setDescription}
       />
 
-      <fieldset className="space-y-6 border-t border-border pt-8">
+      <fieldset className="space-y-6 border-t border-ground-border pt-8">
         <legend className="sr-only">Banner image</legend>
 
-        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
           Banner image
         </p>
 
@@ -187,7 +187,7 @@ export default function MerchPageForm({ page }: { page: AdminMerchPage }) {
         </div>
       </fieldset>
 
-      <div className="flex gap-3 border-t border-border pt-8">
+      <div className="flex gap-3 border-t border-ground-border pt-8">
         <AdminButton type="submit" disabled={isPending}>
           {isPending ? "Saving…" : "Save page"}
         </AdminButton>

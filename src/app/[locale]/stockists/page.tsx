@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 
+import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
 import StockistBadge from "@/src/components/stockists/StockistBadge";
 import StockistDirectory, {
@@ -85,12 +86,13 @@ export default async function Stockists({
   const solo = openStockists.length === 1 ? openStockists[0] : null;
 
   return (
-    <div className="min-h-screen bg-background text-ivory">
+    <div className="ground-ivory min-h-screen">
+      <NavGround ground="ivory" />
       {/* ── HEADER ─────────────────────────────────── */}
-      <section className="bg-background px-4 pt-14 md:px-20 md:pt-32">
+      <section className="px-4 pt-14 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pt-32">
         <Reveal className="mx-auto max-w-350 pb-10">
           <p className="eyebrow mb-4">{dict.stockists.hero.eyebrow}</p>
-          <h1 className="font-heading text-4xl font-normal text-ivory sm:text-5xl md:text-7xl">
+          <h1 className="font-heading text-4xl font-normal text-ground sm:text-5xl md:text-7xl">
             {dict.stockists.hero.heading}
           </h1>
         </Reveal>
@@ -104,11 +106,11 @@ export default async function Stockists({
       />
 
       {/* ── PARTNERS ────────────────────────────────── */}
-      <section className="border-t border-border bg-background px-4 py-14 md:px-20 md:py-30">
+      <section className="border-t border-ground-border px-4 py-14 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:py-30">
         <div className="mx-auto max-w-350">
           <Reveal className="mb-10 md:mb-16">
             <p className="eyebrow mb-4">{dict.stockists.partners.eyebrow}</p>
-            <h2 className="font-heading text-2xl font-normal text-ivory sm:text-3xl md:text-4xl">
+            <h2 className="font-heading text-2xl font-normal text-ground sm:text-3xl md:text-4xl">
               {dict.stockists.partners.heading}
             </h2>
           </Reveal>
@@ -138,16 +140,16 @@ export default async function Stockists({
       </section>
 
       {/* ── WHOLESALE ENQUIRIES ─────────────────────── */}
-      <section className="border-t border-border bg-surface px-4 py-14 text-center md:px-20 md:py-30">
+      <section className="ground-sand border-t border-ground-border px-4 py-14 text-center sm:px-6 md:px-10 lg:px-12 xl:px-16 md:py-30">
         <Reveal className="mx-auto max-w-xl">
           <p className="eyebrow mb-5">{dict.stockists.wholesale.eyebrow}</p>
-          <h2 className="mb-5 font-heading text-2xl font-normal text-ivory sm:text-3xl md:text-4xl">
+          <h2 className="mb-5 font-heading text-2xl font-normal text-ground sm:text-3xl md:text-4xl">
             {dict.stockists.wholesale.heading}
           </h2>
-          <p className="mb-11 text-[13px] leading-loose text-ivory/40">
+          <p className="mb-11 text-[13px] leading-loose text-ground-muted">
             {dict.stockists.wholesale.lede}
           </p>
-          <a href={`mailto:${wholesaleEmail}`} className="btn-luxury">
+          <a href={`mailto:${wholesaleEmail}`} className="btn btn-outline">
             {dict.stockists.wholesale.cta}
           </a>
         </Reveal>
@@ -173,14 +175,14 @@ function StockistFeature({
   labels: Dictionary["stockists"];
 }) {
   return (
-    <div className="grid grid-cols-1 bg-surface lg:grid-cols-2">
+    <div className="card grid grid-cols-1 overflow-hidden lg:grid-cols-2">
       <div className="img-zoom relative aspect-4/3 overflow-hidden lg:aspect-auto lg:min-h-125">
         <Image
           src={stockist.image.url}
           alt={stockist.image.alt}
           fill
           sizes="(min-width: 1024px) 50vw, 100vw"
-          className="object-cover brightness-55 saturate-65"
+          className="object-cover"
         />
       </div>
 
@@ -195,13 +197,13 @@ function StockistFeature({
 
         {/* Store records come from the database — English only. */}
         <h3
-          className="mb-2 font-heading text-2xl font-normal text-ivory md:text-3xl"
+          className="mb-2 font-heading text-2xl font-normal text-ground md:text-3xl"
           {...island}
         >
           {stockist.name}
         </h3>
         <p
-          className="text-[12px] tracking-[0.1em] text-gold/60"
+          className="text-[12px] tracking-[0.1em] text-ground-accent/60"
           {...island}
         >
           {stockist.city}, {stockist.country}
@@ -230,14 +232,14 @@ function StockistCard({
   labels: Dictionary["stockists"];
 }) {
   return (
-    <article className="h-full bg-surface">
+    <article className="h-full">
       <div className="img-zoom relative h-50 overflow-hidden">
         <Image
           src={stockist.image.url}
           alt={stockist.image.alt}
           fill
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover brightness-45 saturate-50"
+          className="object-cover"
         />
       </div>
 
@@ -245,7 +247,7 @@ function StockistCard({
         <div className="mb-3 flex items-start justify-between gap-3">
           {/* Store records come from the database — English only. */}
           <h3
-            className="font-heading text-[15px] font-normal text-ivory"
+            className="font-heading text-[15px] font-normal text-ground"
             {...island}
           >
             {stockist.name}
@@ -257,7 +259,7 @@ function StockistCard({
         </div>
 
         <p
-          className="mb-2 text-[12px] tracking-[0.08em] text-gold/60"
+          className="mb-2 text-[12px] tracking-[0.08em] text-ground-accent/60"
           {...island}
         >
           {stockist.city}, {stockist.country}
@@ -265,14 +267,14 @@ function StockistCard({
         {/* Both are nullable — rendered only when the record carries them. */}
         {stockist.address ? (
           <p
-            className="mb-1 text-[11px] leading-relaxed text-ivory/35"
+            className="mb-1 text-[11px] leading-relaxed text-ground-muted"
             {...island}
           >
             {stockist.address}
           </p>
         ) : null}
         {stockist.hours ? (
-          <p className="text-[11px] text-ivory/25" {...island}>
+          <p className="text-[11px] text-ground-muted/70" {...island}>
             {stockist.hours}
           </p>
         ) : null}

@@ -42,26 +42,26 @@ export default async function ProductIngredients({
           <LocaleLink
             key={ingredient.id}
             href={`/ingredients?ingredient=${ingredient.slug}`}
-            className="flex flex-col gap-2 bg-surface p-6 no-underline transition-colors duration-300 ease-out hover:bg-card focus-visible:bg-card focus-visible:outline-none sm:flex-row sm:gap-6"
+            className="card flex flex-col gap-2 p-6 no-underline transition-colors duration-300 ease-out focus-visible:outline-none sm:flex-row sm:gap-6"
             dir="auto"
           >
             <div className="sm:w-40 sm:shrink-0">
-              <p className="font-heading text-[13px] text-ivory">
+              <p className="font-heading text-[13px] text-ground">
                 {ingredient.name}
               </p>
               {/* A botanical binomial is Latin in every language — this is the
                   one genuine LTR island on the row. */}
-              <p {...island} className="text-[10px] italic text-ivory/30">
+              <p {...island} className="text-[10px] italic text-ground-muted/70">
                 {ingredient.latinName}
               </p>
-              <p className="mt-1 text-[10px] tracking-wide text-gold/60">
+              <p className="mt-1 text-[10px] tracking-wide text-ground-accent/60">
                 {interpolate(dict.product.ingredientOrigin, {
                   origin: ingredient.origin,
                 })}
               </p>
             </div>
 
-            <p className="text-xs leading-relaxed text-ivory/40">
+            <p className="text-xs leading-relaxed text-ground-muted">
               {ingredient.facts[0]}
             </p>
           </LocaleLink>

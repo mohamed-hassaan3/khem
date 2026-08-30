@@ -91,7 +91,7 @@ export default async function AdminProductsPage({
             <AdminRow key={product.slug}>
               <AdminCell>
                 <span className="block">{product.name}</span>
-                <span className="mt-1 block text-[10px] tracking-wide text-ivory/25">
+                <span className="mt-1 block text-[10px] tracking-wide text-ground-subtle">
                   {product.slug}
                 </span>
               </AdminCell>
@@ -121,7 +121,7 @@ export default async function AdminProductsPage({
               <AdminCell>
                 <Link
                   href={localizePath(activeLocale, `/admin/products/${product.slug}`)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Edit
                 </Link>

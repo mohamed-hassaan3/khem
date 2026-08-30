@@ -46,8 +46,8 @@ export default async function CampaignPreview({
   });
 
   return (
-    <div className="border border-border bg-background">
-      <p className="border-b border-border px-4 py-3 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+    <div className="border border-ground-border bg-ivory">
+      <p className="border-b border-ground-border px-4 py-3 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
         Preview
       </p>
 
@@ -55,7 +55,7 @@ export default async function CampaignPreview({
         title="Campaign preview"
         sandbox=""
         srcDoc={payload.html}
-        className="h-[42rem] w-full border-0 bg-background"
+        className="h-[42rem] w-full border-0 bg-ivory"
       />
     </div>
   );

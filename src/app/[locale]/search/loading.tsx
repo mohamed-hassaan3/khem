@@ -9,7 +9,7 @@
 
 /** One placeholder block. `aria-hidden` — the wrapper carries the status. */
 function Bar({ className }: { className: string }) {
-  return <div aria-hidden="true" className={`khem-shimmer bg-white/4 ${className}`} />;
+  return <div aria-hidden="true" className={`khem-shimmer bg-stone ${className}`} />;
 }
 
 const CARDS = [0, 1, 2, 3, 4, 5];
@@ -20,17 +20,17 @@ export default function Loading() {
       role="status"
       aria-live="polite"
       aria-label="Loading search results"
-      className="min-h-screen bg-background"
+      className="ground-ivory min-h-screen"
     >
       {/* Header — mirrors <PageHeader>'s paddings. */}
-      <div className="border-b border-border px-4 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
+      <div className="border-b border-ground-border px-4 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
         <Bar className="h-2.5 w-20" />
         <Bar className="mt-4 h-9 w-64 sm:h-11 sm:w-80" />
         <Bar className="mt-4 h-2.5 w-24" />
       </div>
 
       {/* Field — mirrors <SearchForm>. */}
-      <div className="border-b border-border px-4 py-6 sm:px-8 lg:px-14 xl:px-20">
+      <div className="border-b border-ground-border px-4 py-6 sm:px-8 lg:px-14 xl:px-20">
         <Bar className="h-7 w-full max-w-md" />
       </div>
 

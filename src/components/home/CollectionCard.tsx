@@ -21,14 +21,20 @@ export interface CollectionCardProps {
   tone?: "standard" | "dark";
 }
 
+/*
+ * Noir's photography is graded darker than the rest, so it is *lifted* rather
+ * than dimmed — the same `brightness-105` treatment its collection banner takes
+ * in `<CollectionView>`, so the two agree about what NOIR looks like.
+ *
+ * Everything else runs untouched. These were `brightness-[0.55]` and
+ * `brightness-[0.4]` under a near-opaque black gradient: the last fully dark
+ * surface left in the customer app, on the home page, at a moment when its own
+ * captions had already become charcoal on an ivory card. The dimming was making
+ * the photograph worse and the caption no better.
+ */
 const IMAGE_TONE = {
-  standard: "brightness-[0.55] saturate-[0.8] group-hover:brightness-[0.65]",
-  dark: "brightness-[0.4] saturate-[0.6] group-hover:brightness-[0.5]",
-} as const;
-
-const OVERLAY_TONE = {
-  standard: "from-background/90",
-  dark: "from-black/95",
+  standard: "",
+  dark: "brightness-105",
 } as const;
 
 export default async function CollectionCard({
@@ -42,19 +48,28 @@ export default async function CollectionCard({
   return (
     <LocaleLink
       href={`/collections/${collection.slug}`}
-      className="img-zoom group relative block aspect-3/4 overflow-hidden bg-surface no-underline"
+      /*
+        `ground-ivory`, declared rather than inherited. The type sits on the
+        photograph under the house banner scrim, so the ground it needs is the
+        scrim's — and the scrim is ivory, which makes the caption charcoal.
+        Stating it also keeps the card correct if the section around it ever
+        changes ground.
+      */
+      className="ground-ivory img-zoom group relative block aspect-3/4 overflow-hidden bg-sand no-underline"
     >
       <Image
         src={collection.cardUrl}
         alt={collection.cardAlt}
         fill
         sizes="(min-width: 768px) 50vw, 100vw"
-        className={`object-cover transition-[filter] duration-700 ease-out ${IMAGE_TONE[tone]}`}
+        className={`object-cover transition-[filter] duration-700 ease-out ${IMAGE_TONE[tone]}`.trimEnd()}
       />
 
-      <div
-        className={`absolute inset-0 flex flex-col justify-end bg-linear-to-t ${OVERLAY_TONE[tone]} via-transparent to-transparent p-8 md:p-12`}
-      >
+      {/* The house banner scrim, base anchor — the caption sits on the bottom
+          edge of the card, which is the same shape a collection banner has. */}
+      <div aria-hidden="true" className="banner-scrim banner-scrim-base" />
+
+      <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12">
         <p className="eyebrow mb-3">{ordinal}</p>
         {/*
           `dir="auto"` rather than an LTR island: the category collections carry
@@ -64,17 +79,17 @@ export default async function CollectionCard({
         */}
         <h3
           dir="auto"
-          className="mb-5 font-heading text-3xl font-normal text-ivory md:text-4xl"
+          className="mb-5 font-heading text-3xl font-normal text-ground md:text-4xl"
         >
           {collection.name}
         </h3>
         <p
           dir="auto"
-          className="mb-8 max-w-md text-xs leading-relaxed text-ivory/50 md:text-sm"
+          className="mb-8 max-w-md text-xs leading-relaxed text-ground-muted md:text-sm"
         >
           {collection.description}
         </p>
-        <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
+        <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
           {dict.common.explore} {readingArrow(locale)}
         </span>
       </div>

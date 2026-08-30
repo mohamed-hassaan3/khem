@@ -292,7 +292,7 @@ export default function OfferPopup({
             something over it, and which a thumb dismisses by accident. The
             padding here *is* the margin: the panel is `w-full` inside it.
           */
-          className="fixed inset-0 z-1200 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md sm:p-6"
+          className="fixed inset-0 z-1200 flex items-center justify-center bg-ink/55 p-4 backdrop-blur-md sm:p-6"
           initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -320,13 +320,26 @@ export default function OfferPopup({
               because a mobile browser's toolbars change the viewport as it
               scrolls, and `vh` would leave the last row under the chrome.
             */
-            className="relative grid max-h-[calc(100dvh-2rem)] w-full max-w-4xl grid-cols-1 overflow-y-auto border border-gold/20 bg-background shadow-[var(--shadow-luxury)] focus:outline-none sm:max-h-[calc(100dvh-3rem)] md:grid-cols-2"
+            /*
+              `ground-ivory` for the same reason as the cart and search panels:
+              a modal is its own surface and must not pick up the foreground
+              variables of the page it is covering.
+
+              Ivory rather than obsidian. This modal is the most interruptive
+              surface on the site — it arrives unbidden over whatever the
+              visitor was reading — so it is the last place that should also
+              change the lights. On ivory with a charcoal action it reads as an
+              invitation from the house; in obsidian it read as a takeover.
+              The photograph on the other half of the grid is what carries the
+              drama, which is the trade §17 asks for everywhere.
+            */
+            className="ground-ivory relative grid max-h-[calc(100dvh-2rem)] w-full max-w-4xl grid-cols-1 overflow-y-auto border border-ground-accent/25 shadow-3 focus:outline-none sm:max-h-[calc(100dvh-3rem)] md:grid-cols-2"
           >
             <button
               type="button"
               onClick={close}
               aria-label={dict.offerPopup.close}
-              className="absolute end-0 top-0 z-2 flex h-12 w-12 cursor-pointer items-center justify-center text-ivory/50 transition-colors duration-300 hover:text-gold focus-visible:text-gold focus-visible:outline-none"
+              className="absolute end-0 top-0 z-2 flex h-12 w-12 cursor-pointer items-center justify-center text-ground-muted transition-colors duration-300 hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-none"
             >
               <X size={18} strokeWidth={1.25} />
             </button>
@@ -348,7 +361,7 @@ export default function OfferPopup({
               field off a 667px screen and leaves the visitor scrolling a modal
               to find the thing it is asking them to do.
             */}
-            <div className="relative h-40 w-full shrink-0 overflow-hidden bg-card sm:h-56 md:h-full md:min-h-[30rem] md:shrink">
+            <div className="relative h-40 w-full shrink-0 overflow-hidden bg-sand sm:h-56 md:h-full md:min-h-[30rem] md:shrink">
               {settings.offerPopupImageUrl ? (
                 <Image
                   src={settings.offerPopupImageUrl}
@@ -370,28 +383,28 @@ export default function OfferPopup({
             <div className="flex flex-col justify-center gap-5 p-7 text-start sm:p-10 md:p-12">
               {phase === "form" ? (
                 <>
-                  <p className="font-heading text-[10px] uppercase tracking-[0.3em] text-gold/70">
+                  <p className="font-heading text-[10px] uppercase tracking-[0.3em] text-ground-accent/70">
                     {settings.offerPopupEyebrow ?? dict.offerPopup.eyebrow}
                   </p>
 
                   <h2
                     id="offer-popup-heading"
                     dir="auto"
-                    className="font-heading text-2xl leading-tight font-normal text-ivory sm:text-3xl"
+                    className="font-heading text-2xl leading-tight font-normal text-ground sm:text-3xl"
                   >
                     {settings.offerPopupHeading}
                   </h2>
 
                   <div className="gold-line" />
 
-                  <p dir="auto" className="text-[13px] leading-loose text-ivory/55">
+                  <p dir="auto" className="text-[13px] leading-loose text-ground-muted">
                     {settings.offerPopupBody ?? offerLine}
                   </p>
 
                   {/* When the house wrote its own body copy the offer still has
                       to be stated, or the panel promises nothing. */}
                   {settings.offerPopupBody ? (
-                    <p className="font-heading text-sm tracking-[0.12em] text-champagne">
+                    <p className="font-heading text-sm tracking-[0.12em] text-gold-soft">
                       {offerLine}
                     </p>
                   ) : null}
@@ -414,7 +427,7 @@ export default function OfferPopup({
                       placeholder={dict.offerPopup.emailPlaceholder}
                       aria-invalid={error !== null}
                       aria-describedby={error ? "offer-email-error" : undefined}
-                      className="w-full border border-gold/30 bg-black/40 px-4 py-3.5 text-xs text-ivory transition-colors placeholder:text-ivory/30 focus:border-gold focus:outline-none"
+                      className="field"
                     />
 
                     {/* Honeypot — off-screen rather than hidden, matching
@@ -449,7 +462,7 @@ export default function OfferPopup({
                       type="submit"
                       disabled={isPending}
                       aria-busy={isPending}
-                      className="w-full cursor-pointer bg-gold px-8 py-3.5 font-heading text-xs font-medium uppercase tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-champagne disabled:cursor-not-allowed disabled:opacity-50"
+                      className="w-full cursor-pointer bg-gold px-8 py-3.5 font-heading text-xs font-medium uppercase tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isPending
                         ? dict.offerPopup.submitting
@@ -457,7 +470,7 @@ export default function OfferPopup({
                     </button>
                   </form>
 
-                  <p className="text-[10px] tracking-[0.08em] text-ivory/25">
+                  <p className="text-[10px] tracking-[0.08em] text-ground-muted/70">
                     {dict.offerPopup.disclaimer}
                   </p>
                 </>
@@ -465,14 +478,14 @@ export default function OfferPopup({
                 <div role="status" className="space-y-5">
                   <h2
                     id="offer-popup-heading"
-                    className="font-heading text-2xl leading-tight font-normal text-gold sm:text-3xl"
+                    className="font-heading text-2xl leading-tight font-normal text-ground-accent sm:text-3xl"
                   >
                     {dict.offerPopup.successHeading}
                   </h2>
 
                   <div className="gold-line" />
 
-                  <p dir="auto" className="text-[13px] leading-loose text-ivory/55">
+                  <p dir="auto" className="text-[13px] leading-loose text-ground-muted">
                     {alreadySubscribed
                       ? dict.offerPopup.alreadyBody
                       : dict.offerPopup.successBody}
@@ -486,7 +499,7 @@ export default function OfferPopup({
                       reaches this line, written in their name by
                       `claim_subscriber_offer()`.
                     */
-                    <p className="border border-gold/30 bg-gold/5 px-4 py-3 text-[12px] tracking-[0.08em] text-champagne">
+                    <p className="border border-ground-accent/30 bg-gold/5 px-4 py-3 text-[12px] tracking-[0.08em] text-gold-soft">
                       {interpolate(dict.offerPopup.successCode, { code })}
                     </p>
                   ) : null}
@@ -494,7 +507,7 @@ export default function OfferPopup({
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="w-full cursor-pointer border border-gold/40 px-8 py-3.5 font-heading text-xs uppercase tracking-[0.2em] text-gold transition-colors duration-300 hover:bg-gold/10"
+                    className="w-full cursor-pointer border border-ground-accent/40 px-8 py-3.5 font-heading text-xs uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:bg-gold/10"
                   >
                     {dict.offerPopup.close}
                   </button>

@@ -71,16 +71,31 @@ function logFailure(query: string, message: string): void {
 const RITUAL_KINDS: readonly CollectionKind[] = ["BODY", "HOME"];
 
 /**
- * Every kind with a detail page of its own — the fragrances plus the two above.
+ * The collection kinds served by `/set/[slug]`.
+ *
+ * Discovery and gift sets are one page shape — a boxed composition, a contents
+ * list, a story, a buy block — so they share one route the way body care and
+ * home fragrance share `/ritual/[slug]`.
+ */
+const SET_KINDS: readonly CollectionKind[] = ["DISCOVERY", "GIFT"];
+
+/**
+ * Every kind with a detail page of its own.
  *
  * The query-side statement of `hasDetailPage()` in `src/lib/routes.ts`, and the
  * two must agree: this is what decides whether a slug can be commented on and
- * what a related rail is allowed to link to. The sets are absent from both,
- * because they sell from a category grid.
+ * what a related rail is allowed to link to.
+ *
+ * The sets used to be absent, because they sold from a category grid and had
+ * nowhere for a comment to appear. They have `/set/[slug]` now, so all five
+ * kinds are here and this list is the union — which is the shape it should have
+ * had all along, and the reason it is spelled out rather than replaced by a
+ * `true`: a sixth kind must still make a decision here.
  */
 const DETAIL_PAGE_KINDS: readonly CollectionKind[] = [
   "FRAGRANCE",
   ...RITUAL_KINDS,
+  ...SET_KINDS,
 ];
 
 /**
@@ -99,6 +114,23 @@ const DETAIL_PAGE_KINDS: readonly CollectionKind[] = [
 export const RITUAL_RELATED_KINDS: readonly CollectionKind[] = [
   "FRAGRANCE",
   ...RITUAL_KINDS,
+];
+
+/**
+ * What a set page's related rail may draw from.
+ *
+ * The fragrances first — a discovery set exists to introduce them, so the
+ * neighbour a visitor most wants next is a full bottle of something in the box
+ * — and the other sets, so gifting can be compared. `related_products()` breaks
+ * ties toward the same kind, which puts the other sets first on a gift page and
+ * lets the perfumes follow.
+ *
+ * The ritual goods are deliberately absent: a body mist is neither what a
+ * discovery set contains nor an alternative to one.
+ */
+export const SET_RELATED_KINDS: readonly CollectionKind[] = [
+  "FRAGRANCE",
+  ...SET_KINDS,
 ];
 
 /**
@@ -557,6 +589,71 @@ export async function getRitualProductBySlug(
 }
 
 /**
+ * A single **set** by slug — the discovery and gift detail page
+ * (`/set/[slug]`). Returns `null` when absent so the route can call
+ * `notFound()` rather than throwing (AGENTS.md §1.7).
+ *
+ * A separate function rather than a widened {@link getRitualProductBySlug},
+ * and the `in` filter is the reason: each detail page is scoped to the kinds it
+ * can actually render, so `/set/<a-perfume>` and `/perfume/<a-set>` are both
+ * 404s at the query rather than pages that render the wrong shape. One URL
+ * space per page shape is what keeps them that way.
+ */
+export async function getSetProductBySlug(
+  locale: Locale,
+  slug: string,
+): Promise<Product | null> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("Product")
+    .select(`${PRODUCT_WITH_IMAGES_COLUMNS}, collection:Collection!inner(kind)`)
+    .eq("slug", slug)
+    .in("collection.kind", SET_KINDS)
+    .eq("isArchived", false)
+    .is("deletedAt", null)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getSetProductBySlug", error.message);
+    return null;
+  }
+
+  return toProduct(data, locale, await getProductPromotions(locale));
+}
+
+/**
+ * Every discovery and gift-set slug, for `/set/[slug]`'s
+ * `generateStaticParams` and for the sitemap.
+ *
+ * The list twin of {@link getSetProductBySlug}, scoped by the same `in` filter
+ * — so the routes that get prerendered are exactly the routes that resolve, and
+ * nothing in the sitemap can 404.
+ */
+export async function getSetProductSlugs(): Promise<string[]> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Product")
+    .select("slug, collection:Collection!inner(kind)")
+    .in("collection.kind", SET_KINDS)
+    .eq("isArchived", false)
+    .is("deletedAt", null)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getSetProductSlugs", error.message);
+    return [];
+  }
+
+  return (data ?? [])
+    .map((row) => (typeof row.slug === "string" ? row.slug : null))
+    .filter((slug): slug is string => slug !== null);
+}
+
+/**
  * Where a product's detail page is, by slug — or `null` when it has none.
  *
  * The lookup a *page-agnostic* caller needs, and `actions/comments.ts` is the
@@ -570,9 +667,11 @@ export async function getRitualProductBySlug(
  * on. Selecting a full row with its gallery to answer an existence check would
  * be the over-selection this file's header rules out, on a write path at that.
  *
- * Still scoped, not unscoped: a discovery or gift-set slug is rejected as
- * firmly as an unknown one, because neither has a page a comment could appear
- * on. That is the same rule as `hasDetailPage()`, asked of the database.
+ * Still scoped, not unscoped: a slug whose kind has no detail page is rejected
+ * as firmly as an unknown one, because there would be no page for the comment
+ * to appear on. That is the same rule as `hasDetailPage()`, asked of the
+ * database. All five kinds qualify today — the sets joined when `/set/[slug]`
+ * landed — but the scoping stays, because a sixth kind should have to opt in.
  */
 export async function getDetailPageTarget(
   slug: string,

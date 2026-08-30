@@ -110,13 +110,13 @@ export default function CommentImageUploader({
         onClick={() => inputRef.current?.click()}
         aria-label={copy.addPhotos}
         title={copy.addPhotos}
-        className="group grid size-11 cursor-pointer place-items-center border border-border bg-ivory/3 transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40"
+        className="group grid size-11 cursor-pointer place-items-center border border-ground-border bg-ivory/3 transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40"
       >
         <ImagePlus
           size={16}
           strokeWidth={1.25}
           aria-hidden="true"
-          className="text-ivory/50 transition-colors duration-300 ease-out group-hover:text-gold"
+          className="text-ground-muted transition-colors duration-300 ease-out group-hover:text-ground-accent"
         />
       </button>
 
@@ -128,7 +128,7 @@ export default function CommentImageUploader({
           <img
             src={image.dataUrl}
             alt=""
-            className="size-16 border border-border object-cover"
+            className="size-16 border border-ground-border object-cover"
           />
 
           <button
@@ -139,7 +139,7 @@ export default function CommentImageUploader({
               onChange(images.filter((_, position) => position !== index));
             }}
             aria-label={interpolate(copy.removePhoto, { index: index + 1 })}
-            className="absolute -end-2 -top-2 grid size-6 cursor-pointer place-items-center border border-border bg-background text-ivory/60 transition-colors duration-300 ease-out hover:border-gold hover:text-gold focus-visible:border-gold focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40"
+            className="absolute -end-2 -top-2 grid size-6 cursor-pointer place-items-center border border-ground-border bg-ground-bg text-ground-muted transition-colors duration-300 ease-out hover:border-gold hover:text-ground-accent focus-visible:border-gold focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40"
           >
             <X size={12} strokeWidth={1.25} aria-hidden="true" />
           </button>

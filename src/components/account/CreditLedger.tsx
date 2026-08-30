@@ -42,7 +42,7 @@ function describe(
 export default function CreditLedger({ entries, locale, dict }: CreditLedgerProps) {
   if (entries.length === 0) {
     return (
-      <p className="border border-border bg-surface/60 px-6 py-8 text-[12px] text-ivory/35">
+      <p className="border border-ground-border bg-stone px-6 py-8 text-[12px] text-ground-muted">
         {dict.empty}
       </p>
     );
@@ -54,17 +54,17 @@ export default function CreditLedger({ entries, locale, dict }: CreditLedgerProp
      * of prose do not fit a 320px viewport, and a horizontally scrolling
      * document is a worse answer than a horizontally scrolling table.
      */
-    <div className="overflow-x-auto border border-border bg-surface/60">
+    <div className="overflow-x-auto border border-ground-border bg-stone">
       <table className="w-full min-w-[34rem] border-collapse text-start">
         <thead>
-          <tr className="border-b border-border">
+          <tr className="border-b border-ground-border">
             {[dict.date, dict.description, dict.type, dict.amount].map(
               (heading, index) => (
                 <th
                   key={heading}
                   scope="col"
                   className={[
-                    "px-5 py-4 font-heading text-[10px] uppercase tracking-[0.16em] text-ivory/30",
+                    "px-5 py-4 font-heading text-[10px] uppercase tracking-[0.16em] text-ground-muted/70",
                     // The amount column is numeric and reads from the far edge.
                     index === 3 ? "text-end" : "text-start",
                   ].join(" ")}
@@ -81,23 +81,23 @@ export default function CreditLedger({ entries, locale, dict }: CreditLedgerProp
             const isCredit = entry.amountInCents >= 0;
 
             return (
-              <tr key={entry.id} className="border-b border-border last:border-b-0">
-                <td className="whitespace-nowrap px-5 py-4 text-[12px] text-ivory/40">
+              <tr key={entry.id} className="border-b border-ground-border last:border-b-0">
+                <td className="whitespace-nowrap px-5 py-4 text-[12px] text-ground-muted">
                   {formatAccountDate(entry.occurredAt, locale)}
                 </td>
 
-                <td className="px-5 py-4 text-[12px] text-ivory/70" dir="auto">
+                <td className="px-5 py-4 text-[12px] text-ground-muted" dir="auto">
                   {describe(entry, dict)}
 
                   {entry.kind === "ADJUSTED" && entry.note ? (
-                    <span className="mt-1 block text-[11px] text-ivory/35">
+                    <span className="mt-1 block text-[11px] text-ground-muted">
                       {entry.note}
                     </span>
                   ) : null}
                 </td>
 
                 <td className="whitespace-nowrap px-5 py-4">
-                  <span className="border border-border px-2.5 py-1 font-heading text-[10px] uppercase tracking-[0.14em] text-ivory/35">
+                  <span className="border border-ground-border px-2.5 py-1 font-heading text-[10px] uppercase tracking-[0.14em] text-ground-muted">
                     {dict.kind[entry.kind]}
                   </span>
                 </td>
@@ -105,7 +105,7 @@ export default function CreditLedger({ entries, locale, dict }: CreditLedgerProp
                 <td
                   className={[
                     "whitespace-nowrap px-5 py-4 text-end font-heading text-[13px] tabular-nums",
-                    isCredit ? "text-gold" : "text-ivory/45",
+                    isCredit ? "text-ground-accent" : "text-ground-muted",
                   ].join(" ")}
                 >
                   {/*

@@ -110,14 +110,14 @@ export default function OrderCelebration({
         </p>
 
         <h1
-          className="khem-rise mb-5 font-heading text-3xl font-normal leading-tight text-ivory sm:text-4xl"
+          className="khem-rise mb-5 font-heading text-3xl font-normal leading-tight text-ground sm:text-4xl"
           style={{ animationDelay: "1220ms" }}
         >
           {isCash ? copy.headingCash : copy.heading}
         </h1>
 
         <p
-          className="khem-rise mb-6 md:mb-10 max-w-md text-[13px] leading-loose text-ivory/45"
+          className="khem-rise mb-6 md:mb-10 max-w-md text-[13px] leading-loose text-ground-muted"
           style={{ animationDelay: "1340ms" }}
         >
           {isCash
@@ -129,10 +129,10 @@ export default function OrderCelebration({
 
         {/* 4. The card. */}
         <div
-          className="khem-rise w-full border border-border bg-surface px-4 py-8 sm:px-9"
+          className="khem-rise w-full border border-ground-border bg-stone px-4 py-8 sm:px-9"
           style={{ animationDelay: "1800ms" }}
         >
-          <p className="mb-1.5 text-[10px] uppercase tracking-[0.24em] text-gold/60">
+          <p className="mb-1.5 text-[10px] uppercase tracking-[0.24em] text-ground-accent/60">
             {copy.orderNumber}
           </p>
           {/*
@@ -141,12 +141,12 @@ export default function OrderCelebration({
            */}
           <p
             dir="ltr"
-            className="mb-8 font-heading text-2xl tracking-[0.14em] text-gold"
+            className="mb-8 font-heading text-2xl tracking-[0.14em] text-ground-accent"
           >
             {order.orderNumber}
           </p>
 
-          <dl className="flex flex-col gap-3 border-t border-border pt-6 text-start">
+          <dl className="flex flex-col gap-3 border-t border-ground-border pt-6 text-start">
             <Row label={copy.placedOn} value={placedOnLabel} />
             <Row
               label={copy.paymentMethod}
@@ -159,21 +159,21 @@ export default function OrderCelebration({
             />
           </dl>
 
-          <ul className="mt-6 flex flex-col gap-2 border-t border-border pt-6 text-start">
+          <ul className="mt-6 flex flex-col gap-2 border-t border-ground-border pt-6 text-start">
             {order.lines.map((line) => (
               <li
                 key={`${line.productName}-${line.quantity}`}
                 className="flex items-baseline justify-between gap-4 text-[12px]"
               >
-                <span className="text-ivory/60">{line.productName}</span>
-                <span className="tabular-nums text-ivory/30">
+                <span className="text-ground-muted">{line.productName}</span>
+                <span className="tabular-nums text-ground-muted/70">
                   &times;&nbsp;{line.quantity}
                 </span>
               </li>
             ))}
           </ul>
 
-          <p className="mt-7 border-t border-border pt-6 text-[11px] leading-relaxed text-ivory/30">
+          <p className="mt-7 border-t border-ground-border pt-6 text-[11px] leading-relaxed text-ground-muted/70">
             {order.maskedEmail
               ? interpolate(copy.emailSent, { email: order.maskedEmail })
               : copy.emailSentGeneric}
@@ -187,14 +187,14 @@ export default function OrderCelebration({
         >
           <LocaleLink
             href={isSignedIn ? ACCOUNT_PATHS.orders : AUTH_PATHS.signUp}
-            className="btn-luxury btn-luxury-fill w-full justify-center"
+            className="btn btn-primary w-full justify-center"
           >
             {isSignedIn ? copy.trackCta : copy.createAccountCta}
           </LocaleLink>
 
           <LocaleLink
             href="/collections"
-            className="font-heading text-[11px] tracking-[0.15em] text-ivory/30 no-underline transition-colors duration-300 ease-out hover:text-ivory/60 focus-visible:text-gold focus-visible:outline-none"
+            className="font-heading text-[11px] tracking-[0.15em] text-ground-muted/70 no-underline transition-colors duration-300 ease-out hover:text-ground-muted focus-visible:text-ground-accent focus-visible:outline-none"
           >
             {copy.continueCta}
           </LocaleLink>
@@ -215,12 +215,12 @@ function Row({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <dt className="text-[11px] tracking-[0.08em] text-ivory/35">{label}</dt>
+      <dt className="text-[11px] tracking-[0.08em] text-ground-muted">{label}</dt>
       <dd
         className={
           emphasis
-            ? "font-heading text-base tabular-nums text-gold"
-            : "text-[12px] tabular-nums text-ivory/70"
+            ? "font-heading text-base tabular-nums text-ground-accent"
+            : "text-[12px] tabular-nums text-ground-muted"
         }
       >
         {value}

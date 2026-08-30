@@ -204,7 +204,7 @@ export default function OrderForm({
 
       {/* ── Customer ─────────────────────────────────────── */}
       <section className="space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-gold/70">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-ground-accent">
           Customer
         </h2>
 
@@ -252,7 +252,7 @@ export default function OrderForm({
 
       {/* ── Lines ────────────────────────────────────────── */}
       <section className="space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-gold/70">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-ground-accent">
           Products
         </h2>
 
@@ -268,7 +268,7 @@ export default function OrderForm({
             return (
               <div
                 key={line.key}
-                className="grid gap-4 border border-border p-5 sm:grid-cols-[1fr_120px_auto] sm:items-end"
+                className="grid gap-4 border border-ground-border p-5 sm:grid-cols-[1fr_120px_auto] sm:items-end"
               >
                 <AdminSelect
                   id={`line-${line.key}-slug`}
@@ -307,7 +307,7 @@ export default function OrderForm({
                       )
                     }
                     aria-label={`Remove line ${index + 1}`}
-                    className="border border-border p-3 text-ivory/35 transition-colors duration-300 hover:border-danger/50 hover:text-danger"
+                    className="border border-ground-border p-3 text-ground-muted transition-colors duration-300 hover:border-danger/50 hover:text-danger"
                   >
                     <X size={13} strokeWidth={1.25} />
                   </button>
@@ -325,7 +325,7 @@ export default function OrderForm({
 
       {/* ── Totals ───────────────────────────────────────── */}
       <section className="space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-gold/70">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-ground-accent">
           Totals
         </h2>
 
@@ -353,31 +353,31 @@ export default function OrderForm({
           />
         </div>
 
-        <dl className="border border-border p-6 text-[12px] tracking-wide">
+        <dl className="border border-ground-border p-6 text-[12px] tracking-wide">
           <div className="flex justify-between py-1">
-            <dt className="text-ivory/35">Subtotal</dt>
-            <dd className="text-ivory/70">{egp(subtotalInCents)}</dd>
+            <dt className="text-ground-muted">Subtotal</dt>
+            <dd className="text-ground">{egp(subtotalInCents)}</dd>
           </div>
           <div className="flex justify-between py-1">
-            <dt className="text-ivory/35">Delivery</dt>
-            <dd className="text-ivory/70">{egp(shipInCents)}</dd>
+            <dt className="text-ground-muted">Delivery</dt>
+            <dd className="text-ground">{egp(shipInCents)}</dd>
           </div>
-          <div className="mt-3 flex justify-between border-t border-border pt-3">
-            <dt className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <div className="mt-3 flex justify-between border-t border-ground-border pt-3">
+            <dt className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               Total
             </dt>
-            <dd className="font-heading text-[13px] tracking-[0.1em] text-gold">
+            <dd className="font-heading text-[13px] tracking-[0.1em] text-ground-accent">
               {egp(subtotalInCents + shipInCents)}
             </dd>
           </div>
-          <p className="mt-4 text-[11px] leading-relaxed text-ivory/25">
+          <p className="mt-4 text-[11px] leading-relaxed text-ground-subtle">
             A preview. The order is priced from the catalog when it is saved, so
             a price edited in another tab wins over this figure.
           </p>
         </dl>
       </section>
 
-      <div className="flex items-center gap-4 border-t border-border pt-8">
+      <div className="flex items-center gap-4 border-t border-ground-border pt-8">
         <AdminButton type="submit" disabled={isPending || products.length === 0}>
           {isPending ? "Recording…" : "Record order"}
         </AdminButton>

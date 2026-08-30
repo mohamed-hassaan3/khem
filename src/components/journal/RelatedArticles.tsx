@@ -30,11 +30,11 @@ export default async function RelatedArticles({
   const dict = await getDictionary(locale);
 
   return (
-    <section className="border-t border-border px-4 py-14 md:px-20 md:py-32">
+    <section className="border-t border-ground-border px-4 py-14 md:px-20 md:py-32">
       <div className="mx-auto max-w-350">
         <Reveal className="mb-10 md:mb-16 text-center">
           <p className="eyebrow mb-4">{dict.journal.article.related.eyebrow}</p>
-          <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl">
+          <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl">
             {dict.journal.article.related.heading}
           </h2>
         </Reveal>

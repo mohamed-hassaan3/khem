@@ -18,10 +18,10 @@
  *
  * ## The palette
  *
- * Gold line, champagne wash, hairline grid on obsidian — the same tokens as the
+ * Gold line, gold-soft wash, hairline grid on obsidian — the same tokens as the
  * rest of the desk, applied to a canvas that knows nothing about Tailwind.
  * Written as literals because the library takes colour strings, not classes;
- * they mirror `--color-gold`, `--color-champagne` and `--color-border`.
+ * they mirror `--color-gold`, `--color-gold-soft` and `--color-border`.
  */
 
 import {

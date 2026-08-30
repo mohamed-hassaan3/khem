@@ -37,16 +37,16 @@ export default function EmptyState({
           size={64}
           strokeWidth={0.8}
           aria-hidden="true"
-          className="mx-auto mb-8 text-gold/30"
+          className="mx-auto mb-8 text-ground-accent/30"
         />
 
-        <h2 className="mb-4 font-heading text-2xl font-normal text-ivory sm:text-3xl">
+        <h2 className="mb-4 font-heading text-2xl font-normal text-ground sm:text-3xl">
           {heading}
         </h2>
 
-        <p className="mb-6 md:mb-10 text-[13px] leading-loose text-ivory/40">{body}</p>
+        <p className="mb-6 md:mb-10 text-[13px] leading-loose text-ground-muted">{body}</p>
 
-        <LocaleLink href={href} className="btn-luxury btn-luxury-fill">
+        <LocaleLink href={href} className="btn btn-primary">
           {cta}
         </LocaleLink>
       </div>

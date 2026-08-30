@@ -191,6 +191,10 @@ export const en = {
       eyebrow: "Our Collections",
       heading: "Two Worlds of Scent",
       ordinal: "Collection {ordinal}",
+      /* Names the slider's scroll region and its two pointer controls. */
+      sliderLabel: "Our collections",
+      previous: "Previous collection",
+      next: "Next collection",
     },
     essences: {
       eyebrow: "The Essences",
@@ -738,6 +742,8 @@ export const en = {
     inStock: "In stock — ships within 48 hours",
     lowStock: "Only {count} remaining",
     storyHeading: "The Story",
+    /* `/set/[slug]` only — the contents of a discovery or gift set. */
+    includesHeading: "What Is Inside",
     pyramidHeading: "Fragrance Pyramid",
     topNotes: "Top Notes",
     heartNotes: "Heart Notes",
@@ -909,6 +915,29 @@ export const en = {
       BODY: "The Ritual",
       HOME: "Scent Your Sanctuary",
     } satisfies Record<Extract<CollectionKind, "BODY" | "HOME">, string>,
+  },
+
+  /**
+   * `/set/[slug]` — the discovery and gift-set detail page.
+   *
+   * Its own block rather than entries under `ritual`, for the same reason the
+   * route is its own: the two pages carry different goods and their copy should
+   * be free to diverge without one of them acquiring a key it never prints.
+   */
+  set: {
+    meta: {
+      title: "The Sets",
+      description:
+        "Discovery and gift sets from KHEM — every composition presented in full, with the pieces it contains.",
+      ogTitle: "The Sets | KHEM",
+      ogDescription:
+        "A boxed introduction to the house, and the gifts built from it.",
+    },
+    /* Only `DISCOVERY` and `GIFT` reach this page. */
+    eyebrow: {
+      DISCOVERY: "The Discovery Set",
+      GIFT: "The Gift Set",
+    } satisfies Record<Extract<CollectionKind, "DISCOVERY" | "GIFT">, string>,
   },
 
   newArrival: {

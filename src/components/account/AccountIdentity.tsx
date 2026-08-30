@@ -27,28 +27,28 @@ export default function AccountIdentity({
   locale,
 }: AccountIdentityProps) {
   return (
-    <div className="border-b border-border px-9 pb-9">
+    <div className="border-b border-ground-border px-9 pb-9">
       {viewer.imageUrl ? (
         <Image
           src={viewer.imageUrl}
           alt=""
           width={56}
           height={56}
-          className="mb-4 h-14 w-14 rounded-full border border-gold/30 object-cover"
+          className="mb-4 h-14 w-14 rounded-full border border-ground-accent/30 object-cover"
         />
       ) : (
         <div
           aria-hidden="true"
-          className="mb-4 grid h-14 w-14 place-items-center rounded-full border border-gold/30 bg-gold/15"
+          className="mb-4 grid h-14 w-14 place-items-center rounded-full border border-ground-accent/30 bg-gold/15"
         >
-          <span className="font-heading text-lg font-semibold text-gold">
+          <span className="font-heading text-lg font-semibold text-ground-accent">
             {viewer.initial}
           </span>
         </div>
       )}
 
       {viewer.fullName ? (
-        <p className="mb-1 font-heading text-[15px] font-normal text-ivory">
+        <p className="mb-1 font-heading text-[15px] font-normal text-ground">
           {viewer.fullName}
         </p>
       ) : null}
@@ -56,7 +56,7 @@ export default function AccountIdentity({
       {viewer.primaryEmail ? (
         <p
           {...ltrIsland(locale)}
-          className="text-[11px] tracking-[0.05em] text-ivory/35"
+          className="text-[11px] tracking-[0.05em] text-ground-muted"
         >
           {viewer.primaryEmail}
         </p>

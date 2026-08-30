@@ -68,7 +68,7 @@ export default function ProductPrice({
         provider already writes it the way the active locale reads.
       */}
       <span
-        className="text-[10px] tabular-nums text-ivory/35 line-through decoration-ivory/30 decoration-[0.5px] sm:text-[11px]"
+        className="text-[10px] tabular-nums text-ground-muted line-through decoration-ground-muted/60 decoration-[0.5px] sm:text-[11px]"
         // Announced as what it is, so a screen reader does not read two prices
         // as a range.
         aria-label={`Was ${formatPrice(promotion.listPriceInCents)}`}
@@ -83,7 +83,7 @@ export default function ProductPrice({
       {showPercent && promotion.percentOff > 0 ? (
         <span
           aria-hidden
-          className="border border-gold/30 px-1.5 py-px font-heading text-[8px] uppercase tracking-[0.15em] text-gold/70 sm:text-[9px]"
+          className="border border-ground-accent/30 px-1.5 py-px font-heading text-[8px] uppercase tracking-[0.15em] text-ground-accent/80 sm:text-[9px]"
         >
           −{promotion.percentOff}%
         </span>

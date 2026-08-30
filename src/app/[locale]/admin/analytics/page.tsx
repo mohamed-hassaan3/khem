@@ -100,13 +100,13 @@ export default async function AdminAnalyticsPage({
             <SalesChart points={unitPoints} kind="histogram" unit="units" height={220} />
           </ChartPanel>
 
-          <section className="border border-border bg-ivory/2 p-6 sm:p-8">
-            <h2 className="mb-6 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <section className="border border-ground-border bg-ivory/2 p-6 sm:p-8">
+            <h2 className="mb-6 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               Best sellers · last {range} days
             </h2>
 
             {top.length === 0 ? (
-              <p className="text-[12px] leading-relaxed text-ivory/30">
+              <p className="text-[12px] leading-relaxed text-ground-muted">
                 Nothing has sold in this window, so there is nothing to rank.
               </p>
             ) : (
@@ -120,8 +120,8 @@ export default async function AdminAnalyticsPage({
           </section>
         </div>
 
-        <section className="border border-border bg-ivory/2 p-6 sm:p-8">
-          <h2 className="mb-6 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <section className="border border-ground-border bg-ivory/2 p-6 sm:p-8">
+          <h2 className="mb-6 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Where the sales came from
           </h2>
 
@@ -136,16 +136,16 @@ export default async function AdminAnalyticsPage({
                     : 0;
 
                 return (
-                  <div key={row.channel} className="border border-border p-6">
-                    <p className="font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/25">
+                  <div key={row.channel} className="border border-ground-border p-6">
+                    <p className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
                       {row.channel === "OFFLINE"
                         ? "Offline — the boutique"
                         : "Online — the website"}
                     </p>
-                    <p className="mt-3 font-heading text-2xl tracking-[0.1em] text-gold">
+                    <p className="mt-3 font-heading text-2xl tracking-[0.1em] text-ground-accent">
                       {egp(row.revenueInCents)}
                     </p>
-                    <p className="mt-2 text-[11px] tracking-wide text-ivory/30">
+                    <p className="mt-2 text-[11px] tracking-wide text-ground-muted">
                       {row.orderCount} order{row.orderCount === 1 ? "" : "s"} · {share}%
                       of the book
                     </p>

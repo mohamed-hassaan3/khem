@@ -35,7 +35,7 @@ export default function SearchForm({ defaultValue }: SearchFormProps) {
       method="get"
       action={localizePath(locale, "/search")}
       role="search"
-      className="border-b border-border px-4 py-6 sm:px-8 lg:px-14 xl:px-20"
+      className="border-b border-ground-border px-4 py-6 sm:px-8 lg:px-14 xl:px-20"
     >
       <div className="flex items-center gap-4 transition-colors duration-400 ease-luxury-bezier">
         <Search
@@ -43,7 +43,7 @@ export default function SearchForm({ defaultValue }: SearchFormProps) {
           height={18}
           strokeWidth={1.25}
           aria-hidden="true"
-          className="shrink-0 text-gold/60"
+          className="shrink-0 text-ground-accent/60"
         />
 
         <input
@@ -59,7 +59,7 @@ export default function SearchForm({ defaultValue }: SearchFormProps) {
           autoComplete="off"
           spellCheck={false}
           enterKeyHint="search"
-          className="w-full min-w-0 bg-transparent font-heading text-lg tracking-wide text-ivory placeholder:text-ivory/25 focus:outline-none sm:text-xl"
+          className="w-full min-w-0 bg-transparent font-heading text-lg tracking-wide text-ground placeholder:text-ground-muted/70 focus:outline-none sm:text-xl"
         />
 
         {value.length > 0 ? (
@@ -70,7 +70,7 @@ export default function SearchForm({ defaultValue }: SearchFormProps) {
               inputRef.current?.focus();
             }}
             aria-label={dict.search.clear}
-            className="shrink-0 cursor-pointer p-1 text-ivory/40 transition-colors duration-300 hover:text-gold"
+            className="shrink-0 cursor-pointer p-1 text-ground-muted transition-colors duration-300 hover:text-ground-accent"
           >
             <X width={16} height={16} strokeWidth={1.25} aria-hidden="true" />
           </button>
@@ -83,7 +83,7 @@ export default function SearchForm({ defaultValue }: SearchFormProps) {
          */}
         <button
           type="submit"
-          className="btn-luxury shrink-0 px-6 py-2.5 text-[10px]"
+          className="btn btn-outline shrink-0 px-6 py-2.5 text-[10px]"
         >
           {dict.search.submit}
         </button>

@@ -60,10 +60,10 @@ export default function CreditStep({
 
   return (
     <section className="mt-12">
-      <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ivory">
+      <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ground">
         {copy.heading}
       </h2>
-      <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-ivory/45">
+      <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-ground-muted">
         {copy.lede}
       </p>
 
@@ -80,13 +80,13 @@ export default function CreditStep({
               className={`flex w-full items-baseline justify-between gap-4 border px-5 py-4 text-start transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                 active
                   ? "border-gold/50 bg-gold/10"
-                  : "border-border hover:border-gold/30"
+                  : "border-ground-border hover:border-ground-accent/30"
               }`}
             >
               <span>
                 <span
                   className={`block font-heading text-[12px] tracking-[0.1em] ${
-                    active ? "text-gold" : "text-ivory/70"
+                    active ? "text-ground-accent" : "text-ground-muted"
                   }`}
                 >
                   {interpolate(copy.use, {
@@ -96,7 +96,7 @@ export default function CreditStep({
                   })}
                 </span>
                 {credit.expiresAt ? (
-                  <span className="mt-1 block text-[11px] tracking-wide text-ivory/30">
+                  <span className="mt-1 block text-[11px] tracking-wide text-ground-muted/70">
                     {interpolate(copy.expires, {
                       date: new Intl.DateTimeFormat(
                         locale === "ar" ? "ar-EG" : "en-GB",
@@ -107,7 +107,7 @@ export default function CreditStep({
                 ) : null}
               </span>
 
-              <span className="font-heading text-[12px] tracking-[0.1em] text-ivory/40">
+              <span className="font-heading text-[12px] tracking-[0.1em] text-ground-muted">
                 {formatPrice(credit.balanceInCents)}
               </span>
             </button>
@@ -120,8 +120,8 @@ export default function CreditStep({
           onClick={() => onSelect("")}
           className={`w-full border px-5 py-4 text-start font-heading text-[12px] tracking-[0.1em] transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             selectedId === ""
-              ? "border-gold/50 bg-gold/10 text-gold"
-              : "border-border text-ivory/50 hover:border-gold/30"
+              ? "border-gold/50 bg-gold/10 text-ground-accent"
+              : "border-ground-border text-ground-muted hover:border-ground-accent/30"
           }`}
         >
           {copy.none}
@@ -135,7 +135,7 @@ export default function CreditStep({
       ) : null}
 
       {selected ? (
-        <p className="mt-3 text-[11px] leading-relaxed text-ivory/30">
+        <p className="mt-3 text-[11px] leading-relaxed text-ground-muted/70">
           {copy.deliveryStillCharged}
         </p>
       ) : null}

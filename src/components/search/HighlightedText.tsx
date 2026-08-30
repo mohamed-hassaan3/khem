@@ -69,7 +69,7 @@ export default function HighlightedText({ text, terms }: HighlightedTextProps) {
   ranges.forEach(([start, end], index) => {
     if (start > cursor) parts.push(text.slice(cursor, start));
     parts.push(
-      <mark key={`${start}-${index}`} className="bg-transparent text-gold">
+      <mark key={`${start}-${index}`} className="bg-transparent text-ground-accent">
         {text.slice(start, end)}
       </mark>,
     );

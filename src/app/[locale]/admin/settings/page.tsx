@@ -66,10 +66,10 @@ export default async function AdminSettingsPage({
 
       <section className="space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             The house
           </h2>
-          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             The house address receives the contact form and every Inner Circle
             signup. A typo there is a swallowed enquiry, so it is checked as a
             real address before it is saved.
@@ -81,10 +81,10 @@ export default async function AdminSettingsPage({
 
       <section className="mt-12 space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Contact channels
           </h2>
-          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             The panel beside the enquiry form on /contact. Line breaks in a
             value are preserved; leave the link target empty for anything that
             is not a telephone number or an address to write to.
@@ -96,10 +96,10 @@ export default async function AdminSettingsPage({
 
       <section className="mt-12 space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Social profiles
           </h2>
-          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             Shown on /contact and in the signature of every branded email the
             house sends — a dead link here is a dead link in somebody&rsquo;s
             inbox.

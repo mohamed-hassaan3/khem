@@ -92,12 +92,12 @@ export default function OrderStatusControl({
   return (
     <div className="space-y-8">
       <div>
-        <p className="mb-4 font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/25">
+        <p className="mb-4 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
           Fulfilment
         </p>
 
         {next.length === 0 ? (
-          <p className="mb-4 text-[12px] leading-relaxed text-ivory/30">
+          <p className="mb-4 text-[12px] leading-relaxed text-ground-muted">
             This order is closed. Its units were returned to stock and it cannot
             be reopened — record a new order instead.
           </p>
@@ -127,14 +127,14 @@ export default function OrderStatusControl({
                 }
                 className={`rounded-none border px-5 py-2.5 font-heading text-[9px] uppercase tracking-[0.2em] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none disabled:pointer-events-none ${
                   active
-                    ? "border-gold/50 bg-gold/10 text-gold"
+                    ? "border-gold/50 bg-gold/10 text-ground-accent"
                     : isArmed
                       ? "border-danger bg-danger/10 text-danger"
                       : !reachable
-                        ? "border-border/50 text-ivory/15"
+                        ? "border-ground-border/50 text-ground-subtle"
                         : restocks
-                          ? "border-border text-ivory/40 hover:border-danger/50 hover:text-danger"
-                          : "border-border text-ivory/45 hover:border-gold/40 hover:text-gold"
+                          ? "border-ground-border text-ground-muted hover:border-danger/50 hover:text-danger"
+                          : "border-ground-border text-ground-muted hover:border-gold/40 hover:text-ground-accent"
                 }`}
               >
                 {isArmed ? `Confirm — restocks` : label(to)}
@@ -145,7 +145,7 @@ export default function OrderStatusControl({
       </div>
 
       <div>
-        <p className="mb-4 font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/25">
+        <p className="mb-4 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
           Payment
         </p>
 
@@ -162,8 +162,8 @@ export default function OrderStatusControl({
                 aria-pressed={active}
                 className={`rounded-none border px-5 py-2.5 font-heading text-[9px] uppercase tracking-[0.2em] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none disabled:pointer-events-none ${
                   active
-                    ? "border-gold/50 bg-gold/10 text-gold"
-                    : "border-border text-ivory/40 hover:border-gold/40 hover:text-gold"
+                    ? "border-gold/50 bg-gold/10 text-ground-accent"
+                    : "border-ground-border text-ground-muted hover:border-gold/40 hover:text-ground-accent"
                 }`}
               >
                 {label(value)}

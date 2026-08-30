@@ -130,7 +130,7 @@ export default async function AdminAnnouncementsPage({
                   {announcement.messageAr ? (
                     <span
                       dir="rtl"
-                      className="mt-1 block max-w-md truncate text-[11px] text-ivory/30"
+                      className="mt-1 block max-w-md truncate text-[11px] text-ground-muted"
                     >
                       {announcement.messageAr}
                     </span>
@@ -160,7 +160,7 @@ export default async function AdminAnnouncementsPage({
                         ? "border-success/40 text-success"
                         : shown.tone === "warning"
                           ? "border-warning/40 text-warning"
-                          : "border-border text-ivory/30"
+                          : "border-ground-border text-ground-muted"
                     }`}
                   >
                     {shown.label}
@@ -170,7 +170,7 @@ export default async function AdminAnnouncementsPage({
                 <AdminCell>
                   <Link
                     href={`${basePath}/${announcement.id}`}
-                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                   >
                     Edit
                   </Link>
@@ -182,14 +182,14 @@ export default async function AdminAnnouncementsPage({
       )}
 
       <section className="mt-14">
-        <h2 className="mb-6 font-heading text-sm uppercase tracking-[0.2em] text-ivory/60">
+        <h2 className="mb-6 font-heading text-sm uppercase tracking-[0.2em] text-ground-muted">
           Behaviour
         </h2>
 
         {settings === null ? (
-          <p className="border border-border px-5 py-10 text-center text-[12px] leading-relaxed text-ivory/35">
+          <p className="border border-ground-border px-5 py-10 text-center text-[12px] leading-relaxed text-ground-muted">
             The marketing settings row could not be read. Run{" "}
-            <code className="text-gold/70">npm run db:migrate</code> and reload.
+            <code className="text-ground-accent">npm run db:migrate</code> and reload.
           </p>
         ) : (
           <MarketingSettingsForm

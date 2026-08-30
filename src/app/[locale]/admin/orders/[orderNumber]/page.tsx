@@ -65,11 +65,11 @@ function addressLines(shipping: OrderShippingAddress): string[] {
 
 function Detail({ term, children }: { term: string; children: React.ReactNode }) {
   return (
-    <div className="border-b border-border py-3 last:border-b-0">
-      <dt className="font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/25">
+    <div className="border-b border-ground-border py-3 last:border-b-0">
+      <dt className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
         {term}
       </dt>
-      <dd className="mt-1.5 text-[12px] tracking-wide text-ivory/70">{children}</dd>
+      <dd className="mt-1.5 text-[12px] tracking-wide text-ground">{children}</dd>
     </div>
   );
 }
@@ -91,7 +91,7 @@ export default async function AdminOrderPage({
     <>
       <Link
         href={listPath}
-        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35 transition-colors duration-300 hover:text-gold"
+        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
       >
         <ArrowLeft size={13} strokeWidth={1.25} />
         All orders
@@ -122,7 +122,7 @@ export default async function AdminOrderPage({
                       activeLocale,
                       `/admin/products/${line.productSlug}`,
                     )}
-                    className="transition-colors duration-300 hover:text-gold"
+                    className="transition-colors duration-300 hover:text-ground-accent"
                   >
                     {line.productName}
                   </Link>
@@ -137,10 +137,10 @@ export default async function AdminOrderPage({
                   {line.listPriceInCents !== null &&
                   line.listPriceInCents > line.priceInCents ? (
                     <span className="inline-flex items-baseline gap-2">
-                      <span className="text-ivory/25 line-through">
+                      <span className="text-ground-subtle line-through">
                         {egp(line.listPriceInCents)}
                       </span>
-                      <span className="text-gold/80">{egp(line.priceInCents)}</span>
+                      <span className="text-ground-accent">{egp(line.priceInCents)}</span>
                     </span>
                   ) : (
                     egp(line.priceInCents)
@@ -152,24 +152,24 @@ export default async function AdminOrderPage({
             ))}
           </AdminTable>
 
-          <dl className="max-w-sm border border-border p-6 text-[12px] tracking-wide">
+          <dl className="max-w-sm border border-ground-border p-6 text-[12px] tracking-wide">
             <div className="flex justify-between py-1">
-              <dt className="text-ivory/35">Subtotal</dt>
-              <dd className="text-ivory/70">{egp(order.subtotalInCents)}</dd>
+              <dt className="text-ground-muted">Subtotal</dt>
+              <dd className="text-ground">{egp(order.subtotalInCents)}</dd>
             </div>
             <div className="flex justify-between py-1">
-              <dt className="text-ivory/35">Delivery</dt>
-              <dd className="text-ivory/70">{egp(order.shipInCents)}</dd>
+              <dt className="text-ground-muted">Delivery</dt>
+              <dd className="text-ground">{egp(order.shipInCents)}</dd>
             </div>
             {order.discountInCents > 0 ? (
               <div className="flex justify-between py-1">
-                <dt className="text-ivory/35">
+                <dt className="text-ground-muted">
                   Discount
                   {order.discountCode ? (
-                    <span className="ms-2 text-ivory/25">{order.discountCode}</span>
+                    <span className="ms-2 text-ground-subtle">{order.discountCode}</span>
                   ) : null}
                 </dt>
-                <dd className="text-gold">
+                <dd className="text-ground-accent">
                   −{egp(order.discountInCents)}
                   {order.discountCode ? (
                     <Link
@@ -177,7 +177,7 @@ export default async function AdminOrderPage({
                         activeLocale,
                         `/admin/discounts/${order.discountCode}`,
                       )}
-                      className="ms-3 font-heading text-[9px] uppercase tracking-[0.2em] text-gold/60 transition-colors duration-300 hover:text-gold"
+                      className="ms-3 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                     >
                       Code
                     </Link>
@@ -187,8 +187,8 @@ export default async function AdminOrderPage({
             ) : null}
             {order.creditAppliedInCents > 0 ? (
               <div className="flex justify-between py-1">
-                <dt className="text-ivory/35">Discovery credit</dt>
-                <dd className="text-gold">
+                <dt className="text-ground-muted">Discovery credit</dt>
+                <dd className="text-ground-accent">
                   −{egp(order.creditAppliedInCents)}
                   {order.creditId ? (
                     <Link
@@ -196,7 +196,7 @@ export default async function AdminOrderPage({
                         activeLocale,
                         `/admin/credits/${order.creditId}`,
                       )}
-                      className="ms-3 font-heading text-[9px] uppercase tracking-[0.2em] text-gold/60 transition-colors duration-300 hover:text-gold"
+                      className="ms-3 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                     >
                       Ledger
                     </Link>
@@ -204,22 +204,22 @@ export default async function AdminOrderPage({
                 </dd>
               </div>
             ) : null}
-            <div className="mt-3 flex justify-between border-t border-border pt-3">
-              <dt className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+            <div className="mt-3 flex justify-between border-t border-ground-border pt-3">
+              <dt className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
                 Total
               </dt>
-              <dd className="font-heading text-[13px] tracking-[0.1em] text-gold">
+              <dd className="font-heading text-[13px] tracking-[0.1em] text-ground-accent">
                 {egp(order.totalInCents)}
               </dd>
             </div>
           </dl>
 
           {order.stockReleasedAt ? (
-            <div className="border border-border bg-ivory/2 p-6">
-              <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+            <div className="border border-ground-border bg-ivory/2 p-6">
+              <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
                 Stock returned
               </p>
-              <p className="mt-3 text-[12px] leading-relaxed text-ivory/40">
+              <p className="mt-3 text-[12px] leading-relaxed text-ground-muted">
                 These units went back into the website&rsquo;s inventory on{" "}
                 {stamp(order.stockReleasedAt)}. They are returned once, so
                 moving this order between cancelled and refunded does not add
@@ -230,7 +230,7 @@ export default async function AdminOrderPage({
         </div>
 
         <aside className="space-y-8">
-          <div className="border border-border bg-ivory/2 p-6">
+          <div className="border border-ground-border bg-ivory/2 p-6">
             <dl>
               <Detail term="Customer">{order.customerName}</Detail>
               {order.customerEmail ? (
@@ -251,7 +251,7 @@ export default async function AdminOrderPage({
                 {order.paymentMethod === "CARD" ? "Card" : "Cash on delivery"} ·{" "}
                 {label(order.paymentStatus)}
                 {order.paidAt ? (
-                  <span className="block text-ivory/35">
+                  <span className="block text-ground-muted">
                     Paid {stamp(order.paidAt)}
                   </span>
                 ) : null}
@@ -278,7 +278,7 @@ export default async function AdminOrderPage({
               ) : null}
               {order.stripePaymentIntentId ? (
                 <Detail term="Stripe intent">
-                  <span className="break-all text-ivory/45">
+                  <span className="break-all text-ground-muted">
                     {order.stripePaymentIntentId}
                   </span>
                 </Detail>
@@ -287,7 +287,7 @@ export default async function AdminOrderPage({
             </dl>
           </div>
 
-          <div className="border border-border bg-ivory/2 p-6">
+          <div className="border border-ground-border bg-ivory/2 p-6">
             <OrderStatusControl
               orderId={order.id}
               status={order.status}

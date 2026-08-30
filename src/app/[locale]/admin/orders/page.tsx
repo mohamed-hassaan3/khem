@@ -186,7 +186,7 @@ export default async function AdminOrdersPage({
                 <span className="block font-heading text-[11px] tracking-[0.1em]">
                   {order.orderNumber}
                 </span>
-                <span className="mt-1 block text-[10px] tracking-wide text-ivory/25">
+                <span className="mt-1 block text-[10px] tracking-wide text-ground-subtle">
                   {order.channel.toLowerCase()}
                 </span>
                 {/*
@@ -197,7 +197,7 @@ export default async function AdminOrdersPage({
                 {order.firstOpenedAt === null ? (
                   <span
                     title="Nobody at the desk has opened this order yet"
-                    className="mt-2 inline-block border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-gold"
+                    className="mt-2 inline-block border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent"
                   >
                     New
                   </span>
@@ -214,7 +214,7 @@ export default async function AdminOrdersPage({
                       ? "text-success"
                       : order.paymentStatus === "FAILED"
                         ? "text-danger"
-                        : "text-ivory/35"
+                        : "text-ground-muted"
                   }
                 >
                   {label(order.paymentStatus)}
@@ -224,10 +224,10 @@ export default async function AdminOrdersPage({
                 <span
                   className={`inline-block border px-3 py-1 font-heading text-[9px] uppercase tracking-[0.2em] ${
                     order.status === "CANCELLED" || order.status === "REFUNDED"
-                      ? "border-border text-ivory/30"
+                      ? "border-ground-border text-ground-muted"
                       : order.status === "DELIVERED"
                         ? "border-success/40 text-success"
-                        : "border-gold/40 text-gold"
+                        : "border-gold/40 text-ground-accent"
                   }`}
                 >
                   {label(order.status)}
@@ -236,7 +236,7 @@ export default async function AdminOrdersPage({
               <AdminCell>
                 <Link
                   href={`${basePath}/${order.orderNumber}`}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Open
                 </Link>

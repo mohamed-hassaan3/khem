@@ -10,6 +10,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
 import CategoryHero from "@/src/components/ecommerce/CategoryHero";
 import DiscoveryComparison from "@/src/components/ecommerce/DiscoveryComparison";
@@ -61,7 +62,8 @@ export default async function CategoryView({
       const ritual = copy.ritual;
 
       return (
-        <div className="min-h-screen bg-background text-ivory">
+        <div className="ground-ivory min-h-screen">
+      <NavGround ground="ivory" />
           <CategoryHero
             eyebrow={copy.eyebrow}
             titleLead={copy.titleLead}
@@ -98,7 +100,7 @@ export default async function CategoryView({
       const copy = dict.homeFragrance;
 
       return (
-        <div className="min-h-screen bg-background text-ivory">
+        <div className="ground-ivory min-h-screen">
           <CategoryHero
             eyebrow={copy.eyebrow}
             titleLead={copy.titleLead}
@@ -124,7 +126,7 @@ export default async function CategoryView({
       const steps = copy.promise.steps;
 
       return (
-        <div className="min-h-screen bg-background text-ivory">
+        <div className="ground-ivory min-h-screen">
           <CategoryHero
             eyebrow={copy.eyebrow}
             titleLead={copy.titleLead}
@@ -166,7 +168,7 @@ export default async function CategoryView({
       const ritual = copy.ritual;
 
       return (
-        <div className="min-h-screen bg-background text-ivory">
+        <div className="ground-ivory min-h-screen">
           <CategoryHero
             eyebrow={copy.eyebrow}
             titleLead={copy.titleLead}
@@ -220,16 +222,16 @@ function SetGrid({
   emptyLabel: string;
 }) {
   return (
-    <section className="bg-background px-4 py-14 md:px-20 md:py-30">
+    <section className="px-4 py-14 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:py-30">
       <div className="mx-auto max-w-350">
         {sets.length === 0 ? (
-          <p className="py-14 md:py-24 text-center text-[13px] leading-loose text-ivory/35">
+          <p className="py-14 md:py-24 text-center text-[13px] leading-loose text-ground-muted">
             {emptyLabel}
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-px bg-border lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
             {sets.map((set, index) => (
-              <Reveal key={set.id} delay={(index % 3) * 0.1}>
+              <Reveal key={set.id} delay={(index % 4) * 0.1} className="h-full">
                 <DiscoverySetCard product={set} locale={locale} />
               </Reveal>
             ))}

@@ -38,11 +38,11 @@ export default function TopProductsBars({
             <div className="mb-2 flex items-baseline justify-between gap-4">
               <Link
                 href={hrefFor(row.productSlug)}
-                className="text-[12px] tracking-wide text-ivory/80 transition-colors duration-300 hover:text-gold"
+                className="text-[12px] tracking-wide text-ground transition-colors duration-300 hover:text-ground-accent"
               >
                 {row.productName}
               </Link>
-              <span className="shrink-0 font-heading text-[11px] tracking-[0.1em] text-gold/80">
+              <span className="shrink-0 font-heading text-[11px] tracking-[0.1em] text-ground-accent">
                 {egpCompact(row.revenueInCents)}
               </span>
             </div>
@@ -54,7 +54,7 @@ export default function TopProductsBars({
                   style={{ width: `${Math.max(share, 2)}%` }}
                 />
               </div>
-              <span className="w-16 shrink-0 text-end text-[10px] tracking-wide text-ivory/30">
+              <span className="w-16 shrink-0 text-end text-[10px] tracking-wide text-ground-muted">
                 {row.units} sold
               </span>
             </div>

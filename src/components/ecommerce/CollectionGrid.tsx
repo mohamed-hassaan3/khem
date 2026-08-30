@@ -3,7 +3,6 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
-import AddToBagButton from "@/src/components/ecommerce/AddToBagButton";
 import {
   FACET_ORDER,
   FACET_PARAM,
@@ -24,7 +23,7 @@ import { useDictionary } from "@/src/providers/i18n-provider";
  * `ReactNode`s — `<ProductCard>` is an async Server Component, so re-authoring
  * its markup here would fork the card design and drag the catalog projection
  * across the client boundary. This component only filters and reorders the
- * nodes it is given and overlays `<AddToBagButton>` on each.
+ * nodes it is given; each card carries its own bag control.
  *
  * ## One filter row, one parameter, and a line that says what it did
  *
@@ -199,7 +198,7 @@ export default function CollectionGrid({
   return (
     <>
       {/* ── DESCRIPTION + SORT BAR ──────────────────── */}
-      <section className="border-b border-border bg-background px-4 py-10 md:px-20">
+      <section className="border-b border-ground-border px-4 py-10 sm:px-6 md:px-10 lg:px-12 xl:px-16">
         <div className="mx-auto flex max-w-350 flex-col gap-4 md:gap-6 md:flex-row md:items-center md:justify-between">
           {description}
 
@@ -207,7 +206,7 @@ export default function CollectionGrid({
             <div className="flex items-center gap-5">
               <label
                 htmlFor="collection-sort"
-                className="whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-ivory/35"
+                className="whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-ground-muted"
               >
                 {dict.collections.sortBy}
               </label>
@@ -217,7 +216,7 @@ export default function CollectionGrid({
                   id="collection-sort"
                   value={sort}
                   onChange={(event) => setSort(event.target.value as SortKey)}
-                  className="cursor-pointer appearance-none border border-white/10 bg-white/4 px-4 py-2.5 pe-9 font-heading text-[11px] tracking-[0.1em] text-ivory transition-colors duration-300 ease-out hover:border-gold/50 focus-visible:border-gold focus-visible:outline-none"
+                  className="cursor-pointer appearance-none border border-ground-border bg-stone px-4 py-2.5 pe-9 font-heading text-[11px] tracking-[0.1em] text-ground transition-colors duration-300 ease-out hover:border-gold/50 focus-visible:border-gold focus-visible:outline-none"
                 >
                   <option value="featured">
                     {dict.collections.sortOptions.featured}
@@ -234,7 +233,7 @@ export default function CollectionGrid({
                   size={14}
                   strokeWidth={1.25}
                   aria-hidden="true"
-                  className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-gold/60"
+                  className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-ground-accent/60"
                 />
               </div>
             </div>
@@ -255,10 +254,15 @@ export default function CollectionGrid({
          */
         <nav
           aria-label={dict.collections.filterLabel}
-          className="sticky top-20 z-30 border-b border-border bg-[color-mix(in_srgb,var(--color-surface)_96%,transparent)] backdrop-blur-xl"
+          /*
+             A veil over the page's own ground, not a fixed obsidian one. This
+             bar sticks under the header on a shop page that is now ivory; at
+             `--color-surface` it painted a dark band across it.
+           */
+          className="sticky top-[var(--header-h)] z-30 border-b border-ground-border bg-ground-bg"
         >
           {/* One scrolling strip at every width — never a second line. */}
-          <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-x-auto px-4 py-4 md:px-20">
+          <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-x-auto px-4 py-4 sm:px-6 md:px-10 lg:px-12 xl:px-16">
             <FilterChip
               label={dict.collections.tabAll}
               isActive={facet === null}
@@ -278,7 +282,7 @@ export default function CollectionGrid({
       ) : null}
 
       {/* ── PRODUCT GRID ────────────────────────────── */}
-      <section className="bg-background px-4 pb-14 pt-10 md:px-20 md:pb-36">
+      <section className="px-4 pb-14 pt-10 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pb-36">
         {/*
          * What the visitor is looking at, in words.
          *
@@ -294,7 +298,7 @@ export default function CollectionGrid({
          * for one result.
          */}
         {showFacets && (isFiltered || isSorted) ? (
-          <div className="mx-auto mb-6 md:mb-10 flex max-w-350 flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-wide text-ivory/40">
+          <div className="mx-auto mb-6 md:mb-10 flex max-w-350 flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-wide text-ground-muted">
             {isFiltered ? (
               <span>
                 {interpolate(dict.collections.activeState.filteredBy, {
@@ -304,7 +308,7 @@ export default function CollectionGrid({
             ) : null}
 
             {isFiltered && isSorted ? (
-              <span aria-hidden="true" className="text-ivory/20">
+              <span aria-hidden="true" className="text-ground-muted/60">
                 ·
               </span>
             ) : null}
@@ -320,7 +324,7 @@ export default function CollectionGrid({
             <button
               type="button"
               onClick={clearAll}
-              className="cursor-pointer border-b border-transparent pb-0.5 uppercase tracking-[0.2em] transition-colors duration-300 ease-out hover:border-gold/50 hover:text-gold focus-visible:border-gold focus-visible:text-gold focus-visible:outline-none"
+              className="cursor-pointer border-b border-transparent pb-0.5 uppercase tracking-[0.2em] transition-colors duration-300 ease-out hover:border-gold/50 hover:text-ground-accent focus-visible:border-gold focus-visible:text-ground-accent focus-visible:outline-none"
             >
               {dict.collections.activeState.clear}
             </button>
@@ -347,22 +351,24 @@ export default function CollectionGrid({
            */
           <div
             key={`${facet ?? "all"}-${sort}`}
-            className="khem-fade mx-auto grid max-w-350 grid-cols-2 gap-px bg-border lg:grid-cols-3"
+            className="khem-fade mx-auto grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-4 max-w-350"
           >
+            {/*
+              The cards are their own grid items now. This used to wrap each one
+              in a `relative` div so `<AddToBagButton>` could be overlaid on top
+              — the card was a single anchor and could not contain a button. It
+              is an `<article>` with a stretched link now and carries its own
+              bag, so the wrapper, the import, and the chance of a grid
+              forgetting to add one are all gone.
+            */}
             {sorted.map((item) => (
-              <div key={item.id} className="relative">
-                <AddToBagButton
-                  productId={item.id}
-                  name={item.name}
-                  inventory={item.inventory}
-                />
-
+              <div key={item.id} className="h-full">
                 {item.card}
               </div>
             ))}
           </div>
         ) : (
-          <p className="py-10 md:py-16 text-center text-sm text-ivory/40">
+          <p className="py-10 md:py-16 text-center text-sm text-ground-muted">
             {dict.collections.empty}
           </p>
         )}
@@ -398,8 +404,8 @@ function FilterChip({
       dir="auto"
       className={`shrink-0 cursor-pointer whitespace-nowrap border px-4 py-2 font-heading text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 ease-out focus-visible:border-gold focus-visible:outline-none ${
         isActive
-          ? "border-gold/70 bg-gold/10 text-gold"
-          : "border-white/10 text-ivory/40 hover:border-gold/40 hover:text-ivory/70"
+          ? "border-gold/70 bg-gold/10 text-ground-accent"
+          : "border-ground-border text-ground-muted hover:border-ground-accent/40 hover:text-ground-muted"
       }`}
     >
       {label}
