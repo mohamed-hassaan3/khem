@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 
+import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { isLocale } from "@/src/lib/i18n/config";
@@ -48,7 +49,7 @@ function TimelineYear({
 }) {
   return (
     <p
-      className={`font-heading text-xl font-semibold text-gold ${className}`.trim()}
+      className={`font-heading text-xl font-semibold text-ground-accent ${className}`.trim()}
     >
       {year}
     </p>
@@ -64,10 +65,10 @@ function TimelineCopy({
 }) {
   return (
     <>
-      <h3 className="mb-3 font-heading text-[15px] font-normal text-ivory">
+      <h3 className="mb-3 font-heading text-[15px] font-normal text-ground">
         {title}
       </h3>
-      <p className="text-[13px] leading-relaxed text-ivory/45">{description}</p>
+      <p className="text-[13px] leading-relaxed text-ground-muted">{description}</p>
     </>
   );
 }
@@ -90,9 +91,38 @@ export default async function Heritage({
   const island = ltrIsland(activeLocale);
 
   return (
-    <div className="min-h-screen bg-background text-ivory">
+    <div className="min-h-screen">
+      {/* §19: dark-led, with sand for the stone and the timeline. */}
+      <NavGround ground="ivory" />
       {/* ── HERO ───────────────────────────────────── */}
-      <section className="relative flex h-screen min-h-150 items-center overflow-hidden bg-black">
+      {/*
+        The page banner, as photography rather than as a dark mode.
+
+        Every editorial page opened on the same thing: a full-viewport image
+        crushed to a fifth of its brightness under an obsidian ground. §14 is
+        blunt about it — repeating that banner is what "forces every page into
+        a dark visual mode", and it was doing so above the fold on six routes.
+
+        Three changes, the same three everywhere this pattern appears.
+
+        The height comes down from the whole viewport, so the banner introduces
+        the page rather than being the page, and the first light section is
+        visible without scrolling. The image runs at its own luminance with no
+        filter at all. And the type is charcoal on an ivory gradient rather than
+        ivory on a darkened photograph — which is what makes this one banner
+        language with the collection and category banners instead of a third.
+
+        No top padding, and no clearance maths: the page wrapper in
+        `layout.tsx` reserves `--header-h` for the whole document, so this
+        banner already starts below the nav rather than behind it. The section
+        is sized to its own composition and nothing else.
+
+        This carried a `pt-20` and an inflated `min-h` while the header floated
+        over the content — both existed only to keep the heading out from under
+        the bar, and both are dead weight now that the bar occupies its own
+        space.
+      */}
+      <section className="ground-ivory relative flex h-[72vh] min-h-175 items-center overflow-hidden bg-sand">
         <Image
           src="https://images.unsplash.com/photo-1678287714479-adaa0cfbe6c6?w=1800&h=1000&fit=crop&auto=format"
           alt=""
@@ -100,26 +130,26 @@ export default async function Heritage({
           priority
           quality={85}
           sizes="100vw"
-          className="object-cover brightness-30 saturate-50"
+          className="object-cover"
         />
-        <div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/70 to-background/30 rtl:bg-linear-to-l" />
+        <div aria-hidden="true" className="banner-scrim banner-scrim-column" />
 
         <div className="relative z-10 max-w-2xl px-4 md:px-20 lg:px-30">
           <p className="eyebrow mb-7">{dict.heritage.hero.eyebrow}</p>
-          <h1 className="mb-8 font-heading text-5xl font-normal leading-none text-ivory sm:text-6xl md:text-7xl lg:text-8xl">
+          <h1 className="mb-8 font-heading text-5xl font-normal leading-none text-ground sm:text-6xl md:text-7xl lg:text-8xl">
             {dict.heritage.hero.headingLine1}
             <br />
-            <span className="text-gold">{dict.heritage.hero.headingLine2}</span>
+            <span className="text-ground-accent">{dict.heritage.hero.headingLine2}</span>
           </h1>
           <div className="gold-line mb-8" />
-          <p className="max-w-lg text-sm leading-loose text-ivory/55">
+          <p className="max-w-lg text-sm leading-loose text-ground-muted">
             {dict.heritage.hero.lede}
           </p>
         </div>
       </section>
 
       {/* ── PHILOSOPHY ──────────────────────────────── */}
-      <section className="bg-background px-4 py-14 md:px-20 md:py-36">
+      <section className="ground-sand px-4 py-14 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 md:gap-12 lg:grid-cols-[1fr_2fr] lg:gap-25">
           <Reveal>
             <p className="eyebrow mb-6">{dict.heritage.philosophy.eyebrow}</p>
@@ -127,13 +157,13 @@ export default async function Heritage({
           </Reveal>
 
           <Reveal delay={STAGGER_STEP * 2}>
-            <h2 className="mb-6 md:mb-10 font-heading text-2xl font-normal leading-snug text-ivory sm:text-3xl lg:text-5xl">
+            <h2 className="mb-6 md:mb-10 font-heading text-2xl font-normal leading-snug text-ground sm:text-3xl lg:text-5xl">
               {dict.heritage.philosophy.heading}
             </h2>
-            <p className="mb-6 text-sm leading-loose text-ivory/50">
+            <p className="mb-6 text-sm leading-loose text-ground-muted">
               {dict.heritage.philosophy.body1}
             </p>
-            <p className="text-sm leading-loose text-ivory/50">
+            <p className="text-sm leading-loose text-ground-muted">
               {dict.heritage.philosophy.body2}
             </p>
           </Reveal>
@@ -147,11 +177,11 @@ export default async function Heritage({
           alt=""
           fill
           sizes="100vw"
-          className="object-cover brightness-40 saturate-60"
+          className="object-cover brightness-80"
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-background/50 px-4 md:px-20">
+        <div className="ground-obsidian absolute inset-0 flex items-center justify-center bg-ink/45 px-4 md:px-20">
           <Reveal className="text-center">
-            <p className="mx-auto max-w-3xl font-heading text-lg leading-relaxed tracking-widest text-ivory sm:text-2xl md:text-4xl">
+            <p className="mx-auto max-w-3xl font-heading text-lg leading-relaxed tracking-widest text-ground sm:text-2xl md:text-4xl">
               {dict.heritage.quoteBand}
             </p>
             <div className="gold-line mx-auto mt-7" />
@@ -159,12 +189,19 @@ export default async function Heritage({
         </div>
       </section>
 
-      {/* ── TIMELINE ────────────────────────────────── */}
-      <section className="bg-background px-4 py-14 md:px-20 md:py-36">
+      {/*
+        ── TIMELINE ─── sand ────────────────────────
+
+        The longest continuous read on the site, and §15 puts it on the
+        heritage ground: limestone, paper, engraving. Sand is warmer than ivory
+        and slower to read against, which is the right trade for a section
+        someone spends time in rather than scans.
+      */}
+      <section className="ground-sand px-4 py-14 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
         <div className="mx-auto max-w-4xl">
           <Reveal className="mb-10 text-center md:mb-25">
             <p className="eyebrow mb-5">{dict.heritage.timeline.eyebrow}</p>
-            <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl md:text-5xl">
+            <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl md:text-5xl">
               {dict.heritage.timeline.heading}
             </h2>
           </Reveal>
@@ -206,7 +243,7 @@ export default async function Heritage({
                         className="flex justify-center pt-2"
                         aria-hidden="true"
                       >
-                        <span className="mt-1.5 h-3 w-3 flex-none rounded-full border-2 border-gold bg-background" />
+                        <span className="mt-1.5 h-3 w-3 flex-none rounded-full border-2 border-ground-accent bg-ground-bg" />
                       </div>
 
                       {/* After the rail — and the only cell below `md`. */}
@@ -243,11 +280,11 @@ export default async function Heritage({
       </section>
 
       {/* ── VALUES ──────────────────────────────────── */}
-      <section className="border-t border-border bg-surface px-4 py-14 md:px-20 md:py-30">
+      <section className="ground-ivory border-t border-ground-border px-4 py-14 sm:px-6 md:px-10 md:py-30 lg:px-12 xl:px-16">
         <div className="mx-auto max-w-350">
           <Reveal className="mb-10 text-center md:mb-20">
             <p className="eyebrow mb-5">{dict.heritage.values.eyebrow}</p>
-            <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl md:text-5xl">
+            <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl md:text-5xl">
               {dict.heritage.values.heading}
             </h2>
           </Reveal>
@@ -257,15 +294,15 @@ export default async function Heritage({
               <Reveal
                 key={value.id}
                 delay={index * STAGGER_STEP}
-                className="bg-background p-10 md:p-12"
+                className="card p-10 md:p-12"
               >
                 <div className="gold-line mb-8" />
                 {/* Brand values come from the database — English only. */}
                 <div {...island}>
-                  <h3 className="mb-5 font-heading text-xl font-normal text-ivory">
+                  <h3 className="mb-5 font-heading text-xl font-normal text-ground">
                     {value.title}
                   </h3>
-                  <p className="text-[13px] leading-loose text-ivory/45">
+                  <p className="text-[13px] leading-loose text-ground-muted">
                     {value.description}
                   </p>
                 </div>
@@ -275,21 +312,21 @@ export default async function Heritage({
         </div>
       </section>
 
-      {/* ── CTA ─────────────────────────────────────── */}
-      <section className="bg-background px-4 py-14 text-center md:px-20 md:py-30">
+      {/* ── CTA ─── ivory ───────────────────────────── */}
+      <section className="ground-ivory border-t border-ground-border px-4 py-14 text-center sm:px-6 md:px-10 md:py-30 lg:px-12 xl:px-16">
         <Reveal className="mx-auto max-w-xl">
           <p className="eyebrow mb-5">{dict.heritage.cta.eyebrow}</p>
-          <h2 className="mb-6 md:mb-10 font-heading text-2xl font-normal text-ivory sm:text-3xl md:text-4xl">
+          <h2 className="mb-6 md:mb-10 font-heading text-2xl font-normal text-ground sm:text-3xl md:text-4xl">
             {dict.heritage.cta.heading}
           </h2>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <LocaleLink
               href="/collections"
-              className="btn-luxury btn-luxury-fill"
+              className="btn btn-primary"
             >
               {dict.heritage.cta.primary}
             </LocaleLink>
-            <LocaleLink href="/craftsmanship" className="btn-luxury">
+            <LocaleLink href="/craftsmanship" className="btn btn-outline">
               {dict.heritage.cta.secondary}
             </LocaleLink>
           </div>

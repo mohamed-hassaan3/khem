@@ -92,8 +92,8 @@ function Chips({
             onClick={() => onToggle(option.slug)}
             className={`border px-4 py-2 text-[11px] tracking-wide transition-colors duration-300 ${
               active
-                ? "border-gold/50 bg-gold/10 text-gold"
-                : "border-border text-ivory/35 hover:border-gold/30 hover:text-ivory"
+                ? "border-gold/50 bg-gold/10 text-ground-accent"
+                : "border-ground-border text-ground-muted hover:border-gold/30 hover:text-ground"
             }`}
           >
             {option.name}
@@ -266,7 +266,7 @@ export default function DiscountForm({
       ) : null}
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           The code
         </h2>
 
@@ -321,7 +321,7 @@ export default function DiscountForm({
       </section>
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           When and how often
         </h2>
 
@@ -388,7 +388,7 @@ export default function DiscountForm({
       </section>
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           What it applies to
         </h2>
 
@@ -446,7 +446,7 @@ export default function DiscountForm({
       </div>
 
       {armed ? (
-        <p className="text-[11px] leading-relaxed text-ivory/35">
+        <p className="text-[11px] leading-relaxed text-ground-muted">
           Deleting removes the code, its restrictions, every outstanding grant
           and its whole redemption history — the usage figures go with it. To
           stop a code and keep the record, switch off &ldquo;Accepted at

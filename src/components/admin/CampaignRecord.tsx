@@ -44,11 +44,11 @@ function stamp(iso: string | null): string {
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid gap-1 border-b border-border py-4 last:border-b-0 sm:grid-cols-[10rem_1fr] sm:gap-4">
-      <p className="font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/30">
+    <div className="grid gap-1 border-b border-ground-border py-4 last:border-b-0 sm:grid-cols-[10rem_1fr] sm:gap-4">
+      <p className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-muted">
         {label}
       </p>
-      <div className="min-w-0 text-[12px] leading-relaxed text-ivory/75">
+      <div className="min-w-0 text-[12px] leading-relaxed text-ground">
         {children}
       </div>
     </div>
@@ -65,11 +65,11 @@ export default function CampaignRecord({
   return (
     <div className="max-w-3xl space-y-8">
       <section className="border border-gold/20 bg-gold/5 px-6 py-5">
-        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
           {campaign.status === "SENDING" ? "Sending" : "Sent"}
         </p>
 
-        <p className="mt-2 text-[12px] leading-relaxed text-ivory/55">
+        <p className="mt-2 text-[12px] leading-relaxed text-ground-muted">
           {campaign.delivered} of {campaign.claimed}{" "}
           {campaign.claimed === 1 ? "letter" : "letters"} accepted by the mail
           provider
@@ -77,13 +77,13 @@ export default function CampaignRecord({
           {campaign.sentAt ? ` — ${stamp(campaign.sentAt)}` : ""}.
         </p>
 
-        <p className="mt-3 text-[11px] leading-relaxed text-ivory/30">
+        <p className="mt-3 text-[11px] leading-relaxed text-ground-muted">
           This is a record of what went out. It cannot be edited, and the letter
           below is exactly what its recipients received.
         </p>
       </section>
 
-      <section className="border border-border bg-surface/60 px-6 py-2">
+      <section className="border border-ground-border bg-stone/60 px-6 py-2">
         <Row label="Name">{campaign.name}</Row>
         <Row label="Type">{TYPE_LABEL[campaign.type] ?? campaign.type}</Row>
         <Row label="List">
@@ -98,7 +98,7 @@ export default function CampaignRecord({
         {campaign.discountCode ? (
           <Row label="Voucher">
             {/* A code is a Latin string whose character order is its meaning. */}
-            <span dir="ltr" className="font-heading tracking-[0.14em] text-gold">
+            <span dir="ltr" className="font-heading tracking-[0.14em] text-ground-accent">
               {campaign.discountCode}
             </span>
           </Row>
@@ -107,7 +107,7 @@ export default function CampaignRecord({
         {campaign.ctaLabel ? (
           <Row label="Button">
             {campaign.ctaLabel}
-            <span className="mt-0.5 block break-all text-[11px] text-ivory/30">
+            <span className="mt-0.5 block break-all text-[11px] text-ground-muted">
               {campaign.ctaHref}
             </span>
           </Row>

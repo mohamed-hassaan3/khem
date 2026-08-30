@@ -40,14 +40,14 @@ export default function StatGrid({ summary }: { summary: AccountSummary }) {
   return (
     <div className="mb-15 grid grid-cols-1 gap-px sm:grid-cols-2">
       {stats.map((stat) => (
-        <div key={stat.key} className="bg-surface px-8 py-9">
-          <p className="mb-2 font-heading text-3xl font-semibold text-gold">
+        <div key={stat.key} className="bg-stone px-8 py-9">
+          <p className="mb-2 font-heading text-3xl font-semibold text-ground-accent">
             {stat.value}
           </p>
-          <p className="mb-1 font-heading text-[13px] text-ivory">
+          <p className="mb-1 font-heading text-[13px] text-ground">
             {stat.label}
           </p>
-          <p className="text-[11px] text-ivory/30">{stat.sub}</p>
+          <p className="text-[11px] text-ground-muted/70">{stat.sub}</p>
         </div>
       ))}
     </div>

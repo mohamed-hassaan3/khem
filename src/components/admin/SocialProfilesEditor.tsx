@@ -149,7 +149,7 @@ function ProfileCard({
   }
 
   return (
-    <div className="border border-border p-5 sm:p-6">
+    <div className="border border-ground-border p-5 sm:p-6">
       <div className="space-y-4 md:space-y-6">
         {result ? (
           <AdminNotice tone={result.ok ? "success" : "error"}>
@@ -242,7 +242,7 @@ export default function SocialProfilesEditor({
   return (
     <div className="space-y-5">
       {profiles.length === 0 && !adding ? (
-        <p className="border border-border px-5 py-10 text-center text-[12px] leading-relaxed text-ivory/35">
+        <p className="border border-ground-border px-5 py-10 text-center text-[12px] leading-relaxed text-ground-muted">
           No social profiles. Email signatures render without them.
         </p>
       ) : null}

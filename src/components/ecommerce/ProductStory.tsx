@@ -28,7 +28,7 @@ export default function ProductStory({ story, heading }: ProductStoryProps) {
         {paragraphs.map((paragraph) => (
           <p
             key={paragraph.slice(0, 48)}
-            className="mb-4 text-sm leading-loose text-ivory/55 last:mb-0"
+            className="mb-4 text-sm leading-loose text-ground-muted last:mb-0"
           >
             {paragraph}
           </p>

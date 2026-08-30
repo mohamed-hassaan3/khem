@@ -100,6 +100,20 @@ const nextConfig: NextConfig = {
   },
 
   images: {
+    /*
+     * AVIF first, WebP as the fallback.
+     *
+     * The default is WebP only. This site is photography — bottles, botanicals,
+     * editorial spreads — and AVIF is typically 20–30% smaller than WebP at
+     * matched quality on exactly that kind of image. The optimizer negotiates
+     * on `Accept`, so a browser without AVIF support is served the WebP it
+     * would have been served before; nothing is lost for older clients.
+     *
+     * The cost is encode time on a cache miss, paid once per size per image and
+     * then held in the image cache — which is the right trade for a catalogue
+     * whose photographs change rarely and are requested constantly.
+     */
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",

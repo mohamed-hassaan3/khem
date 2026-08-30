@@ -29,7 +29,7 @@ export default async function NewDiscountPage({
     <>
       <Link
         href={localizePath(activeLocale, "/admin/discounts")}
-        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35 transition-colors duration-300 hover:text-gold"
+        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
       >
         <ArrowLeft size={13} strokeWidth={1.25} />
         All discounts

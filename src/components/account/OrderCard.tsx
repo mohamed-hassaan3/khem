@@ -58,38 +58,38 @@ export default function OrderCard({
     .join(" · ");
 
   return (
-    <article id={order.orderNumber} className="scroll-mt-32 bg-surface p-8">
+    <article id={order.orderNumber} className="scroll-mt-32 bg-stone p-8">
       <div className="grid grid-cols-1 items-start gap-4 md:gap-6 sm:grid-cols-[1fr_auto]">
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-4">
             <span
               {...ltrIsland(locale)}
-              className="font-heading text-sm text-ivory"
+              className="font-heading text-sm text-ground"
             >
               {order.orderNumber}
             </span>
 
-            <span className="border border-gold/25 px-2.5 py-0.5 font-heading text-[9px] tracking-[0.15em] text-gold/80">
+            <span className="border border-ground-accent/25 px-2.5 py-0.5 font-heading text-[9px] tracking-[0.15em] text-ground-accent/80">
               {dict.status[order.status]}
             </span>
 
             {isLatest ? (
-              <span className="font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/30">
+              <span className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-muted/70">
                 {dict.latest}
               </span>
             ) : null}
           </div>
 
-          <p {...ltrIsland(locale)} className="mb-2 text-xs text-ivory/50">
+          <p {...ltrIsland(locale)} className="mb-2 text-xs text-ground-muted">
             {items}
           </p>
 
-          <p className="mb-3 text-[11px] text-ivory/25">{placedAt}</p>
+          <p className="mb-3 text-[11px] text-ground-muted/70">{placedAt}</p>
 
           {order.trackingCode ? (
             <p
               {...ltrIsland(locale)}
-              className="text-[10px] tracking-[0.08em] text-ivory/25"
+              className="text-[10px] tracking-[0.08em] text-ground-muted/70"
             >
               {interpolate(dict.tracking, { code: order.trackingCode })}
             </p>
@@ -100,13 +100,13 @@ export default function OrderCard({
           <p>
             <Price
               cents={order.totalInCents}
-              className="font-heading text-xl text-gold"
+              className="font-heading text-xl text-ground-accent"
             />
           </p>
         </div>
       </div>
 
-      <div className="mt-8 border-t border-border pt-8">
+      <div className="mt-8 border-t border-ground-border pt-8">
         <OrderTracker
           status={order.status}
           events={order.events}

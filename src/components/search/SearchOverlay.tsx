@@ -320,7 +320,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         inert={!open}
         onClick={onClose}
         className={[
-          "fixed inset-0 z-1099 cursor-default bg-black/55 backdrop-blur-md",
+          "fixed inset-0 z-1099 cursor-default bg-ink/40 backdrop-blur-md",
           "transition-opacity duration-400 ease-luxury-bezier",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         ].join(" ")}
@@ -337,10 +337,23 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         inert={!open}
         onKeyDown={onKeyDown}
         className={[
-          "fixed inset-y-0 end-0 z-1100 flex w-full flex-col overflow-hidden",
+          /*
+           * An explicit ground, not an inherited one. This is a `fixed` overlay
+           * but it is still a *descendant* in the tree, so it would otherwise
+           * pick up the foreground variables of whichever page it is covering.
+           * An overlay is its own surface, and states it.
+           *
+           * Ivory now, and opaque. The panel was 97% obsidian over a
+           * `blur(40px)`: three percent of a blur nobody could see, on a
+           * `fixed` element, which the compositor keeps live for as long as the
+           * element is in the DOM — and this one is mounted on every route.
+           * The scrim behind it still carries the blur, where it is doing
+           * visible work separating the panel from the page.
+           */
+          "ground-ivory fixed inset-y-0 end-0 z-1100 flex w-full flex-col overflow-hidden",
           "sm:w-[85%] lg:w-[75%] lg:max-w-260",
-          "border-s border-border bg-[color-mix(in_srgb,var(--color-background)_97%,transparent)]",
-          "shadow-luxury backdrop-blur-2xl",
+          "border-s border-ground-border bg-ground-bg",
+          "shadow-3",
           "transition-transform duration-500 ease-luxury-bezier",
           // `dir` does not mirror transforms — the RTL offset is explicit.
           open ? "translate-x-0" : "translate-x-full rtl:-translate-x-full",
@@ -354,7 +367,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             type="button"
             onClick={onClose}
             aria-label={dict.search.close}
-            className="-me-2.5 flex cursor-pointer items-center gap-2.5 px-2.5 py-2 text-ivory/50 transition-colors duration-300 hover:text-gold"
+            className="-me-2.5 flex cursor-pointer items-center gap-2.5 px-2.5 py-2 text-ground-muted transition-colors duration-300 hover:text-ground-accent"
           >
             <span
               aria-hidden="true"
@@ -368,13 +381,13 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 
         {/* Field */}
         <div className="shrink-0 px-4 md:px-12">
-          <div className="flex items-center gap-4 border-b border-border pb-5 transition-colors duration-400 ease-luxury-bezier focus-within:border-gold">
+          <div className="flex items-center gap-4 border-b border-ground-border pb-5 transition-colors duration-400 ease-luxury-bezier focus-within:border-gold">
             <Search
               width={20}
               height={20}
               strokeWidth={1.25}
               aria-hidden="true"
-              className="shrink-0 text-gold/60"
+              className="shrink-0 text-ground-accent/60"
             />
 
             <input
@@ -398,7 +411,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
               autoComplete="off"
               spellCheck={false}
               enterKeyHint="search"
-              className="w-full min-w-0 bg-transparent font-heading text-2xl tracking-wide text-ivory placeholder:text-ivory/25 focus:outline-none sm:text-3xl"
+              className="w-full min-w-0 bg-transparent font-heading text-2xl tracking-wide text-ground placeholder:text-ground-muted/70 focus:outline-none sm:text-3xl"
             />
 
             {query.length > 0 ? (
@@ -409,7 +422,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                   inputRef.current?.focus();
                 }}
                 aria-label={dict.search.clear}
-                className="shrink-0 cursor-pointer p-1 text-ivory/40 transition-colors duration-300 hover:text-gold"
+                className="shrink-0 cursor-pointer p-1 text-ground-muted transition-colors duration-300 hover:text-ground-accent"
               >
                 <X width={16} height={16} strokeWidth={1.25} aria-hidden="true" />
               </button>
@@ -490,12 +503,12 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             </div>
           ) : (
             <div className="max-w-xl">
-              <p className="font-heading text-xl text-ivory sm:text-2xl" dir="auto">
+              <p className="font-heading text-xl text-ground sm:text-2xl" dir="auto">
                 {hasFailed
                   ? dict.search.error
                   : interpolate(dict.search.noResults, { query: normalized })}
               </p>
-              <p className="mt-4 text-[13px] leading-loose text-ivory/40">
+              <p className="mt-4 text-[13px] leading-loose text-ground-muted">
                 {dict.search.noResultsHint}
               </p>
 
@@ -512,12 +525,12 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         </div>
 
         {/* Footer hint */}
-        <div className="flex shrink-0 items-center justify-between gap-4 border-t border-border px-4 py-5 md:px-12">
+        <div className="flex shrink-0 items-center justify-between gap-4 border-t border-ground-border px-4 py-5 md:px-12">
           <button
             type="button"
             onClick={() => submit(query)}
             disabled={!active}
-            className="flex cursor-pointer items-center gap-2.5 font-body text-[10px] uppercase tracking-[0.25em] text-ivory/40 transition-colors duration-300 hover:text-gold disabled:cursor-default disabled:opacity-40 disabled:hover:text-ivory/40"
+            className="flex cursor-pointer items-center gap-2.5 font-body text-[10px] uppercase tracking-[0.25em] text-ground-muted transition-colors duration-300 hover:text-ground-accent disabled:cursor-default disabled:opacity-40 disabled:hover:text-ground-muted"
           >
             <CornerDownLeft
               width={13}
@@ -530,7 +543,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
           </button>
 
           {active && !isLoading ? (
-            <span className="font-body text-[10px] tracking-[0.25em] text-ivory/25">
+            <span className="font-body text-[10px] tracking-[0.25em] text-ground-muted/70">
               {countLabel}
             </span>
           ) : null}
@@ -564,7 +577,7 @@ function IdleState({
             <button
               type="button"
               onClick={onClearRecent}
-              className="cursor-pointer font-body text-[10px] uppercase tracking-[0.2em] text-ivory/30 transition-colors duration-300 hover:text-gold"
+              className="cursor-pointer font-body text-[10px] uppercase tracking-[0.2em] text-ground-muted/70 transition-colors duration-300 hover:text-ground-accent"
             >
               {dict.search.clearRecent}
             </button>
@@ -577,7 +590,7 @@ function IdleState({
                 type="button"
                 onClick={() => onPick(entry)}
                 dir="auto"
-                className="group flex max-w-full cursor-pointer items-center gap-3 text-start text-xs tracking-widest text-ivory/50 transition-colors duration-300 hover:text-gold"
+                className="group flex max-w-full cursor-pointer items-center gap-3 text-start text-xs tracking-widest text-ground-muted transition-colors duration-300 hover:text-ground-accent"
               >
                 <span
                   aria-hidden="true"
@@ -618,10 +631,10 @@ function IdleState({
               onClick={onClose}
               className="group block no-underline"
             >
-              <p className="mb-1 font-heading text-[13px] tracking-widest text-ivory transition-colors duration-300 group-hover:text-gold">
+              <p className="mb-1 font-heading text-[13px] tracking-widest text-ground transition-colors duration-300 group-hover:text-ground-accent">
                 {dict.nav.collectionItems[key].label}
               </p>
-              <p className="text-[11px] tracking-wider text-ivory/40">
+              <p className="text-[11px] tracking-wider text-ground-muted">
                 {dict.nav.collectionItems[key].desc}
               </p>
             </LocaleLink>
@@ -646,7 +659,7 @@ function TermChips({
           key={term}
           type="button"
           onClick={() => onPick(term)}
-          className="cursor-pointer border border-border px-4 py-2 font-body text-[11px] tracking-[0.15em] text-ivory/60 transition-all duration-400 ease-luxury-bezier hover:border-gold/50 hover:text-gold"
+          className="cursor-pointer border border-ground-border px-4 py-2 font-body text-[11px] tracking-[0.15em] text-ground-muted transition-all duration-400 ease-luxury-bezier hover:border-gold/50 hover:text-ground-accent"
         >
           {label}
         </button>
@@ -701,7 +714,7 @@ function ProductRow({
       className={[
         "search-row group flex w-full cursor-pointer items-center gap-5 border-b border-border/60 px-2 py-4 text-start",
         "transition-colors duration-300 ease-luxury-bezier",
-        isHighlighted ? "bg-white/3" : "bg-transparent",
+        isHighlighted ? "bg-stone" : "bg-transparent",
       ].join(" ")}
     >
       <Image
@@ -714,10 +727,10 @@ function ProductRow({
       />
 
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-heading text-sm tracking-wide text-ivory">
+        <span className="block truncate font-heading text-sm tracking-wide text-ground">
           <HighlightedText text={product.name} terms={terms} />
         </span>
-        <span className="mt-1 block truncate text-[11px] tracking-wider text-ivory/40">
+        <span className="mt-1 block truncate text-[11px] tracking-wider text-ground-muted">
           {typeLabel ? `${product.collectionName} · ${typeLabel}` : product.collectionName}
         </span>
       </span>
@@ -728,12 +741,12 @@ function ProductRow({
         ellipsis. No percentage badge here — a suggestion row is a shortcut, not
         a shelf.
       */}
-      <span className="shrink-0 font-heading text-[13px] text-gold/80">
+      <span className="shrink-0 font-heading text-[13px] text-ground-accent/80">
         <ProductPrice
           priceInCents={product.priceInCents}
           promotion={product.promotion}
           stacked
-          className="text-[13px] text-gold/80"
+          className="text-[13px] text-ground-accent/80"
         />
       </span>
     </button>
@@ -770,7 +783,7 @@ function CollectionRow({
       className={[
         "search-row group flex w-full cursor-pointer items-center gap-4 border-b border-border/60 px-2 py-4 text-start",
         "transition-colors duration-300 ease-luxury-bezier",
-        isHighlighted ? "bg-white/3" : "bg-transparent",
+        isHighlighted ? "bg-stone" : "bg-transparent",
       ].join(" ")}
     >
       <span
@@ -778,10 +791,10 @@ function CollectionRow({
         className="inline-block h-px w-6 shrink-0 bg-gold/40"
       />
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-heading text-sm tracking-wide text-ivory">
+        <span className="block truncate font-heading text-sm tracking-wide text-ground">
           <HighlightedText text={collection.name} terms={terms} />
         </span>
-        <span className="mt-1 block truncate text-[11px] tracking-wider text-ivory/40">
+        <span className="mt-1 block truncate text-[11px] tracking-wider text-ground-muted">
           {collection.description}
         </span>
       </span>
@@ -801,12 +814,12 @@ function SuggestionSkeleton() {
           key={row}
           className="flex animate-pulse items-center gap-5 border-b border-border/60 px-2 py-4"
         >
-          <div className="h-18 w-14 shrink-0 rounded-sm bg-white/5" />
+          <div className="h-18 w-14 shrink-0 rounded-sm bg-stone" />
           <div className="flex-1">
-            <div className="h-3 w-2/5 rounded-xs bg-white/5" />
-            <div className="mt-2.5 h-2.5 w-1/4 rounded-xs bg-white/4" />
+            <div className="h-3 w-2/5 rounded-xs bg-stone" />
+            <div className="mt-2.5 h-2.5 w-1/4 rounded-xs bg-stone" />
           </div>
-          <div className="h-3 w-12 rounded-xs bg-white/5" />
+          <div className="h-3 w-12 rounded-xs bg-stone" />
         </div>
       ))}
     </div>

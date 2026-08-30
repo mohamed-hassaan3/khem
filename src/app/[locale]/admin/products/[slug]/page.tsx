@@ -49,7 +49,7 @@ export default async function EditProductPage({
           storefrontHref ? (
             <Link
               href={localizePath(activeLocale, storefrontHref)}
-              className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/40 transition-colors duration-300 hover:text-gold"
+              className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
             >
               View on storefront ↗
             </Link>
@@ -59,11 +59,11 @@ export default async function EditProductPage({
 
       <ProductForm product={product} collections={collections} locale={activeLocale} />
 
-      <section className="mt-10 md:mt-16 max-w-3xl border-t border-border pt-10">
-        <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.25em] text-gold/70">
+      <section className="mt-10 md:mt-16 max-w-3xl border-t border-ground-border pt-10">
+        <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.25em] text-ground-accent">
           Gallery
         </h2>
-        <p className="mb-6 max-w-xl text-[11px] leading-relaxed text-ivory/30">
+        <p className="mb-6 max-w-xl text-[11px] leading-relaxed text-ground-muted">
           The primary image is what every grid card shows. Order is the order
           the detail page displays them in.
         </p>
@@ -71,11 +71,11 @@ export default async function EditProductPage({
         <ProductImageEditor productSlug={product.slug} images={product.images} />
       </section>
 
-      <section className="mt-10 md:mt-16 max-w-3xl border-t border-border pt-8">
+      <section className="mt-10 md:mt-16 max-w-3xl border-t border-ground-border pt-8">
         <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-danger/70">
           Availability
         </h2>
-        <p className="mt-3 mb-5 max-w-xl text-[11px] leading-relaxed text-ivory/30">
+        <p className="mt-3 mb-5 max-w-xl text-[11px] leading-relaxed text-ground-muted">
           Archiving removes this product from every grid and 404s its detail
           page. Nothing is deleted, and it can be restored from here or from the
           list.

@@ -92,8 +92,8 @@ function Chips({
             onClick={() => onToggle(option.slug)}
             className={`border px-4 py-2 text-[11px] tracking-wide transition-colors duration-300 ${
               active
-                ? "border-gold/50 bg-gold/10 text-gold"
-                : "border-border text-ivory/35 hover:border-gold/30 hover:text-ivory"
+                ? "border-gold/50 bg-gold/10 text-ground-accent"
+                : "border-ground-border text-ground-muted hover:border-gold/30 hover:text-ground"
             }`}
           >
             {option.name}
@@ -237,7 +237,7 @@ export default function PromotionForm({
       ) : null}
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           The campaign
         </h2>
 
@@ -292,7 +292,7 @@ export default function PromotionForm({
       </section>
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           What it takes off
         </h2>
 
@@ -329,7 +329,7 @@ export default function PromotionForm({
       </section>
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           What it applies to
         </h2>
 
@@ -367,7 +367,7 @@ export default function PromotionForm({
       </section>
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           When it runs
         </h2>
 
@@ -418,7 +418,7 @@ export default function PromotionForm({
       </div>
 
       {armed ? (
-        <p className="text-[11px] leading-relaxed text-ivory/35">
+        <p className="text-[11px] leading-relaxed text-ground-muted">
           Deleting removes the campaign and its selection. Orders already placed
           keep the price they were charged and what it was reduced from — only the
           campaign&rsquo;s name is lost from them. To stop it and keep the record,

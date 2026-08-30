@@ -36,7 +36,7 @@ export default function DeleteCollectionButton({
 
   if (productCount > 0) {
     return (
-      <p className="text-[11px] leading-relaxed text-ivory/30">
+      <p className="text-[11px] leading-relaxed text-ground-muted">
         This collection holds {productCount} product{productCount === 1 ? "" : "s"}.
         Move or archive them before it can be deleted.
       </p>

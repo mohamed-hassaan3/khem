@@ -46,10 +46,10 @@ export default function CartLine({
   const maxQuantity = quantityCeiling(product.inventory);
 
   return (
-    <article className="grid grid-cols-[88px_1fr] items-start gap-5 border-b border-border py-7 sm:grid-cols-[120px_1fr] sm:gap-7">
+    <article className="grid grid-cols-[88px_1fr] items-start gap-5 border-b border-ground-border py-7 sm:grid-cols-[120px_1fr] sm:gap-7">
       <LocaleLink
         href={productHref(product)}
-        className="img-zoom relative block aspect-3/4 overflow-hidden bg-surface"
+        className="img-zoom relative block aspect-3/4 overflow-hidden bg-[var(--card-bg)]"
         tabIndex={-1}
         aria-hidden="true"
       >
@@ -65,23 +65,23 @@ export default function CartLine({
       <div>
         <div className="mb-2 flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
           <div>
-            <p className="mb-1.5 text-[9px] uppercase tracking-[0.2em] text-gold/60">
+            <p className="mb-1.5 text-[9px] uppercase tracking-[0.2em] text-ground-accent/60">
               {interpolate(dict.product.collectionLabel, {
                 name: product.collectionName,
               })}
             </p>
             {/* Catalog records are English in both trees. */}
-            <h2 className="font-heading text-base font-normal tracking-wide text-ivory sm:text-lg" {...island}>
+            <h2 className="font-heading text-base font-normal tracking-wide text-ground sm:text-lg" {...island}>
               <LocaleLink
                 href={productHref(product)}
-                className="transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
+                className="transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-none"
               >
                 {product.name}
               </LocaleLink>
             </h2>
           </div>
 
-          <span className="font-heading text-base tabular-nums text-gold sm:text-lg" {...island}>
+          <span className="font-heading text-base tabular-nums text-ground-accent sm:text-lg" {...island}>
             {formatPrice(
               lineTotalInCents({
                 priceInCents: unitPriceInCents(product),
@@ -93,7 +93,7 @@ export default function CartLine({
 
         {/* Translated in both trees — no LTR island; the bidi algorithm places
             the Latin volume token correctly inside the Arabic run. */}
-        <p className="mb-5 text-[11px] tracking-[0.1em] text-ivory/35">
+        <p className="mb-5 text-[11px] tracking-[0.1em] text-ground-muted">
           {formatProductType(product, dict.product.concentrations)} ·{" "}
           {formatVolume(product.volumeMl)}
         </p>
@@ -111,7 +111,7 @@ export default function CartLine({
             type="button"
             onClick={onRemove}
             aria-label={interpolate(dict.cart.remove, { name: product.name })}
-            className="inline-flex items-center gap-2 font-heading text-[11px] tracking-[0.1em] text-ivory/25 transition-colors duration-300 ease-out hover:text-ivory/60 focus-visible:text-gold focus-visible:outline-none"
+            className="inline-flex items-center gap-2 font-heading text-[11px] tracking-[0.1em] text-ground-muted/70 transition-colors duration-300 ease-out hover:text-ground-muted focus-visible:text-ground-accent focus-visible:outline-none"
           >
             <Trash2 size={13} strokeWidth={1.25} aria-hidden="true" />
             {dict.cart.removeLabel}

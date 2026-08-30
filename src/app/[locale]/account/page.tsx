@@ -87,7 +87,7 @@ export default async function AccountPage({
     <div>
       <p className="eyebrow mb-3">{dict.account.eyebrow}</p>
 
-      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ivory sm:text-4xl lg:text-5xl">
+      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ground sm:text-4xl lg:text-5xl">
         {heading}
       </h1>
 
@@ -96,13 +96,13 @@ export default async function AccountPage({
       {mostRecentOrder ? (
         <section className="mb-6 md:mb-10">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="font-heading text-base text-ivory">
+            <h2 className="font-heading text-base text-ground">
               {dict.account.recentOrder}
             </h2>
 
             <LocaleLink
               href={ACCOUNT_PATHS.orders}
-              className="font-heading text-[10px] tracking-[0.15em] text-gold/70 no-underline transition-colors duration-300 hover:text-gold"
+              className="font-heading text-[10px] tracking-[0.15em] text-ground-accent/70 no-underline transition-colors duration-300 hover:text-ground-accent"
             >
               {`${dict.account.viewAllOrders} ${readingArrow(activeLocale)}`}
             </LocaleLink>

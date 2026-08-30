@@ -32,7 +32,7 @@ export default function QuantityStepper({
   const canIncrease = value < max;
 
   return (
-    <div className="flex w-fit items-center border border-white/10">
+    <div className="flex w-fit items-center border border-ground-border">
       <StepButton
         label={decreaseLabel}
         disabled={!canDecrease}
@@ -43,7 +43,7 @@ export default function QuantityStepper({
 
       <span
         aria-live="polite"
-        className="grid size-11 place-items-center font-heading text-sm text-ivory"
+        className="grid size-11 place-items-center font-heading text-sm text-ground"
       >
         {value}
       </span>
@@ -76,7 +76,7 @@ function StepButton({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="grid size-11 place-items-center text-ivory/50 transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none disabled:pointer-events-none disabled:opacity-30"
+      className="grid size-11 place-items-center text-ground-muted transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-none disabled:pointer-events-none disabled:opacity-30"
     >
       {children}
     </button>

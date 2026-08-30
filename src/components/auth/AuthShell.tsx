@@ -1,3 +1,4 @@
+import NavGround from "@/src/components/NavGround";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 
@@ -30,17 +31,25 @@ export default function AuthShell({
   children,
 }: AuthShellProps) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-5 pb-14 md:pb-24 pt-16 md:pt-32 sm:px-8">
+    /*
+     * Ivory, not obsidian. Signing in is the same kind of task as checking out
+     * — a short form completed under mild impatience — and §17 puts the account
+     * area in light for exactly that reason. The cinematic register belongs to
+     * the pages that are selling something.
+     */
+    <main className="ground-ivory flex min-h-screen flex-col items-center justify-center px-5 pb-14 pt-16 sm:px-8 md:pb-24 md:pt-32">
+      <NavGround ground="ivory" />
+
       <header className="mb-6 md:mb-10 max-w-md text-center">
         <p className="eyebrow mb-3">{eyebrow}</p>
 
-        <h1 className="mb-5 font-heading text-3xl font-normal text-ivory sm:text-4xl">
+        <h1 className="mb-5 font-heading text-3xl font-normal text-ground sm:text-4xl">
           {heading}
         </h1>
 
         <div className="gold-line mx-auto mb-6" />
 
-        <p className="text-[13px] leading-loose text-ivory/45">{body}</p>
+        <p className="text-[13px] leading-loose text-ground-muted">{body}</p>
       </header>
 
       {/*
@@ -51,14 +60,14 @@ export default function AuthShell({
       <div className="flex w-full justify-center">{children}</div>
 
       <footer className="mt-8 md:mt-14 text-center">
-        <p className="mb-4 text-[11px] tracking-[0.08em] text-ivory/30">
+        <p className="mb-4 text-[11px] tracking-[0.08em] text-ground-muted/70">
           {guest.guestLead}
         </p>
 
         <div className="flex items-center justify-center">
           <LocaleLink
             href="/cart"
-            className="font-heading text-[11px] uppercase tracking-[0.15em] text-gold/70 no-underline transition-colors duration-300 hover:text-gold"
+            className="font-heading text-[11px] uppercase tracking-[0.15em] text-ground-accent/70 no-underline transition-colors duration-300 hover:text-ground-accent"
           >
             {guest.guestCart}
           </LocaleLink>

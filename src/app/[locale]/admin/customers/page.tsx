@@ -133,7 +133,7 @@ export default async function AdminCustomersPage({
         />
       ) : (
         <>
-          <p className="mb-5 text-[11px] tracking-wide text-ivory/30">
+          <p className="mb-5 text-[11px] tracking-wide text-ground-muted">
             {total} customer{total === 1 ? "" : "s"}
             {term.length > 0 ? " matching" : ""} · {withAccounts} on this page
             {withAccounts === 1 ? " has" : " have"} an account
@@ -157,7 +157,7 @@ export default async function AdminCustomersPage({
                     {customer.name ?? "Unnamed"}
                   </span>
                   {customer.marketingOptIn ? (
-                    <span className="mt-1 block text-[10px] uppercase tracking-[0.2em] text-gold/60">
+                    <span className="mt-1 block text-[10px] uppercase tracking-[0.2em] text-ground-accent">
                       Subscribed
                     </span>
                   ) : null}
@@ -166,7 +166,7 @@ export default async function AdminCustomersPage({
                 <AdminCell muted>
                   <span className="block">{customer.email ?? "—"}</span>
                   {customer.phone ? (
-                    <span className="mt-1 block text-[11px] text-ivory/25">
+                    <span className="mt-1 block text-[11px] text-ground-subtle">
                       {customer.phone}
                     </span>
                   ) : null}
@@ -176,8 +176,8 @@ export default async function AdminCustomersPage({
                   <span
                     className={`inline-block border px-3 py-1 font-heading text-[9px] uppercase tracking-[0.2em] ${
                       customer.hasAccount
-                        ? "border-gold/40 text-gold"
-                        : "border-border text-ivory/30"
+                        ? "border-gold/40 text-ground-accent"
+                        : "border-ground-border text-ground-muted"
                     }`}
                   >
                     {customer.hasAccount ? "Registered" : "Walk-in"}
@@ -191,7 +191,7 @@ export default async function AdminCustomersPage({
                 <AdminCell>
                   <Link
                     href={`${basePath}/${encodeURIComponent(customer.id)}`}
-                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                   >
                     Open
                   </Link>
@@ -208,7 +208,7 @@ export default async function AdminCustomersPage({
               {page > 1 ? (
                 <Link
                   href={pageHref(basePath, query, page - 1)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Previous
                 </Link>
@@ -216,14 +216,14 @@ export default async function AdminCustomersPage({
                 <span />
               )}
 
-              <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/30">
+              <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
                 Page {page} of {lastPage}
               </span>
 
               {page < lastPage ? (
                 <Link
                   href={pageHref(basePath, query, page + 1)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Next
                 </Link>

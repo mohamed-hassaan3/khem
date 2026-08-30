@@ -89,8 +89,8 @@ export default function StockistPublishToggle({
         armed
           ? "border-danger/50 text-danger"
           : isPublished
-            ? "border-success/40 text-success hover:border-gold/40 hover:text-gold"
-            : "border-border text-ivory/30 hover:border-gold/40 hover:text-gold"
+            ? "border-success/40 text-success hover:border-gold/40 hover:text-ground-accent"
+            : "border-ground-border text-ground-muted hover:border-gold/40 hover:text-ground-accent"
       }`}
     >
       {isPending

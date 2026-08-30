@@ -22,15 +22,23 @@
 import { Plus, X } from "lucide-react";
 import type { ReactNode } from "react";
 
-export const FIELD_CLASS =
-  "w-full border border-border bg-ivory/3 px-4 py-3 text-[13px] tracking-wide text-ivory transition-colors duration-300 placeholder:text-ivory/25 focus:border-gold/40 focus:outline-none disabled:opacity-40";
+/*
+ * These four are now thin aliases over the shared primitives in `globals.css`.
+ *
+ * They keep their names because 24 admin modules import them, and because the
+ * indirection is still worth something: an admin-only adjustment has one place
+ * to live that is not the sitewide rule. What they must never do again is
+ * *redefine* the field — the four copies of this constant that existed across
+ * the admin, checkout, contact and comment forms had quietly drifted apart in
+ * padding, type size, and focus treatment.
+ */
+export const FIELD_CLASS = "field disabled:opacity-40";
 
-export const LABEL_CLASS =
-  "mb-2 block font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35";
+export const LABEL_CLASS = "label";
 
-export const ERROR_CLASS = "mt-2 text-[11px] tracking-wide text-danger";
+export const ERROR_CLASS = "field-error";
 
-export const HINT_CLASS = "mt-2 text-[11px] leading-relaxed tracking-wide text-ivory/30";
+export const HINT_CLASS = "field-hint";
 
 interface FieldShellProps {
   label: string;
@@ -54,7 +62,7 @@ export function AdminField({
     <div>
       <label className={LABEL_CLASS} htmlFor={htmlFor}>
         {label}
-        {required ? <span className="text-gold/60"> *</span> : null}
+        {required ? <span className="text-ground-accent"> *</span> : null}
       </label>
       {children}
       {hint ? <p className={HINT_CLASS}>{hint}</p> : null}
@@ -114,7 +122,7 @@ export function AdminInput({
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={error ? true : undefined}
-        className={`${FIELD_CLASS} ${readOnly ? "cursor-not-allowed text-ivory/40" : ""}`}
+        className={`${FIELD_CLASS} ${readOnly ? "cursor-not-allowed text-ground-muted" : ""}`}
       />
     </AdminField>
   );
@@ -177,10 +185,10 @@ export function AdminSelect({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={error ? true : undefined}
-        className={`${FIELD_CLASS} appearance-none bg-surface`}
+        className={`${FIELD_CLASS} appearance-none bg-stone`}
       >
         {options.map((option) => (
-          <option key={option.value} value={option.value} className="bg-surface">
+          <option key={option.value} value={option.value} className="bg-stone">
             {option.label}
           </option>
         ))}
@@ -216,12 +224,12 @@ export function AdminToggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-start gap-4 border border-border bg-ivory/3 px-4 py-3 text-start transition-colors duration-300 hover:border-gold/30 focus:border-gold/40 focus:outline-none"
+      className="flex w-full items-start gap-4 border border-ground-border bg-ivory/3 px-4 py-3 text-start transition-colors duration-300 hover:border-gold/30 focus:border-gold/40 focus:outline-none"
     >
       <span
         aria-hidden
         className={`mt-0.5 flex h-4 w-8 shrink-0 items-center rounded-full border transition-colors duration-300 ${
-          checked ? "border-gold/50 bg-gold/25" : "border-border bg-ivory/5"
+          checked ? "border-gold/50 bg-gold/25" : "border-ground-border bg-ivory/5"
         }`}
       >
         <span
@@ -232,11 +240,11 @@ export function AdminToggle({
       </span>
 
       <span className="min-w-0">
-        <span className="block font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/60">
+        <span className="block font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           {label}
         </span>
         {description ? (
-          <span className="mt-1 block text-[11px] leading-relaxed text-ivory/30">
+          <span className="mt-1 block text-[11px] leading-relaxed text-ground-muted">
             {description}
           </span>
         ) : null}
@@ -289,7 +297,7 @@ export function AdminStringList({
               type="button"
               aria-label={`Remove ${label} entry ${index + 1}`}
               onClick={() => onChange(values.filter((_, at) => at !== index))}
-              className="shrink-0 border border-border px-3 text-ivory/40 transition-colors duration-300 hover:border-danger/50 hover:text-danger focus:outline-none"
+              className="shrink-0 border border-ground-border px-3 text-ground-muted transition-colors duration-300 hover:border-danger/50 hover:text-danger focus:outline-none"
             >
               <X size={14} strokeWidth={1.25} />
             </button>
@@ -299,7 +307,7 @@ export function AdminStringList({
         <button
           type="button"
           onClick={() => onChange([...values, ""])}
-          className="inline-flex items-center gap-2 border border-border px-4 py-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/45 transition-colors duration-300 hover:border-gold/40 hover:text-gold focus:outline-none"
+          className="inline-flex items-center gap-2 border border-ground-border px-4 py-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent focus:outline-none"
         >
           <Plus size={13} strokeWidth={1.25} />
           {addLabel}
@@ -324,8 +332,8 @@ export function AdminButton({
   onClick?: () => void;
 }) {
   const variants = {
-    gold: "border-gold/40 text-gold hover:border-gold hover:bg-gold/10",
-    ghost: "border-border text-ivory/55 hover:border-gold/30 hover:text-gold",
+    gold: "border-gold/40 text-ground-accent hover:border-gold hover:bg-gold/10",
+    ghost: "border-ground-border text-ground-muted hover:border-gold/30 hover:text-ground-accent",
     danger: "border-danger/40 text-danger hover:border-danger hover:bg-danger/10",
   } as const;
 
@@ -354,7 +362,7 @@ export function AdminNotice({
       role="status"
       className={`border px-4 py-3 text-[12px] tracking-wide ${
         tone === "success"
-          ? "border-gold/30 bg-gold/5 text-champagne"
+          ? "border-gold/30 bg-gold/5 text-ground-accent-soft"
           : "border-danger/40 bg-danger/5 text-danger"
       }`}
     >

@@ -63,7 +63,7 @@ export default function BuyNowButton({
           router.push(localizePath(locale, "/checkout"));
         });
       }}
-      className={`btn-luxury justify-center disabled:pointer-events-none disabled:opacity-40 ${className}`}
+      className={`btn btn-outline justify-center disabled:pointer-events-none disabled:opacity-40 ${className}`}
     >
       {dict.product.buyNow}
     </button>

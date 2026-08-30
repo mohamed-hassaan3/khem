@@ -78,13 +78,13 @@ export default async function UnsubscribePage({
         // No token at all — the same wording as a token that matches nothing,
         // so neither case tells a prober anything the other does not.
         <div className="mx-auto max-w-xl text-center">
-          <p className="font-heading text-[10px] uppercase tracking-[0.3em] text-gold/70">
+          <p className="font-heading text-[10px] uppercase tracking-[0.3em] text-ground-accent/70">
             {dict.unsubscribe.eyebrow}
           </p>
-          <h1 className="mt-6 font-heading text-2xl tracking-[0.08em] text-ivory sm:text-3xl">
+          <h1 className="mt-6 font-heading text-2xl tracking-[0.08em] text-ground sm:text-3xl">
             {dict.unsubscribe.invalidHeading}
           </h1>
-          <p className="mt-6 text-[13px] leading-relaxed tracking-wide text-ivory/50">
+          <p className="mt-6 text-[13px] leading-relaxed tracking-wide text-ground-muted">
             {dict.unsubscribe.invalidBody}
           </p>
         </div>
@@ -94,7 +94,7 @@ export default async function UnsubscribePage({
 
       <Link
         href={localizePath(activeLocale, "/")}
-        className="mt-14 font-heading text-[10px] uppercase tracking-[0.25em] text-ivory/35 transition-colors duration-300 hover:text-gold"
+        className="mt-14 font-heading text-[10px] uppercase tracking-[0.25em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
       >
         {dict.unsubscribe.home}
       </Link>

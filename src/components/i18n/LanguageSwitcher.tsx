@@ -77,7 +77,7 @@ export default function LanguageSwitcher({
                 aria-current="true"
                 dir={dir}
                 lang={LOCALE_HTML_TAG[locale]}
-                className={`font-body ${sizeClass} ${labelClass} text-gold`}
+                className={`font-body ${sizeClass} ${labelClass} text-ground-accent`}
               >
                 {labels[locale]}
               </span>
@@ -87,7 +87,7 @@ export default function LanguageSwitcher({
                 hrefLang={LOCALE_HTML_TAG[locale]}
                 dir={dir}
                 lang={LOCALE_HTML_TAG[locale]}
-                className={`font-body ${sizeClass} ${labelClass} text-ivory/40 no-underline transition-colors duration-300 ease-luxury-bezier hover:text-gold`}
+                className={`font-body ${sizeClass} ${labelClass} text-ground-muted no-underline transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent`}
               >
                 {labels[locale]}
               </Link>

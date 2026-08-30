@@ -83,30 +83,30 @@ export default function StickyPurchaseBar({
           : "pointer-events-none translate-y-full opacity-0 motion-reduce:translate-y-0",
       ].join(" ")}
     >
-      <div className="mx-auto flex w-full max-w-3xl items-center gap-4 border border-border-gold/40 bg-[color-mix(in_srgb,var(--color-background)_88%,transparent)] px-4 py-3 shadow-luxury backdrop-blur-md sm:gap-6 sm:px-6">
+      <div className="mx-auto flex w-full max-w-3xl items-center gap-4 border border-border-gold/40 bg-ground-bg px-4 py-3 shadow-2 sm:gap-6 sm:px-6">
         {/*
           The identity half. Hidden below `sm`, where the two controls need the
           whole width to sit side by side — the visitor is on that product's
           page and does not need to be told which one it is.
         */}
         <div className="hidden min-w-0 flex-1 sm:block" {...ltrIsland(locale)}>
-          <p className="truncate font-heading text-[13px] tracking-wide text-ivory">
+          <p className="truncate font-heading text-[13px] tracking-wide text-ground">
             {name}
           </p>
           <ProductPrice
             priceInCents={priceInCents}
             promotion={promotion}
-            className="mt-0.5 text-[12px] text-gold"
+            className="mt-0.5 text-[12px] text-ground-accent"
           />
         </div>
 
         {/* Below `sm` the price stands alone, ahead of the controls. */}
-        <div className="text-[13px] text-gold sm:hidden">
+        <div className="text-[13px] text-ground-accent sm:hidden">
           <ProductPrice
             priceInCents={priceInCents}
             promotion={promotion}
             stacked
-            className="text-[13px] text-gold"
+            className="text-[13px] text-ground-accent"
           />
         </div>
 
@@ -116,7 +116,7 @@ export default function StickyPurchaseBar({
             type="button"
             disabled={isSoldOut}
             onClick={onAddToCart}
-            className="btn-luxury btn-luxury-fill flex-1 justify-center gap-2 px-4 py-3 text-[10px] tracking-[0.15em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 sm:flex-none sm:px-7"
+            className="btn btn-primary flex-1 justify-center gap-2 px-4 py-3 text-[10px] tracking-[0.15em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 sm:flex-none sm:px-7"
           >
             {isSoldOut ? (
               dict.product.soldOut

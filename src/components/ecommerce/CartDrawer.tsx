@@ -238,7 +238,7 @@ export default function CartDrawer() {
         inert={!isOpen}
         onClick={close}
         className={[
-          "fixed inset-0 z-1050 cursor-default bg-black/55 backdrop-blur-sm",
+          "fixed inset-0 z-1050 cursor-default bg-ink/40 backdrop-blur-sm",
           "transition-opacity duration-400 ease-luxury-bezier",
           isOpen ? "opacity-100" : "pointer-events-none opacity-0",
         ].join(" ")}
@@ -255,11 +255,24 @@ export default function CartDrawer() {
         inert={!isOpen}
         onKeyDown={onKeyDown}
         className={[
-          "fixed inset-y-0 end-0 z-1051 flex flex-col",
+          /*
+           * An explicit ground, not an inherited one. This is a `fixed` overlay
+           * but it is still a *descendant* in the tree, so it would otherwise
+           * pick up the foreground variables of whichever page it is covering.
+           * An overlay is its own surface, and states it.
+           *
+           * Ivory now, and opaque. The panel was 97% obsidian over a
+           * `blur(40px)`: three percent of a blur nobody could see, on a
+           * `fixed` element, which the compositor keeps live for as long as the
+           * element is in the DOM — and this one is mounted on every route.
+           * The scrim behind it still carries the blur, where it is doing
+           * visible work separating the panel from the page.
+           */
+          "ground-ivory fixed inset-y-0 end-0 z-1051 flex flex-col",
           // Never full-bleed: a strip of the page stays visible at every width.
           "w-[88vw] max-w-100 sm:w-100 lg:w-110",
-          "border-s border-border bg-[color-mix(in_srgb,var(--color-background)_97%,transparent)]",
-          "shadow-luxury backdrop-blur-2xl",
+          "border-s border-ground-border bg-ground-bg",
+          "shadow-3",
           "transition-transform duration-500 ease-luxury-bezier",
           // `dir` does not mirror transforms — the RTL offset is explicit.
           isOpen ? "translate-x-0" : "translate-x-full rtl:-translate-x-full",
@@ -271,12 +284,12 @@ export default function CartDrawer() {
             <p className="eyebrow mb-1.5">{dict.cart.eyebrow}</p>
             <h2
               id={headingId}
-              className="font-heading text-lg font-normal tracking-wide text-ivory"
+              className="font-heading text-lg font-normal tracking-wide text-ground"
             >
               {dict.cart.drawer.heading}
             </h2>
             {countLabel ? (
-              <p className="mt-1 text-[11px] tracking-[0.08em] text-ivory/30">
+              <p className="mt-1 text-[11px] tracking-[0.08em] text-ground-muted/70">
                 {countLabel}
               </p>
             ) : null}
@@ -287,13 +300,13 @@ export default function CartDrawer() {
             type="button"
             onClick={close}
             aria-label={dict.cart.drawer.close}
-            className="-me-2.5 grid size-11 cursor-pointer place-items-center text-ivory/50 transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
+            className="-me-2.5 grid size-11 cursor-pointer place-items-center text-ground-muted transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-none"
           >
             <X size={18} strokeWidth={1.25} aria-hidden="true" />
           </button>
         </div>
 
-        <div className="mx-7 mt-4 shrink-0 border-t border-border" />
+        <div className="mx-7 mt-4 shrink-0 border-t border-ground-border" />
 
         {/* ── BODY ───────────────────────────────── */}
         <div className="min-h-0 flex-1 overflow-y-auto px-7">
@@ -309,24 +322,24 @@ export default function CartDrawer() {
                   key={row}
                   className="mb-6 grid grid-cols-[72px_1fr] gap-4"
                 >
-                  <div className="aspect-3/4 bg-card" />
+                  <div className="aspect-3/4 bg-stone" />
                   <div className="space-y-2 pt-1">
-                    <div className="h-3 w-3/4 bg-card" />
-                    <div className="h-2.5 w-1/2 bg-card" />
-                    <div className="mt-5 h-8 w-24 bg-card" />
+                    <div className="h-3 w-3/4 bg-stone" />
+                    <div className="h-2.5 w-1/2 bg-stone" />
+                    <div className="mt-5 h-8 w-24 bg-stone" />
                   </div>
                 </div>
               ))}
             </div>
           ) : hasFailed ? (
             <div className="flex min-h-60 flex-col items-center justify-center text-center">
-              <p className="mb-6 text-[13px] leading-loose text-ivory/40">
+              <p className="mb-6 text-[13px] leading-loose text-ground-muted">
                 {dict.cart.drawer.error}
               </p>
               <LocaleLink
                 href="/cart"
                 onClick={close}
-                className="btn-luxury btn-luxury-fill"
+                className="btn btn-primary"
               >
                 {dict.cart.drawer.viewBag}
               </LocaleLink>
@@ -337,18 +350,18 @@ export default function CartDrawer() {
                 size={44}
                 strokeWidth={0.8}
                 aria-hidden="true"
-                className="mb-7 text-gold/30"
+                className="mb-7 text-ground-accent/30"
               />
-              <h3 className="mb-3 font-heading text-xl font-normal text-ivory">
+              <h3 className="mb-3 font-heading text-xl font-normal text-ground">
                 {dict.cart.empty.heading}
               </h3>
-              <p className="mb-9 text-[12px] leading-loose text-ivory/40">
+              <p className="mb-9 text-[12px] leading-loose text-ground-muted">
                 {dict.cart.empty.body}
               </p>
               <LocaleLink
                 href="/collections"
                 onClick={close}
-                className="btn-luxury btn-luxury-fill"
+                className="btn btn-primary"
               >
                 {dict.cart.empty.cta}
               </LocaleLink>
@@ -383,7 +396,7 @@ export default function CartDrawer() {
 
         {/* ── FOOTER ─────────────────────────────── */}
         {resolved.length > 0 && !isLoading && !hasFailed ? (
-          <div className="shrink-0 border-t border-border px-7 py-7">
+          <div className="shrink-0 border-t border-ground-border px-7 py-7">
             {/*
               The campaign, when one is running. Printed above the subtotal
               rather than folded into it, so the panel says the same thing the
@@ -392,25 +405,25 @@ export default function CartDrawer() {
             */}
             {pricing.promotionSavingsInCents > 0 ? (
               <div className="mb-1.5 flex items-baseline justify-between">
-                <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ivory/50">
+                <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-muted">
                   {dict.cart.promotion}
                 </span>
-                <span className="font-heading text-[13px] tabular-nums text-gold">
+                <span className="font-heading text-[13px] tabular-nums text-ground-accent">
                   −{formatPrice(pricing.promotionSavingsInCents)}
                 </span>
               </div>
             ) : null}
 
             <div className="mb-1.5 flex items-baseline justify-between">
-              <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ivory/50">
+              <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-muted">
                 {dict.cart.subtotal}
               </span>
-              <span className="font-heading text-lg tabular-nums text-gold">
+              <span className="font-heading text-lg tabular-nums text-ground-accent">
                 {formatPrice(subtotal)}
               </span>
             </div>
 
-            <p className="mb-6 text-[10px] tracking-[0.08em] text-ivory/25">
+            <p className="mb-6 text-[10px] tracking-[0.08em] text-ground-muted/70">
               {dict.cart.taxNote}
             </p>
 
@@ -418,7 +431,7 @@ export default function CartDrawer() {
               <LocaleLink
                 href="/checkout"
                 onClick={close}
-                className="btn-luxury btn-luxury-fill w-full justify-center"
+                className="btn btn-primary w-full justify-center"
               >
                 {dict.cart.checkout}
               </LocaleLink>
@@ -426,7 +439,7 @@ export default function CartDrawer() {
               <LocaleLink
                 href="/cart"
                 onClick={close}
-                className="btn-luxury w-full justify-center"
+                className="btn btn-outline w-full justify-center"
               >
                 {dict.cart.drawer.viewBag}
               </LocaleLink>

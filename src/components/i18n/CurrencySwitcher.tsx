@@ -47,13 +47,13 @@ export default function CurrencySwitcher() {
       }}
       aria-label={dictionary.currencySwitcher.label}
       {...ltrIsland(locale)}
-      className="cursor-pointer appearance-none border-none bg-transparent p-0 font-body text-[11px] uppercase tracking-[0.1em] text-ivory/25 outline-none transition-colors duration-300 ease-luxury-bezier hover:text-gold focus-visible:text-gold disabled:cursor-default disabled:opacity-60"
+      className="cursor-pointer appearance-none border-none bg-transparent p-0 font-body text-[11px] uppercase tracking-[0.1em] text-ground-muted/70 outline-none transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent focus-visible:text-ground-accent disabled:cursor-default disabled:opacity-60"
     >
       {CURRENCIES.map((code) => (
         // The option list is drawn by the platform, so it is deliberately left
         // unstyled — a half-styled native dropdown looks broken, an unstyled
         // one looks like the operating system.
-        <option key={code} value={code} className="bg-surface text-ivory">
+        <option key={code} value={code} className="bg-ivory text-ink">
           {code}
         </option>
       ))}

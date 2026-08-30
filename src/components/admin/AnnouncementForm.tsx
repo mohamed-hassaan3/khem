@@ -161,7 +161,7 @@ export default function AnnouncementForm({
       ) : null}
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           The message
         </h2>
 
@@ -187,7 +187,7 @@ export default function AnnouncementForm({
       </section>
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           Where it leads
         </h2>
 
@@ -221,7 +221,7 @@ export default function AnnouncementForm({
       </section>
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           When it shows
         </h2>
 
@@ -281,7 +281,7 @@ export default function AnnouncementForm({
       </div>
 
       {armed ? (
-        <p className="text-[11px] leading-relaxed text-ivory/35">
+        <p className="text-[11px] leading-relaxed text-ground-muted">
           Deleting removes the line for good. To take it off the bar and keep the
           wording, switch off &ldquo;Showing&rdquo; instead.
         </p>

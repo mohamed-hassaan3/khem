@@ -226,7 +226,7 @@ export default function ProductForm({
 
       {/* ── Identity ─────────────────────────────────────── */}
       <section className="space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-gold/70">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-ground-accent">
           Identity
         </h2>
 
@@ -284,8 +284,8 @@ export default function ProductForm({
       </section>
 
       {/* ── Copy ─────────────────────────────────────────── */}
-      <section className="space-y-6 border-t border-border pt-10">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-gold/70">
+      <section className="space-y-6 border-t border-ground-border pt-10">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-ground-accent">
           Copy
         </h2>
 
@@ -311,8 +311,8 @@ export default function ProductForm({
       </section>
 
       {/* ── Character ────────────────────────────────────── */}
-      <section className="space-y-6 border-t border-border pt-10">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-gold/70">
+      <section className="space-y-6 border-t border-ground-border pt-10">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-ground-accent">
           Character
         </h2>
 
@@ -377,8 +377,8 @@ export default function ProductForm({
       </section>
 
       {/* ── Commerce ─────────────────────────────────────── */}
-      <section className="space-y-6 border-t border-border pt-10">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-gold/70">
+      <section className="space-y-6 border-t border-ground-border pt-10">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-ground-accent">
           Commerce
         </h2>
 
@@ -450,7 +450,7 @@ export default function ProductForm({
         </div>
 
         <div className="space-y-3">
-          <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Merchandising tags
           </p>
           {TAG_OPTIONS.map((option) => (
@@ -474,7 +474,7 @@ export default function ProductForm({
         </div>
       </section>
 
-      <div className="flex gap-3 border-t border-border pt-8">
+      <div className="flex gap-3 border-t border-ground-border pt-8">
         <AdminButton type="submit" disabled={isPending || collections.length === 0}>
           {isPending ? "Saving…" : isEdit ? "Save product" : "Create product"}
         </AdminButton>

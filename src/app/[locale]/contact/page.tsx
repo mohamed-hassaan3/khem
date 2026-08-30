@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
 import ContactForm from "@/src/components/contact/ContactForm";
 import { isLocale } from "@/src/lib/i18n/config";
@@ -60,9 +61,10 @@ export default async function Contact({
   const island = ltrIsland(activeLocale);
 
   return (
-    <div className="min-h-screen bg-background text-ivory">
+    <div className="ground-ivory min-h-screen">
+      <NavGround ground="ivory" />
       {/* ── HEADER ─────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b border-border px-4 py-14 md:px-20 md:py-30">
+      <section className="relative overflow-hidden border-b border-ground-border px-4 py-14 md:px-20 md:py-30">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,_color-mix(in_srgb,var(--color-gold)_4%,transparent)_0%,_transparent_60%)]"
           aria-hidden="true"
@@ -71,15 +73,15 @@ export default async function Contact({
         <div className="relative mx-auto grid max-w-350 grid-cols-1 items-center gap-6 md:gap-12 lg:grid-cols-2 lg:gap-20">
           <Reveal>
             <p className="eyebrow mb-5">{dict.contact.hero.eyebrow}</p>
-            <h1 className="mb-7 font-heading text-4xl font-normal leading-tight text-ivory sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="mb-7 font-heading text-4xl font-normal leading-tight text-ground sm:text-5xl md:text-6xl lg:text-7xl">
               {dict.contact.hero.headingLine1}
               <br />
-              <span className="text-gold">
+              <span className="text-ground-accent">
                 {dict.contact.hero.headingLine2}
               </span>
             </h1>
             <div className="gold-line mb-7" />
-            <p className="text-sm leading-loose text-ivory/45">
+            <p className="text-sm leading-loose text-ground-muted">
               {dict.contact.hero.lede}
             </p>
           </Reveal>
@@ -90,16 +92,16 @@ export default async function Contact({
               {channels.map((channel) => (
                 <div
                   key={channel.id}
-                  className="flex flex-col gap-2 border-b border-border pb-8 sm:flex-row sm:gap-7"
+                  className="flex flex-col gap-2 border-b border-ground-border pb-8 sm:flex-row sm:gap-7"
                 >
-                  <dt className="flex-none pt-0.5 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/50 sm:w-25">
+                  <dt className="flex-none pt-0.5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/50 sm:w-25">
                     {channel.label}
                   </dt>
-                  <dd className="text-sm leading-relaxed text-ivory/70">
+                  <dd className="text-sm leading-relaxed text-ground-muted">
                     {channel.href ? (
                       <a
                         href={channel.href}
-                        className="no-underline transition-colors duration-300 hover:text-gold"
+                        className="no-underline transition-colors duration-300 hover:text-ground-accent"
                       >
                         {channel.value}
                       </a>
@@ -121,7 +123,7 @@ export default async function Contact({
         <div className="mx-auto grid max-w-350 grid-cols-1 gap-6 md:gap-12 lg:grid-cols-[1fr_500px] lg:gap-25">
           <Reveal>
             <p className="eyebrow mb-6">{dict.contact.form.eyebrow}</p>
-            <h2 className="mb-8 md:mb-12 font-heading text-2xl font-normal leading-snug text-ivory sm:text-3xl md:text-4xl">
+            <h2 className="mb-8 md:mb-12 font-heading text-2xl font-normal leading-snug text-ground sm:text-3xl md:text-4xl">
               {dict.contact.form.headingLine1}
               <br />
               {dict.contact.form.headingLine2}
@@ -131,19 +133,19 @@ export default async function Contact({
           </Reveal>
 
           <div className="flex flex-col gap-0.5">
-            <Reveal className="border border-border bg-surface p-10 md:p-12">
+            <Reveal className="card p-10 md:p-12">
               <p className="eyebrow mb-6">
                 {dict.contact.consultation.eyebrow}
               </p>
-              <h3 className="mb-5 font-heading text-xl font-normal leading-snug text-ivory">
+              <h3 className="mb-5 font-heading text-xl font-normal leading-snug text-ground">
                 {dict.contact.consultation.heading}
               </h3>
-              <p className="mb-7 text-[13px] leading-loose text-ivory/45">
+              <p className="mb-7 text-[13px] leading-loose text-ground-muted">
                 {dict.contact.consultation.body}
               </p>
               <a
                 href={`mailto:${conciergeEmail}`}
-                className="btn-luxury inline-flex"
+                className="btn btn-outline inline-flex"
               >
                 {dict.contact.consultation.cta}
               </a>
@@ -151,7 +153,7 @@ export default async function Contact({
 
             <Reveal
               delay={STAGGER_STEP}
-              className="border border-border bg-surface p-6 md:p-10 md:px-12 md:py-10"
+              className="card p-6 md:p-10 md:px-12 md:py-10"
             >
               <p className="eyebrow mb-6">{dict.contact.social.eyebrow}</p>
               <ul className="flex flex-col">
@@ -165,12 +167,12 @@ export default async function Contact({
                         dict.contact.social.profileLabel,
                         { platform: profile.platform },
                       )}
-                      className="flex items-center justify-between gap-4 border-b border-border py-3.5 no-underline transition-colors duration-300 hover:text-gold"
+                      className="flex items-center justify-between gap-4 border-b border-ground-border py-3.5 no-underline transition-colors duration-300 hover:text-ground-accent"
                     >
-                      <span className="font-heading text-xs tracking-wider text-ivory">
+                      <span className="font-heading text-xs tracking-wider text-ground">
                         {profile.platform}
                       </span>
-                      <span className="text-[11px] tracking-wide text-gold/60">
+                      <span className="text-[11px] tracking-wide text-ground-accent/60">
                         {profile.handle}
                       </span>
                     </a>

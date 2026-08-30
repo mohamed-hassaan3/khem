@@ -1,238 +1,297 @@
 # KHEM UI/UX Design System & Responsive Enhancement Specification
 
+> **Status: superseded in part, and rewritten here.**
+>
+> Sections 1–5 of this document previously specified a *dual-mode* system —
+> large dark environments for storytelling, light ones for shopping — and a
+> homepage that deliberately alternated between them. That direction has been
+> withdrawn. See `src/docs/KHEM-REDESIGN-AND-PERFORMANCE.md` for the brief that
+> replaced it and `prompts/light-first-redesign-and-performance.md` for the
+> implementation record.
+>
+> Everything from § 6 onward — collection direction, the product card system,
+> grids, responsive rules, admin layout — was written independently of the
+> colour question and still stands. Only the colour and section-mode sections
+> below have been rewritten.
+
 ## Purpose
 
-This document defines the visual direction, color system, responsive behavior, and required UI enhancements for the KHEM web application.
+This document defines the visual direction, colour system, responsive behaviour
+and required UI enhancements for the KHEM web application.
 
-Claude must use this document as a design and implementation reference when improving the customer-facing website and the admin dashboard.
+Claude must use this document as a design and implementation reference when
+improving the customer-facing website and the admin dashboard.
 
-The goal is to create a consistent, premium, modern, responsive luxury e-commerce experience that reflects KHEM's identity:
+The goal is a consistent, premium, modern, responsive luxury e-commerce
+experience that reflects KHEM's identity:
 
 > **KHEM — Essence of Heritage**
 
-KHEM should combine:
-
-* Modern luxury
-* Egyptian heritage
-* Cinematic storytelling
-* Premium product presentation
-* Comfortable e-commerce usability
-
-The website must not feel like a generic perfume store or a generic black luxury website.
+KHEM combines modern luxury, Egyptian heritage, editorial storytelling, premium
+product presentation and comfortable e-commerce usability. It must not feel like
+a generic perfume store — and, since this revision, it must not feel like a
+generic black luxury website either.
 
 ---
 
 # 1. Core Design Philosophy
 
-KHEM should not use only dark mode or only light mode.
+**KHEM is one light environment.**
 
-The interface must use color intentionally based on the purpose of each page and section.
+It is not a dark site with light sections in it, and it is not a site that
+switches modes according to what a page is doing. Navigating from the home page
+to a collection to a product to the bag to the account portal to the dashboard
+must never cross a dark/light boundary.
 
-## The KHEM Color Philosophy
+The hierarchy, in one line:
 
-> **Black creates emotion.**
-> **Ivory creates comfort.**
-> **Sand creates heritage.**
-> **Gold creates identity.**
+> **Ivory is the environment. Stone is the surface above it. Sand carries
+> warmth and rhythm. Charcoal is structure. Gold is jewellery.**
 
-The overall experience should follow this principle:
+## Why this replaced the dual-mode system
 
-> **Dark for emotion. Light for shopping. Gold for identity.**
+The previous philosophy assigned a mode per section: dark for heritage, craft,
+NOIR, banners and loading; light for shopping. Each decision was defensible on
+its own. Together they produced a site that changed lights roughly every screen
+and a half, and a visitor moving through a normal purchase crossed the boundary
+six or seven times.
 
-The customer experience should move naturally between cinematic storytelling and comfortable e-commerce browsing.
-
----
-
-# 2. Core Color System
-
-## 2.1 Obsidian Black
-
-**Color:** `#0D0D0D`
-
-Primary brand dark color.
-
-Use for:
-
-* Homepage hero
-* Brand storytelling
-* Cinematic campaigns
-* KHEM NOIR
-* Editorial sections
-* Footer
-* Dark immersive sections
-
-Emotion:
-
-* Mystery
-* Power
-* Luxury
-* Heritage
-* Exclusivity
+The failure was not any one dark section. It was that "which mode is this?"
+became a question every new surface had to answer, and there was no wrong
+answer — so the answers diverged, and the site stopped reading as one place.
 
 ---
 
-## 2.2 Charcoal Black
+# 2. Core Colour System
 
-**Color:** `#1A1A1A`
+The canonical values live in `@theme` in `src/app/globals.css`. That file is the
+implementation; this is the reasoning.
 
-Use for:
+## 2.1 Ivory — the environment
 
-* Secondary dark backgrounds
-* Dark cards
-* Dropdown menus
-* Modal surfaces
-* Secondary NOIR sections
-* Admin dark navigation areas where appropriate
+`#F7F5F0` · token `--color-ivory` · ground `.ground-ivory`
 
-Charcoal should provide visual depth without making every dark section look identical.
+The ground of the site. Home, shop, product, cart, checkout, account, editorial,
+admin. If a surface has no reason to be anything else, it is this, and most
+surfaces have no reason to be anything else.
 
----
+## 2.2 Soft Stone — the surface above the environment
 
-## 2.3 Royal Ivory
+`#EFEBE4` · token `--color-stone` · ground `.ground-stone`
 
-**Color:** `#F7F5F0`
+Cards, form fields, dashboard panels, order summaries, skeletons. Anywhere a
+region must read as *on* the page rather than as the page.
 
-This is the primary light background for KHEM.
+Replaces the former `--color-cream` (`#FBFAF7`), a near-white that existed to
+read as lifted against obsidian. On ivory it was indistinguishable from the
+ground, so a card drawn in it had no surface of its own.
 
-Do not use pure white as the default background across the entire application.
+## 2.3 Egyptian Sand — warmth and rhythm
 
-Use Royal Ivory for:
+`#E8E1D5` · token `--color-sand` · ground `.ground-sand`
 
-* Shop pages
-* Product listings
-* Product detail pages
-* Cart
-* Checkout
-* Account pages
-* Editorial reading
-* Dashboard content areas
+Heritage storytelling, olfactory notes, editorial breaks, collection
+introductions, the transition into the footer.
 
-Emotion:
+Sand is *punctuation*, not alternation. Two sand sections with one ivory section
+between them reads as stripes, which is the switching problem in warmer clothes.
 
-* Elegance
-* Comfort
-* Premium simplicity
-* Clarity
+## 2.4 Charcoal — structure
 
----
+`#242321` · token `--color-ink` · ground `.ground-charcoal`
 
-## 2.4 Egyptian Sand
+Primary typography, buttons, icons, navigation text, borders where a hairline is
+not enough — and the footer, which is the one full-width charcoal surface in the
+system.
 
-**Color:** `#E8E1D5`
+Charcoal is **not a dark mode**. The footer is charcoal because a document needs
+an ending, and it is the *same colour* as the type on every light page above it,
+so it reads as the palette's structural colour filling the frame rather than as
+a different environment.
 
-Use for:
+It is `#242321` rather than the former `#151515`: as the only structural colour
+on an ivory page it has to read as warm charcoal, not as a hole. Contrast on
+ivory is 13.4:1.
 
-* Heritage storytelling
-* Olfactory notes
-* Collection introductions
-* Discovery sections
-* Warm content areas
-* Home fragrance areas
-* Storytelling transitions
+## 2.5 KHEM Gold — the accent
 
-Emotion:
+`#B08D57` · token `--color-gold`
+`#8A6A3F` · token `--color-gold-deep` — **the gold that survives as text on a
+light ground**
 
-* Egyptian heritage
-* Stone
-* History
-* Warmth
+Fine rules, small premium labels, selected states, hover details, the house
+speaking about itself.
 
-This color should provide a connection to KHEM's heritage without making the website look like a historical museum or tourism website.
+### Important rule
 
----
+Gold is never the primary UI colour. No gold page backgrounds, no gold primary
+buttons in a commerce flow, no gold body copy, no gold borders by default. Target
+is roughly 5% of any visible surface.
 
-## 2.5 KHEM Gold
+**Choosing between the two golds is an accessibility decision, not a shade
+preference.** `--color-gold` on ivory is about 2.6:1 and fails at body size;
+`--color-gold-deep` is about 4.9:1. Gold on a light ground takes the deep one —
+and every light ground sets `--ground-accent` to it automatically, so a component
+that writes `text-ground-accent` cannot get this wrong.
 
-**Color:** `#B08D57`
+## 2.6 Obsidian — framing only
 
-Primary brand accent.
+`#0D0D0D` · token `--color-background` · ground `.ground-obsidian`
 
-Use carefully for:
+**Not a page ground.** No route renders on this. What survives is the framing
+case: the inside of a full-bleed image, a lightbox scrim, a product well where a
+photographed bottle needs a dark surround. In every one of those the dark area is
+bounded by an image, not by the page.
 
-* Logo details
-* Decorative lines
-* Small borders
-* Hover states
-* Premium labels
-* Important visual details
-* Collection accents
-
-### Important Rule
-
-Gold must remain an accent.
-
-Do not use gold everywhere.
-
-Gold should feel like jewelry:
-
-> Rare, intentional, and valuable.
+If you are reaching for obsidian to make a *section* dramatic, the answer the
+system wants is photography, charcoal detail and composition.
 
 ---
 
-## 2.6 Soft Gold
+# 3. Typography Colour System
 
-**Color:** `#D4B77A`
+Text colours are named for the ground they sit on, because the mistake this
+system makes possible is using a dark-ground colour on a light one.
 
-Use sparingly for:
+| Role | Token | Value | On ivory |
+| --- | --- | --- | --- |
+| Primary | `--color-ink` | `#242321` | 13.4:1 |
+| Secondary | `--color-ink-muted` | `#625F58` | 6.2:1 |
+| Muted | `--color-ink-subtle` | `#8B867D` | 3.6:1 |
+| Accent | `--color-gold-deep` | `#8A6A3F` | 4.9:1 |
+| On charcoal | `--color-ivory` / `--color-dim` | `#F7F5F0` / `#B8B3AA` | — |
 
-* Hover states
-* Premium highlights
-* Limited editions
-* Special collection details
-* Small animations
+`--color-ink-subtle` is above the 3:1 floor for large text and UI and below the
+4.5:1 body floor. It is for chrome and metadata, never for a paragraph.
 
----
+## Never write an opacity of a fixed colour
 
-# 3. Typography Color System
-
-## On Dark Backgrounds
-
-### Primary Text
-
-`#F7F5F0`
-
-### Secondary Text
-
-`#B8B3AA`
-
-### Accent Text
-
-`#B08D57`
+`text-ivory/40` was the idiom that made the old site dark-only: an opacity of a
+fixed colour cannot be correct on more than one ground. Use the ground-relative
+utilities — `text-ground`, `text-ground-muted`, `text-ground-subtle`,
+`text-ground-accent`, `border-ground-border` — which resolve against whichever
+`.ground-*` they land inside, including under `hover:`, `group-hover:` and
+breakpoint variants.
 
 ---
 
-## On Light Backgrounds
+# 3a. Semantic Tokens
 
-### Primary Text
+Components should not think *"I need charcoal"*. They should think *"I need a
+primary action"*. The vocabulary, layered over the ground machinery:
 
-`#151515`
+```
+--background-primary     ivory      --text-primary       charcoal
+--background-secondary   stone      --text-secondary     warm grey
+--background-tertiary    sand       --text-muted         subtle grey
+--surface-primary        stone      --border-default     #D8D3CA
+--surface-secondary      sand       --accent-gold        deep gold
+--action-primary         charcoal   --action-primary-hover  black
+```
 
-### Secondary Text
-
-`#5F5A52`
-
-### Accent
-
-`#8A6A3F`
-
-The darker gold variation should be used when better contrast is required.
+The three background levels are fixed rungs and are deliberately *not*
+ground-relative: `--background-secondary` means stone everywhere, which is what
+makes "one level up from the page" a portable instruction.
 
 ---
 
-# 4. Website Color Distribution
+# 3b. The Ground Contract
 
-The approximate visual balance across the KHEM website should be:
+A section declares one of `.ground-ivory`, `.ground-stone`, `.ground-sand`,
+`.ground-charcoal` or `.ground-obsidian`, and gets its background, foreground,
+muted tone, accent, hairline, button fill, field fill and card surface together.
 
-| Color               | Approximate Usage |
-| ------------------- | ----------------: |
-| Obsidian / Dark     |               40% |
-| Royal Ivory / Light |               40% |
-| Egyptian Sand       |               15% |
-| Gold Accents        |                5% |
+**Never write `bg-ivory` and hope.** Write `ground-ivory` and the type comes
+with it. The failure this prevents was everywhere in the old system: a component
+wrote `bg-surface`, inherited `text-ivory` from `body`, and worked only because
+every ancestor happened to be dark.
 
-This is not a strict mathematical rule for every page.
+An overlay — drawer, modal, mega-menu, banner — is its own surface and must
+declare its ground explicitly, even though it is a descendant in the tree.
 
-It is a visual direction for the overall product.
+---
+
+# 4. Website Colour Distribution
+
+| Colour | Approximate usage |
+| --- | ---: |
+| Ivory | 65% |
+| Sand | 15% |
+| Stone | 12% |
+| Charcoal (footer, buttons, type) | 5% |
+| Gold | 3% |
+
+Not a mathematical rule per page. It is the balance the product should read at,
+and it replaces the previous 40/40 dark-light split.
+
+---
+
+# 4a. The Banner System
+
+There is no single banner component recoloured per page. §14 of the redesign
+brief asks for four shapes, and the site implements four:
+
+| Shape | Ground | Where |
+| --- | --- | --- |
+| **Editorial** | Ivory, large type, minimal image | Home hero |
+| **Collection** | Photography with an ivory scrim, charcoal type | `CollectionView` |
+| **Category** | Photography with a directional ivory gradient | `CategoryHero` |
+| **Utility** | Compact, short, quiet | `LegalHero` |
+
+Two rules hold across all four:
+
+**Do not automatically darken a hero image.** Every banner on the old site ran a
+blanket `brightness-20`–`brightness-45`, which is what made them all the same
+dark rectangle and threw away the photography. Images now run at their own
+luminance; a *bounded* gradient carries the type.
+
+**Type on a banner is charcoal.** Which means the scrim's job is to guarantee a
+light field under the words, not a dark one.
+
+## The scrim, and its three anchors
+
+The gradient is **not** hand-written per banner. `globals.css` defines
+`.banner-scrim` plus three anchors, and every banner on the site declares one:
+
+| Anchor | For | Used by |
+| --- | --- | --- |
+| `.banner-scrim-base` | Type on the bottom edge | Collection banner, journal article, legal page, home collection card, nav tiles |
+| `.banner-scrim-column` | Type in a reading column | Category mastheads, Heritage, About, Ingredients |
+| `.banner-scrim-center` | Type centred over the frame | New Arrival, Craftsmanship, the stockists map |
+
+A shared *treatment*, not a shared component: each banner keeps its own layout,
+height and composition and only states where its type sits.
+
+**Every anchor holds the reading area at or above ~70% ivory**, whatever the
+photograph does there. Ivory at 70% over black resolves to about `#adaba6`, and
+charcoal on that is ~4.6:1 — clear of the 4.5:1 body floor, which is what
+"readable on any banner" has to mean for a 10px eyebrow. Display type only needs
+3:1; the small type is the binding constraint and the numbers are set by it.
+
+`.banner-scrim-column` carries *two* layers for that reason. The directional
+wash gives the composition and lets the picture through on the trailing side;
+the bottom layer is the guarantee. A directional wash alone is what this
+replaced, and it failed exactly where you would expect — on
+`/collections/body-care` it had faded to nothing under the eyebrow and the lede,
+leaving charcoal type on a dark vase. Thinning either layer breaks the darkest
+photography first, and silently.
+
+## Cards do not dim their photographs
+
+A card's caption sits in its own panel *below* the image, so dimming the
+photograph buys no legibility. The grades that used to be there — from
+`brightness-75` on a product card to `brightness-[0.15] saturate-0 sepia-[0.3]`
+on the stockists map — were left over from the dark system, where a card's type
+lay on the picture. They cost image quality and bought nothing (§41).
+
+The one exception is a card whose type really is over the image: it takes a
+scrim anchor, like a banner, rather than a filter.
+
+Noir is the only photography that is still graded, and it is *lifted*
+(`brightness-105`) rather than dimmed, so it joins the light system instead of
+being the one surface that stays dark. `<CollectionCard tone="dark">` and
+`<CollectionView>` apply the same value, so the home page and the collection
+banner agree about what NOIR looks like.
 
 ---
 
@@ -240,9 +299,28 @@ It is a visual direction for the overall product.
 
 The homepage should feel like a journey.
 
-It should alternate between dark and light environments.
+It moves between **ivory and sand**, and it does not change lights. The
+"alternate between dark and light environments" instruction this section used to
+carry is exactly what the redesign removed.
 
-Avoid making the entire page continuously black or continuously white.
+The rhythm as built, top to bottom:
+
+```
+IVORY   hero
+SAND    collections preview
+IVORY   essences
+SAND    brand story
+IVORY   craftsmanship
+[image] featured perfume — a photograph, not a ground
+SAND    collection slider
+IVORY   journal
+IVORY   testimonials
+SAND    newsletter
+CHARCOAL footer
+```
+
+One dark band in eleven sections, and it is a full-bleed photograph of a bottle
+bounded by light on both sides — punctuation, not alternation.
 
 ---
 
@@ -250,25 +328,31 @@ Avoid making the entire page continuously black or continuously white.
 
 ### Mode
 
-**Dark**
+**Ivory editorial** (§13, Option A of the redesign brief)
 
 ### Background
 
-Obsidian Black `#0D0D0D`
+Royal Ivory `#F7F5F0`
 
-Use for:
-
-* Main brand introduction
-* Cinematic imagery
-* Hero campaign
-* KHEM identity
+The wordmark, a gold rule, the tagline, one primary action, and two concentric
+circles drawn in charcoal at 5–8% — an engraving on paper.
 
 Typography:
 
-* Primary: Ivory
-* Accent: Gold
+* Primary: Charcoal
+* Accent: Deep gold
 
-The hero should create the feeling of entering the KHEM world.
+### What was removed, and why it should not come back
+
+A full-bleed photograph at `opacity-35` under a radial gradient that faded to
+solid obsidian. At that opacity under that wash it was not photography, it was
+texture — work an ivory ground does for free. It was also a 1800px `priority`
+image on the critical path of the most-visited route, spent on a composition
+that is typographic.
+
+When a real KHEM campaign photograph exists it belongs here **full-bleed and
+untreated**, with the type moved off it — not layered under it at a third of its
+opacity.
 
 ---
 
@@ -357,14 +441,21 @@ Avoid generic default carousel styling.
 
 Primary mode:
 
-**Dark**
+**Ivory, like everything else** — §17 of the redesign brief is explicit that the
+collection's name does not entitle it to a dark website.
 
-Colors:
+Colours:
 
-* Obsidian Black
-* Charcoal
-* Gold
-* Ivory
+* Royal Ivory — the page
+* Charcoal — type, and the framing around its photography
+* Gold — the accent, unchanged
+
+Where the distinction actually comes from:
+
+* Photography, graded darker than the other collections
+* Bottle presentation and composition
+* More dramatic crops
+* Charcoal detail, used more heavily than elsewhere
 
 Feeling:
 
@@ -372,6 +463,10 @@ Feeling:
 * Rare
 * Cinematic
 * Exclusive
+
+The banner image for `noir` is lifted rather than dimmed (`brightness-105` in
+`CollectionView`), so it joins the light system instead of being the one page
+that still goes dark. The drama is in the picture.
 
 ---
 
@@ -1327,7 +1422,178 @@ Do not rely only on visual meaning.
 
 ---
 
-# 34. Implementation Principles
+# 34. Animation & Motion System
+
+KHEM uses motion to enhance the luxury experience, guide attention, and create a sense of refinement. Animations must remain **subtle, smooth, and purposeful**. Avoid excessive motion, flashy effects, or animations that make the interface feel like a generic e-commerce website.
+
+### 1. Scroll-Triggered Section Reveal
+
+Major landing-page sections should reveal naturally as the visitor scrolls.
+
+**Default behavior:**
+
+* Initial: `opacity: 0`, `translateY(24px)`
+* Enter viewport when approximately 15–20% is visible.
+* Animate to `opacity: 1`, `translateY(0)`.
+* Duration: approximately `600–800ms`.
+* Use a smooth ease-out curve.
+* Animate **once only**; do not replay when scrolling back.
+* Unobserve the element after it has appeared.
+
+For sections with multiple elements, use subtle staggered timing:
+
+```text
+Heading
+   ↓ ~100ms
+Description
+   ↓ ~100ms
+CTA / supporting content
+```
+
+Use a **single reusable reveal mechanism** across the website rather than separate animation logic for every section.
+
+The implementation should match the project's existing stack and architecture. Prefer the simplest maintainable solution already supported by the project.
+
+### 2. KHEM Directional Motion
+
+Not every section needs the exact same movement.
+
+Use subtle variations where they improve the editorial composition:
+
+* Standard sections → upward reveal.
+* Alternating editorial/image sections → very subtle horizontal movement.
+* Product imagery → gentle fade/scale where appropriate.
+* Text → primarily fade + translate.
+* Avoid large or exaggerated movement.
+
+Motion should never compete with the product photography or typography.
+
+### 3. Product & Card Interactions
+
+Product and editorial cards may use restrained hover interactions:
+
+* Image transition/zoom: very subtle.
+* Content movement: minimal.
+* CTA/button transition: smooth.
+* No excessive scaling or bouncing.
+
+The interaction should feel closer to a **luxury editorial website** than a typical e-commerce interface.
+
+### 4. Carousel Motion
+
+Where KHEM uses a carousel, such as the landing-page collection sections, use a smooth editorial transition.
+
+**Responsive behavior:**
+
+* Desktop: 2 cards visible.
+* Tablet/mobile: adapt naturally to the available width, with mobile showing 1 card where appropriate.
+
+Carousel behavior:
+
+* Smooth horizontal `translateX` transition.
+* Approximately 5–6 seconds autoplay.
+* Pause on hover and keyboard focus.
+* Resume after interaction.
+* Touch/swipe support.
+* Keyboard arrow navigation when focused.
+* Handle a single slide gracefully without unnecessary controls.
+
+### 5. Carousel Progress Indicator
+
+Do not use traditional bullet dots for premium KHEM carousels.
+
+Use a minimal horizontal progress track:
+
+```text
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+████████
+```
+
+The filled portion represents the active slide and progresses toward the next slide.
+
+The progress animation should reset when the slide changes.
+
+Keep the indicator:
+
+* Thin.
+* Minimal.
+* Elegant.
+* Visually secondary to the content.
+
+### 6. Popup & Modal Motion
+
+Marketing popups, including the subscribe/special-offer popup, should enter and exit smoothly.
+
+Preferred direction:
+
+```text
+opacity: 0 → 1
+subtle scale / translate → natural position
+```
+
+Keep the movement short and refined.
+
+Do not use aggressive bounce effects.
+
+The popup should feel like an invitation rather than an interruption.
+
+### 7. Announcement Bar Motion
+
+For announcement marquees:
+
+* Use smooth continuous movement.
+* Avoid abrupt jumps.
+* Respect reduced-motion preferences.
+* Carousel announcements should transition smoothly rather than abruptly changing content.
+
+### 8. Reduced Motion & Graceful Degradation
+
+All KHEM animations must respect:
+
+```text
+prefers-reduced-motion: reduce
+```
+
+When reduced motion is enabled:
+
+* Show content immediately.
+* Disable non-essential transitions.
+* Keep functionality unchanged.
+
+Content must remain usable if JavaScript fails or an animation cannot initialize.
+
+Animations must never hide important content permanently.
+
+### 9. Performance Rules
+
+Animation should use performant properties such as:
+
+* `transform`
+* `opacity`
+
+Avoid unnecessary animation of layout properties such as:
+
+* `top`
+* `left`
+* `width`
+* `height`
+
+Do not introduce a large animation library when the existing project can achieve the required behavior with lightweight reusable utilities.
+
+### KHEM Motion Principle
+
+**Motion should be felt, not noticed.**
+
+Every animation should support one of three purposes:
+
+1. **Guide** — help the visitor understand where to look.
+2. **Reveal** — create a refined sense of discovery while scrolling.
+3. **Elevate** — make interactions feel premium.
+
+If an animation does not serve one of these purposes, it should probably not exist.
+
+
+# 35. Implementation Principles
 
 Before creating new components, review existing components and reuse the existing architecture where possible.
 
@@ -1345,7 +1611,7 @@ Preferred approach:
 
 ---
 
-# 35. Required Components to Review and Enhance
+# 36. Required Components to Review and Enhance
 
 Review and improve where applicable:
 
@@ -1372,7 +1638,7 @@ Review and improve where applicable:
 
 ---
 
-# 36. Product Interaction Rules
+# 37. Product Interaction Rules
 
 ## Product Card
 
@@ -1408,7 +1674,7 @@ Must have dedicated product detail pages.
 
 ---
 
-# 37. Do Not Break Existing Business Logic
+# 38. Do Not Break Existing Business Logic
 
 UI improvements must not break:
 
@@ -1425,7 +1691,7 @@ This is primarily a UI/UX enhancement unless additional changes are required to 
 
 ---
 
-# 38. Final Visual Direction
+# 39. Final Visual Direction
 
 The KHEM website should feel like:
 

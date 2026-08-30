@@ -2,6 +2,7 @@ import { SearchX } from "lucide-react";
 import type { Metadata } from "next";
 
 import EmptyState from "@/src/components/ecommerce/EmptyState";
+import NavGround from "@/src/components/NavGround";
 import PageHeader from "@/src/components/ecommerce/PageHeader";
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
@@ -98,7 +99,8 @@ export default async function Search({
     : undefined;
 
   return (
-    <div className="min-h-screen bg-background text-ivory">
+    <div className="ground-ivory min-h-screen">
+      <NavGround ground="ivory" />
       {/*
        * The query is visitor-typed text of unknown script — `dir="auto"` on the
        * heading lets an English query keep its LTR run inside the Arabic page
@@ -151,7 +153,7 @@ export default async function Search({
                 <LocaleLink
                   key={term}
                   href={searchHref(term)}
-                  className="border border-border px-4 py-2 font-body text-[11px] tracking-[0.15em] text-ivory/60 no-underline transition-all duration-400 ease-luxury-bezier hover:border-gold/50 hover:text-gold"
+                  className="border border-ground-border px-4 py-2 font-body text-[11px] tracking-[0.15em] text-ground-muted no-underline transition-all duration-400 ease-luxury-bezier hover:border-gold/50 hover:text-ground-accent"
                 >
                   {label}
                 </LocaleLink>

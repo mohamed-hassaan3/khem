@@ -73,14 +73,14 @@ export default function TestimonialCarousel({
               style={{ pointerEvents: isActive ? "auto" : "none" }}
               aria-hidden={!isActive}
             >
-              <blockquote className="mb-6 font-heading text-lg italic leading-relaxed text-ivory sm:text-xl md:text-2xl">
+              <blockquote className="mb-6 font-heading text-lg italic leading-relaxed text-ground sm:text-xl md:text-2xl">
                 &quot;{testimonial.quote}&quot;
               </blockquote>
               <figcaption>
-                <p className="mb-1 font-heading text-xs uppercase tracking-[0.15em] text-gold">
+                <p className="mb-1 font-heading text-xs uppercase tracking-[0.15em] text-ground-accent">
                   {testimonial.author}
                 </p>
-                <p className="text-[11px] uppercase tracking-wider text-ivory/35">
+                <p className="text-[11px] uppercase tracking-wider text-ground-muted">
                   {testimonial.authorTitle}
                 </p>
               </figcaption>

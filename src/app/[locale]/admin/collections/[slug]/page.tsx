@@ -50,7 +50,7 @@ export default async function EditCollectionPage({
         action={
           <Link
             href={localizePath(activeLocale, `/collections/${collection.slug}`)}
-            className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/40 transition-colors duration-300 hover:text-gold"
+            className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
           >
             View on storefront ↗
           </Link>
@@ -59,11 +59,11 @@ export default async function EditCollectionPage({
 
       <CollectionForm collection={collection} locale={activeLocale} />
 
-      <section className="mt-10 md:mt-16 max-w-3xl border-t border-border pt-8">
+      <section className="mt-10 md:mt-16 max-w-3xl border-t border-ground-border pt-8">
         <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-danger/70">
           Danger zone
         </h2>
-        <p className="mt-3 mb-5 max-w-xl text-[11px] leading-relaxed text-ivory/30">
+        <p className="mt-3 mb-5 max-w-xl text-[11px] leading-relaxed text-ground-muted">
           Deleting a collection is permanent and has no archive equivalent. Only
           an empty collection can be deleted.
         </p>
@@ -110,7 +110,7 @@ async function renderMerchPage(locale: Locale, slug: string) {
         action={
           <Link
             href={localizePath(locale, `/collections/${page.slug}`)}
-            className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/40 transition-colors duration-300 hover:text-gold"
+            className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
           >
             View on storefront ↗
           </Link>

@@ -115,7 +115,7 @@ export default function StockistDirectory({
       {/* ── REGION FILTER ───────────────────────────── */}
       <nav
         aria-label={dict.stockists.filterLabel}
-        className="border-b border-border bg-background"
+        className="border-b border-ground-border"
       >
         <div className="mx-auto flex max-w-350 gap-5 md:gap-9 overflow-x-auto px-4 md:px-20">
           <RegionTab
@@ -138,19 +138,29 @@ export default function StockistDirectory({
       {/* ── MAP PANEL + DIRECTORY ───────────────────── */}
       <section className="grid grid-cols-1 lg:grid-cols-[1fr_440px]">
         {/* Map column */}
-        <div className="relative min-h-100 overflow-hidden border-b border-border bg-surface lg:min-h-150 lg:border-b-0 lg:border-e">
+        <div className="relative min-h-100 overflow-hidden border-b border-ground-border bg-[var(--card-bg)] lg:min-h-150 lg:border-b-0 lg:border-e">
           <Image
             src={MAP_TEXTURE}
             alt=""
             fill
             sizes="(min-width: 1024px) 60vw, 100vw"
-            className="object-cover brightness-[0.15] saturate-0 sepia-[0.3]"
+            className="object-cover"
           />
+
+          {/*
+            The one image in this sweep that really does carry type, so it
+            keeps a treatment — the house scrim, centre anchor, rather than the
+            `brightness-[0.15] saturate-0 sepia-[0.3]` it had. Fifteen percent
+            luminance, desaturated and sepia'd is not an image treatment; it is
+            a way of turning a photograph into a dark background, because the
+            type on it used to be ivory. The type is charcoal now.
+          */}
+          <div aria-hidden="true" className="banner-scrim banner-scrim-center" />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8">
             <div className="gold-line" />
 
-            <p className="font-heading text-[13px] tracking-[0.15em] text-gold/50">
+            <p className="font-heading text-[13px] tracking-[0.15em] text-ground-accent">
               {interpolate(
                 openCount === 1
                   ? dict.stockists.countOne
@@ -174,7 +184,7 @@ export default function StockistDirectory({
                   return (
                     <span
                       key={stockist.id}
-                      className={`${chipClasses} border-dashed border-gold/15 text-ivory/25`}
+                      className={`${chipClasses} border-dashed border-ground-accent/15 text-ground-muted/70`}
                     >
                       {/* The island wraps the city name only — the status
                           annotation beside it is translated chrome. */}
@@ -196,8 +206,8 @@ export default function StockistDirectory({
                     onClick={() => toggleSelected(stockist.id)}
                     className={`${chipClasses} cursor-pointer transition-colors duration-300 ease-out focus-visible:border-gold focus-visible:outline-none ${
                       isSelected
-                        ? "border-gold bg-gold/15 text-gold"
-                        : "border-gold/20 text-ivory/40 hover:text-ivory/70"
+                        ? "border-gold bg-gold/15 text-ground-accent"
+                        : "border-ground-accent/20 text-ground-muted hover:text-ground-muted"
                     }`}
                     {...island}
                   >
@@ -227,7 +237,7 @@ export default function StockistDirectory({
               />
             ))
           ) : (
-            <p className="px-4 md:px-6 py-10 md:py-16 text-center text-sm text-ivory/40">
+            <p className="px-4 md:px-6 py-10 md:py-16 text-center text-sm text-ground-muted">
               {dict.stockists.empty}
             </p>
           )}
@@ -254,8 +264,8 @@ function RegionTab({
       onClick={onSelect}
       className={`cursor-pointer whitespace-nowrap border-b-2 py-5 font-heading text-[11px] tracking-[0.2em] transition-colors duration-300 ease-out focus-visible:outline-none ${
         isActive
-          ? "border-gold text-gold"
-          : "border-transparent text-ivory/40 hover:text-ivory/70 focus-visible:text-gold"
+          ? "border-gold text-ground-accent"
+          : "border-transparent text-ground-muted hover:text-ground-muted focus-visible:text-ground-accent"
       }`}
     >
       {label}
@@ -299,7 +309,7 @@ function StockistRow({
       {/* Store records come from the database — English only. */}
       <span
         className={`mb-1 block font-heading text-[15px] font-normal ${
-          isComingSoon ? "text-ivory/60" : "text-ivory"
+          isComingSoon ? "text-ground-muted" : "text-ground"
         }`}
         {...island}
       >
@@ -307,7 +317,7 @@ function StockistRow({
       </span>
       <span
         className={`block text-[11px] tracking-[0.1em] ${
-          isComingSoon ? "text-gold/35" : "text-gold/60"
+          isComingSoon ? "text-gold/35" : "text-ground-accent/60"
         }`}
         {...island}
       >
@@ -318,10 +328,10 @@ function StockistRow({
 
   if (isComingSoon) {
     return (
-      <div className="border-b border-s-3 border-border border-s-transparent">
+      <div className="border-b border-s-3 border-ground-border border-s-transparent">
         <div className="flex items-start justify-between gap-4 px-4 py-7 md:px-9">
           {heading}
-          <span className="shrink-0 whitespace-nowrap border border-dashed border-gold/25 px-2.5 py-1 font-heading text-[9px] tracking-[0.15em] text-gold/50">
+          <span className="shrink-0 whitespace-nowrap border border-dashed border-ground-accent/25 px-2.5 py-1 font-heading text-[9px] tracking-[0.15em] text-ground-accent/50">
             {labels.comingSoon}
           </span>
         </div>
@@ -331,7 +341,7 @@ function StockistRow({
 
   return (
     <div
-      className={`border-b border-s-3 border-border transition-colors duration-300 ease-out ${
+      className={`border-b border-s-3 border-ground-border transition-colors duration-300 ease-out ${
         isSelected ? "border-s-gold bg-gold/6" : "border-s-transparent"
       }`}
     >
@@ -353,7 +363,7 @@ function StockistRow({
             size={14}
             strokeWidth={1.25}
             aria-hidden="true"
-            className={`text-ivory/30 transition-transform duration-300 ease-out ${
+            className={`text-ground-muted/70 transition-transform duration-300 ease-out ${
               isSelected ? "rotate-180" : ""
             }`}
           />
@@ -363,7 +373,7 @@ function StockistRow({
       {isSelected ? (
         <div
           id={detailId}
-          className="border-t border-border px-4 pb-7 pt-5 md:px-9"
+          className="border-t border-ground-border px-4 pb-7 pt-5 md:px-9"
         >
           <StockistDetails stockist={stockist} island={island} labels={labels} />
         </div>
@@ -406,7 +416,7 @@ export function StockistDetails({
           >
             <dt className="sr-only">{labels.address}</dt>
             <dd
-              className="text-[12px] leading-relaxed text-ivory/50"
+              className="text-[12px] leading-relaxed text-ground-muted"
               {...island}
             >
               {address}
@@ -427,7 +437,7 @@ export function StockistDetails({
               <a
                 href={phoneHref}
                 dir="ltr"
-                className="inline-block text-[11px] text-ivory/40 no-underline transition-colors duration-300 ease-out hover:text-gold focus-visible:text-gold focus-visible:outline-none"
+                className="inline-block text-[11px] text-ground-muted no-underline transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-none"
               >
                 {phone}
               </a>
@@ -440,7 +450,7 @@ export function StockistDetails({
             icon={<Clock size={13} strokeWidth={1.25} aria-hidden="true" />}
           >
             <dt className="sr-only">{labels.hours}</dt>
-            <dd className="text-[11px] text-ivory/40" {...island}>
+            <dd className="text-[11px] text-ground-muted" {...island}>
               {hours}
             </dd>
           </DetailRow>
@@ -453,7 +463,7 @@ export function StockistDetails({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={interpolate(labels.directionsFor, { name: stockist.name })}
-          className="mt-6 inline-flex items-center gap-2 font-heading text-[10px] tracking-[0.15em] text-gold no-underline transition-colors duration-300 ease-out hover:text-champagne focus-visible:text-champagne focus-visible:outline-none"
+          className="mt-6 inline-flex items-center gap-2 font-heading text-[10px] tracking-[0.15em] text-ground-accent no-underline transition-colors duration-300 ease-out hover:text-gold-soft focus-visible:text-gold-soft focus-visible:outline-none"
         >
           {labels.directions}
           <ExternalLink size={11} strokeWidth={1.25} aria-hidden="true" />
@@ -472,7 +482,7 @@ function DetailRow({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="mt-0.5 shrink-0 text-gold/50">{icon}</span>
+      <span className="mt-0.5 shrink-0 text-ground-accent/50">{icon}</span>
       <div className="min-w-0">{children}</div>
     </div>
   );

@@ -209,7 +209,7 @@ export default function IngredientExplorer({
   };
 
   return (
-    <section className="bg-background px-4 py-10 md:px-20 md:py-20">
+    <section className="ground-ivory px-4 py-10 md:px-20 md:py-20">
       <div className="mx-auto grid max-w-350 grid-cols-1 gap-0.5 bg-border sm:grid-cols-2 lg:grid-cols-4">
         {ordered.map((ingredient) => {
           const isActive = ingredient.slug === activeSlug;
@@ -227,7 +227,7 @@ export default function IngredientExplorer({
               className={`overflow-hidden border transition-colors duration-500 ease-out ${
                 isActive
                   ? "border-gold/35 bg-gold/5 sm:col-span-2 lg:col-span-4"
-                  : "border-transparent bg-surface hover:border-gold/20"
+                  : "border-transparent bg-stone hover:border-ground-accent/20"
               }`}
             >
               <div
@@ -247,7 +247,7 @@ export default function IngredientExplorer({
                   className="img-zoom block w-full overflow-hidden text-start"
                 >
                   <div
-                    className={`relative overflow-hidden bg-card ${
+                    className={`relative overflow-hidden bg-stone ${
                       isActive ? "h-65 lg:h-full lg:min-h-120" : "h-65"
                     }`}
                   >
@@ -256,19 +256,19 @@ export default function IngredientExplorer({
                       alt={ingredient.image.alt}
                       fill
                       sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover brightness-60 saturate-50"
+                      className="object-cover"
                     />
                   </div>
 
                   {isActive ? null : (
                     <div className="px-6 pb-7 pt-6" {...island}>
-                      <h3 className="mb-2 font-heading text-base font-normal tracking-wide text-ivory">
+                      <h3 className="mb-2 font-heading text-base font-normal tracking-wide text-ground">
                         {ingredient.name}
                       </h3>
-                      <p className="mb-2 text-[10px] italic tracking-[0.12em] text-gold/50">
+                      <p className="mb-2 text-[10px] italic tracking-[0.12em] text-ground-accent/50">
                         {ingredient.latinName}
                       </p>
-                      <p className="mb-3 text-[11px] tracking-wide text-ivory/35">
+                      <p className="mb-3 text-[11px] tracking-wide text-ground-muted">
                         {interpolate(dict.home.ingredients.from, {
                           origin: ingredient.origin,
                         })}
@@ -277,7 +277,7 @@ export default function IngredientExplorer({
                         {ingredient.families.map((family) => (
                           <span
                             key={family}
-                            className="border border-gold/15 px-2 py-0.5 text-[9px] tracking-widest text-gold/45"
+                            className="border border-ground-accent/15 px-2 py-0.5 text-[9px] tracking-widest text-gold/45"
                           >
                             {family}
                           </span>
@@ -306,16 +306,16 @@ export default function IngredientExplorer({
                             <p className="eyebrow mb-2.5">
                               {ingredient.rarity}
                             </p>
-                            <h3 className="mb-1 font-heading text-2xl font-normal text-ivory md:text-4xl">
+                            <h3 className="mb-1 font-heading text-2xl font-normal text-ground md:text-4xl">
                               {ingredient.name}
                             </h3>
                             <p
                               {...island}
-                              className="mb-1 text-xs italic tracking-wider text-gold/55"
+                              className="mb-1 text-xs italic tracking-wider text-ground-accent/55"
                             >
                               {ingredient.latinName}
                             </p>
-                            <p className="text-[11px] tracking-widest text-ivory/35">
+                            <p className="text-[11px] tracking-widest text-ground-muted">
                               {interpolate(dict.home.ingredients.from, {
                                 origin: ingredient.origin,
                               })}
@@ -329,7 +329,7 @@ export default function IngredientExplorer({
                               { name: ingredient.name },
                             )}
                             onClick={() => selectSlug(null)}
-                            className="flex h-9 w-9 flex-none items-center justify-center border border-ivory/12 text-ivory/40 transition-colors duration-300 hover:border-gold hover:text-gold"
+                            className="flex h-9 w-9 flex-none items-center justify-center border border-ivory/12 text-ground-muted transition-colors duration-300 hover:border-gold hover:text-ground-accent"
                           >
                             <X size={14} strokeWidth={1.25} aria-hidden="true" />
                           </button>
@@ -339,14 +339,14 @@ export default function IngredientExplorer({
 
                         <p
                           dir="auto"
-                          className="mb-8 text-[13px] leading-loose text-ivory/50"
+                          className="mb-8 text-[13px] leading-loose text-ground-muted"
                         >
                           {ingredient.description}
                         </p>
 
                         <div className="grid grid-cols-1 gap-5 md:gap-8 sm:grid-cols-2">
                           <div>
-                            <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/50">
+                            <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/50">
                               {dict.ingredientsExplorer.foundIn}
                             </p>
                             <ul className="flex flex-col gap-2">
@@ -359,7 +359,7 @@ export default function IngredientExplorer({
                                       page. */}
                                   <LocaleLink
                                     href={productHref(product)}
-                                    className="flex items-center gap-2 text-xs text-ivory/60 no-underline transition-colors duration-300 hover:text-gold"
+                                    className="flex items-center gap-2 text-xs text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
                                   >
                                     <span
                                       className="h-px w-4 bg-current"
@@ -373,7 +373,7 @@ export default function IngredientExplorer({
                           </div>
 
                           <div>
-                            <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-gold/50">
+                            <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/50">
                               {dict.ingredientsExplorer.rareFacts}
                             </p>
                             <ul className="flex flex-col gap-2">
@@ -381,10 +381,10 @@ export default function IngredientExplorer({
                                 <li
                                   key={fact}
                                   dir="auto"
-                                  className="flex items-start gap-2 text-[11px] leading-relaxed text-ivory/40"
+                                  className="flex items-start gap-2 text-[11px] leading-relaxed text-ground-muted"
                                 >
                                   <span
-                                    className="flex-none text-gold"
+                                    className="flex-none text-ground-accent"
                                     aria-hidden="true"
                                   >
                                     —

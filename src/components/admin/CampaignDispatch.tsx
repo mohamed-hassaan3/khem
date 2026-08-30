@@ -72,10 +72,10 @@ export default function CampaignDispatch({
   if (finished) {
     return (
       <section className="border border-gold/20 bg-gold/5 px-6 py-5">
-        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
           Sent
         </p>
-        <p className="mt-2 text-[12px] text-ivory/50">
+        <p className="mt-2 text-[12px] text-ground-muted">
           {campaign.delivered} of {campaign.claimed} letters were accepted by the
           mail provider.
         </p>
@@ -84,12 +84,12 @@ export default function CampaignDispatch({
   }
 
   return (
-    <section className="space-y-5 border border-border bg-surface/60 px-6 py-6">
+    <section className="space-y-5 border border-ground-border bg-stone/60 px-6 py-6">
       <div>
-        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
           Sending
         </p>
-        <p className="mt-2 text-[12px] leading-relaxed text-ivory/45">
+        <p className="mt-2 text-[12px] leading-relaxed text-ground-muted">
           {sending
             ? `Under way — ${campaign.delivered} of ${campaign.claimed} sent, ${outstanding} to go. The next run continues automatically.`
             : `This will write to ${campaign.audienceNow} subscribed ${
@@ -132,7 +132,7 @@ export default function CampaignDispatch({
       </div>
 
       {sending ? null : (
-        <div className="space-y-3 border-t border-border pt-5">
+        <div className="space-y-3 border-t border-ground-border pt-5">
           <AdminInput
             id="scheduledAt"
             label="Or schedule it"

@@ -99,7 +99,7 @@ export default function InventoryEditor({
         type="button"
         onClick={save}
         disabled={!changed || isPending}
-        className="rounded-none border border-border px-3 py-2 font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/40 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/40 hover:text-gold disabled:pointer-events-none disabled:opacity-25"
+        className="rounded-none border border-ground-border px-3 py-2 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-muted transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/40 hover:text-ground-accent disabled:pointer-events-none disabled:opacity-25"
       >
         {isPending ? "…" : saved && !changed ? "Saved" : "Save"}
       </button>

@@ -64,12 +64,12 @@ export default function MarketingPreference({
   }
 
   return (
-    <section className="border border-border bg-surface/60 px-6 py-6 sm:px-8 sm:py-7">
-      <p className="mb-1.5 font-heading text-[13px] tracking-[0.08em] text-gold">
+    <section className="border border-ground-border bg-stone px-6 py-6 sm:px-8 sm:py-7">
+      <p className="mb-1.5 font-heading text-[13px] tracking-[0.08em] text-ground-accent">
         {copy.heading}
       </p>
 
-      <p className="mb-6 max-w-prose text-[12px] leading-loose text-ivory/40">
+      <p className="mb-6 max-w-prose text-[12px] leading-loose text-ground-muted">
         {copy.body}
       </p>
 
@@ -79,12 +79,12 @@ export default function MarketingPreference({
         aria-checked={optedIn}
         disabled={isPending}
         onClick={() => change(!optedIn)}
-        className="flex w-full items-start gap-4 border border-border bg-ivory/3 px-4 py-4 text-start transition-colors duration-300 ease-luxury-bezier hover:border-gold/30 focus-visible:border-gold/40 focus-visible:outline-none disabled:opacity-60"
+        className="flex w-full items-start gap-4 border border-ground-border bg-ivory/3 px-4 py-4 text-start transition-colors duration-300 ease-luxury-bezier hover:border-ground-accent/30 focus-visible:border-ground-accent/40 focus-visible:outline-none disabled:opacity-60"
       >
         <span
           aria-hidden="true"
           className={`mt-0.5 flex h-4 w-8 shrink-0 items-center rounded-full border transition-colors duration-300 ease-luxury-bezier ${
-            optedIn ? "border-gold/50 bg-gold/25" : "border-border bg-ivory/5"
+            optedIn ? "border-gold/50 bg-gold/25" : "border-ground-border bg-ivory/5"
           }`}
         >
           <span
@@ -94,7 +94,7 @@ export default function MarketingPreference({
           />
         </span>
 
-        <span className="min-w-0 text-[12px] leading-relaxed text-ivory/70">
+        <span className="min-w-0 text-[12px] leading-relaxed text-ground-muted">
           {copy.label}
         </span>
       </button>
@@ -103,7 +103,7 @@ export default function MarketingPreference({
           appearing at the moment it fills. */}
       <p
         aria-live="polite"
-        className={`mt-3 min-h-4 text-[11px] ${failed ? "text-danger" : "text-gold/70"}`}
+        className={`mt-3 min-h-4 text-[11px] ${failed ? "text-danger" : "text-ground-accent/70"}`}
       >
         {isPending ? copy.saving : null}
         {!isPending && failed ? copy.failed : null}
@@ -115,7 +115,7 @@ export default function MarketingPreference({
         ) : null}
       </p>
 
-      <p className="mt-4 max-w-prose border-t border-border pt-4 text-[11px] leading-loose text-ivory/30">
+      <p className="mt-4 max-w-prose border-t border-ground-border pt-4 text-[11px] leading-loose text-ground-muted/70">
         {copy.transactional}
       </p>
     </section>

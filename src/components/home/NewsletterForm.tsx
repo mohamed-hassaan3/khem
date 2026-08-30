@@ -77,10 +77,10 @@ export default function NewsletterForm() {
         transition={{ duration: 0.6, ease: EASE_LUXURY }}
         role="status"
       >
-        <p className="font-heading text-sm uppercase tracking-wider text-gold">
+        <p className="font-heading text-sm uppercase tracking-wider text-ground-accent">
           {dict.newsletter.successHeading}
         </p>
-        <p className="mt-2 text-xs text-ivory/40">
+        <p className="mt-2 text-xs text-ground-muted">
           {dict.newsletter.successBody}
         </p>
       </motion.div>
@@ -111,7 +111,7 @@ export default function NewsletterForm() {
           placeholder={dict.forms.newsletterPlaceholder}
           aria-invalid={error !== null}
           aria-describedby={error ? "newsletter-email-error" : undefined}
-          className="w-full border border-gold/30 bg-black/40 px-4 py-3 text-xs text-ivory transition-colors placeholder:text-ivory/30 focus:border-gold focus:outline-none"
+          className="field"
         />
         {error ? (
           <p
@@ -143,7 +143,7 @@ export default function NewsletterForm() {
         type="submit"
         disabled={isPending}
         aria-busy={isPending}
-        className="h-fit cursor-pointer bg-gold px-8 py-3 font-heading text-xs font-medium uppercase tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-champagne disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-fit cursor-pointer bg-gold px-8 py-3 font-heading text-xs font-medium uppercase tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? dict.forms.sending : dict.forms.subscribe}
       </button>

@@ -168,17 +168,17 @@ export default function DeliveryStep({
       {!shipsHere ? (
         <div
           role="note"
-          className="border border-gold/30 bg-gold/5 px-5 py-4 sm:col-span-2"
+          className="border border-ground-accent/30 bg-gold/5 px-5 py-4 sm:col-span-2"
         >
-          <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+          <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
             {copy.outsideEgyptTitle}
           </p>
-          <p className="mt-2 text-[12px] leading-relaxed text-ivory/60">
+          <p className="mt-2 text-[12px] leading-relaxed text-ground-muted">
             {copy.outsideEgyptBody}
           </p>
           <a
             href={`mailto:${HOUSE_EMAIL}`}
-            className="mt-3 inline-block text-[12px] tracking-wide text-gold underline-offset-4 hover:underline"
+            className="mt-3 inline-block text-[12px] tracking-wide text-ground-accent underline-offset-4 hover:underline"
           >
             {HOUSE_EMAIL}
           </a>

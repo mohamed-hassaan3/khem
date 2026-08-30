@@ -65,7 +65,7 @@ export default function VoucherPicker({
 
   return (
     <details className="mt-5 max-w-xl">
-      <summary className="cursor-pointer list-none font-heading text-[11px] tracking-[0.14em] text-gold/70 underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-gold hover:underline">
+      <summary className="cursor-pointer list-none font-heading text-[11px] tracking-[0.14em] text-ground-accent/70 underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline">
         {copy.vouchers.show}
       </summary>
 
@@ -79,17 +79,17 @@ export default function VoucherPicker({
           return (
             <li
               key={voucher.code}
-              className="flex flex-wrap items-center justify-between gap-4 border border-border px-5 py-4"
+              className="flex flex-wrap items-center justify-between gap-4 border border-ground-border px-5 py-4"
             >
               <div className="min-w-0">
                 <p
                   {...ltrIsland(locale)}
-                  className="font-heading text-[13px] tracking-[0.16em] text-gold"
+                  className="font-heading text-[13px] tracking-[0.16em] text-ground-accent"
                 >
                   {voucher.code}
                 </p>
 
-                <p className="mt-1 flex flex-wrap items-baseline gap-1.5 text-[12px] text-ivory/60">
+                <p className="mt-1 flex flex-wrap items-baseline gap-1.5 text-[12px] text-ground-muted">
                   {voucher.kind === "PERCENTAGE" ? (
                     interpolate(dict.account.vouchers.list.percentOff, {
                       value: String(voucher.value),
@@ -102,7 +102,7 @@ export default function VoucherPicker({
                   )}
                 </p>
 
-                <div className="mt-1 flex flex-wrap gap-x-4 text-[11px] text-ivory/30">
+                <div className="mt-1 flex flex-wrap gap-x-4 text-[11px] text-ground-muted/70">
                   {voucher.minimumOrderInCents > 0 ? (
                     <span className="flex items-baseline gap-1.5">
                       {copy.vouchers.minimum}
@@ -132,7 +132,7 @@ export default function VoucherPicker({
                 type="button"
                 disabled={disabled}
                 onClick={() => onUse(voucher.code)}
-                className="shrink-0 cursor-pointer border border-gold/40 px-4 py-2.5 font-heading text-[10px] uppercase tracking-[0.18em] text-gold transition-all duration-500 ease-luxury-bezier hover:border-gold hover:bg-gold/8 disabled:cursor-not-allowed disabled:border-border disabled:text-ivory/20"
+                className="shrink-0 cursor-pointer border border-ground-accent/40 px-4 py-2.5 font-heading text-[10px] uppercase tracking-[0.18em] text-ground-accent transition-all duration-500 ease-luxury-bezier hover:border-gold hover:bg-gold/8 disabled:cursor-not-allowed disabled:border-ground-border disabled:text-ground-muted/60"
               >
                 {copy.vouchers.use}
               </button>

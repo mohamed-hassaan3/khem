@@ -165,6 +165,9 @@ export const ar: Dictionary = {
       eyebrow: "مجموعاتنا",
       heading: "عالمان من العطور",
       ordinal: "المجموعة {ordinal}",
+      sliderLabel: "مجموعاتنا",
+      previous: "المجموعة السابقة",
+      next: "المجموعة التالية",
     },
     essences: {
       eyebrow: "الجواهر",
@@ -650,6 +653,7 @@ export const ar: Dictionary = {
     inStock: "متوفر — يُشحن خلال ٤٨ ساعة",
     lowStock: "لم يتبقَّ سوى {count}",
     storyHeading: "الحكاية",
+    includesHeading: "ما بداخل الصندوق",
     pyramidHeading: "هرم العطر",
     topNotes: "النفحات العليا",
     heartNotes: "نفحات القلب",
@@ -789,6 +793,20 @@ export const ar: Dictionary = {
     eyebrow: {
       BODY: "الطقس",
       HOME: "عطِّر ملاذك",
+    },
+  },
+
+  set: {
+    meta: {
+      title: "المجموعات",
+      description:
+        "مجموعات الاكتشاف والإهداء من كيم — كل تركيبة مقدَّمة بالكامل مع القطع التي تحتويها.",
+      ogTitle: "المجموعات | KHEM",
+      ogDescription: "مدخل إلى الدار داخل صندوق، والهدايا المبنيّة عليه.",
+    },
+    eyebrow: {
+      DISCOVERY: "مجموعة الاكتشاف",
+      GIFT: "مجموعة الإهداء",
     },
   },
 

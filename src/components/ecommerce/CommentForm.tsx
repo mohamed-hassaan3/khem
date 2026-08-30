@@ -40,11 +40,10 @@ import type { ProductComment } from "@/src/types/comments";
  * re-sniffs every uploaded byte, and the database carries the same bounds.
  */
 
-const FIELD_CLASS =
-  "w-full resize-y border border-border bg-ivory/3 px-5 py-4 text-[13px] leading-relaxed tracking-wide text-ivory transition-colors duration-300 placeholder:text-ivory/25 focus:border-gold/40 focus:outline-none";
+/* The shared primitives. See `globals.css` — `.field`, `.label`. */
+const FIELD_CLASS = "field resize-y leading-relaxed";
 
-const LABEL_CLASS =
-  "mb-2.5 block font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35";
+const LABEL_CLASS = "label";
 
 export interface CommentFormProps {
   slug: string;
@@ -171,7 +170,7 @@ export default function CommentForm({
         <div className="mb-8">
           <p className={LABEL_CLASS}>
             {copy.ratingLabel}
-            <span className="ms-2 text-ivory/20">{copy.ratingOptional}</span>
+            <span className="ms-2 text-ground-muted/60">{copy.ratingOptional}</span>
           </p>
 
           <StarRatingInput
@@ -238,7 +237,7 @@ export default function CommentForm({
             type="submit"
             disabled={!canSubmit}
             aria-busy={isPending}
-            className="btn-luxury btn-luxury-fill min-w-50 justify-center disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn btn-primary min-w-50 justify-center disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending
               ? copy.submitting
@@ -271,7 +270,7 @@ export default function CommentForm({
           ) : null}
 
           {isSent && !error ? (
-            <p role="status" className="text-[12px] tracking-wide text-gold">
+            <p role="status" className="text-[12px] tracking-wide text-ground-accent">
               {copy.sent}
             </p>
           ) : null}

@@ -30,7 +30,7 @@ export default async function ProductBreadcrumb({
   const island = ltrIsland(locale);
 
   return (
-    <div className="border-b border-border px-4 py-6 md:px-20">
+    <div className="border-b border-ground-border px-4 py-6 md:px-20">
       <nav
         aria-label={dict.product.collections}
         className="mx-auto flex max-w-350 flex-wrap items-center gap-2 text-[11px] tracking-wide"
@@ -54,7 +54,7 @@ export default async function ProductBreadcrumb({
         ) : null}
 
         <Separator />
-        <span aria-current="page" className="text-gold/70" {...island}>
+        <span aria-current="page" className="text-ground-accent/70" {...island}>
           {productName}
         </span>
       </nav>
@@ -72,7 +72,7 @@ function BreadcrumbLink({
   return (
     <LocaleLink
       href={href}
-      className="text-ivory/35 no-underline transition-colors duration-300 ease-out hover:text-ivory/70 focus-visible:text-gold focus-visible:outline-none"
+      className="text-ground-muted no-underline transition-colors duration-300 ease-out hover:text-ground-muted focus-visible:text-ground-accent focus-visible:outline-none"
     >
       {children}
     </LocaleLink>
@@ -85,7 +85,7 @@ function Separator() {
       size={12}
       strokeWidth={1.25}
       aria-hidden="true"
-      className="shrink-0 text-ivory/20 rtl:rotate-180"
+      className="shrink-0 text-ground-muted/60 rtl:rotate-180"
     />
   );
 }

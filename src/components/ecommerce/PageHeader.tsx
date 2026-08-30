@@ -34,12 +34,12 @@ export default function PageHeader({
   headingDir,
 }: PageHeaderProps) {
   return (
-    <header className="border-b border-border px-4 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
+    <header className="border-b border-ground-border px-4 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
       <p className="eyebrow mb-3">{eyebrow}</p>
 
       <h1
         dir={headingDir}
-        className="font-heading text-3xl font-normal text-ivory sm:text-4xl lg:text-5xl"
+        className="font-heading text-3xl font-normal text-ground sm:text-4xl lg:text-5xl"
       >
         {heading}
       </h1>
@@ -47,7 +47,7 @@ export default function PageHeader({
       {meta ? (
         <p
           {...(metaLive ? { "aria-live": "polite" as const } : {})}
-          className="mt-3 text-xs tracking-[0.08em] text-ivory/30"
+          className="mt-3 text-xs tracking-[0.08em] text-ground-muted"
         >
           {meta}
         </p>

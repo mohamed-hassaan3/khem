@@ -30,25 +30,25 @@ export default function AddressCard({
   return (
     <article
       className={[
-        "relative bg-surface p-9",
-        address.isDefault ? "border border-gold/20" : "border border-transparent",
+        "relative bg-stone p-9",
+        address.isDefault ? "border border-ground-accent/20" : "border border-transparent",
       ].join(" ")}
     >
       {address.isDefault ? (
-        <span className="absolute end-5 top-5 border border-gold/30 bg-gold/10 px-2.5 py-1 font-heading text-[9px] tracking-[0.15em] text-gold">
+        <span className="absolute end-5 top-5 border border-ground-accent/30 bg-gold/10 px-2.5 py-1 font-heading text-[9px] tracking-[0.15em] text-ground-accent">
           {dict.default}
         </span>
       ) : null}
 
       <p className="eyebrow mb-4 text-[9px]">{address.label}</p>
 
-      <p className="mb-2 font-heading text-[15px] text-ivory">
+      <p className="mb-2 font-heading text-[15px] text-ground">
         {address.recipient}
       </p>
 
       <address
         {...ltrIsland(locale)}
-        className="text-[13px] not-italic leading-loose text-ivory/50"
+        className="text-[13px] not-italic leading-loose text-ground-muted"
       >
         {address.line1}
         <br />

@@ -39,11 +39,11 @@ function stamp(iso: string | null, withTime = false): string {
 
 function Detail({ term, children }: { term: string; children: React.ReactNode }) {
   return (
-    <div className="border-b border-border py-3 last:border-b-0">
-      <dt className="font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/25">
+    <div className="border-b border-ground-border py-3 last:border-b-0">
+      <dt className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
         {term}
       </dt>
-      <dd className="mt-1.5 text-[12px] tracking-wide text-ivory/70">{children}</dd>
+      <dd className="mt-1.5 text-[12px] tracking-wide text-ground">{children}</dd>
     </div>
   );
 }
@@ -66,7 +66,7 @@ export default async function AdminCreditPage({
     <>
       <Link
         href={listPath}
-        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35 transition-colors duration-300 hover:text-gold"
+        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
       >
         <ArrowLeft size={13} strokeWidth={1.25} />
         All credits
@@ -83,7 +83,7 @@ export default async function AdminCreditPage({
         <div className="space-y-8">
           {/* ── The ledger ─────────────────────────────── */}
           <section>
-            <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+            <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               The ledger
             </h2>
 
@@ -91,22 +91,22 @@ export default async function AdminCreditPage({
               {credit.transactions.map((entry) => (
                 <li
                   key={entry.id}
-                  className="flex flex-wrap items-baseline justify-between gap-3 border border-border p-4 sm:p-5"
+                  className="flex flex-wrap items-baseline justify-between gap-3 border border-ground-border p-4 sm:p-5"
                 >
                   <div>
-                    <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/50">
+                    <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
                       {KIND_LABELS[entry.kind]}
                     </span>
-                    <span className="ms-3 text-[11px] tracking-wide text-ivory/25">
+                    <span className="ms-3 text-[11px] tracking-wide text-ground-subtle">
                       {stamp(entry.occurredAt, true)}
                     </span>
                     {entry.note ? (
-                      <span className="mt-2 block text-[12px] leading-relaxed text-ivory/45">
+                      <span className="mt-2 block text-[12px] leading-relaxed text-ground-muted">
                         {entry.note}
                       </span>
                     ) : null}
                     {entry.actor ? (
-                      <span className="mt-1 block text-[11px] text-ivory/25">
+                      <span className="mt-1 block text-[11px] text-ground-subtle">
                         by {entry.actor}
                       </span>
                     ) : null}
@@ -114,7 +114,7 @@ export default async function AdminCreditPage({
 
                   <span
                     className={`font-heading text-[13px] tracking-[0.1em] ${
-                      entry.amountInCents > 0 ? "text-success" : "text-ivory/45"
+                      entry.amountInCents > 0 ? "text-success" : "text-ground-muted"
                     }`}
                   >
                     {entry.amountInCents > 0 ? "+" : "−"}
@@ -124,7 +124,7 @@ export default async function AdminCreditPage({
               ))}
             </ul>
 
-            <p className="mt-5 text-[11px] leading-relaxed text-ivory/25">
+            <p className="mt-5 text-[11px] leading-relaxed text-ground-subtle">
               Append-only. A correction is a new row, never a change to one
               above — which is what lets this list be trusted as the record.
             </p>
@@ -132,7 +132,7 @@ export default async function AdminCreditPage({
 
           {/* ── Adjust ─────────────────────────────────── */}
           <section>
-            <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+            <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               Record an adjustment
             </h2>
 
@@ -142,13 +142,13 @@ export default async function AdminCreditPage({
 
         {/* ── The record ───────────────────────────────── */}
         <aside className="space-y-8">
-          <div className="border border-border p-5 sm:p-6">
-            <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <div className="border border-ground-border p-5 sm:p-6">
+            <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               Standing
             </h2>
             <dl>
               <Detail term="Balance">
-                <span className="font-heading text-lg tracking-[0.1em] text-gold">
+                <span className="font-heading text-lg tracking-[0.1em] text-ground-accent">
                   {egp(credit.balanceInCents)}
                 </span>
               </Detail>
@@ -164,8 +164,8 @@ export default async function AdminCreditPage({
             ) : null}
           </div>
 
-          <div className="border border-border p-5 sm:p-6">
-            <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <div className="border border-ground-border p-5 sm:p-6">
+            <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               Earned on
             </h2>
             <dl>
@@ -173,7 +173,7 @@ export default async function AdminCreditPage({
                 {credit.sourceOrderNumber ? (
                   <Link
                     href={`${ordersPath}/${credit.sourceOrderNumber}`}
-                    className="text-gold/80 transition-colors duration-300 hover:text-gold"
+                    className="text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                   >
                     {credit.sourceOrderNumber}
                   </Link>
@@ -184,7 +184,7 @@ export default async function AdminCreditPage({
               <Detail term="Customer">{credit.customerName ?? "—"}</Detail>
               <Detail term="Email">{credit.customerEmail ?? "—"}</Detail>
             </dl>
-            <p className="mt-4 text-[11px] leading-relaxed text-ivory/25">
+            <p className="mt-4 text-[11px] leading-relaxed text-ground-subtle">
               A credit belongs to the account that bought the Set and is not
               transferable.
             </p>

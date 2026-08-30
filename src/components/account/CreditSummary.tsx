@@ -28,20 +28,20 @@ export default function CreditSummary({
   dict,
 }: CreditSummaryProps) {
   return (
-    <div className="border border-gold/20 bg-gold/6 px-6 py-8 sm:px-10 sm:py-10">
+    <div className="border border-ground-accent/20 bg-gold/6 px-6 py-8 sm:px-10 sm:py-10">
       <p className="eyebrow mb-4">{dict.available}</p>
 
-      <p className="mb-2 font-heading text-4xl font-semibold text-gold sm:text-5xl">
+      <p className="mb-2 font-heading text-4xl font-semibold text-ground-accent sm:text-5xl">
         <Price cents={availableInCents} />
       </p>
 
-      <p className="mb-5 font-heading text-[12px] tracking-[0.08em] text-ivory/50">
+      <p className="mb-5 font-heading text-[12px] tracking-[0.08em] text-ground-muted">
         {availableCount === 1
           ? dict.countOne
           : interpolate(dict.count, { count: String(availableCount) })}
       </p>
 
-      <p className="max-w-prose text-[12px] leading-loose text-ivory/35">
+      <p className="max-w-prose text-[12px] leading-loose text-ground-muted">
         {dict.terms}
       </p>
     </div>

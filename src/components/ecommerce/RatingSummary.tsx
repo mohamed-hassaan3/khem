@@ -37,10 +37,10 @@ export default function RatingSummary({
 
   return (
     <div
-      className="mb-8 md:mb-12 flex items-center gap-5 border-s border-gold/30 ps-5"
+      className="mb-8 md:mb-12 flex items-center gap-5 border-s border-ground-accent/30 ps-5"
       aria-label={copy.ratingSummaryLabel}
     >
-      <span className="font-heading text-3xl leading-none tabular-nums text-gold">
+      <span className="font-heading text-3xl leading-none tabular-nums text-ground-accent">
         {average}
       </span>
 
@@ -51,7 +51,7 @@ export default function RatingSummary({
           size={13}
           className="mb-1.5"
         />
-        <p className="text-[11px] tracking-wide text-ivory/35">
+        <p className="text-[11px] tracking-wide text-ground-muted">
           {summary.count === 1
             ? copy.ratingCountOne
             : interpolate(copy.ratingCount, {

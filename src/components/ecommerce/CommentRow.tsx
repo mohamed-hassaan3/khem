@@ -45,9 +45,9 @@ export default function CommentRow({
   const authorLabel = comment.authorName ?? guestLabel;
 
   return (
-    <article className="border-t border-border py-7">
+    <article className="border-t border-ground-border py-7">
       <header className="mb-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+        <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
           {authorLabel}
         </span>
 
@@ -64,7 +64,7 @@ export default function CommentRow({
 
         <time
           dateTime={comment.createdAt}
-          className="text-[11px] tracking-wide text-ivory/35"
+          className="text-[11px] tracking-wide text-ground-muted"
           {...ltrIsland(locale)}
         >
           {formatCommentDate(comment.createdAt, locale)}
@@ -72,7 +72,7 @@ export default function CommentRow({
       </header>
 
       {comment.body ? (
-        <p className="whitespace-pre-line text-[13px] leading-relaxed text-ivory/70">
+        <p className="whitespace-pre-line text-[13px] leading-relaxed text-ground-muted">
           {comment.body}
         </p>
       ) : null}

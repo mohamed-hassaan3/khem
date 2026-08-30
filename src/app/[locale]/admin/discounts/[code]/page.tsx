@@ -59,7 +59,7 @@ export default async function EditDiscountPage({
     <>
       <Link
         href={localizePath(activeLocale, "/admin/discounts")}
-        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35 transition-colors duration-300 hover:text-gold"
+        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
       >
         <ArrowLeft size={13} strokeWidth={1.25} />
         All discounts
@@ -84,12 +84,12 @@ export default async function EditDiscountPage({
 
       {discount.requiresGrant ? (
         <section className="mt-12 max-w-3xl">
-          <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Grants
           </h2>
 
           {discount.grants.length === 0 ? (
-            <p className="border border-border px-5 py-10 text-center text-[12px] leading-relaxed text-ivory/35">
+            <p className="border border-ground-border px-5 py-10 text-center text-[12px] leading-relaxed text-ground-muted">
               No grants issued. Nobody can redeem this code until one is.
             </p>
           ) : (
@@ -108,12 +108,12 @@ export default async function EditDiscountPage({
       ) : null}
 
       <section className="mt-12 max-w-3xl">
-        <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           Every use
         </h2>
 
         {discount.redemptions.length === 0 ? (
-          <p className="border border-border px-5 py-10 text-center text-[12px] leading-relaxed text-ivory/35">
+          <p className="border border-ground-border px-5 py-10 text-center text-[12px] leading-relaxed text-ground-muted">
             This code has not been used yet.
           </p>
         ) : (
@@ -124,7 +124,7 @@ export default async function EditDiscountPage({
                   {use.orderNumber ? (
                     <Link
                       href={`${ordersPath}/${use.orderNumber}`}
-                      className="font-heading text-[11px] tracking-[0.1em] transition-colors duration-300 hover:text-gold"
+                      className="font-heading text-[11px] tracking-[0.1em] transition-colors duration-300 hover:text-ground-accent"
                     >
                       {use.orderNumber}
                     </Link>
@@ -139,8 +139,8 @@ export default async function EditDiscountPage({
                   <span
                     className={`inline-block border px-3 py-1 font-heading text-[9px] uppercase tracking-[0.2em] ${
                       use.releasedAt === null
-                        ? "border-gold/40 text-gold"
-                        : "border-border text-ivory/30"
+                        ? "border-gold/40 text-ground-accent"
+                        : "border-ground-border text-ground-muted"
                     }`}
                     title={
                       use.releasedAt

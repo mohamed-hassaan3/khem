@@ -165,7 +165,7 @@ function CardForm({ returnUrl, totalInCents, onSucceeded, dir }: CardFormProps) 
         <div role="alert" className="mt-5">
           <p className="text-[12px] tracking-wide text-danger">{error}</p>
           {detail ? (
-            <p className="mt-1.5 text-[11px] leading-relaxed text-ivory/35">
+            <p className="mt-1.5 text-[11px] leading-relaxed text-ground-muted">
               {detail}
             </p>
           ) : null}
@@ -175,7 +175,7 @@ function CardForm({ returnUrl, totalInCents, onSucceeded, dir }: CardFormProps) 
       <button
         type="submit"
         disabled={!stripe || isPaying}
-        className="btn-luxury btn-luxury-fill mt-8 w-full justify-center disabled:cursor-not-allowed disabled:opacity-45"
+        className="btn btn-primary mt-8 w-full justify-center disabled:cursor-not-allowed disabled:opacity-45"
       >
         {isPaying
           ? dict.checkout.submit.working

@@ -86,11 +86,11 @@ export default async function AdminCampaignsPage({
               <AdminCell>
                 <AdminLink
                   href={localizePath(activeLocale, `/admin/campaigns/${campaign.id}`)}
-                  className="text-ivory no-underline transition-colors duration-300 hover:text-gold"
+                  className="text-ground no-underline transition-colors duration-300 hover:text-ground-accent"
                 >
                   {campaign.name}
                 </AdminLink>
-                <span className="mt-0.5 block text-[11px] text-ivory/30">
+                <span className="mt-0.5 block text-[11px] text-ground-muted">
                   {campaign.subject}
                 </span>
               </AdminCell>
@@ -109,7 +109,7 @@ export default async function AdminCampaignsPage({
                   */}
                 <AdminLink
                   href={localizePath(activeLocale, `/admin/campaigns/${campaign.id}`)}
-                  className="inline-flex items-center gap-2 whitespace-nowrap border border-border px-4 py-2 font-heading text-[9px] uppercase tracking-[0.18em] text-ivory/50 no-underline transition-colors duration-300 hover:border-gold/40 hover:text-gold"
+                  className="inline-flex items-center gap-2 whitespace-nowrap border border-ground-border px-4 py-2 font-heading text-[9px] uppercase tracking-[0.18em] text-ground-muted no-underline transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent"
                 >
                   {isEditable(campaign.status) ? (
                     <>

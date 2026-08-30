@@ -71,8 +71,8 @@ export default function CopyCodeButton({
           "font-heading text-[10px] uppercase tracking-[0.2em]",
           "transition-all duration-500 ease-luxury-bezier",
           disabled
-            ? "cursor-not-allowed border-border text-ivory/20"
-            : "cursor-pointer border-gold/40 text-gold hover:border-gold hover:bg-gold/8",
+            ? "cursor-not-allowed border-ground-border text-ground-muted/60"
+            : "cursor-pointer border-ground-accent/40 text-ground-accent hover:border-gold hover:bg-gold/8",
         ].join(" ")}
       >
         {state === "copied" ? (
@@ -91,7 +91,7 @@ export default function CopyCodeButton({
         aria-live="polite"
         className={[
           "min-h-4 text-[11px] tracking-[0.04em]",
-          state === "failed" ? "text-danger" : "text-gold/70",
+          state === "failed" ? "text-danger" : "text-ground-accent/70",
         ].join(" ")}
       >
         {state === "copied" ? dict.copied : null}

@@ -58,7 +58,7 @@ export default async function AdminIngredientsPage({
     <>
       <Link
         href={localizePath(activeLocale, "/admin/content")}
-        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35 transition-colors duration-300 hover:text-gold"
+        className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
       >
         <ArrowLeft size={13} strokeWidth={1.25} />
         All content
@@ -78,7 +78,7 @@ export default async function AdminIngredientsPage({
       <AdminSearch placeholder="Search by name, binomial or origin" />
 
       {all.length > 0 ? (
-        <p className="mb-5 text-[11px] tracking-wide text-ivory/30">
+        <p className="mb-5 text-[11px] tracking-wide text-ground-muted">
           {all.length} material{all.length === 1 ? "" : "s"}
           {untranslated > 0 ? ` · ${untranslated} with no Arabic name` : ""}
         </p>
@@ -114,13 +114,13 @@ export default async function AdminIngredientsPage({
             <AdminRow key={ingredient.id}>
               <AdminCell>
                 <span className="block tracking-wide">{ingredient.name}</span>
-                <span className="mt-1 block text-[11px] italic text-ivory/25">
+                <span className="mt-1 block text-[11px] italic text-ground-subtle">
                   {ingredient.latinName}
                 </span>
                 {ingredient.name_ar === null ? (
                   <span
                     title="No Arabic name — the Arabic page falls back to the English"
-                    className="mt-2 inline-block border border-border px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/30"
+                    className="mt-2 inline-block border border-ground-border px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-muted"
                   >
                     No Arabic
                   </span>
@@ -144,7 +144,7 @@ export default async function AdminIngredientsPage({
               <AdminCell>
                 <Link
                   href={`${basePath}/${ingredient.slug}`}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Edit
                 </Link>

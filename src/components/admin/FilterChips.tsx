@@ -60,13 +60,13 @@ export default function FilterChips({
             aria-current={isActive ? "true" : undefined}
             className={`border px-4 py-2 font-heading text-[9px] uppercase tracking-[0.2em] transition-colors duration-300 ${
               isActive
-                ? "border-gold/50 bg-gold/10 text-gold"
-                : "border-border text-ivory/35 hover:border-gold/30 hover:text-ivory"
+                ? "border-gold/50 bg-gold/10 text-ground-accent"
+                : "border-ground-border text-ground-muted hover:border-gold/30 hover:text-ground"
             }`}
           >
             {chip.label}
             {typeof chip.count === "number" ? (
-              <span className="ms-2 text-ivory/25">{chip.count}</span>
+              <span className="ms-2 text-ground-subtle">{chip.count}</span>
             ) : null}
           </Link>
         );

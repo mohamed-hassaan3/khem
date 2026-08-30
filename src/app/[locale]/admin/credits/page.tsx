@@ -102,20 +102,20 @@ function Figure({
       className={`border p-6 sm:p-8 ${
         tone === "warning"
           ? "border-warning/30 bg-warning/5"
-          : "border-border bg-ivory/2"
+          : "border-ground-border bg-ivory/2"
       }`}
     >
       <p
         className={`font-heading text-[10px] uppercase tracking-[0.2em] ${
-          tone === "warning" ? "text-warning" : "text-ivory/35"
+          tone === "warning" ? "text-warning" : "text-ground-muted"
         }`}
       >
         {label}
       </p>
-      <p className="mt-4 font-heading text-3xl tracking-[0.1em] text-gold sm:text-4xl">
+      <p className="mt-4 font-heading text-3xl tracking-[0.1em] text-ground-accent sm:text-4xl">
         {value}
       </p>
-      {note ? <p className="mt-3 text-[11px] text-ivory/30">{note}</p> : null}
+      {note ? <p className="mt-3 text-[11px] text-ground-muted">{note}</p> : null}
     </div>
   );
 }
@@ -223,7 +223,7 @@ export default async function AdminCreditsPage({
                   <span className="block font-heading text-[11px] tracking-[0.1em]">
                     {credit.id.slice(0, 8)}
                   </span>
-                  <span className="mt-1 block text-[10px] tracking-wide text-ivory/25">
+                  <span className="mt-1 block text-[10px] tracking-wide text-ground-subtle">
                     earned {stamp(credit.earnedAt)}
                   </span>
                 </AdminCell>
@@ -240,8 +240,8 @@ export default async function AdminCreditsPage({
                         : credit.status === "PENDING_DELIVERY"
                           ? "border-warning/40 text-warning"
                           : credit.status === "REDEEMED"
-                            ? "border-gold/40 text-gold"
-                            : "border-border text-ivory/30"
+                            ? "border-gold/40 text-ground-accent"
+                            : "border-ground-border text-ground-muted"
                     }`}
                   >
                     {STATUS_LABELS[credit.status]}
@@ -253,7 +253,7 @@ export default async function AdminCreditsPage({
                 <AdminCell>
                   <Link
                     href={`${basePath}/${credit.id}`}
-                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                   >
                     Open
                   </Link>
@@ -270,7 +270,7 @@ export default async function AdminCreditsPage({
               {page > 1 ? (
                 <Link
                   href={pageHref(basePath, query, page - 1)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Previous
                 </Link>
@@ -278,14 +278,14 @@ export default async function AdminCreditsPage({
                 <span />
               )}
 
-              <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/30">
+              <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
                 Page {page} of {lastPage}
               </span>
 
               {page < lastPage ? (
                 <Link
                   href={pageHref(basePath, query, page + 1)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Next
                 </Link>

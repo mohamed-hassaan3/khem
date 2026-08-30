@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import CartLine from "@/src/components/ecommerce/CartLine";
 import CartSummary from "@/src/components/ecommerce/CartSummary";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
+import NavGround from "@/src/components/NavGround";
 import PageHeader from "@/src/components/ecommerce/PageHeader";
 import { cartPricing } from "@/src/lib/pricing";
 import type { Locale } from "@/src/lib/i18n/config";
@@ -72,7 +73,8 @@ export default function CartView({ locale, catalog }: CartViewProps) {
    */
   if (!isHydrated) {
     return (
-      <div className="min-h-screen bg-background pt-20 text-ivory">
+      <div className="ground-ivory min-h-screen">
+      <NavGround ground="ivory" />
         <PageHeader eyebrow={dict.cart.eyebrow} heading={dict.cart.heading} />
         <div className="min-h-[60vh]" aria-hidden="true" />
       </div>
@@ -81,7 +83,8 @@ export default function CartView({ locale, catalog }: CartViewProps) {
 
   if (resolved.length === 0) {
     return (
-      <div className="min-h-screen bg-background pt-20 text-ivory">
+      <div className="ground-ivory min-h-screen">
+      <NavGround ground="ivory" />
         <PageHeader eyebrow={dict.cart.eyebrow} heading={dict.cart.heading} />
         <EmptyState
           icon={ShoppingBag}
@@ -95,7 +98,8 @@ export default function CartView({ locale, catalog }: CartViewProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20 text-ivory">
+    <div className="ground-ivory min-h-screen">
+      <NavGround ground="ivory" />
       <PageHeader
         eyebrow={dict.cart.eyebrow}
         heading={dict.cart.heading}
@@ -107,7 +111,7 @@ export default function CartView({ locale, catalog }: CartViewProps) {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px]">
-        <section className="border-border px-4 py-10 sm:px-8 lg:border-e lg:px-14 lg:py-14 xl:px-20">
+        <section className="border-ground-border px-4 py-10 sm:px-8 lg:border-e lg:px-14 lg:py-14 xl:px-20">
           {resolved.map(({ product, quantity }) => (
             <CartLine
               key={product.id}

@@ -13,12 +13,12 @@ export default function MemberBenefits({
   body: string;
 }) {
   return (
-    <section className="border border-gold/15 bg-gold/6 px-8 py-6">
-      <p className="mb-1.5 font-heading text-[13px] tracking-[0.08em] text-gold">
+    <section className="border border-ground-accent/15 bg-gold/6 px-8 py-6">
+      <p className="mb-1.5 font-heading text-[13px] tracking-[0.08em] text-ground-accent">
         {heading}
       </p>
 
-      <p className="text-xs leading-loose text-ivory/40">{body}</p>
+      <p className="text-xs leading-loose text-ground-muted">{body}</p>
     </section>
   );
 }

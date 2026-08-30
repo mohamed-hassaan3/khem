@@ -212,10 +212,10 @@ export default function CollectionForm({
         left as four adjacent URL fields, which is where the wrong file gets
         pasted into the wrong box.
       */}
-      <fieldset className="space-y-6 border-t border-border pt-8">
+      <fieldset className="space-y-6 border-t border-ground-border pt-8">
         <legend className="sr-only">Banner image</legend>
 
-        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
           Banner image
         </p>
 
@@ -243,10 +243,10 @@ export default function CollectionForm({
         </div>
       </fieldset>
 
-      <fieldset className="space-y-6 border-t border-border pt-8">
+      <fieldset className="space-y-6 border-t border-ground-border pt-8">
         <legend className="sr-only">Card image</legend>
 
-        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-gold">
+        <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
           Card image
         </p>
 
@@ -304,7 +304,7 @@ export default function CollectionForm({
         onChange={setIsFeatured}
       />
 
-      <div className="flex gap-3 border-t border-border pt-8">
+      <div className="flex gap-3 border-t border-ground-border pt-8">
         <AdminButton type="submit" disabled={isPending}>
           {isPending ? "Saving…" : isEdit ? "Save collection" : "Create collection"}
         </AdminButton>

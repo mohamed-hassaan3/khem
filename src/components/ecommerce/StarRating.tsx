@@ -52,7 +52,7 @@ export default function StarRating({
             strokeWidth={1.25}
             aria-hidden="true"
             className={
-              isFilled ? "fill-gold text-gold" : "fill-none text-ivory/20"
+              isFilled ? "fill-gold text-ground-accent" : "fill-none text-ground-muted/60"
             }
           />
         );

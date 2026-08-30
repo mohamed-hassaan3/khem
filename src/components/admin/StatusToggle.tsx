@@ -89,8 +89,8 @@ export default function StatusToggle({
           armed
             ? "border-danger bg-danger/10 text-danger"
             : destructive
-              ? "border-border text-ivory/40 hover:border-danger/50 hover:text-danger"
-              : "border-border text-ivory/40 hover:border-gold/40 hover:text-gold"
+              ? "border-ground-border text-ground-muted hover:border-danger/50 hover:text-danger"
+              : "border-ground-border text-ground-muted hover:border-gold/40 hover:text-ground-accent"
         }`}
       >
         {isPending ? "Working…" : armed ? confirmLabel : isOn ? onLabel : offLabel}

@@ -32,27 +32,27 @@ export default function ChartPanel({
   action?: ReactNode;
 }) {
   return (
-    <section className="border border-border bg-ivory/2 p-6 sm:p-8">
+    <section className="border border-ground-border bg-ivory/2 p-6 sm:p-8">
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             {title}
           </h2>
           {figure ? (
-            <p className="mt-3 font-heading text-3xl tracking-[0.1em] text-gold">
+            <p className="mt-3 font-heading text-3xl tracking-[0.1em] text-ground-accent">
               {figure}
             </p>
           ) : null}
           {caption ? (
-            <p className="mt-2 text-[11px] tracking-wide text-ivory/30">{caption}</p>
+            <p className="mt-2 text-[11px] tracking-wide text-ground-muted">{caption}</p>
           ) : null}
         </div>
         {action}
       </header>
 
       {isEmpty ? (
-        <div className="flex h-[260px] items-center justify-center border border-dashed border-border">
-          <p className="max-w-sm text-center text-[12px] leading-relaxed text-ivory/30">
+        <div className="flex h-[260px] items-center justify-center border border-dashed border-ground-border">
+          <p className="max-w-sm text-center text-[12px] leading-relaxed text-ground-muted">
             {emptyMessage}
           </p>
         </div>

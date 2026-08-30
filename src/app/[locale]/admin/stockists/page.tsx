@@ -121,7 +121,7 @@ export default async function AdminStockistsPage({
       />
 
       {all.length > 0 ? (
-        <p className="mb-5 text-[11px] tracking-wide text-ivory/30">
+        <p className="mb-5 text-[11px] tracking-wide text-ground-muted">
           {all.length} location{all.length === 1 ? "" : "s"}
           {hidden > 0 ? ` · ${hidden} not on the public directory` : ""}
         </p>
@@ -158,13 +158,13 @@ export default async function AdminStockistsPage({
             <AdminRow key={stockist.id}>
               <AdminCell>
                 <span className="block tracking-wide">{stockist.name}</span>
-                <span className="mt-1 block text-[10px] tracking-wide text-ivory/25">
+                <span className="mt-1 block text-[10px] tracking-wide text-ground-subtle">
                   {stockist.id}
                 </span>
                 {stockist.name_ar === null ? (
                   <span
                     title="No Arabic name — the Arabic site falls back to the Latin one"
-                    className="mt-2 inline-block border border-border px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/30"
+                    className="mt-2 inline-block border border-ground-border px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-muted"
                   >
                     No Arabic
                   </span>
@@ -173,7 +173,7 @@ export default async function AdminStockistsPage({
 
               <AdminCell muted>
                 <span className="block">{stockist.city}</span>
-                <span className="mt-1 block text-[11px] text-ivory/25">
+                <span className="mt-1 block text-[11px] text-ground-subtle">
                   {stockist.country} · {REGION_LABELS[stockist.region]}
                 </span>
               </AdminCell>
@@ -187,7 +187,7 @@ export default async function AdminStockistsPage({
                   className={`inline-block border px-3 py-1 font-heading text-[9px] uppercase tracking-[0.2em] ${
                     stockist.status === "open"
                       ? "border-success/40 text-success"
-                      : "border-gold/40 text-gold"
+                      : "border-gold/40 text-ground-accent"
                   }`}
                 >
                   {stockist.status === "open" ? "Open" : "Announced"}
@@ -206,7 +206,7 @@ export default async function AdminStockistsPage({
               <AdminCell>
                 <Link
                   href={`${basePath}/${stockist.id}`}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Edit
                 </Link>

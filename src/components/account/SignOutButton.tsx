@@ -32,7 +32,7 @@ export default function SignOutButton({
       onClick={() => signOut({ redirectUrl: localizePath(locale, "/") })}
       className={[
         "cursor-pointer bg-transparent p-0 font-heading text-[11px] tracking-[0.12em]",
-        "text-ivory/30 transition-colors duration-300 hover:text-ivory/60",
+        "text-ground-muted/70 transition-colors duration-300 hover:text-ground-muted",
         className,
       ].join(" ")}
     >

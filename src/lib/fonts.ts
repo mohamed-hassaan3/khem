@@ -20,10 +20,18 @@ import { DEFAULT_LOCALE, type Locale } from "./i18n/config";
 
 /* ── Latin (en) ─────────────────────────────────────── */
 
+/*
+ * Three weights, not four.
+ *
+ * 700 was reachable from exactly two places, both oversized watermark numerals
+ * set at 10-15% opacity where it is visually identical to 600. Each weight is
+ * its own woff2 file on a font that is not preloaded, so dropping it removes a
+ * request from the critical path of every page for no visible change.
+ */
 export const headingFont = Cinzel({
   subsets: ["latin"],
   variable: "--font-heading",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   display: "swap",
   preload: false,
 });
@@ -31,7 +39,7 @@ export const headingFont = Cinzel({
 export const bodyFont = Inter({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   display: "swap",
   preload: false,
 });
@@ -59,7 +67,7 @@ export const arHeadingFont = Amiri({
 export const arBodyFont = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
   variable: "--font-body",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   display: "swap",
   preload: false,
 });

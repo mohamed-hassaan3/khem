@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
 import ProductBreadcrumb from "@/src/components/ecommerce/ProductBreadcrumb";
 import ProductComments from "@/src/components/ecommerce/ProductComments";
@@ -109,8 +110,10 @@ export default async function PerfumePage({
   ];
 
   return (
-    /* `pt-20` clears the fixed 5rem Nav — this page opens on a bar, not a hero. */
-    <div className="min-h-screen bg-background pt-20 text-ivory">
+    <div className="ground-ivory min-h-screen">
+      {/* §13: the product needs room and light. The story block below keeps
+          its own dark ground. */}
+      <NavGround ground="ivory" />
       <ProductBreadcrumb
         locale={activeLocale}
         collection={collection}

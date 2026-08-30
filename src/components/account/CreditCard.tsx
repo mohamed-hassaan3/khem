@@ -50,7 +50,7 @@ export default function CreditCard({ credit, locale, dict }: CreditCardProps) {
     <article
       className={[
         "flex flex-col gap-4 border px-6 py-6",
-        isAvailable ? "border-gold/25 bg-gold/6" : "border-border bg-surface/60",
+        isAvailable ? "border-ground-accent/25 bg-gold/6" : "border-ground-border bg-stone",
         isSpent ? "opacity-55" : "",
       ].join(" ")}
     >
@@ -58,7 +58,7 @@ export default function CreditCard({ credit, locale, dict }: CreditCardProps) {
         <p
           className={[
             "font-heading text-2xl font-semibold",
-            isAvailable ? "text-gold" : "text-ivory/60",
+            isAvailable ? "text-ground-accent" : "text-ground-muted",
           ].join(" ")}
         >
           <Price cents={amount} />
@@ -67,14 +67,14 @@ export default function CreditCard({ credit, locale, dict }: CreditCardProps) {
         <span
           className={[
             "shrink-0 border px-3 py-1.5 font-heading text-[10px] uppercase tracking-[0.16em]",
-            isAvailable ? "border-gold/40 text-gold" : "border-border text-ivory/35",
+            isAvailable ? "border-ground-accent/40 text-ground-accent" : "border-ground-border text-ground-muted",
           ].join(" ")}
         >
           {dict.status[credit.status]}
         </span>
       </div>
 
-      <div className="flex flex-col gap-1.5 text-[12px] leading-relaxed text-ivory/40">
+      <div className="flex flex-col gap-1.5 text-[12px] leading-relaxed text-ground-muted">
         {timing ? <p>{timing}</p> : null}
 
         {/*

@@ -61,12 +61,12 @@ export default async function ProductComments({
      */
     <section
       id="comments"
-      className="scroll-mt-24 border-t border-border px-4 py-14 md:scroll-mt-32 md:px-20 md:py-32"
+      className="scroll-mt-24 border-t border-ground-border px-4 py-14 md:scroll-mt-32 md:px-20 md:py-32"
     >
       <div className="mx-auto max-w-200">
         <Reveal className="mb-8 md:mb-12">
           <p className="eyebrow mb-4">{copy.eyebrow}</p>
-          <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl">
+          <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl">
             {copy.heading}
           </h2>
         </Reveal>

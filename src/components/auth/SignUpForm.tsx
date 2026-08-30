@@ -69,7 +69,7 @@ export default function SignUpForm({ locale }: { locale: Locale }) {
        * box floating beneath it. `-mt-px` collapses the doubled border where
        * the two meet.
        */}
-      <label className="-mt-px flex w-full max-w-100 cursor-pointer items-start gap-3 border border-border bg-surface px-6 py-5 text-start">
+      <label className="-mt-px flex w-full max-w-100 cursor-pointer items-start gap-3 border border-ground-border bg-stone px-6 py-5 text-start">
         <input
           type="checkbox"
           checked={marketingOptIn}
@@ -84,11 +84,11 @@ export default function SignUpForm({ locale }: { locale: Locale }) {
         />
 
         <span>
-          <span className="block text-xs leading-relaxed text-ivory/70">
+          <span className="block text-xs leading-relaxed text-ground-muted">
             {dict.auth.marketing.label}
           </span>
 
-          <span className="mt-1 block text-[11px] leading-relaxed text-ivory/30">
+          <span className="mt-1 block text-[11px] leading-relaxed text-ground-muted/70">
             {dict.auth.marketing.note}
           </span>
         </span>

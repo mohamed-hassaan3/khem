@@ -104,11 +104,11 @@ export default async function DiscoveryComparison({
   ];
 
   return (
-    <section className="border-t border-border bg-background px-4 py-14 md:px-20 md:py-30">
+    <section className="ground-ivory border-t border-ground-border px-4 py-14 md:px-20 md:py-30">
       <div className="mx-auto max-w-275">
         <Reveal className="mb-8 md:mb-14 text-center">
           <p className="eyebrow mb-4">{dict.discovery.compare.eyebrow}</p>
-          <h2 className="font-heading text-3xl font-normal text-ivory sm:text-4xl">
+          <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl">
             {dict.discovery.compare.heading}
           </h2>
         </Reveal>
@@ -139,12 +139,12 @@ export default async function DiscoveryComparison({
 
             <thead>
               <tr>
-                <th className="border-b border-border px-6 py-5" />
+                <th className="border-b border-ground-border px-6 py-5" />
                 {sets.map((set) => (
                   <th
                     key={set.id}
                     scope="col"
-                    className="border-b border-border px-6 py-5 text-center font-heading text-[13px] font-normal tracking-[0.1em] text-ivory"
+                    className="border-b border-ground-border px-6 py-5 text-center font-heading text-[13px] font-normal tracking-[0.1em] text-ground"
                     {...island}
                   >
                     {set.name.replace(/^The /, "")}
@@ -157,11 +157,11 @@ export default async function DiscoveryComparison({
               {rows.map((row, rowIndex) => (
                 <tr
                   key={row.label}
-                  className={rowIndex % 2 === 0 ? undefined : "bg-white/2"}
+                  className={rowIndex % 2 === 0 ? undefined : "bg-stone/60"}
                 >
                   <th
                     scope="row"
-                    className="border-b border-border px-6 py-4 text-start text-xs font-normal tracking-wide text-ivory/40"
+                    className="border-b border-ground-border px-6 py-4 text-start text-xs font-normal tracking-wide text-ground-muted"
                   >
                     {row.label}
                   </th>
@@ -169,7 +169,7 @@ export default async function DiscoveryComparison({
                   {row.cells.map((cell, cellIndex) => (
                     <td
                       key={sets[cellIndex].id}
-                      className="border-b border-border px-6 py-4 text-center text-xs tracking-wide text-ivory"
+                      className="border-b border-ground-border px-6 py-4 text-center text-xs tracking-wide text-ground"
                     >
                       {cell.kind === "text" ? (
                         <span {...island}>{cell.value}</span>
@@ -183,7 +183,7 @@ export default async function DiscoveryComparison({
                             size={14}
                             strokeWidth={1.25}
                             aria-hidden="true"
-                            className="mx-auto text-gold"
+                            className="mx-auto text-ground-accent"
                           />
                           <span className="sr-only">
                             {dict.discovery.compare.yes}
@@ -195,7 +195,7 @@ export default async function DiscoveryComparison({
                             size={14}
                             strokeWidth={1.25}
                             aria-hidden="true"
-                            className="mx-auto text-ivory/20"
+                            className="mx-auto text-ground-muted/60"
                           />
                           <span className="sr-only">
                             {dict.discovery.compare.no}

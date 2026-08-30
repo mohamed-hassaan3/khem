@@ -28,7 +28,7 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
   switch (block.kind) {
     case "text":
       return (
-        <p className="mb-5 text-sm leading-loose text-ivory/50">{block.text}</p>
+        <p className="mb-5 text-sm leading-loose text-ground-muted">{block.text}</p>
       );
 
     case "list":
@@ -37,7 +37,7 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
           {block.items.map((item) => (
             <li
               key={item}
-              className="flex gap-4 text-sm leading-loose text-ivory/50"
+              className="flex gap-4 text-sm leading-loose text-ground-muted"
             >
               {/* Gold hairline instead of a bullet — matches `.gold-line`. */}
               <span
@@ -52,11 +52,11 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
 
     case "link":
       return (
-        <p className="mb-5 text-sm leading-loose text-ivory/50">
+        <p className="mb-5 text-sm leading-loose text-ground-muted">
           {block.text}{" "}
           <LocaleLink
             href={block.href}
-            className="text-gold underline decoration-gold/30 underline-offset-4 transition-colors duration-300 hover:decoration-gold"
+            className="text-ground-accent underline decoration-gold/30 underline-offset-4 transition-colors duration-300 hover:decoration-gold"
           >
             {block.label}
           </LocaleLink>
@@ -65,7 +65,7 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
 
     case "note":
       return (
-        <aside className="mb-6 border-l-2 border-gold bg-surface/60 px-6 py-5 text-sm leading-loose text-ivory/70">
+        <aside className="ground-sand mb-6 border-s-2 border-ground-accent px-6 py-5 text-sm leading-loose">
           {block.text}
         </aside>
       );
@@ -81,7 +81,7 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
                   <th
                     key={heading}
                     scope="col"
-                    className="border-b border-border pb-3 pr-6 font-body text-[10px] font-medium uppercase tracking-[0.2em] text-gold/60"
+                    className="border-b border-ground-border pb-3 pr-6 font-body text-[10px] font-medium uppercase tracking-[0.2em] text-ground-accent/60"
                   >
                     {heading}
                   </th>
@@ -93,11 +93,11 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
                 <tr key={label}>
                   <th
                     scope="row"
-                    className="border-b border-border py-4 pr-6 align-top text-[13px] font-normal leading-relaxed text-ivory/80"
+                    className="border-b border-ground-border py-4 pr-6 align-top text-[13px] font-normal leading-relaxed text-ground"
                   >
                     {label}
                   </th>
-                  <td className="border-b border-border py-4 pr-6 align-top text-[13px] leading-relaxed text-ivory/50">
+                  <td className="border-b border-ground-border py-4 pr-6 align-top text-[13px] leading-relaxed text-ground-muted">
                     {value}
                   </td>
                 </tr>
@@ -132,12 +132,12 @@ export default function LegalDocumentBody({
               <li key={section.id}>
                 <a
                   href={`#${section.id}`}
-                  className="flex gap-4 border-b border-border py-3 no-underline transition-colors duration-300 hover:text-gold"
+                  className="flex gap-4 border-b border-ground-border py-3 no-underline transition-colors duration-300 hover:text-ground-accent"
                 >
-                  <span className="flex-none font-heading text-[10px] leading-5 tracking-widest text-gold/40">
+                  <span className="flex-none font-heading text-[10px] leading-5 tracking-widest text-ground-accent/40">
                     {sectionNumeral(index)}
                   </span>
-                  <span className="text-xs leading-5 text-ivory/45 transition-colors duration-300 hover:text-gold">
+                  <span className="text-xs leading-5 text-ground-muted transition-colors duration-300 hover:text-ground-accent">
                     {section.title}
                   </span>
                 </a>
@@ -152,13 +152,13 @@ export default function LegalDocumentBody({
             <section
               key={section.id}
               id={section.id}
-              className="mb-8 md:mb-14 scroll-mt-30 border-t border-border pt-12 first:border-t-0 first:pt-0"
+              className="mb-8 md:mb-14 scroll-mt-30 border-t border-ground-border pt-12 first:border-t-0 first:pt-0"
             >
               <Reveal delay={index * SECTION_STAGGER}>
-                <p className="mb-4 font-heading text-[10px] tracking-[0.25em] text-gold/40">
+                <p className="mb-4 font-heading text-[10px] tracking-[0.25em] text-ground-accent/40">
                   {sectionNumeral(index)}
                 </p>
-                <h2 className="mb-8 font-heading text-xl font-normal leading-snug text-ivory sm:text-2xl">
+                <h2 className="mb-8 font-heading text-xl font-normal leading-snug text-ground sm:text-2xl">
                   {section.title}
                 </h2>
 
@@ -173,13 +173,13 @@ export default function LegalDocumentBody({
           ))}
 
           {/* ── QUESTIONS ─────────────────────────── */}
-          <Reveal className="border border-border bg-surface p-10 md:p-12">
+          <Reveal className="card p-10 md:p-12">
             <p className="eyebrow mb-6">Questions</p>
-            <p className="mb-7 max-w-md text-[13px] leading-loose text-ivory/45">
+            <p className="mb-7 max-w-md text-[13px] leading-loose text-ground-muted">
               If anything on this page is unclear, write to us. We would rather
               explain it than have you guess.
             </p>
-            <a href={`mailto:${contactEmail}`} className="btn-luxury inline-flex">
+            <a href={`mailto:${contactEmail}`} className="btn btn-outline inline-flex">
               Email Us
             </a>
           </Reveal>

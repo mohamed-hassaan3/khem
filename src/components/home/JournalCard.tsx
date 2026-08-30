@@ -23,7 +23,7 @@ export default async function JournalCard({
   return (
     <LocaleLink
       href={`/journal/${article.slug}`}
-      className="img-zoom group block bg-background no-underline"
+      className="img-zoom group block bg-[var(--card-bg)] no-underline"
     >
       <div className="relative h-[240px] overflow-hidden">
         <Image
@@ -31,7 +31,7 @@ export default async function JournalCard({
           alt={article.image.alt}
           fill
           sizes="(min-width: 768px) 33vw, 100vw"
-          className="object-cover brightness-[0.6] saturate-[0.7]"
+          className="object-cover"
         />
       </div>
       <div className="p-8">
@@ -39,21 +39,21 @@ export default async function JournalCard({
             `formatArticleDate()` in Western digits for both trees. */}
         <div dir="auto">
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-[9px] uppercase tracking-[0.2em] text-gold">
+            <span className="text-[9px] uppercase tracking-[0.2em] text-ground-accent">
               {article.category}
             </span>
             <time
               dateTime={article.publishedAt}
-              className="text-[10px] tracking-wider text-ivory/30"
+              className="text-[10px] tracking-wider text-ground-muted/70"
             >
               {formatArticleDate(article.publishedAt)}
             </time>
           </div>
-          <h3 className="mb-5 font-heading text-base font-normal leading-snug tracking-wide text-ivory">
+          <h3 className="mb-5 font-heading text-base font-normal leading-snug tracking-wide text-ground">
             {article.title}
           </h3>
         </div>
-        <span className="inline-block font-heading text-[10px] uppercase tracking-[0.15em] text-gold transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
+        <span className="inline-block font-heading text-[10px] uppercase tracking-[0.15em] text-ground-accent transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
           {dict.common.readMore} {readingArrow(locale)}
         </span>
       </div>

@@ -82,18 +82,18 @@ export default function UnsubscribePanel({
 
   return (
     <div className="mx-auto max-w-xl text-center">
-      <p className="font-heading text-[10px] uppercase tracking-[0.3em] text-gold/70">
+      <p className="font-heading text-[10px] uppercase tracking-[0.3em] text-ground-accent/70">
         {copy.eyebrow}
       </p>
 
       <h1
         aria-live="polite"
-        className="mt-6 font-heading text-2xl tracking-[0.08em] text-ivory sm:text-3xl"
+        className="mt-6 font-heading text-2xl tracking-[0.08em] text-ground sm:text-3xl"
       >
         {heading}
       </h1>
 
-      <p className="mt-6 text-[13px] leading-relaxed tracking-wide text-ivory/50">
+      <p className="mt-6 text-[13px] leading-relaxed tracking-wide text-ground-muted">
         {body}
       </p>
 
@@ -102,7 +102,7 @@ export default function UnsubscribePanel({
         only to somebody who arrived holding its token.
       */}
       {email && (phase === "done" || phase === "already") ? (
-        <p className="mt-4 text-[13px] tracking-wide text-champagne">{email}</p>
+        <p className="mt-4 text-[13px] tracking-wide text-gold-soft">{email}</p>
       ) : null}
 
       {phase === "confirm" ? (
@@ -111,7 +111,7 @@ export default function UnsubscribePanel({
             type="button"
             onClick={onConfirm}
             disabled={pending}
-            className="mt-10 inline-flex items-center justify-center border border-gold/40 px-10 py-4 font-heading text-[11px] uppercase tracking-[0.25em] text-gold transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold hover:bg-gold/10 disabled:opacity-50 disabled:pointer-events-none"
+            className="mt-10 inline-flex items-center justify-center border border-ground-accent/40 px-10 py-4 font-heading text-[11px] uppercase tracking-[0.25em] text-ground-accent transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold hover:bg-gold/10 disabled:opacity-50 disabled:pointer-events-none"
           >
             {pending ? copy.working : copy.confirmButton}
           </button>

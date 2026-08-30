@@ -1,4 +1,5 @@
 import { SearchX } from "lucide-react";
+import NavGround from "@/src/components/NavGround";
 import type { Metadata } from "next";
 
 import OrderCelebration from "@/src/components/checkout/OrderCelebration";
@@ -78,7 +79,8 @@ export default async function CheckoutConfirmedPage({
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-background pt-20 text-ivory">
+      <div className="ground-ivory min-h-screen">
+        <NavGround ground="ivory" />
         <EmptyState
           icon={SearchX}
           heading={dict.checkout.confirmed.notFound.heading}
@@ -106,7 +108,8 @@ export default async function CheckoutConfirmedPage({
   }).format(new Date(order.placedAt));
 
   return (
-    <div className="min-h-screen bg-background pt-20 text-ivory">
+    <div className="ground-ivory min-h-screen">
+      <NavGround ground="ivory" />
       <OrderCelebration
         order={order}
         isSignedIn={userId !== null}

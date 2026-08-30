@@ -55,7 +55,7 @@ export default async function ArrivalShowcase({
   ];
 
   return (
-    <section className="border-t border-border bg-background px-4 py-12 md:px-20 md:py-28">
+    <section className="border-t border-ground-border px-4 py-12 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:py-28">
       <div className="mx-auto grid max-w-350 grid-cols-1 items-center gap-6 md:gap-12 lg:grid-cols-12 lg:gap-20">
         {/*
          * `lg:order-*` rather than two markup branches: the reading order in
@@ -71,17 +71,17 @@ export default async function ArrivalShowcase({
                 logical properties to survive the RTL mirror. */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -bottom-3.5 -end-3.5 top-3.5 start-3.5 border border-gold/25"
+              className="pointer-events-none absolute -bottom-3.5 -end-3.5 top-3.5 start-3.5 border border-ground-accent/25"
             />
 
-            <div className="img-zoom relative aspect-4/5 overflow-hidden bg-card">
+            <div className="img-zoom relative aspect-4/5 overflow-hidden bg-stone">
               <Image
                 src={image.url}
                 alt={image.alt}
                 fill
                 quality={85}
                 sizes={IMAGE_SIZES}
-                className="object-cover brightness-75 saturate-75"
+                className="object-cover"
               />
             </div>
           </div>
@@ -91,7 +91,7 @@ export default async function ArrivalShowcase({
           delay={0.1}
           className={`lg:col-span-5 ${imageFirst ? "lg:order-2" : "lg:order-1"}`}
         >
-          <p className="mb-7 font-heading text-[11px] uppercase tracking-[0.3em] text-gold/50">
+          <p className="mb-7 font-heading text-[11px] uppercase tracking-[0.3em] text-ground-accent/50">
             {dict.newArrival.indexLabel}{" "}
             <span dir="ltr">
               {String(index + 1).padStart(2, "0")} —{" "}
@@ -103,7 +103,7 @@ export default async function ArrivalShowcase({
               subtitle beneath it is translated. */}
           <h2
             {...island}
-            className="font-heading text-3xl font-normal leading-tight text-ivory sm:text-4xl md:text-5xl"
+            className="font-heading text-3xl font-normal leading-tight text-ground sm:text-4xl md:text-5xl"
           >
             {product.name}
           </h2>
@@ -111,7 +111,7 @@ export default async function ArrivalShowcase({
           {product.subtitle ? (
             <p
               dir="auto"
-              className="mt-4 text-[13px] leading-loose tracking-wide text-ivory/45"
+              className="mt-4 text-[13px] leading-loose tracking-wide text-ground-muted"
             >
               {product.subtitle}
             </p>
@@ -122,7 +122,7 @@ export default async function ArrivalShowcase({
           {product.story ? (
             <p
               dir="auto"
-              className="mb-6 md:mb-10 whitespace-pre-line text-[13px] leading-loose text-ivory/40"
+              className="mb-6 md:mb-10 whitespace-pre-line text-[13px] leading-loose text-ground-muted"
             >
               {product.story}
             </p>
@@ -130,24 +130,24 @@ export default async function ArrivalShowcase({
 
           <dl className="mb-6 md:mb-10 grid grid-cols-1 gap-px bg-border sm:grid-cols-3">
             {tiers.map((tier) => (
-              <div key={tier.label} className="bg-background py-5 pe-4">
-                <dt className="mb-3 font-heading text-[9px] uppercase tracking-[0.25em] text-gold/50">
+              <div key={tier.label} className="bg-ground-bg py-5 pe-4">
+                <dt className="mb-3 font-heading text-[9px] uppercase tracking-[0.25em] text-ground-accent/50">
                   {tier.label}
                 </dt>
-                <dd dir="auto" className="text-xs leading-loose text-ivory/50">
+                <dd dir="auto" className="text-xs leading-loose text-ground-muted">
                   {tier.notes.join(" · ")}
                 </dd>
               </div>
             ))}
           </dl>
 
-          <div className="mb-9 flex items-center gap-4 md:gap-6 border-t border-border pt-6">
+          <div className="mb-9 flex items-center gap-4 md:gap-6 border-t border-ground-border pt-6">
             <ProductPrice
               priceInCents={product.priceInCents}
               promotion={product.promotion}
-              className="font-heading text-2xl text-gold"
+              className="font-heading text-2xl text-ground-accent"
             />
-            <span className="text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               {formatVolume(product.volumeMl)}
               {product.concentration
                 ? ` · ${dict.product.concentrations[product.concentration]}`
@@ -157,7 +157,7 @@ export default async function ArrivalShowcase({
 
           <LocaleLink
             href={`/perfume/${product.slug}`}
-            className="btn-luxury"
+            className="btn btn-outline"
           >
             {dict.newArrival.cta}
           </LocaleLink>

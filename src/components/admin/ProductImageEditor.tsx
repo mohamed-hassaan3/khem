@@ -106,20 +106,20 @@ export default function ProductImageEditor({
       ) : null}
 
       {rows.length === 0 ? (
-        <p className="border border-border px-6 py-10 text-center text-[12px] tracking-wide text-ivory/35">
+        <p className="border border-ground-border px-6 py-10 text-center text-[12px] tracking-wide text-ground-muted">
           No photographs yet. The grid will show a placeholder until one is added.
         </p>
       ) : null}
 
       <ul className="space-y-4">
         {rows.map((row, index) => (
-          <li key={row.id ?? `new-${index}`} className="border border-border p-4">
+          <li key={row.id ?? `new-${index}`} className="border border-ground-border p-4">
             <div className="flex gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={row.url || undefined}
                 alt=""
-                className="h-24 w-20 shrink-0 border border-border object-cover"
+                className="h-24 w-20 shrink-0 border border-ground-border object-cover"
               />
 
               <div className="min-w-0 flex-1 space-y-3">
@@ -154,7 +154,7 @@ export default function ProductImageEditor({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4">
-                  <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-ivory/45">
+                  <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-ground-muted">
                     <input
                       type="radio"
                       name="primary-image"
@@ -171,7 +171,7 @@ export default function ProductImageEditor({
                       aria-label="Move up"
                       disabled={index === 0}
                       onClick={() => move(index, -1)}
-                      className="border border-border p-2 text-ivory/40 transition-colors duration-300 hover:border-gold/40 hover:text-gold disabled:opacity-25"
+                      className="border border-ground-border p-2 text-ground-muted transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent disabled:opacity-25"
                     >
                       <ArrowUp size={13} strokeWidth={1.25} />
                     </button>
@@ -180,7 +180,7 @@ export default function ProductImageEditor({
                       aria-label="Move down"
                       disabled={index === rows.length - 1}
                       onClick={() => move(index, 1)}
-                      className="border border-border p-2 text-ivory/40 transition-colors duration-300 hover:border-gold/40 hover:text-gold disabled:opacity-25"
+                      className="border border-ground-border p-2 text-ground-muted transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent disabled:opacity-25"
                     >
                       <ArrowDown size={13} strokeWidth={1.25} />
                     </button>
@@ -188,7 +188,7 @@ export default function ProductImageEditor({
                       type="button"
                       aria-label="Remove image"
                       onClick={() => setRows((current) => current.filter((_, at) => at !== index))}
-                      className="border border-border p-2 text-ivory/40 transition-colors duration-300 hover:border-danger/50 hover:text-danger"
+                      className="border border-ground-border p-2 text-ground-muted transition-colors duration-300 hover:border-danger/50 hover:text-danger"
                     >
                       <X size={13} strokeWidth={1.25} />
                     </button>
@@ -200,7 +200,7 @@ export default function ProductImageEditor({
         ))}
       </ul>
 
-      <div className="flex flex-wrap gap-3 border-t border-border pt-6">
+      <div className="flex flex-wrap gap-3 border-t border-ground-border pt-6">
         <AdminButton
           variant="ghost"
           onClick={() =>

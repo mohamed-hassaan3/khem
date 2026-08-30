@@ -81,7 +81,7 @@ export default function IngredientProductsPanel({
       ) : null}
 
       {products.length === 0 ? (
-        <p className="border border-border px-5 py-10 text-center text-[12px] leading-relaxed text-ivory/35">
+        <p className="border border-ground-border px-5 py-10 text-center text-[12px] leading-relaxed text-ground-muted">
           There are no live products to link this material to.
         </p>
       ) : (
@@ -98,8 +98,8 @@ export default function IngredientProductsPanel({
                 title={product.collectionSlug}
                 className={`border px-4 py-2 text-[11px] tracking-wide transition-colors duration-300 ${
                   active
-                    ? "border-gold/50 bg-gold/10 text-gold"
-                    : "border-border text-ivory/35 hover:border-gold/30 hover:text-ivory"
+                    ? "border-gold/50 bg-gold/10 text-ground-accent"
+                    : "border-ground-border text-ground-muted hover:border-gold/30 hover:text-ground"
                 }`}
               >
                 {product.name}
@@ -118,7 +118,7 @@ export default function IngredientProductsPanel({
               : "No unsaved changes"}
         </AdminButton>
 
-        <span className="text-[11px] tracking-wide text-ivory/30">
+        <span className="text-[11px] tracking-wide text-ground-muted">
           {chosen.length === 0
             ? "Printed on no perfume"
             : `Printed on ${chosen.length} perfume${chosen.length === 1 ? "" : "s"}`}

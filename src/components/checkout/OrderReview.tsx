@@ -84,9 +84,9 @@ export default function OrderReview({
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
   return (
-    <aside className="border-border bg-surface px-4 py-10 sm:px-8 lg:sticky lg:top-20 lg:h-fit lg:border-s lg:px-10 lg:py-14">
+    <aside className="border-ground-border bg-stone px-4 py-10 sm:px-8 lg:sticky lg:top-[var(--header-h)] lg:h-fit lg:border-s lg:px-10 lg:py-14">
       <div className="mb-8 flex items-baseline justify-between gap-4">
-        <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ivory">
+        <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ground">
           {copy.heading}
         </h2>
 
@@ -94,22 +94,22 @@ export default function OrderReview({
             using the browser's back button and hoping the form survives. */}
         <LocaleLink
           href="/cart"
-          className="text-[11px] tracking-[0.1em] text-gold/60 underline-offset-4 transition-colors duration-300 ease-out hover:text-gold hover:underline focus-visible:text-gold focus-visible:outline-none"
+          className="text-[11px] tracking-[0.1em] text-ground-accent/60 underline-offset-4 transition-colors duration-300 ease-out hover:text-ground-accent hover:underline focus-visible:text-ground-accent focus-visible:outline-none"
         >
           {copy.edit}
         </LocaleLink>
       </div>
 
-      <p className="mb-6 text-[11px] tracking-[0.08em] text-ivory/25">
+      <p className="mb-6 text-[11px] tracking-[0.08em] text-ground-muted/70">
         {itemCount === 1
           ? copy.itemCountOne
           : interpolate(copy.itemCount, { count: itemCount })}
       </p>
 
-      <ul className="mb-8 flex flex-col gap-5 border-b border-border pb-8">
+      <ul className="mb-8 flex flex-col gap-5 border-b border-ground-border pb-8">
         {lines.map(({ product, quantity }) => (
           <li key={product.id} className="flex gap-4">
-            <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-background">
+            <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-ivory">
               <Image
                 src={product.primaryImage.url}
                 alt=""
@@ -129,10 +129,10 @@ export default function OrderReview({
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-              <p className="truncate font-heading text-[13px] tracking-[0.04em] text-ivory">
+              <p className="truncate font-heading text-[13px] tracking-[0.04em] text-ground">
                 {product.name}
               </p>
-              <p className="text-[11px] tabular-nums text-ivory/35">
+              <p className="text-[11px] tabular-nums text-ground-muted">
                 {formatPrice(unitPriceInCents(product) * quantity)}
               </p>
             </div>
@@ -157,7 +157,7 @@ export default function OrderReview({
           <Row
             label={dict.cart.promotion}
             value={
-              <span className="text-gold">
+              <span className="text-ground-accent">
                 −{formatPrice(pricing.promotionSavingsInCents)}
               </span>
             }
@@ -168,7 +168,7 @@ export default function OrderReview({
           <Row
             label={copy.discount}
             value={
-              <span className="text-gold">−{formatPrice(discountInCents)}</span>
+              <span className="text-ground-accent">−{formatPrice(discountInCents)}</span>
             }
           />
         ) : null}
@@ -176,7 +176,7 @@ export default function OrderReview({
           label={copy.delivery}
           value={
             shipping === 0 ? (
-              <span className="text-gold">{copy.complimentary}</span>
+              <span className="text-ground-accent">{copy.complimentary}</span>
             ) : (
               formatPrice(shipping)
             )
@@ -186,7 +186,7 @@ export default function OrderReview({
           <Row
             label={dict.checkout.credit.applied}
             value={
-              <span className="text-gold">
+              <span className="text-ground-accent">
                 −{formatPrice(creditAppliedInCents)}
               </span>
             }
@@ -194,16 +194,16 @@ export default function OrderReview({
         ) : null}
       </div>
 
-      <div className="mt-6 border-t border-border pt-6">
+      <div className="mt-6 border-t border-ground-border pt-6">
         <div className="flex items-center justify-between">
-          <span className="font-heading text-sm tracking-[0.1em] text-ivory">
+          <span className="font-heading text-sm tracking-[0.1em] text-ground">
             {copy.total}
           </span>
-          <span className="font-heading text-xl tabular-nums text-gold">
+          <span className="font-heading text-xl tabular-nums text-ground-accent">
             {formatPrice(total)}
           </span>
         </div>
-        <p className="mt-2 text-[10px] tracking-[0.05em] text-ivory/25">
+        <p className="mt-2 text-[10px] tracking-[0.05em] text-ground-muted/70">
           {copy.taxNote}
         </p>
       </div>
@@ -214,8 +214,8 @@ export default function OrderReview({
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <span className="text-xs tracking-[0.08em] text-ivory/40">{label}</span>
-      <span className="font-heading text-[13px] tabular-nums text-ivory">
+      <span className="text-xs tracking-[0.08em] text-ground-muted">{label}</span>
+      <span className="font-heading text-[13px] tabular-nums text-ground">
         {value}
       </span>
     </div>

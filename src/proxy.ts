@@ -146,7 +146,23 @@ function withCurrencyCookie(
   return response;
 }
 
+/**
+ * ⚠️ TEMPORARY — the design review surface at `/design-preview`.
+ *
+ * It lives outside `app/[locale]/`, so the rewrite below would push it to
+ * `/en/design-preview`, which does not exist and would be answered by the
+ * `[locale]/[...rest]` catch-all as a 404.
+ *
+ * This grants no privilege — it only skips the locale rewrite. Delete this
+ * constant, its use below, and `src/app/design-preview/` together.
+ */
+const DESIGN_PREVIEW_PATH = "/design-preview";
+
 export default clerkMiddleware(async (auth, request) => {
+  if (request.nextUrl.pathname === DESIGN_PREVIEW_PATH) {
+    return withCurrencyCookie(request, NextResponse.next());
+  }
+
   // The public pathname, split into the locale it addresses and the path
   // beneath — the same function the sidebar uses to mark its active link, so
   // both agree on what "/ar/account/orders" means.

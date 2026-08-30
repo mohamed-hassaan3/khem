@@ -66,7 +66,7 @@ export default async function ProfilePage({
     <div>
       <p className="eyebrow mb-3">{dict.account.profile.eyebrow}</p>
 
-      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ivory sm:text-4xl">
+      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ground sm:text-4xl">
         {dict.account.profile.heading}
       </h1>
 

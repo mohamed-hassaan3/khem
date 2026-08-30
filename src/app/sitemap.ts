@@ -10,6 +10,7 @@ import {
   getCollections,
   getProductSlugs,
   getRitualProductSlugs,
+  getSetProductSlugs,
 } from "@/src/services/products";
 
 /**
@@ -115,14 +116,21 @@ const STATIC_ROUTES: { path: string; priority: number }[] = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [collections, productSlugs, ritualSlugs, legalDocuments, articles] =
-    await Promise.all([
+  const [
+    collections,
+    productSlugs,
+    ritualSlugs,
+    setSlugs,
+    legalDocuments,
+    articles,
+  ] = await Promise.all([
       // URLs only — every slug is identical in both trees (localizing one
       // would fork the URL space), so the default locale is the right and
       // cheapest argument here.
       getCollections("en"),
       getProductSlugs(),
       getRitualProductSlugs(),
+      getSetProductSlugs(),
       getLegalDocuments("en"),
       getJournalArticles(),
     ]);
@@ -179,6 +187,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // below the fragrances, which are what the house is searched for.
     ...ritualSlugs.flatMap((slug) =>
       localizedEntries(`/ritual/${slug}`, { priority: 0.7 }),
+    ),
+
+    // Discovery and gift sets, which gained detail pages with `/set/[slug]`.
+    // Scoped by the same query `generateStaticParams` uses, so nothing here can
+    // 404. Priority matches the ritual goods: a set is a real product and a
+    // genuine entry point — a discovery box is how a lot of people meet the
+    // house — but the fragrances are still what it is searched for.
+    ...setSlugs.flatMap((slug) =>
+      localizedEntries(`/set/${slug}`, { priority: 0.7 }),
     ),
 
     // Journal articles. `getJournalArticles()` reads through the publishable

@@ -92,11 +92,11 @@ function pageHref(
 
 function Figure({ label: text, value }: { label: string; value: number }) {
   return (
-    <div className="border border-border bg-ivory/2 p-6 sm:p-8">
-      <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+    <div className="border border-ground-border bg-ivory/2 p-6 sm:p-8">
+      <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
         {text}
       </p>
-      <p className="mt-4 font-heading text-3xl tracking-[0.1em] text-gold sm:text-4xl">
+      <p className="mt-4 font-heading text-3xl tracking-[0.1em] text-ground-accent sm:text-4xl">
         {value}
       </p>
     </div>
@@ -185,7 +185,7 @@ export default async function AdminNewsletterPage({
                 <AdminCell>
                   <span className="block tracking-wide">{subscriber.email}</span>
                   {subscriber.clerkUserId ? (
-                    <span className="mt-1 block text-[10px] uppercase tracking-[0.2em] text-ivory/25">
+                    <span className="mt-1 block text-[10px] uppercase tracking-[0.2em] text-ground-subtle">
                       Has an account
                     </span>
                   ) : null}
@@ -196,7 +196,7 @@ export default async function AdminNewsletterPage({
                     className={`inline-block border px-3 py-1 font-heading text-[9px] uppercase tracking-[0.2em] ${
                       subscriber.status === "SUBSCRIBED"
                         ? "border-success/40 text-success"
-                        : "border-border text-ivory/30"
+                        : "border-ground-border text-ground-muted"
                     }`}
                   >
                     {label(subscriber.status)}
@@ -221,7 +221,7 @@ export default async function AdminNewsletterPage({
               {page > 1 ? (
                 <Link
                   href={pageHref(basePath, query, page - 1)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Previous
                 </Link>
@@ -229,14 +229,14 @@ export default async function AdminNewsletterPage({
                 <span />
               )}
 
-              <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/30">
+              <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
                 Page {page} of {lastPage}
               </span>
 
               {page < lastPage ? (
                 <Link
                   href={pageHref(basePath, query, page + 1)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Next
                 </Link>

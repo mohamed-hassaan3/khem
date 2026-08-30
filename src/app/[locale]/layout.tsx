@@ -36,6 +36,7 @@ import { CartProvider } from "@/src/providers/cart-provider";
 import { ConsentProvider } from "@/src/providers/consent-provider";
 import { CurrencyProvider } from "@/src/providers/currency-provider";
 import { I18nProvider } from "@/src/providers/i18n-provider";
+import { NavGroundProvider } from "@/src/providers/nav-ground-provider";
 
 /**
  * Both locale trees are prerendered. Without this, the `[locale]` segment would
@@ -280,7 +281,7 @@ export default async function RootLayout({
          * beside the bar they describe.
          */
         data-announcement={showAnnouncements ? "on" : undefined}
-        className={`${getFontVariables(locale)} bg-background font-body text-ivory antialiased`}
+        className={`${getFontVariables(locale)} font-body antialiased`}
       >
         {/*
          * `<ClerkProvider>` sits inside `<body>` — required by Clerk v7, where
@@ -346,6 +347,13 @@ export default async function RootLayout({
                    * control on every product card.
                    */}
                   <CartDrawerProvider>
+                    {/*
+                     * Wraps `<Nav>` *and* `{children}`, because the declaration
+                     * comes from a page and the reader is the header — they have
+                     * to share a provider, and the header is not an ancestor of
+                     * the page. See `providers/nav-ground-provider.tsx`.
+                     */}
+                    <NavGroundProvider>
                     {showAnnouncements ? (
                       <AnnouncementBar
                         announcements={announcements}
@@ -355,13 +363,22 @@ export default async function RootLayout({
                     ) : null}
                     <Nav />
                     {/*
-                     * The offset for the fixed header stack. `--announcement-h`
-                     * is `0px` when there is no bar, so this wrapper is inert on
-                     * every page that has none — and every page's own `pt-20`
-                     * keeps meaning "below the header" rather than "below the
-                     * top of the document".
+                     * The offset for the whole fixed header stack — the
+                     * announcement bar *and* the nav bar, not just the bar
+                     * above the nav.
+                     *
+                     * This is what puts every page's first pixel below the
+                     * header instead of behind it: banners begin where the nav
+                     * ends, and nothing is ever hidden under it. It replaces
+                     * the `pt-20` that a dozen pages each carried privately —
+                     * one declaration that follows `--nav-h` responsively,
+                     * rather than twelve hard-coded copies of one breakpoint's
+                     * value.
+                     *
+                     * `--header-h` collapses to the nav's height alone when no
+                     * announcement bar is rendered. See `globals.css`.
                      */}
-                    <div className="pt-[var(--announcement-h)]">{children}</div>
+                    <div className="pt-[var(--header-h)]">{children}</div>
                     <Footer locale={locale} />
                     {/*
                      * Mounted once here rather than inside `<Nav>`: it is a
@@ -382,6 +399,7 @@ export default async function RootLayout({
                     {marketing.offerPopupEnabled ? (
                       <OfferPopup settings={marketing} offer={welcomeOffer} />
                     ) : null}
+                    </NavGroundProvider>
                   </CartDrawerProvider>
                 </CartProvider>
               </CurrencyProvider>

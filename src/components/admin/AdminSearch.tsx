@@ -105,7 +105,7 @@ export default function AdminSearch({ placeholder }: { placeholder: string }) {
         size={14}
         strokeWidth={1.25}
         aria-hidden
-        className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-ivory/25"
+        className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-ground-subtle"
       />
 
       <input
@@ -114,7 +114,7 @@ export default function AdminSearch({ placeholder }: { placeholder: string }) {
         value={term}
         placeholder={placeholder}
         onChange={(event) => setTerm(event.target.value)}
-        className="w-full border border-border bg-ivory/3 py-3 pe-10 ps-11 text-[13px] tracking-wide text-ivory transition-colors duration-300 placeholder:text-ivory/25 focus:border-gold/40 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+        className="w-full border border-ground-border bg-ivory/3 py-3 pe-10 ps-11 text-[13px] tracking-wide text-ground transition-colors duration-300 placeholder:text-ground-subtle focus:border-gold/40 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
       />
 
       {term.length > 0 ? (
@@ -122,7 +122,7 @@ export default function AdminSearch({ placeholder }: { placeholder: string }) {
           type="button"
           aria-label="Clear search"
           onClick={() => setTerm("")}
-          className="absolute end-3 top-1/2 -translate-y-1/2 p-1 text-ivory/30 transition-colors duration-300 hover:text-gold focus:outline-none"
+          className="absolute end-3 top-1/2 -translate-y-1/2 p-1 text-ground-muted transition-colors duration-300 hover:text-ground-accent focus:outline-none"
         >
           <X size={14} strokeWidth={1.25} />
         </button>

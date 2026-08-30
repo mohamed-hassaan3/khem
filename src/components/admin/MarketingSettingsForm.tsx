@@ -178,7 +178,7 @@ export default function MarketingSettingsForm({
       ) : null}
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           The announcement bar
         </h2>
 
@@ -213,7 +213,7 @@ export default function MarketingSettingsForm({
       </section>
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           The offer popup
         </h2>
 
@@ -225,11 +225,11 @@ export default function MarketingSettingsForm({
           onChange={setOfferPopupEnabled}
         />
 
-        <p className="text-[11px] leading-relaxed text-ivory/30">
+        <p className="text-[11px] leading-relaxed text-ground-muted">
           What it promises is the welcome offer —{" "}
           <Link
             href={localizePath(locale, "/admin/discounts")}
-            className="text-gold/70 underline-offset-4 transition-colors duration-300 hover:text-gold"
+            className="text-ground-accent underline-offset-4 transition-colors duration-300 hover:text-ground-accent"
           >
             edited with the discount codes
           </Link>
@@ -269,7 +269,7 @@ export default function MarketingSettingsForm({
       </section>
 
       <section className="space-y-4 md:space-y-6">
-        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+        <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
           What the popup says
         </h2>
 

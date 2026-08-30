@@ -93,13 +93,13 @@ export default async function AdminContentPage({
 
       <Link
         href={localizePath(activeLocale, "/admin/content/ingredients")}
-        className="mb-10 flex items-center justify-between gap-4 border border-border bg-ivory/2 p-5 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/30 sm:p-6"
+        className="mb-10 flex items-center justify-between gap-4 border border-ground-border bg-ivory/2 p-5 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/30 sm:p-6"
       >
         <span>
-          <span className="block font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <span className="block font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Ingredients
           </span>
-          <span className="mt-2 block text-[12px] leading-relaxed text-ivory/45">
+          <span className="mt-2 block text-[12px] leading-relaxed text-ground-muted">
             The raw materials. A record rather than a row — its own screen, with
             a photograph, provenance notes and the perfumes it is printed on.
           </span>
@@ -108,16 +108,16 @@ export default async function AdminContentPage({
           size={16}
           strokeWidth={1.25}
           aria-hidden
-          className="shrink-0 text-gold/60"
+          className="shrink-0 text-ground-accent"
         />
       </Link>
 
       <section className="space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Heritage timeline
           </h2>
-          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             The dated moments on /heritage. The year is display text rather than
             a date, which is why it has an Arabic field of its own — &ldquo;3000
             BC&rdquo; becomes &ldquo;٣٠٠٠ ق.م&rdquo;.
@@ -150,10 +150,10 @@ export default async function AdminContentPage({
 
       <section className="mt-12 space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Craft pillars
           </h2>
-          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             The four-item summary on the home page. The ordinal has no Arabic
             field — &ldquo;01&rdquo; is written in Western digits in both trees.
           </p>
@@ -184,10 +184,10 @@ export default async function AdminContentPage({
 
       <section className="mt-12 space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Brand values
           </h2>
-          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             The values panel further down /heritage.
           </p>
         </div>
@@ -216,10 +216,10 @@ export default async function AdminContentPage({
 
       <section className="mt-12 space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Atelier stages
           </h2>
-          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             The numbered process on /craftsmanship. One photograph serves both
             languages — only its description changes.
           </p>
@@ -250,10 +250,10 @@ export default async function AdminContentPage({
 
       <section className="mt-12 space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Craft figures
           </h2>
-          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             The stat band on /craftsmanship. Leave the Arabic figure empty for
             anything like &ldquo;300+&rdquo; or &ldquo;100%&rdquo;, which reads
             the same in both scripts.
@@ -279,10 +279,10 @@ export default async function AdminContentPage({
 
       <section className="mt-12 space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Perfumer&rsquo;s quote
           </h2>
-          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             /craftsmanship prints the first published quote by sort order.
             Unpublishing one hides it from the site entirely — the row stays
             here, and only this screen can still see it.
@@ -316,10 +316,10 @@ export default async function AdminContentPage({
 
       <section className="mt-12 space-y-5">
         <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/35">
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             Mission statements
           </h2>
-          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ivory/35">
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             The labelled sections on /about.
           </p>
         </div>

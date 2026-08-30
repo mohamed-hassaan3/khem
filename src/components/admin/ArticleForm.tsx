@@ -199,7 +199,7 @@ export default function ArticleForm({
           onChange={setCategory}
         />
         {categories.length > 0 ? (
-          <p className="mt-2 text-[11px] tracking-wide text-ivory/25">
+          <p className="mt-2 text-[11px] tracking-wide text-ground-subtle">
             In use: {categories.join(" · ")}
           </p>
         ) : null}
@@ -292,7 +292,7 @@ export default function ArticleForm({
         />
       </div>
 
-      <div className="flex gap-3 border-t border-border pt-8">
+      <div className="flex gap-3 border-t border-ground-border pt-8">
         <AdminButton type="submit" disabled={isPending}>
           {isPending ? "Saving…" : isEdit ? "Save article" : "Create article"}
         </AdminButton>

@@ -135,7 +135,7 @@ export default function OrderTracker({
             ? "border-danger/70 bg-danger/70"
             : isReached(station.state)
               ? "border-gold bg-gold"
-              : "border-border bg-surface";
+              : "border-ground-border bg-stone";
 
         const ring =
           station.state === "current"
@@ -183,15 +183,15 @@ export default function OrderTracker({
                   station.state === "halted"
                     ? "text-danger/80"
                     : isReached(station.state)
-                      ? "text-ivory/70"
-                      : "text-ivory/25"
+                      ? "text-ground-muted"
+                      : "text-ground-muted/70"
                 }`}
               >
                 {dict[station.status]}
               </span>
 
               {station.reachedAt ? (
-                <span className="mt-1 block text-[10px] text-ivory/25">
+                <span className="mt-1 block text-[10px] text-ground-muted/70">
                   {formatStamp(station.reachedAt, locale)}
                 </span>
               ) : null}

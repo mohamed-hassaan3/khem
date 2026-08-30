@@ -52,25 +52,36 @@ import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 /** `--ease-luxury-bezier` as a tuple, matching `animation/Reveal.tsx`. */
 const EASE_LUXURY: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-/** Long enough for the hero to settle, short enough to feel intentional. */
-const ENTRY_DELAY_MS = 900;
+/**
+ * Long enough for the hero to settle, short enough to feel intentional.
+ *
+ * 300ms, down from 900ms. The banner is a large light card pinned to the
+ * bottom of the viewport, so on the home page — whose hero is typographic and
+ * carries no photograph — it is the *largest contentful element on the page*.
+ * Every millisecond of this delay was therefore being added directly to LCP,
+ * on top of the hydration the banner already waits for.
+ *
+ * 300ms still reads as an arrival rather than a flash, and it still lands after
+ * the hero has painted. It is a deliberate pause, just not a second-long one.
+ */
+const ENTRY_DELAY_MS = 300;
 
-const ghostButtonClass = [
-  "inline-flex items-center justify-center border border-white/12 px-7 py-3.5",
-  "font-heading text-[0.7rem] uppercase tracking-[0.2em] text-ivory/75",
-  "transition-all duration-500 ease-luxury-bezier",
-  "hover:border-gold/50 hover:text-gold",
-  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold/60",
-].join(" ");
+/*
+ * ## Why these stopped being bespoke
+ *
+ * `border-white/12` on the ghost and a solid gold fill on the accept were both
+ * written against an obsidian card. On ivory the first is an invisible hairline
+ * and the second breaks §33 twice over: gold is not what a primary action looks
+ * like, and "Accept All" on a cookie banner is the most ordinary primary action
+ * on the site — precisely the place the accent must not be spent.
+ *
+ * They are the house primitives now. `.btn-primary` resolves to charcoal on
+ * this card's ivory ground, `.btn-outline` takes the ground's own hairline, and
+ * both inherit the focus ring `.btn:focus-visible` already defines.
+ */
+const ghostButtonClass = "btn btn-outline";
 
-const goldButtonClass = [
-  "inline-flex items-center justify-center border border-gold bg-gold px-7 py-3.5",
-  "font-heading text-[0.7rem] uppercase tracking-[0.2em] text-black",
-  "transition-all duration-500 ease-luxury-bezier",
-  "hover:border-champagne hover:bg-champagne hover:shadow-gold",
-  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold/60",
-  "focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
-].join(" ");
+const acceptButtonClass = "btn btn-primary";
 
 export default function CookieConsent() {
   const dict = useDictionary();
@@ -147,7 +158,7 @@ export default function CookieConsent() {
     <AnimatePresence>
       {visible && (
         <div
-          className="pointer-events-none fixed inset-x-0 bottom-0 z-990 px-4 pb-4 sm:px-6 sm:pb-6"
+          className="ground-ivory pointer-events-none fixed inset-x-0 bottom-0 z-990 px-4 pb-4 sm:px-6 sm:pb-6"
           role="region"
           aria-label={copy.regionLabel}
         >
@@ -169,8 +180,15 @@ export default function CookieConsent() {
             className={[
               "pointer-events-auto relative mx-auto w-full max-w-5xl",
               "rounded-lg border border-border-gold/40",
-              "bg-[color-mix(in_srgb,var(--color-surface)_92%,transparent)]",
-              "p-6 shadow-luxury backdrop-blur-xl focus:outline-none sm:p-8",
+              /*
+                Opaque ivory. This was 92% charcoal over a `blur(24px)` — and
+                the banner is `fixed`, so that blur stayed live behind it for
+                the whole of a first visit, on a surface the visitor is meant
+                to read once and dismiss. `shadow-3` does the separation work
+                the blur was nominally there for, at no per-frame cost.
+              */
+              "bg-ground-bg",
+              "p-6 shadow-3 focus:outline-none sm:p-8",
             ].join(" ")}
           >
             {/* Hairline gold rule along the top edge of the card. */}
@@ -183,18 +201,18 @@ export default function CookieConsent() {
 
             <h2
               id={titleId}
-              className="mb-4 font-heading text-lg tracking-[0.12em] text-ivory sm:text-xl"
+              className="mb-4 font-heading text-lg tracking-[0.12em] text-ground sm:text-xl"
             >
               {copy.title}
             </h2>
 
-            <p className="max-w-2xl text-sm leading-relaxed text-ivory/65">
+            <p className="max-w-2xl text-sm leading-relaxed text-ground-muted">
               {copy.body}
             </p>
 
             <LocaleLink
               href="/cookie-policy"
-              className="mt-3 inline-block text-xs tracking-[0.08em] text-gold/80 underline-offset-4 transition-colors duration-300 hover:text-gold hover:underline"
+              className="mt-3 inline-block text-xs tracking-[0.08em] text-ground-accent/80 underline-offset-4 transition-colors duration-300 hover:text-ground-accent hover:underline"
             >
               {copy.policyLink}
             </LocaleLink>
@@ -225,18 +243,18 @@ export default function CookieConsent() {
                   }}
                   className="overflow-hidden"
                 >
-                  <div className="mt-7 divide-y divide-white/6 border-y border-white/6">
+                  <div className="mt-7 divide-y divide-ground-border border-y border-ground-border">
                     {/* Essential — stated, never offered as a choice. */}
                     <div className="flex items-start justify-between gap-4 md:gap-6 py-4">
                       <div>
-                        <p className="font-heading text-[0.72rem] uppercase tracking-[0.18em] text-ivory">
+                        <p className="font-heading text-[0.72rem] uppercase tracking-[0.18em] text-ground">
                           {copy.categories.essential.name}
                         </p>
-                        <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-ivory/55">
+                        <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-ground-muted">
                           {copy.categories.essential.description}
                         </p>
                       </div>
-                      <span className="shrink-0 whitespace-nowrap pt-1 text-[0.65rem] uppercase tracking-[0.18em] text-gold/70">
+                      <span className="shrink-0 whitespace-nowrap pt-1 text-[0.65rem] uppercase tracking-[0.18em] text-ground-accent/70">
                         {copy.alwaysActive}
                       </span>
                     </div>
@@ -249,11 +267,11 @@ export default function CookieConsent() {
                         <div>
                           <p
                             id={`${categoryLabelId}-${category}`}
-                            className="font-heading text-[0.72rem] uppercase tracking-[0.18em] text-ivory"
+                            className="font-heading text-[0.72rem] uppercase tracking-[0.18em] text-ground"
                           >
                             {copy.categories[category].name}
                           </p>
-                          <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-ivory/55">
+                          <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-ground-muted">
                             {copy.categories[category].description}
                           </p>
                         </div>
@@ -274,7 +292,7 @@ export default function CookieConsent() {
                   </div>
 
                   {record !== null && (
-                    <p className="mt-4 text-[0.68rem] tracking-[0.08em] text-ivory/30">
+                    <p className="mt-4 text-[0.68rem] tracking-[0.08em] text-ground-muted/70">
                       {interpolate(copy.lastUpdated, {
                         date: formatConsentDate(record.decidedAt, locale),
                       })}
@@ -291,7 +309,7 @@ export default function CookieConsent() {
                 onClick={() => setExpanded((previous) => !previous)}
                 aria-expanded={expanded}
                 aria-controls={expanded ? panelId : undefined}
-                className="group inline-flex items-center gap-2 self-start text-[0.7rem] uppercase tracking-[0.18em] text-ivory/55 transition-colors duration-300 hover:text-gold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold/60"
+                className="group inline-flex items-center gap-2 self-start text-[0.7rem] uppercase tracking-[0.18em] text-ground-muted transition-colors duration-300 hover:text-ground-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold/60"
               >
                 <span className="relative">
                   {expanded ? copy.hidePreferences : copy.managePreferences}
@@ -328,7 +346,7 @@ export default function CookieConsent() {
                   <button
                     type="button"
                     onClick={() => save(draft)}
-                    className={goldButtonClass}
+                    className={acceptButtonClass}
                   >
                     {copy.savePreferences}
                   </button>
@@ -336,7 +354,7 @@ export default function CookieConsent() {
                   <button
                     type="button"
                     onClick={acceptAll}
-                    className={goldButtonClass}
+                    className={acceptButtonClass}
                   >
                     {copy.acceptAll}
                   </button>
