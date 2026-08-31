@@ -6,7 +6,7 @@ import CampaignRecord from "@/src/components/admin/CampaignRecord";
 import CampaignPreview from "@/src/components/admin/CampaignPreview";
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import { isLocale } from "@/src/lib/i18n/config";
-import { audienceCount, getCampaign } from "@/src/services/admin/campaigns";
+import { getCampaign, subscriberCount } from "@/src/services/admin/campaigns";
 import { isEditable } from "@/src/types/campaign";
 
 /**
@@ -35,8 +35,8 @@ export default async function CampaignPage({
 
   const [campaign, en, ar] = await Promise.all([
     getCampaign(id),
-    audienceCount("en"),
-    audienceCount("ar"),
+    subscriberCount("en"),
+    subscriberCount("ar"),
   ]);
 
   if (!campaign) notFound();
@@ -54,11 +54,11 @@ export default async function CampaignPage({
          */
         description={
           editable
-            ? `Not yet sent. The ${
-                campaign.locale === "ar" ? "Arabic" : "English"
-              } list holds ${campaign.audienceNow} subscribed ${
-                campaign.audienceNow === 1 ? "address" : "addresses"
-              } today.`
+            ? `Not yet sent. As selected it would reach ${
+                campaign.audience.total
+              } ${
+                campaign.audience.total === 1 ? "address" : "addresses"
+              } today — choose the audience below before sending.`
             : campaign.subject
         }
       />

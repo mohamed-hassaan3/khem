@@ -34,10 +34,20 @@ import "server-only";
  *
  * ## Privacy
  *
- * `next_campaign_chunk()` returns addresses and unsubscribe tokens because a
+ * `next_campaign_batch()` returns addresses and unsubscribe tokens because a
  * letter cannot be composed without them. **Neither is ever logged.** A token in
  * a log is a credential in a log — anyone holding it can unsubscribe that
  * person. Counts and campaign ids only.
+ *
+ * ## Three audiences, one letter each
+ *
+ * A recipient may be a subscriber, a consenting customer, or an address
+ * somebody typed. Nothing in this file knows the difference: the claim in
+ * `begin_campaign_dispatch()` unions the three and the address is the primary
+ * key, so an address on two lists is already one row by the time anything here
+ * reads it. The unsubscribe token now belongs to the **send row** rather than to
+ * a subscriber, which is what lets a customer's letter carry a working link
+ * without enrolling them in a list they never joined.
  */
 
 import { campaignEmail } from "@/src/lib/email/campaign-template";
@@ -48,7 +58,7 @@ import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { CAMPAIGN_COLUMNS, toCampaign } from "@/src/schemas/db/campaigns";
 import { getSocialProfiles } from "@/src/services/contact";
-import type { Campaign } from "@/src/types/campaign";
+import type { Campaign, CampaignRecipientKind } from "@/src/types/campaign";
 
 /** Resend's documented ceiling for one batch call. */
 const CHUNK_SIZE = 100;
@@ -56,11 +66,12 @@ const CHUNK_SIZE = 100;
 /** How many batches one invocation may send before leaving the rest. */
 const MAX_BATCHES = 10;
 
-/** One claimed recipient, as the chunk query returns them. */
+/** One claimed recipient, as the batch query returns them. */
 interface Recipient {
-  subscriberId: string;
   email: string;
+  /** This send row's own unsubscribe token. Never logged. */
   token: string;
+  kind: CampaignRecipientKind;
 }
 
 export interface DispatchResult {
@@ -92,7 +103,7 @@ async function nextChunk(
   supabase: Supabase,
   id: string,
 ): Promise<Recipient[]> {
-  const { data, error } = await supabase.rpc("next_campaign_chunk", {
+  const { data, error } = await supabase.rpc("next_campaign_batch", {
     campaign_id: id,
     chunk_size: CHUNK_SIZE,
   });
@@ -106,10 +117,14 @@ async function nextChunk(
 
   return data.flatMap((row: unknown) => {
     const entry = row as Partial<Recipient>;
-    return typeof entry.subscriberId === "string" &&
-      typeof entry.email === "string" &&
-      typeof entry.token === "string"
-      ? [{ subscriberId: entry.subscriberId, email: entry.email, token: entry.token }]
+    return typeof entry.email === "string" && typeof entry.token === "string"
+      ? [
+          {
+            email: entry.email,
+            token: entry.token,
+            kind: (entry.kind ?? "SUBSCRIBER") as CampaignRecipientKind,
+          },
+        ]
       : [];
   });
 }
@@ -218,8 +233,13 @@ export async function dispatchCampaign(id: string): Promise<DispatchResult> {
      */
     const results = await sendBatch(resend, letters, `${id}:${batch}`);
 
+    /*
+     * Keyed by address, because that is what the row is keyed by and what the
+     * provider was handed. A recipient with no subscriber row — a customer, a
+     * typed address — has no other identity to stamp against.
+     */
     const items = recipients.map((recipient, index) => ({
-      subscriberId: recipient.subscriberId,
+      email: recipient.email,
       error: results.errors.get(index),
     }));
 

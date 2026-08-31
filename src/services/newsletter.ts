@@ -69,26 +69,59 @@ export async function subscribe(
   return toSubscribeOutcome(data);
 }
 
+const NOT_FOUND: UnsubscribeOutcome = {
+  found: false,
+  alreadyOff: false,
+  email: null,
+};
+
 /**
  * Take an address off the list, by the token in their letter.
  *
  * Idempotent: a second click, or a mail client that fetches the link twice,
  * gets the same answer rather than an error implying it did not work.
+ *
+ * ## Two kinds of token, one link
+ *
+ * A subscriber's row has carried its own token since `0025_newsletter.sql`, and
+ * every letter sent before campaigns had audiences used it. Since
+ * `0036_campaign_audiences.sql` each *send* also carries one, so a customer or a
+ * hand-typed address can unsubscribe without ever having been enrolled in the
+ * Inner Circle — following that one suppresses the address for every future
+ * campaign, and unsubscribes the list row as well when there is one.
+ *
+ * The two are separate secrets in separate tables, so the order below is not a
+ * correctness question: a token matches at most one of them. Subscriber tokens
+ * are tried first because links sent before this change carry those, and a
+ * letter that has already gone must keep working forever.
  */
 export async function unsubscribeByToken(
   token: string,
 ): Promise<UnsubscribeOutcome> {
   const supabase = getSupabaseAdmin();
-  if (!supabase) return { found: false, alreadyOff: false, email: null };
+  if (!supabase) return NOT_FOUND;
 
   const { data, error } = await supabase.rpc("unsubscribe_newsletter", { token });
 
   if (error) {
     console.error(`[newsletter] unsubscribe failed: ${error.message}`);
-    return { found: false, alreadyOff: false, email: null };
+    return NOT_FOUND;
   }
 
-  return toUnsubscribeOutcome(data);
+  const outcome = toUnsubscribeOutcome(data);
+  if (outcome.found) return outcome;
+
+  const { data: bySend, error: sendError } = await supabase.rpc(
+    "unsubscribe_by_campaign_token",
+    { token },
+  );
+
+  if (sendError) {
+    console.error(`[newsletter] campaign unsubscribe failed: ${sendError.message}`);
+    return NOT_FOUND;
+  }
+
+  return toUnsubscribeOutcome(bySend);
 }
 
 /**
