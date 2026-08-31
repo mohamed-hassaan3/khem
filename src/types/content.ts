@@ -197,3 +197,98 @@ export interface CraftQuote {
   /** Role, e.g. "Head Perfumer & Co-Founder, KHEM". */
   authorTitle: string;
 }
+
+// ── The landing-page hero ─────────────────────────────────────
+
+/**
+ * What the first screen of `/` is made of.
+ *
+ * `IMAGES` reads {@link HeroSlide}s and ignores the video fields; `VIDEO` reads
+ * one video and ignores the slides. Never both — see the header of
+ * `supabase/sql/0037_hero.sql`.
+ */
+export type HeroMediaType = "IMAGES" | "VIDEO";
+
+/**
+ * Where the headline, description and button sit in the frame.
+ *
+ * Named for the Latin-script reading, placed with logical properties: under
+ * `dir="rtl"` `BOTTOM_LEFT` lands in the bottom *right*, which is the same
+ * corner of the reading order. See `supabase/sql/0038_hero_content_position.sql`.
+ */
+export type HeroContentPosition = "CENTER" | "BOTTOM_LEFT";
+
+/** One hero image, resolved to the active locale. */
+export interface HeroSlide {
+  id: string;
+  imageUrl: string;
+  /** Already resolved. Never empty — the column refuses it. */
+  alt: string;
+}
+
+/**
+ * The hero, as the storefront renders it.
+ *
+ * **Resolved and already filtered.** The service has chosen between each
+ * English column and its `_ar` twin, and it has applied the three `show*`
+ * booleans: a headline the desk switched off arrives as `null`, so the
+ * component cannot render a heading nobody asked for and has no visibility rule
+ * of its own to get wrong.
+ *
+ * `slides` is empty and `videoUrl` is null when the house has configured no
+ * media. That is the unconfigured state, and the home page answers it with the
+ * typographic composition it opened on before this table existed.
+ */
+export interface Hero {
+  mediaType: HeroMediaType;
+  contentPosition: HeroContentPosition;
+  /** Milliseconds one slide holds. Meaningless with fewer than two slides. */
+  slideDurationMs: number;
+  slides: readonly HeroSlide[];
+  videoUrl: string | null;
+  videoPosterUrl: string | null;
+  /** Resolved. Names the video for somebody who cannot see it. */
+  videoAlt: string | null;
+  headline: string | null;
+  description: string | null;
+  buttonLabel: string | null;
+  /** An app path. `LocaleLink` prefixes it for the active locale. */
+  buttonHref: string | null;
+}
+
+/** One hero image, as the dashboard edits it. */
+export interface AdminHeroSlide {
+  /** `null` for a row added in the editor and not yet written. */
+  id: string | null;
+  imageUrl: string;
+  alt: string;
+  altAr: string | null;
+}
+
+/**
+ * The hero with both languages and the visibility flags, for the editor.
+ *
+ * The `show*` booleans are here and absent from {@link Hero} for the reason
+ * given there: the storefront is handed a decision, the dashboard is handed the
+ * switch.
+ */
+export interface AdminHero {
+  mediaType: HeroMediaType;
+  contentPosition: HeroContentPosition;
+  slideDurationMs: number;
+  videoUrl: string | null;
+  videoPosterUrl: string | null;
+  videoAlt: string | null;
+  videoAltAr: string | null;
+  showHeadline: boolean;
+  showDescription: boolean;
+  showButton: boolean;
+  headline: string | null;
+  headlineAr: string | null;
+  description: string | null;
+  descriptionAr: string | null;
+  buttonLabel: string | null;
+  buttonLabelAr: string | null;
+  buttonHref: string | null;
+  slides: readonly AdminHeroSlide[];
+}

@@ -38,6 +38,7 @@ export type AdminEntity =
   | "product"
   | "article"
   | "image"
+  | "hero"
   | "stockist";
 
 /**
@@ -183,6 +184,31 @@ export function postgresFailure(
           },
         };
       }
+      /*
+       * The hero's two cross-field constraints. `heroSchema` refuses both
+       * first; reaching one here means the schema and the column drifted, so
+       * the message says what the rule means rather than naming it.
+       */
+      if (error.message.includes("HeroSetting_video_present")) {
+        return {
+          ok: false,
+          message: "Some fields need attention.",
+          fieldErrors: {
+            videoUrl: "A video hero needs a video. Add one, or switch back to images.",
+          },
+        };
+      }
+
+      if (error.message.includes("HeroSetting_button_complete")) {
+        return {
+          ok: false,
+          message: "Some fields need attention.",
+          fieldErrors: {
+            buttonHref: "A button needs both a label and somewhere to go.",
+          },
+        };
+      }
+
       return {
         ok: false,
         message: "One of these values is outside the range the database allows.",

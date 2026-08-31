@@ -1,13 +1,17 @@
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import ContentBackLink from "@/src/components/admin/ContentBackLink";
 import ContentRowsEditor from "@/src/components/admin/ContentRowsEditor";
+import HeroForm from "@/src/components/admin/HeroForm";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import {
   createCraftPillar,
   deleteCraftPillar,
   updateCraftPillar,
 } from "@/src/actions/admin/content";
-import { listAdminCraftPillars } from "@/src/services/admin/content";
+import {
+  getAdminHero,
+  listAdminCraftPillars,
+} from "@/src/services/admin/content";
 
 /**
  * The home page, section by section.
@@ -24,6 +28,10 @@ import { listAdminCraftPillars } from "@/src/services/admin/content";
  *
  * ## And it says what is not editable yet
  *
+ * The **hero** used to be on that list and no longer is: it has its own table
+ * (`supabase/sql/0037_hero.sql`) and its editor is on this screen. Everything
+ * else below still applies.
+ *
  * The headings, eyebrows and standfirsts between those bands live in
  * `src/lib/i18n/dictionaries/{en,ar}.ts` — roughly 3,500 lines of typed,
  * interpolated, RTL-aware copy, together with every page's SEO metadata. Moving
@@ -37,7 +45,8 @@ export const dynamic = "force-dynamic";
 const SECTIONS = [
   {
     name: "Hero",
-    source: "Headline, standfirst and the two buttons — code-owned copy.",
+    source: "The first screen — images or a film, and its overlay. Edited below.",
+    here: true,
   },
   {
     name: "Collections",
@@ -86,7 +95,10 @@ export default async function AdminLandingContentPage({
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  const pillars = await listAdminCraftPillars();
+  const [hero, pillars] = await Promise.all([
+    getAdminHero(),
+    listAdminCraftPillars(),
+  ]);
 
   return (
     <>
@@ -133,6 +145,28 @@ export default async function AdminLandingContentPage({
             </li>
           ))}
         </ol>
+      </section>
+
+      <section className="mt-12 space-y-5">
+        <div>
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+            Hero
+          </h2>
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
+            The first screen of the home page. Configure images or a film here;
+            with neither, the page opens on the typographic composition it has
+            always used.
+          </p>
+        </div>
+
+        {hero ? (
+          <HeroForm hero={hero} />
+        ) : (
+          <p className="border border-ground-border px-5 py-4 text-[12px] leading-relaxed text-ground-muted">
+            The hero settings row could not be read. Apply the database
+            migrations (<code>npm run db:migrate</code>) and reload.
+          </p>
+        )}
       </section>
 
       <section className="mt-12 space-y-5">

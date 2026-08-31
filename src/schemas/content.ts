@@ -357,3 +357,186 @@ export const setIngredientProductsSchema = z.object({
     // duplicate anyway; de-duplicating here makes it a no-op rather than an error.
     .transform((slugs) => [...new Set(slugs)]),
 });
+
+// ── The landing-page hero ─────────────────────────────────────
+
+/**
+ * A media URL: absolute, and https only.
+ *
+ * Stricter than the ingredient photograph field above, which still accepts
+ * `http://`. A hero image is the largest asset on the site's most-visited page
+ * and is served into an https document; an insecure one would be blocked as
+ * mixed content and show as a hole in the composition. The database restates
+ * this as a check constraint.
+ */
+function mediaUrl(message: string) {
+  return z
+    .string()
+    .trim()
+    .transform((value) => (value.length === 0 ? null : value))
+    .refine((value) => value === null || /^https:\/\/\S+$/.test(value), message);
+}
+
+/**
+ * The hero button's destination — an app path, or nothing.
+ *
+ * The same rule and the same refusal as `href` in `src/schemas/marketing.ts`:
+ * this value is rendered straight into an anchor above the fold, so absolute
+ * URLs, protocol-relative hosts and `javascript:` are rejected at the boundary
+ * and again by the column. A hero button is not the place to introduce an open
+ * redirect.
+ */
+const heroHrefField = z
+  .string()
+  .trim()
+  .transform((value) => (value.length === 0 ? null : value))
+  .refine(
+    (value) => value === null || /^\/[A-Za-z0-9/_-]*$/.test(value),
+    "Use a path on this site, starting with a slash — for example /collections.",
+  );
+
+/**
+ * One slide.
+ *
+ * A row whose URL and both alts are empty is a spare the editor added and did
+ * not fill in; `heroFields` drops those before this schema ever sees them, which
+ * is why the URL here is required rather than optional.
+ */
+const heroSlideSchema = z.object({
+  id: z
+    .string()
+    .trim()
+    .transform((value) => (value.length === 0 ? null : value))
+    .nullable()
+    .default(null),
+  imageUrl: z
+    .string()
+    .trim()
+    .min(1, "A slide needs an image.")
+    .refine(
+      (value) => /^https:\/\/\S+$/.test(value),
+      "Use a full https:// image address.",
+    ),
+  alt: requiredText(
+    2,
+    160,
+    "Describe the image for anyone who cannot see it.",
+    "That description is too long.",
+  ),
+  altAr: optionalText(160, "That description is too long."),
+});
+
+/** True for a row the editor added and left entirely blank. */
+function isBlankSlide(row: unknown): boolean {
+  if (typeof row !== "object" || row === null) return true;
+
+  const slide = row as Record<string, unknown>;
+
+  return ["imageUrl", "alt", "altAr"].every((key) => {
+    const value = slide[key];
+    return typeof value !== "string" || value.trim().length === 0;
+  });
+}
+
+const heroFields = z.object({
+  mediaType: z.enum(["IMAGES", "VIDEO"], {
+    error: "Choose images or a video.",
+  }),
+
+  /**
+   * Where the words sit. No cross-field rule: a hero with no content at all is
+   * still allowed to carry a position, which is what lets an editor switch the
+   * headline back on and find the composition they left.
+   */
+  contentPosition: z.enum(["CENTER", "BOTTOM_LEFT"], {
+    error: "Choose where the hero content sits.",
+  }),
+
+  slideDurationMs: z.coerce
+    .number({ error: "Choose how long a slide holds." })
+    .int("Whole milliseconds only.")
+    .min(3000, "Three seconds is the shortest a slide may hold.")
+    .max(15000, "Fifteen seconds is the longest a slide may hold."),
+
+  /**
+   * No maximum. One image is a static hero, two or more rotate, and how many a
+   * campaign runs is the house's decision — the storefront fetches only the
+   * first on load, so the marginal one costs a request that may never happen.
+   */
+  slides: z.preprocess(
+    (value) => (Array.isArray(value) ? value.filter((row) => !isBlankSlide(row)) : value),
+    z.array(heroSlideSchema),
+  ),
+
+  videoUrl: mediaUrl("Use a full https:// video address."),
+  videoPosterUrl: mediaUrl("Use a full https:// image address."),
+  videoAlt: optionalText(160, "That description is too long."),
+  videoAltAr: optionalText(160, "That description is too long."),
+
+  showHeadline: z.boolean(),
+  showDescription: z.boolean(),
+  showButton: z.boolean(),
+
+  headline: optionalText(120, "Keep the headline to 120 characters."),
+  headlineAr: optionalText(120, "Keep the headline to 120 characters."),
+  description: optionalText(280, "Keep the description to 280 characters."),
+  descriptionAr: optionalText(280, "Keep the description to 280 characters."),
+  buttonLabel: optionalText(40, "That label is too long."),
+  buttonLabelAr: optionalText(40, "That label is too long."),
+  buttonHref: heroHrefField,
+});
+
+/**
+ * The four rules a hero must satisfy to render rather than break.
+ *
+ * None of them says "there must be media". A hero with no images and no video
+ * is the unconfigured state — the home page answers it with the typographic
+ * composition it has always had — and refusing to save it would leave an editor
+ * unable to clear a campaign.
+ */
+function heroRules(
+  value: z.infer<typeof heroFields>,
+  ctx: z.RefinementCtx,
+): void {
+  if (value.mediaType === "VIDEO" && value.videoUrl === null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["videoUrl"],
+      message: "A video hero needs a video. Add one, or switch back to images.",
+    });
+  }
+
+  if (value.showHeadline && value.headline === null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["headline"],
+      message: "The headline is switched on but empty.",
+    });
+  }
+
+  if (value.showDescription && value.description === null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["description"],
+      message: "The description is switched on but empty.",
+    });
+  }
+
+  if (value.showButton && value.buttonLabel === null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["buttonLabel"],
+      message: "The button is switched on but has no label.",
+    });
+  }
+
+  if (value.showButton && value.buttonHref === null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["buttonHref"],
+      message: "The button is switched on but has nowhere to go.",
+    });
+  }
+}
+
+export const heroSchema = heroFields.superRefine(heroRules);

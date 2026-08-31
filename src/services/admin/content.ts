@@ -23,6 +23,8 @@ import {
   ADMIN_CRAFT_QUOTE_COLUMNS,
   ADMIN_CRAFT_STAT_COLUMNS,
   ADMIN_CRAFT_STEP_COLUMNS,
+  ADMIN_HERO_SETTING_COLUMNS,
+  ADMIN_HERO_SLIDE_COLUMNS,
   ADMIN_INGREDIENT_COLUMNS,
   ADMIN_MISSION_STATEMENT_COLUMNS,
   ADMIN_TIMELINE_COLUMNS,
@@ -31,6 +33,7 @@ import {
   toAdminCraftQuote,
   toAdminCraftStat,
   toAdminCraftStep,
+  toAdminHero,
   toAdminIngredient,
   toAdminMissionStatement,
   toAdminTimelineEvent,
@@ -43,6 +46,7 @@ import {
   type AdminMissionStatement,
   type AdminTimelineEvent,
 } from "@/src/schemas/db/content";
+import type { AdminHero } from "@/src/types/content";
 
 function logFailure(query: string, message: string): void {
   console.error(`[admin] ${query} failed: ${message}`);
@@ -184,4 +188,44 @@ export async function getAdminIngredient(
   }
 
   return toAdminIngredient(data);
+}
+
+/**
+ * The hero, as the editor holds it.
+ *
+ * `null` only when the database is unreachable or the singleton row is missing
+ * — `0037_hero.sql` inserts it, so the screen renders an explanatory empty state
+ * rather than a form whose save would write nothing.
+ *
+ * The slides come back whatever the media type says. An editor who switched to
+ * video for a fortnight still has their campaign images listed underneath, which
+ * is the whole reason the rows are kept rather than deleted on the switch.
+ */
+export async function getAdminHero(): Promise<AdminHero | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+
+  const [setting, slides] = await Promise.all([
+    supabase
+      .from("HeroSetting")
+      .select(ADMIN_HERO_SETTING_COLUMNS)
+      .eq("id", "default")
+      .maybeSingle(),
+    supabase
+      .from("HeroSlide")
+      .select(ADMIN_HERO_SLIDE_COLUMNS)
+      .order("sortOrder")
+      .order("createdAt"),
+  ]);
+
+  if (setting.error) {
+    logFailure("getAdminHero", setting.error.message);
+    return null;
+  }
+
+  if (slides.error) {
+    logFailure("getAdminHero slides", slides.error.message);
+  }
+
+  return toAdminHero(setting.data, slides.data as unknown[] | null);
 }

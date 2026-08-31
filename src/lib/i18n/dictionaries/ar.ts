@@ -160,6 +160,10 @@ export const ar: Dictionary = {
       exploreCollections: "استكشف المجموعات",
       ourStory: "قصّتنا",
       scroll: "مرّر",
+      /** انظر التعليق في النسخة الإنجليزية: أدوات واجهة الحملة المصوّرة. */
+      region: "الحملة المميّزة",
+      slide: "اعرض الشريحة {index} من {total}",
+      video: "فيلم حملة خِم",
     },
     collections: {
       eyebrow: "مجموعاتنا",

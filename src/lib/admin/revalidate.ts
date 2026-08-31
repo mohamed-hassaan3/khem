@@ -212,6 +212,17 @@ export function revalidateCraftPillars(): void {
 }
 
 /**
+ * After the landing-page hero is saved.
+ *
+ * The home page only, both locales. The hero is the first screen of `/` and
+ * appears nowhere else — unlike the announcement bar, which the root layout puts
+ * on every page and which therefore needs the whole tree.
+ */
+export function revalidateHero(): void {
+  revalidateAllLocales(HOME);
+}
+
+/**
  * After a brand value changes. `/heritage`, beside the timeline.
  */
 export function revalidateBrandValues(): void {
