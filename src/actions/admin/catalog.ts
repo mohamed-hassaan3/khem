@@ -530,6 +530,28 @@ export async function setProductArchived(
  * dashboard is more machinery than the risk deserves. The failure mode is
  * bounded and visible: if the insert fails, the gallery is empty, the card
  * falls back to `PLACEHOLDER_IMAGE`, and the editor is told to try again.
+ *
+ * ## Why the previous rows are read first
+ *
+ * A replace writes every column, but this form only *owns* four of them: the
+ * url, the alt text, which row is primary, and the order. `"ProductImage"` also
+ * carries `alt_ar`, `caption` and `caption_ar`, which are edited elsewhere and
+ * are not on this screen at all. Building the new rows from the submitted
+ * fields alone therefore inserted `null` into all three — so reordering a
+ * gallery, or swapping one photograph, silently erased the Arabic alt text and
+ * both captions of every row in it. That is exactly what happened to the Amber
+ * body mist: three rows lost their `alt_ar`, two lost their captions, and
+ * nothing reported an error because nothing had failed.
+ *
+ * So the prior rows are read first and each submitted row is merged **onto** the
+ * one it replaces, keyed by id. The spread is deliberately whole-row rather
+ * than a list of the three columns to rescue: a column added to this table
+ * later is preserved by default, instead of being lost until somebody notices
+ * and adds its name here too. The owned fields are written last and always win.
+ *
+ * The read is also a **precondition**: if it fails, nothing is deleted. A
+ * replace that cannot see what it is replacing is the one case where doing
+ * nothing is unambiguously better than proceeding.
  */
 export async function saveProductImages(
   input: unknown,
@@ -556,8 +578,42 @@ export async function saveProductImages(
    * grid would silently fall back to `sortOrder` and then to a placeholder,
    * which reads as "my photograph did not save".
    */
+  /*
+   * What is about to be replaced. Read before the delete so the columns this
+   * form does not own survive it — see the header.
+   */
+  const { data: previous, error: previousError } = await supabase
+    .from("ProductImage")
+    .select("*")
+    .eq("productSlug", productSlug);
+
+  if (previousError) {
+    console.error(
+      `[admin] gallery read rejected (${actor.email}): ${previousError.message}`,
+    );
+    return {
+      ok: false,
+      message: "The existing photographs could not be read, so nothing was changed.",
+    };
+  }
+
+  /*
+   * Keyed by id, never by url. The editor sends the id of every row it did not
+   * invent this session, so the match is exact; matching on url would carry one
+   * row's caption onto another whenever a gallery repeats a photograph.
+   */
+  const carried = new Map<string, Record<string, unknown>>(
+    (previous ?? []).flatMap((row) => {
+      const record = row as Record<string, unknown>;
+      return typeof record.id === "string" ? [[record.id, record] as const] : [];
+    }),
+  );
+
   const hasPrimary = images.some((image) => image.isPrimary);
   const rows = images.map((image, index) => ({
+    // Whatever the replaced row held, including columns this screen has never
+    // heard of. The owned fields below overwrite their own keys and only those.
+    ...(image.id ? (carried.get(image.id) ?? {}) : {}),
     id: image.id ?? crypto.randomUUID(),
     productSlug,
     url: image.url,

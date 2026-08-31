@@ -96,7 +96,7 @@
       ],
       "facts_ar": null,
       "image": {
-        "url": "https://images.unsplash.com/photo-1607506740211-ff3d6b933dda?w=700&h=900&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-oud.jpg",
         "alt": "Aged oud wood chips resting on dark stone",
         "alt_ar": null
       }
@@ -143,7 +143,7 @@
       ],
       "facts_ar": null,
       "image": {
-        "url": "https://images.unsplash.com/photo-1643797517714-a273548abc3c?w=700&h=900&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-Frankincense.jpg",
         "alt": "Frankincense resin tears in low golden light",
         "alt_ar": null
       }
@@ -185,7 +185,7 @@
       ],
       "facts_ar": null,
       "image": {
-        "url": "https://images.unsplash.com/photo-1640975972263-1f73398e943b?w=700&h=900&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-saffron.jpg",
         "alt": "Hand-picked saffron threads gathered in a dark bowl",
         "alt_ar": null
       }
@@ -236,7 +236,7 @@
       ],
       "facts_ar": null,
       "image": {
-        "url": "https://images.unsplash.com/photo-1533603208986-24fd819e718a?w=700&h=900&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-neroli.jpg",
         "alt": "Neroli blossoms from the Egyptian bitter orange harvest",
         "alt_ar": null
       }
@@ -299,7 +299,7 @@
       ],
       "facts_ar": null,
       "image": {
-        "url": "https://images.unsplash.com/photo-1760860992203-85ca32536788?w=700&h=900&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-amber.jpg",
         "alt": "A weathered piece of ambergris against deep shadow",
         "alt_ar": null
       }
@@ -350,7 +350,7 @@
       ],
       "facts_ar": null,
       "image": {
-        "url": "https://images.unsplash.com/photo-1613549026666-73c9c9083c62?w=700&h=900&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-vetiver.jpg",
         "alt": "Vetiver roots drying before distillation",
         "alt_ar": null
       }
@@ -393,7 +393,7 @@
       ],
       "facts_ar": null,
       "image": {
-        "url": "https://images.unsplash.com/photo-1676950933747-5f886cadf014?w=700&h=900&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-rose.jpg",
         "alt": "Rose petals from Grasse awaiting extraction",
         "alt_ar": null
       }
@@ -448,7 +448,7 @@
       ],
       "facts_ar": null,
       "image": {
-        "url": "https://images.unsplash.com/photo-1631189944771-466264f05965?w=700&h=900&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-black-iris.jpg",
         "alt": "A dark iris bloom against deep shadow",
         "alt_ar": null
       }
@@ -838,7 +838,7 @@
     }
   ],
   "craftQuote": {
-    "id": "leila-hassan",
+    "id": "mohamed-hassaan",
     "quote": "A fragrance is not made. It is discovered — through patience, silence, and an absolute refusal to compromise.",
     "quote_ar": null,
     "author": "Mohamed Hassaan",

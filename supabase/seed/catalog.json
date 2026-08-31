@@ -167,7 +167,7 @@
       "volumeMl": 100,
       "priceInCents": 147000,
       "sku": "KHEM-SIG-SUN-100",
-      "inventory": 18,
+      "inventory": 14,
       "isBestseller": false,
       "collectionSlug": "signature",
       "images": [
@@ -253,7 +253,7 @@
       "volumeMl": 50,
       "priceInCents": 84000,
       "sku": "KHEM-GEM-SAP-050",
-      "inventory": 12,
+      "inventory": 8,
       "isBestseller": false,
       "collectionSlug": "gemstone",
       "images": [
@@ -337,7 +337,7 @@
       "volumeMl": 100,
       "priceInCents": 147000,
       "sku": "KHEM-SIG-ONX-100",
-      "inventory": 24,
+      "inventory": 20,
       "isBestseller": true,
       "collectionSlug": "signature",
       "images": [
@@ -421,7 +421,7 @@
       "volumeMl": 100,
       "priceInCents": 147000,
       "sku": "KHEM-SIG-IVO-100",
-      "inventory": 18,
+      "inventory": 16,
       "isBestseller": true,
       "collectionSlug": "signature",
       "images": [
@@ -841,7 +841,7 @@
       "volumeMl": 100,
       "priceInCents": 288000,
       "sku": "KHEM-NOI-MEN-100",
-      "inventory": 11,
+      "inventory": 8,
       "isBestseller": true,
       "collectionSlug": "noir",
       "images": [
@@ -1321,12 +1321,12 @@
       "volumeMl": 150,
       "priceInCents": 39000,
       "sku": "KHEM-BOD-AMB-150",
-      "inventory": 30,
+      "inventory": 29,
       "isBestseller": false,
       "collectionSlug": "body-care",
       "images": [
         {
-          "url": "https://images.unsplash.com/photo-1767360963892-3353defd6584?w=600&h=800&fit=crop&auto=format",
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-AMBER.jpg",
           "alt": "The Amber body mist bottle standing in soft golden light",
           "alt_ar": "زجاجه رذاذ Amber للجسم واقفة في ضوء ذهبي ناعم",
           "caption": "The bottle, photographed under the same low light the accord was corrected in.",
@@ -1381,7 +1381,7 @@
       "volumeMl": 150,
       "priceInCents": 39000,
       "sku": "KHEM-BOD-OPA-150",
-      "inventory": 30,
+      "inventory": 29,
       "isBestseller": false,
       "collectionSlug": "body-care",
       "images": [
@@ -1561,7 +1561,7 @@
       "volumeMl": 200,
       "priceInCents": 49000,
       "sku": "KHEM-HOM-AMB-200",
-      "inventory": 24,
+      "inventory": 23,
       "isBestseller": false,
       "collectionSlug": "home-fragrance",
       "images": [
@@ -1815,7 +1815,7 @@
       "volumeMl": 18,
       "priceInCents": 69000,
       "sku": "KHEM-DIS-INI-018",
-      "inventory": 40,
+      "inventory": 38,
       "isBestseller": false,
       "collectionSlug": "discovery",
       "images": [
