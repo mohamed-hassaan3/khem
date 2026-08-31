@@ -1326,21 +1326,21 @@
       "collectionSlug": "body-care",
       "images": [
         {
-          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-AMBER.jpg",
-          "alt": "The Amber body mist bottle standing in soft golden light",
-          "alt_ar": "زجاجه رذاذ Amber للجسم واقفة في ضوء ذهبي ناعم",
-          "caption": "The bottle, photographed under the same low light the accord was corrected in.",
-          "caption_ar": "الزجاجة، مصوَّرة تحت الضوء الخافت نفسه الذي صُحِّح فيه الأكورد.",
-          "isPrimary": true,
-          "sortOrder": 0
-        },
-        {
           "url": "https://images.unsplash.com/photo-1643797517714-a273548abc3c?w=800&h=1000&fit=crop&auto=format",
           "alt": "Frankincense resin tears in low golden light",
           "alt_ar": "دموع راتنج اللبان في ضوء ذهبي خافت",
           "caption": "Benzoin arrives as resin, is weighed as resin, and is never rushed into solution.",
           "caption_ar": "يصل اللبان الجاوي راتنجًا، ويُوزن راتنجًا، ولا يُستعجَل ذوبانه أبدًا.",
           "isPrimary": false,
+          "sortOrder": 0
+        },
+        {
+          "url": "https://res.cloudinary.com/co1xzkhf/image/upload/hero-AMBER.jpg",
+          "alt": "The Amber body mist bottle standing in soft golden light",
+          "alt_ar": "زجاجه رذاذ Amber للجسم واقفة في ضوء ذهبي ناعم",
+          "caption": "The bottle, photographed under the same low light the accord was corrected in.",
+          "caption_ar": "الزجاجة، مصوَّرة تحت الضوء الخافت نفسه الذي صُحِّح فيه الأكورد.",
+          "isPrimary": true,
           "sortOrder": 1
         },
         {
