@@ -8,12 +8,12 @@ import "server-only";
  * `promotions` has no `productCount` column, for the reason `0026` gives about
  * credit balances and `0028` gives about redemption counts: a stored figure and
  * the rows it describes are two records of one fact, and the day they disagree
- * there is no way to tell which is lying. A campaign's reach is a `select` over
+ * there is no way to tell which is lying. A promotion's reach is a `select` over
  * `active_product_promotions`, which is the same view the storefront prices
  * from — so the number on the list is the number of products actually being
  * repriced, not the number somebody selected.
  *
- * That distinction matters more here than it looks: a collection-scoped campaign
+ * That distinction matters more here than it looks: a collection-scoped promotion
  * that a product-scoped one outranks will show a smaller count than its
  * selection, and that is the truth about what it is doing.
  */
@@ -83,7 +83,7 @@ async function targetsFor(promotionId: string): Promise<PromotionTargets> {
   };
 }
 
-/** Every campaign, newest first, with what it is currently repricing. */
+/** Every promotion, newest first, with what it is currently repricing. */
 export async function listPromotions(): Promise<PromotionDetail[]> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return [];
@@ -115,7 +115,7 @@ export async function listPromotions(): Promise<PromotionDetail[]> {
   });
 }
 
-/** One campaign, with its selections, for the editor. */
+/** One promotion, with its selections, for the editor. */
 export async function getPromotion(id: string): Promise<PromotionDetail | null> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;

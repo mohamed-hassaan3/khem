@@ -11,16 +11,16 @@
  * These actions govern **what a customer is charged**, which puts them beside
  * `actions/admin/discounts.ts` as the most consequential writes in the
  * dashboard. And like those, nothing here computes a price: they describe a
- * campaign, and `active_product_promotions` applies it — inside the order
+ * promotion, and `active_product_promotions` applies it — inside the order
  * transaction, when `place_order()` reads it under a row lock.
  *
  * ## Deactivating is not deleting
  *
- * Switching a campaign off, or letting its window lapse, stops it repricing
+ * Switching a promotion off, or letting its window lapse, stops it repricing
  * anything while the row and its selections survive. Deleting removes them —
  * and, because `"OrderItem"."promotionId"` is `on delete set null`, past orders
  * keep the price they were charged and their `listPriceInCents` snapshot; only
- * the *name* of the campaign is lost. That is the right trade: no order is ever
+ * the *name* of the promotion is lost. That is the right trade: no order is ever
  * repriced by an edit here.
  */
 
@@ -65,14 +65,14 @@ function failure(error: PostgresErrorLike): AdminActionResult {
 }
 
 /**
- * Replace a campaign's target sets.
+ * Replace a promotion's target sets.
  *
  * Cleared and rewritten rather than diffed, for the reason
  * `actions/admin/discounts.ts` gives: these are two-column junctions with no
  * identity of their own and no history worth keeping, so a diff would be
  * ceremony.
  *
- * **Both are cleared regardless of scope.** Switching a campaign from products
+ * **Both are cleared regardless of scope.** Switching a promotion from products
  * to collections must not leave its old product rows behind — they would be
  * invisible in the editor and would come back the moment somebody switched the
  * scope again.
@@ -183,7 +183,7 @@ export async function createPromotion(input: unknown): Promise<AdminActionResult
     return {
       ok: false,
       message:
-        "The campaign was created, but what it applies to could not be saved. Open it and set the selection again.",
+        "The promotion was created, but what it applies to could not be saved. Open it and set the selection again.",
     };
   }
 
@@ -247,7 +247,7 @@ export async function updatePromotion(input: unknown): Promise<AdminActionResult
   return { ok: true, slug: id, message: `${String(data.name)} saved.` };
 }
 
-/** Stop or restart a campaign without touching its selections. */
+/** Stop or restart a promotion without touching its selections. */
 export async function setPromotionActive(
   input: unknown,
 ): Promise<AdminActionResult> {
