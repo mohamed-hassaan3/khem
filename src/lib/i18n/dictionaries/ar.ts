@@ -167,7 +167,7 @@ export const ar: Dictionary = {
     },
     collections: {
       eyebrow: "مجموعاتنا",
-      heading: "عالمان من العطور",
+      heading: "عوالم من العطور",
       ordinal: "المجموعة {ordinal}",
       sliderLabel: "مجموعاتنا",
       previous: "المجموعة السابقة",

@@ -34,7 +34,17 @@ export default function NewArrivalHero({
   imageAlt,
 }: NewArrivalHeroProps) {
   return (
-    <section className="ground-ivory relative flex h-[78vh] min-h-140 items-center justify-center overflow-hidden bg-sand">
+    /*
+     * Centred type, on the floor.
+     *
+     * The alignment is the page's own — a showroom opening has no reading
+     * column to hang off, and centring it is deliberate — but the *vertical*
+     * placement now follows `<CollectionView>` like every other banner: the
+     * photograph owns the top of the frame, the ivory floor comes up under the
+     * words. Centred in the middle of the picture is what forced the radial
+     * pool that was washing the release photography out.
+     */
+    <section className="ground-ivory relative flex h-[78vh] min-h-165 items-end justify-center overflow-hidden bg-sand">
       <Image
         src={imageUrl}
         alt={imageAlt}
@@ -46,14 +56,19 @@ export default function NewArrivalHero({
       />
 
       {/*
-        The house banner scrim, centre anchor — the type is centred over the
-        frame and has no edge to anchor to, so a radial pool carries it. This
-        was two hand-written layers saying roughly the same thing; the variant
-        keeps both jobs and holds the same contrast floor as the other anchors.
+        The house banner scrim — the floor, as on every page banner, reaching
+        far enough to clear a centred block that runs eyebrow → title → rule →
+        description → count (~63% of the frame on a phone, ~73% on a desktop) —
+        and reaching a little further than the category mastheads because the
+        release photography is dark marble, where the gold eyebrow at the top of
+        the block needs more floor under it than a pale still life does.
       */}
-      <div aria-hidden="true" className="banner-scrim banner-scrim-center" />
+      <div
+        aria-hidden="true"
+        className="banner-scrim banner-scrim-base [--scrim-mid:58%] [--scrim-end:100%] md:[--scrim-mid:52%] md:[--scrim-end:96%]"
+      />
 
-      <div className="relative z-1 w-full px-4 text-center md:px-20">
+      <div className="relative z-1 w-full px-4 pb-14 text-center md:px-20 md:pb-18">
         <div className="mx-auto max-w-3xl">
           <p className="eyebrow mb-6">{eyebrow}</p>
 

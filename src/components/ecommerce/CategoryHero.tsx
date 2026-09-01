@@ -36,14 +36,28 @@ export default function CategoryHero({
   /*
    * The category banner, as an *editorial* banner (§14).
    *
-   * Charcoal type over the photograph's own light, with an ivory gradient
-   * holding the reading column. It was ivory type over `brightness-30`, which
-   * is the dark banner §14 asks to stop repeating — and this component is
-   * mounted by every category page, so it was repeating it more than any other
-   * single element on the site.
+   * ## The type sits on the floor, not in the middle of the picture
+   *
+   * This was `items-center` with a reading-column scrim: the words ran across
+   * the middle of the frame, which meant the gradient had to be strong enough
+   * to carry a paragraph over the busiest part of the photograph. The result
+   * was a banner you could read and could not see — at 390px, Body Care was a
+   * washed corner of a bottle behind a lede, while `/collections/signature`
+   * one section away showed its photograph whole.
+   *
+   * So the composition follows `<CollectionView>`, which is the house
+   * reference: the photograph owns the top of the frame at its own luminance,
+   * the ivory floor comes up under the type, and the reader sees the artwork
+   * before reading a word. The copy, the type scale and the two-line title are
+   * untouched — this is where they sit, not what they say.
+   *
+   * The frame is taller on a phone than on a desktop (`80vh` → `70vh`) and
+   * not by accident: the text block is a fixed number of *lines*, so it eats a
+   * far larger share of a narrow frame. Holding the picture's share roughly
+   * constant across widths is what makes one banner rather than three.
    */
   return (
-    <section className="ground-ivory relative flex h-[60vh] min-h-105 items-center overflow-hidden bg-sand">
+    <section className="ground-ivory relative flex h-[80vh] min-h-150 items-end overflow-hidden bg-sand md:h-[70vh] md:min-h-140">
       <Image
         src={imageUrl}
         alt={imageAlt}
@@ -55,20 +69,25 @@ export default function CategoryHero({
       />
 
       {/*
-       * The house banner scrim, column anchor — see `globals.css`.
-       *
-       * This component is why the primitive exists. It carried a *horizontal
-       * gradient only*, which guarantees nothing: on `/collections/body-care`
-       * it had faded out exactly where the eyebrow and the lede sit, leaving
-       * charcoal type on a dark vase. The column variant keeps that
-       * composition and adds the floor underneath it.
-       *
-       * It also mirrors with the document, so the Arabic reading column gets
-       * the opaque side rather than the busy half of the frame.
+       * The house banner scrim — one variant, the floor. With the type on the
+       * bottom edge there is nothing left for a horizontal wash to protect,
+       * and the mirrored reading-column gradient this used to carry went with
+       * it: an RTL page now gets the same floor as an LTR one, because a floor
+       * has no side.
        */}
-      <div aria-hidden="true" className="banner-scrim banner-scrim-column" />
+      {/*
+       * The floor is pushed up to clear this banner's own copy — eyebrow,
+       * two-line title, rule, lede and an optional note. Measured, not
+       * guessed: the block's top edge sits at ~53% of the frame on a phone and
+       * ~73% on a desktop, so the wash has to have fallen to nothing above
+       * that, not at the collection banners' 64%.
+       */}
+      <div
+        aria-hidden="true"
+        className="banner-scrim banner-scrim-base [--scrim-mid:32%] [--scrim-end:72%] md:[--scrim-mid:46%] md:[--scrim-end:90%]"
+      />
 
-      <div className="relative z-1 w-full px-4 md:px-20">
+      <div className="relative z-1 w-full px-4 pb-14 md:px-20 md:pb-18">
         <div className="mx-auto max-w-350">
           <div className="max-w-2xl">
             <p className="eyebrow mb-5">{eyebrow}</p>

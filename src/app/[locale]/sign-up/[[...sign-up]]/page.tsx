@@ -51,6 +51,7 @@ export default async function SignUpPage({
 
   return (
     <AuthShell
+      logoAlt={dict.footer.logoAlt}
       eyebrow={dict.auth.signUp.eyebrow}
       heading={dict.auth.signUp.heading}
       body={dict.auth.signUp.body}

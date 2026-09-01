@@ -200,7 +200,7 @@ export const en = {
     },
     collections: {
       eyebrow: "Our Collections",
-      heading: "Two Worlds of Scent",
+      heading: "Worlds of Scent",
       ordinal: "Collection {ordinal}",
       /* Names the slider's scroll region and its two pointer controls. */
       sliderLabel: "Our collections",
