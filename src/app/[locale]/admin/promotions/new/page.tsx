@@ -9,7 +9,7 @@ import {
   listAdminProducts,
 } from "@/src/services/admin/catalog";
 
-/** A new campaign. Targets are pickers over the live catalog, never free text. */
+/** A new promotion. Targets are pickers over the live catalog, never free text. */
 export const dynamic = "force-dynamic";
 
 export default async function NewPromotionPage({
@@ -37,7 +37,7 @@ export default async function NewPromotionPage({
 
       <AdminPageHeader
         title="New promotion"
-        description="What the campaign takes off is applied by the database when an order is placed. This screen describes the rule."
+        description="What the promotion takes off is applied by the database when an order is placed. This screen describes the rule."
       />
 
       <PromotionForm

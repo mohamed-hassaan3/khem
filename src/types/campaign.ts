@@ -47,6 +47,10 @@ export interface Campaign {
   ctaHref: string;
   /** A real `discounts.code`, guaranteed by a foreign key. */
   discountCode: string | null;
+  /** Whether the Inner Circle list in this campaign's language is included. */
+  toSubscribers: boolean;
+  /** Whether consenting customers are included. Never anybody who declined. */
+  toCustomers: boolean;
   status: CampaignStatus;
   scheduledAt: string | null;
   sentAt: string | null;
@@ -56,14 +60,37 @@ export interface Campaign {
   updatedAt: string;
 }
 
+/** Which list a claimed recipient came from. */
+export type CampaignRecipientKind = "SUBSCRIBER" | "CUSTOMER" | "SPECIFIC";
+
+/**
+ * Who a campaign would reach if it went now.
+ *
+ * `total` is **not** the sum of the other three. An address that is both a
+ * subscriber and a consenting customer is counted once, under the source it was
+ * attributed to — which is exactly the number of letters that would leave,
+ * because `campaign_sends` is keyed on the address and the second claim
+ * conflicts. The screen shows both figures for that reason: the sources explain
+ * where the audience came from, the total says what will happen.
+ */
+export interface AudienceBreakdown {
+  subscribers: number;
+  customers: number;
+  specific: number;
+  /** Deduplicated. The number of letters. */
+  total: number;
+}
+
 /** A campaign with what has become of it. */
 export interface CampaignWithProgress extends Campaign {
   /** Letters claimed for it. Zero until dispatch begins. */
   claimed: number;
   /** Of those, how many the provider accepted. */
   delivered: number;
-  /** How many addresses it would reach if sent now. */
-  audienceNow: number;
+  /** Who it would reach if sent now. */
+  audience: AudienceBreakdown;
+  /** The addresses somebody typed for this campaign, lowercased. */
+  recipients: string[];
 }
 
 /** True while a campaign may still be edited. */

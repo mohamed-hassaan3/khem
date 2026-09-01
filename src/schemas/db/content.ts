@@ -11,14 +11,22 @@
 import { z } from "zod";
 
 import type { Locale } from "@/src/lib/i18n/config";
-import { resolveList, resolveText } from "@/src/lib/i18n/resolve";
+import {
+  resolveList,
+  resolveOptionalText,
+  resolveText,
+} from "@/src/lib/i18n/resolve";
 
 import type {
+  AdminHero,
+  AdminHeroSlide,
   BrandValue,
   CraftPillar,
   CraftQuote,
   CraftStat,
   CraftStep,
+  Hero,
+  HeroSlide,
   Ingredient,
   JournalArticle,
   MissionStatement,
@@ -602,4 +610,183 @@ export type AdminCraftQuote = z.infer<typeof adminCraftQuoteRowSchema>;
 export function toAdminCraftQuote(row: unknown): AdminCraftQuote | null {
   const parsed = adminCraftQuoteRowSchema.safeParse(row);
   return parsed.success ? parsed.data : null;
+}
+
+// ── Hero ──────────────────────────────────────────────────────
+
+const heroMediaTypeSchema = z.enum(["IMAGES", "VIDEO"]);
+
+const heroContentPositionSchema = z.enum(["CENTER", "BOTTOM_LEFT"]);
+
+export const HERO_SLIDE_COLUMNS = "id, imageUrl, alt, alt_ar";
+
+const heroSlideRowSchema = z.object({
+  id: z.string(),
+  imageUrl: z.string(),
+  alt: z.string(),
+  alt_ar: z.string().nullable().default(null),
+});
+
+export function toHeroSlide(row: unknown, locale: Locale): HeroSlide | null {
+  const parsed = heroSlideRowSchema.safeParse(row);
+  if (!parsed.success) return null;
+
+  const { alt_ar, ...slide } = parsed.data;
+
+  return { ...slide, alt: resolveText(slide.alt, alt_ar, locale) };
+}
+
+export const HERO_SETTING_COLUMNS =
+  "mediaType, contentPosition, slideDurationMs, videoUrl, videoPosterUrl, videoAlt, " +
+  "videoAlt_ar, showHeadline, showDescription, showButton, headline, " +
+  "headline_ar, description, description_ar, buttonLabel, buttonLabel_ar, " +
+  "buttonHref";
+
+const heroSettingRowSchema = z.object({
+  mediaType: heroMediaTypeSchema.default("IMAGES"),
+  contentPosition: heroContentPositionSchema.catch("CENTER"),
+  slideDurationMs: z.coerce.number().default(6000),
+  videoUrl: z.string().nullable().default(null),
+  videoPosterUrl: z.string().nullable().default(null),
+  videoAlt: z.string().nullable().default(null),
+  videoAlt_ar: z.string().nullable().default(null),
+  showHeadline: z.boolean().default(false),
+  showDescription: z.boolean().default(false),
+  showButton: z.boolean().default(false),
+  headline: z.string().nullable().default(null),
+  headline_ar: z.string().nullable().default(null),
+  description: z.string().nullable().default(null),
+  description_ar: z.string().nullable().default(null),
+  buttonLabel: z.string().nullable().default(null),
+  buttonLabel_ar: z.string().nullable().default(null),
+  buttonHref: z.string().nullable().default(null),
+});
+
+/**
+ * The storefront's hero, with every decision already made.
+ *
+ * Two of those decisions are worth naming, because they are the reason this
+ * mapper exists rather than the component reading the row:
+ *
+ * 1. **The `show*` flags are applied here.** A headline that is switched off, or
+ *    switched on with nothing typed into it, both arrive as `null` — so the
+ *    component's only question is "is there a headline", and there is no second
+ *    visibility rule in the view layer to disagree with this one.
+ * 2. **The media branch is applied here.** A hero in `VIDEO` mode is handed no
+ *    slides and a hero in `IMAGES` mode is handed no video, whatever the row
+ *    happens to still hold from a previous campaign. The columns keep their
+ *    values so an editor can switch back; the storefront never sees the half it
+ *    is not showing.
+ *
+ * A button survives only with both a label and a destination. The database says
+ * the same thing in a check constraint; this is the defensive half, for a row
+ * written before that constraint existed.
+ */
+export function toHero(
+  row: unknown,
+  slideRows: readonly unknown[] | null,
+  locale: Locale,
+): Hero | null {
+  const parsed = heroSettingRowSchema.safeParse(row);
+  if (!parsed.success) return null;
+
+  const setting = parsed.data;
+  const isVideo = setting.mediaType === "VIDEO";
+
+  const slides = isVideo
+    ? []
+    : (slideRows ?? [])
+        .map((slideRow) => toHeroSlide(slideRow, locale))
+        .filter((slide): slide is HeroSlide => slide !== null);
+
+  const headline = setting.showHeadline
+    ? resolveOptionalText(setting.headline, setting.headline_ar, locale)
+    : null;
+  const description = setting.showDescription
+    ? resolveOptionalText(setting.description, setting.description_ar, locale)
+    : null;
+  const buttonLabel = setting.showButton
+    ? resolveOptionalText(setting.buttonLabel, setting.buttonLabel_ar, locale)
+    : null;
+  const buttonHref = setting.showButton ? setting.buttonHref : null;
+
+  const hasButton = buttonLabel !== null && buttonHref !== null;
+
+  return {
+    mediaType: setting.mediaType,
+    contentPosition: setting.contentPosition,
+    slideDurationMs: setting.slideDurationMs,
+    slides,
+    videoUrl: isVideo ? setting.videoUrl : null,
+    videoPosterUrl: isVideo ? setting.videoPosterUrl : null,
+    videoAlt: isVideo
+      ? resolveOptionalText(setting.videoAlt, setting.videoAlt_ar, locale)
+      : null,
+    headline,
+    description,
+    buttonLabel: hasButton ? buttonLabel : null,
+    buttonHref: hasButton ? buttonHref : null,
+  };
+}
+
+/** The dashboard's projection — both languages, the flags, and the order. */
+export const ADMIN_HERO_SLIDE_COLUMNS = `${HERO_SLIDE_COLUMNS}, sortOrder`;
+
+const adminHeroSlideRowSchema = heroSlideRowSchema.extend({
+  sortOrder: z.coerce.number().default(0),
+});
+
+export function toAdminHeroSlide(row: unknown): AdminHeroSlide | null {
+  const parsed = adminHeroSlideRowSchema.safeParse(row);
+  if (!parsed.success) return null;
+
+  return {
+    id: parsed.data.id,
+    imageUrl: parsed.data.imageUrl,
+    alt: parsed.data.alt,
+    altAr: parsed.data.alt_ar,
+  };
+}
+
+export const ADMIN_HERO_SETTING_COLUMNS = HERO_SETTING_COLUMNS;
+
+/**
+ * The hero as the editor holds it: nothing resolved, nothing filtered.
+ *
+ * `resolveText()` would hand back the English fallback for an empty Arabic
+ * field, and saving that would write the English copy into the Arabic column as
+ * though somebody had translated it — the reason `src/services/admin/content.ts`
+ * gives at the top for every one of these twins.
+ */
+export function toAdminHero(
+  row: unknown,
+  slideRows: readonly unknown[] | null,
+): AdminHero | null {
+  const parsed = heroSettingRowSchema.safeParse(row);
+  if (!parsed.success) return null;
+
+  const setting = parsed.data;
+
+  return {
+    mediaType: setting.mediaType,
+    contentPosition: setting.contentPosition,
+    slideDurationMs: setting.slideDurationMs,
+    videoUrl: setting.videoUrl,
+    videoPosterUrl: setting.videoPosterUrl,
+    videoAlt: setting.videoAlt,
+    videoAltAr: setting.videoAlt_ar,
+    showHeadline: setting.showHeadline,
+    showDescription: setting.showDescription,
+    showButton: setting.showButton,
+    headline: setting.headline,
+    headlineAr: setting.headline_ar,
+    description: setting.description,
+    descriptionAr: setting.description_ar,
+    buttonLabel: setting.buttonLabel,
+    buttonLabelAr: setting.buttonLabel_ar,
+    buttonHref: setting.buttonHref,
+    slides: (slideRows ?? [])
+      .map(toAdminHeroSlide)
+      .filter((slide): slide is AdminHeroSlide => slide !== null),
+  };
 }

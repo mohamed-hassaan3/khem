@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import LocaleLink from "@/src/components/i18n/LocaleLink";
@@ -42,6 +43,32 @@ import type { Announcement, AnnouncementMode } from "@/src/types/marketing";
  * The animation is paused while the pointer is over the bar and while anything
  * inside it has focus, so a link in a moving track can actually be clicked.
  *
+ * ## Going back
+ *
+ * The carousel carries two arrows. A rotating bar has one real failure — a
+ * visitor reads half a line and it is replaced — and the only fix for it is a
+ * way back. They wrap in both directions: from the first message, previous
+ * shows the last, which is what the automatic rotation already does going
+ * forward, so the two agree about the shape of the list.
+ *
+ * A click restarts the timer rather than adding a second one. `epoch` is in the
+ * interval effect's dependency list, so selecting a message tears the interval
+ * down and arms a fresh one — the chosen message then holds for its full
+ * interval instead of being rotated away immediately, and there is never more
+ * than one timer alive because that effect's cleanup is its only owner.
+ *
+ * The arrows appear in `CAROUSEL` alone. `STATIC` has nowhere to go, and the
+ * marquee is a continuous track with no discrete current message to step
+ * between — arrows there would have to mean something invented.
+ *
+ * They sit **beside the message**, not at the ends of the bar. Pinned to the
+ * viewport edges they were two unexplained glyphs a metre apart on a desktop
+ * screen, with no visible relationship to the sentence they move; beside the
+ * text they read as one control — `←  message  →` — and the group stays
+ * together at every width. The message truncates before it reaches either
+ * arrow, so the bar is still exactly one line tall and still cannot reflow the
+ * page.
+ *
  * ## Stacking
  *
  * `z-997` sits **below** the mega-menu scrim (`z-998`) and the mobile drawer
@@ -66,6 +93,7 @@ export default function AnnouncementBar({
 }) {
   const dict = useDictionary();
   const [index, setIndex] = useState(0);
+  const [epoch, setEpoch] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
   /*
@@ -84,7 +112,18 @@ export default function AnnouncementBar({
     }, intervalMs);
 
     return () => window.clearInterval(timer);
-  }, [effectiveMode, isPaused, intervalMs, announcements.length]);
+    // `epoch` is the reset: an arrow restarts this interval rather than
+    // adding one.
+  }, [effectiveMode, isPaused, epoch, intervalMs, announcements.length]);
+
+  /** Step the bar by hand, and give the new message a full interval. */
+  function step(delta: 1 | -1) {
+    setIndex((current) => {
+      const count = announcements.length;
+      return (current + delta + count) % count;
+    });
+    setEpoch((current) => current + 1);
+  }
 
   /*
    * The list is doubled so the track can loop seamlessly: the animation travels
@@ -133,22 +172,89 @@ export default function AnnouncementBar({
         </div>
       ) : (
         /*
-         * `polite`, never `assertive`: a rotating marketing line must not
-         * interrupt what somebody is reading further down the page.
+         * One centred row: arrow, message, arrow. The row is `max-w-full` and
+         * the message `min-w-0`, which is what lets the sentence truncate
+         * rather than push the arrows off the ends of the bar on a narrow
+         * phone.
          */
-        <p
-          aria-live="polite"
-          aria-atomic="true"
-          className="w-full px-5 text-center sm:px-8"
-        >
-          <Message
-            key={announcements[index % announcements.length].id}
-            announcement={announcements[index % announcements.length]}
-            fade={effectiveMode === "CAROUSEL"}
-          />
-        </p>
+        <div className="mx-auto flex max-w-full items-center justify-center px-2 sm:px-4">
+          {effectiveMode === "CAROUSEL" ? (
+            <Arrow
+              direction="previous"
+              label={dict.announcementBar.previous}
+              onClick={() => step(-1)}
+            />
+          ) : null}
+
+          {/*
+           * `polite`, never `assertive`: a rotating marketing line must not
+           * interrupt what somebody is reading further down the page.
+           */}
+          <p
+            aria-live="polite"
+            aria-atomic="true"
+            className="min-w-0 px-1 text-center sm:px-2"
+          >
+            <Message
+              key={announcements[index % announcements.length].id}
+              announcement={announcements[index % announcements.length]}
+              fade={effectiveMode === "CAROUSEL"}
+            />
+          </p>
+
+          {effectiveMode === "CAROUSEL" ? (
+            <Arrow
+              direction="next"
+              label={dict.announcementBar.next}
+              onClick={() => step(1)}
+            />
+          ) : null}
+        </div>
       )}
     </aside>
+  );
+}
+
+/**
+ * One of the two carousel controls, in the row beside the message.
+ *
+ * The order in the DOM is previous-message-next, so direction follows the
+ * writing mode for free: in Arabic the row is laid out right-to-left and
+ * "previous" is on the right, where a reader of Arabic reaches for it. The
+ * glyph is mirrored in CSS for the same reason — a chevron pointing the wrong
+ * way in RTL is the commonest version of this bug, and it is a layout question
+ * rather than a locale one.
+ *
+ * The hit area is the full height of the bar and 36px wide — as wide as the bar
+ * is tall, so the target is square rather than a sliver. What is *drawn* is a
+ * 13px chevron at muted weight: this is the site's quietest strip of chrome and
+ * the arrows have to be findable without becoming the loudest thing on it.
+ */
+function Arrow({
+  direction,
+  label,
+  onClick,
+}: {
+  direction: "previous" | "next";
+  label: string;
+  onClick: () => void;
+}) {
+  const Glyph = direction === "previous" ? ChevronLeft : ChevronRight;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="flex h-[var(--announcement-h)] w-9 shrink-0 items-center justify-center text-ground-muted transition-colors duration-300 hover:text-ground focus-visible:text-ground-accent focus-visible:outline-none"
+    >
+      <Glyph
+        size={13}
+        strokeWidth={1.25}
+        aria-hidden
+        className="rtl:-scale-x-100"
+      />
+    </button>
   );
 }
 

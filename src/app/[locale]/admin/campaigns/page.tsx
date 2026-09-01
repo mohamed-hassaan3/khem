@@ -10,7 +10,7 @@ import {
   AdminTable,
 } from "@/src/components/admin/AdminTable";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
-import { audienceCount, listCampaigns } from "@/src/services/admin/campaigns";
+import { listCampaigns, subscriberCount } from "@/src/services/admin/campaigns";
 import { isEditable } from "@/src/types/campaign";
 
 /**
@@ -44,8 +44,8 @@ export default async function AdminCampaignsPage({
   const [{ locale }, campaigns, en, ar] = await Promise.all([
     params,
     listCampaigns(),
-    audienceCount("en"),
-    audienceCount("ar"),
+    subscriberCount("en"),
+    subscriberCount("ar"),
   ]);
 
   const activeLocale = isLocale(locale) ? locale : "en";

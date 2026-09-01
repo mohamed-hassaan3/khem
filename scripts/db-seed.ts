@@ -30,6 +30,24 @@
  * - Every value travels as a bound parameter. Nothing is interpolated into SQL:
  *   this data is editorial prose full of apostrophes, and it is injection-proof
  *   by construction rather than by escaping.
+ *
+ * ## Which database
+ *
+ * None of the safety above answers the question that actually matters before a
+ * production deployment: *is this pointed at the right database?* Upsert-only
+ * means this script cannot delete anything, but run against production with a
+ * stale `SUPABASE_DB_URL` it would **overwrite** live content — every heading an
+ * editor has fixed since the export was taken, replaced by the frozen JSON, in
+ * one transaction that succeeds.
+ *
+ * So a remote target has to be named out loud:
+ *
+ *     KHEM_SEED_CONFIRM=<host> npm run db:seed
+ *
+ * A local database needs nothing. The variable is deliberately the *host* rather
+ * than a yes: typing `db.abcd.supabase.co` is a moment spent reading which
+ * project is about to be written to, and copying `KHEM_SEED_CONFIRM=yes` out of
+ * a runbook is not.
  */
 
 import { readFile } from "node:fs/promises";
@@ -529,7 +547,62 @@ async function seedDirectory(
   );
 }
 
+/**
+ * Hosts that are unambiguously a developer's own machine.
+ *
+ * Everything else — a Supabase project, a staging box, anything reached over a
+ * network — is treated as data somebody could be looking at.
+ */
+const LOCAL_HOSTS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "::1",
+  "[::1]",
+  "host.docker.internal",
+]);
+
+/**
+ * Refuse a remote database unless it was named.
+ *
+ * Throws rather than returning a boolean: the only correct response to "this
+ * might be production" is to not run, and a caller cannot forget to check the
+ * result of something that throws.
+ */
+function guardTarget(url: string): void {
+  let host: string;
+
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    throw new Error("The database URL could not be parsed. Refusing to seed.");
+  }
+
+  if (LOCAL_HOSTS.has(host)) return;
+
+  const confirmed = (process.env.KHEM_SEED_CONFIRM ?? "").trim();
+
+  if (confirmed !== host) {
+    throw new Error(
+      [
+        `Refusing to seed ${redactUrl(url)} — it is not a local database.`,
+        "",
+        "This script upserts the frozen JSON export over whatever is there. On a",
+        "database anyone is using, that overwrites content edited since the export",
+        "was taken. Production is deployed with `npm run db:migrate`, never with this.",
+        "",
+        "If this really is the database you mean, name its host:",
+        "",
+        `    KHEM_SEED_CONFIRM=${host} npm run db:seed`,
+      ].join("\n"),
+    );
+  }
+
+  console.log(`Confirmed target ${host} — seeding a remote database.`);
+}
+
 async function main(): Promise<void> {
+  guardTarget(connectionString());
+
   const catalog = await readSeed<CatalogSeed>("catalog.json");
   const content = await readSeed<ContentSeed>("content.json");
   const directory = await readSeed<DirectorySeed>("directory.json");

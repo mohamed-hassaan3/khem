@@ -57,11 +57,11 @@ export default async function AdminIngredientsPage({
   return (
     <>
       <Link
-        href={localizePath(activeLocale, "/admin/content")}
+        href={localizePath(activeLocale, "/admin/content/world")}
         className="mb-8 inline-flex items-center gap-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
       >
         <ArrowLeft size={13} strokeWidth={1.25} />
-        All content
+        World of KHEM
       </Link>
 
       <AdminPageHeader

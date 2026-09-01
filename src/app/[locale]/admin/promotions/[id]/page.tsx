@@ -11,7 +11,7 @@ import {
 } from "@/src/services/admin/catalog";
 import { getPromotion } from "@/src/services/admin/promotions";
 
-/** One campaign. */
+/** One promotion. */
 export const dynamic = "force-dynamic";
 
 export default async function EditPromotionPage({
@@ -44,7 +44,7 @@ export default async function EditPromotionPage({
         title={promotion.name}
         description={
           promotion.productCount === 0
-            ? "Pricing nothing at the moment — check its window, its switch, and whether another campaign outranks it."
+            ? "Pricing nothing at the moment — check its window, its switch, and whether another promotion outranks it."
             : `Currently the price on ${promotion.productCount} product${promotion.productCount === 1 ? "" : "s"}.`
         }
       />

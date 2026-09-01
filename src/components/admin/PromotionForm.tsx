@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Create or edit a promotional campaign.
+ * Create or edit a promotion.
  *
  * ## This screen sets a price, not a code
  *
- * A campaign here reprices products for everybody, with nothing to type at
+ * A promotion here reprices products for everybody, with nothing to type at
  * checkout. Codes — the welcome offer, invitations, anything a customer enters —
  * live in the discount editor and have their own grants and redemption ledger.
  * The two systems meet at exactly one switch on this form, *Allow codes on top*,
@@ -14,14 +14,14 @@
  * ## Nothing is computed here
  *
  * No price is calculated in this component or in the action behind it. The
- * campaign describes a rule; `active_product_promotions` picks the winning one
+ * promotion describes a rule; `active_product_promotions` picks the winning one
  * per product and `place_order()` reads it under a row lock inside the
  * transaction that writes the order — see `supabase/sql/0035_marketing.sql`.
  *
  * ## Targets appear only when they mean something
  *
  * A promotion has no "everything" scope, so one picker or the other is always
- * shown and the schema refuses an empty selection: a campaign that prices
+ * shown and the schema refuses an empty selection: a promotion that prices
  * nothing is never what somebody meant.
  */
 
@@ -238,7 +238,7 @@ export default function PromotionForm({
 
       <section className="space-y-4 md:space-y-6">
         <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
-          The campaign
+          The promotion
         </h2>
 
         <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
@@ -258,7 +258,7 @@ export default function PromotionForm({
             value={priority}
             onChange={setPriority}
             error={fieldErrors.priority}
-            hint="Higher wins when two campaigns name the same product. A product-level campaign already beats a collection-level one."
+            hint="Higher wins when two promotions name the same product. A product-level promotion already beats a collection-level one."
           />
         </div>
 
@@ -274,7 +274,7 @@ export default function PromotionForm({
         <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           <AdminInput
             id="label"
-            label="Campaign label — English"
+            label="Badge label — English"
             value={label}
             onChange={setLabel}
             error={fieldErrors.label}
@@ -283,7 +283,7 @@ export default function PromotionForm({
           />
           <AdminInput
             id="labelAr"
-            label="Campaign label — Arabic"
+            label="Badge label — Arabic"
             value={labelAr}
             onChange={setLabelAr}
             error={fieldErrors.labelAr}
@@ -322,7 +322,7 @@ export default function PromotionForm({
         <AdminToggle
           id="stacksWithCodes"
           label="Allow discount codes on top"
-          description="Off — the safe default — means a discounted line is not part of any code's eligible total, so a customer cannot compound this campaign with a voucher. On, the two combine."
+          description="Off — the safe default — means a discounted line is not part of any code's eligible total, so a customer cannot compound this promotion with a voucher. On, the two combine."
           checked={stacksWithCodes}
           onChange={setStacksWithCodes}
         />
@@ -388,14 +388,14 @@ export default function PromotionForm({
             value={endsAt}
             onChange={setEndsAt}
             error={fieldErrors.endsAt}
-            hint="Leave empty for no end. Outside its window a campaign stops pricing on its own."
+            hint="Leave empty for no end. Outside its window a promotion stops pricing on its own."
           />
         </div>
 
         <AdminToggle
           id="isActive"
           label="Running"
-          description="Switching this off restores the list prices immediately, without touching the campaign or its selection."
+          description="Switching this off restores the list prices immediately, without touching the promotion or its selection."
           checked={isActive}
           onChange={setIsActive}
         />
@@ -403,7 +403,7 @@ export default function PromotionForm({
 
       <div className="flex flex-wrap items-center gap-4">
         <AdminButton type="submit" disabled={isPending}>
-          {isPending ? "Saving" : isEdit ? "Save campaign" : "Create campaign"}
+          {isPending ? "Saving" : isEdit ? "Save promotion" : "Create promotion"}
         </AdminButton>
 
         {isEdit ? (
@@ -419,9 +419,9 @@ export default function PromotionForm({
 
       {armed ? (
         <p className="text-[11px] leading-relaxed text-ground-muted">
-          Deleting removes the campaign and its selection. Orders already placed
+          Deleting removes the promotion and its selection. Orders already placed
           keep the price they were charged and what it was reduced from — only the
-          campaign&rsquo;s name is lost from them. To stop it and keep the record,
+          promotion&rsquo;s name is lost from them. To stop it and keep the record,
           switch off &ldquo;Running&rdquo; instead.
         </p>
       ) : null}

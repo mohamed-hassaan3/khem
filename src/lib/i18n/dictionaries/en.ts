@@ -186,6 +186,17 @@ export const en = {
       exploreCollections: "Explore Collections",
       ourStory: "Our Story",
       scroll: "Scroll",
+      /*
+       * The campaign hero's chrome, used only when the house has configured
+       * one. `slide` names each progress segment for a screen reader —
+       * "Show slide 2 of 5" — because the segments are real buttons, not
+       * decoration, and a hero whose only heading is switched off would
+       * otherwise ship a page with an unlabelled control on it.
+       */
+      region: "Featured campaign",
+      slide: "Show slide {index} of {total}",
+      /** Read by assistive technology in place of the film itself. */
+      video: "KHEM campaign film",
     },
     collections: {
       eyebrow: "Our Collections",

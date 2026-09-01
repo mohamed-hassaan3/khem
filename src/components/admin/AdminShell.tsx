@@ -14,6 +14,22 @@
  * resolved keeps `/ar/admin` navigating within itself instead of throwing an
  * editor into the other tree mid-task.
  *
+ * ## Grouped by job, not by table
+ *
+ * The rail used to be seventeen flat rows in frequency-of-use order, which asks
+ * a new member of the desk "which table am I in?" instead of "what am I trying
+ * to do?". It is now five named groups — Commerce, Marketing, Content,
+ * Analytics, System — with Dashboard standing alone above them.
+ *
+ * **No route moved.** The grouping is presentation; every href here is the URL
+ * it always was, so bookmarks, redirects and the 110 in-code references to
+ * these paths are all still correct.
+ *
+ * World of KHEM's five pages are a second level, revealed only while the
+ * editor is somewhere inside Content. Revealed from `pathname` rather than from
+ * state: a rail that remembers which branch was open is a rail that disagrees
+ * with the page beside it, and deriving it means there is nothing to hydrate.
+ *
  * ## One rail, two behaviours
  *
  * The rail is on the inline-start edge at every width. Below `lg` it is an
@@ -35,7 +51,7 @@ import {
   BarChart3,
   Boxes,
   ExternalLink,
-  FileText,
+  Landmark,
   LayoutList,
   LayoutGrid,
   Package,
@@ -64,36 +80,88 @@ import { UnsavedChangesProvider } from "@/src/providers/unsaved-changes-provider
 import type { AdminNotification, LowStockItem } from "@/src/types/notification";
 
 /**
- * Trade first, then the catalog behind it.
+ * The rail, as five jobs rather than seventeen tables.
  *
- * Orders and inventory are what a desk opens the dashboard for on a normal
- * day; collections and the journal are edited occasionally. The rail is
- * ordered by how often each is reached for, not by how the tables relate.
+ * Order within a group is still how often a desk reaches for it — Orders before
+ * Stockists, Promotions before Announcements — because grouping answers "where
+ * do I look?" and ordering answers "what do I open every morning?".
+ *
+ * `children` is a second level, and only Content has one. Journal keeps its own
+ * top-level route while sitting under World of KHEM here: the IA is a claim
+ * about where an editor looks for it, not a claim about where it lives.
  */
-const SECTIONS = [
-  { path: "/admin", label: "Dashboard", icon: LayoutGrid },
-  { path: "/admin/orders", label: "Orders", icon: Receipt },
-  { path: "/admin/customers", label: "Customers", icon: Users },
-  { path: "/admin/credits", label: "Credits", icon: Ticket },
-  { path: "/admin/discounts", label: "Discounts", icon: Tag },
-  /*
-   * Promotions sit beside Discounts, not inside them: one is a price the
-   * catalogue carries and the other is a string somebody types. Neighbours on
-   * the rail because a desk running a sale reaches for both in the same hour;
-   * separate rows because they are separate systems with separate records.
-   */
-  { path: "/admin/promotions", label: "Promotions", icon: BadgePercent },
-  { path: "/admin/announcements", label: "Announcements", icon: Megaphone },
-  { path: "/admin/newsletter", label: "Newsletter", icon: Mail },
-  { path: "/admin/campaigns", label: "Campaigns", icon: Send },
-  { path: "/admin/inventory", label: "Inventory", icon: Boxes },
-  { path: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { path: "/admin/collections", label: "Collections", icon: Sparkles },
-  { path: "/admin/products", label: "Products", icon: Package },
-  { path: "/admin/journal", label: "Journal", icon: FileText },
-  { path: "/admin/content", label: "Content", icon: LayoutList },
-  { path: "/admin/stockists", label: "Stockists", icon: MapPin },
-  { path: "/admin/settings", label: "Settings", icon: Settings },
+const GROUPS = [
+  {
+    heading: null,
+    items: [{ path: "/admin", label: "Dashboard", icon: LayoutGrid }],
+  },
+  {
+    heading: "Commerce",
+    items: [
+      { path: "/admin/orders", label: "Orders", icon: Receipt },
+      { path: "/admin/customers", label: "Customers", icon: Users },
+      { path: "/admin/products", label: "Products", icon: Package },
+      { path: "/admin/collections", label: "Collections", icon: Sparkles },
+      { path: "/admin/inventory", label: "Inventory", icon: Boxes },
+      { path: "/admin/stockists", label: "Stockists", icon: MapPin },
+    ],
+  },
+  {
+    heading: "Marketing",
+    items: [
+      /*
+       * Promotions sits beside Discounts, not inside it: one is a price the
+       * catalogue carries and the other is a string somebody types. Neighbours
+       * because a desk running a sale reaches for both in the same hour;
+       * separate rows because they are separate systems with separate records.
+       */
+      { path: "/admin/promotions", label: "Promotions", icon: BadgePercent },
+      { path: "/admin/discounts", label: "Discounts", icon: Tag },
+      { path: "/admin/credits", label: "Credits", icon: Ticket },
+      { path: "/admin/campaigns", label: "Campaigns", icon: Send },
+      { path: "/admin/newsletter", label: "Newsletter", icon: Mail },
+      { path: "/admin/announcements", label: "Announcements", icon: Megaphone },
+    ],
+  },
+  {
+    heading: "Content",
+    items: [
+      { path: "/admin/content/landing", label: "Landing Page", icon: LayoutList },
+      {
+        path: "/admin/content/world",
+        label: "World of KHEM",
+        icon: Landmark,
+        children: [
+          { path: "/admin/content/heritage", label: "Heritage" },
+          { path: "/admin/content/craftsmanship", label: "Craftsmanship" },
+          { path: "/admin/content/ingredients", label: "Ingredients" },
+          { path: "/admin/journal", label: "Journal" },
+          { path: "/admin/content/about", label: "About KHEM" },
+        ],
+      },
+    ],
+  },
+  {
+    heading: "Analytics",
+    items: [{ path: "/admin/analytics", label: "Analytics", icon: BarChart3 }],
+  },
+  {
+    heading: "System",
+    items: [{ path: "/admin/settings", label: "Settings", icon: Settings }],
+  },
+] as const;
+
+/**
+ * Everything the Content group owns, including the two routes that do not sit
+ * under `/admin/content`. Used to decide whether the second level is showing
+ * and whether the World of KHEM row is the one being edited.
+ */
+const WORLD_PATHS = [
+  "/admin/content/heritage",
+  "/admin/content/craftsmanship",
+  "/admin/content/ingredients",
+  "/admin/journal",
+  "/admin/content/about",
 ] as const;
 
 /** A single UI boolean. Never an identifier, never anything about an order. */
@@ -206,6 +274,20 @@ export default function AdminShell({
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
+  /**
+   * World of KHEM owns five pages, two of which are not under its own path —
+   * `/admin/content/ingredients` and `/admin/journal` kept the URLs they have
+   * always had. So the row's active state is the union, not a prefix test.
+   */
+  const inWorld =
+    isActive("/admin/content/world") || WORLD_PATHS.some(isActive);
+
+  /**
+   * The second level shows while the editor is anywhere in Content — including
+   * on the `/admin/content` hub itself, which is how they got there.
+   */
+  const showWorld = inWorld || isActive("/admin/content");
+
   const resolved = open !== null;
   /** Before resolution the CSS default decides, and it matches `true` at `lg`. */
   const shown = open ?? true;
@@ -270,29 +352,73 @@ export default function AdminShell({
           </p>
         </div>
 
-        <nav className="mt-6 md:mt-10 flex flex-col gap-1 px-4">
-          {SECTIONS.map((section) => {
-            const active = isActive(section.path);
-            const Icon = section.icon;
+        <nav className="mt-6 md:mt-10 flex flex-col px-4">
+          {GROUPS.map((group) => (
+            <div
+              key={group.heading ?? "root"}
+              className={group.heading ? "mt-7 first:mt-0" : ""}
+            >
+              {group.heading ? (
+                <p className="mb-2 px-4 font-heading text-[9px] uppercase tracking-[0.3em] text-ground-subtle">
+                  {group.heading}
+                </p>
+              ) : null}
 
-            return (
-              <AdminLink
-                key={section.path}
-                href={localizePath(locale, section.path)}
-                aria-current={active ? "page" : undefined}
-                tabIndex={resolved && !open ? -1 : undefined}
-                onClick={closeOnMobile}
-                className={`flex shrink-0 items-center gap-3 border-s-2 px-4 py-3 font-heading text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 ${
-                  active
-                    ? "border-ground-accent bg-ivory text-ground"
-                    : "border-transparent text-ground-muted hover:text-ground"
-                }`}
-              >
-                <Icon size={14} strokeWidth={1.25} />
-                {section.label}
-              </AdminLink>
-            );
-          })}
+              <div className="flex flex-col gap-1">
+                {group.items.map((item) => {
+                  const children =
+                    "children" in item ? item.children : undefined;
+                  // The parent of a second level is lit by its whole branch.
+                  const active = children ? inWorld : isActive(item.path);
+                  const Icon = item.icon;
+
+                  return (
+                    <div key={item.path}>
+                      <AdminLink
+                        href={localizePath(locale, item.path)}
+                        aria-current={active ? "page" : undefined}
+                        tabIndex={resolved && !open ? -1 : undefined}
+                        onClick={closeOnMobile}
+                        className={`flex shrink-0 items-center gap-3 border-s-2 px-4 py-3 font-heading text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 ${
+                          active
+                            ? "border-ground-accent bg-ivory text-ground"
+                            : "border-transparent text-ground-muted hover:text-ground"
+                        }`}
+                      >
+                        <Icon size={14} strokeWidth={1.25} />
+                        {item.label}
+                      </AdminLink>
+
+                      {children && showWorld ? (
+                        <div className="mt-1 flex flex-col gap-1">
+                          {children.map((child) => {
+                            const childActive = isActive(child.path);
+
+                            return (
+                              <AdminLink
+                                key={child.path}
+                                href={localizePath(locale, child.path)}
+                                aria-current={childActive ? "page" : undefined}
+                                tabIndex={resolved && !open ? -1 : undefined}
+                                onClick={closeOnMobile}
+                                className={`flex shrink-0 items-center border-s-2 py-2.5 ps-11 pe-4 text-[11px] tracking-[0.08em] transition-colors duration-300 ${
+                                  childActive
+                                    ? "border-ground-accent bg-ivory text-ground"
+                                    : "border-transparent text-ground-muted hover:text-ground"
+                                }`}
+                              >
+                                {child.label}
+                              </AdminLink>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         <div className="mt-6 md:mt-10 border-t border-ground-border px-8 pt-6">

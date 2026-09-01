@@ -17,10 +17,10 @@ import { listPromotions } from "@/src/services/admin/promotions";
  * Promotional pricing.
  *
  * The column worth reading twice is **Pricing** — how many products this
- * campaign is the winning price for right now. It is counted from
+ * promotion is the winning price for right now. It is counted from
  * `active_product_promotions`, the same view the storefront and `place_order()`
  * read, so it is the number of bottles actually repriced rather than the number
- * somebody selected. A collection-wide campaign that a product-level one
+ * somebody selected. A collection-wide promotion that a product-level one
  * outranks will show fewer, and that is the truth about what it is doing.
  */
 export const dynamic = "force-dynamic";
@@ -69,24 +69,24 @@ export default async function AdminPromotionsPage({
         action={
           <AdminLinkButton href={`${basePath}/new`}>
             <Plus size={13} strokeWidth={1.25} />
-            New campaign
+            New promotion
           </AdminLinkButton>
         }
       />
 
       {promotions.length === 0 ? (
         <AdminEmpty
-          message="No promotional campaigns yet. Every product sells at its list price."
+          message="No promotions yet. Every product sells at its list price."
           action={
             <AdminLinkButton href={`${basePath}/new`}>
-              Create the first campaign
+              Create the first promotion
             </AdminLinkButton>
           }
         />
       ) : (
         <AdminTable
           headers={[
-            "Campaign",
+            "Promotion",
             "Takes off",
             "Applies to",
             "Pricing",
@@ -111,7 +111,7 @@ export default async function AdminPromotionsPage({
                     </span>
                   ) : (
                     <span
-                      title="No campaign label, so cards carry no banner — a quiet reduction"
+                      title="No badge label, so cards carry no banner — a quiet reduction"
                       className="mt-2 inline-block text-[10px] tracking-wide text-ground-subtle"
                     >
                       Unlabelled

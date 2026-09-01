@@ -6,6 +6,7 @@ import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import CollectionCard from "@/src/components/home/CollectionCard";
+import Hero from "@/src/components/home/Hero";
 import CollectionSlider from "@/src/components/home/CollectionSlider";
 import IngredientCard from "@/src/components/home/IngredientCard";
 import JournalCard from "@/src/components/home/JournalCard";
@@ -19,6 +20,7 @@ import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { ltrIsland, readingArrow } from "@/src/lib/i18n/rtl";
 import {
   getCraftPillars,
+  getHero,
   getIngredients,
   getLatestArticles,
   getTestimonials,
@@ -72,6 +74,7 @@ export default async function Home({
     ingredients,
     articles,
     testimonials,
+    hero,
   ] = await Promise.all([
     getFeaturedCollections(activeLocale),
     getFeaturedProducts(activeLocale),
@@ -80,6 +83,7 @@ export default async function Home({
     getIngredients(activeLocale),
     getLatestArticles(),
     getTestimonials(),
+    getHero(activeLocale),
   ]);
   const dict = await getDictionary(activeLocale);
   const island = ltrIsland(activeLocale);
@@ -96,139 +100,182 @@ export default async function Home({
     featuredProduct?.images.find((image) => !image.isPrimary) ??
     featuredProduct?.images[0];
 
+  /*
+   * Whether the house has actually configured a campaign hero.
+   *
+   * A `"HeroSetting"` row always exists — the migration inserts it — so its
+   * presence says nothing. What decides is whether there is media: at least one
+   * slide, or a video. Without either, the page opens on the typographic
+   * composition below, which is what it has always done and what a database
+   * that cannot answer also produces.
+   */
+  const heroMedia =
+    hero !== null &&
+    (hero.mediaType === "VIDEO" ? hero.videoUrl !== null : hero.slides.length > 0);
+
   return (
     <div className="min-h-screen">
       {/*
         Declared explicitly, where the home page previously declared nothing
         and inherited the fail-safe solid header.
 
-        The hero is the ivory editorial composition, so there is no photograph
-        for the bar to obscure — but there is a full-screen field of negative
-        space that the wordmark is centred in, and a bordered bar sitting on
-        top of it closes the composition off. Transparent until the visitor
-        scrolls is what lets the page open on the mark alone.
+        Two answers, because there are now two heroes. The typographic
+        composition is ivory — no photograph for the bar to obscure, just a
+        field of negative space the wordmark is centred in. A configured
+        campaign hero is a photograph or a film, which is a dark surface
+        whatever it depicts, and charcoal links over it would be the
+        illegible-header case `nav-ground-provider.tsx` exists to prevent.
       */}
-      <NavGround ground="ivory" />
-      {/*
-        ── HERO ───────────────────────────── ivory ──
-
-        The Ivory editorial hero (§13, Option A).
-
-        ## What went, and why
-
-        A full-bleed Unsplash photograph at `opacity-35`, sitting under a radial
-        gradient that faded to solid obsidian at the edges. Three things were
-        wrong with it. It was the site's largest dark surface and the first
-        thing anyone saw, so it set the whole visit's register as "dark site".
-        At 35% opacity under a near-opaque wash it was not really photography
-        either — it was texture, doing the work a paper ground does for free on
-        ivory. And it was a 1800px `priority` image on the critical path of the
-        most-visited route, which is the wrong thing to spend an LCP on when
-        the composition underneath it is typographic.
-
-        So the photograph is gone rather than recoloured. What is left is what
-        the hero always actually was: the wordmark, a rule, a line of tracking,
-        and two concentric circles — now drawn in charcoal and gold on ivory,
-        where they read as an engraving rather than as a glow.
-
-        This is deliberately a *composition* and not a placeholder. When a real
-        KHEM campaign photograph exists it belongs here, full-bleed and
-        untreated, with this type moved off it — not layered under it at a
-        third of its opacity.
-      */}
-      <section className="ground-ivory relative flex h-svh min-h-160 items-center justify-center overflow-hidden">
-        {/*
-          The geometry, in charcoal rather than gold.
-
-          Gold at 10% on obsidian was a halo; gold at 10% on ivory is invisible,
-          and raising it to compensate would spend the accent budget (§9) on
-          decoration. Charcoal at 8% is a drawn line on paper — the same figure,
-          in the medium the page is now made of.
-        */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          aria-hidden="true"
-        >
-          <div className="absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-ink/8 sm:h-[600px] sm:w-[600px]" />
-          <div className="absolute left-1/2 top-1/2 h-[450px] w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-ink/5 sm:h-[900px] sm:w-[900px]" />
-          <div className="absolute left-0 top-1/2 h-px w-20 -translate-y-1/2 bg-linear-to-r from-transparent to-gold/40" />
-          <div className="absolute right-0 top-1/2 h-px w-20 -translate-y-1/2 bg-linear-to-l from-transparent to-gold/40" />
-        </div>
-
-        <div className="relative z-10 px-4 text-center">
-          <div className="mb-7 flex justify-center">
-            <Image src={logo} width={40} height={40} alt="KHEM" priority />
-          </div>
-
+      <NavGround ground={heroMedia ? "obsidian" : "ivory"} />
+      {heroMedia && hero ? (
+        <>
+          <Hero
+            hero={hero}
+            labels={{
+              region: dict.home.hero.region,
+              slide: dict.home.hero.slide,
+              video: dict.home.hero.video,
+            }}
+          />
           {/*
-           * The wordmark is Latin in both locales, so it is an LTR island: the
-           * RTL rule in `globals.css` would otherwise strip the 0.3em tracking
-           * the mark is built on, and `lang="en"` keeps screen readers from
-           * announcing it in an Arabic voice.
-           *
-           * The `drop-shadow` gold bloom is gone with the dark ground that
-           * justified it. A glow behind charcoal type on paper is a smudge.
-           */}
-          <h1
-            {...island}
-            className="mb-4 font-heading text-6xl font-semibold leading-none tracking-[0.3em] text-ground sm:text-8xl md:text-9xl lg:text-[160px]"
+            The heading of last resort.
+
+            A campaign hero may legitimately carry no headline — §3 of the brief
+            names "pure visual hero" as a supported configuration — and a home
+            page with no `<h1>` is an SEO regression the desk would have no way
+            of knowing it had caused. So when the hero prints no heading, one is
+            provided for machines and screen readers and for nobody else. When
+            the hero *does* have a headline it is the `<h1>`, and this is not
+            rendered: two would be worse than none.
+          */}
+          {hero.headline === null ? (
+            <h1 className="sr-only">{dict.home.hero.tagline}</h1>
+          ) : null}
+        </>
+      ) : (
+        <>
+        {/*
+          ── HERO ───────────────────────────── ivory ──
+
+          The Ivory editorial hero (§13, Option A).
+
+          ## What went, and why
+
+          A full-bleed Unsplash photograph at `opacity-35`, sitting under a radial
+          gradient that faded to solid obsidian at the edges. Three things were
+          wrong with it. It was the site's largest dark surface and the first
+          thing anyone saw, so it set the whole visit's register as "dark site".
+          At 35% opacity under a near-opaque wash it was not really photography
+          either — it was texture, doing the work a paper ground does for free on
+          ivory. And it was a 1800px `priority` image on the critical path of the
+          most-visited route, which is the wrong thing to spend an LCP on when
+          the composition underneath it is typographic.
+
+          So the photograph is gone rather than recoloured. What is left is what
+          the hero always actually was: the wordmark, a rule, a line of tracking,
+          and two concentric circles — now drawn in charcoal and gold on ivory,
+          where they read as an engraving rather than as a glow.
+
+          This is deliberately a *composition* and not a placeholder. When a real
+          KHEM campaign photograph exists it belongs here, full-bleed and
+          untreated, with this type moved off it — not layered under it at a
+          third of its opacity.
+        */}
+        <section className="ground-ivory relative flex h-svh min-h-160 items-center justify-center overflow-hidden">
+          {/*
+            The geometry, in charcoal rather than gold.
+
+            Gold at 10% on obsidian was a halo; gold at 10% on ivory is invisible,
+            and raising it to compensate would spend the accent budget (§9) on
+            decoration. Charcoal at 8% is a drawn line on paper — the same figure,
+            in the medium the page is now made of.
+          */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            aria-hidden="true"
           >
-            KHEM
-          </h1>
-
-          <div className="mx-auto mb-5 h-px w-12 bg-linear-to-r from-transparent via-gold to-transparent" />
-
-          {/*
-           * The tagline takes the deep gold at full strength. It was
-           * `text-ground-accent/80` — an 80% tint of a colour already chosen
-           * for its minimum legible contrast, which on ivory falls under the
-           * threshold at this size.
-           */}
-          <p className="mb-8 md:mb-14 font-heading text-xs uppercase tracking-[0.4em] text-ground-accent sm:text-sm">
-            {dict.home.hero.tagline}
-          </p>
-
-          {/*
-           * The primary action is now filled charcoal rather than an outline.
-           * On obsidian an outline button was the emphatic option available;
-           * on ivory §33 gives the page a real primary, and the homepage's one
-           * job is to send the visitor into the collections.
-           */}
-          <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
-            <LocaleLink
-              href="/collections"
-              className="btn btn-primary"
-            >
-              {dict.home.hero.exploreCollections}
-            </LocaleLink>
-            <LocaleLink
-              href="/heritage"
-              className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-muted no-underline transition-colors duration-300 hover:text-ground"
-            >
-              {dict.home.hero.ourStory} {arrow}
-            </LocaleLink>
+            <div className="absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-ink/8 sm:h-[600px] sm:w-[600px]" />
+            <div className="absolute left-1/2 top-1/2 h-[450px] w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-ink/5 sm:h-[900px] sm:w-[900px]" />
+            <div className="absolute left-0 top-1/2 h-px w-20 -translate-y-1/2 bg-linear-to-r from-transparent to-gold/40" />
+            <div className="absolute right-0 top-1/2 h-px w-20 -translate-y-1/2 bg-linear-to-l from-transparent to-gold/40" />
           </div>
-        </div>
 
-        {/*
-          The scroll indicator.
+          <div className="relative z-10 px-4 text-center">
+            <div className="mb-7 flex justify-center">
+              <Image src={logo} width={40} height={40} alt="KHEM" priority />
+            </div>
 
-          `animate-pulse` is gone. It was a continuous opacity animation on a
-          decorative 60px rule, running for as long as the tab was open —
-          §37/§48 name exactly this as work the page does while the visitor is
-          only reading. A static gradient rule says "there is more below" just
-          as well, and says it without a repainting element.
-        */}
-        <div
-          className="absolute bottom-10 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
-          aria-hidden="true"
-        >
-          <p className="text-[9px] uppercase tracking-[0.3em] text-ground-subtle">
-            {dict.home.hero.scroll}
-          </p>
-          <div className="h-15 w-px bg-linear-to-b from-ink/30 to-transparent" />
-        </div>
-      </section>
+            {/*
+             * The wordmark is Latin in both locales, so it is an LTR island: the
+             * RTL rule in `globals.css` would otherwise strip the 0.3em tracking
+             * the mark is built on, and `lang="en"` keeps screen readers from
+             * announcing it in an Arabic voice.
+             *
+             * The `drop-shadow` gold bloom is gone with the dark ground that
+             * justified it. A glow behind charcoal type on paper is a smudge.
+             */}
+            <h1
+              {...island}
+              className="mb-4 font-heading text-6xl font-semibold leading-none tracking-[0.3em] text-ground sm:text-8xl md:text-9xl lg:text-[160px]"
+            >
+              KHEM
+            </h1>
+
+            <div className="mx-auto mb-5 h-px w-12 bg-linear-to-r from-transparent via-gold to-transparent" />
+
+            {/*
+             * The tagline takes the deep gold at full strength. It was
+             * `text-ground-accent/80` — an 80% tint of a colour already chosen
+             * for its minimum legible contrast, which on ivory falls under the
+             * threshold at this size.
+             */}
+            <p className="mb-8 md:mb-14 font-heading text-xs uppercase tracking-[0.4em] text-ground-accent sm:text-sm">
+              {dict.home.hero.tagline}
+            </p>
+
+            {/*
+             * The primary action is now filled charcoal rather than an outline.
+             * On obsidian an outline button was the emphatic option available;
+             * on ivory §33 gives the page a real primary, and the homepage's one
+             * job is to send the visitor into the collections.
+             */}
+            <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
+              <LocaleLink
+                href="/collections"
+                className="btn btn-primary"
+              >
+                {dict.home.hero.exploreCollections}
+              </LocaleLink>
+              <LocaleLink
+                href="/heritage"
+                className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-muted no-underline transition-colors duration-300 hover:text-ground"
+              >
+                {dict.home.hero.ourStory} {arrow}
+              </LocaleLink>
+            </div>
+          </div>
+
+          {/*
+            The scroll indicator.
+
+            `animate-pulse` is gone. It was a continuous opacity animation on a
+            decorative 60px rule, running for as long as the tab was open —
+            §37/§48 name exactly this as work the page does while the visitor is
+            only reading. A static gradient rule says "there is more below" just
+            as well, and says it without a repainting element.
+          */}
+          <div
+            className="absolute bottom-10 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
+            aria-hidden="true"
+          >
+            <p className="text-[9px] uppercase tracking-[0.3em] text-ground-subtle">
+              {dict.home.hero.scroll}
+            </p>
+            <div className="h-15 w-px bg-linear-to-b from-ink/30 to-transparent" />
+          </div>
+        </section>
+        </>
+      )}
 
       {/* ── COLLECTIONS PREVIEW ─── sand ───────────── */}
       <section className="ground-sand px-4 py-14 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">

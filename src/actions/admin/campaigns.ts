@@ -40,7 +40,9 @@ import { sendCampaignTest } from "@/src/lib/email/send-campaign-mail";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import {
+  campaignAudienceSchema,
   campaignIdSchema,
+  campaignRecipientsSchema,
   createCampaignSchema,
   scheduleCampaignSchema,
   updateCampaignSchema,
@@ -50,6 +52,7 @@ import {
   campaignStatusSchema,
   toCampaign,
 } from "@/src/schemas/db/campaigns";
+import { audienceBreakdown } from "@/src/services/admin/campaigns";
 import { isEditable } from "@/src/types/campaign";
 
 import { UNCONFIGURED, fieldErrorsFrom, type PostgresErrorLike } from "./shared";
@@ -395,6 +398,159 @@ export async function unscheduleCampaign(input: unknown): Promise<AdminActionRes
 }
 
 /**
+ * Choose which stored audiences a campaign speaks to.
+ *
+ * Two booleans, and neither of them is who: **consent is not decided here.** The
+ * Customers audience is `customer_directory` filtered on `marketingOptIn`, and
+ * the suppression list is subtracted from every source — both in
+ * `campaign_audience()`, where no form can reach them. What this action chooses
+ * is which of those already-filtered sets to draw from.
+ *
+ * Editable campaigns only. A campaign that is sending or sent has already
+ * claimed its audience, and changing the selection afterwards would describe an
+ * audience that is not the one that received it.
+ */
+export async function setCampaignAudience(
+  input: unknown,
+): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = campaignAudienceSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "That audience could not be saved.",
+      fieldErrors: fieldErrorsFrom(parsed.error),
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  const { data, error } = await supabase
+    .from("campaigns")
+    .update({
+      toSubscribers: parsed.data.toSubscribers,
+      toCustomers: parsed.data.toCustomers,
+      updatedAt: new Date().toISOString(),
+    })
+    .eq("id", parsed.data.id)
+    .in("status", ["DRAFT", "SCHEDULED"])
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error(`[admin] setCampaignAudience rejected (${actor.email})`);
+    return {
+      ok: false,
+      message: "Only a campaign that has not been sent can change its audience.",
+    };
+  }
+
+  console.info(
+    `[admin] campaign ${parsed.data.id} audience set by ${actor.email}`,
+  );
+  revalidatePath(`${CAMPAIGNS_PATH}/${parsed.data.id}`);
+
+  return { ok: true, slug: parsed.data.id, message: "Audience saved." };
+}
+
+/**
+ * Replace the hand-typed addresses for a campaign.
+ *
+ * Delete-then-insert inside one request rather than a diff: the list is at most
+ * a couple of hundred rows, it belongs to one campaign, and a diff would be
+ * three code paths where this is one. The delete is scoped to the campaign id,
+ * which is checked to be editable first.
+ *
+ * ## Logging
+ *
+ * A count. **Never the addresses** — they are exactly the kind of value this
+ * file's header forbids putting in a log.
+ */
+export async function setCampaignRecipients(
+  input: unknown,
+): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = campaignRecipientsSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Those addresses could not be saved.",
+      fieldErrors: fieldErrorsFrom(parsed.error),
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  const { data: campaign, error: readError } = await supabase
+    .from("campaigns")
+    .select("status")
+    .eq("id", parsed.data.id)
+    .maybeSingle();
+
+  if (readError || !campaign) {
+    return { ok: false, message: "That campaign no longer exists." };
+  }
+
+  const status = campaignStatusSchema.safeParse(campaign.status);
+  if (!status.success || !isEditable(status.data)) {
+    return {
+      ok: false,
+      message: "A campaign that has been sent is a record and cannot be changed.",
+    };
+  }
+
+  const { error: clearError } = await supabase
+    .from("campaign_recipients")
+    .delete()
+    .eq("campaignId", parsed.data.id);
+
+  if (clearError) {
+    console.error(
+      `[admin] setCampaignRecipients clear failed (${actor.email}): ${clearError.message}`,
+    );
+    return { ok: false, message: "Those addresses could not be saved." };
+  }
+
+  if (parsed.data.emails.length > 0) {
+    const { error: insertError } = await supabase
+      .from("campaign_recipients")
+      .insert(
+        parsed.data.emails.map((email) => ({
+          campaignId: parsed.data.id,
+          email,
+        })),
+      );
+
+    if (insertError) {
+      console.error(
+        `[admin] setCampaignRecipients insert failed (${actor.email}): ${insertError.message}`,
+      );
+      return { ok: false, message: "Those addresses could not be saved." };
+    }
+  }
+
+  console.info(
+    `[admin] campaign ${parsed.data.id}: ${parsed.data.emails.length} named recipient(s) set by ${actor.email}`,
+  );
+  revalidatePath(`${CAMPAIGNS_PATH}/${parsed.data.id}`);
+
+  return {
+    ok: true,
+    slug: parsed.data.id,
+    message:
+      parsed.data.emails.length === 0
+        ? "Named addresses cleared."
+        : `${parsed.data.emails.length} named address${
+            parsed.data.emails.length === 1 ? "" : "es"
+          } saved.`,
+  };
+}
+
+/**
  * Send it now.
  *
  * **The irreversible one.** Everything protecting it is in
@@ -410,6 +566,21 @@ export async function sendCampaignNow(input: unknown): Promise<AdminActionResult
 
   const parsed = campaignIdSchema.safeParse(input);
   if (!parsed.success) return { ok: false, message: "Unknown campaign." };
+
+  /*
+   * An empty audience is refused here rather than discovered by the dispatch.
+   * `begin_campaign_dispatch()` would claim nothing, mark the campaign SENDING
+   * and then SENT — a campaign that reached nobody, recorded as delivered. The
+   * count comes from the same function the confirmation showed.
+   */
+  const audience = await audienceBreakdown(parsed.data.id);
+  if (audience.total === 0) {
+    return {
+      ok: false,
+      message:
+        "That campaign would reach nobody. Choose an audience, or add an address to send to.",
+    };
+  }
 
   const result = await dispatchCampaign(parsed.data.id);
 

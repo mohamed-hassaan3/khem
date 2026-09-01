@@ -1801,3 +1801,104 @@ body[data-announcement="on"] {
     animation: none;
   }
 }
+
+/*
+ * ── The landing-page hero ───────────────────────────────────
+ *
+ * Three pieces of motion, all of them CSS, and all of them switched off in the
+ * reduced-motion block at the end rather than through a hook. That placement is
+ * the point: the preference holds before hydration, so a visitor who has asked
+ * for less motion never sees the first frame of something they turned off.
+ */
+
+/*
+ * The cross-fade between slides.
+ *
+ * Opacity only — the images are stacked in the same box, so a transform would
+ * move a photograph that is already exactly where it belongs. 1200ms is slow for
+ * a UI transition and right for this: it reads as a dissolve in a campaign film
+ * rather than as a control changing state.
+ */
+.khem-hero-slide {
+  opacity: 0;
+  transition: opacity 1200ms var(--ease-luxury-bezier);
+}
+
+.khem-hero-slide[data-active="true"] {
+  opacity: 1;
+}
+
+/*
+ * The content reveal — headline, then description, then button.
+ *
+ * The delays are on the elements rather than in a keyframe sequence so each
+ * piece is independent: a hero with no description still shows its button
+ * second, not third with a gap where the paragraph would have been. `both` fill
+ * keeps the first frame hidden and the last frame held, which is what stops the
+ * flash between paint and animation start.
+ *
+ * The travel is 14px. Enough to read as arrival, small enough that it cannot
+ * shift anything around it — the element is positioned by flow and moved by
+ * transform, so nothing reflows and this contributes nothing to CLS.
+ */
+@keyframes khem-hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.khem-hero-reveal {
+  animation: khem-hero-rise 900ms var(--ease-luxury-bezier) both;
+}
+
+/*
+ * The progress indicator.
+ *
+ * A single transform-driven fill per segment, its duration set inline from the
+ * configured slide duration and restarted by React keying the element on the
+ * slide index. It runs on the compositor; nothing measures a clock per frame.
+ */
+@keyframes khem-hero-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.khem-hero-progress {
+  transform-origin: left center;
+  animation: khem-hero-progress linear both;
+}
+
+[dir="rtl"] .khem-hero-progress {
+  transform-origin: right center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * The rotation itself is kept, for the reason the announcement bar keeps
+   * its own: changing which image is shown is a content change, and stopping it
+   * would leave a reduced-motion visitor able to see only the first slide of a
+   * campaign. What goes is the motion — the dissolve becomes a swap, the content
+   * appears in place, and the progress bar stops drawing itself.
+   */
+  .khem-hero-slide {
+    transition: none;
+  }
+
+  .khem-hero-reveal {
+    animation: none;
+  }
+
+  .khem-hero-progress {
+    animation: none;
+    transform: scaleX(1);
+  }
+}

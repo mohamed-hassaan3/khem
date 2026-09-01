@@ -20,6 +20,8 @@ import {
   CRAFT_QUOTE_COLUMNS,
   CRAFT_STAT_COLUMNS,
   CRAFT_STEP_COLUMNS,
+  HERO_SETTING_COLUMNS,
+  HERO_SLIDE_COLUMNS,
   INGREDIENT_COLUMNS,
   MISSION_STATEMENT_COLUMNS,
   TESTIMONIAL_COLUMNS,
@@ -30,6 +32,7 @@ import {
   toCraftQuote,
   toCraftStat,
   toCraftStep,
+  toHero,
   toIngredient,
   toMissionStatement,
   toTestimonial,
@@ -41,6 +44,7 @@ import type {
   CraftQuote,
   CraftStat,
   CraftStep,
+  Hero,
   Ingredient,
   JournalArticle,
   MissionStatement,
@@ -385,4 +389,47 @@ export async function getMissionStatements(
     MISSION_STATEMENT_COLUMNS,
     (row) => toMissionStatement(row, locale),
   );
+}
+
+/**
+ * The landing-page hero.
+ *
+ * Two reads rather than a PostgREST embed: `"HeroSetting"` and `"HeroSlide"`
+ * have no foreign key between them — the settings row is a singleton and the
+ * slides are the whole table — so there is no relationship for an embed to
+ * traverse. They are issued together and awaited once.
+ *
+ * `null` on any failure, and `null` is not an error state anybody has to
+ * handle specially: the home page falls back to the typographic composition it
+ * opened on before this table existed, which is also what an unconfigured hero
+ * renders. A database that cannot answer therefore costs the visitor a campaign
+ * image, never a page.
+ */
+export async function getHero(locale: Locale): Promise<Hero | null> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const [setting, slides] = await Promise.all([
+    supabase
+      .from("HeroSetting")
+      .select(HERO_SETTING_COLUMNS)
+      .eq("id", "default")
+      .maybeSingle(),
+    supabase
+      .from("HeroSlide")
+      .select(HERO_SLIDE_COLUMNS)
+      .order("sortOrder")
+      .order("createdAt"),
+  ]);
+
+  if (setting.error) {
+    logFailure("getHero", setting.error.message);
+    return null;
+  }
+
+  if (slides.error) {
+    logFailure("getHero slides", slides.error.message);
+  }
+
+  return toHero(setting.data, slides.data as unknown[] | null, locale);
 }

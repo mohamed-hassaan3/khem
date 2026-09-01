@@ -1,7 +1,7 @@
 import CampaignForm from "@/src/components/admin/CampaignForm";
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import { isLocale } from "@/src/lib/i18n/config";
-import { audienceCount } from "@/src/services/admin/campaigns";
+import { subscriberCount } from "@/src/services/admin/campaigns";
 
 /**
  * Composing a new campaign.
@@ -20,8 +20,8 @@ export default async function NewCampaignPage({
 }) {
   const [{ locale }, en, ar] = await Promise.all([
     params,
-    audienceCount("en"),
-    audienceCount("ar"),
+    subscriberCount("en"),
+    subscriberCount("ar"),
   ]);
 
   const activeLocale = isLocale(locale) ? locale : "en";

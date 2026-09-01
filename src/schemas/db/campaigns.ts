@@ -32,7 +32,8 @@ export const campaignStatusSchema = z.enum([
 
 export const CAMPAIGN_COLUMNS =
   "id, name, type, locale, subject, preheader, body, heroUrl, heroAlt, " +
-  "ctaLabel, ctaHref, discountCode, status, scheduledAt, sentAt, " +
+  "ctaLabel, ctaHref, discountCode, toSubscribers, toCustomers, " +
+  "status, scheduledAt, sentAt, " +
   "audienceCount, createdAt, updatedAt";
 
 const campaignRowSchema = z.object({
@@ -48,6 +49,8 @@ const campaignRowSchema = z.object({
   ctaLabel: z.string().default(""),
   ctaHref: z.string().default(""),
   discountCode: z.string().nullable().default(null),
+  toSubscribers: z.boolean().default(true),
+  toCustomers: z.boolean().default(false),
   status: campaignStatusSchema.catch("DRAFT"),
   scheduledAt: z.string().nullable().default(null),
   sentAt: z.string().nullable().default(null),

@@ -34,6 +34,7 @@ import {
   revalidateCraftPillars,
   revalidateCraftsmanship,
   revalidateHeritage,
+  revalidateHero,
   revalidateIngredients,
 } from "@/src/lib/admin/revalidate";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
@@ -57,6 +58,7 @@ import {
   deleteCraftStepSchema,
   deleteMissionStatementSchema,
   deleteTimelineEventSchema,
+  heroSchema,
   updateBrandValueSchema,
   updateCraftPillarSchema,
   updateCraftQuoteSchema,
@@ -753,4 +755,142 @@ export async function setIngredientProducts(
         ? "This material is no longer printed on any perfume."
         : `Printed on ${productSlugs.length} perfume${productSlugs.length === 1 ? "" : "s"}.`,
   };
+}
+
+// ── The landing-page hero ─────────────────────────────────────
+
+/**
+ * The hero, saved as a whole.
+ *
+ * ## Why one action and not five
+ *
+ * The settings row and the slides are one decision. A save that wrote the media
+ * type but not the images could leave `VIDEO` selected with no film, or an
+ * images hero with the previous campaign's photographs — both of which are
+ * broken above the fold on the site's most-visited page. So the form submits
+ * everything it holds and this writes everything, every time.
+ *
+ * ## The slides are a set, not rows
+ *
+ * The editor sends the list it wants to exist. This removes what is no longer in
+ * it, updates what stayed, inserts what is new, and assigns `sortOrder` from the
+ * array position — so what the dashboard shows top to bottom is exactly what the
+ * hero fades through, and re-submitting the same list twice is a no-op.
+ *
+ * PostgREST gives no transaction across those statements. The order is chosen so
+ * that the worst interruption is survivable: settings first, then removals, then
+ * updates, then insertions. A failure part-way leaves a hero that still renders
+ * — some slides missing, never a slide pointing at nothing — and the editor's
+ * next save reconciles it.
+ *
+ * ## No ceiling
+ *
+ * One image is a static hero; two or more rotate. Nothing here counts them.
+ */
+export async function saveHero(input: unknown): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = heroSchema.safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  const hero = parsed.data;
+
+  const settings = await supabase
+    .from("HeroSetting")
+    .update({
+      mediaType: hero.mediaType,
+      contentPosition: hero.contentPosition,
+      slideDurationMs: hero.slideDurationMs,
+      videoUrl: hero.videoUrl,
+      videoPosterUrl: hero.videoPosterUrl,
+      videoAlt: hero.videoAlt,
+      videoAlt_ar: hero.videoAltAr,
+      showHeadline: hero.showHeadline,
+      showDescription: hero.showDescription,
+      showButton: hero.showButton,
+      headline: hero.headline,
+      headline_ar: hero.headlineAr,
+      description: hero.description,
+      description_ar: hero.descriptionAr,
+      buttonLabel: hero.buttonLabel,
+      buttonLabel_ar: hero.buttonLabelAr,
+      buttonHref: hero.buttonHref,
+      updatedAt: new Date().toISOString(),
+    })
+    .eq("id", "default");
+
+  if (settings.error) {
+    console.error(`[admin] saveHero rejected (${actor.email}): ${settings.error.message}`);
+    return postgresFailure(settings.error as PostgresErrorLike, "hero");
+  }
+
+  const keptIds = hero.slides
+    .map((slide) => slide.id)
+    .filter((id): id is string => id !== null);
+
+  /*
+   * `neq("id", "")` when nothing is kept: PostgREST refuses a delete with no
+   * filter, and an id is a uuid string, so this matches every row. `not in`
+   * with an empty list would be a syntax error rather than "delete everything".
+   */
+  const removal =
+    keptIds.length > 0
+      ? await supabase
+          .from("HeroSlide")
+          .delete()
+          .not("id", "in", `(${keptIds.join(",")})`)
+      : await supabase.from("HeroSlide").delete().neq("id", "");
+
+  if (removal.error) {
+    console.error(`[admin] saveHero slide removal failed (${actor.email}): ${removal.error.message}`);
+    return postgresFailure(removal.error as PostgresErrorLike, "hero");
+  }
+
+  for (const [index, slide] of hero.slides.entries()) {
+    if (slide.id === null) continue;
+
+    const { error } = await supabase
+      .from("HeroSlide")
+      .update({
+        imageUrl: slide.imageUrl,
+        alt: slide.alt,
+        alt_ar: slide.altAr,
+        sortOrder: index,
+      })
+      .eq("id", slide.id);
+
+    if (error) {
+      console.error(`[admin] saveHero slide update failed (${actor.email}): ${error.message}`);
+      return postgresFailure(error as PostgresErrorLike, "hero");
+    }
+  }
+
+  const additions = hero.slides
+    .map((slide, index) => ({ slide, index }))
+    .filter(({ slide }) => slide.id === null)
+    .map(({ slide, index }) => ({
+      imageUrl: slide.imageUrl,
+      alt: slide.alt,
+      alt_ar: slide.altAr,
+      sortOrder: index,
+    }));
+
+  if (additions.length > 0) {
+    const { error } = await supabase.from("HeroSlide").insert(additions);
+
+    if (error) {
+      console.error(`[admin] saveHero slide insert failed (${actor.email}): ${error.message}`);
+      return postgresFailure(error as PostgresErrorLike, "hero");
+    }
+  }
+
+  revalidateHero();
+  console.info(`[admin] hero saved by ${actor.email}`);
+
+  // `slug` is the row's identity in `AdminActionResult`; this table holds one
+  // row, and "default" is what its primary key says.
+  return { ok: true, slug: "default", message: "Hero saved." };
 }

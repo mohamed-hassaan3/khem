@@ -153,5 +153,69 @@ export const scheduleCampaignSchema = z.object({
     ),
 });
 
+/**
+ * Which stored audiences a campaign speaks to.
+ *
+ * Both may be false. A campaign sent only to hand-typed addresses selects
+ * neither, and refusing that here would make Mode B impossible — whether the
+ * selection actually reaches anybody is a question about counts, and
+ * `sendCampaignNow()` asks it against the audience the database returns rather
+ * than against the shape of this form.
+ */
+export const campaignAudienceSchema = z.object({
+  id: z.string().trim().min(8, "Unknown campaign."),
+  toSubscribers: z.boolean(),
+  toCustomers: z.boolean(),
+});
+
+/** Nothing legitimate is longer, and the check happens before any query. */
+const MAX_SPECIFIC_RECIPIENTS = 200;
+
+const recipientEmail = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(1, "Enter an email address.")
+  .max(254, "That address is too long.")
+  .pipe(z.email("That is not a valid email address."));
+
+/**
+ * The addresses somebody typed, as the complete list for this campaign.
+ *
+ * A **replacement**, not an append: the editor holds the whole list, sends the
+ * whole list, and what comes back is what the campaign has. An append endpoint
+ * would need a delete endpoint beside it and a way for the two to disagree.
+ *
+ * Duplicates are refused rather than silently collapsed. The database would
+ * collapse them anyway — `campaign_recipients` is keyed on the address, and the
+ * send is keyed on it again — but an editor who typed the same address twice
+ * made a mistake, and quietly fixing it hides the fact that one of the two rows
+ * they are looking at is not the one they meant.
+ */
+export const campaignRecipientsSchema = z
+  .object({
+    id: z.string().trim().min(8, "Unknown campaign."),
+    emails: z
+      .array(recipientEmail)
+      .max(
+        MAX_SPECIFIC_RECIPIENTS,
+        `That is more than ${MAX_SPECIFIC_RECIPIENTS} addresses. Send to a stored audience instead.`,
+      ),
+  })
+  .superRefine((value, ctx) => {
+    const seen = new Set<string>();
+
+    value.emails.forEach((email, index) => {
+      if (seen.has(email)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["emails", index],
+          message: "That address is already on the list.",
+        });
+      }
+      seen.add(email);
+    });
+  });
+
 export type CreateCampaignInput = z.input<typeof createCampaignSchema>;
 export type UpdateCampaignInput = z.input<typeof updateCampaignSchema>;
