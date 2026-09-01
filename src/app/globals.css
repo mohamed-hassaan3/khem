@@ -1060,27 +1060,71 @@
   }
 
   /*
-   * Type on the bottom edge — collection, journal and legal banners.
-   * Opaque at the very bottom so the banner resolves into the page below it
-   * with no seam.
+   * Type on the bottom edge — **every page banner**, and the only anchor the
+   * house has. Opaque at the very bottom so the banner resolves into the page
+   * below it with no seam.
+   *
+   * This is the anchor a banner takes **unless its type block makes it
+   * impossible**. A wash strong enough to carry a paragraph across the middle
+   * of a photograph is a wash strong enough to hide the photograph — which is
+   * what `/collections/body-care` was doing while `/collections/signature`,
+   * one section of the same site away, showed its picture whole. Every
+   * category masthead moved here, and reads the way the collection banners
+   * always did: the image owns the top of the frame at its own luminance, this
+   * floor comes up under the words, the reader sees the artwork before reading.
+   *
+   * The two remaining anchors below are not leftovers. They hold the editorial
+   * mastheads, whose three-line 96px display titles over a lede fill a frame
+   * however they are anchored — on the floor, the floor would have to climb to
+   * the top of the picture to carry them, which is the fault above wearing the
+   * fix's clothes. Their compositions leave part of the frame clear instead,
+   * which is why those pages never had the washed-out complaint.
    */
   .banner-scrim-base {
+    /*
+     * The floor's reach, as two stops a caller may move.
+     *
+     * The defaults are the collection banners' — a count and a title, roughly a
+     * third of the frame, clear of the picture by 64%. A banner whose type
+     * block is *taller* than that (a lede, a note, a two-line display title)
+     * needs the floor to reach further or the top of its own copy ends up
+     * outside it, which is how "THE RITUAL" came to sit invisibly on a bottle.
+     *
+     * A percentage rather than a pixel length because the section's height is a
+     * viewport fraction: the same block occupies half a phone's banner and a
+     * third of a desktop's, so the reach is per breakpoint too. Callers set
+     * `[--scrim-mid:…] [--scrim-end:…]` and their `md:` counterparts, measured
+     * against the block they actually render.
+     *
+     * The ramp stays soft either way — at the `--scrim-end` stop the wash has
+     * already fallen to nothing, so pushing it up costs a haze in the middle of
+     * the frame, not the photograph.
+     */
     background: linear-gradient(
       to top,
       var(--color-ivory) 0%,
-      color-mix(in srgb, var(--color-ivory) 82%, transparent) 30%,
-      transparent 64%
+      color-mix(in srgb, var(--color-ivory) 82%, transparent) var(--scrim-mid, 30%),
+      transparent var(--scrim-end, 64%)
     );
   }
 
   /*
-   * Type in a reading column on the leading edge — the category mastheads and
-   * the editorial pages.
+   * Type in a reading column on the leading edge — the editorial mastheads:
+   * heritage, about, ingredients.
+   *
+   * Kept, where the category mastheads that also used it were moved to the
+   * floor. The difference is the type block. A three-line display title at
+   * 96px over a lede is most of a banner however it is anchored: put it on the
+   * floor and the floor has to climb to the top of the frame to carry it,
+   * which washes out the whole photograph — the fault this pass exists to fix,
+   * reintroduced by the fix. Held in a reading column instead, it leaves the
+   * trailing half of the picture untouched, which is why these pages never had
+   * the washed-out complaint the category pages did.
    *
    * Two layers, and both are load-bearing: the horizontal one shapes the
    * composition and lets the picture come through on the trailing side, the
-   * bottom one is the floor that stops a dark photograph from swallowing the
-   * lede where the horizontal wash has run out.
+   * vertical one is the shared floor below, so the banner still resolves into
+   * the page with no seam.
    *
    * `--banner-dir` rather than a duplicated RTL rule: the reading column swaps
    * sides with the document, and a wash that stayed on the left would leave
@@ -1091,9 +1135,9 @@
     background:
       linear-gradient(
         to top,
-        color-mix(in srgb, var(--color-ivory) 72%, transparent) 0%,
-        color-mix(in srgb, var(--color-ivory) 30%, transparent) 42%,
-        transparent 70%
+        var(--color-ivory) 0%,
+        color-mix(in srgb, var(--color-ivory) 82%, transparent) 30%,
+        transparent 64%
       ),
       linear-gradient(
         var(--banner-dir),
@@ -1108,18 +1152,27 @@
   }
 
   /*
-   * Type centred over the frame — the new-arrival hero.
+   * Type centred *over* the frame — the craftsmanship masthead, and the map
+   * panel in `<StockistDirectory>`.
+   *
+   * Kept for the same reason as `-column`: craftsmanship carries the same
+   * three-line display title, and the map panel is not a page banner at all —
+   * it is a bordered card beside the directory list, holding a legend and a
+   * row of city chips over a map texture. There is no title to read, no
+   * reading order to establish, and no page ground below it for a floor to
+   * dissolve into.
    *
    * A radial pool rather than a directional wash, because centred type has no
-   * edge to anchor to. The vertical layer under it seats the section on the
-   * page above and below, so the banner does not end on a hard line.
+   * edge to anchor to; the vertical layer under it shares the base ramp so the
+   * card's bottom edge matches every other banner's.
    */
   .banner-scrim-center {
     background:
       linear-gradient(
         to top,
-        color-mix(in srgb, var(--color-ivory) 78%, transparent) 0%,
-        color-mix(in srgb, var(--color-ivory) 28%, transparent) 45%,
+        var(--color-ivory) 0%,
+        color-mix(in srgb, var(--color-ivory) 82%, transparent) 30%,
+        color-mix(in srgb, var(--color-ivory) 22%, transparent) 64%,
         color-mix(in srgb, var(--color-ivory) 55%, transparent) 100%
       ),
       radial-gradient(

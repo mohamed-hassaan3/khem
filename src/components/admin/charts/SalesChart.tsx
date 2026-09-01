@@ -18,10 +18,19 @@
  *
  * ## The palette
  *
- * Gold line, gold-soft wash, hairline grid on obsidian — the same tokens as the
- * rest of the desk, applied to a canvas that knows nothing about Tailwind.
- * Written as literals because the library takes colour strings, not classes;
- * they mirror `--color-gold`, `--color-gold-soft` and `--color-border`.
+ * Gold line, low-alpha gold wash, hairline grid **on ivory** — the same tokens
+ * as the rest of the desk, applied to a canvas that knows nothing about
+ * Tailwind. Written as literals because the library takes colour strings, not
+ * classes; they mirror `--color-gold-deep`, `--color-gold`, `--color-ink-muted`
+ * and `--color-border-light`.
+ *
+ * These were the obsidian values — ivory type at 35% opacity, white gridlines
+ * at 6% — from a desk that was dark. `<AdminShell>` is `ground-ivory`, so that
+ * palette painted near-white text onto `#f7f5f0`: the axis dates, the axis
+ * figures, the gridlines and the crosshair labels were all being drawn, and all
+ * invisible. That is the whole of the "analytics shows no dates or numbers"
+ * fault — the series, the gap-filling and the RPCs behind them were correct and
+ * are untouched.
  */
 
 import {
@@ -34,7 +43,12 @@ import {
 } from "lightweight-charts";
 import { useEffect, useRef } from "react";
 
-const GOLD = "#c8a96a";
+/*
+ * `--color-gold-deep`: the gold that survives on a light ground (~4.9:1 on
+ * ivory). `--color-gold` itself is ~2.6:1 there and was what made the line read
+ * as a smudge rather than as a series.
+ */
+const GOLD_DEEP = "#8a6a3f";
 
 export interface ChartPoint {
   /** `YYYY-MM-DD`, ascending and unique — the library requires all three. */
@@ -69,17 +83,23 @@ export default function SalesChart({
         // Transparent rather than the panel colour: the chart then sits on
         // whatever surface it is dropped into without a seam.
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "rgba(247, 244, 236, 0.35)",
+        // `--color-ink-muted`, the colour every other label on the desk is set
+        // in. This is the value that puts the dates back on the axis.
+        textColor: "#625f58",
         fontSize: 10,
-        fontFamily:
-          "var(--font-body), ui-sans-serif, system-ui, -apple-system, sans-serif",
+        // A literal stack, not `var(--font-body)`: a canvas font shorthand is
+        // parsed by the 2D context, which cannot resolve a custom property —
+        // the whole declaration was being dropped and the axis fell back to the
+        // browser default face.
+        fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, sans-serif",
         attributionLogo: false,
       },
       grid: {
         // Horizontal only. Vertical gridlines on a 90-day series turn the panel
         // into a ledger, which is the opposite of the house look.
         vertLines: { visible: false },
-        horzLines: { color: "rgba(255, 255, 255, 0.06)" },
+        // `--color-border-light`, softened. A white hairline on paper is nothing.
+        horzLines: { color: "rgba(216, 211, 202, 0.9)" },
       },
       rightPriceScale: {
         borderVisible: false,
@@ -91,8 +111,8 @@ export default function SalesChart({
         fixRightEdge: true,
       },
       crosshair: {
-        vertLine: { color: "rgba(200, 169, 106, 0.4)", width: 1, style: 0, labelBackgroundColor: GOLD },
-        horzLine: { color: "rgba(200, 169, 106, 0.4)", width: 1, style: 0, labelBackgroundColor: GOLD },
+        vertLine: { color: "rgba(138, 106, 63, 0.4)", width: 1, style: 0, labelBackgroundColor: GOLD_DEEP },
+        horzLine: { color: "rgba(138, 106, 63, 0.4)", width: 1, style: 0, labelBackgroundColor: GOLD_DEEP },
       },
       localization: {
         locale: "en-US",
@@ -111,15 +131,16 @@ export default function SalesChart({
     const series =
       kind === "area"
         ? chart.addSeries(AreaSeries, {
-            lineColor: GOLD,
-            topColor: "rgba(200, 169, 106, 0.28)",
-            bottomColor: "rgba(200, 169, 106, 0.01)",
+            lineColor: GOLD_DEEP,
+            topColor: "rgba(176, 141, 87, 0.26)",
+            bottomColor: "rgba(176, 141, 87, 0.02)",
             lineWidth: 2,
             priceLineVisible: false,
             lastValueVisible: false,
           })
         : chart.addSeries(HistogramSeries, {
-            color: "rgba(230, 214, 168, 0.55)",
+            // Champagne at 55% was a bar the same value as the paper behind it.
+            color: "rgba(176, 141, 87, 0.7)",
             priceLineVisible: false,
             lastValueVisible: false,
           });

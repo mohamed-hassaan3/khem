@@ -3,9 +3,22 @@
  *
  * Defined once and imported by `<ClerkProvider>`, `<SignIn>`, `<SignUp>`,
  * `<UserProfile>`, and `<UserButton>`. Clerk's default palette is a light card
- * with an indigo accent — dropped into an obsidian page it reads as a
- * third-party widget bolted onto the boutique, which is precisely the "generic
- * SaaS aesthetic" AGENTS.md §1.6 rules out.
+ * with an indigo accent — dropped into a KHEM page it reads as a third-party
+ * widget bolted onto the boutique, which is precisely the "generic SaaS
+ * aesthetic" AGENTS.md §1.6 rules out.
+ *
+ * ## Light, not obsidian
+ *
+ * This object used to be written against the dark tokens — `#1a1a1a` card,
+ * ivory type — from a time when the site was dark all the way up. Every surface
+ * that mounts a Clerk component is now light: `<AuthShell>` is `ground-ivory`,
+ * `/account` is `ground-ivory`, and the `<UserButton>` popover opens over an
+ * ivory header. A near-black card in the middle of a page of paper is the
+ * mismatch that made the sign-in screen read as generic; it is not that Clerk
+ * was under-themed, it is that it was themed for a different site.
+ *
+ * So the same variables are re-pointed at the light ground. Nothing about the
+ * flow, the redirects, or the metadata changes — this file is presentation.
  *
  * The values are the §3.1 design tokens. They are written as literals rather
  * than as `var(--color-gold)` because Clerk renders parts of its UI (the modal
@@ -17,7 +30,9 @@
  *
  * Flow decisions (`useSignIn`/`useSignUp` hand-rolled forms) are deliberately
  * not taken. Owning the flow means owning password reset, MFA, OAuth
- * callbacks, bot protection, and every error string in two languages.
+ * callbacks, bot protection, and every error string in two languages. It is
+ * also why the password policy is not expressible here at all — it lives in the
+ * Clerk Dashboard; see `src/docs/clerk-password-policy.md`.
  */
 
 /*
@@ -35,50 +50,52 @@
  */
 
 /* §3.1 tokens, mirrored from `globals.css`. */
-const BACKGROUND = "#0d0d0d";
-const SURFACE = "#1a1a1a";
-const CARD = "#242424";
-const GOLD = "#c8a96a";
-const CHAMPAGNE = "#e6d6a8";
-const IVORY = "#f7f4ec";
+const IVORY = "#f7f5f0";
+const STONE = "#efebe4";
+const INK = "#242321";
+const INK_MUTED = "#625f58";
+const BORDER_LIGHT = "#d8d3ca";
+/* The gold that survives as text on a light ground — ~4.9:1 on ivory. */
+const GOLD_DEEP = "#8a6a3f";
 const DANGER = "#c0392b";
 const SUCCESS = "#4caf50";
 const WARNING = "#e8a317";
 
 export const khemClerkAppearance = {
   variables: {
-    colorPrimary: GOLD,
-    colorPrimaryForeground: BACKGROUND,
+    colorPrimary: GOLD_DEEP,
+    colorPrimaryForeground: IVORY,
 
-    colorBackground: SURFACE,
-    colorForeground: IVORY,
-    colorMutedForeground: "rgba(247, 244, 236, 0.45)",
-    colorMuted: CARD,
+    colorBackground: IVORY,
+    colorForeground: INK,
+    colorMutedForeground: INK_MUTED,
+    colorMuted: STONE,
 
     /*
-     * The single most important value in this file for a dark theme.
+     * The single most important value in this file.
      *
      * Clerk *generates* a shade ramp from `colorNeutral` and uses it for
      * borders, hover backgrounds, and — critically — the text of dropdown
-     * options and social buttons. It defaults to a dark neutral, which is
-     * correct on Clerk's default light card and produces black-on-obsidian
-     * everywhere here: the "Continue with Google" label and the "Manage
-     * account" / "Sign out" rows of the `<UserButton>` popover were both
-     * unreadable until this was set.
+     * options and social buttons. It is not a text colour itself: setting
+     * `colorForeground` alone does not reach those elements.
      *
-     * Light value = light generated shades. It is not a text colour itself;
-     * setting `colorForeground` alone does not reach these elements.
+     * It was ivory here, which was correct while the card was obsidian and
+     * wrong the moment the card became paper — light generated shades on a
+     * light card is the "Continue with Google" label disappearing. Ink is the
+     * same decision taken for the light ground.
      */
-    colorNeutral: IVORY,
+    colorNeutral: INK,
 
-    colorInput: "rgba(255, 255, 255, 0.04)",
-    colorInputForeground: IVORY,
+    /* A wash of ink rather than of white: the card it sits on is already ivory. */
+    colorInput: "rgba(36, 35, 33, 0.03)",
+    colorInputForeground: INK,
 
-    colorBorder: "rgba(255, 255, 255, 0.08)",
-    colorRing: GOLD,
-    colorShimmer: "rgba(200, 169, 106, 0.2)",
-    colorShadow: "rgba(0, 0, 0, 0.45)",
-    colorModalBackdrop: "rgba(0, 0, 0, 0.8)",
+    colorBorder: BORDER_LIGHT,
+    colorRing: GOLD_DEEP,
+    colorShimmer: "rgba(138, 106, 63, 0.16)",
+    colorShadow: "rgba(36, 35, 33, 0.12)",
+    /* Ink, not black. A pure-black scrim over a paper page reads as a different site. */
+    colorModalBackdrop: "rgba(36, 35, 33, 0.55)",
 
     colorDanger: DANGER,
     colorSuccess: SUCCESS,
@@ -100,15 +117,15 @@ export const khemClerkAppearance = {
   elements: {
     /*
      * The card sits inside `<AuthShell>`, which already draws the framed
-     * surface — so Clerk's own card drops its background and border rather
-     * than painting a second box inside the first.
+     * surface — so Clerk's own card carries only the house hairline rather
+     * than painting a second raised box inside the first.
      */
     cardBox: {
       boxShadow: "none",
-      border: "1px solid rgba(255, 255, 255, 0.08)",
+      border: `1px solid ${BORDER_LIGHT}`,
     },
     card: {
-      backgroundColor: SURFACE,
+      backgroundColor: IVORY,
       boxShadow: "none",
     },
 
@@ -123,12 +140,18 @@ export const khemClerkAppearance = {
       letterSpacing: "0.2em",
       fontSize: "11px",
       transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-      "&:hover": { backgroundColor: CHAMPAGNE },
+      /*
+       * Hovers to ink, not to champagne. Champagne was the lift a gold button
+       * takes on obsidian; on paper it is a pale button going paler, and the
+       * ivory label on it disappears. Ink is the house's other structural
+       * colour and the same move the site's own buttons make on light.
+       */
+      "&:hover": { backgroundColor: INK },
     },
 
     footerActionLink: {
-      color: GOLD,
-      "&:hover": { color: CHAMPAGNE },
+      color: GOLD_DEEP,
+      "&:hover": { color: INK },
     },
   },
 

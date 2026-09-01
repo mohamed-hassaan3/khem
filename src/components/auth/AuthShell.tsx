@@ -1,3 +1,6 @@
+import Image from "next/image";
+
+import logo from "@/public/logo/logo-transparent.webp";
 import NavGround from "@/src/components/NavGround";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
@@ -17,6 +20,13 @@ import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 
 export interface AuthShellProps {
   eyebrow: string;
+  /**
+   * The brand mark's alt text. Passed in rather than read from a key of its
+   * own: `dict.footer.logoAlt` is already the house's one description of the
+   * mark in both locales, and a second string would be the same sentence
+   * translated twice.
+   */
+  logoAlt: string;
   heading: string;
   body: string;
   guest: Dictionary["auth"];
@@ -25,6 +35,7 @@ export interface AuthShellProps {
 
 export default function AuthShell({
   eyebrow,
+  logoAlt,
   heading,
   body,
   guest,
@@ -41,6 +52,26 @@ export default function AuthShell({
       <NavGround ground="ivory" />
 
       <header className="mb-6 md:mb-10 max-w-md text-center">
+        {/*
+         * The house mark, above the words.
+         *
+         * A credential form is the one screen where a visitor stops to check
+         * *whose* form it is, and Clerk's card cannot carry the mark itself —
+         * v7 exposes no stable, typed slot for it, and the CSS route into the
+         * card's header is the kind of hack that breaks on a Clerk release.
+         * So it sits in the house furniture instead, where it is ours.
+         *
+         * Static import, like the Footer's: a relative `src` resolves against
+         * the current URL and would 404 on every `/ar` route.
+         */}
+        <Image
+          src={logo}
+          alt={logoAlt}
+          sizes="64px"
+          priority
+          className="mx-auto mb-6 h-16 w-auto"
+        />
+
         <p className="eyebrow mb-3">{eyebrow}</p>
 
         <h1 className="mb-5 font-heading text-3xl font-normal text-ground sm:text-4xl">
