@@ -13,6 +13,7 @@
  */
 
 import type { OrderStatus } from "./account";
+import type { DiscountRefusalCode } from "./discount";
 
 /** Mirrors the `PaymentMethod` enum added in `supabase/sql/0016_checkout.sql`. */
 export type PaymentMethod = "CARD" | "CASH";
@@ -89,6 +90,16 @@ export type CheckoutResult =
        * English; shown beneath the translated `formError`, never instead of it.
        */
       detail?: string;
+      /**
+       * The refusal `resolve_discount()` named, when the failure was a discount
+       * code. Present only alongside `formError: "discountRejected"`, and only
+       * against a database that has applied `0040` — so the English `detail`
+       * remains the fallback rather than the exception.
+       *
+       * It exists so the sentence beneath the payment button is the sentence
+       * the code field shows, in the language the visitor is reading.
+       */
+      reasonCode?: DiscountRefusalCode;
       fieldErrors?: Record<string, string>;
     };
 

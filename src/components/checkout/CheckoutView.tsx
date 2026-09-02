@@ -46,6 +46,7 @@ import PageHeader from "@/src/components/ecommerce/PageHeader";
 import { placeCustomerOrder } from "@/src/actions/checkout";
 import { previewDiscount } from "@/src/actions/discounts";
 import { cartTotalInCents } from "@/src/lib/cart";
+import { discountRefusalMessage } from "@/src/lib/discount-message";
 import { cartPricing } from "@/src/lib/pricing";
 import { formatPrice } from "@/src/lib/format";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
@@ -56,6 +57,7 @@ import {
 } from "@/src/lib/shipping";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
+import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { PaymentMethod } from "@/src/types/checkout";
 import type { ProductCardData } from "@/src/types/catalog";
@@ -192,6 +194,14 @@ export default function CheckoutView({
   const [method, setMethod] = useState<PaymentMethod>(
     cardAvailable ? "CARD" : "CASH",
   );
+
+  /*
+   * The visitor's currency, for the one figure a refusal can carry — the
+   * minimum an offer applies from. The module-level `formatPrice` above stays
+   * where it is: it prints the base-currency total on the card button, which is
+   * the amount Stripe is actually given.
+   */
+  const formatDisplayPrice = useFormatPrice();
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -470,7 +480,23 @@ export default function CheckoutView({
             ),
           );
         }
-        showFailure(result.formError, result.detail);
+        /*
+         * A discount refused at the button reads exactly as it reads at the
+         * field: same function, same dictionary. Only when the database did
+         * not name the reason — a build older than `0040`, or a refusal this
+         * one cannot name — does the server's English sentence stand in.
+         */
+        showFailure(
+          result.formError,
+          result.reasonCode === undefined
+            ? result.detail
+            : discountRefusalMessage(
+                { ok: false, reasonCode: result.reasonCode, reason: result.detail ?? "" },
+                dict.checkout.discount,
+                locale,
+                formatDisplayPrice,
+              ),
+        );
         return;
       }
 

@@ -58,9 +58,11 @@ import { shippingInCents } from "@/src/lib/cart";
 import { clientKey, isRateLimited } from "@/src/lib/email/rate-limit";
 import { announceOrder } from "@/src/lib/email/send-order-mail";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
+import { discountRefusalCodeSchema } from "@/src/schemas/db/discount-preview";
 import { checkoutFieldErrors, checkoutSchema } from "@/src/schemas/checkout";
 import { getOrderForMailByNumber, resolveCartToLines } from "@/src/services/orders";
 import type { CheckoutFormInput, CheckoutResult } from "@/src/types/checkout";
+import type { DiscountRefusalCode } from "@/src/types/discount";
 
 import { revalidateProductsBySlug } from "./admin/shared";
 
@@ -143,6 +145,26 @@ async function sweepStaleHolds(
  * built inside Postgres would mean parsing it, and a checkout that guesses at
  * the shape of an error string is a checkout that shows the wrong one.
  */
+/**
+ * The reason code a discount refusal travelled with, if it did.
+ *
+ * `supabase/sql/0040_discount_refusal_detail.sql` puts `DISCOUNT:<reasonCode>`
+ * in the exception's `hint`, which is the one channel that carries a *name*
+ * rather than a sentence — and a name is the only thing this action is willing
+ * to translate, per the header on `placementFailure` below.
+ *
+ * An unrecognised name is dropped rather than passed on: the client would have
+ * no sentence for it, and the English `detail` beside it is already true.
+ */
+function discountReasonFromHint(
+  hint: string | null | undefined,
+): DiscountRefusalCode | undefined {
+  if (typeof hint !== "string" || !hint.startsWith("DISCOUNT:")) return undefined;
+
+  const named = discountRefusalCodeSchema.safeParse(hint.slice("DISCOUNT:".length));
+  return named.success ? named.data : undefined;
+}
+
 function placementFailure(message: string): CheckoutResult {
   if (message.includes("in stock")) {
     return { ok: false, formError: "outOfStock", detail: message };
@@ -304,7 +326,19 @@ export async function placeCustomerOrder(
 
   if (error) {
     console.error(`[checkout] place_order failed: ${error.message}`);
-    return placementFailure(error.message);
+
+    /*
+     * A discount refusal is the one failure whose *reason* the database names,
+     * so it is the one the visitor can be shown in their own language. Anything
+     * else — stock, archived, a credit — keeps the English sentence beneath the
+     * translated heading, for the reason `placementFailure` gives.
+     */
+    const reasonCode = discountReasonFromHint(error.hint);
+    const failure = placementFailure(error.message);
+
+    return reasonCode !== undefined && !failure.ok
+      ? { ...failure, reasonCode }
+      : failure;
   }
 
   const orderNumber = typeof data === "string" ? data : "";

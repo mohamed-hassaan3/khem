@@ -37,12 +37,14 @@
 import { Check } from "lucide-react";
 
 import Price from "@/src/components/ecommerce/Price";
+import { discountRefusalMessage } from "@/src/lib/discount-message";
 import VoucherPicker, {
   type CheckoutVoucher,
 } from "@/src/components/checkout/VoucherPicker";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
+import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { DiscountPreview } from "@/src/types/discount";
 
@@ -94,19 +96,21 @@ export default function DiscountStep({
 }: DiscountStepProps) {
   const dict = useDictionary();
   const copy = dict.checkout.discount;
+  const formatPrice = useFormatPrice();
 
   /*
-   * The translated sentence for a named refusal, and the server's English one
-   * for a name this build does not know. Never a generic apology while a real
-   * reason exists — §5.4 asks for exactly that, and the reason is already
-   * written for a customer.
+   * The sentence is chosen in `src/lib/discount-message.ts`, which the payment
+   * button's failure path also calls — the two places a refusal can surface say
+   * the same thing because they read the same function, not because somebody
+   * kept them in step.
+   *
+   * Never a generic apology while a real reason exists — §5.4 asks for exactly
+   * that, and the reason is already written for a customer.
    */
   const refusalText =
     refusal === null
       ? null
-      : refusal.reasonCode === "UNKNOWN"
-        ? refusal.reason
-        : copy.reason[refusal.reasonCode];
+      : discountRefusalMessage(refusal, copy, locale, formatPrice);
 
   return (
     <section className="mt-12">
@@ -192,6 +196,12 @@ export default function DiscountStep({
            */}
           <p
             aria-live="polite"
+            /*
+             * `dir="auto"` rather than `ltrIsland`: this is Arabic prose that
+             * may carry a Latin collection or fragrance name, which is the case
+             * `src/lib/i18n/rtl.ts` says resolves from the text itself.
+             */
+            dir="auto"
             className={`mt-3 min-h-4 max-w-xl text-[12px] leading-relaxed ${
               refusalText ? "text-danger" : "text-warning"
             }`}

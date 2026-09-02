@@ -1222,7 +1222,7 @@ export const en = {
        */
       stale: "Your order changed. Apply your code again to use it.",
       blockedByCredit:
-        "A discount code cannot be combined with a Discovery Credit. Remove the credit above to use one.",
+        "One offer at a time: a discount code cannot be combined with a Discovery Credit. Remove the credit above to enter a code.",
 
       /*
        * Keyed by the `DiscountRefusalCode` union, which
@@ -1232,17 +1232,36 @@ export const en = {
        */
       reason: {
         NO_CODE: "Enter a code first.",
-        NOT_RECOGNISED: "That code is not recognised.",
-        INACTIVE: "That code is no longer active.",
-        NOT_STARTED: "That code is not available yet.",
-        EXPIRED: "That code has expired.",
-        BELOW_MINIMUM: "That code needs a larger order.",
-        NOT_GRANTED: "That code is not available on this order.",
-        ALREADY_USED: "That code has already been used.",
-        FULLY_REDEEMED: "That code has been fully redeemed.",
-        CUSTOMER_LIMIT: "You have already used that code.",
-        NOTHING_ELIGIBLE: "That code does not apply to anything in your bag.",
-        ZERO_AMOUNT: "That code takes nothing off this order.",
+        NOT_RECOGNISED: "This code is not valid.",
+        INACTIVE: "This code is no longer active.",
+        NOT_STARTED: "This code is not available yet.",
+        EXPIRED: "This code has expired.",
+        BELOW_MINIMUM: "This code needs a larger order.",
+        NOT_GRANTED: "This code is not available on this account.",
+        ALREADY_USED: "You have already used this code.",
+        FULLY_REDEEMED: "This code has reached its limit.",
+        CUSTOMER_LIMIT: "You have already used this code.",
+        NOTHING_ELIGIBLE: "This code does not apply to anything in your bag.",
+        ZERO_AMOUNT: "This code takes nothing off this order.",
+      },
+
+      /*
+       * The fuller sentence, shown when `resolve_discount()` sent the
+       * specifics — see `src/lib/discount-message.ts`. Only a code whose terms
+       * are public ever reaches these; an invitation-only code keeps the plain
+       * sentence above, which is what stops a private campaign being read off a
+       * refusal.
+       */
+      reasonDetail: {
+        BELOW_MINIMUM: "This code applies to orders of {amount} or more.",
+        COLLECTIONS_ONE: "This code is valid only for the {names} collection.",
+        COLLECTIONS_MANY:
+          "This code is valid only for selected collections: {names}.",
+        PRODUCTS_ONE: "This code is valid only for {names}, which is not in your bag.",
+        PRODUCTS_MANY:
+          "This code is valid only for selected fragrances: {names}.",
+        /** Appended when more sets qualify than the three that are named. */
+        andMore: " And {count} more.",
       },
 
       /** The signed-in customer's own vouchers, offered instead of remembered. */

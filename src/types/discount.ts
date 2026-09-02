@@ -132,6 +132,41 @@ export type DiscountRefusalCode =
   | "NOTHING_ELIGIBLE"
   | "ZERO_AMOUNT";
 
+/** One eligible set a restricted code names in its refusal. */
+export interface DiscountRefusalName {
+  name: string;
+  /**
+   * The Arabic name, where the row carries one. Null on a product — a fragrance
+   * name is a proper noun and stays in Latin script on `/ar`, per
+   * `supabase/sql/0008_i18n_content.sql`.
+   */
+  nameAr?: string | null;
+}
+
+/**
+ * The specifics behind a refusal, when there are any that may be said aloud.
+ *
+ * Attached by `supabase/sql/0040_discount_refusal_detail.sql` to two refusals
+ * only — `BELOW_MINIMUM` and `NOTHING_ELIGIBLE` — and only for a code that is
+ * not grant-gated. Its **absence is normal**: an invitation-only code, a
+ * refusal with nothing specific to add, or a database that has not yet applied
+ * `0040`. Every message must read correctly without it.
+ *
+ * Nothing here is ever computed in TypeScript. The figure and the names are
+ * read from rows inside `resolve_discount()`, which is what keeps the sentence
+ * the customer reads and the rule that refused them from ever disagreeing.
+ */
+export interface DiscountRefusalDetail {
+  /** Piastres. The order this code applies from. */
+  minimumInCents?: number;
+  /** What the code is restricted to. Absent when it applies to everything. */
+  scope?: "PRODUCTS" | "COLLECTIONS";
+  /** At most three — a refusal that recites nine sets is not a message. */
+  names?: readonly DiscountRefusalName[];
+  /** Eligible sets beyond the named three. */
+  more?: number;
+}
+
 /**
  * What a code would be worth against the bag as it stands.
  *
@@ -154,4 +189,6 @@ export type DiscountPreview =
       reasonCode: DiscountRefusalCode | "UNKNOWN";
       /** The English sentence, for a `reasonCode` the client cannot name. */
       reason: string;
+      /** Specifics, where the code's terms are public. Often absent. */
+      detail?: DiscountRefusalDetail;
     };
