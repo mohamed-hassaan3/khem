@@ -2,6 +2,8 @@ import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import ContentBackLink from "@/src/components/admin/ContentBackLink";
 import ContentRowsEditor from "@/src/components/admin/ContentRowsEditor";
 import HeroForm from "@/src/components/admin/HeroForm";
+import LandingSectionsEditor from "@/src/components/admin/LandingSectionsEditor";
+import NewArrivalForm from "@/src/components/admin/NewArrivalForm";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import {
   createCraftPillar,
@@ -12,6 +14,9 @@ import {
   getAdminHero,
   listAdminCraftPillars,
 } from "@/src/services/admin/content";
+import { getLandingSections } from "@/src/services/content";
+import { getAdminSettings } from "@/src/services/admin/settings";
+import { listAdminProducts } from "@/src/services/admin/catalog";
 
 /**
  * The home page, section by section.
@@ -41,51 +46,6 @@ import {
  */
 export const dynamic = "force-dynamic";
 
-/** The bands of `/`, in the order the page renders them. */
-const SECTIONS = [
-  {
-    name: "Hero",
-    source: "The first screen — images or a film, and its overlay. Edited below.",
-    here: true,
-  },
-  {
-    name: "Collections",
-    source: "The featured collections rail — Commerce → Collections.",
-  },
-  {
-    name: "Essences",
-    source: "The bestseller band — Commerce → Products.",
-  },
-  {
-    name: "Story",
-    source: "The house paragraph — code-owned copy.",
-  },
-  {
-    name: "Craft pillars",
-    source: "Edited below.",
-    here: true,
-  },
-  {
-    name: "Featured fragrance",
-    source: "The full-bleed bottle — System → Settings, “featured fragrance”.",
-  },
-  {
-    name: "Ingredients",
-    source: "The materials band — Content → World of KHEM → Ingredients.",
-  },
-  {
-    name: "Journal",
-    source: "The latest three articles — Content → World of KHEM → Journal.",
-  },
-  {
-    name: "Testimonials",
-    source: "The `Testimonial` table. No editor yet — changed in Supabase.",
-  },
-  {
-    name: "Newsletter",
-    source: "The Inner Circle signup — code-owned copy; the list is Marketing → Newsletter.",
-  },
-] as const;
 
 export default async function AdminLandingContentPage({
   params,
@@ -95,10 +55,27 @@ export default async function AdminLandingContentPage({
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  const [hero, pillars] = await Promise.all([
+  const [hero, pillars, sections, settings, products] = await Promise.all([
     getAdminHero(),
     listAdminCraftPillars(),
+    getLandingSections(),
+    getAdminSettings(),
+    listAdminProducts(),
   ]);
+
+  // Archived products are excluded: featuring one would put a full-bleed band on
+  // the home page for something nobody can buy.
+  const featurable = products
+    .filter((product: { isArchived: boolean }) => !product.isArchived)
+    .map((product: { slug: string; name: string }) => ({
+      slug: product.slug,
+      name: product.name,
+    }));
+
+  // The band whose settings this screen owns.
+  const featured = sections.find(
+    (section: { key: string }) => section.key === "featured",
+  );
 
   return (
     <>
@@ -118,33 +95,36 @@ export default async function AdminLandingContentPage({
             Sections
           </h2>
           <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
+            Move a band to change where it falls on the page, or hide it to take
+            it off entirely. A hidden band costs no query. The hero stays first
+            because it decides the header’s colour over the first screen.
+          </p>
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             Copy marked code-owned — headings, standfirsts and page metadata —
             is not in the database yet and still needs a developer to change.
           </p>
         </div>
 
-        <ol className="divide-y divide-ground-border border border-ground-border">
-          {SECTIONS.map((section, index) => (
-            <li
-              key={section.name}
-              className="flex flex-wrap items-baseline gap-x-4 gap-y-1 px-5 py-4 sm:px-6"
-            >
-              <span className="font-heading text-[10px] tabular-nums tracking-[0.2em] text-ground-subtle">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <span
-                className={`font-heading text-[10px] uppercase tracking-[0.2em] ${
-                  "here" in section ? "text-ground-accent" : "text-ground"
-                }`}
-              >
-                {section.name}
-              </span>
-              <span className="basis-full text-[12px] leading-relaxed text-ground-muted sm:basis-auto">
-                {section.source}
-              </span>
-            </li>
-          ))}
-        </ol>
+        <LandingSectionsEditor sections={sections} />
+      </section>
+
+      <section className="mt-12 space-y-5">
+        <div>
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+            New Arrival
+          </h2>
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
+            Everything this band shows, in one place — which product it features,
+            what fills its backdrop, and optionally its own title, paragraph and
+            button. Leave an override empty to use the product’s own.
+          </p>
+        </div>
+
+        <NewArrivalForm
+          settings={featured?.settings ?? {}}
+          featuredProductSlug={settings?.featuredProductSlug ?? null}
+          products={featurable}
+        />
       </section>
 
       <section className="mt-12 space-y-5">

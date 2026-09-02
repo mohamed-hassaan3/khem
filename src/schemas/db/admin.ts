@@ -121,7 +121,17 @@ export function toAdminMerchPage(row: unknown): AdminMerchPage | null {
 export const ADMIN_PRODUCT_COLUMNS =
   "id, name, slug, subtitle, description, story, concentration, format, includes, " +
   "badge, tags, topNotes, heartNotes, baseNotes, volumeMl, priceInCents, " +
-  "sku, inventory, isBestseller, collectionSlug, sortOrder, isArchived, updatedAt";
+  /*
+   * Both counters by name, and the total.
+   *
+   * The storefront aliases `"inventoryOnline"` to `inventory`
+   * (`src/schemas/db/catalog.ts`), because a visitor may only buy what the
+   * website holds. The dashboard is the opposite case: it exists to show what
+   * the house holds *everywhere*, so it reads the two real columns and the
+   * maintained total side by side.
+   */
+  "sku, inventory, inventoryOnline, inventoryOffline, isBestseller, " +
+  "collectionSlug, sortOrder, isArchived, updatedAt";
 
 /** The edit screen additionally needs the gallery it is about to rewrite. */
 export const ADMIN_PRODUCT_WITH_IMAGES_COLUMNS =
@@ -156,6 +166,8 @@ const adminProductRowSchema = z.object({
   priceInCents: z.number(),
   sku: z.string(),
   inventory: z.number(),
+  inventoryOnline: z.number(),
+  inventoryOffline: z.number(),
   isBestseller: z.boolean(),
   collectionSlug: z.string(),
   sortOrder: z.number(),

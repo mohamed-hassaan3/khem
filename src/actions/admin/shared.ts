@@ -39,7 +39,8 @@ export type AdminEntity =
   | "article"
   | "image"
   | "hero"
-  | "stockist";
+  | "stockist"
+  | "section";
 
 /**
  * Returned when `SUPABASE_SECRET_KEY` is absent.

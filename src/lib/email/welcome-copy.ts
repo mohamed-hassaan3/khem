@@ -78,7 +78,7 @@ export const ACCOUNT_WELCOME_COPY: Record<Locale, AccountWelcomeCopy> = {
     privilegeExpiry: "Yours until {date}.",
     privilegeNoExpiry: "Yours to use whenever you are ready.",
     privilegeHow:
-      "Enter it at checkout, or choose it from your account — it is already waiting there.",
+      "Enter it at checkout, or choose it from your account. It is already waiting there.",
     cta: "Explore KHEM House",
     noPrivilege:
       "Your account is ready whenever you are. New compositions and private offers reach you here first.",
@@ -99,7 +99,7 @@ export const ACCOUNT_WELCOME_COPY: Record<Locale, AccountWelcomeCopy> = {
     privilegeExpiry: "صالح لك حتى {date}.",
     privilegeNoExpiry: "استخدمه متى شئت.",
     privilegeHow:
-      "أدخله عند إتمام الطلب، أو اختره من حسابك — فهو في انتظارك هناك.",
+      "أدخله عند إتمام الطلب، أو اختره من حسابك؛ فهو في انتظارك هناك.",
     cta: "تعرّف على دار كيم",
     noPrivilege:
       "حسابك جاهز متى أردت. التركيبات الجديدة والعروض الخاصة تصلك هنا أولًا.",
@@ -114,7 +114,7 @@ export const INVITATION_COPY: Record<Locale, InvitationCopy> = {
     eyebrow: "A Private Invitation",
     headline: "You are invited.",
     intro:
-      "The house has opened a place for you at KHEM. Accept the invitation below and your account will be ready in a moment — with the privileges the house extends to its members.",
+      "The house has opened a place for you at KHEM. Accept the invitation below and your account will be ready in a moment, with the privileges the house extends to its members.",
     house:
       "KHEM composes fragrance in Cairo, drawing on five millennia of Egyptian perfumery. Each bottle is finished by hand, and each composition is made in small number.",
     cta: "Accept Invitation",

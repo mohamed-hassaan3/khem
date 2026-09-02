@@ -269,7 +269,18 @@ export default function ProductPurchase({
         {stockLabel}
       </p>
 
-      <div className="mt-8 md:mt-12 grid grid-cols-1 gap-4 md:gap-6 border-t border-ground-border pt-7 sm:grid-cols-3">
+      {/*
+        Two-up, at every width.
+
+        The row was `grid-cols-1 sm:grid-cols-3` when there were three badges.
+        A fourth ("No Blind Buy") made three-across leave one orphan on its own
+        line, and four-across is too tight for this column: on `lg:` the page is
+        two columns, so this one is half the viewport and each badge would get
+        roughly a hundred pixels for a two-line description. Two-up divides
+        evenly, keeps the descriptions on two lines at 375px, and reads as the
+        pairing the copy is ordered in.
+      */}
+      <div className="mt-8 md:mt-12 grid grid-cols-2 gap-4 md:gap-6 border-t border-ground-border pt-7">
         {Object.values(dict.product.trust).map((badge) => (
           <div key={badge.title}>
             <p className="mb-1 font-heading text-[10px] tracking-[0.1em] text-ground-accent">

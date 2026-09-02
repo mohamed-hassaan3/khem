@@ -122,7 +122,7 @@ export default async function SetPage({
      * discovery box can offer a full bottle of something it introduced. The
      * kinds are a module constant, never anything derived from the request.
      */
-    getRelatedProductCards(activeLocale, product.slug, 3, SET_RELATED_KINDS),
+    getRelatedProductCards(activeLocale, product.slug, 4, SET_RELATED_KINDS),
   ]);
 
   const gallery = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder);

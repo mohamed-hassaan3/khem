@@ -586,56 +586,56 @@
     {
       "id": "birth-of-kyphi",
       "year": "3000 BC",
-      "year_ar": null,
+      "year_ar": "٣٠٠٠ ق.م",
       "title": "The Birth of Kyphi",
-      "title_ar": null,
+      "title_ar": "ولادة الكيفي",
       "description": "Ancient Egyptians develop the first complex perfume formula — Kyphi — from sixteen sacred ingredients. It is burned in temples at sunset as an offering to the gods.",
-      "description_ar": null
+      "description_ar": "طوّر المصريون القدماء أول تركيبة عطرية معقّدة، الكيفي، من ستة عشر مكوّنًا مقدّسًا. كان يُحرق في المعابد عند الغروب قربانًا للآلهة."
     },
     {
       "id": "great-papyrus-formulas",
       "year": "1550 BC",
-      "year_ar": null,
+      "year_ar": "١٥٥٠ ق.م",
       "title": "The Great Papyrus Formulas",
-      "title_ar": null,
+      "title_ar": "تركيبات البردية العظيمة",
       "description": "The Ebers Papyrus records hundreds of scent formulas using frankincense, myrrh, cinnamon, and rare resins. Perfumery becomes a sacred art form.",
-      "description_ar": null
+      "description_ar": "تسجّل بردية إيبرس مئات التركيبات العطرية باللبان والمرّ والقرفة والراتنجات النادرة، فتغدو صناعة العطر فنًّا مقدّسًا."
     },
     {
       "id": "the-scented-queen",
       "year": "69 BC",
-      "year_ar": null,
+      "year_ar": "٦٩ ق.م",
       "title": "The Scented Queen",
-      "title_ar": null,
+      "title_ar": "الملكة المعطَّرة",
       "description": "Cleopatra VII saturates the sails of her ships in rose and jasmine perfume so that her arrival is announced by scent before she appears. Fragrance becomes power.",
-      "description_ar": null
+      "description_ar": "تُشبِع كليوباترا السابعة أشرعة سفنها بعطر الورد والياسمين، فيسبق عبيرها وصولها. هكذا صار العطر قوّة."
     },
     {
       "id": "khem-is-founded",
       "year": "2019 AD",
-      "year_ar": null,
+      "year_ar": "٢٠١٩ م",
       "title": "KHEM is Founded",
-      "title_ar": null,
+      "title_ar": "تأسيس كيم",
       "description": "A gathering of Egyptian perfumers, historians, and craftspeople in Cairo establish KHEM — a fragrance house dedicated to transforming ancient wisdom into modern luxury.",
-      "description_ar": null
+      "description_ar": "يؤسّس نخبة من صانعي العطور والمؤرخين والحرفيين المصريين في القاهرة دار كيم، وهي دار عطور تكرّس عملها لتحويل الحكمة القديمة إلى فخامة معاصرة."
     },
     {
       "id": "the-first-collection",
       "year": "2021 AD",
-      "year_ar": null,
+      "year_ar": "٢٠٢١ م",
       "title": "The First Collection",
-      "title_ar": null,
+      "title_ar": "المجموعة الأولى",
       "description": "The Signature Collection launches to critical acclaim, including Onyx Night — KHEM's defining fragrance and the most complex formula in the house.",
-      "description_ar": null
+      "description_ar": "تُطلق مجموعة سيغنتشر وتلقى إشادة النقاد، ومنها Onyx Night، عطر كيم الأبرز وأكثر تركيبات الدار تعقيدًا."
     },
     {
       "id": "the-noir-chapter",
       "year": "2024 AD",
-      "year_ar": null,
+      "year_ar": "٢٠٢٤ م",
       "title": "The Noir Chapter",
-      "title_ar": null,
+      "title_ar": "فصل نور",
       "description": "The second collection — Noir — explores the darker, more esoteric aspects of Egyptian heritage. Small runs. Museum-grade packaging.",
-      "description_ar": null
+      "description_ar": "تستكشف المجموعة الثانية، نور، الجوانب الأكثر عتمةً وباطنيةً في التراث المصري. إصدارات محدودة، وتغليف بمستوى المتاحف."
     }
   ],
   "brandValues": [

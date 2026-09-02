@@ -1,4 +1,5 @@
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
+import { productTypesForKind } from "@/src/lib/product-types";
 
 /**
  * Navigation structure — routes only, no display copy.
@@ -66,6 +67,30 @@ export type CollectionEntry =
  * on materials of that family. Membership is derived through
  * `"Ingredient"` → `"IngredientUsage"`; see `src/lib/scent-profiles.ts`.
  */
+/**
+ * The two non-fragrance ranges, and the three dictionary keys each one needs.
+ *
+ * Written here rather than in `src/lib/product-types.ts` because these are
+ * *navigation* facts — which heading the disclosure prints and which row means
+ * "the whole range" — and that file is about the catalogue. It knows the types;
+ * this knows how the menu says them.
+ */
+const RANGES = {
+  BODY: {
+    slug: "body-care",
+    groupKey: "bodyCare",
+    allKey: "bodyCare",
+  },
+  HOME: {
+    slug: "home-fragrance",
+    groupKey: "homeFragrance",
+    allKey: "homeFragrance",
+  },
+} as const satisfies Record<
+  "BODY" | "HOME",
+  { slug: string; groupKey: CollectionGroupKey; allKey: CollectionKey }
+>;
+
 export const collections: ReadonlyArray<CollectionEntry> = [
   { kind: "link", key: "allProducts", path: "/collections" },
   {
@@ -88,8 +113,37 @@ export const collections: ReadonlyArray<CollectionEntry> = [
       { key: "gourmand", path: "/collections/gourmand" },
     ],
   },
-  { kind: "link", key: "bodyCare", path: "/collections/body-care" },
-  { kind: "link", key: "homeFragrance", path: "/collections/home-fragrance" },
+  /*
+   * The two ranges, as disclosures rather than as links.
+   *
+   * Each holds goods of more than one kind — a Body Mist today, a Body Cream
+   * later — and those kinds are now addressable, because `"Product"` carries a
+   * typed `"productType"` (`supabase/sql/0041_product_type.sql`). The children
+   * are generated from `PRODUCT_TYPES` rather than written out here, so adding
+   * a type is one row in `src/lib/product-types.ts` plus its copy, and this
+   * table follows on its own.
+   *
+   * The range keeps its own page as the first child. `fragrances` and
+   * `scentProfiles` are disclosures with nothing behind the heading, but
+   * `/collections/body-care` is a real editorial page and dropping it from the
+   * menu would strand it — so it is printed as "All Body Care" beneath its own
+   * heading, the way `allProducts` opens the column above.
+   */
+  ...(["BODY", "HOME"] as const).map((kind) => {
+    const range = RANGES[kind];
+
+    return {
+      kind: "group" as const,
+      key: range.groupKey,
+      children: [
+        { key: range.allKey, path: `/collections/${range.slug}` },
+        ...productTypesForKind(kind).map((type) => ({
+          key: type.navKey,
+          path: `/collections/${type.slug}`,
+        })),
+      ],
+    };
+  }),
 ];
 
 /**

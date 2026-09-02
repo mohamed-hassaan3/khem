@@ -3,7 +3,6 @@ import ContactChannelsEditor from "@/src/components/admin/ContactChannelsEditor"
 import HouseSettingsForm from "@/src/components/admin/HouseSettingsForm";
 import SocialProfilesEditor from "@/src/components/admin/SocialProfilesEditor";
 import { isLocale } from "@/src/lib/i18n/config";
-import { listAdminProducts } from "@/src/services/admin/catalog";
 import {
   getAdminSettings,
   listAdminContactChannels,
@@ -44,18 +43,18 @@ export default async function AdminSettingsPage({
   const { locale } = await params;
   void isLocale(locale);
 
-  const [settings, channels, profiles, products] = await Promise.all([
+  /*
+   * No product list here any more.
+   *
+   * The featured fragrance moved to Content → Landing Page → New Arrival, which
+   * is where the band it controls is configured. The column it writes is
+   * unchanged; only its editor moved, so there is still exactly one of it.
+   */
+  const [settings, channels, profiles] = await Promise.all([
     getAdminSettings(),
     listAdminContactChannels(),
     listAdminSocialProfiles(),
-    listAdminProducts(),
   ]);
-
-  // Archived products are excluded: featuring one would put a full-bleed
-  // section on the home page for something nobody can buy.
-  const featurable = products
-    .filter((product) => !product.isArchived)
-    .map((product) => ({ slug: product.slug, name: product.name }));
 
   return (
     <>
@@ -76,7 +75,7 @@ export default async function AdminSettingsPage({
           </p>
         </div>
 
-        <HouseSettingsForm settings={settings} products={featurable} />
+        <HouseSettingsForm settings={settings} />
       </section>
 
       <section className="mt-12 space-y-5">

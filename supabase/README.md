@@ -28,6 +28,7 @@ seed/    a generated export of the database — written by `npm run db:dump`,
 
 ```bash
 npm run db:migrate    # apply sql/*.sql — idempotent, safe to re-run
+
 npm run db:seed       # load seed/*.json — upserts, never deletes
 npm run db:dump       # write seed/*.json back out of the database
 npm run db:verify     # counts, integrity, and the security assertions
@@ -36,6 +37,43 @@ npm run embed -- --check   # non-zero exit if any product lacks a vector
 ```
 
 A fresh project is `db:migrate`, `db:seed`, `embed`, in that order.
+
+## After a migration: reload the schema cache
+
+`npm run db:migrate` changes Postgres. It does **not** tell Supabase's API layer
+about it.
+
+PostgREST — everything reached through `@supabase/supabase-js`, which is every
+storefront and dashboard read — serves from a cached copy of the schema. A
+migration that creates or renames a table, adds a column the API must return, or
+changes a view or function signature leaves that cache stale, and the client
+answers:
+
+```
+Could not find the table 'public.X' in the schema cache
+```
+
+The failure is quiet in the worst way. Services here are written to degrade
+rather than throw, so a stale cache does not produce an error page: the home
+page falls back to its shipped section order, a grid renders empty, a setting
+looks unsaved. The feature appears to have been built wrong.
+
+**`npm run db:migrate` now does this for you.** Its last statement, outside the
+migration transaction, is:
+
+```sql
+notify pgrst, 'reload schema';
+```
+
+and it says so on success: *"Schema applied. PostgREST schema cache reload
+signalled."* If you do not see that line, the reload did not happen.
+
+It is automated rather than documented because the failure is invisible: a green
+migration and a broken page look identical, and the rule only helps the person
+who remembers it. Applying schema by any other route — the Supabase SQL editor,
+`psql`, a dashboard migration — leaves the cache stale, so run the `notify`
+yourself or restart the API (Settings → API → Restart) before validating
+anything.
 
 ## Where content is edited
 

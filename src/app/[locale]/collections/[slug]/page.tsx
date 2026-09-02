@@ -12,6 +12,10 @@ import {
   type MerchPageFacet,
 } from "@/src/lib/facets";
 import {
+  PRODUCT_TYPE_SLUGS,
+  parseProductTypeSlug,
+} from "@/src/lib/product-types";
+import {
   SCENT_PROFILE_BANNERS,
   SCENT_PROFILE_FAMILIES,
   SCENT_PROFILE_SLUGS,
@@ -26,6 +30,7 @@ import {
   getCollections,
   getMerchPage,
   getProductCardsByCollection,
+  getProductCardsByProductType,
   getProductCardsByScentProfile,
   getScentProfile,
 } from "@/src/services/products";
@@ -54,6 +59,7 @@ export async function generateStaticParams() {
     ...collections.map((collection) => collection.slug),
     ...MERCH_PAGE_FACETS,
     ...SCENT_PROFILE_SLUGS,
+    ...PRODUCT_TYPE_SLUGS,
   ];
 
   return LOCALES.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
@@ -153,6 +159,23 @@ export async function generateMetadata({
         description: stored?.description ?? copy.meta.description,
         ogTitle: copy.meta.ogTitle,
         ogDescription: stored?.description ?? copy.meta.ogDescription,
+      });
+    }
+
+    // Then the product types, whose copy is dictionary-only — there is no
+    // stored row to override it, by design (see `renderProductType`).
+    const productType = parseProductTypeSlug(slug);
+
+    if (productType) {
+      const { meta } = dict.collections.productTypes[productType.copyKey];
+
+      return localeMetadata({
+        locale: activeLocale,
+        path: `/collections/${productType.slug}`,
+        title: meta.title,
+        description: meta.description,
+        ogTitle: meta.ogTitle,
+        ogDescription: meta.ogDescription,
       });
     }
 
@@ -315,11 +338,11 @@ async function renderMerchPage(locale: Locale, slug: string) {
  * for the reason `renderMerchPage()` gives: five menu links point here, and none
  * of them may break because nothing in the catalogue currently smells of figs.
  *
- * This is the last resolution step — an unknown slug 404s from here.
+ * Falls through to {@link renderProductType}, which is the last step.
  */
 async function renderScentProfile(locale: Locale, slug: string) {
   const profileSlug = parseScentProfileSlug(slug);
-  if (!profileSlug) notFound();
+  if (!profileSlug) return renderProductType(locale, slug);
 
   const [dict, stored] = await Promise.all([
     getDictionary(locale),
@@ -354,5 +377,56 @@ async function renderScentProfile(locale: Locale, slug: string) {
       // A profile crosses the fragrance boundary: a cedar candle is woody too.
       countsEverything
     />
+  );
+}
+
+/**
+ * One product type, as a collection page.
+ *
+ * The fourth and last resolution step: everything that is not a seeded
+ * collection, a merchandising cut or a scent profile is tried here, and an
+ * unknown slug 404s from this function.
+ *
+ * Membership is a single indexed equality on `"Product"."productType"` — a type
+ * is stored on the object, where a profile is derived from the ingredient
+ * tables. `src/lib/product-types.ts` explains why that is the right shape, and
+ * `supabase/sql/0041_product_type.sql` holds the trigger that keeps a
+ * `BODY_MIST` from ever landing in a `HOME` collection.
+ *
+ * There is no `ProductTypePage` table and the header is not editable yet. The
+ * banner is **inherited from the parent range**, so adding a third type is copy
+ * in two dictionaries and a row in `PRODUCT_TYPES` — no new photograph, no new
+ * table, no migration beyond the enum value itself. If editors later need to
+ * write these pages from the dashboard, the shape to copy is `"ScentProfile"`:
+ * a row that wins whole over the dictionary, never field by field.
+ *
+ * An empty result renders the hero and the grid's empty state rather than a
+ * 404, for the reason the two functions above give: the Nav links here, and a
+ * menu link must not break because the range is briefly out of stock.
+ */
+async function renderProductType(locale: Locale, slug: string) {
+  const entry = parseProductTypeSlug(slug);
+  if (!entry) notFound();
+
+  const [dict, parent, products] = await Promise.all([
+    getDictionary(locale),
+    // Only for its photograph and its alt text — the copy below is this page's
+    // own. A missing parent leaves the banner empty rather than failing.
+    getCollectionBySlug(locale, entry.parentSlug),
+    getProductCardsByProductType(locale, entry.value),
+  ]);
+
+  const copy = dict.collections.productTypes[entry.copyKey];
+
+  const header: CollectionHeader = {
+    slug: entry.slug,
+    name: copy.name,
+    description: copy.description,
+    bannerUrl: parent?.bannerUrl ?? "",
+    bannerAlt: parent?.bannerAlt ?? copy.name,
+  };
+
+  return (
+    <CollectionView locale={locale} collection={header} products={products} />
   );
 }

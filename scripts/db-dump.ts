@@ -120,11 +120,12 @@ const COLLECTION_COLUMNS = `
  */
 const PRODUCT_COLUMNS = `
   id, name, slug, subtitle, subtitle_ar, description, description_ar,
-  story, story_ar, concentration, format, format_ar,
+  story, story_ar, concentration, format, format_ar, "productType",
   includes, includes_ar, badge, badge_ar, tags::text[] as tags,
   "topNotes", "topNotes_ar", "heartNotes", "heartNotes_ar",
   "baseNotes", "baseNotes_ar",
-  "volumeMl", "priceInCents", sku, inventory, "isBestseller",
+  "volumeMl", "priceInCents", sku,
+  inventory, "inventoryOnline", "inventoryOffline", "isBestseller",
   "collectionSlug"
 `;
 
@@ -257,6 +258,13 @@ function toProduct(
     story_ar: row.story_ar,
     concentration: row.concentration,
     format: row.format,
+    /*
+     * The typed product kind (`supabase/sql/0041_product_type.sql`). Exported
+     * beside `format` and not derived from it: the migration backfills one from
+     * the other *once*, and an editor may correct either afterwards. A scalar
+     * enum is text already, so it needs no cast.
+     */
+    productType: row.productType,
     format_ar: row.format_ar,
     includes: row.includes,
     includes_ar: row.includes_ar,
@@ -272,7 +280,20 @@ function toProduct(
     volumeMl: row.volumeMl,
     priceInCents: row.priceInCents,
     sku: row.sku,
+    /*
+     * The two counters, and the total they add up to.
+     *
+     * `supabase/sql/0042_inventory_channels.sql` split stock in two and made
+     * `inventory` a trigger-maintained total. Exporting only the total would
+     * make this file unable to restore stock at all: a seeded row gets
+     * online = offline = 0, the trigger recomputes the total as 0, and a fresh
+     * environment comes up with the whole catalogue silently sold out. The
+     * total is still exported because it is readable, but the counters are what
+     * `db-seed.ts` actually writes.
+     */
     inventory: row.inventory,
+    inventoryOnline: row.inventoryOnline,
+    inventoryOffline: row.inventoryOffline,
     isBestseller: row.isBestseller,
     collectionSlug: row.collectionSlug,
     images: [...images],

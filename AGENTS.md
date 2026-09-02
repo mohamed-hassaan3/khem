@@ -268,6 +268,19 @@ All routes must follow strict dynamic parameters, metadata definitions, and layo
 
 All schema changes MUST be executed via `npx prisma migrate dev`. Never mutate the Postgres database directly.
 
+> **Any migration that creates or renames a table, or otherwise changes
+> API-visible schema, must reload the PostgREST schema cache before anything is
+> validated.** `npm run db:migrate` now does this automatically and prints
+> "PostgREST schema cache reload signalled" — applying SQL by any other route
+> (the Supabase SQL editor, `psql`) does not, so run
+> `notify pgrst, 'reload schema';` yourself or restart the Supabase API.
+>
+> `@supabase/supabase-js` reads through PostgREST, which serves a cached schema.
+> A stale cache does not raise — the services in this repo degrade instead, so
+> the page renders a fallback and the feature simply looks broken. A green
+> migration and a broken page are indistinguishable until the cache is reloaded.
+> See `supabase/README.md`.
+
 ```prisma
 datasource db {
   provider = "postgresql"

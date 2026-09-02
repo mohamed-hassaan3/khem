@@ -321,11 +321,19 @@ const productFields = {
     .min(2, "A product needs a SKU.")
     .max(64, "That SKU is too long.")
     .regex(/^[A-Za-z0-9._-]+$/, "Letters, numbers, dots, dashes and underscores only."),
-  inventory: z.coerce
-    .number({ error: "Enter a stock count." })
-    .int("Stock must be a whole number.")
-    .min(0, "Stock cannot be negative.")
-    .max(1_000_000, "That stock count looks like a typing mistake."),
+  /*
+   * Stock is **not** a product field any more.
+   *
+   * `supabase/sql/0042_inventory_channels.sql` split it into
+   * `"inventoryOnline"` and `"inventoryOffline"` and made `"inventory"` a
+   * trigger-maintained total. A `Stock` input on this form would write to a
+   * column the trigger immediately recomputes: it would report success, change
+   * nothing, and leave no ledger row — which is worse than not offering it.
+   *
+   * Stock now moves only through `src/actions/admin/inventory.ts`, where every
+   * change names the counter it touches and writes an `"InventoryMovement"`.
+   * The product form links there instead.
+   */
   isBestseller: z.boolean().default(false),
   collectionSlug: slugField,
   sortOrder: z.coerce.number().int().min(0).max(9_999).default(0),

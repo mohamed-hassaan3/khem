@@ -400,12 +400,28 @@ function stripArabicColumns<T extends Record<string, unknown>>(
   ) as Omit<T, `${string}_ar`>;
 }
 
+/*
+ * ## `inventory` is the *online* counter, everywhere on the storefront
+ *
+ * `supabase/sql/0042_inventory_channels.sql` split stock into
+ * `"inventoryOnline"` and `"inventoryOffline"`, and left `"inventory"` behind as
+ * the maintained total. The storefront must never sell from the total: units on
+ * the offline shelf are promised to the counter, so a product with 0 online and
+ * 50 offline is *sold out* on the website.
+ *
+ * Both projections below therefore alias `"inventoryOnline"` to `inventory`.
+ * That is one edit rather than twenty: every card, the detail page, the sticky
+ * bar, the cart's quantity ceiling and every sold-out test already read
+ * `product.inventory`, and all of them become online-aware without touching a
+ * component. The admin reads the two real columns by name instead — see
+ * `src/services/admin/analytics.ts`.
+ */
 export const PRODUCT_COLUMNS =
   "id, name, slug, subtitle, subtitle_ar, description, description_ar, story, " +
   "story_ar, concentration, format, format_ar, includes, includes_ar, " +
   "badge, badge_ar, tags, topNotes, topNotes_ar, heartNotes, heartNotes_ar, " +
   "baseNotes, baseNotes_ar, volumeMl, priceInCents, sku, " +
-  "inventory, isBestseller, collectionSlug";
+  "inventory:inventoryOnline, isBestseller, collectionSlug";
 
 /** `PRODUCT_COLUMNS` plus the gallery, for the detail page. */
 export const PRODUCT_WITH_IMAGES_COLUMNS = `${PRODUCT_COLUMNS}, images:ProductImage(${IMAGE_COLUMNS})`;
@@ -453,7 +469,7 @@ export const productCardRowSchema = productRowSchema
 export const PRODUCT_CARD_COLUMNS =
   "id, name, slug, subtitle, subtitle_ar, description, description_ar, " +
   "topNotes, topNotes_ar, heartNotes, heartNotes_ar, baseNotes, baseNotes_ar, " +
-  "volumeMl, priceInCents, collectionSlug, inventory, concentration, " +
+  "volumeMl, priceInCents, collectionSlug, inventory:inventoryOnline, concentration, " +
   "format, format_ar, includes, includes_ar, badge, badge_ar, isBestseller, tags, " +
   "collection:Collection!inner(name, name_ar, kind), " +
   `images:ProductImage(${IMAGE_COLUMNS})`;

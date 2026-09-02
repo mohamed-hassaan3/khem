@@ -116,6 +116,38 @@ export const updatePaymentStatusSchema = z.object({
   paymentStatus: z.enum(paymentStatusValues),
 });
 
+/**
+ * The counter a stock operation addresses.
+ *
+ * Online and offline move independently: the website sells from one, the desk
+ * from the other, and neither borrows. Reused from `"OrderChannel"` in the
+ * database rather than twinned, because an order's channel *is* the counter it
+ * draws from.
+ */
+const inventoryChannel = z.enum(["ONLINE", "OFFLINE"], {
+  error: "Choose online or offline.",
+});
+
+/** A quantity that actually moves something. */
+const movementQuantity = z.coerce
+  .number({ error: "Enter a quantity." })
+  .int("Quantity must be a whole number.")
+  .min(1, "Quantity must be at least 1.")
+  .max(1_000_000, "That quantity looks like a typing mistake.");
+
+const productSlug = z
+  .string()
+  .trim()
+  .regex(SLUG_PATTERN, "That is not a product slug.");
+
+/** An optional note an editor may attach to a movement. */
+const movementReason = z
+  .string()
+  .trim()
+  .max(200, "Please shorten that note.")
+  .optional()
+  .transform((value) => (value === "" ? undefined : value));
+
 export const adjustInventorySchema = z.object({
   slug: z.string().trim().regex(SLUG_PATTERN, "That is not a product slug."),
   /**
@@ -128,7 +160,46 @@ export const adjustInventorySchema = z.object({
     .int("Stock must be a whole number.")
     .min(0, "Stock cannot be negative.")
     .max(1_000_000, "That stock count looks like a typing mistake."),
+  /**
+   * Which counter is being corrected. Stock is two independent numbers since
+   * `supabase/sql/0042_inventory_channels.sql` — see `channel` below.
+   */
+  channel: inventoryChannel,
 });
+
+/** Units sold at the counter, entered at the end of the day. */
+export const offlineSaleSchema = z.object({
+  slug: productSlug,
+  quantity: movementQuantity,
+  reason: movementReason,
+});
+
+/** New stock arriving into one counter. */
+export const receiveStockSchema = z.object({
+  slug: productSlug,
+  channel: inventoryChannel,
+  quantity: movementQuantity,
+  reason: movementReason,
+});
+
+/**
+ * Units moved between counters.
+ *
+ * `from` and `to` are both required and must differ — the database refuses a
+ * same-channel transfer too, but a form should not be able to ask for one.
+ */
+export const transferStockSchema = z
+  .object({
+    slug: productSlug,
+    from: inventoryChannel,
+    to: inventoryChannel,
+    quantity: movementQuantity,
+    reason: movementReason,
+  })
+  .refine((value) => value.from !== value.to, {
+    error: "A transfer needs two different counters.",
+    path: ["to"],
+  });
 
 /**
  * Which status may follow which.

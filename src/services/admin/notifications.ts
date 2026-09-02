@@ -56,6 +56,13 @@ export async function listAdminNotifications(): Promise<AdminNotification[]> {
  * `LOW_STOCK_THRESHOLD` is the site's single definition — the same constant the
  * storefront's stock chip and the inventory screen read, so the bell cannot
  * disagree with the badge on the product row about what "low" means.
+ *
+ * It counts the **online** column, and aliases it to `inventory` so the row
+ * shape is unchanged. Reading the maintained total would have made this the one
+ * screen that stayed quiet about the failure the channel split introduced: a
+ * product with nothing online and fifty on the shelf is sold out to every
+ * visitor, and a bell watching `online + offline` would see fifty and say
+ * nothing. The desk needs telling precisely then — the fix is a transfer.
  */
 export async function listLowStock(): Promise<LowStockItem[]> {
   const supabase = getSupabaseAdmin();
@@ -63,10 +70,10 @@ export async function listLowStock(): Promise<LowStockItem[]> {
 
   const { data, error } = await supabase
     .from("Product")
-    .select("slug, name, inventory")
+    .select("slug, name, inventory:inventoryOnline")
     .eq("isArchived", false)
-    .lt("inventory", LOW_STOCK_THRESHOLD)
-    .order("inventory", { ascending: true })
+    .lt("inventoryOnline", LOW_STOCK_THRESHOLD)
+    .order("inventoryOnline", { ascending: true })
     .limit(20);
 
   if (error) {

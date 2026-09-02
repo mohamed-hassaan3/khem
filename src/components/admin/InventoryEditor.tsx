@@ -1,11 +1,18 @@
 "use client";
 
 /**
- * Setting a product's stock from the inventory table.
+ * Setting a product's stock from the inventory table — one field per counter.
+ *
+ * Stock is two independent numbers since
+ * `supabase/sql/0042_inventory_channels.sql`: the website sells from online,
+ * the desk from offline, and neither borrows. Both are corrected here, and each
+ * writes its own `"InventoryMovement"` row recording the delta it implied.
  *
  * An absolute count, not a delta: this is the control used after counting the
  * shelf, and on a page left open while sales came in "set it to 4" stays
- * correct where "subtract 1" would double-apply.
+ * correct where "subtract 1" would double-apply. The *ledger* still gets a
+ * delta — the database computes it inside `set_channel_stock()`, so the audit
+ * trail explains the jump without the editor having to do arithmetic.
  *
  * Save is explicit and only offered once the number has actually changed —
  * a stock field that wrote on every keystroke would fire a request per digit,
@@ -25,9 +32,29 @@ const CONFIRMATION_MS = 2_500;
 
 export default function InventoryEditor({
   slug,
+  inventoryOnline,
+  inventoryOffline,
+}: {
+  slug: string;
+  inventoryOnline: number;
+  inventoryOffline: number;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <ChannelField slug={slug} channel="ONLINE" inventory={inventoryOnline} />
+      <ChannelField slug={slug} channel="OFFLINE" inventory={inventoryOffline} />
+    </div>
+  );
+}
+
+/** One counter's field. Two of these make the row. */
+function ChannelField({
+  slug,
+  channel,
   inventory,
 }: {
   slug: string;
+  channel: "ONLINE" | "OFFLINE";
   inventory: number;
 }) {
   const router = useRouter();
@@ -61,7 +88,7 @@ export default function InventoryEditor({
     setError(null);
 
     startTransition(async () => {
-      const outcome = await adjustInventory({ slug, inventory: value });
+      const outcome = await adjustInventory({ slug, channel, inventory: value });
 
       if (!outcome.ok) {
         setError(outcome.fieldErrors?.inventory ?? outcome.message);
@@ -75,12 +102,15 @@ export default function InventoryEditor({
 
   return (
     <div className="flex items-center gap-2">
-      <label className="sr-only" htmlFor={`stock-${slug}`}>
-        Stock for {slug}
+      <label
+        className="w-14 font-heading text-[9px] uppercase tracking-[0.15em] text-ground-subtle"
+        htmlFor={`stock-${channel}-${slug}`}
+      >
+        {channel === "ONLINE" ? "Online" : "Offline"}
       </label>
 
       <input
-        id={`stock-${slug}`}
+        id={`stock-${channel}-${slug}`}
         type="number"
         min={0}
         value={value}

@@ -84,6 +84,20 @@ export type ProductSeedRow = Omit<Product, "images" | "promotion"> & {
   topNotes_ar: string[] | null;
   heartNotes_ar: string[] | null;
   baseNotes_ar: string[] | null;
+  /*
+   * The typed product kind. Declared here rather than on `Product` because the
+   * storefront never reads it off a product object — it is a *filter*, applied
+   * in `getProductCardsByProductType()` — so adding it to the app's type would
+   * oblige every card and detail parse to carry a field none of them uses.
+   */
+  productType: "BODY_MIST" | "ROOM_SPRAY" | null;
+  /*
+   * The two stock counters. `inventory` on the base `Product` type is the
+   * trigger-maintained total and is not what the seeder writes — see
+   * `scripts/db-seed.ts`.
+   */
+  inventoryOnline: number;
+  inventoryOffline: number;
   images: ProductImageSeedRow[];
 };
 

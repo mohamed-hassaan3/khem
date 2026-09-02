@@ -184,7 +184,46 @@ export interface InventoryRow {
   sku: string;
   collectionSlug: string;
   priceInCents: number;
+  /** The maintained total, kept by trigger at online + offline. */
   inventory: number;
+  /** What the website may sell. A visitor sees "sold out" when this is 0. */
+  inventoryOnline: number;
+  /** What the counter may sell. Never drawn on by the storefront. */
+  inventoryOffline: number;
   isArchived: boolean;
   unitsSoldRecently: number;
+}
+
+/** The stock counter an operation addresses. Mirrors `"OrderChannel"`. */
+export type InventoryChannel = "ONLINE" | "OFFLINE";
+
+/** What kind of event a stock movement records. Mirrors `"InventoryAction"`. */
+export type InventoryAction =
+  | "SALE"
+  | "RESTOCK"
+  | "RECEIPT"
+  | "ADJUSTMENT"
+  | "TRANSFER_IN"
+  | "TRANSFER_OUT";
+
+/**
+ * One line of the stock ledger.
+ *
+ * `previousQuantity + quantity = newQuantity` is enforced by a check constraint
+ * in `supabase/sql/0042_inventory_channels.sql`, so a row can be read as an
+ * explanation rather than merely a description.
+ */
+export interface InventoryMovement {
+  id: string;
+  productSlug: string;
+  channel: InventoryChannel;
+  action: InventoryAction;
+  /** Signed: negative took units away. */
+  quantity: number;
+  previousQuantity: number;
+  newQuantity: number;
+  reason: string | null;
+  actor: string | null;
+  orderId: string | null;
+  createdAt: string;
 }

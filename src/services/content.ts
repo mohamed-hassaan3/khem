@@ -9,6 +9,14 @@
 
 import "server-only";
 
+import {
+  resolveSectionOrder,
+  type LandingSection,
+} from "@/src/lib/landing-sections";
+import {
+  LANDING_SECTION_COLUMNS,
+  toLandingSection,
+} from "@/src/schemas/db/landing";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { parseList } from "@/src/schemas/db/catalog";
@@ -432,4 +440,28 @@ export async function getHero(locale: Locale): Promise<Hero | null> {
   }
 
   return toHero(setting.data, slides.data as unknown[] | null, locale);
+}
+
+/**
+ * The home page's bands, as configured.
+ *
+ * Returns the *resolved* order — see `resolveSectionOrder()` — so a caller
+ * never has to reason about a missing row, an unknown key, or a tie. An
+ * unreachable database yields the shipped order with everything enabled, which
+ * is what `/` rendered before this table existed.
+ */
+export async function getLandingSections(): Promise<LandingSection[]> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return resolveSectionOrder([]);
+
+  const { data, error } = await supabase
+    .from("LandingSection")
+    .select(LANDING_SECTION_COLUMNS);
+
+  if (error) {
+    logFailure("getLandingSections", error.message);
+    return resolveSectionOrder([]);
+  }
+
+  return resolveSectionOrder(parseList(data as unknown[] | null, toLandingSection));
 }

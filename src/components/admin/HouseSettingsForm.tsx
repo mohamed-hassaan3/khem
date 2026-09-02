@@ -27,7 +27,6 @@ import {
   AdminButton,
   AdminInput,
   AdminNotice,
-  AdminSelect,
 } from "@/src/components/admin/fields";
 import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
 import { useAdminToast } from "@/src/providers/admin-toast-provider";
@@ -41,12 +40,10 @@ export interface FeaturedOption {
 
 export default function HouseSettingsForm({
   settings,
-  products,
 }: {
   /** `null` when the row is missing — see `getAdminSettings()`. */
   settings: BoutiqueSetting | null;
   /** Live products, for the featured picker. */
-  products: readonly FeaturedOption[];
 }) {
   const router = useRouter();
 
@@ -57,9 +54,7 @@ export default function HouseSettingsForm({
   const [wholesaleEmail, setWholesaleEmail] = useState(
     settings?.wholesaleEmail ?? "",
   );
-  const [featuredProductSlug, setFeaturedProductSlug] = useState(
-    settings?.featuredProductSlug ?? "",
-  );
+
 
   const [result, setResult] = useState<AdminActionResult | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -76,7 +71,6 @@ export default function HouseSettingsForm({
     houseEmail,
     conciergeEmail,
     wholesaleEmail,
-    featuredProductSlug,
   };
 
   const { toast } = useAdminToast();
@@ -169,21 +163,7 @@ export default function HouseSettingsForm({
           error={fieldErrors.wholesaleEmail}
           hint="Printed on /stockists for partnership enquiries."
         />
-        <AdminSelect
-          id="featuredProductSlug"
-          label="Featured fragrance"
-          value={featuredProductSlug}
-          onChange={setFeaturedProductSlug}
-          options={[
-            { value: "", label: "None — hide the feature section" },
-            ...products.map((product) => ({
-              value: product.slug,
-              label: product.name,
-            })),
-          ]}
-          error={fieldErrors.featuredProductSlug}
-          hint="The full-bleed section on the home page."
-        />
+
       </div>
 
       <AdminButton type="submit" disabled={isPending}>

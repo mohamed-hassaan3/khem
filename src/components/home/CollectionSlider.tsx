@@ -46,6 +46,15 @@ export interface CollectionSliderProps {
   label: string;
   previousLabel: string;
   nextLabel: string;
+  /**
+   * How many cards the widest step shows. Three by default — the collections
+   * rail this was written for — and four for the product band, whose cards are
+   * narrower and whose row would otherwise read as half empty.
+   *
+   * Still capped by the number of children, so a rail never opens more slots
+   * than it can fill.
+   */
+  lgPerView?: 2 | 3 | 4;
 }
 
 export default function CollectionSlider({
@@ -53,6 +62,7 @@ export default function CollectionSlider({
   label,
   previousLabel,
   nextLabel,
+  lgPerView = 3,
 }: CollectionSliderProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
@@ -69,10 +79,23 @@ export default function CollectionSlider({
    * house currently features two. Capping the widest step at the number of
    * items is deterministic and needs no measurement.
    */
-  const wideBasis =
-    items.length >= 3
-      ? "lg:basis-[calc(33.333%-1rem)]"
-      : "lg:basis-[calc(50%-0.75rem)]";
+  /*
+   * The ladder, written out rather than computed: Tailwind scans source text
+   * for class names, so an interpolated `lg:basis-[calc(${n}%...)]` would be
+   * invisible to it and the style would simply not exist.
+   *
+   * Each value is `100%/n` less the share of the `lg:gap-6` (1.5rem) each card
+   * gives up: two-thirds of it at three across, three-quarters at four.
+   */
+  const WIDE_BASIS = {
+    1: "lg:basis-full",
+    2: "lg:basis-[calc(50%-0.75rem)]",
+    3: "lg:basis-[calc(33.333%-1rem)]",
+    4: "lg:basis-[calc(25%-1.125rem)]",
+  } as const;
+
+  const across = Math.min(lgPerView, Math.max(items.length, 1)) as 1 | 2 | 3 | 4;
+  const wideBasis = WIDE_BASIS[across];
 
   /*
    * `Math.abs` on both edges, and a 2px tolerance.

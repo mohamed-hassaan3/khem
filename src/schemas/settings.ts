@@ -29,7 +29,6 @@
 import { z } from "zod";
 
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /** Empty string means "not set" — a form input cannot hold null. */
 function optionalText(max: number, tooLong: string) {
@@ -64,22 +63,18 @@ const sortOrderField = z.coerce
  * not a cosmetic error — it is a silently swallowed enquiry, which is the one
  * failure mode `src/services/settings.ts` keeps a hard-coded fallback for.
  *
- * `featuredProductSlug` is checked for *shape* here and for *existence* by the
- * foreign key on the column. Both matter: this catches "that is not a slug",
- * the constraint catches "that product does not exist".
+ * `featuredProductSlug` is **not** here any more. The column still exists and is
+ * still the single answer to "which product is featured", but it is edited on
+ * the New Arrival screen (`/admin/content/landing`) rather than under System →
+ * Settings, so this form neither sends it nor writes it. Leaving it in the
+ * schema would have been worse than tidy: the field is required, and a form that
+ * stopped sending it would have failed to save the three email addresses with a
+ * validation error about a product.
  */
 export const updateBoutiqueSettingsSchema = z.object({
   houseEmail: z.email("That is not a valid email address."),
   conciergeEmail: z.email("That is not a valid email address."),
   wholesaleEmail: z.email("That is not a valid email address."),
-  featuredProductSlug: z
-    .string()
-    .trim()
-    .transform((value) => (value.length === 0 ? null : value))
-    .refine(
-      (value) => value === null || SLUG_PATTERN.test(value),
-      "That is not a product slug.",
-    ),
 });
 
 // ── ContactChannel ────────────────────────────────────────────

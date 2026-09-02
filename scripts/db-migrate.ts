@@ -26,7 +26,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
-import { connectionString, redactUrl, withTransaction } from "./db";
+import { connectionString, redactUrl, withClient, withTransaction } from "./db";
 
 const SQL_DIR = path.join(process.cwd(), "supabase", "sql");
 
@@ -53,7 +53,34 @@ async function main(): Promise<void> {
     }
   });
 
-  console.log("Schema applied.");
+  /*
+   * Tell the API layer what just changed.
+   *
+   * `db:migrate` changes Postgres; it does not change what Supabase's API can
+   * see. Everything reached through `@supabase/supabase-js` — every storefront
+   * and dashboard read — goes via PostgREST, which serves a **cached** copy of
+   * the schema. After a migration that adds or renames a table, that cache is
+   * stale and the client answers "Could not find the table 'public.X' in the
+   * schema cache".
+   *
+   * The failure is quiet in the worst way. The services in this repository are
+   * written to degrade rather than throw, so a stale cache produces no error
+   * page: the home page falls back to its shipped section order, a grid renders
+   * empty, a setting looks unsaved. A green migration and a broken page are
+   * indistinguishable, and the next hour goes on debugging correct code. It
+   * happened once here, with `"LandingSection"`.
+   *
+   * So the reload is not advice in a README, it is the last statement of the
+   * migration. `notify` is a cheap message to a listening connection — not a
+   * restart, and harmless when nothing API-visible changed. Outside the
+   * transaction above deliberately: `notify` inside one is only delivered on
+   * commit, and this must run whether or not PostgREST is the thing listening.
+   */
+  await withClient(async (client) => {
+    await client.query("notify pgrst, 'reload schema'");
+  });
+
+  console.log("Schema applied. PostgREST schema cache reload signalled.");
 }
 
 main().catch((cause: unknown) => {

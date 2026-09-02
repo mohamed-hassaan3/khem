@@ -165,6 +165,10 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
       concentration: product.concentration,
       format: product.format,
       format_ar: product.format_ar,
+      // Null for fragrances and sets, and the trigger in 0041 rejects a value
+      // whose collection kind disagrees — so a bad export fails loudly here
+      // rather than seeding a product onto the wrong menu page.
+      productType: product.productType ?? null,
       includes: product.includes,
       includes_ar: product.includes_ar,
       badge: product.badge,
@@ -179,7 +183,14 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
       volumeMl: product.volumeMl,
       priceInCents: product.priceInCents,
       sku: product.sku,
-      inventory: product.inventory,
+      /*
+       * The counters, not the total. `inventory` is owned by the
+       * `sync_inventory_total` trigger from 0042 and is recomputed on every
+       * write, so sending it would be ignored — and sending *only* it would
+       * seed every product at zero.
+       */
+      inventoryOnline: product.inventoryOnline ?? product.inventory ?? 0,
+      inventoryOffline: product.inventoryOffline ?? 0,
       isBestseller: product.isBestseller,
       collectionSlug: product.collectionSlug,
       sortOrder: index,

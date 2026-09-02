@@ -55,23 +55,23 @@ export default async function AdminInventoryPage({
   const rows = all
     .filter((row) =>
       state === "low"
-        ? stockState(row.inventory) === "low"
+        ? stockState(row.inventoryOnline) === "low"
         : state === "out"
-          ? stockState(row.inventory) === "out"
+          ? stockState(row.inventoryOnline) === "out"
           : true,
     )
     .filter((row) => matchesTerm(term, [row.name, row.slug, row.sku, row.collectionSlug]));
 
   const counts = {
-    low: all.filter((row) => stockState(row.inventory) === "low").length,
-    out: all.filter((row) => stockState(row.inventory) === "out").length,
+    low: all.filter((row) => stockState(row.inventoryOnline) === "low").length,
+    out: all.filter((row) => stockState(row.inventoryOnline) === "out").length,
   };
 
   return (
     <>
       <AdminPageHeader
         title="Inventory"
-        description={`One stock figure per product, and it is the website's. Below ${LOW_STOCK_THRESHOLD} the storefront stops saying “in stock” and names the number instead; at zero it says sold out and the add-to-cart is refused.`}
+        description={`Two counters per product. The website sells from online only — below ${LOW_STOCK_THRESHOLD} it stops saying “in stock” and names the number, and at zero it says sold out however much is on the shelf. Offline is the counter's, and moves only when someone records a sale, a delivery or a transfer. Every change is written to the product's stock history.`}
       />
 
       <FilterChips
@@ -85,6 +85,15 @@ export default async function AdminInventoryPage({
           { value: "low", label: "Low", count: counts.low },
         ]}
       />
+
+      <p className="mb-6">
+        <Link
+          href={localizePath(activeLocale, "/admin/inventory/history")}
+          className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
+        >
+          Stock history — every movement, filterable
+        </Link>
+      </p>
 
       <AdminSearch placeholder="Search by name, slug, SKU or collection" />
 
@@ -105,7 +114,8 @@ export default async function AdminInventoryPage({
             "SKU",
             "Price",
             `Sold (${range}d)`,
-            "State",
+            "Online",
+            "Offline",
             { label: "Set stock", hidden: true },
           ]}
         >
@@ -121,15 +131,31 @@ export default async function AdminInventoryPage({
                 <span className="mt-1 block text-[10px] tracking-wide text-ground-subtle">
                   {row.collectionSlug}
                 </span>
+                <Link
+                  href={localizePath(
+                    activeLocale,
+                    `/admin/inventory/${row.slug}`,
+                  )}
+                  className="mt-1 block font-heading text-[9px] uppercase tracking-[0.15em] text-ground-subtle transition-colors duration-300 hover:text-ground-accent"
+                >
+                  Stock history
+                </Link>
               </AdminCell>
               <AdminCell muted>{row.sku}</AdminCell>
               <AdminCell muted>{egp(row.priceInCents)}</AdminCell>
               <AdminCell muted>{row.unitsSoldRecently}</AdminCell>
+              {/* The chip reads the online counter: it is the storefront's
+                  state, and this screen is where an editor comes to fix it. */}
               <AdminCell>
-                <StockChip inventory={row.inventory} />
+                <StockChip inventory={row.inventoryOnline} />
               </AdminCell>
+              <AdminCell muted>{row.inventoryOffline}</AdminCell>
               <AdminCell>
-                <InventoryEditor slug={row.slug} inventory={row.inventory} />
+                <InventoryEditor
+                  slug={row.slug}
+                  inventoryOnline={row.inventoryOnline}
+                  inventoryOffline={row.inventoryOffline}
+                />
               </AdminCell>
             </AdminRow>
           ))}

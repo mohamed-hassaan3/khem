@@ -143,7 +143,19 @@ export default function NewsletterForm() {
         type="submit"
         disabled={isPending}
         aria-busy={isPending}
-        className="h-fit cursor-pointer bg-gold px-8 py-3 font-heading text-xs font-medium uppercase tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-50"
+        /*
+          `border-transparent` and `leading-6` are what make this the same
+          height as the input beside it, and they are derived rather than
+          guessed: `.field` is `12px` padding + a `24px` line box + a `1px`
+          border, and this button had the same padding but a `16px` line box and
+          no border — exactly the 10px it was short by.
+
+          Matching the two halves of the box rather than setting a fixed height
+          means the pair stays aligned if `.field`'s padding or type size ever
+          changes, and `h-fit` still keeps the button from stretching when the
+          validation message appears under the input and grows the row.
+        */
+        className="h-fit cursor-pointer border border-transparent bg-gold px-8 py-3 font-heading text-xs font-medium uppercase leading-6 tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? dict.forms.sending : dict.forms.subscribe}
       </button>

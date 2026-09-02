@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -13,7 +12,12 @@ import type { ProductImage } from "@/src/types/catalog";
  *
  * A native scroll-snap track rather than a cross-fade or a carousel library:
  * the browser gives swipe, momentum, trackpad and shift+wheel for free, and the
- * strip stays usable before hydration. Scroll position is the source of truth —
+ * strip stays usable before hydration.
+ *
+ * There are no arrow controls. They were removed deliberately: they owned no
+ * state — each one only called `scrollIntoView` on a slide — so everything they
+ * offered is still reachable by swipe, by trackpad, by the arrow keys once the
+ * track has focus, and by the thumbnail strip below. Scroll position is the source of truth —
  * `activeIndex` is *derived* from an IntersectionObserver, so a manual swipe
  * and a thumbnail click both end in the same state and never fight each other.
  *
@@ -41,9 +45,6 @@ const SIZES = "(min-width: 1024px) 50vw, 100vw";
 
 /** Enough of a slide must be on screen before it counts as "the" slide. */
 const VISIBLE_THRESHOLD = 0.6;
-
-const ARROW_CLASS =
-  "absolute top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center border border-border-gold bg-ivory/85 text-ink transition-all duration-500 ease-out hover:border-gold hover:text-ground-accent hover:shadow-[0_0_20px_rgba(200,169,106,0.25)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:opacity-40 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100";
 
 export default function ProductGallery({
   images,
@@ -116,9 +117,6 @@ export default function ProductGallery({
     goTo(activeIndex + (forward ? 1 : -1));
   };
 
-  const PreviousIcon = dir === "rtl" ? ChevronRight : ChevronLeft;
-  const NextIcon = dir === "rtl" ? ChevronLeft : ChevronRight;
-
   return (
     <div /*
         `ground-stone`: the gallery is a stage the product stands on, one step
@@ -128,12 +126,12 @@ export default function ProductGallery({
         It was `ground-obsidian` over `bg-card` — a charcoal well, which is how
         you light a dark product page and exactly what §25 rules out: the
         product environment is ivory, and the photograph is given room by
-        negative space rather than by dropping the lights around it. The arrows
-        and caption below now resolve to charcoal-on-stone, which is legible
-        without needing the well.
+        negative space rather than by dropping the lights around it. The caption
+        below resolves to charcoal-on-stone, which is legible without needing
+        the well.
       */
       className="ground-stone flex w-full flex-col overflow-hidden lg:sticky lg:top-[var(--header-h)] lg:h-[calc(100svh-var(--header-h))]">
-      <div className="group relative aspect-4/5 w-full overflow-hidden lg:aspect-auto lg:flex-1">
+      <div className="relative aspect-4/5 w-full overflow-hidden lg:aspect-auto lg:flex-1">
         <ul
           ref={trackRef}
           // Focusable so the arrow keys have somewhere to land; a plain list
@@ -164,29 +162,6 @@ export default function ProductGallery({
           ))}
         </ul>
 
-        {hasMultiple ? (
-          <>
-            <button
-              type="button"
-              onClick={() => goTo(activeIndex - 1)}
-              disabled={activeIndex === 0}
-              aria-label={dict.product.gallery.previous}
-              className={`${ARROW_CLASS} start-4`}
-            >
-              <PreviousIcon className="size-4" strokeWidth={1.25} />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => goTo(activeIndex + 1)}
-              disabled={activeIndex === images.length - 1}
-              aria-label={dict.product.gallery.next}
-              className={`${ARROW_CLASS} end-4`}
-            >
-              <NextIcon className="size-4" strokeWidth={1.25} />
-            </button>
-          </>
-        ) : null}
       </div>
 
       {/*

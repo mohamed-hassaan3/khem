@@ -315,3 +315,13 @@ function revalidateWholeTree(): void {
 export function revalidatePromotions(): void {
   revalidateWholeTree();
 }
+
+/**
+ * After the home page's own structure changes — a band reordered, switched off,
+ * or given different media.
+ *
+ * Only `/`: nothing else on the site renders `"LandingSection"`.
+ */
+export function revalidateHome(): void {
+  revalidateAllLocales(HOME);
+}

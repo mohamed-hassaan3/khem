@@ -23,6 +23,7 @@
 
 import "server-only";
 
+import type { ProductType } from "@/src/lib/product-types";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { getProductPromotions } from "@/src/services/marketing";
@@ -363,6 +364,31 @@ export async function getProductCardsByScentProfile(
     locale,
     "getProductCardsByScentProfile",
     await query.in("slug", slugs).order("sortOrder"),
+  );
+}
+
+/**
+ * Every product of one type — `/collections/body-mist`, `/collections/room-spray`.
+ *
+ * A single indexed equality on `"Product"."productType"`, which is why this is
+ * three lines where {@link getProductCardsByScentProfile} needs a join: a
+ * profile is derived from the ingredient tables, a type is stored on the
+ * product. See `src/lib/product-types.ts` for why that difference is deliberate.
+ *
+ * `type` is a `ProductType`, narrowed from the URL by `parseProductTypeSlug()`
+ * before it arrives — never a raw segment.
+ */
+export async function getProductCardsByProductType(
+  locale: Locale,
+  type: ProductType,
+): Promise<ProductCardData[]> {
+  const query = cardQuery();
+  if (!query) return [];
+
+  return toCards(
+    locale,
+    "getProductCardsByProductType",
+    await query.eq("productType", type).order("sortOrder"),
   );
 }
 
@@ -796,8 +822,10 @@ export async function getRitualProductSlugs(): Promise<string[]> {
  * the product's own collection whenever vectors cannot decide — which is the
  * whole ordering until `npm run embed` has run, so the rail is never empty on a
  * fresh database. And it tops the list up from the rest of the catalog: Noir
- * and Gemstone hold only three fragrances each, and without the top-up a
- * visitor would see two suggestions on one page and three on another.
+ * holds two fragrances and Gemstone six, so without the top-up a visitor would
+ * see one suggestion on one page and four on another. The rail asks for four —
+ * the width `<RelatedProducts>` grids to at `lg:` — and the top-up is what
+ * makes four reachable from a two-product collection.
  *
  * `kinds` is what the rail is allowed to draw from, and it defaults to the
  * fragrances so `/perfume/[slug]` reads exactly as it did before the argument
@@ -809,7 +837,7 @@ export async function getRitualProductSlugs(): Promise<string[]> {
 export async function getRelatedProductCards(
   locale: Locale,
   slug: string,
-  limit = 3,
+  limit = 4,
   kinds: readonly CollectionKind[] = ["FRAGRANCE"],
 ): Promise<ProductCardData[]> {
   const supabase = getSupabasePublic();

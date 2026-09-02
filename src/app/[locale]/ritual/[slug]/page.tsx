@@ -109,7 +109,7 @@ export default async function RitualPage({
      * mist can offer the eau de parfum it shares a heart with. The kinds are a
      * module constant, never anything derived from the request.
      */
-    getRelatedProductCards(activeLocale, product.slug, 3, RITUAL_RELATED_KINDS),
+    getRelatedProductCards(activeLocale, product.slug, 4, RITUAL_RELATED_KINDS),
     getIngredientsForProduct(product.slug, activeLocale),
   ]);
 
@@ -138,17 +138,31 @@ export default async function RitualPage({
         <ProductGallery images={gallery} productName={product.name} />
 
         <div className="flex max-w-2xl flex-col gap-7 md:gap-16 px-4 py-14 sm:px-8 lg:px-14 lg:py-20 xl:px-20">
-          {/* The one thing this page says that the perfume page does not: which
-              of the two ranges the object belongs to. */}
-          <p className="eyebrow -mb-10 text-ground-accent/55">
-            {dict.ritual.eyebrow[kind]}
-          </p>
+          {/*
+            The range eyebrow and the collection eyebrow are one stacked unit,
+            not two children of the column.
 
-          <ProductPurchase
-            product={product}
-            collectionName={collection?.name ?? "KHEM"}
-            locale={activeLocale}
-          />
+            `<ProductPurchase>` opens with its own eyebrow, so these two lines
+            always print together and must be spaced as a pair. They used to be
+            siblings, with the range line pulled down by `-mb-10` to close the
+            column's gap — which worked at `md:` (64px gap − 40px = 24px) and
+            collided on mobile (28px − 40px = −12px). Wrapping them removes the
+            arithmetic: the pair sets its own spacing, and the column's gap
+            applies below the unit rather than through the middle of it.
+          */}
+          <div className="flex flex-col gap-1.5">
+            {/* The one thing this page says that the perfume page does not:
+                which of the two ranges the object belongs to. */}
+            <p className="eyebrow text-ground-accent/55">
+              {dict.ritual.eyebrow[kind]}
+            </p>
+
+            <ProductPurchase
+              product={product}
+              collectionName={collection?.name ?? "KHEM"}
+              locale={activeLocale}
+            />
+          </div>
 
           {product.story ? (
             <Reveal>

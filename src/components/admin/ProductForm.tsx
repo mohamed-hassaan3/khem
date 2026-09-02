@@ -35,6 +35,8 @@ import {
   AdminTextarea,
   AdminToggle,
 } from "@/src/components/admin/fields";
+import Link from "next/link";
+
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
 import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
 import { useAdminToast } from "@/src/providers/admin-toast-provider";
@@ -107,7 +109,6 @@ export default function ProductForm({
     product ? toEgpString(product.priceInCents) : "",
   );
   const [sku, setSku] = useState(product?.sku ?? "");
-  const [inventory, setInventory] = useState(String(product?.inventory ?? 0));
   const [isBestseller, setIsBestseller] = useState(product?.isBestseller ?? false);
   const [sortOrder, setSortOrder] = useState(String(product?.sortOrder ?? 0));
 
@@ -150,7 +151,6 @@ export default function ProductForm({
     volumeMl,
     priceEgp,
     sku,
-    inventory,
     isBestseller,
     collectionSlug,
     sortOrder,
@@ -417,16 +417,58 @@ export default function ProductForm({
             onChange={setSku}
           />
 
-          <AdminInput
-            id="inventory"
-            label="Stock"
-            required
-            type="number"
-            min={0}
-            value={inventory}
-            error={fieldErrors.inventory}
-            onChange={setInventory}
-          />
+          {/*
+            Stock is read-only here, and deliberately.
+
+            It used to be an editable "Stock" field writing `"Product".inventory`.
+            Since `supabase/sql/0042_inventory_channels.sql` that column is a
+            trigger-maintained total of two counters, so the field wrote to
+            something the database immediately recomputed — it reported success,
+            changed nothing, and left no ledger row. A control that lies is worse
+            than no control.
+
+            Stock now moves only where the movement can be named and recorded:
+            a sale through an order, a delivery through Restock, a correction
+            through Adjustment, or units moved with Transfer. All of them live on
+            the Inventory screen, which this links to.
+          */}
+          <div className="flex flex-col gap-2">
+            <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-subtle">
+              Inventory
+            </span>
+
+            {product ? (
+              <>
+                <p className="text-[12px] text-ground">
+                  Online {product.inventoryOnline} · Offline{" "}
+                  {product.inventoryOffline}
+                </p>
+                <div className="flex gap-4">
+                  <Link
+                    href={localizePath(locale, "/admin/inventory")}
+                    className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
+                  >
+                    Manage inventory
+                  </Link>
+                  <Link
+                    href={localizePath(
+                      locale,
+                      `/admin/inventory/${product.slug}`,
+                    )}
+                    className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
+                  >
+                    Stock history
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <p className="text-[11px] leading-relaxed text-ground-muted">
+                A new product opens at zero in both counters. Add its first
+                stock from Inventory once it is saved, so the arrival is
+                recorded as a movement rather than appearing from nowhere.
+              </p>
+            )}
+          </div>
 
           <AdminInput
             id="badge"

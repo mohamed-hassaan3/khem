@@ -105,12 +105,20 @@ export const en = {
         desc: "Honey and vanilla, kept dry and kept adult",
       },
       bodyCare: {
-        label: "Body Care",
+        label: "All Body Care",
         desc: "Rituals for the skin",
       },
+      bodyMist: {
+        label: "Body Mist",
+        desc: "The accords, worn closer and lighter",
+      },
       homeFragrance: {
-        label: "Home Fragrances",
+        label: "All Home Fragrances",
         desc: "Scent your sanctuary",
+      },
+      roomSpray: {
+        label: "Room Spray",
+        desc: "The accords, given to a room",
       },
     },
     /*
@@ -121,6 +129,8 @@ export const en = {
     collectionGroups: {
       fragrances: "Fragrances",
       scentProfiles: "Scent Profiles",
+      bodyCare: "Body Care",
+      homeFragrance: "Home Fragrances",
     },
     worldItems: {
       heritage: { label: "Our Heritage" },
@@ -208,6 +218,10 @@ export const en = {
       next: "Next collection",
     },
     essences: {
+      /* Names the rail's scroll region and its two pointer controls. */
+      sliderLabel: "Signature fragrances",
+      previous: "Previous fragrance",
+      next: "Next fragrance",
       eyebrow: "The Essences",
       heading: "Signature Fragrances",
       viewAll: "View All",
@@ -241,6 +255,9 @@ export const en = {
       from: "From {origin}",
     },
     journal: {
+      sliderLabel: "From the journal",
+      previous: "Previous article",
+      next: "Next article",
       eyebrow: "The KHEM Journal",
       heading: "Stories of Scent",
       cta: "Read the Journal",
@@ -339,6 +356,42 @@ export const en = {
      * is what the pages render when the database is reachable, so an editor can
      * rewrite a profile's story without a deploy.
      */
+    /*
+     * The product-type pages — `/collections/body-mist`, `/collections/room-spray`.
+     *
+     * A type is what the object *is*, where the range above is where it is
+     * sold; `src/lib/product-types.ts` explains why that distinction is a typed
+     * column and not a second collection. The banner is inherited from the
+     * parent range, so a new type needs copy here and nothing else.
+     */
+    productTypes: {
+      bodyMist: {
+        name: "Body Mist",
+        description:
+          "The Gemstone accords, made to be worn closer and lighter. A fine mist for skin and hair that can be worn alone through the day or layered beneath the eau de parfum it shares its heart with.",
+        meta: {
+          title: "Body Mist",
+          description:
+            "KHEM body mists in the Amber, Opal, Lapis and Turquoise accords. Light enough to wear alone, made to layer beneath the fragrance they share a heart with.",
+          ogTitle: "Body Mist | KHEM",
+          ogDescription:
+            "The Gemstone accords, worn closer and lighter on skin and hair.",
+        },
+      },
+      roomSpray: {
+        name: "Room Spray",
+        description:
+          "The same accords, given to a room instead of to skin. Five pumps into the air and it holds at head height for hours, without settling into anything heavy.",
+        meta: {
+          title: "Room Spray",
+          description:
+            "KHEM room sprays in the Amber, Opal, Lapis and Turquoise accords. Made for the hour before people arrive.",
+          ogTitle: "Room Spray | KHEM",
+          ogDescription:
+            "The KHEM accords, given to a room instead of to skin.",
+        },
+      },
+    },
     scentProfiles: {
       oriental: {
         name: "Oriental",
@@ -689,7 +742,7 @@ export const en = {
     emailInvalid: "Please enter a valid email address.",
     subjectInvalid: "Please choose a subject from the list.",
     messageRequired: "Please enter a message.",
-    messageTooShort: "Please write a little more — at least ten characters.",
+    messageTooShort: "Please write at least ten characters.",
     messageTooLong: "Please shorten your message to 4,000 characters or fewer.",
   },
 
@@ -748,9 +801,9 @@ export const en = {
     buyNow: "Buy Now",
     added: "Added to Cart",
     /* Accessible name for the bar that follows the visitor down the page. */
-    stickyBar: "{name} — purchase",
+    stickyBar: "Purchase {name}",
     soldOut: "Sold Out",
-    inStock: "In stock — ships within 48 hours",
+    inStock: "In stock. Ships within 48 hours",
     lowStock: "Only {count} remaining",
     storyHeading: "The Story",
     /* `/set/[slug]` only — the contents of a discovery or gift set. */
@@ -772,8 +825,6 @@ export const en = {
     gallery: {
       label: "{name} gallery",
       thumbnail: "View image {index} of {total}",
-      previous: "Previous image",
-      next: "Next image",
     },
     /*
      * Keyed by the `Concentration` union so a new enum member is a compile
@@ -794,8 +845,17 @@ export const en = {
         title: "Luxury Packaging",
         desc: "Gift-ready presentation",
       },
+      /*
+       * Ordered as two pairs, because the grid prints them two-up: delivery and
+       * packaging are what the house does to the parcel, and these two are what
+       * it offers the buyer who is not yet sure.
+       */
+      noBlindBuy: {
+        title: "No Blind Buy",
+        desc: "Try the tester before the seal is broken",
+      },
       returns: {
-        title: "30-Day Returns",
+        title: "7-Day Returns",
         desc: "Unworn, sealed items",
       },
     },
@@ -1040,11 +1100,11 @@ export const en = {
       steps: {
         choose: {
           title: "Choose Your Set",
-          body: "Select the discovery set that aligns with your curiosity — whether you are drawn to warmth and heritage, darkness and mystery, or wish to explore the complete KHEM world.",
+          body: "Choose the discovery set that matches what you want to explore: warmth and heritage, darkness and mystery, or the complete KHEM world.",
         },
         discover: {
           title: "Discover Your Signature",
-          body: "Wear each vial across different days and occasions. KHEM fragrances evolve dramatically on skin — give each one the time it deserves before deciding.",
+          body: "Wear each vial across different days and occasions. KHEM fragrances evolve dramatically on skin, so give each one time before deciding.",
         },
         unlock: {
           title: "Unlock Your Credit",
@@ -1177,12 +1237,12 @@ export const en = {
       postalCodePlaceholder: "Optional",
       country: "Country",
       /** Under the country field once it has been resolved from the request. */
-      countryDetected: "Chosen from your location — change it if that is not right.",
+      countryDetected: "Chosen from your location. Change it if that is not right.",
       outsideEgyptTitle: "We deliver within Egypt",
       outsideEgyptBody:
-        "The country above is one the house does not ship to yet, so this order cannot be completed. If you are in Egypt, choose it from the list and you may carry on — otherwise write to us and we will tell you the moment that changes.",
+        "The house does not ship to the country above yet, so this order cannot be completed. If you are in Egypt, choose it from the list to carry on. Otherwise, write to us and we will tell you the moment that changes.",
       note: "Delivery Instructions",
-      notePlaceholder: "Optional — a gate code, a preferred hour",
+      notePlaceholder: "Optional: a gate code, a preferred hour",
     },
 
     payment: {
@@ -1553,7 +1613,7 @@ export const en = {
         awaitingDelivery: "Available once your Discovery Set is delivered",
         emptyHeading: "No credit yet",
         emptyBody:
-          "A Discovery Set returns its full price to you as credit towards a full-size fragrance — yours for sixty days from the day the Set arrives.",
+          "A Discovery Set returns its full price to you as credit towards a full-size fragrance, yours for sixty days from the day the Set arrives.",
         emptyCta: "Explore the Discovery Sets",
         /* Keyed by the `CreditStatus` union, so a sixth state is a compile error. */
         status: {
@@ -1629,7 +1689,7 @@ export const en = {
         copyFailed: "Could not copy. Select the code and copy it by hand.",
         emptyHeading: "No vouchers yet",
         emptyBody:
-          "Privileges the house extends to you — a welcome offer, a private code — will be kept here, ready to use at checkout.",
+          "Any privilege the house extends to you, such as a welcome offer or a private code, is kept here and ready to use at checkout.",
         emptyCta: "Explore Collections",
       },
     },
@@ -1669,7 +1729,7 @@ export const en = {
       view: "View",
       emptyHeading: "Nothing to read yet",
       emptyBody:
-        "Order updates, credits and private offers gather here. The house also writes to you by email — every confirmation, dispatch and delivery note reaches your inbox.",
+        "Order updates, credits and private offers gather here. The house also writes to you by email: every confirmation, dispatch and delivery note reaches your inbox.",
     },
 
     preferences: {
@@ -1685,7 +1745,7 @@ export const en = {
         label: "Write to me with news and private offers",
         /* The line that stops a customer fearing they will lose their receipts. */
         transactional:
-          "Letters about your orders and your account are sent either way — confirmations, dispatch notes and delivery updates are never marketing.",
+          "Letters about your orders and your account are sent either way. Confirmations, dispatch notes and delivery updates are never marketing.",
         saving: "Saving",
         saved: "Your preference has been saved.",
         failed: "That could not be saved. Please try again.",
@@ -1738,9 +1798,9 @@ export const en = {
     submit: "Join KHEM",
     submitting: "One moment",
     successHeading: "Welcome to the Circle",
-    successBody: "Look for our letter — it carries your welcome offer.",
+    successBody: "Look for our letter. It carries your welcome offer.",
     successCode: "Your code is {code}. Enter it at checkout.",
-    alreadyBody: "You are already with us — nothing has changed.",
+    alreadyBody: "You are already with us. Nothing has changed.",
     disclaimer: "One letter a month. Leave whenever you wish.",
   },
 
@@ -1759,7 +1819,7 @@ export const en = {
     doneBody:
       "We will not write to you again. If it was a mistake, you are welcome back at any time from the foot of any page.",
     alreadyHeading: "You are already unsubscribed.",
-    alreadyBody: "There is nothing further to do — the house is not writing to you.",
+    alreadyBody: "There is nothing further to do. The house is not writing to you.",
     invalidHeading: "That link is not valid.",
     invalidBody:
       "It may have already been used, or been altered in transit. Write to the house and a person will help.",
@@ -1819,13 +1879,13 @@ export const en = {
 
     noResults: "No matches for “{query}”",
     noResultsHint:
-      "Try a note — oud, amber, jasmine — or the feeling you are after.",
+      "Try a note like oud, amber or jasmine, or the feeling you are after.",
     error: "Search is unavailable for a moment. Please try again.",
     enterHint: "Press Enter for all results",
 
     emptyPrompt: "What are you searching for?",
     emptyPromptBody:
-      "Search by name, by note, or by the mood you want to wear — “something smoky for a winter night” works as well as “oud”.",
+      "Search by name, by note, or by the mood you want to wear. “Something smoky for a winter night” works as well as “oud”.",
     browseCta: "Browse the Collections",
 
     /*
@@ -1845,7 +1905,7 @@ export const en = {
 
   notFound: {
     heading: "Page Not Found",
-    body: "The page you are seeking has slipped beyond our grasp — like perfume dispersing into warm air.",
+    body: "This page is no longer here. It may have moved, or the address may have been mistyped.",
     primary: "Return Home",
     secondary: "Explore Collections",
   },
@@ -1888,7 +1948,7 @@ export const en = {
     regionLabel: "Cookie consent",
     eyebrow: "Privacy",
     title: "Cookies at KHEM",
-    body: "We use a small number of cookies to keep your bag intact, remember your preferences, and understand which pages are read. We run no advertising cookies and work with no ad networks — your browsing is never sold or shared.",
+    body: "We use a small number of cookies to keep your bag intact, remember your preferences, and understand which pages are read. We run no advertising cookies and work with no ad networks. Your browsing is never sold or shared.",
     policyLink: "Read the Cookie Policy",
     settingsLink: "Cookie Settings",
     acceptAll: "Accept All",

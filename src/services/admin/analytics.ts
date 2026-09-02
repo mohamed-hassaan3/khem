@@ -31,6 +31,9 @@ import { listAdminProducts } from "@/src/services/admin/catalog";
 import { stockState } from "@/src/lib/inventory";
 import type {
   ChannelSplitRow,
+  InventoryAction,
+  InventoryChannel,
+  InventoryMovement,
   InventoryRow,
   ProductSalesRow,
   SalesPoint,
@@ -197,15 +200,118 @@ export async function listInventoryRows(days: SalesRange): Promise<InventoryRow[
       collectionSlug: product.collectionSlug,
       priceInCents: product.priceInCents,
       inventory: product.inventory,
+      inventoryOnline: product.inventoryOnline,
+      inventoryOffline: product.inventoryOffline,
       isArchived: product.isArchived,
       unitsSoldRecently: soldBySlug.get(product.slug) ?? 0,
     }));
 
   const rank = { out: 0, low: 1, in: 2 } as const;
 
+  /*
+   * Ranked by the **online** counter, not the total.
+   *
+   * This screen exists so an editor finds the problem without browsing, and
+   * since 0042 the problem is what the website cannot sell: a product with 0
+   * online and 50 offline is sold out to every visitor, and burying it below
+   * genuinely healthy rows because the total looks fine would hide exactly the
+   * case the split introduced. The transfer control is the fix, and it is on
+   * this row.
+   */
   return rows.sort((a, b) => {
-    const byState = rank[stockState(a.inventory)] - rank[stockState(b.inventory)];
+    const byState =
+      rank[stockState(a.inventoryOnline)] - rank[stockState(b.inventoryOnline)];
     if (byState !== 0) return byState;
     return a.name.localeCompare(b.name);
   });
+}
+
+/**
+ * One product's stock movements, newest first.
+ *
+ * The audit trail `supabase/sql/0042_inventory_channels.sql` exists to produce:
+ * every sale, restock, receipt, correction and transfer, each carrying the
+ * figure before and the figure after. Nothing in the application writes to
+ * `"InventoryMovement"` directly — the database functions do, in the same
+ * transaction as the change — so this is a pure read and the rows cannot
+ * disagree with the counters they describe.
+ *
+ * Capped rather than paged: a product with more than two hundred movements is a
+ * reporting question, not a screen an editor scrolls.
+ */
+export async function listInventoryMovements(
+  slug: string,
+  limit = 200,
+): Promise<InventoryMovement[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("InventoryMovement")
+    .select(
+      'id, productSlug, channel, action, quantity, previousQuantity, newQuantity, reason, actor, orderId, createdAt',
+    )
+    .eq("productSlug", slug)
+    .order("createdAt", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    logFailure("listInventoryMovements", error.message);
+    return [];
+  }
+
+  return (data ?? []) as unknown as InventoryMovement[];
+}
+
+/** What the history screen may narrow by. All optional, and combinable. */
+export interface MovementFilters {
+  channel?: InventoryChannel;
+  action?: InventoryAction;
+  slug?: string;
+  /** Inclusive ISO dates, `YYYY-MM-DD`. */
+  from?: string;
+  to?: string;
+}
+
+/**
+ * The whole ledger, newest first, narrowed by any combination of filters.
+ *
+ * Filtering happens in Postgres rather than in the page: the ledger grows by a
+ * row per sale and would be the one admin screen that got slower every day if
+ * this fetched everything and filtered in memory.
+ *
+ * The free-text search is *not* here. It matches product name and order number,
+ * neither of which is a column on this table, so the page resolves those and
+ * passes the resulting slugs down — see `/admin/inventory/history`.
+ */
+export async function listMovements(
+  filters: MovementFilters = {},
+  limit = 500,
+): Promise<InventoryMovement[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  let query = supabase
+    .from("InventoryMovement")
+    .select(
+      'id, productSlug, channel, action, quantity, previousQuantity, newQuantity, reason, actor, orderId, createdAt',
+    );
+
+  if (filters.channel) query = query.eq("channel", filters.channel);
+  if (filters.action) query = query.eq("action", filters.action);
+  if (filters.slug) query = query.eq("productSlug", filters.slug);
+  if (filters.from) query = query.gte("createdAt", `${filters.from}T00:00:00Z`);
+  // `to` is inclusive of the whole day, which is what a date picker means by it.
+  if (filters.to) query = query.lte("createdAt", `${filters.to}T23:59:59Z`);
+
+  const { data, error } = await query
+    .order("createdAt", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    logFailure("listMovements", error.message);
+    return [];
+  }
+
+  return (data ?? []) as unknown as InventoryMovement[];
 }

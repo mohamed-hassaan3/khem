@@ -1,3 +1,5 @@
+import type { InventoryAction, InventoryChannel } from "@/src/types/order";
+
 /**
  * What "low stock" means, in one place.
  *
@@ -26,4 +28,46 @@ export type StockState = "out" | "low" | "in";
 export function stockState(inventory: number): StockState {
   if (inventory <= 0) return "out";
   return inventory < LOW_STOCK_THRESHOLD ? "low" : "in";
+}
+
+/**
+ * What each movement is called on screen.
+ *
+ * The vocabulary is the house's, not the enum's, and the two differ in one
+ * place on purpose: `RESTOCK` is what a **cancelled order** returns, and reads
+ * as "Returned to stock", while `RECEIPT` is a **delivery arriving** and reads
+ * as "Restock". Those are the two words the desk uses for two genuinely
+ * different events, and collapsing them would make the ledger's most common
+ * pair of rows indistinguishable.
+ *
+ * Keyed by the union, so a seventh action is a compile error here rather than a
+ * raw SCREAMING_SNAKE string appearing in the table.
+ */
+export const INVENTORY_ACTION_LABEL: Record<InventoryAction, string> = {
+  SALE: "Sale",
+  RESTOCK: "Returned to stock",
+  RECEIPT: "Restock",
+  ADJUSTMENT: "Adjustment",
+  TRANSFER_IN: "Transferred in",
+  TRANSFER_OUT: "Transferred out",
+};
+
+/** The filter row on the history screen, in the order it is printed. */
+export const INVENTORY_ACTIONS: readonly InventoryAction[] = [
+  "SALE",
+  "RESTOCK",
+  "RECEIPT",
+  "ADJUSTMENT",
+  "TRANSFER_IN",
+  "TRANSFER_OUT",
+];
+
+/** Narrow an untrusted `?action=` value. */
+export function parseInventoryAction(value: string): InventoryAction | null {
+  return INVENTORY_ACTIONS.find((action) => action === value) ?? null;
+}
+
+/** Narrow an untrusted `?channel=` value. */
+export function parseInventoryChannel(value: string): InventoryChannel | null {
+  return value === "ONLINE" || value === "OFFLINE" ? value : null;
 }

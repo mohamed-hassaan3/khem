@@ -217,6 +217,13 @@ export interface Product {
    */
   priceInCents: number;
   sku: string;
+  /**
+   * On the storefront this is the **online** counter: the catalog projections
+   * alias `"inventoryOnline"` to it, because a visitor may only buy what the
+   * website holds. On the dashboard it is the maintained total. See
+   * `src/schemas/db/catalog.ts` for why that alias is one edit rather than
+   * twenty.
+   */
   inventory: number;
   isBestseller: boolean;
   collectionSlug: string;
