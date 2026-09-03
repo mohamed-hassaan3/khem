@@ -223,9 +223,20 @@ export default function NotificationBell({
                       />
 
                       <div className="min-w-0 flex-1">
+                        {/*
+                          * Opening it is reading it. The desk clicked through to
+                          * the order; asking them to also tell us they read the
+                          * line about it is bookkeeping for its own sake, and it
+                          * left the badge counting things the desk had dealt
+                          * with. The action is idempotent, so a second open of
+                          * an already-read row writes nothing.
+                          */}
                         <AdminLink
                           href={hrefFor(item, locale)}
-                          onClick={() => setOpen(false)}
+                          onClick={() => {
+                            setOpen(false);
+                            if (!item.isRead) markRead([item]);
+                          }}
                           className="block no-underline"
                         >
                           <span className="block font-heading text-[10px] uppercase tracking-[0.16em] text-ground-muted">
@@ -252,16 +263,6 @@ export default function NotificationBell({
                             {ago(item.occurredAt)}
                           </span>
 
-                          {item.isRead ? null : (
-                            <button
-                              type="button"
-                              disabled={isPending}
-                              onClick={() => markRead([item])}
-                              className="cursor-pointer bg-transparent p-0 text-[10px] tracking-wide text-ground-muted underline-offset-4 transition-colors duration-300 hover:text-ground-accent hover:underline disabled:opacity-40"
-                            >
-                              Mark as read
-                            </button>
-                          )}
                         </div>
                       </div>
                     </div>

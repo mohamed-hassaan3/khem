@@ -27,7 +27,6 @@ import type {
 import { parseList } from "./catalog";
 
 export const orderStatusSchema = z.enum([
-  "PENDING",
   "PROCESSING",
   "SHIPPED",
   "DELIVERED",

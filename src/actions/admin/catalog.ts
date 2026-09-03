@@ -34,13 +34,16 @@
 
 import { requireAdmin } from "@/src/lib/admin/auth";
 import {
+  revalidateCategory,
   revalidateCollection,
+  revalidateNavigation,
   revalidateMerchPage,
   revalidateProduct,
 } from "@/src/lib/admin/revalidate";
 import { embedDocument, toVectorLiteral } from "@/src/lib/search/embed";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
+  createCategorySchema,
   createCollectionSchema,
   createProductSchema,
   saveProductImagesSchema,
@@ -49,8 +52,13 @@ import {
   updateMerchPageSchema,
   updateProductSchema,
   type AdminActionResult,
+  updateCategorySchema,
 } from "@/src/schemas/admin";
-import { getAdminCollection } from "@/src/services/admin/catalog";
+import {
+  countCollectionsInCategory,
+  getAdminCategory,
+  getAdminCollection,
+} from "@/src/services/admin/catalog";
 import type { CollectionKind, ProductTag } from "@/src/types/catalog";
 
 import {
@@ -69,9 +77,14 @@ import {
  */
 async function resolveCollectionKind(
   collectionSlug: string,
-): Promise<CollectionKind | null> {
+): Promise<{ kind: CollectionKind; categorySlug: string } | null> {
   const collection = await getAdminCollection(collectionSlug);
-  return collection?.kind ?? null;
+  if (!collection) return null;
+
+  // Both facts, because both are needed to revalidate: the kind decides whether
+  // the product has a `/perfume/[slug]` page, and the category owns a page that
+  // lists this product through its collection.
+  return { kind: collection.kind, categorySlug: collection.categorySlug };
 }
 
 /**
@@ -148,6 +161,164 @@ async function refreshProductEmbedding(slug: string): Promise<void> {
 
 // ── Collections ───────────────────────────────────────────────
 
+// ── Categories ────────────────────────────────────────────────
+
+/**
+ * Create a category — the shelf a collection stands on.
+ *
+ * The one place `kind` is authored. Every collection beneath inherits it
+ * through `collection_kind_from_category()`, which is what makes the hierarchy
+ * a fact of the database rather than a convention the dashboard maintains.
+ *
+ * The slug is checked against the pages the code owns before it reaches the
+ * database, which refuses them too (`0047_reserved_slugs.sql`) — this is only
+ * so the editor reads a sentence instead of a constraint name.
+ */
+export async function createCategory(
+  input: unknown,
+): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = createCategorySchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Some fields need attention.",
+      fieldErrors: fieldErrorsFrom(parsed.error),
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  const { slug, ...rest } = parsed.data;
+
+  const { error } = await supabase.from("Category").insert({
+    // Ids are the slug throughout this catalog — `0001_catalog.sql`.
+    id: slug,
+    slug,
+    ...rest,
+  });
+
+  if (error) {
+    console.error(`[admin] createCategory rejected (${actor.email}): ${error.message}`);
+    return postgresFailure(error as PostgresErrorLike, "category");
+  }
+
+  revalidateCategory(slug);
+  console.log(`[admin] category created by ${actor.email} → ${slug}`);
+
+  return { ok: true, slug, message: `Category "${parsed.data.name}" created.` };
+}
+
+/**
+ * Edit a category.
+ *
+ * Changing `kind` rewrites every collection beneath it — the cascade lives in
+ * `category_kind_cascade()` rather than here, because a category and its
+ * collections disagreeing about what they sell would route half of them to the
+ * wrong page shape.
+ */
+export async function updateCategory(
+  input: unknown,
+): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = updateCategorySchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Some fields need attention.",
+      fieldErrors: fieldErrorsFrom(parsed.error),
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  const { slug, ...rest } = parsed.data;
+
+  const { data, error } = await supabase
+    .from("Category")
+    .update({ ...rest, updatedAt: new Date().toISOString() })
+    .eq("slug", slug)
+    .select("slug")
+    .maybeSingle();
+
+  if (error) {
+    console.error(`[admin] updateCategory rejected (${actor.email}): ${error.message}`);
+    return postgresFailure(error as PostgresErrorLike, "category");
+  }
+
+  if (!data) {
+    return { ok: false, message: "That category no longer exists." };
+  }
+
+  revalidateCategory(slug);
+  // Its menu entries carry its name and its enabled state, so both surfaces
+  // have to be re-rendered even when only the copy changed.
+  revalidateNavigation();
+  console.log(`[admin] category updated by ${actor.email} → ${slug}`);
+
+  return { ok: true, slug, message: `Category "${parsed.data.name}" saved.` };
+}
+
+/**
+ * Delete a category.
+ *
+ * Only ever succeeds for an empty one: `"Collection"."categorySlug"` is a real
+ * foreign key, so the database is the authority. The count is checked first
+ * purely so the editor reads a sentence rather than error 23503 — and it is the
+ * same guard `deleteCollection()` applies one level down.
+ *
+ * Switching a category off is the non-destructive alternative and is what
+ * retiring a season should usually mean; the form says so.
+ */
+export async function deleteCategory(
+  slug: unknown,
+): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  if (typeof slug !== "string" || slug.length === 0) {
+    return { ok: false, message: "No category was named." };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  const category = await getAdminCategory(slug);
+  if (!category) {
+    return { ok: false, message: "That category no longer exists." };
+  }
+
+  const collections = await countCollectionsInCategory(slug);
+  if (collections > 0) {
+    return {
+      ok: false,
+      message:
+        collections === 1
+          ? "One collection still stands under this category. Move it first, or switch the category off instead."
+          : `${collections} collections still stand under this category. Move them first, or switch the category off instead.`,
+    };
+  }
+
+  const { error } = await supabase.from("Category").delete().eq("slug", slug);
+
+  if (error) {
+    console.error(`[admin] deleteCategory rejected (${actor.email}): ${error.message}`);
+    return postgresFailure(error as PostgresErrorLike, "category");
+  }
+
+  revalidateCategory(slug);
+  // Its menu entries went with it — `on delete cascade` in `0048_navigation.sql`.
+  revalidateNavigation();
+  console.log(`[admin] category deleted by ${actor.email} → ${slug}`);
+
+  return { ok: true, slug, message: `Category "${category.name}" deleted.` };
+}
+
+// ── Collections ───────────────────────────────────────────────
+
 export async function createCollection(
   input: unknown,
 ): Promise<AdminActionResult> {
@@ -180,7 +351,7 @@ export async function createCollection(
     return postgresFailure(error as PostgresErrorLike, "collection");
   }
 
-  revalidateCollection(slug, parsed.data.kind);
+  revalidateCollection(slug, parsed.data.categorySlug);
   console.log(`[admin] collection created by ${actor.email} → ${slug}`);
 
   return { ok: true, slug, message: `Collection "${parsed.data.name}" created.` };
@@ -225,7 +396,9 @@ export async function updateCollection(
     return { ok: false, message: "That collection no longer exists." };
   }
 
-  revalidateCollection(slug, parsed.data.kind);
+  revalidateCollection(slug, parsed.data.categorySlug);
+  // A menu row that points at this collection prints its name.
+  revalidateNavigation();
   console.log(`[admin] collection updated by ${actor.email} → ${slug}`);
 
   return { ok: true, slug, message: `Collection "${parsed.data.name}" saved.` };
@@ -262,7 +435,9 @@ export async function deleteCollection(
     return postgresFailure(error as PostgresErrorLike, "collection");
   }
 
-  revalidateCollection(slug, collection.kind);
+  revalidateCollection(slug, collection.categorySlug);
+  // Its menu rows went with it — `on delete cascade` in `0048_navigation.sql`.
+  revalidateNavigation();
   console.log(`[admin] collection deleted by ${actor.email} → ${slug}`);
 
   return { ok: true, slug, message: `Collection "${collection.name}" deleted.` };
@@ -348,8 +523,8 @@ export async function createProduct(input: unknown): Promise<AdminActionResult> 
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
 
-  const kind = await resolveCollectionKind(parsed.data.collectionSlug);
-  if (kind === null) {
+  const parent = await resolveCollectionKind(parsed.data.collectionSlug);
+  if (parent === null) {
     return {
       ok: false,
       message: "Some fields need attention.",
@@ -378,7 +553,8 @@ export async function createProduct(input: unknown): Promise<AdminActionResult> 
   revalidateProduct({
     slug,
     collectionSlug: parsed.data.collectionSlug,
-    collectionKind: kind,
+    categorySlug: parent.categorySlug,
+    collectionKind: parent.kind,
     tags: parsed.data.tags as ProductTag[],
   });
   console.log(`[admin] product created by ${actor.email} → ${slug}`);
@@ -401,8 +577,8 @@ export async function updateProduct(input: unknown): Promise<AdminActionResult> 
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
 
-  const kind = await resolveCollectionKind(parsed.data.collectionSlug);
-  if (kind === null) {
+  const parent = await resolveCollectionKind(parsed.data.collectionSlug);
+  if (parent === null) {
     return {
       ok: false,
       message: "Some fields need attention.",
@@ -443,7 +619,8 @@ export async function updateProduct(input: unknown): Promise<AdminActionResult> 
   revalidateProduct({
     slug,
     collectionSlug: parsed.data.collectionSlug,
-    collectionKind: kind,
+    categorySlug: parent.categorySlug,
+    collectionKind: parent.kind,
     tags: parsed.data.tags as ProductTag[],
   });
   console.log(`[admin] product updated by ${actor.email} → ${slug}`);
@@ -491,14 +668,16 @@ export async function setProductArchived(
   }
 
   const row = data as { collectionSlug: string; tags: ProductTag[] | null };
-  const kind = await resolveCollectionKind(row.collectionSlug);
+  const parent = await resolveCollectionKind(row.collectionSlug);
 
   revalidateProduct({
     slug,
     collectionSlug: row.collectionSlug,
     // A collection that vanished under us should still not stop the storefront
-    // being refreshed for the paths we can name.
-    collectionKind: kind ?? "FRAGRANCE",
+    // being refreshed for the paths we can name. The category path is dropped
+    // rather than guessed — there is no safe default for an address.
+    categorySlug: parent?.categorySlug ?? row.collectionSlug,
+    collectionKind: parent?.kind ?? "FRAGRANCE",
     tags: row.tags ?? [],
   });
   console.log(
@@ -650,11 +829,12 @@ export async function saveProductImages(
   const row = product.data as { collectionSlug: string; tags: ProductTag[] | null } | null;
 
   if (row) {
-    const kind = await resolveCollectionKind(row.collectionSlug);
+    const parent = await resolveCollectionKind(row.collectionSlug);
     revalidateProduct({
       slug: productSlug,
       collectionSlug: row.collectionSlug,
-      collectionKind: kind ?? "FRAGRANCE",
+      categorySlug: parent?.categorySlug ?? row.collectionSlug,
+      collectionKind: parent?.kind ?? "FRAGRANCE",
       tags: row.tags ?? [],
     });
   }

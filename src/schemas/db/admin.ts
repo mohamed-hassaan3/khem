@@ -45,9 +45,76 @@ const productTagSchema = z.enum(["NEW_ARRIVAL"]);
 
 // ── Collection ────────────────────────────────────────────────
 
+export const ADMIN_NAV_LINK_COLUMNS =
+  'id, column_key, "parentId", "targetType", "categorySlug", "collectionSlug", ' +
+  '"pageKey", "groupKey", label, "desc", "showInNav", "showInFooter", ' +
+  '"isEnabled", "sortOrder"';
+
+/**
+ * A menu entry as the dashboard reads it — `0048_navigation.sql`.
+ *
+ * The `_ar` overrides are deliberately absent: no dashboard screen has ever
+ * written Arabic (the translations are seeded and revised in SQL), and a label
+ * left blank falls back to the target's own name, which *is* translated. So an
+ * editor adding a collection to the menu gets both languages without touching
+ * either.
+ */
+const adminNavLinkRowSchema = z.object({
+  id: z.string(),
+  column_key: z.enum(["COLLECTIONS", "QUICK_ACCESS", "WORLD"]),
+  parentId: z.string().nullable().default(null),
+  targetType: z.enum(["CATEGORY", "COLLECTION", "PAGE", "GROUP"]),
+  categorySlug: z.string().nullable().default(null),
+  collectionSlug: z.string().nullable().default(null),
+  pageKey: z.string().nullable().default(null),
+  groupKey: z.string().nullable().default(null),
+  label: z.string().nullable().default(null),
+  desc: z.string().nullable().default(null),
+  showInNav: z.boolean(),
+  showInFooter: z.boolean(),
+  isEnabled: z.boolean(),
+  sortOrder: z.number(),
+});
+
+export type AdminNavLink = z.infer<typeof adminNavLinkRowSchema>;
+
+export function toAdminNavLink(row: unknown): AdminNavLink | null {
+  const parsed = adminNavLinkRowSchema.safeParse(row);
+  return parsed.success ? parsed.data : null;
+}
+
+export const ADMIN_CATEGORY_COLUMNS =
+  "id, name, slug, description, bannerUrl, bannerAlt, kind, isEnabled, sortOrder";
+
+/**
+ * A category as the dashboard reads it — `0045_category.sql`.
+ *
+ * Disabled rows are read here and filtered on the storefront, not the other way
+ * round: the one screen that must still show a withdrawn category is the screen
+ * that can switch it back on.
+ */
+const adminCategoryRowSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string(),
+  bannerUrl: z.string(),
+  bannerAlt: z.string(),
+  kind: collectionKindSchema,
+  isEnabled: z.boolean(),
+  sortOrder: z.number(),
+});
+
+export type AdminCategory = z.infer<typeof adminCategoryRowSchema>;
+
+export function toAdminCategory(row: unknown): AdminCategory | null {
+  const parsed = adminCategoryRowSchema.safeParse(row);
+  return parsed.success ? parsed.data : null;
+}
+
 export const ADMIN_COLLECTION_COLUMNS =
   "id, name, slug, description, bannerUrl, bannerAlt, cardUrl, cardAlt, " +
-  "isFeatured, kind, sortOrder";
+  "isFeatured, kind, categorySlug, sortOrder";
 
 /**
  * Note `cardUrl` / `cardAlt` stay **raw** here, null and all — unlike
@@ -66,7 +133,13 @@ const adminCollectionRowSchema = z.object({
   cardUrl: z.string().nullable().default(null),
   cardAlt: z.string().nullable().default(null),
   isFeatured: z.boolean(),
+  /*
+   * Read, never written by the dashboard: `collection_kind_from_category()`
+   * copies it down from the category on every write. The list screen prints it,
+   * and the form offers the category instead.
+   */
   kind: collectionKindSchema,
+  categorySlug: z.string(),
   sortOrder: z.number(),
 });
 

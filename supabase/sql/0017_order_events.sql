@@ -77,19 +77,26 @@ revoke all on public."OrderStatusEvent" from public, anon, authenticated;
 --
 -- Both statements are guarded by `not exists`, so `npm run db:migrate` is safe
 -- to run again — which it is, every deploy.
+--
+-- The opening event was `PENDING` when this file was written. `0051` retired
+-- that label and forbids it by check constraint, so the backfill writes
+-- `PROCESSING` — the state an order now begins in. Changed here rather than
+-- guarded in 0051 because this statement re-runs on every migrate: a backfill
+-- that inserts a value the schema refuses is not a historical record, it is a
+-- migration that fails.
 
 insert into public."OrderStatusEvent" ("orderId", status, "occurredAt")
-select o.id, 'PENDING', o."placedAt"
+select o.id, 'PROCESSING', o."placedAt"
   from public."Order" o
  where not exists (
    select 1 from public."OrderStatusEvent" e
-    where e."orderId" = o.id and e.status = 'PENDING'
+    where e."orderId" = o.id and e.status = 'PROCESSING'
  );
 
 insert into public."OrderStatusEvent" ("orderId", status, "occurredAt")
 select o.id, o.status, o."updatedAt"
   from public."Order" o
- where o.status <> 'PENDING'
+ where o.status <> 'PROCESSING'
    and not exists (
      select 1 from public."OrderStatusEvent" e
       where e."orderId" = o.id and e.status = o.status

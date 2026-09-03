@@ -16,9 +16,9 @@
  * Both call `placeCustomerOrder`, which writes the order and reserves its
  * stock. They diverge on what happens next:
  *
- *   CASH → the action left it PENDING for the desk and sent both emails.
+ *   CASH → the action left it PROCESSING for the desk and sent both emails.
  *          Clear the bag, go to the confirmation.
- *   CARD → the order is PENDING. Ask `/api/checkout/intent` for a client
+ *   CARD → the order is PROCESSING. Ask `/api/checkout/intent` for a client
  *          secret, mount the Payment Element, and let Stripe take it from
  *          there. The bag is cleared only once the payment is confirmed.
  *
@@ -37,7 +37,7 @@
  */
 
 import { ShoppingBag } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState, useTransition } from "react";
 
 import NavGround from "@/src/components/NavGround";
@@ -45,7 +45,7 @@ import EmptyState from "@/src/components/ecommerce/EmptyState";
 import PageHeader from "@/src/components/ecommerce/PageHeader";
 import { placeCustomerOrder } from "@/src/actions/checkout";
 import { previewDiscount } from "@/src/actions/discounts";
-import { cartTotalInCents } from "@/src/lib/cart";
+import { cartTotalInCents, clampQuantity, parseBuyNow } from "@/src/lib/cart";
 import { discountRefusalMessage } from "@/src/lib/discount-message";
 import { cartPricing } from "@/src/lib/pricing";
 import { formatPrice } from "@/src/lib/format";
@@ -121,6 +121,7 @@ export default function CheckoutView({
 }: CheckoutViewProps) {
   const dict = useDictionary();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { lines, isHydrated, clear } = useCart();
 
   /*
@@ -226,13 +227,61 @@ export default function CheckoutView({
     [catalog],
   );
 
+  /*
+   * ── Buy Now ────────────────────────────────────────────────
+   *
+   * A direct purchase: `/checkout?buy=<productId>&qty=<n>`, written by
+   * `<BuyNowButton>`. When one resolves, **it replaces the bag for this
+   * screen** — the customer pressed a button meaning "this bottle", and
+   * checking out three other things alongside it is not what they asked for.
+   *
+   * The bag itself is untouched throughout, including on success: see
+   * `goToConfirmation()`.
+   *
+   * `null` is the ordinary case and also the degraded one. An id that matches
+   * nothing in the catalogue — archived since the link was shared, or simply
+   * mistyped — falls back to the bag rather than erroring, so a stale link
+   * behaves like an ordinary trip to the checkout.
+   */
+  const directLine = useMemo(() => {
+    const request = parseBuyNow(searchParams);
+    if (request === null) return null;
+
+    const product = productsById.get(request.productId);
+    if (!product) return null;
+
+    return {
+      productId: product.id,
+      // Clamped against stock the page actually knows, so a hand-typed
+      // `?qty=999` shows the number the server would enforce rather than a
+      // total it is about to refuse.
+      quantity: clampQuantity(request.quantity, product.inventory),
+    };
+  }, [searchParams, productsById]);
+
+  /**
+   * What this checkout is about: the one direct line, or the bag.
+   *
+   * Everything downstream reads this rather than `lines` — the pricing, the
+   * discount signature, the discount preview payload and the order payload — so
+   * there is no path by which the customer could be shown one basket and
+   * charged for another.
+   */
+  const activeLines = useMemo(
+    // Memoised, not inlined: `[directLine]` is a fresh array on every render,
+    // and handing that to the memo below would rebuild the resolved basket —
+    // and everything priced from it — on every keystroke in the address form.
+    () => (directLine !== null ? [directLine] : lines),
+    [directLine, lines],
+  );
+
   const resolved = useMemo(
     () =>
-      lines.flatMap((line) => {
+      activeLines.flatMap((line) => {
         const product = productsById.get(line.productId);
         return product ? [{ product, quantity: line.quantity }] : [];
       }),
-    [lines, productsById],
+    [activeLines, productsById],
   );
 
   /*
@@ -265,7 +314,7 @@ export default function CheckoutView({
    * this order.
    */
   const discountSignature = [
-    lines
+    activeLines
       .map((line) => `${line.productId}:${line.quantity}`)
       .sort()
       .join(","),
@@ -377,7 +426,7 @@ export default function CheckoutView({
         code,
         // The address the order will carry — what the grant gate matches on.
         customerEmail,
-        items: lines.map((line) => ({
+        items: activeLines.map((line) => ({
           productId: line.productId,
           quantity: line.quantity,
         })),
@@ -406,7 +455,14 @@ export default function CheckoutView({
   }
 
   function goToConfirmation(orderNumber: string) {
-    clear();
+    /*
+     * Only a cart purchase empties the cart.
+     *
+     * A direct purchase never took anything out of the bag, so it has nothing
+     * to put back and nothing to clear — emptying it here would delete a bag
+     * the customer built and did not buy.
+     */
+    if (directLine === null) clear();
     router.push(
       `${localizePath(locale, "/checkout/confirmed")}?order=${encodeURIComponent(orderNumber)}`,
     );
@@ -463,7 +519,7 @@ export default function CheckoutView({
          * never charged for a code they were not shown applied.
          */
         discountCode: activeDiscount?.code ?? "",
-        items: lines.map((line) => ({
+        items: activeLines.map((line) => ({
           productId: line.productId,
           quantity: line.quantity,
         })),
@@ -549,7 +605,8 @@ export default function CheckoutView({
    * returning visitor, so the page holds its height instead. Same treatment as
    * `CartView`.
    */
-  if (!isHydrated) {
+  // A direct purchase does not read the bag, so it need not wait for it.
+  if (!isHydrated && directLine === null) {
     return (
       <div className="ground-ivory min-h-screen">
       {/* §16: trust, clarity, readability. No hero, so the header is solid. */}

@@ -57,7 +57,10 @@ export default async function AdminProductsPage({
         }
       />
 
-      <AdminSearch placeholder="Search by name, slug, SKU or collection" />
+      <AdminSearch
+        placeholder="Search products"
+        label="Search products by name, slug, SKU or collection"
+      />
 
       {products.length === 0 ? (
         <AdminEmpty

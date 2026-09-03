@@ -15,8 +15,8 @@ import type { OrderEvent, OrderStatus } from "@/src/types/account";
  * ## Two rules the drawing follows
  *
  * **A later station implies the earlier ones.** A desk that jumps an order
- * straight from PENDING to SHIPPED did prepare the parcel; it just did not
- * click the button. Those implied stations are filled but carry no date,
+ * straight from PROCESSING to DELIVERED did put it with a courier; it just did
+ * not click the button. Those implied stations are filled but carry no date,
  * because nobody recorded one and inventing it is the thing this whole design
  * exists to avoid.
  *
@@ -28,7 +28,7 @@ import type { OrderEvent, OrderStatus } from "@/src/types/account";
  */
 
 /** The journey, in order. Cancelled and refunded are deliberately not here. */
-const JOURNEY = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"] as const;
+const JOURNEY = ["PROCESSING", "SHIPPED", "DELIVERED"] as const;
 
 type JourneyStatus = (typeof JOURNEY)[number];
 

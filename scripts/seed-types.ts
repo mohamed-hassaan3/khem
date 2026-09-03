@@ -23,7 +23,7 @@
  * `resolveText()` reads to fall back.
  */
 
-import type { Collection, Product } from "../src/types/catalog";
+import type { Category, Collection, Product } from "../src/types/catalog";
 import type { ContactChannel, SocialProfile } from "../src/types/contact";
 import type {
   BrandValue,
@@ -46,6 +46,20 @@ import type { Stockist } from "../src/types/stockist";
  * is a resolved value and not a column. The seed carries the column, so it
  * carries `null` for a collection with no card crop of its own.
  */
+/**
+ * A category, as the file carries it — `0045_category.sql`.
+ *
+ * `kind` is dumped and seeded even though the database copies it down onto every
+ * collection: it is authored *here*, on the category, and a fresh project
+ * restored without it would come up with every collection claiming to be a
+ * fragrance.
+ */
+export type CategorySeedRow = Omit<Category, "sortOrder"> & {
+  name_ar: string | null;
+  description_ar: string | null;
+  bannerAlt_ar: string | null;
+};
+
 export type CollectionSeedRow = Omit<Collection, "cardUrl" | "cardAlt"> & {
   name_ar: string | null;
   description_ar: string | null;
@@ -109,6 +123,12 @@ export type ProductSeedRow = Omit<Product, "images" | "promotion"> & {
  * the seeder writes the array index back.
  */
 export interface CatalogSeed {
+  /*
+   * Categories are written before collections and read back the same way: a
+   * collection's `categorySlug` is a foreign key, so the shelf has to exist
+   * before the thing standing on it.
+   */
+  categories: CategorySeedRow[];
   collections: CollectionSeedRow[];
   products: ProductSeedRow[];
   featuredProductSlug: string;

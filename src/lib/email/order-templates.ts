@@ -230,12 +230,16 @@ function addressBlock(order: OrderMailRecord, locale: Locale): string {
  * Payment method, and — only where money is still owed — the amount to have
  * ready at the door.
  *
- * The `kind` is what makes the second half conditional. A delivered parcel has
- * already been paid for at that door, and telling somebody to "have EGP 2,400
- * ready for the courier" *after* they handed it over reads as a second demand
- * for money they have already given. So the instruction is printed on the two
- * messages where it is still true — the confirmation and the shipping notice —
- * and on no other.
+ * The condition is a fact about the **order**, not about the message. Keying it
+ * on `kind` alone was not enough: a cash order marked delivered before it was
+ * marked shipped still received a shipping notice telling the customer to "have
+ * EGP 870 ready for the courier" — money they had already handed over at the
+ * door. Read as a second demand for payment, which is exactly what it looks
+ * like.
+ *
+ * So three things must all hold: the message is one where money could still be
+ * owed, the order has not been paid, and the parcel has not arrived. Any letter
+ * about a delivered or settled order prints the method and stops.
  *
  * The method line itself stays on every message that shows this block: "Cash on
  * delivery" is a fact about the order, and a receipt that omits how it was
@@ -251,7 +255,10 @@ function paymentBlock(
 
   const method = order.paymentMethod === "CARD" ? labels.card : labels.cash;
 
-  const owing = kind === "confirmation" || kind === "shipped";
+  const owing =
+    (kind === "confirmation" || kind === "shipped") &&
+    order.paymentStatus !== "PAID" &&
+    order.status !== "DELIVERED";
 
   const instruction =
     order.paymentMethod === "CASH" && owing
@@ -297,11 +304,7 @@ function paymentBlock(
  * `order.locale`, and a link that switches the reader back to English at the
  * click is the same bug as an untranslated subject line.
  */
-function trackingHref(order: OrderMailRecord, kind: OrderMailKind): string {
-  const open = kind === "confirmation" || kind === "shipped";
-
-  if (!open) return `${SITE_URL}${localizePath(order.locale, "/collections")}`;
-
+function orderHref(order: OrderMailRecord): string {
   if (order.clerkUserId) {
     return `${SITE_URL}${localizePath(order.locale, ACCOUNT_PATHS.orders)}#${
       order.orderNumber
@@ -311,6 +314,14 @@ function trackingHref(order: OrderMailRecord, kind: OrderMailKind): string {
   return `${SITE_URL}${localizePath(order.locale, "/checkout/confirmed")}?order=${encodeURIComponent(
     order.orderNumber,
   )}`;
+}
+
+function trackingHref(order: OrderMailRecord, kind: OrderMailKind): string {
+  const open = kind === "confirmation" || kind === "shipped";
+
+  if (!open) return `${SITE_URL}${localizePath(order.locale, "/collections")}`;
+
+  return orderHref(order);
 }
 
 export interface CustomerOrderEmailInput {
@@ -648,7 +659,22 @@ export function customerFeedbackEmail({
   const subject = interpolate(copy.subject, { orderNumber: order.orderNumber });
   const headline = interpolate(copy.headline, { name: firstName });
 
-  const ctaHref = `${SITE_URL}${localizePath(locale, "/collections")}`;
+  /*
+   * The order itself, not the collections.
+   *
+   * A letter that arrives a day after the parcel is answering "where is my
+   * order and what did I buy" as often as it is inviting a review, and the
+   * customer has just been told to prepare cash for a courier who has already
+   * been — so the one thing it must not do is send them shopping instead of to
+   * their order.
+   *
+   * `orderHref` rather than `trackingHref`: the latter keys on the *message*,
+   * and the messages it considers closed all get the collections. This letter
+   * is about an order that very much still exists. Same two destinations the
+   * open messages use — the portal for a customer with an account, the
+   * confirmation page for a guest.
+   */
+  const ctaHref = orderHref(order);
 
   const body = [
     paragraph(copy.intro, align),

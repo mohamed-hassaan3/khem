@@ -43,6 +43,8 @@ import type { AdminActionResult } from "@/src/schemas/admin";
 import {
   createDiscountSchema,
   deleteDiscountSchema,
+  issueGrantSchema,
+  revokeGrantSchema,
   setDiscountActiveSchema,
   updateDiscountSchema,
 } from "@/src/schemas/discounts";
@@ -284,4 +286,114 @@ export async function deleteDiscount(input: unknown): Promise<AdminActionResult>
   console.info(`[admin] discount deleted by ${actor.email} → ${String(data.code)}`);
 
   return { ok: true, slug: String(data.code), message: "Discount removed." };
+}
+
+/**
+ * Invite one address to an invitation-only code.
+ *
+ * ## Why this exists
+ *
+ * `discounts."requiresGrant"` gates a code on a row in `discount_grants`, and
+ * until now the only writers of that table were the welcome flows — both of
+ * which issue only the single discount flagged `isWelcome`. Every other
+ * invitation-only code was therefore unredeemable by construction: refused
+ * `NOT_GRANTED` for everybody, forever. The detail screen said as much and
+ * offered no cure.
+ *
+ * ## What this does not change
+ *
+ * Eligibility. `resolve_discount()` is untouched — the same ladder refuses the
+ * same accounts for the same reasons, an address without a grant is still
+ * refused, a spent grant is still `ALREADY_USED`, and an expired one still
+ * expires. What changes is that an eligible address can now be created
+ * deliberately, by an admin, one at a time.
+ *
+ * The amount, the code's terms and the expiry ceiling are all decided in
+ * `issue_discount_grant()`. This action forwards an address and a number of
+ * days; it computes nothing.
+ */
+export async function issueDiscountGrant(input: unknown): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = issueGrantSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Some fields need attention.",
+      fieldErrors: fieldErrorsFrom(parsed.error),
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  const { data, error } = await supabase.rpc("issue_discount_grant", {
+    payload: {
+      code: parsed.data.code,
+      email: parsed.data.email,
+      expiresInDays: parsed.data.expiresInDays,
+    },
+  });
+
+  if (error) {
+    console.error(`[admin] issueDiscountGrant rejected (${actor.email}): ${error.message}`);
+
+    // The function's refusals are written for the desk — "that is not an email
+    // address", "X is open to anybody who has the code" — so they are printed
+    // rather than translated into something vaguer.
+    if (error.code === "23514") return { ok: false, message: error.message };
+    return failure(error as PostgresErrorLike);
+  }
+
+  const issued =
+    typeof data === "object" && data !== null && "issued" in data
+      ? Boolean((data as { issued: unknown }).issued)
+      : false;
+
+  // The address is not logged. It is a customer identifier, and the code plus
+  // the actor is what makes this line useful.
+  console.info(
+    `[admin] ${actor.email} ${issued ? "invited an address to" : "re-invited an existing holder of"} ${parsed.data.code}`,
+  );
+
+  return {
+    ok: true,
+    slug: parsed.data.code,
+    message: issued
+      ? "Invitation issued. That address can now redeem this code."
+      : "That address already holds a grant for this code.",
+  };
+}
+
+/** Withdraw an unused invitation. A spent one is part of the redemption trail. */
+export async function revokeDiscountGrant(input: unknown): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = revokeGrantSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, message: "That invitation could not be withdrawn." };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  const { data, error } = await supabase.rpc("revoke_discount_grant", {
+    grant_id: parsed.data.grantId,
+  });
+
+  if (error) {
+    console.error(`[admin] revokeDiscountGrant rejected (${actor.email}): ${error.message}`);
+    return failure(error as PostgresErrorLike);
+  }
+
+  if (data !== true) {
+    return {
+      ok: false,
+      message: "That invitation has already been used and cannot be withdrawn.",
+    };
+  }
+
+  console.info(`[admin] ${actor.email} withdrew an invitation to ${parsed.data.code}`);
+
+  return { ok: true, slug: parsed.data.code, message: "Invitation withdrawn." };
 }

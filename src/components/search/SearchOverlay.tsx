@@ -22,6 +22,7 @@ import {
 import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { formatProductType } from "@/src/lib/format";
+import type { NavLinkEntry } from "@/src/types/navigation";
 import { localizePath } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { MAX_QUERY_LENGTH } from "@/src/lib/search/config";
@@ -66,6 +67,15 @@ import type {
 export interface SearchOverlayProps {
   open: boolean;
   onClose: () => void;
+  /**
+   * The shelves the panel offers to browse when the box is empty.
+   *
+   * Passed down from `<Nav>`, which already holds the resolved menu, rather
+   * than written out here: this list used to be five hardcoded paths and five
+   * dictionary keys, so a collection created in the dashboard never appeared
+   * and a renamed one would have pointed at a dead address.
+   */
+  shortcuts: readonly NavLinkEntry[];
 }
 
 const DEBOUNCE_MS = 350;
@@ -77,7 +87,11 @@ type Suggestion =
   | { kind: "product"; item: ProductSuggestion }
   | { kind: "collection"; item: CollectionSuggestion };
 
-export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
+export default function SearchOverlay({
+  open,
+  onClose,
+  shortcuts,
+}: SearchOverlayProps) {
   const dict = useDictionary();
   const locale = useLocale();
   const router = useRouter();
@@ -438,6 +452,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 
           {!active ? (
             <IdleState
+              shortcuts={shortcuts}
               recent={recent}
               onClearRecent={clearRecentSearches}
               onPick={(value) => {
@@ -560,11 +575,13 @@ function IdleState({
   onClearRecent,
   onPick,
   onClose,
+  shortcuts,
 }: {
   recent: string[];
   onClearRecent: () => void;
   onPick: (value: string) => void;
   onClose: () => void;
+  shortcuts: readonly NavLinkEntry[];
 }) {
   const dict = useDictionary();
 
@@ -612,31 +629,28 @@ function IdleState({
         <p className="eyebrow mb-5">{dict.search.collections}</p>
         <div className="flex flex-col gap-4">
           {/*
-           * The Nav mega-menu's collections column, reusing its dictionary keys
-           * rather than a second copy of the copy. New Arrival is left out — it
-           * is a showroom rather than a collection to search within.
+           * The Nav's collections column, narrowed to the shelves and capped at
+           * six. Scent profiles, best sellers and the editorial pages are left
+           * out on purpose: this list answers "which part of the catalogue do
+           * you want to search within", and none of those is a part a product
+           * belongs to. New Arrival is out for the same reason — it is a
+           * showroom.
            */}
-          {(
-            [
-              ["signature", "/collections/signature"],
-              ["gemstone", "/collections/gemstone"],
-              ["noir", "/collections/noir"],
-              ["bodyCare", "/collections/body-care"],
-              ["homeFragrance", "/collections/home-fragrance"],
-            ] as const
-          ).map(([key, href]) => (
+          {shortcuts.map((item) => (
             <LocaleLink
-              key={href}
-              href={href}
+              key={item.id}
+              href={item.href}
               onClick={onClose}
               className="group block no-underline"
             >
               <p className="mb-1 font-heading text-[13px] tracking-widest text-ground transition-colors duration-300 group-hover:text-ground-accent">
-                {dict.nav.collectionItems[key].label}
+                {item.label}
               </p>
-              <p className="text-[11px] tracking-wider text-ground-muted">
-                {dict.nav.collectionItems[key].desc}
-              </p>
+              {item.desc !== null ? (
+                <p className="text-[11px] tracking-wider text-ground-muted">
+                  {item.desc}
+                </p>
+              ) : null}
             </LocaleLink>
           ))}
         </div>

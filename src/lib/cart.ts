@@ -76,3 +76,86 @@ export function quantityCeiling(inventory: number): number {
 export function clampQuantity(quantity: number, inventory: number): number {
   return Math.min(Math.max(1, Math.trunc(quantity)), quantityCeiling(inventory));
 }
+
+/*
+ * ── Buy Now ─────────────────────────────────────────────────
+ *
+ * A direct purchase: one product, straight to `/checkout`, with the bag left
+ * exactly as it was.
+ *
+ * Buy Now used to add its line to the cart on the way past. That made a bag
+ * that already held the product hold two of it — `addLine()` increments rather
+ * than replaces, correctly, since adding a fragrance you already have should not
+ * open a second line for the same SKU. It also made the button mean something it
+ * does not say: "add this, then check out everything".
+ *
+ * So the item travels in the URL instead, and the bag is not involved at all.
+ *
+ * ## Why a query parameter and not a second store
+ *
+ * A client store for "the thing being bought right now" is state that can go
+ * stale, survive a refresh it should not survive, and disagree with the page in
+ * front of the customer. `?buy=…&qty=…` is already the shape of "this
+ * navigation is about this product", it is inspectable, and it dies with the
+ * navigation.
+ *
+ * ## Nothing here is trusted
+ *
+ * The server has never priced from the client's numbers: `checkoutSchema`
+ * re-validates every item and `place_order()` reprices under a lock against
+ * `"Product"`. A line carried in a URL is exactly as trusted as one carried from
+ * `localStorage` — which is to say, not at all. The clamping below is a courtesy
+ * to the customer, so they are shown the quantity the server would enforce
+ * rather than a total it is about to refuse.
+ */
+
+export const BUY_NOW_PRODUCT_PARAM = "buy";
+export const BUY_NOW_QUANTITY_PARAM = "qty";
+
+/**
+ * The checkout address for a direct purchase, locale-agnostic.
+ *
+ * `localizePath()` prefixes it at the call site, exactly as it did when this
+ * was a bare `/checkout`.
+ */
+export function buyNowPath(productId: string, quantity: number): string {
+  const params = new URLSearchParams({
+    [BUY_NOW_PRODUCT_PARAM]: productId,
+    [BUY_NOW_QUANTITY_PARAM]: String(Math.max(1, Math.trunc(quantity))),
+  });
+
+  return `/checkout?${params.toString()}`;
+}
+
+/** What a direct-purchase URL asks for, before it has been matched to a product. */
+export interface BuyNowRequest {
+  productId: string;
+  quantity: number;
+}
+
+/**
+ * Read a direct purchase off the URL, or `null` if there is not one.
+ *
+ * `null` is the ordinary case — most arrivals at `/checkout` are cart
+ * checkouts — and it is also what a malformed request produces, so a shared or
+ * hand-typed link degrades to "check out my bag" rather than to an error.
+ *
+ * The quantity is *not* clamped here: stock is a fact about a product this
+ * function has not resolved yet. The caller clamps once it has one, with
+ * {@link clampQuantity}.
+ */
+export function parseBuyNow(
+  params: Pick<URLSearchParams, "get">,
+): BuyNowRequest | null {
+  const productId = params.get(BUY_NOW_PRODUCT_PARAM)?.trim();
+  if (!productId) return null;
+
+  const raw = Number(params.get(BUY_NOW_QUANTITY_PARAM));
+  // Anything unreadable means one: the customer pressed a button that meant
+  // "this bottle", and refusing the whole request over a mangled number would
+  // send them back to a bag they were not shopping from.
+  const quantity =
+    Number.isFinite(raw) && raw >= 1 ? Math.trunc(raw) : 1;
+
+  return { productId, quantity };
+}

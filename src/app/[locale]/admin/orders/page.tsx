@@ -36,7 +36,6 @@ import type { OrderChannel } from "@/src/types/order";
 export const dynamic = "force-dynamic";
 
 const STATUSES: readonly OrderStatus[] = [
-  "PENDING",
   "PROCESSING",
   "SHIPPED",
   "DELIVERED",

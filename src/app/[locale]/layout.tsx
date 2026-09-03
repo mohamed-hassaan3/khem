@@ -22,6 +22,7 @@ import {
   localizePath,
 } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
+import { getNavigationTree } from "@/src/services/navigation";
 // One origin for the whole app. This used to be a second copy of the constant,
 // which is how the root layout and every page's canonical could have come to
 // disagree about which domain KHEM lives on.
@@ -245,10 +246,18 @@ export default async function RootLayout({
    * API, so this layout stays prerenderable exactly as it was; an admin write
    * revalidates it through `revalidateMarketing()`.
    */
-  const [marketing, announcements, welcomeOffer] = await Promise.all([
+  const [marketing, announcements, welcomeOffer, navTree] = await Promise.all([
     getMarketingSettings(locale),
     getLiveAnnouncements(locale),
     getWelcomeOffer(),
+    /*
+     * The menu, which is data now (`supabase/sql/0048_navigation.sql`). Read
+     * here rather than inside `<Nav>` because that component is a client one —
+     * and read for the Nav's surface specifically, since a row may be offered
+     * in the menu without being offered in the Footer's sitemap. The read
+     * cannot fail: it falls back to the tree this repository ships.
+     */
+    getNavigationTree(locale, "nav"),
   ]);
 
   const showAnnouncements =
@@ -361,7 +370,7 @@ export default async function RootLayout({
                         intervalMs={marketing.announcementIntervalMs}
                       />
                     ) : null}
-                    <Nav />
+                    <Nav tree={navTree} />
                     {/*
                      * The offset for the whole fixed header stack — the
                      * announcement bar *and* the nav bar, not just the bar

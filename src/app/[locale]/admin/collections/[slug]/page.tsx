@@ -12,6 +12,7 @@ import {
   countProductsInCollection,
   getAdminCollection,
   getAdminMerchPage,
+  listAdminCategories,
 } from "@/src/services/admin/catalog";
 
 export const dynamic = "force-dynamic";
@@ -35,9 +36,10 @@ export default async function EditCollectionPage({
 
   // The slug is a route param and therefore untrusted; it is used here as an
   // equality filter and nothing else.
-  const [collection, productCount] = await Promise.all([
+  const [collection, productCount, categories] = await Promise.all([
     getAdminCollection(slug),
     countProductsInCollection(slug),
+    listAdminCategories(),
   ]);
 
   if (!collection) return renderMerchPage(activeLocale, slug);
@@ -57,7 +59,11 @@ export default async function EditCollectionPage({
         }
       />
 
-      <CollectionForm collection={collection} locale={activeLocale} />
+      <CollectionForm
+        collection={collection}
+        categories={categories}
+        locale={activeLocale}
+      />
 
       <section className="mt-10 md:mt-16 max-w-3xl border-t border-ground-border pt-8">
         <h2 className="font-heading text-[10px] uppercase tracking-[0.25em] text-danger/70">

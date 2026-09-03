@@ -113,7 +113,7 @@ async function handleSucceeded(intent: Stripe.PaymentIntent): Promise<void> {
 /**
  * `payment_intent.payment_failed`.
  *
- * The order stays PENDING on purpose. A decline is very often the first of two
+ * The order stays PROCESSING on purpose. A decline is very often the first of two
  * attempts — a bank's fraud heuristic, a mistyped CVC — and cancelling here
  * would put the stock back while the buyer is still typing. The sweeper handles
  * the ones that never come back.

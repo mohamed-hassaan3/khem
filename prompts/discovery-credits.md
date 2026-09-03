@@ -4,7 +4,7 @@
 
 Implement the KHEM Discovery Credit policy as a double-entry-style ledger:
 buying a Discovery Set earns a credit worth what was paid for it, and that
-credit pays for a full-size fragrance once, within sixty days of delivery.
+credit pays for a full-size fragrance once, within thirty days of delivery.
 
 **Split into two phases**, because the second one changes what a customer is
 charged and the first one cannot:

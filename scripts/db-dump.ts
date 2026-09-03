@@ -55,6 +55,7 @@ import type {
   ArticleSeedRow,
   BrandValueSeedRow,
   CatalogSeed,
+  CategorySeedRow,
   CollectionSeedRow,
   ContactChannelSeedRow,
   ContentSeed,
@@ -86,6 +87,7 @@ const SEED_DIR = path.join(process.cwd(), "supabase", "seed");
  * and therefore does not store.
  */
 
+type CategoryRow = CategorySeedRow;
 type CollectionRow = CollectionSeedRow;
 
 type ProductRow = Omit<ProductSeedRow, "images">;
@@ -106,7 +108,7 @@ const COLLECTION_COLUMNS = `
   id, name, name_ar, slug, description, description_ar,
   "bannerUrl", "bannerAlt", "bannerAlt_ar",
   "cardUrl", "cardAlt", "cardAlt_ar",
-  "isFeatured", kind
+  "isFeatured", kind, "categorySlug"
 `;
 
 /*
@@ -137,6 +139,13 @@ const PRODUCT_COLUMNS = `
  * sharing a `"sortOrder"` still come back in the same order on every run.
  */
 async function readCatalog(client: Client): Promise<CatalogSeed> {
+  const categories = await client.query<CategoryRow>(
+    `select id, name, name_ar, slug, description, description_ar,
+            "bannerUrl", "bannerAlt", "bannerAlt_ar", kind, "isEnabled"
+       from public."Category"
+      order by "sortOrder", id`,
+  );
+
   const collections = await client.query<CollectionRow>(
     `select ${COLLECTION_COLUMNS}
        from public."Collection"
@@ -207,6 +216,7 @@ async function readCatalog(client: Client): Promise<CatalogSeed> {
   }
 
   return {
+    categories: categories.rows.map(toCategory),
     collections: collections.rows.map(toCollection),
     products: products.rows.map((product) =>
       toProduct(product, byProduct.get(product.slug) ?? []),
@@ -222,6 +232,22 @@ async function readCatalog(client: Client): Promise<CatalogSeed> {
  * here — by this repository — rather than by whatever order Postgres happens to
  * return columns in, which is what keeps a no-change dump a no-change diff.
  */
+
+function toCategory(row: CategoryRow): CategorySeedRow {
+  return {
+    id: row.id,
+    name: row.name,
+    name_ar: row.name_ar,
+    slug: row.slug,
+    description: row.description,
+    description_ar: row.description_ar,
+    bannerUrl: row.bannerUrl,
+    bannerAlt: row.bannerAlt,
+    bannerAlt_ar: row.bannerAlt_ar,
+    kind: row.kind,
+    isEnabled: row.isEnabled,
+  };
+}
 
 function toCollection(row: CollectionRow): CollectionSeedRow {
   return {
@@ -239,6 +265,7 @@ function toCollection(row: CollectionRow): CollectionSeedRow {
     cardAlt_ar: row.cardAlt_ar,
     isFeatured: row.isFeatured,
     kind: row.kind,
+    categorySlug: row.categorySlug,
   };
 }
 

@@ -18,6 +18,7 @@ import { z } from "zod";
 import { MAX_QUANTITY_PER_LINE } from "@/src/lib/cart";
 
 import type { OrderStatus } from "@/src/types/account";
+import type { PaymentStatus } from "@/src/types/order";
 
 /** Same shape the catalog actions return, re-exported so callers import one thing. */
 export type { AdminActionResult } from "./admin";
@@ -25,7 +26,6 @@ export type { AdminActionResult } from "./admin";
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const orderStatusValues = [
-  "PENDING",
   "PROCESSING",
   "SHIPPED",
   "DELIVERED",
@@ -202,19 +202,27 @@ export const transferStockSchema = z
   });
 
 /**
- * Which status may follow which.
+ * Which status may follow which. **Forward only.**
  *
- * A closed record stays closed: once an order is cancelled or refunded its
- * units are back on the shelf, and re-opening it would sell stock the desk has
- * already promised elsewhere without taking it down again. Everything else is
- * allowed to move in both directions, because a desk mis-clicks and correcting
- * "shipped" back to "processing" is a normal Tuesday.
+ * Backward moves used to be allowed on the reasoning that a desk mis-clicks and
+ * correcting "shipped" to "processing" is a normal Tuesday. It is not: every one
+ * of these states is something the customer has already been *told*. The
+ * shipping notice has gone, the tracking code is in their inbox, and moving the
+ * order back unsends neither — it only makes the trail in `"OrderStatusEvent"`
+ * disagree with the parcel's actual history. A mistake is corrected by moving
+ * forward, or by cancelling, and both of those are honest records.
+ *
+ * A closed record stays closed, for the older reason: once an order is
+ * cancelled or refunded its units are back on the shelf, and re-opening it
+ * would sell stock the desk has already promised elsewhere.
+ *
+ * `set_order_status()` holds the same ladder, so a request that skips this
+ * table is refused by the database.
  */
 const TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
-  PENDING: ["PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"],
-  PROCESSING: ["PENDING", "SHIPPED", "DELIVERED", "CANCELLED"],
-  SHIPPED: ["PROCESSING", "DELIVERED", "CANCELLED"],
-  DELIVERED: ["SHIPPED", "REFUNDED"],
+  PROCESSING: ["SHIPPED", "DELIVERED", "CANCELLED"],
+  SHIPPED: ["DELIVERED", "CANCELLED"],
+  DELIVERED: ["REFUNDED"],
   CANCELLED: [],
   REFUNDED: [],
 };
@@ -225,4 +233,42 @@ export function allowedTransitions(from: OrderStatus): readonly OrderStatus[] {
 
 export function canTransition(from: OrderStatus, to: OrderStatus): boolean {
   return TRANSITIONS[from].includes(to);
+}
+
+/**
+ * Which statuses may not be reached until the money has.
+ *
+ * Delivery is the one. A parcel is not handed over unpaid, and `DELIVERED` is
+ * where a Discovery Credit's sixty days start — so an unpaid order reaching it
+ * both misstates the till and starts a clock no payment justifies.
+ *
+ * Stated here so the desk can grey the button, the action can refuse with a
+ * sentence, and `set_order_status()` can raise — three surfaces, one rule, and
+ * the database is the one that actually holds it.
+ */
+export function requiresPayment(status: OrderStatus): boolean {
+  return status === "DELIVERED";
+}
+
+/**
+ * Which payment state may follow which.
+ *
+ * `PAID` is one-way: the only state it may become is `REFUNDED`. A desk that
+ * could un-tick `PAID` could withdraw a credit the customer has already been
+ * shown, and "I clicked the wrong button" and "we gave the money back" must not
+ * be the same click. `REFUNDED` is likewise final — the money has gone back, and
+ * a fresh sale is a fresh order.
+ *
+ * Everything before settlement moves freely: an order can go `UNPAID` →
+ * `FAILED` → `UNPAID` as a card is retried, and none of it has touched money.
+ */
+const PAYMENT_TRANSITIONS: Record<PaymentStatus, readonly PaymentStatus[]> = {
+  UNPAID: ["PAID", "FAILED"],
+  FAILED: ["PAID", "UNPAID"],
+  PAID: ["REFUNDED"],
+  REFUNDED: [],
+};
+
+export function canChangePayment(from: PaymentStatus, to: PaymentStatus): boolean {
+  return PAYMENT_TRANSITIONS[from].includes(to);
 }

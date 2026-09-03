@@ -34,8 +34,14 @@ function logFailure(query: string, message: string): void {
   console.error(`[admin] ${query} failed: ${message}`);
 }
 
-/** Statuses the desk still owes something on. */
-export const OPEN_STATUSES: readonly OrderStatus[] = ["PENDING", "PROCESSING"];
+/**
+ * Statuses the desk still owes something on.
+ *
+ * One member since 0051 retired `PENDING`, and still a list rather than a
+ * scalar: `SHIPPED` is a plausible future member, and the two call sites both
+ * use `.in()`.
+ */
+export const OPEN_STATUSES: readonly OrderStatus[] = ["PROCESSING"];
 
 /**
  * Whether the desk has opened the order yet.

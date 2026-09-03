@@ -33,7 +33,9 @@ export interface PostgresErrorLike {
 
 /** What kind of row the caller was writing, for the message wording. */
 export type AdminEntity =
+  | "category"
   | "collection"
+  | "menu entry"
   | "merchandising page"
   | "product"
   | "article"
@@ -253,21 +255,35 @@ export async function revalidateProductsBySlug(
     wanted.has(product.slug),
   );
 
-  const kinds = new Map<string, CollectionKind>();
+  /*
+   * The parent collection answers two questions at once — what kind of goods it
+   * sells, and which category page also lists them — so it is looked up once
+   * per collection rather than once per product.
+   */
+  const parents = new Map<
+    string,
+    { kind: CollectionKind; categorySlug: string }
+  >();
 
   for (const collectionSlug of new Set(products.map((p) => p.collectionSlug))) {
     const collection = await getAdminCollection(collectionSlug);
-    if (collection) kinds.set(collectionSlug, collection.kind);
+    if (collection) {
+      parents.set(collectionSlug, {
+        kind: collection.kind,
+        categorySlug: collection.categorySlug,
+      });
+    }
   }
 
   for (const product of products) {
-    const collectionKind = kinds.get(product.collectionSlug);
-    if (!collectionKind) continue;
+    const parent = parents.get(product.collectionSlug);
+    if (!parent) continue;
 
     revalidateProduct({
       slug: product.slug,
       collectionSlug: product.collectionSlug,
-      collectionKind,
+      categorySlug: parent.categorySlug,
+      collectionKind: parent.kind,
       tags: product.tags,
     });
   }

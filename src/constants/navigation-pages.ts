@@ -1,18 +1,38 @@
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 import { productTypesForKind } from "@/src/lib/product-types";
+import type {
+  NavGroupEntry,
+  NavLinkEntry,
+  NavigationTree,
+} from "@/src/types/navigation";
 
 /**
- * Navigation structure — routes only, no display copy.
+ * Navigation structure — the **fallback** tree, and the static pages a stored
+ * menu row may point at.
  *
- * Labels and descriptions live in the dictionaries and are looked up by `key`,
- * so adding a nav entry without translating it is a compile error rather than
- * an English string leaking into the Arabic tree.
+ * ## What changed
+ *
+ * These three tables used to *be* the menu: hand-written `{ key, path }` pairs
+ * that only a deploy could change, which is why a collection created in the
+ * dashboard had a page but could not be linked to from anywhere. The menu is
+ * now `"NavLink"` (`supabase/sql/0048_navigation.sql`), read by
+ * `src/services/navigation.ts`.
+ *
+ * This file did not become dead. It is the floor under that read: with no rows,
+ * an unparseable row, or the database unreachable, `getNavigationTree()` returns
+ * {@link fallbackNavigation} and the header renders exactly what it rendered
+ * before the table existed — the same posture `resolveSectionOrder()` takes for
+ * the home page. A menu is on every screen of the site; it is not allowed to
+ * depend on a query succeeding.
+ *
+ * It is also where a `PAGE` row's address comes from. A stored row names a
+ * category, a collection, or one of {@link NAV_PAGE_KEYS} — and the last of
+ * those are pages that exist because the code routes them, so the code is what
+ * says where they are. Labels for them stay in the dictionaries, so a missing
+ * Arabic string is still a compile error rather than an English word leaking
+ * into the Arabic tree.
  *
  * Paths are locale-agnostic; `<LocaleLink>` prefixes them at render time.
- *
- * The Nav and the Footer both render these three tables, which is what makes
- * "the footer navigates the same as the nav" structural rather than a copied
- * list that drifts on the next edit.
  */
 
 export type CollectionKey = keyof Dictionary["nav"]["collectionItems"];
@@ -196,3 +216,193 @@ export const world: ReadonlyArray<{ key: WorldKey; path: string }> = [
   { key: "journal", path: "/journal" },
   { key: "about", path: "/about" },
 ];
+
+
+/*
+ * ── Static pages ────────────────────────────────────────────
+ *
+ * The destinations that are not rows in any table: the catalogue overview, the
+ * merchandising page, the New Arrival showroom, the five scent profiles, and
+ * the five editorial pages. Each exists because a route file exists, so its
+ * address is a fact about this repository and belongs here rather than in a
+ * column an editor could mistype.
+ *
+ * The keys are exactly `nav_link_known_page` in
+ * `supabase/sql/0048_navigation.sql`. A stored row naming anything else is
+ * refused by the database; one naming a key this table forgot is dropped by
+ * `resolveNavigation()` rather than rendered with no address.
+ */
+
+/** Which dictionary section a page's copy is written in. */
+type NavPageSource =
+  | { in: "collectionItems"; key: CollectionKey }
+  | { in: "quickAccessItems"; key: QuickAccessKey }
+  | { in: "worldItems"; key: WorldKey };
+
+export interface NavPage {
+  path: string;
+  copy: NavPageSource;
+}
+
+export const NAV_PAGES = {
+  allProducts: {
+    path: "/collections",
+    copy: { in: "collectionItems", key: "allProducts" },
+  },
+  bestSellers: {
+    path: "/collections/best-sellers",
+    copy: { in: "quickAccessItems", key: "bestSellers" },
+  },
+  newArrival: {
+    path: "/new-arrival",
+    copy: { in: "quickAccessItems", key: "newArrival" },
+  },
+  oriental: {
+    path: "/collections/oriental",
+    copy: { in: "collectionItems", key: "oriental" },
+  },
+  floral: {
+    path: "/collections/floral",
+    copy: { in: "collectionItems", key: "floral" },
+  },
+  fresh: {
+    path: "/collections/fresh",
+    copy: { in: "collectionItems", key: "fresh" },
+  },
+  woody: {
+    path: "/collections/woody",
+    copy: { in: "collectionItems", key: "woody" },
+  },
+  gourmand: {
+    path: "/collections/gourmand",
+    copy: { in: "collectionItems", key: "gourmand" },
+  },
+  heritage: { path: "/heritage", copy: { in: "worldItems", key: "heritage" } },
+  craftsmanship: {
+    path: "/craftsmanship",
+    copy: { in: "worldItems", key: "craftsmanship" },
+  },
+  ingredients: {
+    path: "/ingredients",
+    copy: { in: "worldItems", key: "ingredients" },
+  },
+  journal: { path: "/journal", copy: { in: "worldItems", key: "journal" } },
+  about: { path: "/about", copy: { in: "worldItems", key: "about" } },
+} as const satisfies Record<string, NavPage>;
+
+export type NavPageKey = keyof typeof NAV_PAGES;
+
+export const NAV_PAGE_KEYS = Object.keys(NAV_PAGES) as NavPageKey[];
+
+/** Narrow an untrusted `pageKey` off a stored row. */
+export function parseNavPageKey(value: string | null): NavPageKey | null {
+  if (value === null) return null;
+  return NAV_PAGE_KEYS.find((key) => key === value) ?? null;
+}
+
+/**
+ * A static page's label and description, in the reader's language.
+ *
+ * Three dictionary shapes, because the three columns were written with
+ * different needs: a collections row prints a description under its label, a
+ * Quick Access row is a bare string, and a World row is an object with one
+ * field. Flattening them here means neither surface has to know.
+ */
+export function navPageCopy(
+  dict: Dictionary,
+  key: NavPageKey,
+): { label: string; desc: string | null } {
+  const { copy } = NAV_PAGES[key];
+
+  switch (copy.in) {
+    case "collectionItems": {
+      const entry = dict.nav.collectionItems[copy.key];
+      return { label: entry.label, desc: entry.desc };
+    }
+    case "quickAccessItems":
+      return { label: dict.nav.quickAccessItems[copy.key], desc: null };
+    case "worldItems":
+      return { label: dict.nav.worldItems[copy.key].label, desc: null };
+  }
+}
+
+/*
+ * ── The fallback tree ───────────────────────────────────────
+ *
+ * The three tables above, resolved against the dictionary into the same shape
+ * `"NavLink"` resolves into. Returned whenever the stored menu cannot be read,
+ * so the failure mode of the navigation query is "yesterday's menu", not "no
+ * menu".
+ */
+
+/**
+ * Whether a fallback path names a shelf.
+ *
+ * The stored tree answers this from `targetType`; here there is no row to ask,
+ * so it is read off the address — everything under `/collections/` except the
+ * overview itself and the code-owned pages that share the space.
+ */
+function isShelfPath(path: string): boolean {
+  if (!path.startsWith("/collections/")) return false;
+
+  const slug = path.slice("/collections/".length);
+  return !NON_SHELF_SLUGS.includes(slug);
+}
+
+const NON_SHELF_SLUGS: readonly string[] = [
+  "best-sellers",
+  "oriental",
+  "floral",
+  "fresh",
+  "woody",
+  "gourmand",
+];
+
+function fallbackLink(
+  dict: Dictionary,
+  key: CollectionKey,
+  path: string,
+): NavLinkEntry {
+  const entry = dict.nav.collectionItems[key];
+  return {
+    kind: "link",
+    id: `fallback-${key}`,
+    label: entry.label,
+    desc: entry.desc,
+    href: path,
+    isShelf: isShelfPath(path),
+  };
+}
+
+export function fallbackNavigation(dict: Dictionary): NavigationTree {
+  return {
+    collections: collections.map((entry): NavGroupEntry | NavLinkEntry =>
+      entry.kind === "group"
+        ? {
+            kind: "group",
+            id: `fallback-${entry.key}`,
+            label: dict.nav.collectionGroups[entry.key],
+            children: entry.children.map((child) =>
+              fallbackLink(dict, child.key, child.path),
+            ),
+          }
+        : fallbackLink(dict, entry.key, entry.path),
+    ),
+    quickAccess: quickAccess.map((item) => ({
+      kind: "link",
+      id: `fallback-${item.key}`,
+      label: dict.nav.quickAccessItems[item.key],
+      desc: null,
+      href: item.path,
+      isShelf: isShelfPath(item.path),
+    })),
+    world: world.map((item) => ({
+      kind: "link",
+      id: `fallback-${item.key}`,
+      label: dict.nav.worldItems[item.key].label,
+      desc: null,
+      href: item.path,
+      isShelf: false,
+    })),
+  };
+}

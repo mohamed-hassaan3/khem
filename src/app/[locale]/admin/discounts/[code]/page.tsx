@@ -9,6 +9,9 @@ import {
   AdminTable,
 } from "@/src/components/admin/AdminTable";
 import DiscountForm from "@/src/components/admin/DiscountForm";
+import DiscountGrantForm, {
+  DiscountGrantRevokeButton,
+} from "@/src/components/admin/DiscountGrantForm";
 import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import {
@@ -88,18 +91,35 @@ export default async function EditDiscountPage({
             Grants
           </h2>
 
+          <p className="mb-6 max-w-prose text-[12px] leading-relaxed text-ground-muted">
+            This code is invitation only. It is refused for every address except
+            the ones listed here — issue one below to let somebody redeem it.
+          </p>
+
+          <div className="mb-8 border border-ground-border p-6">
+            <DiscountGrantForm code={discount.code} />
+          </div>
+
           {discount.grants.length === 0 ? (
             <p className="border border-ground-border px-5 py-10 text-center text-[12px] leading-relaxed text-ground-muted">
-              No grants issued. Nobody can redeem this code until one is.
+              No invitations issued. Nobody can redeem this code until one is.
             </p>
           ) : (
-            <AdminTable headers={["Email", "Issued", "Expires", "Used"]}>
+            <AdminTable headers={["Email", "Issued", "Expires", "Used", ""]}>
               {discount.grants.map((grant) => (
                 <AdminRow key={grant.id}>
                   <AdminCell>{grant.email}</AdminCell>
                   <AdminCell muted>{stamp(grant.issuedAt)}</AdminCell>
                   <AdminCell muted>{stamp(grant.expiresAt)}</AdminCell>
                   <AdminCell muted>{stamp(grant.usedAt)}</AdminCell>
+                  <AdminCell>
+                    {grant.usedAt ? null : (
+                      <DiscountGrantRevokeButton
+                        code={discount.code}
+                        grantId={grant.id}
+                      />
+                    )}
+                  </AdminCell>
                 </AdminRow>
               ))}
             </AdminTable>

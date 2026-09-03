@@ -133,6 +133,29 @@ export default async function Home({
   );
 
   /*
+   * Whether the band has anything to draw.
+   *
+   * Deliberately *not* a visibility control: whether this band appears at all is
+   * `"LandingSection"."isEnabled"`, honoured above through `shown.has("featured")`,
+   * and the dashboard's Show/Hide row is the only place that answer is given.
+   * This is the narrower question of whether a band that is switched on has
+   * content — a subject, a backdrop, or a line of copy.
+   *
+   * Every one of the four is sufficient on its own, and that is the fix: the
+   * condition used to read `featuredProduct || (showTitle && title)`, which
+   * consulted neither the banner nor the film. A band set to IMAGE with its
+   * title and description switched off therefore rendered nothing, and once the
+   * featured product had been cleared no media choice could bring it back —
+   * both reported symptoms, one expression.
+   */
+  const newArrivalHasContent =
+    featuredProduct !== null ||
+    (newArrival.mediaType === "IMAGE" && newArrival.imageUrl !== null) ||
+    (newArrival.mediaType === "FILM" && newArrival.videoUrl !== null) ||
+    (newArrival.showTitle && newArrival.title !== null) ||
+    (newArrival.showDescription && newArrival.description !== null);
+
+  /*
    * Whether the house has actually configured a campaign hero.
    *
    * A `"HeroSetting"` row always exists — the migration inserts it — so its
@@ -558,13 +581,16 @@ export default async function Home({
           that carries the type is narrower: the bottle is the point.
         */}
         {/*
-          The band needs a subject. A featured product is one; a hand-written
-          title over a hand-chosen banner is another, which is what makes the
-          three media options usable for a campaign that is not a single bottle.
-          With neither, there is nothing to say and the band does not render —
-          which is exactly what "None — hide this band" does in the dashboard.
+          The band needs content. A featured product is one kind; a banner or a
+          film is another, which is what makes the three media options usable for
+          a campaign that is not a single bottle; a hand-written line of copy is
+          a third. With none of them there is nothing to draw.
+
+          Switching the band *off* is a different gesture and lives elsewhere —
+          the Show/Hide row in Content → Landing, read above as
+          `shown.has("featured")`. See `newArrivalHasContent`.
         */}
-        {featuredProduct || (newArrival.showTitle && newArrival.title) ? (
+        {newArrivalHasContent ? (
           <section className="ground-obsidian relative h-[80vh] min-h-[600px] overflow-hidden bg-ink">
             {/*
               A film if one is configured, the product photograph otherwise.

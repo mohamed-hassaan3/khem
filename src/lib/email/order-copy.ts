@@ -25,10 +25,10 @@ import type { Locale } from "@/src/lib/i18n/config";
 /**
  * The five moments a customer hears from the house about one order.
  *
- Five messages, six statuses: `PENDING` and `PROCESSING` share `confirmation`,
- * because both say the same thing to the buyer — the house has the order and is
- * getting to it. See `mailKindForStatus()` in `./send-order-mail.ts` for the
- * mapping and for why PENDING stopped being silent.
+ * Five messages, five statuses. `PROCESSING` — where an order begins — takes
+ * `confirmation`, which is what checkout would have said: the house has the
+ * order and is getting to it. See `mailKindForStatus()` in
+ * `./send-order-mail.ts` for the mapping.
  */
 export type OrderMailKind =
   | "confirmation"
@@ -275,7 +275,9 @@ export const FEEDBACK_COPY: Record<Locale, OrderMessageCopy> = {
       "A fragrance tells the truth on the second day, not the first — after it has met your skin, your rooms and your hours. Now that yours has had a day, we would be glad to know what you found.",
     detail:
       "Choose any piece below to leave a note and a rating on its page. What you write appears publicly beside it, under your name or as a guest, and it helps the next person choose.",
-    cta: "Explore The Collections",
+    // Points at the order itself, as the delivered message does — see
+    // `customerFeedbackEmail`. The collections are one click further on.
+    cta: "Track Your Order",
     signoff: "With warm regards,",
   },
   ar: {
@@ -287,7 +289,7 @@ export const FEEDBACK_COPY: Record<Locale, OrderMessageCopy> = {
       "العطر يصدق في يومه الثاني لا الأول — بعد أن يلتقي ببشرتك وغرفك وساعات يومك. وقد مضى على عطرك يوم، فيسعدنا أن نعرف ما وجدت.",
     detail:
       "اختر أي قطعة أدناه لتترك ملاحظتك وتقييمك على صفحتها. ما تكتبه يظهر علنًا بجوارها، باسمك أو كضيف، ويساعد من يأتي بعدك على الاختيار.",
-    cta: "استكشف المجموعات",
+    cta: "تتبع طلبك",
     signoff: "مع أطيب التحيات،",
   },
 };

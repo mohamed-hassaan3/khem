@@ -4,7 +4,6 @@ import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import {
-  FACET_ORDER,
   FACET_PARAM,
   parseFacet,
   type ProductFacet,
@@ -88,8 +87,17 @@ export interface CollectionGridProps {
    * one.
    */
   showFacets?: boolean;
+  /**
+   * The chip row's vocabulary — printed order, and a label for each value.
+   *
+   * Passed in rather than imported, because the categories in the middle of the
+   * row are rows in the database now and their names are already resolved to the
+   * reader's language on the server. It is also the whitelist `parseFacet()`
+   * narrows a hand-typed `?facet=` against.
+   */
+  facetOrder: readonly ProductFacet[];
   /** Translated chip labels, keyed by facet. */
-  facetLabels: Readonly<Record<ProductFacet, string>>;
+  facetLabels: Readonly<Record<string, string>>;
   /**
    * Offer the sort control. `/collections` is the one screen that lists the
    * whole house, so reordering by price belongs there; a single collection is
@@ -108,6 +116,7 @@ export interface CollectionGridProps {
 export default function CollectionGrid({
   items,
   showFacets = false,
+  facetOrder,
   facetLabels,
   showSort = false,
   description,
@@ -120,14 +129,14 @@ export default function CollectionGrid({
    * Only facets with something behind them are offered — the `<MerchGrid>`
    * rule: a chip that filters to nothing is a dead affordance, and an emptied
    * collection should take its chip with it rather than wait for a code change.
-   * `FACET_ORDER` supplies the order, so the row reads the same on every visit
+   * `facetOrder` supplies the order, so the row reads the same on every visit
    * whatever the catalog happens to hold.
    */
   const available = useMemo(() => {
     if (!showFacets) return [];
     const present = new Set(items.flatMap((item) => item.facets));
-    return FACET_ORDER.filter((option) => present.has(option));
-  }, [showFacets, items]);
+    return facetOrder.filter((option) => present.has(option));
+  }, [showFacets, items, facetOrder]);
 
   /*
    * Adopt the parameter on mount, and again whenever the visitor uses the Back
@@ -139,13 +148,13 @@ export default function CollectionGrid({
   useEffect(() => {
     const read = () => {
       const params = new URLSearchParams(window.location.search);
-      setFacet(parseFacet(params.get(FACET_PARAM)));
+      setFacet(parseFacet(params.get(FACET_PARAM), facetOrder));
     };
 
     read();
     window.addEventListener("popstate", read);
     return () => window.removeEventListener("popstate", read);
-  }, []);
+  }, [facetOrder]);
 
   const selectFacet = (next: ProductFacet | null) => {
     setFacet(next);

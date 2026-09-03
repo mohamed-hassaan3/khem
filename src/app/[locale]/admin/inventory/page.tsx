@@ -95,7 +95,10 @@ export default async function AdminInventoryPage({
         </Link>
       </p>
 
-      <AdminSearch placeholder="Search by name, slug, SKU or collection" />
+      <AdminSearch
+        placeholder="Search stock"
+        label="Search stock by product name, slug, SKU or collection"
+      />
 
       {rows.length === 0 ? (
         <AdminEmpty

@@ -25,7 +25,24 @@ import { useEffect, useState } from "react";
 /** Long enough to finish a word, short enough not to feel laggy. */
 const DEBOUNCE_MS = 250;
 
-export default function AdminSearch({ placeholder }: { placeholder: string }) {
+export default function AdminSearch({
+  placeholder,
+  label,
+}: {
+  /**
+   * The greyed-out text in the empty field. Keep it short — it sits between a
+   * 44 px leading icon and a 40 px trailing button, and a sentence long enough
+   * to name every searchable column runs under both of them on a phone. That is
+   * what the label below is for.
+   */
+  placeholder: string;
+  /**
+   * What the field is called, for screen readers. Defaults to the placeholder;
+   * pass it when the placeholder had to be shortened, so the full "searchable
+   * by…" wording is still announced.
+   */
+  label?: string;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -98,7 +115,7 @@ export default function AdminSearch({ placeholder }: { placeholder: string }) {
       className="relative mb-6 max-w-md"
     >
       <label htmlFor="admin-search" className="sr-only">
-        {placeholder}
+        {label ?? placeholder}
       </label>
 
       <Search
@@ -114,7 +131,15 @@ export default function AdminSearch({ placeholder }: { placeholder: string }) {
         value={term}
         placeholder={placeholder}
         onChange={(event) => setTerm(event.target.value)}
-        className="w-full border border-ground-border bg-ivory/3 py-3 pe-10 ps-11 text-[13px] tracking-wide text-ground transition-colors duration-300 placeholder:text-ground-subtle focus:border-gold/40 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+        /*
+         * `text-ellipsis` with `overflow-hidden` is the guard, not the fix: the
+         * insets already reserve room for both icons, and text that still does
+         * not fit is clipped with an ellipsis inside them rather than drawn
+         * under them. `appearance-none` goes with it — WebKit's `searchfield`
+         * appearance overrides parts of the box model on `type="search"`, which
+         * is how the padding ended up ignored on Safari in the first place.
+         */
+        className="w-full appearance-none overflow-hidden text-ellipsis border border-ground-border bg-ivory/3 py-3 pe-10 ps-11 text-[13px] tracking-wide text-ground transition-colors duration-300 placeholder:text-ground-subtle focus:border-gold/40 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
       />
 
       {term.length > 0 ? (

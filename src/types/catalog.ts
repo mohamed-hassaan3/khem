@@ -78,6 +78,37 @@ export interface ProductImage {
   sortOrder: number;
 }
 
+/**
+ * Mirrors the `Category` model — `supabase/sql/0045_category.sql`.
+ *
+ * A category is the shelf a collection stands on: Fragrances, Body Care, Home
+ * Fragrances, Discovery, Gift Sets. It used to be nothing but a member of
+ * {@link CollectionKind}, which is why it had no name to translate, no
+ * photograph and no page. It has all three now, and `/collections/[slug]`
+ * resolves one *before* a collection of the same name — see that route.
+ *
+ * `kind` is not a second fact beside the collections beneath it: the database
+ * copies this value down onto every one of them, so a collection cannot
+ * disagree with its category about what it sells.
+ */
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  /** Landscape. The hero on the category page. */
+  bannerUrl: string;
+  bannerAlt: string;
+  /** What the collections beneath it sell — see {@link CollectionKind}. */
+  kind: CollectionKind;
+  /**
+   * A category switched off keeps its row, its collections and its products; it
+   * simply stops being offered. Retiring a season is not deleting it.
+   */
+  isEnabled: boolean;
+  sortOrder: number;
+}
+
 /** Mirrors the `Collection` model. */
 export interface Collection {
   id: string;
@@ -97,8 +128,16 @@ export interface Collection {
   cardUrl: string;
   cardAlt: string;
   isFeatured: boolean;
-  /** What this collection sells — see {@link CollectionKind}. */
+  /**
+   * What this collection sells — see {@link CollectionKind}.
+   *
+   * Derived, not authored: `collection_kind_from_category()` copies it down from
+   * {@link Category.kind} on every write, so nothing in the dashboard sets it
+   * and nothing can set it wrongly.
+   */
   kind: CollectionKind;
+  /** The category this collection stands under — never null since `0045`. */
+  categorySlug: string;
 }
 
 /**
@@ -309,6 +348,15 @@ export type ProductCardData = Pick<
    * query for one column.
    */
   collectionKind: CollectionKind;
+  /**
+   * The category the parent collection stands under — the same join.
+   *
+   * On the card projection because the `/collections` chips cut by category
+   * rather than by collection: "Body Care" is one chip whether the house sells
+   * one range beneath it or four. Deriving it in the grid would mean a second
+   * query per card.
+   */
+  categorySlug: string;
   /** The single `isPrimary` image; a list query never needs the full gallery. */
   primaryImage: ProductImage;
   /**

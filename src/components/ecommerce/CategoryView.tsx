@@ -41,10 +41,25 @@ import type { Collection, ProductCardData } from "@/src/types/catalog";
  * `kind` is set in the admin dashboard gets the right page with no edit here.
  */
 
+/**
+ * What this view needs of the row it is given.
+ *
+ * Structural rather than `Collection`, because since `0045_category.sql` the
+ * same four layouts serve two kinds of row: a **category** page
+ * (`/collections/body-care`) and the **collections** standing under it
+ * (`/collections/body-mist`). Both carry a name, a description, a banner and a
+ * kind, and nothing here needs more than that — so both are accepted without
+ * either being cast to the other.
+ */
+export type CategoryViewRow = Pick<
+  Collection,
+  "slug" | "name" | "description" | "bannerUrl" | "bannerAlt" | "kind"
+>;
+
 export interface CategoryViewProps {
   locale: Locale;
-  /** Never a `FRAGRANCE` collection — that branch renders `<CollectionView>`. */
-  collection: Collection;
+  /** Never `FRAGRANCE` — that branch renders `<CollectionView>`. */
+  collection: CategoryViewRow;
   products: ProductCardData[];
 }
 

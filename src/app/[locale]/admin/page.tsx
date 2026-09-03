@@ -174,7 +174,7 @@ export default async function AdminDashboardPage({
               ? "Pending or being prepared"
               : "Nothing outstanding"
           }
-          href={`${ordersPath}?status=PENDING`}
+          href={`${ordersPath}?status=PROCESSING`}
         />
         <Tile
           label="New · unopened"

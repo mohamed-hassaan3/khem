@@ -28,7 +28,7 @@ import { getOrderForConfirmation } from "@/src/services/orders";
  * ## Why the status is not asserted
  *
  * A card order arrives here the instant Stripe confirms the payment, which is
- * often *before* the webhook has run — so the row may still say PENDING for a
+ * often *before* the webhook has run — so the row may still say UNPAID for a
  * second or two. The page therefore never claims a status it has not verified;
  * it says the order was received, which is true either way, and the emails
  * (sent from the webhook) carry the confirmation that money moved.

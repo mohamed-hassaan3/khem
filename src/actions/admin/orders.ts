@@ -42,9 +42,11 @@ import {
 } from "@/src/lib/email/send-order-mail";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
+  canChangePayment,
   canTransition,
   createOrderSchema,
   markOrderOpenedSchema,
+  requiresPayment,
   updateOrderStatusSchema,
   updatePaymentStatusSchema,
   type AdminActionResult,
@@ -75,6 +77,24 @@ function placementFailure(error: PostgresErrorLike): AdminActionResult {
 
   if (message.includes("in stock") || message.includes("archived")) {
     return { ok: false, message, fieldErrors: { items: message } };
+  }
+
+  return postgresFailure(error, "product");
+}
+
+/**
+ * Why the database's refusal is printed rather than translated.
+ *
+ * `set_order_status()` and `set_order_payment_status()` raise `check_violation`
+ * with a sentence written for the person at the desk — "this order has not been
+ * paid", "refund it to reverse the payment". Those are the same rules the action
+ * checks a moment earlier, so reaching one means the row changed underneath the
+ * screen, and the database's account of *why* is the accurate one. Anything else
+ * falls through to the generic mapping, with the provider's text going to the log.
+ */
+function transitionFailure(error: PostgresErrorLike): AdminActionResult {
+  if (error.code === "23514" && error.message) {
+    return { ok: false, message: error.message };
   }
 
   return postgresFailure(error, "product");
@@ -170,6 +190,20 @@ export async function updateOrderStatus(input: unknown): Promise<AdminActionResu
     };
   }
 
+  /*
+   * Delivery waits for the money. Checked here so the desk gets a sentence
+   * rather than a red toast, and again in `set_order_status()`, which is what
+   * actually holds the rule — this endpoint is one door into it and `psql` is
+   * another.
+   */
+  if (requiresPayment(parsed.data.status) && order.paymentStatus !== "PAID") {
+    return {
+      ok: false,
+      message:
+        "This order has not been paid. Record the payment before confirming delivery.",
+    };
+  }
+
   const { error } = await supabase.rpc("set_order_status", {
     order_id: parsed.data.orderId,
     next_status: parsed.data.status,
@@ -177,7 +211,7 @@ export async function updateOrderStatus(input: unknown): Promise<AdminActionResu
 
   if (error) {
     console.error(`[admin] updateOrderStatus failed: ${error.message}`);
-    return postgresFailure(error, "product");
+    return transitionFailure(error);
   }
 
   console.info(
@@ -189,8 +223,8 @@ export async function updateOrderStatus(input: unknown): Promise<AdminActionResu
   await revalidateProductsBySlug(order.lines.map((line) => line.productSlug));
 
   /*
-   * Tell the customer. `PENDING` maps to null and sends nothing — "your order
-   * is pending" is anxiety with no information in it.
+   * Tell the customer. Every status the desk can set maps to a letter; see
+   * `mailKindForStatus`.
    *
    * `notifyCustomerOfOrder` swallows its own failures, so this cannot throw and
    * cannot change what the desk sees. The row is re-read rather than reusing
@@ -272,7 +306,22 @@ export async function markOrderOpened(input: unknown): Promise<AdminActionResult
   return { ok: true, slug: parsed.data.orderId, message: "Marked as opened." };
 }
 
-/** Payment state only — it moves no stock, so there is no function behind it. */
+/**
+ * Record the payment fact — and everything that follows from it.
+ *
+ * This used to write `"Order"."paymentStatus"` directly, and that was the bug:
+ * a cash Discovery Set went PAID with a null `paidAt` and no Discovery Credit,
+ * because `issue_discovery_credits()` is reached only from a function and this
+ * path called none. The card path was never affected — the Stripe webhook goes
+ * through `settle_order_payment()`, which does the work.
+ *
+ * There is now a function behind both, so "this order has been paid" means the
+ * same thing whoever says it: `set_order_payment_status()` for the desk,
+ * `settle_order_payment()` for Stripe, one issuance rule underneath.
+ *
+ * `PAID` is one-way here. It may become `REFUNDED` and nothing else — un-ticking
+ * it would silently withdraw a credit the customer has already been shown.
+ */
 export async function updatePaymentStatus(input: unknown): Promise<AdminActionResult> {
   const actor = await requireAdmin();
 
@@ -284,31 +333,54 @@ export async function updatePaymentStatus(input: unknown): Promise<AdminActionRe
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
 
-  const { data, error } = await supabase
-    .from("Order")
-    .update({
-      paymentStatus: parsed.data.paymentStatus,
-      updatedAt: new Date().toISOString(),
-    })
-    .eq("id", parsed.data.orderId)
-    .select("orderNumber")
-    .maybeSingle();
+  // Read server-side, like `updateOrderStatus`: this screen may have been open
+  // while the webhook settled the order, and the rule below is only meaningful
+  // against the row as it is now.
+  const order = await getAdminOrderById(parsed.data.orderId);
+  if (!order) {
+    return { ok: false, message: "That order no longer exists." };
+  }
+
+  if (order.paymentStatus === parsed.data.paymentStatus) {
+    return { ok: true, slug: order.orderNumber, message: "Nothing to change." };
+  }
+
+  if (!canChangePayment(order.paymentStatus, parsed.data.paymentStatus)) {
+    return {
+      ok: false,
+      message:
+        order.paymentStatus === "PAID"
+          ? "This order has been paid. Refund it to reverse the payment."
+          : `A payment that is ${order.paymentStatus.toLowerCase()} cannot become ${parsed.data.paymentStatus.toLowerCase()}.`,
+    };
+  }
+
+  const { error } = await supabase.rpc("set_order_payment_status", {
+    order_id: parsed.data.orderId,
+    next_status: parsed.data.paymentStatus,
+  });
 
   if (error) {
     console.error(`[admin] updatePaymentStatus failed: ${error.message}`);
-    return postgresFailure(error, "product");
+    return transitionFailure(error);
   }
 
-  const orderNumber =
-    data && typeof data.orderNumber === "string" ? data.orderNumber : "";
-
   console.info(
-    `[admin] ${actor.email} marked ${orderNumber} ${parsed.data.paymentStatus}`,
+    `[admin] ${actor.email} marked ${order.orderNumber} ${parsed.data.paymentStatus}`,
   );
 
+  /*
+   * A credit may have just been issued, activated or cancelled. Nothing is
+   * revalidated for it: every screen under `/admin` is `force-dynamic`, and the
+   * customer's `/account/vouchers` is a per-request read behind Clerk. There is
+   * no cached surface that could now be wrong.
+   */
   return {
     ok: true,
-    slug: orderNumber,
-    message: `Payment marked ${parsed.data.paymentStatus.toLowerCase()}.`,
+    slug: order.orderNumber,
+    message:
+      parsed.data.paymentStatus === "PAID"
+        ? `Payment recorded for ${order.orderNumber}.`
+        : `Payment marked ${parsed.data.paymentStatus.toLowerCase()}.`,
   };
 }

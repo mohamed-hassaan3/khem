@@ -2,10 +2,10 @@
  * Put back what nobody paid for.
  *
  * The other half of reserving stock before payment. `src/actions/checkout.ts`
- * creates a card order as PENDING with its bottles already off the shelf,
+ * creates a card order as PROCESSING with its bottles already off the shelf,
  * because an order and its stock movement are one event and checkout gets no
  * exception from that. The price of that choice is abandoned baskets holding
- * inventory, and this is what pays it: anything still PENDING, UNPAID and CARD
+ * inventory, and this is what pays it: anything still PROCESSING, UNPAID and CARD
  * after thirty minutes is cancelled and restocked.
  *
  * ## The schedule, and why it is only a backstop

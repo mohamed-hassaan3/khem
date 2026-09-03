@@ -32,21 +32,113 @@ import { cache } from "react";
 import { MERCH_PAGE_FACETS, type MerchPageFacet } from "@/src/lib/facets";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
+  ADMIN_CATEGORY_COLUMNS,
+  ADMIN_NAV_LINK_COLUMNS,
   ADMIN_COLLECTION_COLUMNS,
   ADMIN_MERCH_PAGE_COLUMNS,
   ADMIN_PRODUCT_COLUMNS,
   ADMIN_PRODUCT_WITH_IMAGES_COLUMNS,
   parseList,
+  toAdminCategory,
   toAdminCollection,
+  toAdminNavLink,
   toAdminMerchPage,
   toAdminProduct,
+  type AdminCategory,
   type AdminCollection,
+  type AdminNavLink,
   type AdminMerchPage,
   type AdminProduct,
 } from "@/src/schemas/db/admin";
 
 function logFailure(query: string, message: string): void {
   console.error(`[admin] ${query} failed: ${message}`);
+}
+
+/**
+ * Every menu entry, in printed order — the dashboard's view of `"NavLink"`.
+ *
+ * Disabled and footer-only rows included: this is the screen that switches them
+ * back on. The storefront's own read lives in `src/services/navigation.ts` and
+ * filters; the two must not share a query, because they want opposite things.
+ */
+export async function listAdminNavLinks(): Promise<AdminNavLink[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("NavLink")
+    .select(ADMIN_NAV_LINK_COLUMNS)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("listAdminNavLinks", error.message);
+    return [];
+  }
+
+  return parseList(data, toAdminNavLink);
+}
+
+/** Every category, enabled or not, in editorial order. */
+export async function listAdminCategories(): Promise<AdminCategory[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Category")
+    .select(ADMIN_CATEGORY_COLUMNS)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("listAdminCategories", error.message);
+    return [];
+  }
+
+  return parseList(data, toAdminCategory);
+}
+
+export async function getAdminCategory(
+  slug: string,
+): Promise<AdminCategory | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("Category")
+    .select(ADMIN_CATEGORY_COLUMNS)
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getAdminCategory", error.message);
+    return null;
+  }
+
+  return toAdminCategory(data);
+}
+
+/**
+ * How many collections stand under a category.
+ *
+ * Drives the same guard `countProductsInCollection()` does one level down: a
+ * category with collections beneath it cannot be deleted, because the foreign
+ * key would refuse it anyway and an editor deserves to read why in a sentence.
+ */
+export async function countCollectionsInCategory(slug: string): Promise<number> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return 0;
+
+  const { count, error } = await supabase
+    .from("Collection")
+    .select("slug", { count: "exact", head: true })
+    .eq("categorySlug", slug);
+
+  if (error) {
+    logFailure("countCollectionsInCategory", error.message);
+    return 0;
+  }
+
+  return count ?? 0;
 }
 
 /** Every collection, of every kind, in editorial order. */

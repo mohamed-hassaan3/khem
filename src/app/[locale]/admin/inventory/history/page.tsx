@@ -172,7 +172,10 @@ export default async function InventoryHistoryIndexPage({
 
       <MovementDateRange basePath={base} from={from ?? ""} to={to ?? ""} />
 
-      <AdminSearch placeholder="Search by product, order number or reason" />
+      <AdminSearch
+        placeholder="Search movements"
+        label="Search movements by product, order number or reason"
+      />
 
       {rows.length === 0 ? (
         <AdminEmpty

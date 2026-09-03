@@ -3,7 +3,7 @@
 /**
  * The card half of checkout.
  *
- * Mounted only after `placeCustomerOrder` has written a PENDING order and
+ * Mounted only after `placeCustomerOrder` has written a PROCESSING order and
  * `/api/checkout/intent` has answered with a client secret — so by the time
  * this renders, the bottles are already reserved and the amount is already
  * fixed by a row in the database. Nothing here can influence what is charged.

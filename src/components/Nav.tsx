@@ -6,15 +6,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type {
-  CollectionEntry,
-  CollectionGroupKey,
-  CollectionKey,
-} from "../constants/navigation-pages";
-import {
-  world,
-  collections,
-  quickAccess,
-} from "../constants/navigation-pages";
+  NavEntry,
+  NavLinkEntry,
+  NavigationTree,
+} from "@/src/types/navigation";
 import { ChevronDown, Search, ShoppingBag, UserRound, X } from "lucide-react";
 
 /*
@@ -168,60 +163,69 @@ function CollectionsList({
   entries,
   labelClass,
   idPrefix,
-  groupLabels,
-  itemLabels,
   onNavigate,
 }: {
-  entries: ReadonlyArray<CollectionEntry>;
+  /**
+   * The resolved column — labels already in the reader's language and addresses
+   * already derived, whether they came from `"NavLink"` or from the shipped
+   * fallback tree. See `src/services/navigation.ts`.
+   */
+  entries: ReadonlyArray<NavEntry>;
   /** Typography for a row's label — the only difference between the surfaces. */
   labelClass: string;
   /** Namespaces the `aria-controls` targets, so the two surfaces cannot collide. */
   idPrefix: string;
-  groupLabels: Record<CollectionGroupKey, string>;
-  itemLabels: Record<CollectionKey, { label: string; desc: string }>;
   /** Closes the surface, where the surface is one that closes. */
   onNavigate?: () => void;
 }) {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
 
-  const renderLink = (key: CollectionKey, path: string) => (
+  const renderLink = (link: NavLinkEntry) => (
     <LocaleLink
-      key={path}
-      href={path}
+      key={link.id}
+      href={link.href}
       onClick={onNavigate}
       className="group block no-underline"
     >
       <p
         className={`mb-1 font-heading ${labelClass} tracking-widest text-ground transition-colors duration-300 group-hover:text-ground-accent`}
       >
-        {itemLabels[key].label}
+        {link.label}
       </p>
-      <p className="text-[11px] tracking-wider text-ground-muted">
-        {itemLabels[key].desc}
-      </p>
+      {/*
+        A row created in the dashboard need not carry a description — a
+        collection is a name and a place. The paragraph is omitted rather than
+        rendered empty, so the column keeps its rhythm instead of printing a
+        blank line under some rows and not others.
+      */}
+      {link.desc !== null ? (
+        <p className="text-[11px] tracking-wider text-ground-muted">
+          {link.desc}
+        </p>
+      ) : null}
     </LocaleLink>
   );
 
   return (
     <div className="flex flex-col gap-5">
       {entries.map((entry) => {
-        if (entry.kind === "link") return renderLink(entry.key, entry.path);
+        if (entry.kind === "link") return renderLink(entry);
 
-        const isOpen = openGroup === entry.key;
-        const panelId = `${idPrefix}-${entry.key}`;
+        const isOpen = openGroup === entry.id;
+        const panelId = `${idPrefix}-${entry.id}`;
 
         return (
-          <div key={entry.key}>
+          <div key={entry.id}>
             <button
               type="button"
-              onClick={() => setOpenGroup(isOpen ? null : entry.key)}
+              onClick={() => setOpenGroup(isOpen ? null : entry.id)}
               aria-expanded={isOpen}
               aria-controls={panelId}
               className={`flex w-full cursor-pointer items-center justify-between gap-3 text-start font-heading ${labelClass} tracking-widest text-ground transition-colors duration-300 hover:text-ground-accent ${
                 isOpen ? "text-ground-accent" : ""
               }`}
             >
-              {groupLabels[entry.key]}
+              {entry.label}
               <ChevronDown
                 aria-hidden="true"
                 width={15}
@@ -253,9 +257,7 @@ function CollectionsList({
                */}
               <div className="overflow-hidden">
                 <div className="flex flex-col gap-5 border-s border-ground-border ps-4">
-                  {entry.children.map((child) =>
-                    renderLink(child.key, child.path),
-                  )}
+                  {entry.children.map((child) => renderLink(child))}
                 </div>
               </div>
             </div>
@@ -266,7 +268,7 @@ function CollectionsList({
   );
 }
 
-export default function Nav() {
+export default function Nav({ tree }: { tree: NavigationTree }) {
   const dict = useDictionary();
   const locale = useLocale();
   const { isSignedIn } = useAuth();
@@ -595,7 +597,20 @@ export default function Nav() {
       </nav>
 
       {/* ── SEARCH PANEL ───────────────────────────── */}
-      <SearchOverlay open={searchOpen} onClose={closeSearch} />
+      <SearchOverlay
+        open={searchOpen}
+        onClose={closeSearch}
+        /*
+          The shelves from the menu the header is already holding, capped at
+          six. Filtering on `isShelf` is what keeps the scent profiles and Best
+          Sellers out: the panel offers parts of the catalogue to search
+          *within*, and no product belongs to one of those.
+        */
+        shortcuts={tree.collections
+          .flatMap((entry) => (entry.kind === "group" ? entry.children : [entry]))
+          .filter((entry) => entry.isShelf)
+          .slice(0, 6)}
+      />
 
       {/* ── MOBILE DRAWER ──────────────────────────── */}
       <div
@@ -646,11 +661,9 @@ export default function Nav() {
             <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
             <CollectionsList
               key={pathname}
-              entries={collections}
+              entries={tree.collections}
               labelClass="text-sm"
               idPrefix="drawer-collections"
-              groupLabels={dict.nav.collectionGroups}
-              itemLabels={dict.nav.collectionItems}
               onNavigate={closeDrawer}
             />
           </section>
@@ -660,15 +673,15 @@ export default function Nav() {
           <section>
             <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
             <div className="flex flex-col gap-3.5">
-              {quickAccess.map((item) => (
+              {tree.quickAccess.map((item) => (
                 <LocaleLink
-                  key={item.path}
-                  href={item.path}
+                  key={item.id}
+                  href={item.href}
                   onClick={closeDrawer}
                   className="group flex items-center gap-3 text-xs tracking-widest text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
                 >
                   <span className="inline-block h-px w-5 bg-current" />
-                  {dict.nav.quickAccessItems[item.key]}
+                  {item.label}
                 </LocaleLink>
               ))}
             </div>
@@ -679,14 +692,14 @@ export default function Nav() {
           <section>
             <p className="eyebrow mb-6">{dict.nav.discover}</p>
             <div className="flex flex-col gap-5">
-              {world.map((w) => (
+              {tree.world.map((item) => (
                 <LocaleLink
-                  key={w.path}
-                  href={w.path}
+                  key={item.id}
+                  href={item.href}
                   onClick={closeDrawer}
                   className="font-heading text-sm tracking-widest text-ground no-underline transition-colors duration-300 hover:text-ground-accent"
                 >
-                  {dict.nav.worldItems[w.key].label}
+                  {item.label}
                 </LocaleLink>
               ))}
             </div>
@@ -826,11 +839,9 @@ export default function Nav() {
             <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
             <CollectionsList
               key={pathname}
-              entries={collections}
+              entries={tree.collections}
               labelClass="text-[13px]"
               idPrefix="mega-collections"
-              groupLabels={dict.nav.collectionGroups}
-              itemLabels={dict.nav.collectionItems}
             />
           </div>
           <div>
@@ -870,14 +881,14 @@ export default function Nav() {
           <div>
             <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
             <div className="flex flex-col gap-3.5">
-              {quickAccess.map((item) => (
+              {tree.quickAccess.map((item) => (
                 <LocaleLink
-                  key={item.path}
-                  href={item.path}
+                  key={item.id}
+                  href={item.href}
                   className="group flex items-center gap-3 text-xs tracking-widest text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
                 >
                   <span className="inline-block h-px w-5 bg-current" />
-                  {dict.nav.quickAccessItems[item.key]}
+                  {item.label}
                 </LocaleLink>
               ))}
             </div>
@@ -895,14 +906,14 @@ export default function Nav() {
           <div>
             <p className="eyebrow mb-6">{dict.nav.discover}</p>
             <div className="flex flex-col gap-5">
-              {world.map((w) => (
+              {tree.world.map((item) => (
                 <LocaleLink
-                  key={w.path}
-                  href={w.path}
+                  key={item.id}
+                  href={item.href}
                   className="group no-underline"
                 >
                   <p className="font-heading text-[13px] tracking-widest text-ground transition-colors duration-300 group-hover:text-ground-accent">
-                    {dict.nav.worldItems[w.key].label}
+                    {item.label}
                   </p>
                 </LocaleLink>
               ))}

@@ -170,3 +170,25 @@ export const setDiscountActiveSchema = z.object({
 export const deleteDiscountSchema = z.object({
   id: z.string().trim().min(1, "Which code?"),
 });
+
+/**
+ * Inviting one address to an invitation-only code.
+ *
+ * The address is validated here and **normalised in the database**, not here:
+ * `discount_grants` is unique on the lowercased form and `resolve_discount()`
+ * looks it up the same way, so the normalisation has to happen where both can
+ * see it. This schema's job is to refuse what is not an address at all.
+ */
+export const issueGrantSchema = z.object({
+  code: codeField,
+  email: z.email("That is not a valid email address."),
+  /** Empty means "until the campaign itself ends". */
+  expiresInDays: z
+    .union([z.literal(""), z.coerce.number().int().positive().max(3650)])
+    .transform((value) => (value === "" ? null : value)),
+});
+
+export const revokeGrantSchema = z.object({
+  code: codeField,
+  grantId: z.string().min(1, "Which grant?"),
+});

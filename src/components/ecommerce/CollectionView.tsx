@@ -8,7 +8,8 @@ import CollectionGrid, {
 } from "@/src/components/ecommerce/CollectionGrid";
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import { productFacets } from "@/src/lib/facets";
+import { facetVocabulary, productFacets } from "@/src/lib/facets";
+import { getCategories } from "@/src/services/products";
 import { unitPriceInCents } from "@/src/lib/pricing";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
@@ -111,6 +112,19 @@ export default async function CollectionView({
    * cannot fill, so a collection with nothing live in it takes its chip with it.
    */
   const isOverview = collection === null;
+
+  /*
+   * The chip row's vocabulary: the two merchandising cuts from the dictionary,
+   * and the categories between them from the database — so a category created
+   * in the dashboard becomes a chip with no code change, and one switched off
+   * stops being offered everywhere at once.
+   *
+   * Read only for the overview, which is the one screen that prints chips.
+   */
+  const facets = facetVocabulary(
+    isOverview ? await getCategories(locale) : [],
+    dict.collections.facets,
+  );
 
   /*
    * The one campaign labelling this page, if there is exactly one.
@@ -295,7 +309,8 @@ export default async function CollectionView({
       <CollectionGrid
         items={items}
         showFacets={isOverview}
-        facetLabels={dict.collections.facets}
+        facetOrder={facets.order}
+        facetLabels={facets.labels}
         showSort={isOverview}
         description={
           /*

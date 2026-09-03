@@ -65,7 +65,7 @@ export interface AdminOrderSummary {
    * means nobody has — which is what the order book marks "New".
    *
    * Deliberately not a status: `status` records what has been *done* to an
-   * order, and an untouched PENDING order and a much-discussed one are
+   * order, and an untouched order and a much-discussed one are
    * otherwise the same row. See `supabase/sql/0023_order_opened.sql`.
    */
   firstOpenedAt: string | null;
@@ -166,7 +166,7 @@ export interface SalesTotals {
   revenueInCents: number;
   orderCount: number;
   units: number;
-  /** `PENDING` + `PROCESSING` — what the desk still owes somebody. */
+  /** `PROCESSING` — what the desk still owes somebody. */
   awaitingFulfilment: number;
   /**
    * Orders nobody has opened yet. A state rather than a window, exactly like

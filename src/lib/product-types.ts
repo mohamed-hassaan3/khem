@@ -1,20 +1,27 @@
 /**
- * The product types — `/collections/body-mist` and `/collections/room-spray`.
+ * The product types — what an object *is*.
  *
- * A product type is **what an object is**, as opposed to the range it is sold
- * under. Body Care and Home Fragrance are ranges; a Body Mist and a Room Spray
- * are the kinds of thing inside them. The Nav prints the range as a disclosure
- * and the types beneath it — see `src/constants/navigation-pages.ts`.
+ * A product type is **what an object is**, as opposed to the shelf it is sold
+ * from. A Body Mist and a Room Spray are kinds of thing; Body Care and Home
+ * Fragrances are the categories they are sold under.
  *
- * ## Why the set lives in code
+ * ## This file no longer routes anything
  *
- * The same reason `SCENT_PROFILE_SLUGS` and `MERCH_PAGE_FACETS` do: these pages
- * exist because this file routes them and the Nav links them. The enum in
- * `supabase/sql/0041_product_type.sql` names exactly the values below, so a
- * type that reached the database without reaching this file would be a page
- * with no route, and one that reached this file without the database would be a
- * page with no products. The enum and this table are the two halves of one
- * decision, and adding a third type means editing both — deliberately.
+ * It used to. `/collections/body-mist` and `/collections/room-spray` were
+ * assembled by `/collections/[slug]` from `PRODUCT_TYPES` and a query on this
+ * column, because a product points at exactly one collection and making Body
+ * Mist a collection would have emptied Body Care.
+ *
+ * `0045_category.sql` removed that constraint by giving Body Care a level of its
+ * own, and `0046_range_collections.sql` turned Body Mist and Room Spray into
+ * real `"Collection"` rows beneath it. Those two pages are now rows an editor
+ * can rename, rewrite and photograph — and "Body Cream" is a row rather than an
+ * `alter type` migration plus four code edits.
+ *
+ * What is left here is the column's vocabulary: the values, and which range each
+ * belongs to. `"Product"."productType"` and its trigger are untouched, because
+ * "this object is a mist" is still a true and useful fact that nothing else in
+ * the schema records.
  *
  * ## Why membership is not derived
  *
@@ -31,7 +38,13 @@ import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 /** The stored enum, mirroring `public."ProductType"`. */
 export type ProductType = "BODY_MIST" | "ROOM_SPRAY";
 
-/** The URL segment a type is addressed by, under `/collections/`. */
+/**
+ * The slug of the collection this type is sold from.
+ *
+ * No longer a route this file owns — it is a `"Collection"` row's slug since
+ * `0046_range_collections.sql` — but kept as the link between the column's
+ * vocabulary and the shelf, which is what `parentSlug` below points at.
+ */
 export type ProductTypeSlug = "body-mist" | "room-spray";
 
 /**
@@ -47,9 +60,12 @@ export interface ProductTypeEntry {
   value: ProductType;
   parentKind: Extract<CollectionKind, "BODY" | "HOME">;
   /**
-   * The range this type is sold under. The page inherits its banner from that
-   * collection rather than carrying an image of its own — one photograph per
-   * range, and a new type needs no new asset.
+   * The **category** this type is sold under — `body-care`, `home-fragrance`.
+   *
+   * It named a collection before the restructure, because the range *was* one.
+   * The value is unchanged: `0045` seeded each category at the slug its range
+   * collection used to hold, precisely so nothing that pointed at it had to
+   * move.
    */
   parentSlug: string;
   /** The dictionary key its page copy is written under. */
@@ -78,23 +94,14 @@ export const PRODUCT_TYPES: readonly ProductTypeEntry[] = [
   },
 ];
 
-/** The slugs alone — `generateStaticParams()` wants a flat list. */
-export const PRODUCT_TYPE_SLUGS: readonly ProductTypeSlug[] = PRODUCT_TYPES.map(
-  (entry) => entry.slug,
-);
-
-/**
- * Narrow an untrusted `/collections/[slug]` segment to a product type.
- *
- * Called only after the seeded collections, the merchandising pages and the
- * scent profiles have been tried, so a real collection slug can never be
- * shadowed by one of these.
+/*
+ * `PRODUCT_TYPE_SLUGS` and `parseProductTypeSlug()` were here, and are gone with
+ * the routing they served: `/collections/[slug]` resolves these two addresses
+ * from `"Collection"` now, so a narrowing function for them would be a second
+ * answer to a question the database already answers.
  */
-export function parseProductTypeSlug(slug: string): ProductTypeEntry | null {
-  return PRODUCT_TYPES.find((entry) => entry.slug === slug) ?? null;
-}
 
-/** The types belonging to one range, for the Nav's disclosures. */
+/** The types belonging to one range, for the Nav fallback's disclosures. */
 export function productTypesForKind(
   kind: CollectionKind,
 ): readonly ProductTypeEntry[] {

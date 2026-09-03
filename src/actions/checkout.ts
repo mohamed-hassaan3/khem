@@ -32,10 +32,10 @@
  *
  * Both create the order here. They differ in what state it lands in:
  *
- *   CASH → PENDING and UNPAID until the courier collects. Nothing is being
+ *   CASH → PROCESSING and UNPAID until the courier collects. Nothing is being
  *          waited for, so both emails go out now; the desk moves it to
  *          PROCESSING when it actually starts preparing the parcel.
- *   CARD → PENDING and UNPAID, stock already reserved. **No customer email
+ *   CARD → PROCESSING and UNPAID, stock already reserved. **No customer email
  *          yet** — an unpaid order is not a confirmed one. The client then asks
  *          `/api/checkout/intent` for a client secret, and the webhook marks it
  *          paid and sends the mail once Stripe says the money moved. Paying
@@ -373,22 +373,22 @@ export async function placeCustomerOrder(
 
   if (parsed.data.paymentMethod === "CASH") {
     /*
-     * The order stays PENDING, and both emails go now.
+     * The order is PROCESSING, and both emails go now.
      *
-     * It used to be promoted to PROCESSING here, on the reasoning that there
-     * was nothing to wait for. But PROCESSING means somebody in Cairo has
-     * begun preparing the parcel, and thirty seconds after checkout nobody
-     * has. The customer's rail lit its second station before the first had
-     * been earned. PENDING is the true state — the desk moves it when work
-     * starts — and the desk still sees it, because `OPEN_STATUSES` in
-     * `src/services/admin/orders.ts` counts PENDING as owed.
+     * There was an argument for a stage in front of this one — PROCESSING means
+     * somebody in Cairo has begun preparing the parcel, and thirty seconds
+     * after checkout nobody has. But the interval it described is the desk's
+     * response time, and `"Order"."firstOpenedAt"` (0023) measures that without
+     * spending a fulfilment stage on it. The desk sees the order either way,
+     * because `OPEN_STATUSES` in `src/services/admin/orders.ts` counts
+     * PROCESSING as owed.
      */
     await announceOrder(order);
 
     return { ok: true, orderNumber, paymentMethod: "CASH" };
   }
 
-  // Card: the order is PENDING and its stock is held. No customer email — an
+  // Card: the order is PROCESSING and its stock is held. No customer email — an
   // unpaid order is not a confirmed one, and the webhook sends both messages
   // once Stripe confirms the money moved.
   return {

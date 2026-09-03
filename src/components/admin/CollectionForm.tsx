@@ -31,13 +31,12 @@ import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import type { AdminCollection } from "@/src/schemas/db/admin";
 
-const KIND_OPTIONS = [
-  { value: "FRAGRANCE", label: "Fragrance — sold from /perfume/[slug]" },
-  { value: "BODY", label: "Body care — sold from /body-care" },
-  { value: "HOME", label: "Home fragrances — sold from /collections/home-fragrance" },
-  { value: "DISCOVERY", label: "Discovery — sold from /discovery" },
-  { value: "GIFT", label: "Gift set — sold from /gift-set" },
-] as const;
+/** The categories a collection may stand under, as the form offers them. */
+export interface CategoryOption {
+  slug: string;
+  name: string;
+  kind: string;
+}
 
 /** Slug suggestion, applied only while creating and only if untouched. */
 function slugify(value: string): string {
@@ -51,10 +50,17 @@ function slugify(value: string): string {
 
 export default function CollectionForm({
   collection,
+  categories,
   locale,
 }: {
   /** `null` when creating. */
   collection: AdminCollection | null;
+  /**
+   * Every category, in editorial order — the shelves this collection may stand
+   * on. Passed in rather than fetched here: this is a client component, and the
+   * list is three rows the page already had to read.
+   */
+  categories: readonly CategoryOption[];
   /** The locale this dashboard is being served under, for the post-save route. */
   locale: Locale;
 }) {
@@ -72,7 +78,9 @@ export default function CollectionForm({
   // set — see `src/schemas/db/admin.ts`.
   const [cardUrl, setCardUrl] = useState(collection?.cardUrl ?? "");
   const [cardAlt, setCardAlt] = useState(collection?.cardAlt ?? "");
-  const [kind, setKind] = useState<string>(collection?.kind ?? "FRAGRANCE");
+  const [categorySlug, setCategorySlug] = useState<string>(
+    collection?.categorySlug ?? categories[0]?.slug ?? "",
+  );
   const [isFeatured, setIsFeatured] = useState(collection?.isFeatured ?? false);
   const [sortOrder, setSortOrder] = useState(String(collection?.sortOrder ?? 0));
 
@@ -95,7 +103,7 @@ export default function CollectionForm({
     bannerAlt,
     cardUrl,
     cardAlt,
-    kind,
+    categorySlug,
     isFeatured,
     sortOrder,
   };
@@ -273,15 +281,26 @@ export default function CollectionForm({
       </fieldset>
 
       <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
+        {/*
+          The category, which replaced the old "Kind" select.
+          
+          A collection no longer declares what it sells: its category does, and
+          the database copies that answer down onto this row on every save. So
+          there is one field here instead of two that could contradict each
+          other, and the hint names the consequence rather than the mechanism.
+        */}
         <AdminSelect
-          id="kind"
-          label="Kind"
+          id="categorySlug"
+          label="Category"
           required
-          value={kind}
-          options={KIND_OPTIONS}
-          error={fieldErrors.kind}
-          hint="Decides which storefront route sells these goods. Fragrances get detail pages; the rest sell from their category grid."
-          onChange={setKind}
+          value={categorySlug}
+          options={categories.map((category) => ({
+            value: category.slug,
+            label: `${category.name} — ${category.kind}`,
+          }))}
+          error={fieldErrors.categorySlug}
+          hint="The shelf this collection stands on. It decides how these goods are sold: a fragrance category gives its products their own detail pages, the others sell from the grid."
+          onChange={setCategorySlug}
         />
 
         <AdminInput

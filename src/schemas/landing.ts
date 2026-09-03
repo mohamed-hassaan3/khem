@@ -71,11 +71,28 @@ export const newArrivalSchema = z
      *
      * Stored on `"BoutiqueSetting"`, not here — this field is the *editor* for
      * that column, moved onto this screen so the band is configured in one
-     * place. Empty means no featured product, which is how the band is switched
-     * off from the content side.
+     * place.
+     *
+     * Empty is legal and means "this band features no single product": it
+     * carries its own banner or film and its own copy. It is *not* how the band
+     * is switched off — that is `"LandingSection"."isEnabled"`, and letting this
+     * field mean it too was the second visibility system the storefront then
+     * disagreed with. The refinement below is the one combination that cannot
+     * work: FEATURED media with no product to take the photograph from.
      */
     featuredProductSlug: blankToNull,
   })
+  .refine(
+    (value) =>
+      value.mediaType !== "FEATURED" ||
+      (typeof value.featuredProductSlug === "string" &&
+        value.featuredProductSlug.length > 0),
+    {
+      error:
+        "Featured media takes the product’s own photograph — choose a product, or switch to Image or Film.",
+      path: ["featuredProductSlug"],
+    },
+  )
   .refine(
     (value) =>
       value.mediaType !== "FILM" ||

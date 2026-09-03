@@ -125,6 +125,30 @@ function ordered<T>(items: readonly T[], map: (item: T, index: number) => Row): 
 }
 
 async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
+  /*
+   * Categories first: `"Collection"."categorySlug"` is a foreign key onto them,
+   * and the trigger that copies `kind` down reads the row this writes.
+   */
+  await upsert(
+    client,
+    "Category",
+    "id",
+    ordered(seed.categories, (category, index) => ({
+      id: category.id,
+      name: category.name,
+      name_ar: category.name_ar,
+      slug: category.slug,
+      description: category.description,
+      description_ar: category.description_ar,
+      bannerUrl: category.bannerUrl,
+      bannerAlt: category.bannerAlt,
+      bannerAlt_ar: category.bannerAlt_ar,
+      kind: category.kind,
+      isEnabled: category.isEnabled,
+      sortOrder: index,
+    })),
+  );
+
   await upsert(
     client,
     "Collection",
@@ -143,7 +167,10 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
       cardAlt: collection.cardAlt,
       cardAlt_ar: collection.cardAlt_ar,
       isFeatured: collection.isFeatured,
+      // Written even though `collection_kind_from_category()` overwrites it: an
+      // insert that omitted a not-null column would fail before the trigger ran.
       kind: collection.kind,
+      categorySlug: collection.categorySlug,
       sortOrder: index,
     })),
   );

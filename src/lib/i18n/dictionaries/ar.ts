@@ -257,13 +257,6 @@ export const ar: Dictionary = {
     filterLabel: "تصفية الكتالوج",
     facets: {
       "new-arrivals": "وصل حديثًا",
-      signature: "سيغنتشر",
-      gemstone: "الأحجار الكريمة",
-      noir: "نوار",
-      "body-care": "العناية بالجسم",
-      "home-fragrance": "عطور المنزل",
-      discovery: "علب الاكتشاف",
-      "gift-set": "علب الإهداء",
       "best-sellers": "الأكثر مبيعًا",
     },
     activeState: {
@@ -1099,7 +1092,7 @@ export const ar: Dictionary = {
         NOT_STARTED: "لم يبدأ العمل بهذا الكود بعد.",
         EXPIRED: "انتهت صلاحية هذا الكود.",
         BELOW_MINIMUM: "يتطلب هذا الكود طلبًا بقيمة أكبر.",
-        NOT_GRANTED: "هذا الكود غير متاح لهذا الحساب.",
+        NOT_GRANTED: "هذا الكود متاح بدعوة خاصة فقط.",
         ALREADY_USED: "سبق أن استخدمت هذا الكود.",
         FULLY_REDEEMED: "بلغ هذا الكود حدّ استخدامه.",
         CUSTOMER_LIMIT: "سبق أن استخدمت هذا الكود.",
@@ -1311,7 +1304,6 @@ export const ar: Dictionary = {
       latest: "الأحدث",
       tracker: {
         label: "مسار الطلب",
-        PENDING: "تم استلام الطلب",
         PROCESSING: "قيد التجهيز",
         SHIPPED: "في الطريق إليك",
         DELIVERED: "تم التسليم",
@@ -1319,7 +1311,6 @@ export const ar: Dictionary = {
         REFUNDED: "مُسترد",
       },
       status: {
-        PENDING: "قيد الانتظار",
         PROCESSING: "قيد التجهيز",
         SHIPPED: "تم الشحن",
         DELIVERED: "تم التسليم",
@@ -1458,7 +1449,6 @@ export const ar: Dictionary = {
       eyebrow: "من الدار إليك",
       heading: "الإشعارات",
       markAll: "تحديد الكل كمقروء",
-      markOne: "تحديد كمقروء",
       unread: "{count} جديدة",
       unreadOne: "إشعار جديد",
       kind: {
@@ -1472,7 +1462,6 @@ export const ar: Dictionary = {
         DELIVERED: "تم تسليم الطلب {order}.",
         CANCELLED: "أُلغي الطلب {order}.",
         REFUNDED: "تم ردّ قيمة الطلب {order}.",
-        PENDING: "تم استلام الطلب {order}.",
       },
       creditEarned: "حصلت على رصيد كيم مع الطلب {order}.",
       creditEarnedPlain: "حصلت على رصيد كيم.",

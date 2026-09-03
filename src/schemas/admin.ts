@@ -27,6 +27,7 @@
 import { z } from "zod";
 
 import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
+import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 
 /** Hosts `next/image` is configured for in `next.config.ts`. */
 export const ALLOWED_IMAGE_HOSTS = [
@@ -59,6 +60,32 @@ const slugField = z
     SLUG_PATTERN,
     "Lowercase letters, numbers and single hyphens only — no spaces.",
   );
+
+/**
+ * The `/collections/[slug]` segments the code owns.
+ *
+ * `best-sellers` and the five scent profiles are pages that exist because
+ * `src/lib/facets.ts` and `src/lib/scent-profiles.ts` route them. A category or
+ * collection saved at one of those addresses would win the resolver and make a
+ * live page disappear with no error anywhere.
+ *
+ * The database refuses these too (`supabase/sql/0047_reserved_slugs.sql`), and
+ * that is the constraint that actually holds — a seed, a restore or a `psql`
+ * session never reaches this file. This exists so an editor reads a sentence in
+ * the field instead of a constraint name in a failed save.
+ */
+const RESERVED_SLUGS: readonly string[] = [
+  ...MERCH_PAGE_FACETS,
+  ...SCENT_PROFILE_SLUGS,
+];
+
+const shelfSlugField = slugField.refine(
+  (value) => !RESERVED_SLUGS.includes(value),
+  {
+    error:
+      "That address already belongs to a page KHEM ships — choose another slug.",
+  },
+);
 
 /**
  * An image URL `next/image` will actually render.
@@ -163,6 +190,143 @@ const optionalText = (max: number) =>
     .nullable()
     .default(null);
 
+// ── Navigation ────────────────────────────────────────────────
+
+/**
+ * One menu entry — a row of `"NavLink"` (`supabase/sql/0048_navigation.sql`).
+ *
+ * The shape mirrors the table's `nav_link_target_matches_type` check, because
+ * the rule is the same rule: a row names **one** target, and which field carries
+ * it is decided by `targetType`. Stating it twice is the usual bargain — the
+ * constraint is what holds, this is what produces a sentence in the form.
+ *
+ * There is no `href` field and there must never be one. A menu entry points at
+ * a row or at a page the code routes; a free-text address reachable from a form
+ * is an open redirect wearing a navigation costume.
+ */
+const navColumnField = z.enum(["COLLECTIONS", "QUICK_ACCESS", "WORLD"], {
+  error: "Choose which column this entry belongs to.",
+});
+
+const navTargetField = z.enum(["CATEGORY", "COLLECTION", "PAGE", "GROUP"], {
+  error: "Choose what this entry points at.",
+});
+
+const navLinkFields = {
+  columnKey: navColumnField,
+  /** The disclosure this row sits inside, or null for a top-level row. */
+  parentId: optionalText(64),
+  targetType: navTargetField,
+  categorySlug: optionalText(64),
+  collectionSlug: optionalText(64),
+  pageKey: optionalText(64),
+  groupKey: optionalText(64),
+  /** Blank means "use the target's own name" — see `0048_navigation.sql`. */
+  label: optionalText(120),
+  desc: optionalText(200),
+  showInNav: z.boolean().default(true),
+  showInFooter: z.boolean().default(true),
+  isEnabled: z.boolean().default(true),
+  sortOrder: z.coerce.number().int().min(0).max(9_999).default(0),
+};
+
+function checkNavTarget(
+  value: {
+    targetType: "CATEGORY" | "COLLECTION" | "PAGE" | "GROUP";
+    categorySlug: string | null;
+    collectionSlug: string | null;
+    pageKey: string | null;
+    groupKey: string | null;
+  },
+  ctx: z.RefinementCtx,
+): void {
+  const required = {
+    CATEGORY: "categorySlug",
+    COLLECTION: "collectionSlug",
+    PAGE: "pageKey",
+    GROUP: "groupKey",
+  } as const;
+
+  const field = required[value.targetType];
+
+  if (value[field] === null) {
+    ctx.addIssue({
+      code: "custom",
+      path: [field],
+      message: "Choose what this entry points at.",
+    });
+  }
+
+  // The other three are cleared rather than reported: an editor switching a
+  // row's target should not have to empty the field they switched away from.
+  for (const other of Object.values(required)) {
+    if (other !== field) value[other] = null;
+  }
+}
+
+export const createNavLinkSchema = z
+  .object(navLinkFields)
+  .superRefine(checkNavTarget);
+
+export const updateNavLinkSchema = z
+  .object({ id: z.string().trim().min(1).max(64), ...navLinkFields })
+  .superRefine(checkNavTarget);
+
+export const moveNavLinkSchema = z.object({
+  id: z.string().trim().min(1).max(64),
+  direction: z.enum(["up", "down"], { error: "Up or down." }),
+});
+
+export type CreateNavLinkInput = z.input<typeof createNavLinkSchema>;
+export type UpdateNavLinkInput = z.input<typeof updateNavLinkSchema>;
+
+// ── Category ──────────────────────────────────────────────────
+
+/**
+ * A category — the shelf a collection stands on (`0045_category.sql`).
+ *
+ * `kind` lives here rather than on the collection: the database copies it down
+ * onto every collection beneath, so this is the one place it is authored and
+ * the two can never disagree. It is also what decides which layout a page
+ * renders and whether its products get `/perfume/[slug]` detail pages, which is
+ * why it is a closed enum and not free text.
+ */
+const categoryFields = {
+  name: z
+    .string()
+    .trim()
+    .min(2, "A category needs a name.")
+    .max(120, "That name is too long."),
+  description: z
+    .string()
+    .trim()
+    .min(10, "Write at least a sentence of description.")
+    .max(LONG_TEXT_MAX, "That description is too long."),
+  bannerUrl: imageUrlField,
+  bannerAlt: z
+    .string()
+    .trim()
+    .min(3, "Describe the banner for screen readers.")
+    .max(200, "That alt text is too long."),
+  kind: collectionKindField,
+  isEnabled: z.boolean().default(true),
+  sortOrder: z.coerce.number().int().min(0).max(9_999).default(0),
+};
+
+export const createCategorySchema = z.object({
+  slug: shelfSlugField,
+  ...categoryFields,
+});
+
+/** Update targets the slug; it never changes it — see the collection note. */
+export const updateCategorySchema = z.object({
+  slug: shelfSlugField,
+  ...categoryFields,
+});
+
+export type CreateCategoryInput = z.input<typeof createCategorySchema>;
+export type UpdateCategoryInput = z.input<typeof updateCategorySchema>;
+
 // ── Collection ────────────────────────────────────────────────
 
 const collectionFields = {
@@ -190,7 +354,15 @@ const collectionFields = {
   cardUrl: optionalImageUrlField,
   cardAlt: optionalText(200),
   isFeatured: z.boolean().default(false),
-  kind: collectionKindField,
+  /**
+   * The category this collection stands under.
+   *
+   * What replaced `kind` on this form. A collection no longer says what it
+   * sells — its category does, and the database copies that answer down
+   * (`collection_kind_from_category()`), so the dashboard offers the hierarchy
+   * rather than two fields that could contradict each other.
+   */
+  categorySlug: slugField,
   sortOrder: z.coerce.number().int().min(0).max(9_999).default(0),
 };
 
@@ -225,7 +397,7 @@ function checkCardImagePair(
 
 export const createCollectionSchema = z
   .object({
-    slug: slugField,
+    slug: shelfSlugField,
     ...collectionFields,
   })
   .superRefine(checkCardImagePair);
@@ -240,7 +412,7 @@ export const createCollectionSchema = z
  */
 export const updateCollectionSchema = z
   .object({
-    slug: slugField,
+    slug: shelfSlugField,
     ...collectionFields,
   })
   .superRefine(checkCardImagePair);

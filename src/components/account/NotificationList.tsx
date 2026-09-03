@@ -183,23 +183,21 @@ export default function NotificationList({
                     {formatAccountDate(item.occurredAt, locale)}
                   </span>
 
+                  {/*
+                    * Opening it is reading it — see the note on the same change
+                    * in `NotificationBell`. The dedicated button is gone; "mark
+                    * all as read" stays, because that is the one thing opening
+                    * cannot express.
+                    */}
                   <LocaleLink
                     href={hrefFor(item)}
+                    onClick={() => {
+                      if (!item.isRead) markRead([item]);
+                    }}
                     className="font-heading text-[10px] uppercase tracking-[0.16em] text-ground-accent/70 no-underline underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline"
                   >
                     {copy.view}
                   </LocaleLink>
-
-                  {item.isRead ? null : (
-                    <button
-                      type="button"
-                      disabled={isPending}
-                      onClick={() => markRead([item])}
-                      className="cursor-pointer bg-transparent p-0 text-[10px] tracking-wide text-ground-muted/70 underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline disabled:opacity-40"
-                    >
-                      {copy.markOne}
-                    </button>
-                  )}
                 </div>
               </div>
             </li>

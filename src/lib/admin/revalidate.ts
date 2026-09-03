@@ -12,10 +12,12 @@
  * 1. **Both locales, always.** `/perfume/x` and `/ar/perfume/x` are separate
  *    cache entries of the same row. Revalidating one leaves the other stale,
  *    and the one an editor is least likely to check is the one that stays wrong.
- * 2. **Category paths come from `src/lib/routes.ts`.** Hard-coding
- *    `/collections/home-fragrance` here would mean a sixth `CollectionKind`
- *    compiles fine and silently stops revalidating; going through
- *    `CATEGORY_PATH` makes it a compile error in one place instead.
+ * 2. **A category path is its slug.** It used to be a switch on
+ *    `CollectionKind` naming four literal URLs, which was correct only while
+ *    those four ranges were the only categories. Since `0045_category.sql` a
+ *    category is a row an editor creates, so the path is derived from the slug
+ *    the write already carries — a fifth category revalidates without an edit
+ *    here, and a renamed one cannot be missed.
  */
 
 import "server-only";
@@ -33,32 +35,6 @@ import type { CollectionKind, ProductTag } from "@/src/types/catalog";
  * articles, so it is on every list.
  */
 const HOME = "/";
-
-/**
- * Where a collection's goods are sold, by kind.
- *
- * Mirrors `productHref()` in `src/lib/routes.ts` — fragrances live at
- * `/perfume/[slug]` behind their collection page, everything else sells from
- * its collection page under `/collections/[slug]`. Written as an exhaustive switch so a new kind fails here.
- */
-function categoryPathsForKind(kind: CollectionKind): string[] {
-  switch (kind) {
-    case "FRAGRANCE":
-      return ["/collections"];
-    case "BODY":
-      return ["/collections/body-care"];
-    case "HOME":
-      return ["/collections/home-fragrance"];
-    case "DISCOVERY":
-      return ["/collections/discovery"];
-    case "GIFT":
-      return ["/collections/gift-set"];
-    default: {
-      const unreachable: never = kind;
-      return unreachable;
-    }
-  }
-}
 
 /** Revalidate one app path in every locale it exists under. */
 function revalidateAllLocales(path: string): void {
@@ -96,33 +72,64 @@ export function revalidateMerchPage(slug: MerchPageFacet): void {
   revalidateAllLocales(`/collections/${slug}`);
 }
 
-/** After a collection is created, edited or deleted. */
-export function revalidateCollection(slug: string, kind: CollectionKind): void {
+/**
+ * After a collection is created, edited or deleted.
+ *
+ * Its own page and its category's, because a category page lists every product
+ * beneath it — an edit here changes both, and only one of them is the URL the
+ * editor was looking at.
+ */
+export function revalidateCollection(slug: string, categorySlug: string): void {
+  revalidateAllLocales(HOME);
+  revalidateAllLocales("/collections");
+  revalidateAllLocales(`/collections/${slug}`);
+  revalidateAllLocales(`/collections/${categorySlug}`);
+
+  revalidateSitemap();
+}
+
+/**
+ * After a category is created, edited or deleted.
+ *
+ * The menu too: a category is a destination the Nav and the Footer can point
+ * at, and switching one off withdraws its entries from both surfaces — which
+ * they only notice when the layout that reads them is re-rendered.
+ */
+export function revalidateCategory(slug: string): void {
   revalidateAllLocales(HOME);
   revalidateAllLocales("/collections");
   revalidateAllLocales(`/collections/${slug}`);
 
-  for (const path of categoryPathsForKind(kind)) {
-    revalidateAllLocales(path);
-  }
-
   revalidateSitemap();
+}
+
+/**
+ * After the menu itself is edited.
+ *
+ * The Nav and the Footer are rendered by the `[locale]` layout, which every
+ * page inherits — so there is no one path to revalidate and `layout` is passed
+ * to say so. Without it a reordered menu would take an ISR window to appear,
+ * and the editor would conclude the save failed.
+ */
+export function revalidateNavigation(): void {
+  for (const locale of LOCALES) {
+    revalidatePath(`/${locale}`, "layout");
+  }
 }
 
 /** After a product is created, edited or archived. */
 export function revalidateProduct(input: {
   slug: string;
   collectionSlug: string;
+  /** The collection's category — its page lists this product too. */
+  categorySlug: string;
   collectionKind: CollectionKind;
   tags: readonly ProductTag[];
 }): void {
   revalidateAllLocales(HOME);
   revalidateAllLocales("/collections");
   revalidateAllLocales(`/collections/${input.collectionSlug}`);
-
-  for (const path of categoryPathsForKind(input.collectionKind)) {
-    revalidateAllLocales(path);
-  }
+  revalidateAllLocales(`/collections/${input.categorySlug}`);
 
   // A detail page exists for fragrances only; revalidating a path that was
   // never rendered is a no-op, but naming the condition keeps the intent clear.

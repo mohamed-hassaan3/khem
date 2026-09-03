@@ -11,10 +11,7 @@ import {
   productFacets,
   type MerchPageFacet,
 } from "@/src/lib/facets";
-import {
-  PRODUCT_TYPE_SLUGS,
-  parseProductTypeSlug,
-} from "@/src/lib/product-types";
+
 import {
   SCENT_PROFILE_BANNERS,
   SCENT_PROFILE_FAMILIES,
@@ -26,15 +23,17 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import {
   getCatalogProductCards,
+  getCategories,
+  getCategoryBySlug,
   getCollectionBySlug,
   getCollections,
   getMerchPage,
+  getProductCardsByCategory,
   getProductCardsByCollection,
-  getProductCardsByProductType,
   getProductCardsByScentProfile,
   getScentProfile,
 } from "@/src/services/products";
-import type { Collection } from "@/src/types/catalog";
+import type { Category } from "@/src/types/catalog";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 
 /** ISR, 10 minutes — AGENTS.md §8 routing matrix. */
@@ -53,13 +52,26 @@ export const revalidate = 600;
 export async function generateStaticParams() {
   // Slugs only; they are identical in both trees, so the locale is
   // immaterial here and the default keeps the query cache warm.
-  const collections = await getCollections("en");
+  const [categories, collections] = await Promise.all([
+    getCategories("en"),
+    getCollections("en"),
+  ]);
 
+  /*
+   * Categories and collections both, because both are pages here now
+   * (`0045_category.sql`): `/collections/body-care` is the category and
+   * `/collections/body-mist` a collection beneath it. A slug can never be both
+   * — `0047_reserved_slugs.sql` forbids it — so the two lists cannot collide.
+   *
+   * The product-type slugs that used to be appended are gone: `body-mist` and
+   * `room-spray` are real collection rows since `0046`, so they arrive in the
+   * list above.
+   */
   const slugs = [
+    ...categories.map((category) => category.slug),
     ...collections.map((collection) => collection.slug),
     ...MERCH_PAGE_FACETS,
     ...SCENT_PROFILE_SLUGS,
-    ...PRODUCT_TYPE_SLUGS,
   ];
 
   return LOCALES.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
@@ -92,9 +104,9 @@ type RouteParams = { locale: string; slug: string };
  */
 function categoryMeta(
   dict: Dictionary,
-  collection: Collection,
+  row: Pick<Category, "kind">,
 ): Dictionary["bodyCare"]["meta"] | null {
-  switch (collection.kind) {
+  switch (row.kind) {
     case "BODY":
       return dict.bodyCare.meta;
     case "HOME":
@@ -106,7 +118,7 @@ function categoryMeta(
     case "FRAGRANCE":
       return null;
     default: {
-      const unreachable: never = collection.kind;
+      const unreachable: never = row.kind;
       return unreachable;
     }
   }
@@ -120,10 +132,47 @@ export async function generateMetadata({
   const { locale, slug } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  const [dict, collection] = await Promise.all([
+  /*
+   * The category is tried first, exactly as the page is: `/collections/body-care`
+   * is a category and `/collections/body-mist` a collection, and the two
+   * namespaces cannot overlap (`0047_reserved_slugs.sql`), so the order is about
+   * one read finding an answer rather than about precedence.
+   */
+  const [dict, category, collection] = await Promise.all([
     getDictionary(activeLocale),
+    getCategoryBySlug(activeLocale, slug),
     getCollectionBySlug(activeLocale, slug),
   ]);
+
+  if (category) {
+    const path = `/collections/${category.slug}`;
+
+    /*
+     * The four range pages were written before they shared a route, each with
+     * its own `meta` block, and those blocks are better SEO copy than a row's
+     * `name` and `description`. They belong to the *category* now — it is the
+     * page that kept the address they were written for.
+     */
+    const meta = categoryMeta(dict, category);
+
+    return meta
+      ? localeMetadata({
+          locale: activeLocale,
+          path,
+          title: meta.title,
+          description: meta.description,
+          ogTitle: meta.ogTitle,
+          ogDescription: meta.ogDescription,
+        })
+      : localeMetadata({
+          locale: activeLocale,
+          path,
+          title: category.name,
+          description: category.description,
+          ogTitle: `${category.name} | KHEM`,
+          ogDescription: category.description,
+        });
+  }
 
   if (!collection) {
     // No row, but the slug may still be the merchandising page, which carries
@@ -162,22 +211,15 @@ export async function generateMetadata({
       });
     }
 
-    // Then the product types, whose copy is dictionary-only — there is no
-    // stored row to override it, by design (see `renderProductType`).
-    const productType = parseProductTypeSlug(slug);
-
-    if (productType) {
-      const { meta } = dict.collections.productTypes[productType.copyKey];
-
-      return localeMetadata({
-        locale: activeLocale,
-        path: `/collections/${productType.slug}`,
-        title: meta.title,
-        description: meta.description,
-        ogTitle: meta.ogTitle,
-        ogDescription: meta.ogDescription,
-      });
-    }
+    /*
+     * There is no fourth step any more. `body-mist` and `room-spray` were
+     * resolved here, from `"Product"."productType"` and a hand-written routing
+     * table; `0046_range_collections.sql` made them collection rows, so they are
+     * answered by the read above along with every other collection — and their
+     * copy is a row an editor can rewrite rather than a dictionary entry a
+     * deploy can. The column and its trigger are untouched; only the routing
+     * moved.
+     */
 
     // A genuinely unknown slug renders the 404 below; its metadata falls back
     // to the overview's rather than echoing the requested segment back into
@@ -190,19 +232,15 @@ export async function generateMetadata({
     });
   }
 
+  /*
+   * A collection's metadata is its own row, whatever it sells. The `kind`
+   * switch that used to sit here belonged to the four range pages, and those
+   * are categories now — see the branch above. `body-mist` carries the wording
+   * that used to live in `collections.productTypes` in the dictionary, moved
+   * onto the row by `0046_range_collections.sql`, so it is editable rather than
+   * deployed.
+   */
   const path = `/collections/${collection.slug}`;
-  const meta = categoryMeta(dict, collection);
-
-  if (meta) {
-    return localeMetadata({
-      locale: activeLocale,
-      path,
-      title: meta.title,
-      description: meta.description,
-      ogTitle: meta.ogTitle,
-      ogDescription: meta.ogDescription,
-    });
-  }
 
   return localeMetadata({
     locale: activeLocale,
@@ -237,8 +275,45 @@ export default async function CollectionPage({
   const { locale, slug } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  // The segment is untrusted input: it is matched against seeded slugs, then
-  // against two closed literal lists, and anything else 404s.
+  /*
+   * The segment is untrusted input: it is matched against stored category and
+   * collection slugs, then against two closed literal lists, and anything else
+   * 404s.
+   *
+   * A category is resolved first. `/collections/body-care` is the shelf and
+   * `/collections/body-mist` one range on it, and both are pages; the database
+   * forbids a slug being both (`0047_reserved_slugs.sql`), so this order costs
+   * nothing and reads in the order the hierarchy does.
+   */
+  const category = await getCategoryBySlug(activeLocale, slug);
+
+  if (category) {
+    /*
+     * Every product beneath the category, reached through its collections.
+     * This is what keeps `/collections/body-care` showing the same four mists
+     * it showed when it was a collection of its own — the products moved down
+     * one level and the page reaches through, so no indexed URL lost its
+     * contents in the restructure.
+     */
+    const products = await getProductCardsByCategory(activeLocale, category.slug);
+
+    return category.kind === "FRAGRANCE" ? (
+      <CollectionView
+        locale={activeLocale}
+        collection={category}
+        products={products}
+        // A category spans its whole shelf, so its count is of everything on it.
+        countsEverything
+      />
+    ) : (
+      <CategoryView
+        locale={activeLocale}
+        collection={category}
+        products={products}
+      />
+    );
+  }
+
   const collection = await getCollectionBySlug(activeLocale, slug);
 
   if (!collection) {
@@ -338,11 +413,12 @@ async function renderMerchPage(locale: Locale, slug: string) {
  * for the reason `renderMerchPage()` gives: five menu links point here, and none
  * of them may break because nothing in the catalogue currently smells of figs.
  *
- * Falls through to {@link renderProductType}, which is the last step.
+ * The last of the four resolution steps — an unknown segment 404s from here.
  */
 async function renderScentProfile(locale: Locale, slug: string) {
   const profileSlug = parseScentProfileSlug(slug);
-  if (!profileSlug) return renderProductType(locale, slug);
+  // The last resolution step: an unknown segment 404s from here.
+  if (!profileSlug) notFound();
 
   const [dict, stored] = await Promise.all([
     getDictionary(locale),
@@ -380,53 +456,3 @@ async function renderScentProfile(locale: Locale, slug: string) {
   );
 }
 
-/**
- * One product type, as a collection page.
- *
- * The fourth and last resolution step: everything that is not a seeded
- * collection, a merchandising cut or a scent profile is tried here, and an
- * unknown slug 404s from this function.
- *
- * Membership is a single indexed equality on `"Product"."productType"` — a type
- * is stored on the object, where a profile is derived from the ingredient
- * tables. `src/lib/product-types.ts` explains why that is the right shape, and
- * `supabase/sql/0041_product_type.sql` holds the trigger that keeps a
- * `BODY_MIST` from ever landing in a `HOME` collection.
- *
- * There is no `ProductTypePage` table and the header is not editable yet. The
- * banner is **inherited from the parent range**, so adding a third type is copy
- * in two dictionaries and a row in `PRODUCT_TYPES` — no new photograph, no new
- * table, no migration beyond the enum value itself. If editors later need to
- * write these pages from the dashboard, the shape to copy is `"ScentProfile"`:
- * a row that wins whole over the dictionary, never field by field.
- *
- * An empty result renders the hero and the grid's empty state rather than a
- * 404, for the reason the two functions above give: the Nav links here, and a
- * menu link must not break because the range is briefly out of stock.
- */
-async function renderProductType(locale: Locale, slug: string) {
-  const entry = parseProductTypeSlug(slug);
-  if (!entry) notFound();
-
-  const [dict, parent, products] = await Promise.all([
-    getDictionary(locale),
-    // Only for its photograph and its alt text — the copy below is this page's
-    // own. A missing parent leaves the banner empty rather than failing.
-    getCollectionBySlug(locale, entry.parentSlug),
-    getProductCardsByProductType(locale, entry.value),
-  ]);
-
-  const copy = dict.collections.productTypes[entry.copyKey];
-
-  const header: CollectionHeader = {
-    slug: entry.slug,
-    name: copy.name,
-    description: copy.description,
-    bannerUrl: parent?.bannerUrl ?? "",
-    bannerAlt: parent?.bannerAlt ?? copy.name,
-  };
-
-  return (
-    <CollectionView locale={locale} collection={header} products={products} />
-  );
-}

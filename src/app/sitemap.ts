@@ -7,6 +7,7 @@ import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { getJournalArticles } from "@/src/services/content";
 import { getLegalDocuments } from "@/src/services/legal";
 import {
+  getCategories,
   getCollections,
   getProductSlugs,
   getRitualProductSlugs,
@@ -117,6 +118,7 @@ const STATIC_ROUTES: { path: string; priority: number }[] = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [
+    categories,
     collections,
     productSlugs,
     ritualSlugs,
@@ -127,6 +129,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // URLs only — every slug is identical in both trees (localizing one
       // would fork the URL space), so the default locale is the right and
       // cheapest argument here.
+      getCategories("en"),
       getCollections("en"),
       getProductSlugs(),
       getRitualProductSlugs(),
@@ -153,10 +156,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
     ),
 
-    // Every collection — all seven. Body care, home fragrance, discovery and
-    // gift sets used to hold routes of their own and were excluded here to
-    // avoid a second URL for one page; those routes are 308s now, so these are
-    // the canonical ones.
+    /*
+     * Every category — the five shelves. `/collections/body-care` and its three
+     * siblings are these pages: they kept the addresses they had while they
+     * were collections (`0046_range_collections.sql`), which is what keeps the
+     * four legacy 308s in `next.config.ts` landing somewhere real.
+     */
+    ...categories.flatMap((category) =>
+      localizedEntries(`/collections/${category.slug}`, { priority: 0.8 }),
+    ),
+
+    // Every collection. A slug is never both a category and a collection —
+    // `0047_reserved_slugs.sql` forbids it — so the two loops cannot emit the
+    // same URL twice.
     ...collections.flatMap((collection) =>
       localizedEntries(`/collections/${collection.slug}`, { priority: 0.8 }),
     ),

@@ -18,6 +18,7 @@ import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 import type { Locale } from "@/src/lib/i18n/config";
 import { resolveList, resolveOptionalText, resolveText } from "@/src/lib/i18n/resolve";
 import type {
+  Category,
   Collection,
   MerchPage,
   Product,
@@ -70,6 +71,41 @@ const collectionKindSchema = z.enum([
 
 const productTagSchema = z.enum(["NEW_ARRIVAL"]);
 
+/** The `"Category"` columns, as selected — `0045_category.sql`. */
+export const categoryRowSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  // Null means deliberately untranslated, exactly as on `"Collection"`.
+  name_ar: z.string().nullable().default(null),
+  slug: z.string(),
+  description: z.string(),
+  description_ar: z.string().nullable().default(null),
+  bannerUrl: z.string(),
+  bannerAlt: z.string(),
+  bannerAlt_ar: z.string().nullable().default(null),
+  kind: collectionKindSchema,
+  isEnabled: z.boolean().default(true),
+  sortOrder: z.number().int().default(0),
+});
+
+export const CATEGORY_COLUMNS =
+  "id, name, name_ar, slug, description, description_ar, bannerUrl, bannerAlt, " +
+  "bannerAlt_ar, kind, isEnabled, sortOrder";
+
+export function toCategory(row: unknown, locale: Locale): Category | null {
+  const parsed = categoryRowSchema.safeParse(row);
+  if (!parsed.success) return null;
+
+  const { name_ar, description_ar, bannerAlt_ar, ...category } = parsed.data;
+
+  return {
+    ...category,
+    name: resolveText(category.name, name_ar, locale),
+    description: resolveText(category.description, description_ar, locale),
+    bannerAlt: resolveText(category.bannerAlt, bannerAlt_ar, locale),
+  };
+}
+
 /** The `"Collection"` columns, as selected. */
 export const collectionRowSchema = z.object({
   id: z.string(),
@@ -91,11 +127,19 @@ export const collectionRowSchema = z.object({
   cardAlt_ar: z.string().nullable().default(null),
   isFeatured: z.boolean(),
   kind: collectionKindSchema,
+  /*
+   * Defaulted rather than required, for one migration's width: a row read
+   * through a PostgREST cache that has not yet seen `0045_category.sql` has no
+   * such column, and a required field would drop every collection out of every
+   * grid rather than degrade. `""` is never a real category slug, so the
+   * fallback is recognisable at the call site.
+   */
+  categorySlug: z.string().default(""),
 });
 
 export const COLLECTION_COLUMNS =
   "id, name, name_ar, slug, description, description_ar, bannerUrl, bannerAlt, " +
-  "bannerAlt_ar, cardUrl, cardAlt, cardAlt_ar, isFeatured, kind";
+  "bannerAlt_ar, cardUrl, cardAlt, cardAlt_ar, isFeatured, kind, categorySlug";
 
 export function toCollection(row: unknown, locale: Locale): Collection | null {
   const parsed = collectionRowSchema.safeParse(row);
@@ -256,6 +300,7 @@ function toImage(image: z.infer<typeof imageRowSchema>, locale: Locale): Product
  * than being wrong about it at runtime on one page.
  */
 const embeddedCollectionShape = z.object({
+  categorySlug: z.string().default(""),
   name: z.string(),
   name_ar: z.string().nullable().default(null),
   kind: collectionKindSchema,
@@ -471,7 +516,7 @@ export const PRODUCT_CARD_COLUMNS =
   "topNotes, topNotes_ar, heartNotes, heartNotes_ar, baseNotes, baseNotes_ar, " +
   "volumeMl, priceInCents, collectionSlug, inventory:inventoryOnline, concentration, " +
   "format, format_ar, includes, includes_ar, badge, badge_ar, isBestseller, tags, " +
-  "collection:Collection!inner(name, name_ar, kind), " +
+  "collection:Collection!inner(name, name_ar, kind, categorySlug), " +
   `images:ProductImage(${IMAGE_COLUMNS})`;
 
 /**
@@ -558,6 +603,7 @@ export function toProductCard(
     ...resolveProductText(parsed.data, locale),
     collectionName: resolveText(parent.name, parent.name_ar, locale),
     collectionKind: parent.kind,
+    categorySlug: parent.categorySlug,
     primaryImage,
     hoverImage: resolveHoverImage(gallery, primaryImage),
     promotion: promotions?.get(product.slug) ?? null,

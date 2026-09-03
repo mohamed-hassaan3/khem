@@ -50,10 +50,12 @@ import {
   BadgePercent,
   BarChart3,
   Boxes,
+  Compass,
   ExternalLink,
   Landmark,
   LayoutList,
   LayoutGrid,
+  Library,
   Package,
   PanelLeft,
   PanelLeftClose,
@@ -101,6 +103,13 @@ const GROUPS = [
       { path: "/admin/orders", label: "Orders", icon: Receipt },
       { path: "/admin/customers", label: "Customers", icon: Users },
       { path: "/admin/products", label: "Products", icon: Package },
+      /*
+       * Categories above Collections, because that is the order of the
+       * hierarchy: a category is the shelf, a collection stands on it, a product
+       * sits in the collection. The sidebar reads top-down like the structure
+       * does.
+       */
+      { path: "/admin/categories", label: "Categories", icon: Library },
       { path: "/admin/collections", label: "Collections", icon: Sparkles },
       { path: "/admin/inventory", label: "Inventory", icon: Boxes },
       { path: "/admin/stockists", label: "Stockists", icon: MapPin },
@@ -127,6 +136,9 @@ const GROUPS = [
     heading: "Content",
     items: [
       { path: "/admin/content/landing", label: "Landing Page", icon: LayoutList },
+      // The menu and the footer, which point at the rows the Commerce group
+      // creates — so it lives with the other things that shape a page.
+      { path: "/admin/navigation", label: "Navigation", icon: Compass },
       {
         path: "/admin/content/world",
         label: "World of KHEM",

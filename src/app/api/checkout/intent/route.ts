@@ -15,7 +15,7 @@
  *
  * It is a uuid, so it is not enumerable the way an order number is, and the
  * four guards below mean holding one buys nothing anyway: the route will only
- * act on an order that is still PENDING, still UNPAID, still CARD, and less
+ * act on an order that is still PROCESSING, still UNPAID, still CARD, and less
  * than thirty minutes old. The worst an attacker with a stolen id can do is
  * create a payment intent that lets them pay somebody else's bill.
  *
@@ -99,7 +99,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   // Four guards, one answer. An order that is already paid, already cancelled,
   // a cash order, or one old enough to have been swept must not be payable.
   const isPayable =
-    row.status === "PENDING" &&
+    row.status === "PROCESSING" &&
     row.paymentStatus === "UNPAID" &&
     row.paymentMethod === "CARD" &&
     Date.now() - Date.parse(row.placedAt) < PAYMENT_WINDOW_MINUTES * 60_000;

@@ -14,7 +14,6 @@
 
 /** Mirrors the §9 `OrderStatus` enum. */
 export type OrderStatus =
-  | "PENDING"
   | "PROCESSING"
   | "SHIPPED"
   | "DELIVERED"

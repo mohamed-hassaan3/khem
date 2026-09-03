@@ -6,14 +6,10 @@ import FooterGroup from "@/src/components/FooterGroup";
 import CookieSettingsButton from "@/src/components/consent/CookieSettingsButton";
 import CurrencySwitcher from "@/src/components/i18n/CurrencySwitcher";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import {
-  collections as collectionColumn,
-  collectionLinks as collectionEntries,
-  quickAccess,
-  world,
-} from "@/src/constants/navigation-pages";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
+import { flattenNavigation } from "@/src/schemas/db/navigation";
+import { getNavigationTree } from "@/src/services/navigation";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 
 /*
@@ -46,34 +42,33 @@ export default async function Footer({ locale }: { locale: Locale }) {
   const year = new Date().getFullYear();
 
   /*
-   * The Nav's two shop columns, one under the other. Both tables come from
-   * `src/constants/navigation-pages.ts`, so the footer offers exactly the
-   * destinations the menu does — the lists cannot drift apart on the next edit
-   * because there is only one list.
+   * The Nav's two shop columns, one under the other — read from the same table
+   * the header reads (`"NavLink"`), for the *footer* surface, so a row can be
+   * offered in the menu without being offered in this sitemap and vice versa.
+   * Neither list is written twice, so the two cannot drift apart.
+   *
+   * The flattened form is what a phone gets: a disclosure is a menu affordance,
+   * and a sitemap has nothing to disclose.
    */
-  /*
-   * `collectionEntries` is the nav's column with its "Fragrances" group already
-   * flattened away. The group is a disclosure, and a footer sitemap has nothing
-   * to disclose — every collection is simply listed.
-   */
+  const tree = await getNavigationTree(locale, "footer");
+
   const collectionLinks = [
-    ...collectionEntries.map((c) => ({
-      label: dict.nav.collectionItems[c.key].label,
-      path: c.path,
-    })),
-    ...quickAccess.map((item) => ({
-      label: dict.nav.quickAccessItems[item.key],
-      path: item.path,
-    })),
+    ...flattenNavigation(tree.collections),
+    ...tree.quickAccess,
   ];
 
   const worldLinks = [
-    ...world.map((w) => ({
+    ...tree.world.map((item) => ({
+      /*
+       * The Journal is the one row the footer words differently — "The
+       * Journal", not "Journal" — and it is recognised by its address rather
+       * than by a dictionary key, because a stored row carries no key. The
+       * override on the row itself is the general way to do this; this is the
+       * shipped wording, kept.
+       */
       label:
-        w.key === "journal"
-          ? dict.footer.links.theJournal
-          : dict.nav.worldItems[w.key].label,
-      path: w.path,
+        item.href === "/journal" ? dict.footer.links.theJournal : item.label,
+      path: item.href,
     })),
     { label: dict.footer.links.stockists, path: "/stockists" },
     { label: dict.footer.links.contact, path: "/contact" },
@@ -171,8 +166,8 @@ export default async function Footer({ locale }: { locale: Locale }) {
           >
             {collectionLinks.map((item) => (
               <LocaleLink
-                key={`${item.label}-${item.path}`}
-                href={item.path}
+                key={item.id}
+                href={item.href}
                 className={footerLinkClass}
               >
                 {item.label}
@@ -184,7 +179,7 @@ export default async function Footer({ locale }: { locale: Locale }) {
             className="hidden flex-col gap-3.5 md:flex"
             aria-label={dict.footer.collections}
           >
-            {collectionColumn.map((entry) =>
+            {tree.collections.map((entry) =>
               entry.kind === "group" ? (
                 /*
                  * A group is a disclosure, not a link: there is no page at
@@ -194,27 +189,24 @@ export default async function Footer({ locale }: { locale: Locale }) {
                  * is independent; opening Scent Profiles leaves Fragrances
                  * exactly as the reader left it.
                  */
-                <FooterDisclosure
-                  key={entry.key}
-                  title={dict.nav.collectionGroups[entry.key]}
-                >
+                <FooterDisclosure key={entry.id} title={entry.label}>
                   {entry.children.map((child) => (
                     <LocaleLink
-                      key={child.path}
-                      href={child.path}
+                      key={child.id}
+                      href={child.href}
                       className={`${footerLinkClass} ps-3`}
                     >
-                      {dict.nav.collectionItems[child.key].label}
+                      {child.label}
                     </LocaleLink>
                   ))}
                 </FooterDisclosure>
               ) : (
                 <LocaleLink
-                  key={entry.path}
-                  href={entry.path}
+                  key={entry.id}
+                  href={entry.href}
                   className={footerLinkClass}
                 >
-                  {dict.nav.collectionItems[entry.key].label}
+                  {entry.label}
                 </LocaleLink>
               ),
             )}
@@ -225,13 +217,13 @@ export default async function Footer({ locale }: { locale: Locale }) {
               though it comes from a different table.
             */}
             <FooterDisclosure title={dict.nav.quickAccess}>
-              {quickAccess.map((item) => (
+              {tree.quickAccess.map((item) => (
                 <LocaleLink
-                  key={item.path}
-                  href={item.path}
+                  key={item.id}
+                  href={item.href}
                   className={`${footerLinkClass} ps-3`}
                 >
-                  {dict.nav.quickAccessItems[item.key]}
+                  {item.label}
                 </LocaleLink>
               ))}
             </FooterDisclosure>

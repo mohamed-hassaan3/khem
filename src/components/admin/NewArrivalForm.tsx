@@ -124,11 +124,24 @@ export default function NewArrivalForm({
         value={product}
         onChange={setProduct}
         options={[
-          { value: "", label: "None — hide this band" },
+          /*
+           * An empty choice, and not a way to hide the band.
+           *
+           * It used to read "None — hide this band", which made this select a
+           * second visibility control beside the band's own Show/Hide row in
+           * Landing Sections — and the storefront then refused to draw the band
+           * without a product no matter what media was configured. Visibility
+           * is that row's job alone now. What is left here is the legitimate
+           * case: a campaign band carrying its own banner and its own copy,
+           * which features no single bottle. Choosing it while Media is set to
+           * Featured is refused on save, because that combination has no
+           * photograph to show.
+           */
+          { value: "", label: "None — a band with its own banner and copy" },
           ...products.map((p) => ({ value: p.slug, label: p.name })),
         ]}
         error={errors.featuredProductSlug}
-        hint="Supplies the title, paragraph and button unless you override them below."
+        hint="Supplies the title, paragraph and button unless you override them below. Hiding the band is the Show/Hide switch in Landing Sections."
       />
 
       <fieldset className="flex flex-col gap-3">

@@ -23,7 +23,6 @@
 
 import "server-only";
 
-import type { ProductType } from "@/src/lib/product-types";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { getProductPromotions } from "@/src/services/marketing";
@@ -31,12 +30,14 @@ import type { MerchPageFacet } from "@/src/lib/facets";
 import type { ScentProfileSlug } from "@/src/lib/scent-profiles";
 import type { LinkableProduct } from "@/src/lib/routes";
 import {
+  CATEGORY_COLUMNS,
   COLLECTION_COLUMNS,
   MERCH_PAGE_COLUMNS,
   PRODUCT_CARD_COLUMNS,
   PRODUCT_WITH_IMAGES_COLUMNS,
   SCENT_PROFILE_COLUMNS,
   parseList,
+  toCategory,
   toCollection,
   toDetailPageTarget,
   toMerchPage,
@@ -46,6 +47,7 @@ import {
 } from "@/src/schemas/db/catalog";
 import { BOUTIQUE_SETTING_COLUMNS, toBoutiqueSetting } from "@/src/schemas/db/directory";
 import type {
+  Category,
   Collection,
   CollectionKind,
   MerchPage,
@@ -158,6 +160,119 @@ export async function getFeaturedCollections(
   }
 
   return parseList(data, (row) => toCollection(row, locale));
+}
+
+/**
+ * Every category the house offers, in curated order.
+ *
+ * Disabled categories are dropped here rather than at each call site: a
+ * category switched off is one the storefront must stop offering everywhere at
+ * once, and leaving that to be remembered per surface is how one grid keeps
+ * printing a shelf the menu has withdrawn. The dashboard reads its own list —
+ * see `src/services/admin/catalog.ts` — because it must still show what it can
+ * switch back on.
+ */
+export async function getCategories(locale: Locale): Promise<Category[]> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Category")
+    .select(CATEGORY_COLUMNS)
+    .eq("isEnabled", true)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getCategories", error.message);
+    return [];
+  }
+
+  return parseList(data, (row) => toCategory(row, locale));
+}
+
+/**
+ * A single category by slug, or `null` so the route can call `notFound()`.
+ *
+ * A disabled category answers `null` too: its page is withdrawn along with its
+ * menu entries, which is what switching it off means.
+ */
+export async function getCategoryBySlug(
+  locale: Locale,
+  slug: string,
+): Promise<Category | null> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("Category")
+    .select(CATEGORY_COLUMNS)
+    // Parameterised by the client, never interpolated into SQL.
+    .eq("slug", slug)
+    .eq("isEnabled", true)
+    .maybeSingle();
+
+  if (error) {
+    logFailure("getCategoryBySlug", error.message);
+    return null;
+  }
+
+  return toCategory(data, locale);
+}
+
+/**
+ * The collections standing under one category, in their curated order.
+ *
+ * What a category page lists above its grid, and what the Nav prints inside a
+ * disclosure.
+ */
+export async function getCollectionsByCategory(
+  locale: Locale,
+  categorySlug: string,
+): Promise<Collection[]> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Collection")
+    .select(COLLECTION_COLUMNS)
+    .eq("categorySlug", categorySlug)
+    .order("sortOrder");
+
+  if (error) {
+    logFailure("getCollectionsByCategory", error.message);
+    return [];
+  }
+
+  return parseList(data, (row) => toCollection(row, locale));
+}
+
+/**
+ * Every product beneath a category — through its collections, not around them.
+ *
+ * A product points at a collection and a collection points at a category, so
+ * this is one join rather than a second edge on `"Product"` that would have to
+ * be kept in step with the first. PostgREST expresses it as a filter on the
+ * embedded parent, and `!inner` is what makes it a join rather than a left
+ * join returning every product with a null collection attached.
+ *
+ * This is what keeps `/collections/body-care` showing the same four mists it
+ * showed when it was a collection of its own: the products moved down one
+ * level, and the page reaches through.
+ */
+export async function getProductCardsByCategory(
+  locale: Locale,
+  categorySlug: string,
+): Promise<ProductCardData[]> {
+  const query = cardQuery();
+  if (!query) return [];
+
+  return toCards(
+    locale,
+    "getProductCardsByCategory",
+    // The embed is aliased `collection:` in `PRODUCT_CARD_COLUMNS`, and a
+    // filter on an embedded resource is addressed by its alias.
+    await query.eq("collection.categorySlug", categorySlug).order("sortOrder"),
+  );
 }
 
 /**
@@ -367,30 +482,6 @@ export async function getProductCardsByScentProfile(
   );
 }
 
-/**
- * Every product of one type — `/collections/body-mist`, `/collections/room-spray`.
- *
- * A single indexed equality on `"Product"."productType"`, which is why this is
- * three lines where {@link getProductCardsByScentProfile} needs a join: a
- * profile is derived from the ingredient tables, a type is stored on the
- * product. See `src/lib/product-types.ts` for why that difference is deliberate.
- *
- * `type` is a `ProductType`, narrowed from the URL by `parseProductTypeSlug()`
- * before it arrives — never a raw segment.
- */
-export async function getProductCardsByProductType(
-  locale: Locale,
-  type: ProductType,
-): Promise<ProductCardData[]> {
-  const query = cardQuery();
-  if (!query) return [];
-
-  return toCards(
-    locale,
-    "getProductCardsByProductType",
-    await query.eq("productType", type).order("sortOrder"),
-  );
-}
 
 /**
  * The base card select: published products with their parent collection and

@@ -302,15 +302,17 @@ export const en = {
      * mapping to keep in step. Declared in chip order, which `FACET_ORDER`
      * owns; this object only supplies the words.
      */
+    /*
+     * The two merchandising cuts, and only those.
+     *
+     * The seven collection labels that used to sit here are gone: the chips in
+     * between these two are `"Category"` rows now, and their names come from
+     * the rows themselves in both languages — so a category created in the
+     * dashboard is a chip immediately, and one renamed is renamed everywhere.
+     * See `facetVocabulary()` in `src/lib/facets.ts`.
+     */
     facets: {
       "new-arrivals": "New Arrival",
-      signature: "Signature",
-      gemstone: "Gemstone",
-      noir: "Noir",
-      "body-care": "Body Care",
-      "home-fragrance": "Home Fragrances",
-      discovery: "Discovery Sets",
-      "gift-set": "Gift Sets",
       "best-sellers": "Best Sellers",
     },
     /*
@@ -1297,7 +1299,7 @@ export const en = {
         NOT_STARTED: "This code is not available yet.",
         EXPIRED: "This code has expired.",
         BELOW_MINIMUM: "This code needs a larger order.",
-        NOT_GRANTED: "This code is not available on this account.",
+        NOT_GRANTED: "This code is available by invitation only.",
         ALREADY_USED: "You have already used this code.",
         FULLY_REDEEMED: "This code has reached its limit.",
         CUSTOMER_LIMIT: "You have already used this code.",
@@ -1537,7 +1539,6 @@ export const en = {
        */
       tracker: {
         label: "Order progress",
-        PENDING: "Order Placed",
         PROCESSING: "Being Prepared",
         SHIPPED: "On Its Way",
         DELIVERED: "Delivered",
@@ -1545,7 +1546,6 @@ export const en = {
         REFUNDED: "Refunded",
       },
       status: {
-        PENDING: "Pending",
         PROCESSING: "Processing",
         SHIPPED: "Shipped",
         DELIVERED: "Delivered",
@@ -1702,7 +1702,6 @@ export const en = {
       eyebrow: "Word From the House",
       heading: "Notifications",
       markAll: "Mark all as read",
-      markOne: "Mark as read",
       unread: "{count} new",
       unreadOne: "1 new",
       /* Keyed by `CustomerNotificationKind` — a fourth kind is a compile error. */
@@ -1721,7 +1720,6 @@ export const en = {
         DELIVERED: "{order} has been delivered.",
         CANCELLED: "{order} was cancelled.",
         REFUNDED: "{order} has been refunded.",
-        PENDING: "{order} has been placed.",
       },
       creditEarned: "You earned KHEM Credit with {order}.",
       creditEarnedPlain: "You earned KHEM Credit.",
