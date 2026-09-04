@@ -268,7 +268,7 @@ export default function CollectionGrid({
              bar sticks under the header on a shop page that is now ivory; at
              `--color-surface` it painted a dark band across it.
            */
-          className="sticky top-[var(--header-h)] z-30 border-b border-ground-border bg-ground-bg"
+          className="sticky top-[var(--chrome-h)] z-30 border-b border-ground-border bg-ground-bg transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
         >
           {/* One scrolling strip at every width — never a second line. */}
           <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-x-auto px-4 py-4 sm:px-6 md:px-10 lg:px-12 xl:px-16">

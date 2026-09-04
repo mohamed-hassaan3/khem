@@ -55,7 +55,7 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
   const remaining = amountToFreeShippingInCents(pricing.subtotalInCents);
 
   return (
-    <aside className="ground-sand px-4 py-12 sm:px-8 lg:sticky lg:top-[var(--header-h)] lg:h-fit lg:px-10 lg:py-14">
+    <aside className="ground-sand px-4 py-12 transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:px-8 lg:sticky lg:top-[var(--chrome-h)] lg:h-fit lg:px-10 lg:py-14">
       <h2 className="mb-9 font-heading text-lg font-normal tracking-[0.1em] text-ground">
         {dict.cart.summary}
       </h2>

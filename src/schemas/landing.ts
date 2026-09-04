@@ -58,6 +58,8 @@ export const newArrivalSchema = z
     imageUrl: blankToNull,
     imageAlt: text(200, "Please shorten that description."),
 
+    showEyebrow: z.coerce.boolean(),
+    eyebrow: text(60, "Please shorten the eyebrow."),
     showTitle: z.coerce.boolean(),
     title: text(120, "Please shorten the title."),
     showDescription: z.coerce.boolean(),

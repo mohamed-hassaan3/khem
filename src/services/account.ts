@@ -31,6 +31,7 @@ import type {
   OrderStatus,
   OrderSummary,
   SavedAddress,
+  Viewer,
 } from "@/src/types/account";
 
 /**
@@ -185,6 +186,87 @@ export async function getAccountSummary(
       .filter((order) => order.status !== "CANCELLED" && order.status !== "REFUNDED")
       .reduce((sum, order) => sum + order.totalInCents, 0),
   };
+}
+
+
+/**
+ * The `"User"` row id behind a session, created if the house has not met them.
+ *
+ * `"Address"."userId"` is a foreign key to `"User"(id)`, and `"User"` rows
+ * arrive from `sync_clerk_user()` driven by Clerk's `user.created` webhook. A
+ * customer whose webhook was never delivered — or who signed up before the
+ * endpoint existed — therefore has a Clerk session and no row, and every
+ * address insert for them would fail on the constraint with nothing on screen
+ * to explain why.
+ *
+ * So the write path resolves the row and, finding none, syncs it from the
+ * session it already holds. That is the "lazy call from the account layout"
+ * the note below has always described, arriving where it is actually needed:
+ * at the first write, not on every read.
+ *
+ * `sync_clerk_user()` is reused rather than a bare insert written here. It owns
+ * the rules about when `marketingOptInAt` moves, and a second definition of
+ * "create a customer" is a second thing that can disagree with the webhook.
+ * **It never writes `role`** — that comes from Clerk and the allowlist, so the
+ * database can never be the path by which somebody grants themselves ADMIN.
+ *
+ * Returns `null` when there is no address on the session, because
+ * `sync_clerk_user()` refuses a row without one and the caller must report a
+ * failure rather than write an orphan.
+ */
+export async function ensureUserRowId(viewer: Viewer): Promise<string | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("User")
+    .select("id")
+    .eq("clerkId", viewer.id)
+    .is("deletedAt", null)
+    .maybeSingle();
+
+  if (error) {
+    console.error(`[account] ensureUserRowId lookup failed: ${error.message}`);
+    return null;
+  }
+
+  if (typeof data?.id === "string") return data.id;
+
+  if (viewer.primaryEmail === null) {
+    console.error(`[account] ensureUserRowId: ${viewer.id} has no address`);
+    return null;
+  }
+
+  // Clerk holds one `fullName`; `"User"` holds two columns. The first word is
+  // the given name and the remainder the family name — the same split the
+  // overview's greeting makes, and wrong for some names in the same harmless
+  // way, since neither column is ever matched on.
+  const parts = viewer.fullName?.trim().split(/\s+/).filter(Boolean) ?? [];
+  const firstName = parts[0] ?? null;
+  const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
+
+  const { data: created, error: syncError } = await supabase.rpc(
+    "sync_clerk_user",
+    {
+      payload: {
+        clerkId: viewer.id,
+        email: viewer.primaryEmail,
+        firstName,
+        lastName,
+        phone: null,
+        // Not a consent event. Somebody saving an address has not agreed to
+        // anything, and `false` is the direction that fails closed.
+        marketingOptIn: false,
+      },
+    },
+  );
+
+  if (syncError) {
+    console.error(`[account] ensureUserRowId sync failed: ${syncError.message}`);
+    return null;
+  }
+
+  return typeof created === "string" ? created : null;
 }
 
 

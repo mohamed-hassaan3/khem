@@ -154,6 +154,16 @@ export interface SectionSettings {
    * existed. So a row with none of these set renders exactly what it always
    * rendered — the backward-compatible default is the absence of configuration.
    */
+  /**
+   * The small line above the title.
+   *
+   * Shown with an empty value means "use the house wording" — the dictionary's
+   * `home.featured.eyebrow`, which is what this line was before it was
+   * configurable. Unlike the title and the paragraph it has no product to fall
+   * back to: an eyebrow names the *band*, not the bottle.
+   */
+  showEyebrow?: boolean;
+  eyebrow?: string | null;
   showTitle?: boolean;
   title?: string | null;
   showDescription?: boolean;
@@ -174,6 +184,10 @@ export interface NewArrivalPresentation {
   videoUrl: string | null;
   imageUrl: string | null;
   imageAlt: string | null;
+  showEyebrow: boolean;
+  /** `null` means the dictionary's house wording — the band has no product
+   * eyebrow to inherit. */
+  eyebrow: string | null;
   showTitle: boolean;
   title: string | null;
   showDescription: boolean;
@@ -205,6 +219,9 @@ export function resolveNewArrival(
     videoUrl: trimmed(settings.videoUrl),
     imageUrl: trimmed(settings.imageUrl),
     imageAlt: trimmed(settings.imageAlt),
+
+    showEyebrow: settings.showEyebrow ?? true,
+    eyebrow: trimmed(settings.eyebrow),
 
     showTitle: settings.showTitle ?? true,
     title: trimmed(settings.title) ?? product?.name ?? null,

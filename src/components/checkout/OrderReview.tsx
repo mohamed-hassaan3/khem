@@ -84,7 +84,7 @@ export default function OrderReview({
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
   return (
-    <aside className="border-ground-border bg-stone px-4 py-10 sm:px-8 lg:sticky lg:top-[var(--header-h)] lg:h-fit lg:border-s lg:px-10 lg:py-14">
+    <aside className="border-ground-border bg-stone px-4 py-10 transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:px-8 lg:sticky lg:top-[var(--chrome-h)] lg:h-fit lg:border-s lg:px-10 lg:py-14">
       <div className="mb-8 flex items-baseline justify-between gap-4">
         <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ground">
           {copy.heading}

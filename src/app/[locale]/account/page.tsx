@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import MemberBenefits from "@/src/components/account/MemberBenefits";
 import OrderCard from "@/src/components/account/OrderCard";
+import PrivilegeBanner from "@/src/components/account/PrivilegeBanner";
 import StatGrid from "@/src/components/account/StatGrid";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { getViewer } from "@/src/lib/auth";
@@ -14,6 +15,8 @@ import { interpolate } from "@/src/lib/i18n/interpolate";
 import { readingArrow } from "@/src/lib/i18n/rtl";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { getAccountSummary, getOrdersForUser } from "@/src/services/account";
+import { creditLedgerForUser } from "@/src/services/credits";
+import { vouchersForUser } from "@/src/services/vouchers";
 
 /**
  * Account overview.
@@ -68,10 +71,22 @@ export default async function AccountPage({
   if (viewer === null)
     redirect(signInPathWithReturn(activeLocale, localizePath(activeLocale, PATH)));
 
-  const [dict, summary, orders] = await Promise.all([
+  const [dict, summary, orders, ledger, vouchers] = await Promise.all([
     getDictionary(activeLocale),
     getAccountSummary(viewer.id),
     getOrdersForUser(viewer.id),
+    /*
+     * The privileges band. Read from the same two services the Vouchers &
+     * Credits panel reads, rather than from a summary of its own: a figure
+     * printed at the top of the account and a figure printed on the panel it
+     * links to must be the same figure, and the only way to guarantee that is
+     * to count the same rows.
+     *
+     * The email is the session's verified primary address — a grant may have
+     * been issued to it before this person ever had an account.
+     */
+    creditLedgerForUser(viewer.id),
+    vouchersForUser({ clerkUserId: viewer.id, email: viewer.primaryEmail }),
   ]);
 
   // Greet by first name where Clerk holds one; an email-only account gets the
@@ -83,6 +98,20 @@ export default async function AccountPage({
 
   const [mostRecentOrder] = orders;
 
+  const availableVouchers = vouchers.filter(
+    (voucher) => voucher.status === "AVAILABLE",
+  );
+
+  /*
+   * The soonest date a credit lapses, over the spendable ones only. A credit
+   * still awaiting delivery has no expiry yet (0026 starts the clock at
+   * delivery), and an expired one has nothing left to warn about.
+   */
+  const nextExpiry = ledger.credits
+    .filter((credit) => credit.status === "AVAILABLE" && credit.expiresAt !== null)
+    .map((credit) => credit.expiresAt as string)
+    .sort((a, b) => a.localeCompare(b))[0] ?? null;
+
   return (
     <div>
       <p className="eyebrow mb-3">{dict.account.eyebrow}</p>
@@ -90,6 +119,17 @@ export default async function AccountPage({
       <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ground sm:text-4xl lg:text-5xl">
         {heading}
       </h1>
+
+      {/* Above the figures, because it is the thing a customer can act on
+          today. Renders nothing when they hold neither instrument. */}
+      <PrivilegeBanner
+        creditInCents={ledger.availableInCents}
+        creditCount={ledger.availableCount}
+        voucherCount={availableVouchers.length}
+        expiresAt={nextExpiry}
+        locale={activeLocale}
+        dict={dict.account.privileges}
+      />
 
       <StatGrid summary={summary} />
 

@@ -9,10 +9,13 @@ import LocaleLink from "@/src/components/i18n/LocaleLink";
 import Price from "@/src/components/ecommerce/Price";
 import { formatAccountDate } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
-import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
-import { ACCOUNT_PATHS } from "@/src/lib/routes";
+import {
+  notificationHref,
+  notificationSentence,
+  type NotificationCopy,
+} from "@/src/lib/notification-copy";
 import type {
   CustomerNotification,
   CustomerNotificationKind,
@@ -47,42 +50,11 @@ const KIND_ICON: Record<CustomerNotificationKind, typeof Bell> = {
   VOUCHER_GRANTED: Ticket,
 };
 
-type Copy = Dictionary["account"]["notifications"];
-
-/** Where a notification leads — always to the customer's own screen. */
-function hrefFor(item: CustomerNotification): string {
-  switch (item.kind) {
-    case "ORDER_STATUS":
-      // The orders panel anchors each card by its number.
-      return `${ACCOUNT_PATHS.orders}#${item.label}`;
-    case "CREDIT_EARNED":
-    case "VOUCHER_GRANTED":
-      return ACCOUNT_PATHS.vouchers;
-    default: {
-      const unreachable: never = item.kind;
-      return unreachable;
-    }
-  }
-}
-
-/** The sentence a customer reads. Never a raw status, never a bare code. */
-function sentence(item: CustomerNotification, copy: Copy): string {
-  if (item.kind === "ORDER_STATUS") {
-    const status = item.detail as keyof Copy["status"] | null;
-    const template = status && status in copy.status ? copy.status[status] : null;
-    return template
-      ? interpolate(template, { order: item.label })
-      : copy.kind.ORDER_STATUS;
-  }
-
-  if (item.kind === "CREDIT_EARNED") {
-    return item.label
-      ? interpolate(copy.creditEarned, { order: item.label })
-      : copy.creditEarnedPlain;
-  }
-
-  return interpolate(copy.voucherGranted, { code: item.label });
-}
+/**
+ * The wording and the destination live in `src/lib/notification-copy.ts`, so
+ * the header bell says the same thing about the same row.
+ */
+type Copy = NotificationCopy;
 
 export default function NotificationList({
   notifications,
@@ -166,7 +138,7 @@ export default function NotificationList({
                   * from the prose while the number keeps its own run.
                   */}
                 <p className="text-[13px] leading-relaxed text-ground" dir="auto">
-                  {sentence(item, copy)}
+                  {notificationSentence(item, copy)}
                 </p>
 
                 {item.amountInCents !== null ? (
@@ -190,7 +162,7 @@ export default function NotificationList({
                     * cannot express.
                     */}
                   <LocaleLink
-                    href={hrefFor(item)}
+                    href={notificationHref(item)}
                     onClick={() => {
                       if (!item.isRead) markRead([item]);
                     }}

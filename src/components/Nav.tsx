@@ -32,12 +32,15 @@ import { ChevronDown, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import nameLogo from "@/public/logo/name-logo-transparent.webp";
 
 import AccountMenu from "./account/AccountMenu";
+import NotificationBell from "./account/NotificationBell";
 import SignOutButton from "./account/SignOutButton";
-import LanguageSwitcher from "./i18n/LanguageSwitcher";
+import LocaleRegionSwitcher from "./i18n/LocaleRegionSwitcher";
 import LocaleLink from "./i18n/LocaleLink";
 import SearchOverlay from "./search/SearchOverlay";
+import { useHeaderVisibility } from "@/src/hooks/use-header-visibility";
 import { signInPathWithReturn } from "@/src/lib/auth-redirect";
 import { interpolate } from "@/src/lib/i18n/interpolate";
+import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { useCart } from "@/src/providers/cart-provider";
 import { useCartDrawer } from "@/src/providers/cart-drawer-provider";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
@@ -64,9 +67,8 @@ const BOUTIQUE_ROW =
  * tappable area was the 17x17 icon: a quarter of the 44px minimum, on the
  * three controls a phone actually needs (search, bag, account).
  *
- * It matters more now than it did. The bar is 56px tall on a phone, so there
- * is no longer any incidental slack around a bare icon for a thumb to land in;
- * the target has to be declared. The negative margin on the last control pulls
+ * The bar is 80px tall at every width, but the slack around a bare icon is
+ * still incidental rather than declared; the target has to be stated. The negative margin on the last control pulls
  * the extra box back to the bar's own padding so the row still ends flush.
  */
 const ICON_HIT = "flex h-11 w-11 items-center justify-center";
@@ -311,6 +313,38 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
    */
   const { ground } = useNavGround();
 
+  /*
+   * The header leaves while the visitor reads down and comes back the moment
+   * they read up — or send a mouse to the top edge.
+   *
+   * It is pinned open whenever one of the surfaces anchored to it is showing.
+   * The mega-menu is positioned at `top: var(--header-h)` and the search panel
+   * beneath the bar, so a header that slid away under an open menu would leave
+   * the panel floating clear of anything; and the drawer scroll-locks the
+   * document, which is exactly the state where the bar must not be off screen.
+   */
+  const headerHidden = useHeaderVisibility(
+    activeMenu !== null || drawerOpen || searchOpen,
+  );
+
+  /*
+   * The announcement bar is a sibling of this header, not a child — it is
+   * rendered by the layout above `<Nav>` — so it cannot be moved by the
+   * transform below. The flag goes on the document element and `globals.css`
+   * translates the bar from there, which keeps the two halves of the chrome
+   * travelling as one piece.
+   */
+  useEffect(() => {
+    const root = document.documentElement;
+
+    if (headerHidden) root.dataset.headerHidden = "true";
+    else delete root.dataset.headerHidden;
+
+    return () => {
+      delete root.dataset.headerHidden;
+    };
+  }, [headerHidden]);
+
   const closeMenu = useCallback(() => {
     setMenuOpen(null);
     setMenuPath(pathname);
@@ -417,16 +451,18 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
            * what the blur costs.
            */
           /*
-           * `h-14` on a phone, `h-20` from `md` up — the same two values
-           * `--nav-h` carries in `globals.css`, which is what the page wrapper
-           * and every sticky offset read. The two must agree: this class is
-           * what the bar *is*, and the variable is what everything else
-           * *reserves* for it.
+           * `h-20` at every width — the single value `--nav-h` carries in
+           * `globals.css`, which is what the page wrapper and every sticky
+           * offset read. The two must agree: this class is what the bar *is*,
+           * and the variable is what everything else *reserves* for it.
            *
-           * The controls inside are unchanged at 44px — the 24px comes off the
-           * padding around them, not off the touch targets.
+           * It was `h-14` on a phone, to spend less of a short viewport on
+           * chrome. The bar now leaves on its own while the visitor reads
+           * down, so the argument for a shorter one is gone — and a header
+           * that changes height with the breakpoint gives the wordmark and the
+           * icon row two different compositions to be right in.
            */
-          "fixed inset-x-0 top-[var(--announcement-h)] z-1000 flex h-14 items-center justify-between px-5 sm:px-8 md:h-20 lg:px-12",
+          "fixed inset-x-0 top-[var(--announcement-h)] z-1000 flex h-20 items-center justify-between px-5 sm:px-8 lg:px-12",
           "nav-bar",
           /*
            * **The same ground in both states.**
@@ -448,6 +484,24 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
            * from `.nav-bar`'s veil gradient instead.
            */
           `ground-${ground}`,
+          /*
+           * The smart-header transform.
+           *
+           * `--header-h`, not `--nav-h`: the bar sits below the announcement
+           * bar, so clearing its own height alone would leave it parked over
+           * the promo line rather than off the screen. The extra pixel covers
+           * the hairline a fractional device-pixel ratio can otherwise leave
+           * behind at the top edge.
+           *
+           * A transform and nothing else. `--header-h` is unchanged whichever
+           * state this is in, so the page's top padding, every sticky offset
+           * and the mega-menu's `top` all stay exactly where they were —
+           * there is no layout for this to shift.
+           */
+          "transition-transform duration-500 ease-luxury-bezier motion-reduce:transition-none",
+          headerHidden
+            ? "-translate-y-[calc(var(--header-h)+1px)]"
+            : "translate-y-0",
         ].join(" ")}
       >
         <div className="flex min-w-0 flex-1 items-center gap-5 md:gap-9">
@@ -531,7 +585,7 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
          */}
         <div className="-me-2.5 flex min-w-0 flex-1 items-center justify-end gap-0.5 sm:gap-1.5 lg:gap-3">
           <div className="hidden sm:block">
-            <LanguageSwitcher />
+            <LocaleRegionSwitcher />
           </div>
           {/*
            * Visible at every width. It used to be `hidden sm:inline-flex`,
@@ -573,7 +627,18 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
            * avatar occupy the same 26px box.
            */}
           {isSignedIn ? (
-            <AccountMenu />
+            <>
+              {/*
+               * The bell is rendered for a signed-in visitor only, which is
+               * what keeps §16's "non-intrusive" true after the house asked
+               * for it: somebody browsing fragrances meets no badge and no
+               * count. It reads its own numeral through a Server Action, so
+               * the header still knows nothing about the session at render
+               * time and the site's thirty routes stay static.
+               */}
+              <NotificationBell />
+              <AccountMenu />
+            </>
           ) : (
             /*
              * A plain `<Link>`, not `<LocaleLink>`: `signInPathWithReturn`
@@ -644,7 +709,7 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
             : "-translate-x-full rtl:translate-x-full",
         ].join(" ")}
       >
-        <div className="flex h-14 shrink-0 items-center justify-between px-6 md:h-20">
+        <div className="flex h-20 shrink-0 items-center justify-between px-6">
           <p className="eyebrow">{dict.nav.menu}</p>
           <button
             type="button"
@@ -778,6 +843,25 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
               </LocaleLink>
 
               {/*
+               * The drawer gets a plain link rather than a second bell: a
+               * popover inside a panel is a layer over a layer, and the phone
+               * has the whole notifications page one tap away.
+               */}
+              {isSignedIn ? (
+                <LocaleLink
+                  href={ACCOUNT_PATHS.notifications}
+                  onClick={closeDrawer}
+                  className={BOUTIQUE_ROW}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="inline-block h-px w-5 bg-current"
+                  />
+                  {dict.account.bell.label}
+                </LocaleLink>
+              ) : null}
+
+              {/*
                * The drawer is the only account surface on a phone, so it
                * carries sign-out directly rather than sending the visitor to
                * `/account` to find it. Hidden entirely for a guest, for whom
@@ -798,8 +882,8 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
           <div className="gold-line" />
 
           <section>
-            <p className="eyebrow mb-6">{dict.languageSwitcher.label}</p>
-            <LanguageSwitcher variant="full" />
+            <p className="eyebrow mb-6">{dict.regionSwitcher.label}</p>
+            <LocaleRegionSwitcher variant="full" />
           </section>
         </div>
       </div>

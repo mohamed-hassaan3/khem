@@ -1,4 +1,4 @@
-import OrderTracker from "@/src/components/account/OrderTracker";
+import TrackerDisclosure from "@/src/components/account/TrackerDisclosure";
 import Price from "@/src/components/ecommerce/Price";
 import type { Locale } from "@/src/lib/i18n/config";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
@@ -106,8 +106,14 @@ export default function OrderCard({
         </div>
       </div>
 
-      <div className="mt-8 border-t border-ground-border pt-8">
-        <OrderTracker
+      {/*
+        * The rail, behind a trigger rather than always open. A history of nine
+        * orders was nine timelines stacked down the page; the station name
+        * stays on the closed control, so nothing a customer needs at a glance
+        * moved behind the click. See `<TrackerDisclosure>`.
+        */}
+      <div className="mt-8 border-t border-ground-border pt-6">
+        <TrackerDisclosure
           status={order.status}
           events={order.events}
           locale={locale}

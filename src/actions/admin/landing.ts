@@ -207,6 +207,8 @@ export async function updateNewArrival(input: unknown): Promise<AdminActionResul
     videoUrl: presentation.mediaType === "FILM" ? presentation.videoUrl : null,
     imageUrl: presentation.mediaType === "IMAGE" ? presentation.imageUrl : null,
     imageAlt: presentation.mediaType === "IMAGE" ? presentation.imageAlt : null,
+    showEyebrow: presentation.showEyebrow,
+    eyebrow: presentation.eyebrow ?? null,
     showTitle: presentation.showTitle,
     title: presentation.title ?? null,
     showDescription: presentation.showDescription,

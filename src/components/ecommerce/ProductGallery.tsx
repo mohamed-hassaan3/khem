@@ -130,7 +130,7 @@ export default function ProductGallery({
         below resolves to charcoal-on-stone, which is legible without needing
         the well.
       */
-      className="ground-stone flex w-full flex-col overflow-hidden lg:sticky lg:top-[var(--header-h)] lg:h-[calc(100svh-var(--header-h))]">
+      className="ground-stone flex w-full flex-col overflow-hidden transition-[top,height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none lg:sticky lg:top-[var(--chrome-h)] lg:h-[calc(100svh-var(--chrome-h))]">
       <div className="relative aspect-4/5 w-full overflow-hidden lg:aspect-auto lg:flex-1">
         <ul
           ref={trackRef}

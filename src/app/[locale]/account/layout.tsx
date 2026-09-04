@@ -7,7 +7,6 @@ import SignOutButton from "@/src/components/account/SignOutButton";
 import { getViewer } from "@/src/lib/auth";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { AUTH_PATHS } from "@/src/lib/routes";
-import { unreadNotificationCount } from "@/src/services/notifications";
 
 /**
  * The customer portal shell — identity block, navigation rail, panel slot.
@@ -49,15 +48,12 @@ export default async function AccountLayout({
   if (viewer === null) redirect(localizePath(activeLocale, AUTH_PATHS.signIn));
 
   /*
-   * The rail's unread numeral. Read here rather than in the sidebar because the
-   * sidebar is a Client Component and this is a secret-key query — and read
-   * after the gate, never beside it, so it cannot run for a request that is
-   * about to be redirected away.
+   * No unread count is read here any more. The rail used to carry a numeral and
+   * this layout fetched it; the header bell owns that number now, and it asks
+   * for it through a Server Action of its own so the storefront's thirty routes
+   * stay static. Two surfaces counting the same rows is two surfaces that can
+   * disagree — see `<NotificationBell>`.
    */
-  const unreadCount = await unreadNotificationCount({
-    clerkUserId: viewer.id,
-    email: viewer.primaryEmail,
-  });
 
   return (
     <div className="ground-ivory min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
@@ -68,12 +64,12 @@ export default async function AccountLayout({
        * column; the original page kept a fixed 280px sidebar at every width,
        * which left the panels unusable on a phone.
        */}
-      <aside className="sticky top-[var(--header-h)] z-10 flex flex-col border-b border-ground-border bg-[var(--card-bg)] lg:top-[var(--header-h)] lg:h-[calc(100svh-var(--header-h))] lg:overflow-y-auto lg:border-b-0 lg:border-e lg:border-ground-border lg:bg-[var(--card-bg)] lg:py-15">
+      <aside className="sticky top-[var(--chrome-h)] z-10 flex flex-col border-b border-ground-border bg-[var(--card-bg)] transition-[top,height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none lg:top-[var(--chrome-h)] lg:h-[calc(100svh-var(--chrome-h))] lg:overflow-y-auto lg:border-b-0 lg:border-e lg:border-ground-border lg:bg-[var(--card-bg)] lg:py-15">
         <div className="hidden lg:mb-5 lg:block">
           <AccountIdentity viewer={viewer} locale={activeLocale} />
         </div>
 
-        <AccountSidebar unreadCount={unreadCount} />
+        <AccountSidebar />
       </aside>
 
       <main className="px-5 pb-14 pt-10 sm:px-8 lg:px-20 lg:pt-15">

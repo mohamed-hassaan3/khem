@@ -134,8 +134,85 @@ const COUNTRY_CURRENCY: Record<string, Currency> = {
   ES: "EUR",
 };
 
+/**
+ * The countries KHEM prices in, sorted, as a closed list.
+ *
+ * Derived from the map above rather than written a second time: the switcher
+ * can only offer a country whose currency this file already knows, so the list
+ * and the pricing cannot come to disagree. Everywhere else is
+ * {@link INTERNATIONAL}.
+ *
+ * Sorted by *code* here and re-sorted by localised name where it is shown —
+ * "Germany" and "Allemagne" do not belong in the same position, and this module
+ * has no locale to sort against.
+ */
+export const PRICED_COUNTRIES: readonly string[] = Object.keys(
+  COUNTRY_CURRENCY,
+).sort();
+
+/**
+ * "Anywhere else" — a region rather than a country, and the honest label for
+ * the fallback currency.
+ *
+ * Deliberately not an ISO code: it is neither `EU` nor `US`, both of which
+ * would be claims about the visitor that nothing here supports. Two letters
+ * would also collide with the country codes it sits beside.
+ */
+export const INTERNATIONAL = "INTL";
+
+/** What the region switcher may hold: a priced country, or {@link INTERNATIONAL}. */
+export type Region = string;
+
+export function isRegion(value: unknown): value is Region {
+  return (
+    typeof value === "string" &&
+    (value === INTERNATIONAL || PRICED_COUNTRIES.includes(value))
+  );
+}
+
+/** The currency a chosen region is priced in. */
+export function currencyForRegion(region: Region): Currency {
+  return region === INTERNATIONAL
+    ? FALLBACK_DISPLAY_CURRENCY
+    : resolveCurrencyForCountry(region);
+}
+
+/**
+ * The country a currency implies, when the visitor has not named one.
+ *
+ * Four of the six currencies belong to exactly one market, so a detected EGP
+ * can be shown as "Egypt" without storing anything about where the request came
+ * from — which is the point: `src/proxy.ts` deliberately keeps no country, and
+ * this preserves that. `EUR` and `USD` have no single country behind them and
+ * return `null`; the switcher labels those "Europe" and "International", which
+ * is all that can be said truthfully.
+ */
+export function representativeCountry(currency: Currency): string | null {
+  switch (currency) {
+    case "EGP":
+      return "EG";
+    case "GBP":
+      return "GB";
+    case "AED":
+      return "AE";
+    case "SAR":
+      return "SA";
+    default:
+      return null;
+  }
+}
+
 /** The cookie the proxy writes and the client reads. `khem.*.v1` per `storage.ts`. */
 export const CURRENCY_COOKIE = "khem.currency.v1";
+
+/**
+ * The region the visitor *chose*, when they have chosen one.
+ *
+ * Written only by the browser, never by the proxy — the edge knows the country
+ * and pointedly does not record it (see `src/proxy.ts`). A stated preference is
+ * a different thing from an observed location, and only the first is kept.
+ */
+export const COUNTRY_COOKIE = "khem.country.v1";
 
 /** One year — the ceiling the published cookie policy states. */
 export const CURRENCY_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;

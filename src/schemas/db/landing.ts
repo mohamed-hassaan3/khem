@@ -50,6 +50,16 @@ const settingsSchema = z
     imageUrl: assetUrl,
     imageAlt: overrideText(200),
 
+    /*
+     * The eyebrow — the small line above the title.
+     *
+     * Read-side and write-side must both know a key or it is silently lost:
+     * this object strips what it does not name, so a field added to the save
+     * action alone would round-trip to nothing and the band would go on showing
+     * the house wording.
+     */
+    showEyebrow: z.boolean().optional(),
+    eyebrow: overrideText(60),
     showTitle: z.boolean().optional(),
     title: overrideText(120),
     showDescription: z.boolean().optional(),

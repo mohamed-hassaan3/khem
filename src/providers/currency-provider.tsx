@@ -6,11 +6,15 @@ import { useIsHydrated } from "@/src/hooks/use-is-hydrated";
 import { readCookie, writeCookie } from "@/src/lib/cookies";
 import {
   BASE_CURRENCY,
+  COUNTRY_COOKIE,
   CURRENCY_COOKIE,
   CURRENCY_COOKIE_MAX_AGE,
+  currencyForRegion,
   isCurrency,
+  isRegion,
   resolveCurrencyForCountry,
   type Currency,
+  type Region,
 } from "@/src/lib/currency";
 import { formatPrice as formatPriceIn } from "@/src/lib/format";
 
@@ -55,6 +59,23 @@ interface CurrencyContextValue {
   isHydrated: boolean;
   /** `formatPrice` bound to the active currency. */
   formatPrice: (priceInCents: number) => string;
+  /**
+   * The region the visitor chose, or `null` when they never have.
+   *
+   * `null` is not a missing value to be papered over: it is the difference
+   * between a stated preference and a currency that was detected. The switcher
+   * shows the country the *currency* implies in that case
+   * (`representativeCountry`), which says as much as is actually known.
+   */
+  region: Region | null;
+  /**
+   * Persist a chosen region, and move the currency with it.
+   *
+   * One call rather than two, because a country and the currency it is priced
+   * in are one decision to the visitor — and letting them be set separately is
+   * how a shopper ends up in Egypt paying in riyals.
+   */
+  setRegion: (next: Region) => void;
 }
 
 /**
@@ -150,6 +171,60 @@ function commit(next: Currency): void {
   for (const listener of listeners) listener();
 }
 
+/*
+ * The region store — the same shape as the currency one above, and separate
+ * from it on purpose.
+ *
+ * The two are not one value: the currency is what every price is drawn in and
+ * may have been detected at the edge, while the region is only ever something
+ * the visitor said. Merging them would mean either inventing a country for a
+ * detected currency or discarding a stated one, and both are worse than
+ * carrying two.
+ */
+let regionSnapshot: Region | null = null;
+let regionLoaded = false;
+
+const regionListeners = new Set<() => void>();
+
+function loadRegion(): void {
+  regionSnapshot = readCookie<Region, null>(COUNTRY_COOKIE, isRegion, null);
+  regionLoaded = true;
+}
+
+const regionStore = {
+  subscribe(onStoreChange: () => void) {
+    regionListeners.add(onStoreChange);
+    return () => {
+      regionListeners.delete(onStoreChange);
+    };
+  },
+
+  getSnapshot(): Region | null {
+    if (!regionLoaded) loadRegion();
+    return regionSnapshot;
+  },
+
+  /** Nothing is known about the visitor's region in the prerendered HTML. */
+  getServerSnapshot(): Region | null {
+    return null;
+  },
+};
+
+function commitRegion(next: Region): void {
+  if (!regionLoaded) loadRegion();
+
+  if (next !== regionSnapshot) {
+    regionSnapshot = next;
+    writeCookie(COUNTRY_COOKIE, next, CURRENCY_COOKIE_MAX_AGE);
+
+    for (const listener of regionListeners) listener();
+  }
+
+  // Always, even when the region is unchanged: a visitor re-picking their own
+  // country after overruling the currency by hand means "put it back".
+  commit(currencyForRegion(next));
+}
+
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
@@ -160,7 +235,14 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   );
   const isHydrated = useIsHydrated();
 
+  const region = useSyncExternalStore(
+    regionStore.subscribe,
+    regionStore.getSnapshot,
+    regionStore.getServerSnapshot,
+  );
+
   const setCurrency = useCallback((next: Currency) => commit(next), []);
+  const setRegion = useCallback((next: Region) => commitRegion(next), []);
 
   const formatPrice = useCallback(
     (priceInCents: number) => formatPriceIn(priceInCents, currency),
@@ -168,8 +250,8 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<CurrencyContextValue>(
-    () => ({ currency, setCurrency, isHydrated, formatPrice }),
-    [currency, setCurrency, isHydrated, formatPrice],
+    () => ({ currency, setCurrency, isHydrated, formatPrice, region, setRegion }),
+    [currency, setCurrency, isHydrated, formatPrice, region, setRegion],
   );
 
   return (

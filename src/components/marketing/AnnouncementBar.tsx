@@ -157,7 +157,7 @@ export default function AnnouncementBar({
         bracketed by the same colour top and bottom instead of opening on a
         colour that appears nowhere else.
       */
-      className="ground-charcoal fixed inset-x-0 top-0 z-997 flex h-[var(--announcement-h)] items-center overflow-hidden border-b border-ground-accent/15 bg-ground-bg text-ground-muted"
+      className="announcement-bar ground-charcoal fixed inset-x-0 top-0 z-997 flex h-[var(--announcement-h)] items-center overflow-hidden border-b border-ground-accent/15 bg-ground-bg text-ground-muted"
     >
       {effectiveMode === "MARQUEE" ? (
         <div

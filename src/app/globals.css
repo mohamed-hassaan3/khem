@@ -996,6 +996,37 @@
   }
 
   /*
+   * ── The announcement bar, travelling with the header ────────
+   *
+   * `<Nav>` decides when the chrome is away and writes `data-header-hidden` on
+   * the document element; the bar is its *sibling* (the layout renders it above
+   * `<Nav>`), so it cannot be carried by the header's own transform and follows
+   * the flag instead. Both are `position: fixed`, so neither move touches
+   * layout: `--header-h` is the same number in both states and every offset
+   * that reads it stays put.
+   *
+   * The duration and curve are the header's, deliberately — two pieces of
+   * chrome leaving at different speeds reads as two things, not one.
+   */
+  .announcement-bar {
+    transition: transform 0.5s var(--ease-luxury-bezier);
+  }
+
+  html[data-header-hidden="true"] .announcement-bar {
+    transform: translateY(-100%);
+  }
+
+  /*
+   * Reduced motion keeps the *behaviour* — the bar still gets out of the way,
+   * which is the accommodation — and drops only the travel.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .announcement-bar {
+      transition: none;
+    }
+  }
+
+  /*
    * The mobile drawer shares the bar's language rather than being an opaque
    * panel that happens to be the same colour.
    *
@@ -1729,7 +1760,7 @@
  * Three numbers, declared once, that everything else reads:
  *
  *   --announcement-h  the promo bar, or 0px when none is rendered
- *   --nav-h           the header bar: 56px on a phone, 80px from `md` up
+ *   --nav-h           the header bar: 80px at every width
  *   --header-h        the sum — how much vertical space the chrome occupies
  *
  * They are variables rather than classes because far more than the header
@@ -1757,24 +1788,45 @@
 :root {
   --announcement-h: 0px;
   /*
-   * 56px on a phone.
+   * One height, every width.
    *
-   * The bar is chrome, and on a 667px-tall screen an 80px bar is 12% of the
-   * viewport spent on it before any content. The controls inside keep their
-   * 44px touch targets — the height comes off the padding around them, not off
-   * the buttons, which is the difference between compact and cramped.
+   * It was 56px on a phone, on the argument that an 80px bar is 12% of a 667px
+   * viewport spent before any content. The bar now takes itself away while the
+   * visitor reads down the page (`use-header-visibility.ts`), so that space is
+   * only occupied while it is wanted — and one height means the wordmark and
+   * the icon row have one composition to be right in rather than two.
    */
-  --nav-h: 56px;
-}
-
-@media (min-width: 768px) {
-  :root {
-    --nav-h: 80px;
-  }
+  --nav-h: 80px;
 }
 
 body {
   --header-h: calc(var(--announcement-h) + var(--nav-h));
+
+  /*
+   * ── `--header-h` vs `--chrome-h` ─────────────────────────────
+   *
+   * `--header-h` is the space the chrome *reserves*: the page's top padding,
+   * the full-height maths on the hero and the 404, the mega-menu's `top`. It is
+   * the same number whether the bar is showing or not, which is what makes
+   * hiding the header free of layout shift.
+   *
+   * `--chrome-h` is where the chrome *currently ends*, and it collapses to zero
+   * while the header is away. Everything that sticks *underneath* the header
+   * reads this one — the dashboard's rail and its Boutique Desk bar, the
+   * account rail, the collection filter bar, the gallery and the two order
+   * summaries. Without it those bars stay parked at 118px with nothing above
+   * them, which is the gap that gives away that the header left.
+   *
+   * Only `position: sticky` and `fixed` offsets may read it. A margin, a
+   * padding or a height in normal flow that followed it would move the document
+   * every time the visitor changed scroll direction — the exact shift the
+   * transform-only header exists to avoid.
+   */
+  --chrome-h: var(--header-h);
+}
+
+html[data-header-hidden="true"] body {
+  --chrome-h: 0px;
 }
 
 body[data-announcement="on"] {

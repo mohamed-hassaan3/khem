@@ -75,6 +75,8 @@ export default function NewArrivalForm({
   const [imageUrl, setImageUrl] = useState(settings.imageUrl ?? "");
   const [imageAlt, setImageAlt] = useState(settings.imageAlt ?? "");
 
+  const [showEyebrow, setShowEyebrow] = useState(settings.showEyebrow ?? true);
+  const [eyebrow, setEyebrow] = useState(settings.eyebrow ?? "");
   const [showTitle, setShowTitle] = useState(settings.showTitle ?? true);
   const [title, setTitle] = useState(settings.title ?? "");
   const [showDescription, setShowDescription] = useState(
@@ -96,6 +98,8 @@ export default function NewArrivalForm({
         videoUrl,
         imageUrl,
         imageAlt,
+        showEyebrow,
+        eyebrow,
         showTitle,
         title,
         showDescription,
@@ -211,6 +215,28 @@ export default function NewArrivalForm({
           </Field>
         </>
       ) : null}
+
+      <Override
+        label="Eyebrow"
+        shown={showEyebrow}
+        onToggle={setShowEyebrow}
+        error={errors.eyebrow}
+      >
+        <input
+          type="text"
+          value={eyebrow}
+          /*
+           * The house wording, shown as the placeholder rather than as a
+           * value — typed into the box it would become an override that only
+           * looks like the default, and the English string would then outlive
+           * a change to the Arabic one. Empty means the dictionary line, in
+           * whichever language the visitor is reading.
+           */
+          placeholder="New Arrival — the house wording"
+          onChange={(event) => setEyebrow(event.target.value)}
+          className={`${FIELD_CLASS} px-3 py-2 text-[12px]`}
+        />
+      </Override>
 
       <Override
         label="Title"

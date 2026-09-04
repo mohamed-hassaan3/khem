@@ -4,7 +4,6 @@ import nameLogo from "@/public/logo/name-logo-transparent.webp";
 import FooterDisclosure from "@/src/components/FooterDisclosure";
 import FooterGroup from "@/src/components/FooterGroup";
 import CookieSettingsButton from "@/src/components/consent/CookieSettingsButton";
-import CurrencySwitcher from "@/src/components/i18n/CurrencySwitcher";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
@@ -304,13 +303,16 @@ export default async function Footer({ locale }: { locale: Locale }) {
           <CookieSettingsButton className={legalLinkClass} />
         </div>
         {/*
-         * Currency sits beside "crafted in", not among the legal links: it is a
-         * control, and the row beside it is a set of destinations. The gap keeps
-         * the bar's three parts reading as three parts at `md` and above, and
-         * the pair wraps together on a phone.
+         * "Crafted in" alone, where it used to share the slot with a currency
+         * `<select>`.
+         *
+         * That control has moved into the header's language selector, which now
+         * states the country as well — currency is a consequence of where the
+         * visitor is, and asking it at the bottom of the page in ISO codes was
+         * asking the wrong question in the wrong place. The slot keeps its
+         * position so the bar still reads as three parts at `md` and above.
          */}
         <div className="flex items-center gap-5">
-          <CurrencySwitcher />
           <p className="text-[11px] tracking-[0.08em] text-ground-muted/60">
             {dict.footer.craftedIn}
           </p>

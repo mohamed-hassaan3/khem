@@ -639,7 +639,21 @@ export default async function Home({
             <div className="absolute inset-0 bg-linear-to-r from-ink/90 via-ink/45 to-transparent rtl:bg-linear-to-l" />
             <div className="absolute inset-0 flex items-center px-4 md:px-20 lg:px-32">
               <Reveal className="max-w-lg">
-                <p className="eyebrow mb-5">{dict.home.featured.eyebrow}</p>
+                {newArrival.showEyebrow ? (
+                  /*
+                   * The editor's line, or the house's. `{...island}` only when
+                   * it is the editor's: the dictionary string is already in the
+                   * page's language, while a typed override may be Latin on an
+                   * Arabic page — the same treatment the title and paragraph
+                   * below get.
+                   */
+                  <p
+                    {...(newArrival.eyebrow ? island : {})}
+                    className="eyebrow mb-5"
+                  >
+                    {newArrival.eyebrow ?? dict.home.featured.eyebrow}
+                  </p>
+                ) : null}
                 {newArrival.showTitle && newArrival.title ? (
                   <h2
                     {...island}

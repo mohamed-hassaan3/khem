@@ -1277,6 +1277,8 @@ export const ar: Dictionary = {
       overview: "نظرة عامة",
       profile: "الملف الشخصي",
       orders: "طلباتي",
+      /* Still named here: the sections exist as routes and as headings on
+         the profile, they are simply no longer entries on the rail. */
       addresses: "العناوين",
       vouchers: "القسائم والرصيد",
       notifications: "الإشعارات",
@@ -1293,6 +1295,28 @@ export const ar: Dictionary = {
       heading: "مزايا حصرية للأعضاء",
       body: "بصفتك عضوًا في كيم، تحصل على وصول مبكر للإصدارات الجديدة، ودعوات إلى فعالياتنا الخاصة، وشحن مجاني على كل الطلبات.",
     },
+
+    bell: {
+      label: "الإشعارات",
+      labelWithCount: "الإشعارات، {count} غير مقروءة",
+      heading: "من الدار إليك",
+      markAll: "تعليم الكل كمقروء",
+      viewAll: "عرض الكل",
+      empty: "لا جديد بعد.",
+      justNow: "الآن",
+    },
+
+    privileges: {
+      eyebrow: "في رصيدك",
+      credit: "رصيد كيم",
+      creditCountOne: "رصيد واحد",
+      creditCount: "{count} أرصدة",
+      vouchers: "القسائم",
+      voucherCountOne: "قسيمة متاحة",
+      voucherCount: "{count} قسائم متاحة",
+      expires: "تنتهي في {date}",
+      view: "عرض",
+    },
     orders: {
       meta: {
         title: "طلباتي",
@@ -1304,6 +1328,8 @@ export const ar: Dictionary = {
       latest: "الأحدث",
       tracker: {
         label: "مسار الطلب",
+        trigger: "تتبّع الطلب",
+        hide: "إخفاء التتبّع",
         PROCESSING: "قيد التجهيز",
         SHIPPED: "في الطريق إليك",
         DELIVERED: "تم التسليم",
@@ -1334,10 +1360,41 @@ export const ar: Dictionary = {
       edit: "تعديل",
       remove: "حذف",
       add: "+ إضافة عنوان جديد",
+      makeDefault: "اجعله الافتراضي",
+      confirmRemove: "تأكيد الحذف",
       empty: {
         heading: "لا توجد عناوين محفوظة",
         body: "ستُحفظ هنا العناوين التي تستخدمها عند إتمام الطلب لتستعملها لاحقًا.",
         cta: "استكشف المجموعات",
+      },
+      none: "لم تحفظ أي عنوان بعد.",
+      form: {
+        addHeading: "عنوان جديد",
+        editHeading: "تعديل العنوان",
+        label: "التسمية",
+        labelHint: "ما تسمّي به هذا المكان — المنزل، المكتب.",
+        recipient: "المُستلِم",
+        line1: "العنوان",
+        line2: "علامة مميزة",
+        line2Placeholder: "اختياري — بجوار، خلف، أمام",
+        city: "المدينة",
+        state: "المحافظة",
+        postalCode: "الرمز البريدي",
+        postalCodePlaceholder: "اختياري",
+        country: "الدولة",
+        makeDefault: "التوصيل إلى هنا افتراضيًا",
+        save: "حفظ العنوان",
+        saving: "جارٍ الحفظ",
+        saved: "تم حفظ عنوانك.",
+        cancel: "إلغاء",
+        failed: "تعذّر الحفظ. من فضلك حاول مرة أخرى.",
+        removeFailed: "تعذّر الحذف. من فضلك حاول مرة أخرى.",
+        errors: {
+          required: "هذا الحقل مطلوب.",
+          tooShort: "هذا قصير جدًا.",
+          tooLong: "هذا طويل جدًا.",
+          invalid: "من فضلك راجع هذا الحقل.",
+        },
       },
     },
     profile: {
@@ -1347,6 +1404,11 @@ export const ar: Dictionary = {
       },
       eyebrow: "بياناتك",
       heading: "الملف الشخصي",
+      sections: {
+        account: "بياناتك",
+        addresses: "عناوين التوصيل",
+        preferences: "التفضيلات",
+      },
     },
 
     vouchers: {
@@ -1643,12 +1705,20 @@ export const ar: Dictionary = {
     secondary: "استكشف المجموعات",
   },
 
-  languageSwitcher: {
-    label: "تغيير اللغة",
+  regionSwitcher: {
+    label: "اللغة والدولة",
+    language: "اللغة",
+    country: "الدولة",
+    international: "دولي",
+    shortNames: {
+      AE: "الإمارات",
+      GB: "بريطانيا",
+    },
+    europe: "أوروبا",
+    note: "تُعرض الأسعار بعملة الدولة التي تختارها.",
   },
 
   currencySwitcher: {
-    label: "تغيير العملة",
     names: {
       USD: "دولار أمريكي",
       EGP: "جنيه مصري",

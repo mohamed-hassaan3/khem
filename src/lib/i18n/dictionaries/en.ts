@@ -1505,6 +1505,8 @@ export const en = {
       overview: "Overview",
       profile: "Profile",
       orders: "My Orders",
+      /* Still named here: the sections exist as routes and as headings on
+         the profile, they are simply no longer entries on the rail. */
       addresses: "Addresses",
       vouchers: "Vouchers & Credits",
       notifications: "Notifications",
@@ -1520,6 +1522,41 @@ export const en = {
     benefits: {
       heading: "Exclusive Member Benefits",
       body: "As a KHEM member, you receive early access to new releases, invitations to private events, and complimentary delivery on all orders.",
+    },
+
+    /*
+     * The header bell.
+     *
+     * Its own block rather than a reuse of `notifications`, because the panel
+     * says less than the page does: a kind, a line, and when. The page beneath
+     * it keeps the full wording.
+     */
+    bell: {
+      label: "Notifications",
+      labelWithCount: "Notifications, {count} unread",
+      heading: "Word From the House",
+      markAll: "Mark all as read",
+      viewAll: "View all",
+      empty: "Nothing to read yet.",
+      justNow: "Just now",
+    },
+
+    /*
+     * The band above the overview's two figures.
+     *
+     * It is rendered only when the customer actually holds something, so none
+     * of these strings has a zero case to word.
+     */
+    privileges: {
+      eyebrow: "Yours to Spend",
+      credit: "KHEM Credit",
+      creditCountOne: "1 credit",
+      creditCount: "{count} credits",
+      vouchers: "Vouchers",
+      voucherCountOne: "1 available",
+      voucherCount: "{count} available",
+      expires: "Expires {date}",
+      view: "View",
     },
     orders: {
       meta: {
@@ -1539,6 +1576,10 @@ export const en = {
        */
       tracker: {
         label: "Order progress",
+        /* The disclosure that holds the rail. The station name sits beside it,
+           so a closed card still answers "where is it". */
+        trigger: "Track order",
+        hide: "Hide tracking",
         PROCESSING: "Being Prepared",
         SHIPPED: "On Its Way",
         DELIVERED: "Delivered",
@@ -1569,10 +1610,44 @@ export const en = {
       edit: "Edit",
       remove: "Remove",
       add: "+ Add New Address",
+      makeDefault: "Make default",
+      confirmRemove: "Confirm removal",
       empty: {
         heading: "No Saved Addresses",
         body: "Addresses you use at checkout will be kept here for next time.",
         cta: "Explore Collections",
+      },
+      /* The panel's own empty line — shorter than the page's, because the
+         "Add" control is directly beneath it. */
+      none: "You have not saved an address yet.",
+      form: {
+        addHeading: "New address",
+        editHeading: "Edit address",
+        label: "Label",
+        labelHint: "What you call this place — Home, Office.",
+        recipient: "Recipient",
+        line1: "Street address",
+        line2: "Landmark",
+        line2Placeholder: "Optional — beside, behind, opposite",
+        city: "City",
+        state: "Governorate",
+        postalCode: "Postal code",
+        postalCodePlaceholder: "Optional",
+        country: "Country",
+        makeDefault: "Deliver here by default",
+        save: "Save address",
+        saving: "Saving",
+        saved: "Your address has been saved.",
+        cancel: "Cancel",
+        failed: "That could not be saved. Please try again.",
+        removeFailed: "That could not be removed. Please try again.",
+        /* Keyed by `AddressErrorCode` — a fifth code is a compile error. */
+        errors: {
+          required: "This is needed.",
+          tooShort: "That is too short.",
+          tooLong: "That is too long.",
+          invalid: "Please check this.",
+        },
       },
     },
     profile: {
@@ -1582,6 +1657,13 @@ export const en = {
       },
       eyebrow: "Your Details",
       heading: "Profile",
+      /* The two panels that folded into this page. Addresses and Preferences
+         were rail entries of their own; both were one short section. */
+      sections: {
+        account: "Your Details",
+        addresses: "Delivery Addresses",
+        preferences: "Preferences",
+      },
     },
 
     /*
@@ -1908,8 +1990,42 @@ export const en = {
     secondary: "Explore Collections",
   },
 
-  languageSwitcher: {
-    label: "Change language",
+  /*
+   * The one control that carries both the language the site is read in and the
+   * country its prices are drawn for.
+   *
+   * They were two controls in two places — a language rail in the header and a
+   * currency select in the footer — which asked the visitor to know that the
+   * currency lives at the bottom of the page, and that it is really a question
+   * about where they are. One trigger, two lists, one decision.
+   *
+   * The country *names* are not written here: `Intl.DisplayNames` produces them
+   * in the reading locale, the same way `src/lib/shipping.ts` names countries
+   * at checkout — so this block holds only what a formatter cannot supply.
+   */
+  regionSwitcher: {
+    label: "Language and country",
+    language: "Language",
+    country: "Country",
+    /** Neither a country nor a claim about one — see `INTERNATIONAL`. */
+    international: "International",
+    /*
+     * The countries this house calls by their short name.
+     *
+     * Only where the short form is the *ordinary* one: nobody says "United Arab
+     * Emirates" in a header, and a trigger sized by the longest member of the
+     * list is a trigger that wobbles. Everything absent from this map keeps the
+     * name CLDR gives it (`Intl.DisplayNames`), which already shortens what it
+     * can — "UK" for GB — and leaves "Germany" and "Saudi Arabia" alone,
+     * because those *are* the short names.
+     */
+    shortNames: {
+      AE: "UAE",
+      GB: "UK",
+    },
+    /** What a euro price is shown as before a country has been named. */
+    europe: "Europe",
+    note: "Prices are shown in the currency of the country you choose.",
   },
 
   /*
@@ -1919,7 +2035,6 @@ export const en = {
    * Intl gives them (`src/lib/format.ts`).
    */
   currencySwitcher: {
-    label: "Change currency",
     names: {
       USD: "US Dollar",
       EGP: "Egyptian Pound",

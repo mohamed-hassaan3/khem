@@ -343,7 +343,7 @@ export default function AdminShell({
       <div
         onClick={() => setOpen(false)}
         aria-hidden="true"
-        className={`fixed inset-0 top-[var(--header-h)] z-30 bg-ink/45 transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden ${
+        className={`fixed inset-0 top-[var(--chrome-h)] z-30 bg-ink/45 transition-[opacity,top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none lg:hidden ${
           showScrim ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
@@ -353,7 +353,7 @@ export default function AdminShell({
         aria-hidden={resolved && !open ? true : undefined}
         // `start-0` rather than `left-0`: the inline offset and the transform
         // must agree on which edge is home, or the RTL drawer parks mid-screen.
-        className={`ground-stone fixed bottom-0 start-0 top-[var(--header-h)] z-40 w-[280px] overflow-y-auto border-e border-ground-border py-8 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:sticky lg:bottom-auto lg:h-[calc(100svh-var(--header-h))] lg:w-auto lg:py-12 lg:transition-none ${railPosition}`}
+        className={`ground-stone fixed bottom-0 start-0 top-[var(--chrome-h)] z-40 w-[280px] overflow-y-auto border-e border-ground-border py-8 transition-[transform,top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none lg:sticky lg:bottom-auto lg:h-[calc(100svh-var(--chrome-h))] lg:w-auto lg:py-12 lg:transition-[top,height] ${railPosition}`}
       >
         <div className="px-8">
           <p className="font-heading text-[11px] uppercase tracking-[0.3em] text-ground-accent">
@@ -457,8 +457,16 @@ export default function AdminShell({
           control that hides the rail cannot itself live inside the thing it
           hides. Sticky beneath the storefront nav so it is reachable from the
           bottom of a long order list.
+
+          `--chrome-h`, not `--header-h`: the storefront header now leaves while
+          the visitor reads down (`use-header-visibility.ts`), and a bar parked
+          at the header's *reserved* height would sit 118px down the screen with
+          nothing above it. Reading the live offset instead, this bar closes up
+          to the top edge as the header goes and settles back under it as the
+          header returns — the two move as one. The transition matches the
+          header's own duration and curve.
         */}
-        <div className="sticky top-[var(--header-h)] z-20 -mx-5 mb-8 flex items-center gap-4 border-b border-ground-border bg-ground-bg px-5 py-3 sm:-mx-8 sm:px-8 lg:-mx-14 lg:px-14">
+        <div className="sticky top-[var(--chrome-h)] z-20 -mx-5 mb-8 flex items-center gap-4 border-b border-ground-border bg-ground-bg px-5 py-3 transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:-mx-8 sm:px-8 lg:-mx-14 lg:px-14">
           <button
             type="button"
             onClick={toggle}

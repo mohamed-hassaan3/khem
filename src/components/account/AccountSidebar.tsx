@@ -18,21 +18,16 @@ import { ACCOUNT_PATHS } from "@/src/lib/routes";
  * The panels were tabs in `useState` before this change. They are routes now:
  * shareable, back-button correct, and each one free to become its own query.
  *
+ * ## Four entries, not seven
+ *
+ * Notifications left the rail for the header bell — one place counting unread
+ * rows, not two that can disagree. Addresses and Preferences left it for
+ * `/account/profile`, which is where a customer looks for both: each was one
+ * short section, and a rail of seven made the portal look larger than it is.
+ * All three routes still exist and still answer; only their rail entries went.
  */
 
-export default function AccountSidebar({
-  unreadCount = 0,
-}: {
-  /**
-   * How many notifications are new.
-   *
-   * A quiet numeral beside one rail entry, and the *only* place a count appears
-   * anywhere on the storefront: §16 asks for optional and non-intrusive, so
-   * there is no bell over the shop and no badge in the header. Somebody who has
-   * come to their account sees it; somebody browsing fragrances does not.
-   */
-  unreadCount?: number;
-}) {
+export default function AccountSidebar() {
   const dict = useDictionary();
   const pathname = usePathname();
 
@@ -42,17 +37,14 @@ export default function AccountSidebar({
 
   /*
    * The dashboard's sections, in the order the customer is likely to want
-   * them: who they are, what they have bought, where it goes, what the house
-   * owes them, then the two settings panels.
+   * them: where they stand, what they have bought, what the house owes them,
+   * and last the details they change rarely.
    */
   const links = [
     { href: ACCOUNT_PATHS.overview, label: dict.account.nav.overview },
-    { href: ACCOUNT_PATHS.profile, label: dict.account.nav.profile },
     { href: ACCOUNT_PATHS.orders, label: dict.account.nav.orders },
-    { href: ACCOUNT_PATHS.addresses, label: dict.account.nav.addresses },
     { href: ACCOUNT_PATHS.vouchers, label: dict.account.nav.vouchers },
-    { href: ACCOUNT_PATHS.notifications, label: dict.account.nav.notifications },
-    { href: ACCOUNT_PATHS.preferences, label: dict.account.nav.preferences },
+    { href: ACCOUNT_PATHS.profile, label: dict.account.nav.profile },
   ] as const;
 
   return (
@@ -69,8 +61,6 @@ export default function AccountSidebar({
         {links.map((link) => {
           // Exact match only: `/account` must not light up on `/account/orders`.
           const isActive = path === link.href;
-          const showCount =
-            link.href === ACCOUNT_PATHS.notifications && unreadCount > 0;
 
           return (
             <LocaleLink
@@ -87,12 +77,6 @@ export default function AccountSidebar({
               ].join(" ")}
             >
               {link.label}
-
-              {showCount ? (
-                <span className="ms-2 font-heading text-[10px] tabular-nums text-ground-accent">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              ) : null}
             </LocaleLink>
           );
         })}
