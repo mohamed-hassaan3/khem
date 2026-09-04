@@ -400,11 +400,17 @@ export async function unscheduleCampaign(input: unknown): Promise<AdminActionRes
 /**
  * Choose which stored audiences a campaign speaks to.
  *
- * Two booleans, and neither of them is who: **consent is not decided here.** The
- * Customers audience is `customer_directory` filtered on `marketingOptIn`, and
+ * Two booleans, and neither of them is who: **membership is not decided here.**
+ * The Customers audience is every `customer_directory` row with an address, and
  * the suppression list is subtracted from every source — both in
  * `campaign_audience()`, where no form can reach them. What this action chooses
  * is which of those already-filtered sets to draw from.
+ *
+ * Consent for that audience is the soft opt-in one 0055 settled on: somebody who
+ * has bought from the house may be written to about the house, and the
+ * unsubscribe link on every letter is what carries a refusal.
+ * `"marketingOptIn"` is still recorded and still shown on the customers screens;
+ * it is no longer a condition of sending.
  *
  * Editable campaigns only. A campaign that is sending or sent has already
  * claimed its audience, and changing the selection afterwards would describe an

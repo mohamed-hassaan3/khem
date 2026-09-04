@@ -140,9 +140,10 @@ export default function CampaignDispatch({
                 Audience
               </p>
               <p className="mt-2 text-[12px] leading-relaxed text-ground-muted">
-                The house&rsquo;s stored lists. Anybody who has unsubscribed is
-                left out of both, and a customer who never ticked the marketing
-                box is never in the second one.
+                The house&rsquo;s stored lists. The second is everyone who has
+                ordered and left an address. Anybody who has unsubscribed is
+                left out of both, permanently and from every source &mdash;
+                including an address typed by hand below.
               </p>
             </div>
 
@@ -159,7 +160,7 @@ export default function CampaignDispatch({
             <AdminToggle
               id="toCustomers"
               label="Customers"
-              description={`Customers who agreed to hear from the house — ${audience.customers} ${
+              description={`Everyone who has ordered and left an address — ${audience.customers} ${
                 audience.customers === 1 ? "address" : "addresses"
               } not already counted above.`}
               checked={toCustomers}
