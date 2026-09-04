@@ -1,52 +1,47 @@
 "use client";
 
 /**
- * The storefront's bell — what the house has told this customer, in the header.
+ * The portal's bell — what the house has told this customer, above the panel.
  *
- * ## This reverses an earlier decision, deliberately
+ * ## Where it lives, and why that is not the storefront header
  *
- * The account rail used to carry a quiet numeral and the header carried
- * nothing, on the reading that §16's "optional and non-intrusive" forbade a
- * count over a perfume boutique. The house has asked for the bell. What keeps
- * the original concern honest is *who sees it*: it renders *only* for a signed
- * -in visitor, so somebody browsing fragrances still meets no badge, no count
- * and no dot. The rail's numeral is gone, because two places counting the same
- * unread rows is how the two come to disagree.
+ * Inside the account, and only inside the account. §16 asks for optional and
+ * non-intrusive, and a notification count over a perfume boutique is neither:
+ * somebody browsing fragrances meets no badge, no dot and no numeral. Somebody
+ * who has come to their account meets it at the top of every panel. It replaced
+ * the quiet numeral the navigation rail used to carry — one place counting
+ * unread rows, never two that can disagree.
  *
- * ## It cannot read the session where it renders
+ * ## Server data, not a fetch on mount
  *
- * `<Nav>` is in the layout of every route. Reading `currentUser()` here would
- * turn all thirty routes dynamic — the cost `src/actions/account.ts` documents
- * for `viewerIsAdmin()`, and the reason this component asks the same way: one
- * action for the numeral when it mounts signed-in, one for the list the first
- * time the panel is opened. A visitor who never opens it fetches one integer;
- * a guest fetches nothing.
+ * The feed arrives as a prop. The layout that renders this has already read the
+ * session and the rows — `notificationsForUser()` is memoised per request, so
+ * the panel at `/account/notifications` beneath it shares the same read rather
+ * than running the feed twice — and every account route is `force-dynamic`, so
+ * a navigation is a fresh list. No Server Action of its own, nothing fetched in
+ * an effect, and no moment where the bell is mounted but empty.
  *
  * ## Read state is server state
  *
- * Opening a row marks it read through the same action the panel at
- * `/account/notifications` uses, and the list is re-read rather than dimmed in
- * place. A row that looked read in one tab and came back new in the next would
- * teach a customer to distrust the whole feed.
+ * Opening a row marks it read through the same action the panel uses, then
+ * refreshes. A row that looked read in one tab and came back new in the next
+ * would teach a customer to distrust the whole feed.
  */
 
 import { Bell, Package, Ticket, Wallet } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 
-import {
-  customerNotifications,
-  customerUnreadCount,
-} from "@/src/actions/account-notifications";
 import { markNotificationsRead } from "@/src/actions/notifications";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import type { Locale } from "@/src/lib/i18n/config";
+import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import {
   notificationHref,
   notificationSentence,
 } from "@/src/lib/notification-copy";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
-import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type {
   CustomerNotification,
   CustomerNotificationKind,
@@ -62,10 +57,10 @@ const KIND_ICON: Record<CustomerNotificationKind, typeof Bell> = {
  * How long ago, in the reader's language.
  *
  * `Intl.RelativeTimeFormat` rather than the hand-rolled minutes-and-hours the
- * desk's bell uses: that one is English-only because the desk is, and this
- * header is not. Anything inside the last minute is "just now" — a formatter
- * saying "in 0 seconds" for a notification written a moment ago is worse than
- * the phrase.
+ * desk's bell uses: that one is English-only because the desk is, and the
+ * storefront is not. Anything inside the last minute is "just now" — a
+ * formatter saying "in 0 seconds" for something written a moment ago is worse
+ * than the phrase.
  */
 function ago(iso: string, locale: Locale, justNow: string): string {
   const seconds = Math.round((Date.parse(iso) - Date.now()) / 1000);
@@ -87,41 +82,29 @@ function ago(iso: string, locale: Locale, justNow: string): string {
   return formatter.format(Math.round(days / 30), "month");
 }
 
-export default function NotificationBell() {
-  const dict = useDictionary();
-  const locale = useLocale();
-  const copy = dict.account.bell;
+export interface NotificationBellProps {
+  notifications: readonly CustomerNotification[];
+  locale: Locale;
+  copy: Dictionary["account"]["bell"];
+  /** The kinds and sentences, shared with the panel at `/account/notifications`. */
+  feedCopy: Dictionary["account"]["notifications"];
+}
 
+export default function NotificationBell({
+  notifications,
+  locale,
+  copy,
+  feedCopy,
+}: NotificationBellProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [unread, setUnread] = useState(0);
-  const [items, setItems] = useState<readonly CustomerNotification[] | null>(null);
   const [isPending, startTransition] = useTransition();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  /*
-   * The numeral, once. The component only mounts for a signed-in visitor — see
-   * the branch in `<Nav>` — so there is no signed-out case to guard here, and
-   * the action answers 0 for one anyway.
-   */
-  useEffect(() => {
-    let live = true;
+  const unread = notifications.filter((item) => !item.isRead);
 
-    customerUnreadCount()
-      .then((count) => {
-        if (live) setUnread(count);
-      })
-      .catch(() => {
-        // A header badge is not worth a console full of failures on a flaky
-        // connection. No numeral is the honest fallback.
-      });
-
-    return () => {
-      live = false;
-    };
-  }, []);
-
-  // Pointerdown, like the account menu beside it: a panel that survives until
-  // mouseup reads as one that failed to notice the dismissal.
+  // Pointerdown, like the account menu: a panel that survives until mouseup
+  // reads as one that failed to notice the dismissal.
   useEffect(() => {
     if (!open) return;
 
@@ -142,23 +125,6 @@ export default function NotificationBell() {
     };
   }, [open]);
 
-  /** Re-read rather than patch: the server's answer is the one that counts. */
-  function refresh() {
-    startTransition(async () => {
-      const feed = await customerNotifications();
-      setItems(feed);
-      setUnread(feed.filter((item) => !item.isRead).length);
-    });
-  }
-
-  function toggle() {
-    const next = !open;
-    setOpen(next);
-    // Fetched on the first open and re-fetched on every one after: a bell that
-    // showed the same list an hour later would be a stale bell.
-    if (next) refresh();
-  }
-
   function markRead(rows: readonly CustomerNotification[]) {
     if (rows.length === 0) return;
 
@@ -166,39 +132,36 @@ export default function NotificationBell() {
       await markNotificationsRead({
         items: rows.map((item) => ({ kind: item.kind, entityId: item.entityId })),
       });
-
-      const feed = await customerNotifications();
-      setItems(feed);
-      setUnread(feed.filter((item) => !item.isRead).length);
+      // The layout re-renders and hands down a fresh feed; nothing is dimmed
+      // locally, so the numeral and the database never disagree.
+      router.refresh();
     });
   }
 
-  const unreadRows = (items ?? []).filter((item) => !item.isRead);
-
   return (
-    <div ref={containerRef} className="relative shrink-0">
+    <div ref={containerRef} className="relative">
       <button
         type="button"
         aria-haspopup="dialog"
         aria-expanded={open}
-        onClick={toggle}
+        onClick={() => setOpen((current) => !current)}
         aria-label={
-          unread > 0
-            ? interpolate(copy.labelWithCount, { count: String(unread) })
+          unread.length > 0
+            ? interpolate(copy.labelWithCount, { count: String(unread.length) })
             : copy.label
         }
-        className="nav-link relative flex size-[26px] cursor-pointer items-center justify-center"
+        className="relative flex size-9 cursor-pointer items-center justify-center border border-ground-border bg-transparent text-ground-muted transition-colors duration-300 ease-luxury-bezier hover:border-gold/40 hover:text-ground-accent"
       >
-        <Bell width={17} height={17} strokeWidth={1.25} aria-hidden="true" />
+        <Bell size={16} strokeWidth={1.25} aria-hidden="true" />
 
-        {unread > 0 ? (
+        {unread.length > 0 ? (
           <span
             aria-hidden="true"
-            /* The same gold-on-ivory pill the bag count wears, and for the same
-               reason: it must read against the header's ground, not obsidian. */
-            className="absolute -end-1 -top-1 grid min-w-4 place-items-center rounded-full bg-ground-accent px-1 font-body text-[9px] leading-4 text-ground-bg"
+            /* Deep gold on the panel's ivory ground, like the bag count in the
+               header: legible without shouting, and inside the 5% accent. */
+            className="absolute -end-1.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-ground-accent px-1 font-body text-[9px] leading-4 text-ground-bg"
           >
-            {unread > 9 ? "9+" : unread}
+            {unread.length > 9 ? "9+" : unread.length}
           </span>
         ) : null}
       </button>
@@ -208,7 +171,7 @@ export default function NotificationBell() {
         aria-label={copy.heading}
         inert={!open}
         className={[
-          "absolute end-0 top-[calc(100%+14px)] z-1001 w-[min(92vw,23rem)]",
+          "absolute end-0 top-[calc(100%+10px)] z-1001 w-[min(88vw,23rem)]",
           "border border-ground-border bg-ground-bg shadow-3",
           "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
           open
@@ -221,11 +184,11 @@ export default function NotificationBell() {
             {copy.heading}
           </p>
 
-          {unreadRows.length > 0 ? (
+          {unread.length > 0 ? (
             <button
               type="button"
               disabled={isPending}
-              onClick={() => markRead(unreadRows)}
+              onClick={() => markRead(unread)}
               className="cursor-pointer bg-transparent p-0 font-heading text-[9px] uppercase tracking-[0.16em] text-ground-muted underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline disabled:opacity-40"
             >
               {copy.markAll}
@@ -234,13 +197,13 @@ export default function NotificationBell() {
         </div>
 
         <div className="max-h-[24rem] overflow-y-auto">
-          {items !== null && items.length === 0 ? (
+          {notifications.length === 0 ? (
             <p className="px-5 py-6 text-[11px] leading-relaxed text-ground-muted">
               {copy.empty}
             </p>
           ) : (
             <ul>
-              {(items ?? []).map((item) => {
+              {notifications.map((item) => {
                 const Icon = KIND_ICON[item.kind];
 
                 return (
@@ -272,7 +235,7 @@ export default function NotificationBell() {
 
                       <span className="min-w-0 flex-1">
                         <span className="block font-heading text-[9px] uppercase tracking-[0.18em] text-ground-muted">
-                          {dict.account.notifications.kind[item.kind]}
+                          {feedCopy.kind[item.kind]}
                         </span>
 
                         {/* `dir="auto"` rather than an island: a translated
@@ -282,7 +245,7 @@ export default function NotificationBell() {
                           dir="auto"
                           className="mt-0.5 block text-[12px] leading-relaxed text-ground"
                         >
-                          {notificationSentence(item, dict.account.notifications)}
+                          {notificationSentence(item, feedCopy)}
                         </span>
 
                         <span className="mt-1 block text-[10px] text-ground-muted/70">

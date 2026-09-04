@@ -3,10 +3,13 @@ import { redirect } from "next/navigation";
 
 import AccountIdentity from "@/src/components/account/AccountIdentity";
 import AccountSidebar from "@/src/components/account/AccountSidebar";
+import NotificationBell from "@/src/components/account/NotificationBell";
 import SignOutButton from "@/src/components/account/SignOutButton";
 import { getViewer } from "@/src/lib/auth";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
+import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { AUTH_PATHS } from "@/src/lib/routes";
+import { notificationsForUser } from "@/src/services/notifications";
 
 /**
  * The customer portal shell — identity block, navigation rail, panel slot.
@@ -48,12 +51,29 @@ export default async function AccountLayout({
   if (viewer === null) redirect(localizePath(activeLocale, AUTH_PATHS.signIn));
 
   /*
-   * No unread count is read here any more. The rail used to carry a numeral and
-   * this layout fetched it; the header bell owns that number now, and it asks
-   * for it through a Server Action of its own so the storefront's thirty routes
-   * stay static. Two surfaces counting the same rows is two surfaces that can
-   * disagree — see `<NotificationBell>`.
+   * The bell's feed, read once for the whole portal.
+   *
+   * Read here rather than in the bell because the bell is a Client Component
+   * and this is a secret-key query — and read after the gate, never beside it,
+   * so it cannot run for a request that is about to be redirected away.
+   *
+   * `notificationsForUser()` is memoised per request, so this costs nothing
+   * extra on `/account/notifications`: the panel beneath shares this very read
+   * rather than running the feed a second time. Both halves of the owner come
+   * from the session — a voucher grant may predate the account and is keyed by
+   * address.
+   *
+   * The rail used to carry a quiet numeral instead. The bell owns that number
+   * now; two surfaces counting the same unread rows is two surfaces that can
+   * come to disagree.
    */
+  const [dict, notifications] = await Promise.all([
+    getDictionary(activeLocale),
+    notificationsForUser({
+      clerkUserId: viewer.id,
+      email: viewer.primaryEmail,
+    }),
+  ]);
 
   return (
     <div className="ground-ivory min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
@@ -73,6 +93,20 @@ export default async function AccountLayout({
       </aside>
 
       <main className="px-5 pb-14 pt-10 sm:px-8 lg:px-20 lg:pt-15">
+        {/*
+          * The bell, at the head of every panel and nowhere else on the site.
+          * It sits above the panel rather than inside it so that all four
+          * sections carry it identically, and none of them has to remember to.
+          */}
+        <div className="mb-6 flex justify-end md:mb-8">
+          <NotificationBell
+            notifications={notifications}
+            locale={activeLocale}
+            copy={dict.account.bell}
+            feedCopy={dict.account.notifications}
+          />
+        </div>
+
         {children}
 
         {/* The rail's sign-out sits in the desktop column; on mobile the

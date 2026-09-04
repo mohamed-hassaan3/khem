@@ -32,7 +32,6 @@ import { ChevronDown, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import nameLogo from "@/public/logo/name-logo-transparent.webp";
 
 import AccountMenu from "./account/AccountMenu";
-import NotificationBell from "./account/NotificationBell";
 import SignOutButton from "./account/SignOutButton";
 import LocaleRegionSwitcher from "./i18n/LocaleRegionSwitcher";
 import LocaleLink from "./i18n/LocaleLink";
@@ -40,7 +39,6 @@ import SearchOverlay from "./search/SearchOverlay";
 import { useHeaderVisibility } from "@/src/hooks/use-header-visibility";
 import { signInPathWithReturn } from "@/src/lib/auth-redirect";
 import { interpolate } from "@/src/lib/i18n/interpolate";
-import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { useCart } from "@/src/providers/cart-provider";
 import { useCartDrawer } from "@/src/providers/cart-drawer-provider";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
@@ -627,18 +625,7 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
            * avatar occupy the same 26px box.
            */}
           {isSignedIn ? (
-            <>
-              {/*
-               * The bell is rendered for a signed-in visitor only, which is
-               * what keeps §16's "non-intrusive" true after the house asked
-               * for it: somebody browsing fragrances meets no badge and no
-               * count. It reads its own numeral through a Server Action, so
-               * the header still knows nothing about the session at render
-               * time and the site's thirty routes stay static.
-               */}
-              <NotificationBell />
-              <AccountMenu />
-            </>
+            <AccountMenu />
           ) : (
             /*
              * A plain `<Link>`, not `<LocaleLink>`: `signInPathWithReturn`
@@ -841,25 +828,6 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
                 />
                 {dict.nav.account}
               </LocaleLink>
-
-              {/*
-               * The drawer gets a plain link rather than a second bell: a
-               * popover inside a panel is a layer over a layer, and the phone
-               * has the whole notifications page one tap away.
-               */}
-              {isSignedIn ? (
-                <LocaleLink
-                  href={ACCOUNT_PATHS.notifications}
-                  onClick={closeDrawer}
-                  className={BOUTIQUE_ROW}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="inline-block h-px w-5 bg-current"
-                  />
-                  {dict.account.bell.label}
-                </LocaleLink>
-              ) : null}
 
               {/*
                * The drawer is the only account surface on a phone, so it
