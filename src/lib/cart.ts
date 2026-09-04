@@ -8,16 +8,41 @@
  * to a visitor and a total charged to a card must come from one implementation.
  *
  * Nothing here ever sees a display currency: `formatPrice` converts at the edge
- * (`src/lib/format.ts`), so the free-shipping threshold is crossed at the same
+ * (`src/lib/format.ts`), so the free-delivery minimum is crossed at the same
  * real amount whichever currency the visitor is reading.
+ *
+ * ## The delivery terms are passed in, not held here
+ *
+ * They were two constants until `0053_delivery_terms.sql`, with a comment above
+ * them asking whoever changed one to remember to change a dictionary string too.
+ * They are now a row per order channel, so every function that prices delivery
+ * takes a {@link DeliveryTerms} and this module stays what it says it is: pure
+ * arithmetic with no opinion about where the numbers came from.
  */
 
-/** Free delivery at or above this subtotal — EGP 2,000, the figure published in
- * `dict.product.trust.delivery`. Change both together. */
-export const FREE_SHIPPING_THRESHOLD_IN_CENTS = 200_000;
+import type { DeliveryTerms } from "@/src/schemas/db/delivery";
 
-/** Flat delivery fee below the threshold — EGP 90. */
-export const SHIPPING_FEE_IN_CENTS = 9_000;
+export type { DeliveryTerms };
+
+/**
+ * What delivery costs when the stored terms cannot be read.
+ *
+ * These two were `FREE_SHIPPING_THRESHOLD_IN_CENTS` and
+ * `SHIPPING_FEE_IN_CENTS`, the figures the site charged before
+ * `0053_delivery_terms.sql` made them a row an editor can change. They stay in
+ * the code as the fallback, for the same reason `src/services/settings.ts` keeps
+ * a hard-coded house address: a total is not something the page may decline to
+ * state. A cart that cannot reach the database still quotes EGP 90, and
+ * complimentary delivery from EGP 1,400 — the terms in force the day this was
+ * written — rather than quoting zero or nothing at all.
+ *
+ * They are *not* the authority. `src/services/delivery.ts` reads the row, and
+ * `src/actions/checkout.ts` reads it again before an order is written.
+ */
+export const DEFAULT_DELIVERY_TERMS: DeliveryTerms = {
+  feeInCents: 9_000,
+  freeThresholdInCents: 140_000,
+};
 
 /** Per-order quantity cap, independent of stock. Mirrored by the PDP stepper. */
 export const MAX_QUANTITY_PER_LINE = 10;
@@ -40,24 +65,38 @@ export function cartCount(lines: readonly PricedLine[]): number {
   return lines.reduce((sum, line) => sum + line.quantity, 0);
 }
 
-/** An empty cart ships nothing, so it is never charged for delivery. */
-export function shippingInCents(subtotalInCents: number): number {
+/**
+ * An empty cart ships nothing, so it is never charged for delivery.
+ *
+ * The terms are an argument rather than a module constant, and that is what
+ * keeps this file's opening promise true now that the figures can differ: one
+ * implementation, handed whichever terms apply, quoting the bag and charging the
+ * card with the same arithmetic.
+ */
+export function shippingInCents(
+  subtotalInCents: number,
+  terms: DeliveryTerms,
+): number {
   if (subtotalInCents <= 0) return 0;
-  return subtotalInCents >= FREE_SHIPPING_THRESHOLD_IN_CENTS
-    ? 0
-    : SHIPPING_FEE_IN_CENTS;
+  return subtotalInCents >= terms.freeThresholdInCents ? 0 : terms.feeInCents;
 }
 
-export function cartTotalInCents(subtotalInCents: number): number {
-  return subtotalInCents + shippingInCents(subtotalInCents);
+export function cartTotalInCents(
+  subtotalInCents: number,
+  terms: DeliveryTerms,
+): number {
+  return subtotalInCents + shippingInCents(subtotalInCents, terms);
 }
 
 /**
  * How much more the visitor must spend to earn free delivery, or `0` once the
- * threshold is met — which is the signal to hide the nudge entirely.
+ * minimum is met — which is the signal to hide the nudge entirely.
  */
-export function amountToFreeShippingInCents(subtotalInCents: number): number {
-  return Math.max(0, FREE_SHIPPING_THRESHOLD_IN_CENTS - subtotalInCents);
+export function amountToFreeShippingInCents(
+  subtotalInCents: number,
+  terms: DeliveryTerms,
+): number {
+  return Math.max(0, terms.freeThresholdInCents - subtotalInCents);
 }
 
 /**

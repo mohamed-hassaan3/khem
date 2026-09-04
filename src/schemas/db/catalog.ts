@@ -382,7 +382,7 @@ export const productRowSchema = z.object({
   heartNotes_ar: z.array(z.string()).nullable().default(null),
   baseNotes: z.array(z.string()),
   baseNotes_ar: z.array(z.string()).nullable().default(null),
-  volumeMl: z.number(),
+  volumeMl: z.number().nullable(),
   priceInCents: z.number(),
   sku: z.string(),
   inventory: z.number(),

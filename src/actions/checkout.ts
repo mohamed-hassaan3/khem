@@ -57,9 +57,11 @@ import { getUserId } from "@/src/lib/auth";
 import { shippingInCents } from "@/src/lib/cart";
 import { clientKey, isRateLimited } from "@/src/lib/email/rate-limit";
 import { announceOrder } from "@/src/lib/email/send-order-mail";
+import { isCardPaymentAvailable } from "@/src/lib/stripe/server";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { discountRefusalCodeSchema } from "@/src/schemas/db/discount-preview";
 import { checkoutFieldErrors, checkoutSchema } from "@/src/schemas/checkout";
+import { getDeliveryTerms } from "@/src/services/delivery";
 import { getOrderForMailByNumber, resolveCartToLines } from "@/src/services/orders";
 import type { CheckoutFormInput, CheckoutResult } from "@/src/types/checkout";
 import type { DiscountRefusalCode } from "@/src/types/discount";
@@ -250,6 +252,30 @@ export async function placeCustomerOrder(
     };
   }
 
+  /*
+   * 3a. The card rail, as a boundary rather than an affordance.
+   *
+   * `PaymentStep` hides the card panel when the server says it is unavailable,
+   * and that is all it is: a courtesy to the visitor. The method arrives in the
+   * request body like everything else on this form, so a request that simply
+   * says `CARD` while Stripe is off would otherwise be written straight through
+   * — creating an order that reserves bottles, can never be paid for, and holds
+   * that stock until the sweeper reaches it thirty minutes later. No downstream
+   * check catches it: `/api/checkout/intent` correctly refuses, but by then the
+   * order exists and the stock has already moved.
+   *
+   * Asked of `isCardPaymentAvailable()` rather than of key presence, so that
+   * switching `STRIPE_PAYMENT_ENABLED` off closes this door too.
+   *
+   * `unconfigured` rather than a new key: the visitor's problem is identical to
+   * a missing Supabase key below — the house cannot take this order right now —
+   * and the dictionary already says so in both languages.
+   */
+  if (parsed.data.paymentMethod === "CARD" && !isCardPaymentAvailable()) {
+    console.error("[checkout] CARD requested while the card rail is off.");
+    return { ok: false, formError: "unconfigured" };
+  }
+
   const supabase = getSupabaseAdmin();
   if (!supabase) {
     console.error("[checkout] SUPABASE_SECRET_KEY is not set; no order written.");
@@ -271,7 +297,15 @@ export async function placeCustomerOrder(
   // 5. The one figure the database cannot derive. Same function the cart page
   //    used to quote it, so the total shown and the total charged come from one
   //    implementation — which is the promise `src/lib/cart.ts` opens with.
-  const shipInCents = shippingInCents(resolution.subtotalInCents);
+  //
+  //    The terms are re-read here rather than taken from the request. The
+  //    browser was handed them by the layout and priced the bag with them, but
+  //    what a browser sends is a claim; `"DeliverySetting"` is the fact. A
+  //    tampered payload cannot buy cheap delivery, and a bag priced before an
+  //    editor changed the fee is charged the fee in force at the moment the
+  //    order is written.
+  const deliveryTerms = await getDeliveryTerms("ONLINE");
+  const shipInCents = shippingInCents(resolution.subtotalInCents, deliveryTerms);
 
   // 6. Free anything abandoned before asking for stock, so a bottle held by a
   //    basket nobody paid for is available to the person standing here now.

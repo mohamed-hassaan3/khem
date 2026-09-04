@@ -1,5 +1,6 @@
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import ContactChannelsEditor from "@/src/components/admin/ContactChannelsEditor";
+import DeliverySettingsForm from "@/src/components/admin/DeliverySettingsForm";
 import HouseSettingsForm from "@/src/components/admin/HouseSettingsForm";
 import SocialProfilesEditor from "@/src/components/admin/SocialProfilesEditor";
 import { isLocale } from "@/src/lib/i18n/config";
@@ -7,6 +8,7 @@ import {
   getAdminSettings,
   listAdminContactChannels,
   listAdminSocialProfiles,
+  listDeliverySettings,
 } from "@/src/services/admin/settings";
 
 /**
@@ -50,8 +52,9 @@ export default async function AdminSettingsPage({
    * is where the band it controls is configured. The column it writes is
    * unchanged; only its editor moved, so there is still exactly one of it.
    */
-  const [settings, channels, profiles] = await Promise.all([
+  const [settings, delivery, channels, profiles] = await Promise.all([
     getAdminSettings(),
+    listDeliverySettings(),
     listAdminContactChannels(),
     listAdminSocialProfiles(),
   ]);
@@ -76,6 +79,22 @@ export default async function AdminSettingsPage({
         </div>
 
         <HouseSettingsForm settings={settings} />
+      </section>
+
+      <section className="mt-12 space-y-5">
+        <div>
+          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+            Delivery
+          </h2>
+          <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
+            These are the terms of business, not a display setting. The fee here
+            is what the bag quotes and what the card is charged; the minimum is
+            what the &ldquo;Complimentary Delivery&rdquo; badge promises on every
+            product page. Both take effect on the next page load — no deploy.
+          </p>
+        </div>
+
+        <DeliverySettingsForm settings={delivery} />
       </section>
 
       <section className="mt-12 space-y-5">

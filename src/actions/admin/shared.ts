@@ -220,6 +220,52 @@ export function postgresFailure(
     case "23502":
       return { ok: false, message: "A required field was left empty." };
 
+    case "P0001":
+      /*
+       * `raise exception` from `product_type_matches_kind()`
+       * (`0052_product_type_and_volume.sql`) — the rules that span the product's
+       * type, its volume and its collection's kind, which no CHECK constraint
+       * could hold because they read two tables.
+       *
+       * `checkProductRules` in `src/schemas/admin.ts` refuses all three first.
+       * Reaching one here means a write arrived from somewhere that is not the
+       * form, so the message names the field rather than repeating Postgres.
+       */
+      if (error.message.includes("needs a volume in millilitres")) {
+        return {
+          ok: false,
+          message: "Some fields need attention.",
+          fieldErrors: {
+            volumeMl:
+              "This type of product is measured in millilitres — state how many, or change the type.",
+          },
+        };
+      }
+
+      if (error.message.includes("belongs to a")) {
+        return {
+          ok: false,
+          message: "Some fields need attention.",
+          fieldErrors: {
+            productType:
+              "A Body Mist is sold from Body Care and a Room Spray from Home Fragrance. Change the type or the collection.",
+          },
+        };
+      }
+
+      if (error.message.includes("does not exist")) {
+        return {
+          ok: false,
+          message: "Some fields need attention.",
+          fieldErrors: { collectionSlug: "That collection no longer exists." },
+        };
+      }
+
+      return {
+        ok: false,
+        message: "The database refused that change. The details are in the server log.",
+      };
+
     default:
       return {
         ok: false,

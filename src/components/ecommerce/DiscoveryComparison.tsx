@@ -68,7 +68,9 @@ export default async function DiscoveryComparison({
       label: dict.discovery.compare.rows.volume,
       cells: sets.map((set) => ({
         kind: "text" as const,
-        value: formatVolume(set.volumeMl),
+        // The em dash the row above uses for a missing format, for the same
+        // reason: a comparison table with a blank cell reads as a broken table.
+        value: formatVolume(set.volumeMl) ?? "—",
       })),
     },
     {

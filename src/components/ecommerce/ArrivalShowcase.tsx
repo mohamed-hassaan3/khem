@@ -3,7 +3,7 @@ import Image from "next/image";
 import Reveal from "@/src/components/animation/Reveal";
 import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import { formatVolume } from "@/src/lib/format";
+import { formatVolume, joinTokens } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
@@ -148,10 +148,12 @@ export default async function ArrivalShowcase({
               className="font-heading text-2xl text-ground-accent"
             />
             <span className="text-[10px] uppercase tracking-[0.2em] text-ground-muted">
-              {formatVolume(product.volumeMl)}
-              {product.concentration
-                ? ` · ${dict.product.concentrations[product.concentration]}`
-                : ""}
+              {joinTokens(
+                formatVolume(product.volumeMl),
+                product.concentration
+                  ? dict.product.concentrations[product.concentration]
+                  : null,
+              )}
             </span>
           </div>
 

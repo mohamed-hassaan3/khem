@@ -18,6 +18,7 @@ import Image from "next/image";
 
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { cartTotalInCents, shippingInCents } from "@/src/lib/cart";
+import { useDeliveryTerms } from "@/src/providers/delivery-provider";
 import { unitPriceInCents, type CartPricing } from "@/src/lib/pricing";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useFormatPrice } from "@/src/providers/currency-provider";
@@ -67,20 +68,23 @@ export default function OrderReview({
   const subtotalInCents = pricing.subtotalInCents;
   const dict = useDictionary();
   const formatPrice = useFormatPrice();
+  const terms = useDeliveryTerms();
   const copy = dict.checkout.review;
 
   /*
    * Delivery is charged on the **undiscounted** subtotal, deliberately: the
-   * free-delivery threshold in `src/lib/cart.ts` is a rule about what the
+   * free-delivery minimum in `"DeliverySetting"` is a rule about what the
    * customer bought, and `place_order()` is handed this same fee computed the
    * same way. A discount that also bought free delivery would put two rules in
    * charge of one number — which is the reason `0028` gives for never
    * discounting delivery at all.
    */
-  const shipping = shippingInCents(subtotalInCents);
+  const shipping = shippingInCents(subtotalInCents, terms);
   // Never below the delivery fee: neither instrument pays the courier.
   const total =
-    cartTotalInCents(subtotalInCents) - discountInCents - creditAppliedInCents;
+    cartTotalInCents(subtotalInCents, terms) -
+    discountInCents -
+    creditAppliedInCents;
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
   return (

@@ -35,8 +35,91 @@
 import type { CollectionKind } from "@/src/types/catalog";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 
-/** The stored enum, mirroring `public."ProductType"`. */
-export type ProductType = "BODY_MIST" | "ROOM_SPRAY";
+/**
+ * The stored enum, mirroring `public."ProductType"` after
+ * `0052_product_type_and_volume.sql`.
+ *
+ * Seven values doing one job — naming what an object *is*. The first five are
+ * what the house sells beside its fragrances, added when the catalogue grew to
+ * hold objects that are not measured in millilitres at all; the last two are the
+ * original pair, which additionally name a range and are the only two with a
+ * page of their own. See {@link PRODUCT_TYPES} for why that list is shorter than
+ * this one.
+ */
+export const PRODUCT_TYPE_VALUES = [
+  "PERFUME",
+  "GIFT",
+  "BOX",
+  "ANTIQUE",
+  "DECORATIVE",
+  "BODY_MIST",
+  "ROOM_SPRAY",
+] as const;
+
+export type ProductType = (typeof PRODUCT_TYPE_VALUES)[number];
+
+/** The two that name a range, and so answer to a collection kind. */
+export type RangeProductType = Extract<ProductType, "BODY_MIST" | "ROOM_SPRAY">;
+
+/**
+ * What the dashboard calls each value.
+ *
+ * English only, like every other admin string. Nothing on the storefront prints
+ * a product type — a card states its concentration or its format line, which is
+ * a different question — so there is no dictionary entry to keep in step.
+ */
+export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
+  PERFUME: "Perfume",
+  GIFT: "Gift",
+  BOX: "Box",
+  ANTIQUE: "Antique",
+  DECORATIVE: "Decorative item",
+  BODY_MIST: "Body Mist",
+  ROOM_SPRAY: "Room Spray",
+};
+
+/**
+ * The types measured in millilitres, and so required to state a volume.
+ *
+ * The TypeScript twin of the rule `product_type_matches_kind()` enforces since
+ * `0052_product_type_and_volume.sql`. The database is the authority; this exists
+ * so the form can hide a field rather than let an editor discover the constraint
+ * by tripping over it.
+ */
+const VOLUME_BEARING_TYPES: readonly ProductType[] = [
+  "PERFUME",
+  "BODY_MIST",
+  "ROOM_SPRAY",
+];
+
+/**
+ * Whether a product of this type must state a volume.
+ *
+ * `null` — a product saved before the column was offered, or one whose type an
+ * editor has not chosen — keeps the original rule. Every row in the catalogue
+ * predates the type and carries a volume, so treating "not stated" as
+ * "measured" is what stops the whole catalogue becoming invalid on the way in.
+ */
+export function typeTakesVolume(type: ProductType | null): boolean {
+  return type === null || VOLUME_BEARING_TYPES.includes(type);
+}
+
+/**
+ * Whether a product of this type has a fragrance pyramid and a concentration.
+ *
+ * An antique has no top note. The three note lists and the concentration select
+ * are hidden together because they answer the same question — what does this
+ * smell of — and a type that has no answer to it should not be asked four
+ * times.
+ */
+export function typeIsScented(type: ProductType | null): boolean {
+  return type === null || type === "PERFUME" || VOLUME_BEARING_TYPES.includes(type);
+}
+
+/** Whether this type is a set, and so lists what it contains. */
+export function typeHasContents(type: ProductType | null): boolean {
+  return type === null || type === "GIFT" || type === "BOX";
+}
 
 /**
  * The slug of the collection this type is sold from.
@@ -57,7 +140,7 @@ export type ProductTypeSlug = "body-mist" | "room-spray";
  */
 export interface ProductTypeEntry {
   slug: ProductTypeSlug;
-  value: ProductType;
+  value: RangeProductType;
   parentKind: Extract<CollectionKind, "BODY" | "HOME">;
   /**
    * The **category** this type is sold under — `body-care`, `home-fragrance`.
@@ -74,7 +157,16 @@ export interface ProductTypeEntry {
   navKey: keyof Dictionary["nav"]["collectionItems"];
 }
 
-/** Every type the house sells, in the order the Nav prints them. */
+/**
+ * The types that name a **range**, in the order the Nav prints them.
+ *
+ * Deliberately shorter than {@link PRODUCT_TYPE_VALUES}. An entry here means the
+ * type has a `"Collection"` row, a page, a Nav disclosure and copy in both
+ * dictionaries; `PERFUME`, `GIFT`, `BOX`, `ANTIQUE` and `DECORATIVE` have none
+ * of those, because they describe an object rather than a shelf it is sold from.
+ * Adding a value to the enum therefore does not oblige anybody to add a row
+ * here, and the two lists are not out of step when they differ.
+ */
 export const PRODUCT_TYPES: readonly ProductTypeEntry[] = [
   {
     slug: "body-mist",

@@ -12,6 +12,7 @@ import type { CartPricing } from "@/src/lib/pricing";
 import { BASE_CURRENCY } from "@/src/lib/currency";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCurrency } from "@/src/providers/currency-provider";
+import { useDeliveryTerms } from "@/src/providers/delivery-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 
 /**
@@ -43,6 +44,8 @@ export interface CartSummaryProps {
 export default function CartSummary({ pricing }: CartSummaryProps) {
   const dict = useDictionary();
   const { currency, formatPrice } = useCurrency();
+  // The house's terms, read once in the layout — see `delivery-provider.tsx`.
+  const terms = useDeliveryTerms();
 
   /*
    * Delivery, the nudge and the total are all judged on what the merchandise
@@ -50,9 +53,9 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
    * the first row. A threshold measured against list prices would promise
    * complimentary delivery on a bag that never reaches it at the till.
    */
-  const shipping = shippingInCents(pricing.subtotalInCents);
-  const total = cartTotalInCents(pricing.subtotalInCents);
-  const remaining = amountToFreeShippingInCents(pricing.subtotalInCents);
+  const shipping = shippingInCents(pricing.subtotalInCents, terms);
+  const total = cartTotalInCents(pricing.subtotalInCents, terms);
+  const remaining = amountToFreeShippingInCents(pricing.subtotalInCents, terms);
 
   return (
     <aside className="ground-sand px-4 py-12 transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:px-8 lg:sticky lg:top-[var(--chrome-h)] lg:h-fit lg:px-10 lg:py-14">
@@ -163,8 +166,17 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
               aria-hidden="true"
               className="shrink-0 text-ground-accent"
             />
+            {/*
+              `desc` carries `{amount}` on the delivery badge and nothing on the
+              other three — `interpolate` leaves a string without the token
+              exactly as it found it, so one call serves all four and no badge
+              needs to know which one it is.
+            */}
             <span className="text-[11px] tracking-[0.04em] text-ground-muted">
-              {badge.title} — {badge.desc}
+              {badge.title} —{" "}
+              {interpolate(badge.desc, {
+                amount: formatPrice(terms.freeThresholdInCents),
+              })}
             </span>
           </li>
         ))}

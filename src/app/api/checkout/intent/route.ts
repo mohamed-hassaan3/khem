@@ -29,7 +29,7 @@
 
 import { NextResponse } from "next/server";
 
-import { getStripe } from "@/src/lib/stripe/server";
+import { getStripe, isCardPaymentAvailable } from "@/src/lib/stripe/server";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { z } from "zod";
 
@@ -57,6 +57,22 @@ function refuse(status: number, code: string): NextResponse {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
+  /*
+   * Before the body is even read. An intent is a request to charge somebody,
+   * and the house not currently taking card payments is a complete answer to
+   * it — there is nothing in the request that could change the outcome, so
+   * nothing in the request is parsed.
+   *
+   * `isCardPaymentAvailable()` and not `getStripe()`: a deployment that still
+   * holds working keys but has `STRIPE_PAYMENT_ENABLED` off must refuse here as
+   * well, or the flag would only hide a panel while leaving the route open to
+   * anyone who called it directly.
+   */
+  if (!isCardPaymentAvailable()) {
+    console.error("[checkout] intent refused; the card rail is off.");
+    return refuse(503, "unconfigured");
+  }
+
   const stripe = getStripe();
 
   if (!stripe) {

@@ -117,6 +117,26 @@ export function revalidateNavigation(): void {
   }
 }
 
+/**
+ * After the delivery fee or the free-delivery minimum changes.
+ *
+ * The same `layout` argument, and for the same reason: the terms are read once
+ * in the `[locale]` layout and handed to every priced surface through
+ * `<DeliveryProvider>` (`src/app/[locale]/layout.tsx`), so there is no single
+ * path that holds them. A per-page list would also be wrong — the trust badge
+ * quoting the minimum is on every product page, and enumerating those here would
+ * be a second, staler copy of `revalidateProduct()`.
+ *
+ * The checkout is not in the list because it does not need to be: it is
+ * `force-dynamic`, and `src/actions/checkout.ts` re-reads the row on every order
+ * regardless of what any cache holds.
+ */
+export function revalidateDelivery(): void {
+  for (const locale of LOCALES) {
+    revalidatePath(`/${locale}`, "layout");
+  }
+}
+
 /** After a product is created, edited or archived. */
 export function revalidateProduct(input: {
   slug: string;

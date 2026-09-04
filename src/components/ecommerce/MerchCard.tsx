@@ -133,9 +133,16 @@ export default function MerchCard({
               showPercent
               className="font-heading text-[13px] text-ground sm:text-sm"
             />
-            <p className="mt-1 text-[9px] uppercase tracking-[0.15em] text-ground-muted sm:text-[10px]">
-              {formatVolume(product.volumeMl)}
-            </p>
+            {/*
+              Omitted entirely, not emptied: an object with no volume — a gift
+              box, an antique — would otherwise leave a `mt-1` gap under the
+              price that reads as a rendering fault.
+            */}
+            {formatVolume(product.volumeMl) === null ? null : (
+              <p className="mt-1 text-[9px] uppercase tracking-[0.15em] text-ground-muted sm:text-[10px]">
+                {formatVolume(product.volumeMl)}
+              </p>
+            )}
           </div>
 
           <span className="relative z-2">

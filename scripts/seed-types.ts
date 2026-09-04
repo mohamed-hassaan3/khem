@@ -23,6 +23,7 @@
  * `resolveText()` reads to fall back.
  */
 
+import type { ProductType } from "../src/lib/product-types";
 import type { Category, Collection, Product } from "../src/types/catalog";
 import type { ContactChannel, SocialProfile } from "../src/types/contact";
 import type {
@@ -103,8 +104,12 @@ export type ProductSeedRow = Omit<Product, "images" | "promotion"> & {
    * storefront never reads it off a product object — it is a *filter*, applied
    * in `getProductCardsByProductType()` — so adding it to the app's type would
    * oblige every card and detail parse to carry a field none of them uses.
+   *
+   * Taken from `ProductType` rather than retyped, so a value added to the enum
+   * in `src/lib/product-types.ts` round-trips through a dump without the file
+   * having to be edited a second time.
    */
-  productType: "BODY_MIST" | "ROOM_SPRAY" | null;
+  productType: ProductType | null;
   /*
    * The two stock counters. `inventory` on the base `Product` type is the
    * trigger-maintained total and is not what the seeder writes — see

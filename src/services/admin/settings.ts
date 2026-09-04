@@ -28,6 +28,11 @@ import {
   type AdminSocialProfile,
   type BoutiqueSetting,
 } from "@/src/schemas/db/directory";
+import {
+  DELIVERY_SETTING_COLUMNS,
+  toDeliverySetting,
+  type DeliverySetting,
+} from "@/src/schemas/db/delivery";
 
 function logFailure(query: string, message: string): void {
   console.error(`[admin] ${query} failed: ${message}`);
@@ -59,6 +64,33 @@ export async function getAdminSettings(): Promise<BoutiqueSetting | null> {
   }
 
   return toBoutiqueSetting(data);
+}
+
+/**
+ * Both delivery rows, online first.
+ *
+ * Ordered by `channel` rather than left to the row order: the form renders one
+ * card per channel and "Online" belongs above "Offline" on a screen where one of
+ * them decides what every visitor is charged.
+ *
+ * An empty array on failure, like every other read here. The form renders a
+ * notice rather than a blank pair of inputs that a save would then write.
+ */
+export async function listDeliverySettings(): Promise<DeliverySetting[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("DeliverySetting")
+    .select(DELIVERY_SETTING_COLUMNS)
+    .order("channel");
+
+  if (error) {
+    logFailure("listDeliverySettings", error.message);
+    return [];
+  }
+
+  return parseList(data as unknown[] | null, toDeliverySetting);
 }
 
 /** Every contact channel, in the order `/contact` renders them. */

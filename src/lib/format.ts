@@ -156,9 +156,36 @@ export function formatAccountDate(isoDate: string, locale: Locale): string {
   }).format(new Date(isoDate));
 }
 
-/** Volume label for a product, e.g. 100 → "100 ML". */
-export function formatVolume(volumeMl: number): string {
-  return `${volumeMl} ML`;
+/**
+ * Volume label for a product, e.g. 100 → "100 ML", or `null` for an object that
+ * has no volume.
+ *
+ * `null` rather than `""`, and the distinction is the whole point: every caller
+ * prints this beside something else with a `·` between them, and an empty string
+ * would leave the separator hanging on its own. A nullable return makes the
+ * absent case impossible to render by accident — the type will not allow the
+ * string concatenation that produced " · 100 ML" with nothing before it.
+ *
+ * Nullable since `0052_product_type_and_volume.sql` made `"volumeMl"` optional
+ * for the types that are not measured in millilitres — a gift box, an antique, a
+ * decorative piece.
+ */
+export function formatVolume(volumeMl: number | null): string | null {
+  return volumeMl === null ? null : `${volumeMl} ML`;
+}
+
+/**
+ * The tokens under a price, joined with the separator that belongs between them.
+ *
+ * One function so that "which of these two facts does this product have?" is
+ * answered in one place rather than as a ternary at each of the four sites that
+ * print a pair. A product with neither renders nothing at all, which is the
+ * correct output and not an empty separator.
+ */
+export function joinTokens(
+  ...tokens: readonly (string | null | undefined)[]
+): string {
+  return tokens.filter((token) => Boolean(token)).join(" · ");
 }
 
 /**

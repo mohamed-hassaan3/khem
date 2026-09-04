@@ -27,6 +27,13 @@
 import { z } from "zod";
 
 import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
+import {
+  PRODUCT_TYPE_VALUES,
+  typeHasContents,
+  typeIsScented,
+  typeTakesVolume,
+  type ProductType,
+} from "@/src/lib/product-types";
 import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 
 /** Hosts `next/image` is configured for in `next.config.ts`. */
@@ -179,6 +186,64 @@ const concentrationField = z.enum([
 ]);
 
 const productTagField = z.enum(["NEW_ARRIVAL"]);
+
+/**
+ * What the object *is* — `public."ProductType"`, widened by
+ * `0052_product_type_and_volume.sql`.
+ *
+ * Read from `PRODUCT_TYPE_VALUES` rather than retyped here, so the enum, the
+ * form's options and this schema cannot disagree about what a legal value is.
+ * Blank means *not stated*, which is a real answer: the catalogue predates the
+ * column and no product is obliged to acquire a type just to be edited.
+ */
+const productTypeField = z.enum(PRODUCT_TYPE_VALUES);
+
+/**
+ * A volume in millilitres, or nothing.
+ *
+ * Blank is `null`, never `0`. `z.coerce.number()` turns `""` into zero, and a
+ * zero written to a nullable column is the exact failure this field exists to
+ * prevent: a gift box recorded as measuring nothing rather than as not being
+ * measured at all. Whether blank is *allowed* is not decided here — it depends
+ * on the product's type, which this field cannot see. See
+ * {@link checkProductRules}.
+ */
+const volumeMlField = z
+  .union([z.string(), z.number(), z.null()])
+  .default(null)
+  .transform((value, ctx) => {
+    if (value === null || (typeof value === "string" && value.trim() === "")) {
+      return null;
+    }
+
+    const parsed = Number(value);
+
+    if (!Number.isFinite(parsed)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Enter a volume in millilitres.",
+      });
+      return z.NEVER;
+    }
+
+    if (!Number.isInteger(parsed)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Volume must be a whole number of millilitres.",
+      });
+      return z.NEVER;
+    }
+
+    if (parsed <= 0) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Volume must be greater than zero.",
+      });
+      return z.NEVER;
+    }
+
+    return parsed;
+  });
 
 /** Empty string from a `<select>`/`<input>` means "not set", never "". */
 const optionalText = (max: number) =>
@@ -482,10 +547,17 @@ const productFields = {
   topNotes: stringList(12, "note"),
   heartNotes: stringList(12, "note"),
   baseNotes: stringList(12, "note"),
-  volumeMl: z.coerce
-    .number({ error: "Enter a volume in millilitres." })
-    .int("Volume must be a whole number of millilitres.")
-    .positive("Volume must be greater than zero."),
+  /*
+   * Blank from a `<select>` means "not stated", never the string "". Same
+   * treatment as `concentration` below, for the same reason: an empty option is
+   * how a form says nothing, and the column stores that as null.
+   */
+  productType: z
+    .union([productTypeField, z.literal("")])
+    .transform((value) => (value === "" ? null : value))
+    .nullable()
+    .default(null),
+  volumeMl: volumeMlField,
   priceEgp: priceEgpField,
   sku: z
     .string()
@@ -512,16 +584,81 @@ const productFields = {
 };
 
 /**
- * The TypeScript twin of the `product_strength_or_format` CHECK.
+ * Everything about a product that one field cannot decide alone.
  *
- * The database still holds the real constraint; this exists so the editor is
- * told which two fields are involved instead of being shown a constraint name.
+ * Two rules, and both are twins of something the database already enforces —
+ * the `product_strength_or_format` CHECK from `0001_catalog.sql`, and the volume
+ * rule that `product_type_matches_kind()` gained in
+ * `0052_product_type_and_volume.sql`. The database remains the authority. This
+ * exists so the editor is told which field is involved rather than being shown a
+ * constraint name, and so a form that has already hidden a field does not then
+ * submit a stale value sitting behind it.
+ *
+ * ## Fields are cleared, not complained about
+ *
+ * The same bargain `checkNavTarget` strikes above. An editor who switches a
+ * product from Perfume to Antique should not have to go and empty the volume
+ * and the three note lists themselves — the type they chose has already said
+ * those facts do not apply, so this clears them and the write records what was
+ * meant.
  */
-function requireStrengthOrFormat(
-  value: { concentration: string | null; format: string | null },
+function checkProductRules(
+  value: {
+    productType: ProductType | null;
+    concentration: string | null;
+    format: string | null;
+    volumeMl: number | null;
+    topNotes: string[];
+    heartNotes: string[];
+    baseNotes: string[];
+    includes: string[];
+  },
   ctx: z.RefinementCtx,
 ): void {
-  if (value.concentration === null && value.format === null) {
+  // ── The volume, which follows from the type ────────────────
+  if (typeTakesVolume(value.productType)) {
+    if (value.volumeMl === null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["volumeMl"],
+        message:
+          "A perfume, body mist or room spray is measured in millilitres — state how many, or change the type.",
+      });
+    }
+  } else {
+    value.volumeMl = null;
+  }
+
+  // ── The pyramid, which follows from the same place ─────────
+  if (!typeIsScented(value.productType)) {
+    value.concentration = null;
+    value.topNotes = [];
+    value.heartNotes = [];
+    value.baseNotes = [];
+
+    /*
+     * With the concentration gone, `format` is the only thing left that can
+     * satisfy `product_strength_or_format`. Saying so here, against the field
+     * the editor can actually fill in, is the difference between "write what
+     * this object is" and a CHECK constraint's name.
+     */
+    if (value.format === null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["format"],
+        message:
+          "Describe what this object is — “Alabaster Sphinx”, “Gift Box — 3 Vials”. It stands where a fragrance states its concentration.",
+      });
+    }
+
+  } else if (value.concentration === null && value.format === null) {
+    /*
+     * The original CHECK, reached only for the types that could have satisfied
+     * it either way. An antique has already been told to write a format line
+     * above, and adding a second complaint about a Concentration field its form
+     * does not even render would be an error the editor cannot see, let alone
+     * act on.
+     */
     ctx.addIssue({
       code: "custom",
       path: ["concentration"],
@@ -529,15 +666,19 @@ function requireStrengthOrFormat(
         "A product needs either a concentration (fragrances) or a format line (body, home, sets).",
     });
   }
+
+  if (!typeHasContents(value.productType)) {
+    value.includes = [];
+  }
 }
 
 export const createProductSchema = z
   .object({ slug: slugField, ...productFields })
-  .superRefine(requireStrengthOrFormat);
+  .superRefine(checkProductRules);
 
 export const updateProductSchema = z
   .object({ slug: slugField, ...productFields })
-  .superRefine(requireStrengthOrFormat);
+  .superRefine(checkProductRules);
 
 export type CreateProductInput = z.input<typeof createProductSchema>;
 export type UpdateProductInput = z.input<typeof updateProductSchema>;

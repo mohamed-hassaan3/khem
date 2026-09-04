@@ -243,7 +243,16 @@ export interface Product {
   topNotes: string[];
   heartNotes: string[];
   baseNotes: string[];
-  volumeMl: number;
+  /**
+   * Millilitres, or `null` for an object that is not measured in them.
+   *
+   * Nullable since `0052_product_type_and_volume.sql`: a gift box, an antique or
+   * a decorative piece has no volume, and the `0` that a `not null` column would
+   * have extracted from an editor is a figure the cards would then print.
+   * `formatVolume()` returns `null` in that case and every call site omits the
+   * label and its separator — see `src/lib/format.ts`.
+   */
+  volumeMl: number | null;
   /**
    * Smallest unit of the base currency — Egyptian piastres (147000 = EGP
    * 1,470.00).

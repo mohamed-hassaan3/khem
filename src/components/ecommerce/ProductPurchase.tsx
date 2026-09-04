@@ -9,13 +9,18 @@ import StickyPurchaseBar from "@/src/components/ecommerce/StickyPurchaseBar";
 import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import { quantityCeiling } from "@/src/lib/cart";
 import { BASE_CURRENCY } from "@/src/lib/currency";
-import { formatProductType, formatVolume } from "@/src/lib/format";
+import {
+  formatProductType,
+  formatVolume,
+  joinTokens,
+} from "@/src/lib/format";
 import { LOW_STOCK_THRESHOLD } from "@/src/lib/inventory";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { useCart } from "@/src/providers/cart-provider";
 import { useCurrency } from "@/src/providers/currency-provider";
+import { useDeliveryTerms } from "@/src/providers/delivery-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { Product } from "@/src/types/catalog";
 
@@ -67,6 +72,8 @@ export default function ProductPurchase({
 }: ProductPurchaseProps) {
   const dict = useDictionary();
   const { currency, formatPrice } = useCurrency();
+  // The free-delivery minimum the trust badge promises, from the stored terms.
+  const deliveryTerms = useDeliveryTerms();
   const { addLine } = useCart();
   // Product name and subtitle come from the database — English in both trees.
   const island = ltrIsland(locale);
@@ -164,8 +171,10 @@ export default function ProductPurchase({
           className="font-heading text-3xl text-ground-accent"
         />
         <span className="text-xs tracking-[0.1em] text-ground-muted">
-          {formatVolume(product.volumeMl)} ·{" "}
-          {formatProductType(product, dict.product.concentrations)}
+          {joinTokens(
+            formatVolume(product.volumeMl),
+            formatProductType(product, dict.product.concentrations),
+          )}
         </span>
       </div>
 
@@ -286,8 +295,15 @@ export default function ProductPurchase({
             <p className="mb-1 font-heading text-[10px] tracking-[0.1em] text-ground-accent">
               {badge.title}
             </p>
+            {/*
+              `desc` carries `{amount}` on the delivery badge and nothing on the
+              other three — `interpolate` leaves a string without the token
+              exactly as it found it.
+            */}
             <p className="text-[10px] leading-relaxed text-ground-muted">
-              {badge.desc}
+              {interpolate(badge.desc, {
+                amount: formatPrice(deliveryTerms.freeThresholdInCents),
+              })}
             </p>
           </div>
         ))}

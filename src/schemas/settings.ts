@@ -77,6 +77,46 @@ export const updateBoutiqueSettingsSchema = z.object({
   wholesaleEmail: z.email("That is not a valid email address."),
 });
 
+// ── DeliverySetting ───────────────────────────────────────────
+
+/**
+ * A figure typed in EGP, stored in piastres.
+ *
+ * The same conversion `priceEgpField` performs in `schemas/admin.ts`, and here
+ * for the same reason: it happens exactly once, on the way in, so no component
+ * multiplies by 100 and no rounding difference can open up between the figure an
+ * editor typed and the figure the cart quotes. `Math.round` because `90.1 * 100`
+ * is not `9010` in binary floating point.
+ */
+const egpAmountField = z.coerce
+  .number({ error: "Enter an amount in EGP, e.g. 90 or 1400." })
+  .min(0, "This cannot be negative.")
+  .max(1_000_000, "That figure looks like a typing mistake.")
+  .transform((egp) => Math.round(egp * 100));
+
+/**
+ * What delivery costs on one channel — `"DeliverySetting"`,
+ * `supabase/sql/0053_delivery_terms.sql`.
+ *
+ * The channel is a closed enum, not free text, and it identifies the row rather
+ * than being a value the form sets: there are exactly two rows and the migration
+ * seeds both, so this action updates and never inserts. A blank fee is a legal
+ * answer meaning "delivery is complimentary on this channel", and a blank
+ * minimum means every order qualifies — which is why neither has a lower bound
+ * above zero.
+ */
+export const updateDeliverySettingSchema = z.object({
+  channel: z.enum(["ONLINE", "OFFLINE"], {
+    error: "Which channel — the website or the order desk?",
+  }),
+  feeInCents: egpAmountField,
+  freeThresholdInCents: egpAmountField,
+});
+
+export type UpdateDeliverySettingInput = z.input<
+  typeof updateDeliverySettingSchema
+>;
+
 // ── ContactChannel ────────────────────────────────────────────
 
 const contactChannelFields = z.object({

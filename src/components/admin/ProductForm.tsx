@@ -38,10 +38,35 @@ import {
 import Link from "next/link";
 
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
+import {
+  PRODUCT_TYPE_LABELS,
+  PRODUCT_TYPE_VALUES,
+  typeHasContents,
+  typeIsScented,
+  typeTakesVolume,
+  type ProductType,
+} from "@/src/lib/product-types";
 import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
 import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import type { AdminCollection, AdminProduct } from "@/src/schemas/db/admin";
+
+/**
+ * What the object is, in the order an editor is most likely to want.
+ *
+ * Blank first, and it stays a real choice rather than a placeholder: the
+ * catalogue predates this column, so an existing fragrance opens with no type
+ * and must be able to be saved that way. `typeTakesVolume(null)` reads a blank
+ * as "measured in millilitres", which is what every product written before today
+ * actually is.
+ */
+const PRODUCT_TYPE_OPTIONS = [
+  { value: "", label: "Not stated" },
+  ...PRODUCT_TYPE_VALUES.map((value) => ({
+    value,
+    label: PRODUCT_TYPE_LABELS[value],
+  })),
+] as const;
 
 const CONCENTRATION_OPTIONS = [
   { value: "", label: "None — this is not a fragrance" },
@@ -96,6 +121,9 @@ export default function ProductForm({
   const [collectionSlug, setCollectionSlug] = useState(
     product?.collectionSlug ?? collections[0]?.slug ?? "",
   );
+  const [productType, setProductTypeState] = useState<string>(
+    product?.productType ?? "",
+  );
   const [concentration, setConcentration] = useState<string>(product?.concentration ?? "");
   const [format, setFormat] = useState(product?.format ?? "");
   const [includes, setIncludes] = useState<string[]>(product?.includes ?? []);
@@ -122,6 +150,43 @@ export default function ProductForm({
     label: `${collection.name} — ${collection.kind.toLowerCase()}`,
   }));
 
+  /*
+   * What this type of object has, restated from `src/lib/product-types.ts` so
+   * the form and `checkProductRules` in `schemas/admin.ts` cannot disagree about
+   * which fields apply. The schema is what refuses a save; these decide what is
+   * worth asking for in the first place.
+   */
+  const asType = (productType === "" ? null : productType) as ProductType | null;
+  const takesVolume = typeTakesVolume(asType);
+  const isScented = typeIsScented(asType);
+  const hasContents = typeHasContents(asType);
+
+  /**
+   * Change the type, and empty what the new type does not have.
+   *
+   * Clearing here rather than only on the server is what keeps the screen
+   * honest: a hidden input still holding "100 ML" from before the type changed
+   * would be a value the editor cannot see, cannot correct, and would not expect
+   * to be discarded. The schema clears the same fields again on the way in —
+   * this is the courtesy, that is the guarantee.
+   */
+  function setProductType(next: string) {
+    setProductTypeState(next);
+
+    const nextType = (next === "" ? null : next) as ProductType | null;
+
+    if (!typeTakesVolume(nextType)) setVolumeMl("");
+
+    if (!typeIsScented(nextType)) {
+      setConcentration("");
+      setTopNotes([""]);
+      setHeartNotes([""]);
+      setBaseNotes([""]);
+    }
+
+    if (!typeHasContents(nextType)) setIncludes([]);
+  }
+
   function toggleTag(tag: string) {
     setTags((current) =>
       current.includes(tag) ? current.filter((value) => value !== tag) : [...current, tag],
@@ -140,6 +205,7 @@ export default function ProductForm({
     subtitle,
     description,
     story,
+    productType,
     concentration,
     format,
     includes,
@@ -316,64 +382,93 @@ export default function ProductForm({
           Character
         </h2>
 
+        {/*
+          The type comes first because everything under it follows from the
+          answer: an antique has no concentration, no pyramid and no volume, and
+          the fields for those disappear rather than sitting there inviting a
+          figure somebody has to invent.
+        */}
+        <AdminSelect
+          id="productType"
+          label="Type"
+          value={productType}
+          options={PRODUCT_TYPE_OPTIONS}
+          error={fieldErrors.productType}
+          hint="What the object is. A Perfume, Body Mist or Room Spray states a volume; a Gift, Box, Antique or Decorative item does not. Body Mist and Room Spray also decide which range page lists it."
+          onChange={setProductType}
+        />
+
         <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
-          <AdminSelect
-            id="concentration"
-            label="Concentration"
-            value={concentration}
-            options={CONCENTRATION_OPTIONS}
-            error={fieldErrors.concentration}
-            hint="Fragrances only. Leave as None for body, home and set goods, and fill in a format line instead."
-            onChange={setConcentration}
-          />
+          {isScented ? (
+            <AdminSelect
+              id="concentration"
+              label="Concentration"
+              value={concentration}
+              options={CONCENTRATION_OPTIONS}
+              error={fieldErrors.concentration}
+              hint="Fragrances only. Leave as None for body, home and set goods, and fill in a format line instead."
+              onChange={setConcentration}
+            />
+          ) : null}
 
           <AdminInput
             id="format"
             label="Format line"
+            required={!isScented}
             value={format}
             error={fieldErrors.format}
-            hint='For non-fragrances: "Room Spray", "6 × 3 ML Vials".'
+            hint={
+              isScented
+                ? 'For non-fragrances: "Room Spray", "6 × 3 ML Vials".'
+                : 'Required for this type — it stands where a fragrance states its concentration: "Alabaster Sphinx", "Gift Box — 3 Vials".'
+            }
             onChange={setFormat}
           />
         </div>
 
-        <AdminStringList
-          label="Top notes"
-          values={topNotes}
-          onChange={setTopNotes}
-          error={fieldErrors.topNotes}
-          placeholder="Bergamot"
-          addLabel="Add note"
-          hint="Order matters — the grid cards print the second entry."
-        />
+        {isScented ? (
+          <>
+            <AdminStringList
+              label="Top notes"
+              values={topNotes}
+              onChange={setTopNotes}
+              error={fieldErrors.topNotes}
+              placeholder="Bergamot"
+              addLabel="Add note"
+              hint="Order matters — the grid cards print the second entry."
+            />
 
-        <AdminStringList
-          label="Heart notes"
-          values={heartNotes}
-          onChange={setHeartNotes}
-          error={fieldErrors.heartNotes}
-          placeholder="Damask Rose"
-          addLabel="Add note"
-        />
+            <AdminStringList
+              label="Heart notes"
+              values={heartNotes}
+              onChange={setHeartNotes}
+              error={fieldErrors.heartNotes}
+              placeholder="Damask Rose"
+              addLabel="Add note"
+            />
 
-        <AdminStringList
-          label="Base notes"
-          values={baseNotes}
-          onChange={setBaseNotes}
-          error={fieldErrors.baseNotes}
-          placeholder="Oud"
-          addLabel="Add note"
-        />
+            <AdminStringList
+              label="Base notes"
+              values={baseNotes}
+              onChange={setBaseNotes}
+              error={fieldErrors.baseNotes}
+              placeholder="Oud"
+              addLabel="Add note"
+            />
+          </>
+        ) : null}
 
-        <AdminStringList
-          label="Set contents"
-          values={includes}
-          onChange={setIncludes}
-          error={fieldErrors.includes}
-          placeholder="Onyx Night — 3 ML"
-          addLabel="Add item"
-          hint="One line per item in a discovery or gift set. Leave empty for a single product."
-        />
+        {hasContents ? (
+          <AdminStringList
+            label="Set contents"
+            values={includes}
+            onChange={setIncludes}
+            error={fieldErrors.includes}
+            placeholder="Onyx Night — 3 ML"
+            addLabel="Add item"
+            hint="One line per item in a discovery or gift set. Leave empty for a single product."
+          />
+        ) : null}
       </section>
 
       {/* ── Commerce ─────────────────────────────────────── */}
@@ -396,16 +491,24 @@ export default function ProductForm({
             onChange={setPriceEgp}
           />
 
-          <AdminInput
-            id="volumeMl"
-            label="Volume (ml)"
-            required
-            type="number"
-            min={1}
-            value={volumeMl}
-            error={fieldErrors.volumeMl}
-            onChange={setVolumeMl}
-          />
+          {/*
+            Absent, not merely optional, for the types that are not measured in
+            millilitres. An input left blank is still an invitation to fill it
+            in, and the figure somebody invents to satisfy it is the one the
+            cards then print.
+          */}
+          {takesVolume ? (
+            <AdminInput
+              id="volumeMl"
+              label="Volume (ml)"
+              required
+              type="number"
+              min={1}
+              value={volumeMl}
+              error={fieldErrors.volumeMl}
+              onChange={setVolumeMl}
+            />
+          ) : null}
 
           <AdminInput
             id="sku"

@@ -23,6 +23,7 @@ seed/    a generated export of the database — written by `npm run db:dump`,
 | `sql/0006_privileges.sql` | revokes the write grants Supabase hands `anon`/`authenticated` by default |
 | `sql/0015_orders.sql` | `Order`, `OrderItem`, the three order enums, `place_order()` / `restock_order()` / `set_order_status()`, and the sales reports — readable with the **secret key only** |
 | `sql/0016_checkout.sql` | `PaymentMethod`, the shipping-address and `locale` columns on `Order`, the Stripe intent id, `settle_order_payment()` and `expire_unpaid_orders()` — the storefront half of `0015`, and it replaces `place_order()` in place |
+| `sql/0054_stripe_webhook_events.sql` | `StripeWebhookEvent` and `record_stripe_event()` — one row per Stripe event already acted on, so a redelivered webhook is recognised and ignored. Service-role only, like every other order table |
 
 ## Commands
 

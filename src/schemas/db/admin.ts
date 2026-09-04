@@ -23,6 +23,7 @@
 import { z } from "zod";
 
 import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
+import { PRODUCT_TYPE_VALUES } from "@/src/lib/product-types";
 
 import { parseList } from "./catalog";
 
@@ -42,6 +43,17 @@ const concentrationSchema = z.enum([
 ]);
 
 const productTagSchema = z.enum(["NEW_ARRIVAL"]);
+
+/**
+ * `public."ProductType"`, from the one list that holds its values.
+ *
+ * Built from `PRODUCT_TYPE_VALUES` rather than retyped, so a value added to the
+ * enum in `src/lib/product-types.ts` cannot arrive here as an unparseable row —
+ * which, given that a failed parse degrades to an empty projection rather than
+ * throwing, would show as a product that had quietly vanished from the
+ * dashboard.
+ */
+const productTypeSchema = z.enum(PRODUCT_TYPE_VALUES);
 
 // ── Collection ────────────────────────────────────────────────
 
@@ -195,6 +207,16 @@ export const ADMIN_PRODUCT_COLUMNS =
   "id, name, slug, subtitle, description, story, concentration, format, includes, " +
   "badge, tags, topNotes, heartNotes, baseNotes, volumeMl, priceInCents, " +
   /*
+   * `productType` is read here and nowhere on the storefront.
+   *
+   * It is what the object *is* — a perfume, a gift, an antique — and since
+   * `0052_product_type_and_volume.sql` it also decides whether the row must
+   * carry a volume. Both are editing concerns: a card prints a concentration or
+   * a format line, never a type, so the storefront projections in
+   * `src/schemas/db/catalog.ts` deliberately do not select this column.
+   */
+  "productType, " +
+  /*
    * Both counters by name, and the total.
    *
    * The storefront aliases `"inventoryOnline"` to `inventory`
@@ -235,7 +257,8 @@ const adminProductRowSchema = z.object({
   topNotes: z.array(z.string()),
   heartNotes: z.array(z.string()),
   baseNotes: z.array(z.string()),
-  volumeMl: z.number(),
+  productType: productTypeSchema.nullable(),
+  volumeMl: z.number().nullable(),
   priceInCents: z.number(),
   sku: z.string(),
   inventory: z.number(),

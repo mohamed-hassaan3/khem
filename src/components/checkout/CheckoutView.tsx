@@ -46,6 +46,7 @@ import PageHeader from "@/src/components/ecommerce/PageHeader";
 import { placeCustomerOrder } from "@/src/actions/checkout";
 import { previewDiscount } from "@/src/actions/discounts";
 import { cartTotalInCents, clampQuantity, parseBuyNow } from "@/src/lib/cart";
+import { useDeliveryTerms } from "@/src/providers/delivery-provider";
 import { discountRefusalMessage } from "@/src/lib/discount-message";
 import { cartPricing } from "@/src/lib/pricing";
 import { formatPrice } from "@/src/lib/format";
@@ -120,6 +121,8 @@ export default function CheckoutView({
   vouchers,
 }: CheckoutViewProps) {
   const dict = useDictionary();
+  // The house's delivery terms, read once in the layout.
+  const deliveryTerms = useDeliveryTerms();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { lines, isHydrated, clear } = useCart();
@@ -332,7 +335,9 @@ export default function CheckoutView({
   const discountInCents = activeDiscount?.amountInCents ?? 0;
 
   const totalInCents =
-    cartTotalInCents(subtotalInCents) - discountInCents - creditAppliedInCents;
+    cartTotalInCents(subtotalInCents, deliveryTerms) -
+    discountInCents -
+    creditAppliedInCents;
 
   /*
    * Purely visual: the gold tick on a completed section. Not validation — the

@@ -6,7 +6,11 @@ import QuantityStepper from "@/src/components/ecommerce/QuantityStepper";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { lineTotalInCents, quantityCeiling } from "@/src/lib/cart";
 import { unitPriceInCents } from "@/src/lib/pricing";
-import { formatProductType, formatVolume } from "@/src/lib/format";
+import {
+  formatProductType,
+  formatVolume,
+  joinTokens,
+} from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
@@ -92,8 +96,10 @@ export default function CartDrawerLine({
         {/* Translated in both trees, so no LTR island — the bidi algorithm
             places the Latin volume token correctly inside the Arabic run. */}
         <p className="mb-4 text-[10px] tracking-[0.1em] text-ground-muted">
-          {formatProductType(product, dict.product.concentrations)} ·{" "}
-          {formatVolume(product.volumeMl)}
+          {joinTokens(
+            formatProductType(product, dict.product.concentrations),
+            formatVolume(product.volumeMl),
+          )}
         </p>
 
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">

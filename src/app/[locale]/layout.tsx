@@ -7,6 +7,7 @@ import "../globals.css";
 import Footer from "@/src/components/Footer";
 import Nav from "@/src/components/Nav";
 import CookieConsent from "@/src/components/consent/CookieConsent";
+import CinematicIntro from "@/src/components/intro/CinematicIntro";
 import CartDrawer from "@/src/components/ecommerce/CartDrawer";
 import AnnouncementBar from "@/src/components/marketing/AnnouncementBar";
 import OfferPopup from "@/src/components/marketing/OfferPopup";
@@ -22,6 +23,7 @@ import {
   localizePath,
 } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
+import { getDeliveryTerms } from "@/src/services/delivery";
 import { getNavigationTree } from "@/src/services/navigation";
 // One origin for the whole app. This used to be a second copy of the constant,
 // which is how the root layout and every page's canonical could have come to
@@ -36,6 +38,7 @@ import { CartDrawerProvider } from "@/src/providers/cart-drawer-provider";
 import { CartProvider } from "@/src/providers/cart-provider";
 import { ConsentProvider } from "@/src/providers/consent-provider";
 import { CurrencyProvider } from "@/src/providers/currency-provider";
+import { DeliveryProvider } from "@/src/providers/delivery-provider";
 import { I18nProvider } from "@/src/providers/i18n-provider";
 import { NavGroundProvider } from "@/src/providers/nav-ground-provider";
 
@@ -246,7 +249,8 @@ export default async function RootLayout({
    * API, so this layout stays prerenderable exactly as it was; an admin write
    * revalidates it through `revalidateMarketing()`.
    */
-  const [marketing, announcements, welcomeOffer, navTree] = await Promise.all([
+  const [marketing, announcements, welcomeOffer, navTree, deliveryTerms] =
+    await Promise.all([
     getMarketingSettings(locale),
     getLiveAnnouncements(locale),
     getWelcomeOffer(),
@@ -258,6 +262,15 @@ export default async function RootLayout({
      * cannot fail: it falls back to the tree this repository ships.
      */
     getNavigationTree(locale, "nav"),
+    /*
+     * What delivery costs, for the bag and the checkout alike
+     * (`supabase/sql/0053_delivery_terms.sql`). Read here for the same reason
+     * the menu is: the four components that price delivery are all client ones,
+     * and a total fetched after the first paint is not a flicker, it is a
+     * misquote. Cached and revalidated like every other read above, and it
+     * cannot fail — it falls back to the terms in `src/lib/cart.ts`.
+     */
+    getDeliveryTerms("ONLINE"),
   ]);
 
   const showAnnouncements =
@@ -281,6 +294,24 @@ export default async function RootLayout({
       lang={LOCALE_HTML_TAG[locale]}
       dir={LOCALE_DIRECTION[locale]}
       data-scroll-behavior="smooth"
+      /*
+       * Required by the intro's pre-paint script, which stamps `data-intro`
+       * on this element *before* React hydrates. React then finds an attribute
+       * on `<html>` that its server HTML does not have and reports a hydration
+       * mismatch — "some attributes of the server rendered HTML didn't match
+       * the client properties", naming `data-intro="off"`, on the second and
+       * every subsequent load of a session.
+       *
+       * This is the price of answering "has this tab already seen the intro?"
+       * ahead of the first paint, and it is the same bargain every pre-paint
+       * theme script makes. Nothing is being papered over: the attribute is
+       * *meant* to differ, because the server cannot know the answer.
+       *
+       * The prop is deliberately narrow — it suppresses the warning for this
+       * element's own attributes and text only, one level deep. It does not
+       * apply to `<body>`, to the providers, or to any page below.
+       */
+      suppressHydrationWarning
     >
       <body
         /*
@@ -292,6 +323,32 @@ export default async function RootLayout({
         data-announcement={showAnnouncements ? "on" : undefined}
         className={`${getFontVariables(locale)} font-body antialiased`}
       >
+        {/*
+         * The intro's suppression decision, made before the browser paints.
+         *
+         * `<CinematicIntro>` ships in the server HTML precisely so that a first
+         * visitor never sees a frame of the real site before the curtain. The
+         * cost of that is a *returning* visitor would see a frame of the
+         * curtain before React could remove it — so the question "has this tab
+         * already seen it?" has to be answered by the document itself, ahead of
+         * the first paint.
+         *
+         * Inline and render-blocking rather than `next/script`: every strategy
+         * that library offers, `beforeInteractive` included, resolves after the
+         * first paint, which is the one thing this cannot do. It is one
+         * statement and it interpolates nothing — the string below is a
+         * constant, so no request data can reach `dangerouslySetInnerHTML`.
+         *
+         * First child of `<body>` rather than a hand-written `<head>`, which
+         * the App Router owns.
+         */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(sessionStorage.getItem('khem:intro:seen'))document.documentElement.dataset.intro='off'}catch(e){}",
+          }}
+        />
+
         {/*
          * `<ClerkProvider>` sits inside `<body>` — required by Clerk v7, where
          * wrapping `<html>` (the Core 2 pattern) no longer works — and
@@ -346,6 +403,13 @@ export default async function RootLayout({
                * `currency-provider.tsx`).
                */}
               <CurrencyProvider>
+                {/*
+                 * Delivery sits between currency and the bag: it is priced in
+                 * piastres and displayed through `formatPrice`, so it needs the
+                 * currency above it, and every surface that quotes it — the
+                 * drawer, the cart page, the checkout — is inside the cart.
+                 */}
+                <DeliveryProvider terms={deliveryTerms}>
                 <CartProvider>
                   {/*
                    * Panel visibility, nested inside the cart rather than
@@ -411,10 +475,24 @@ export default async function RootLayout({
                     </NavGroundProvider>
                   </CartDrawerProvider>
                 </CartProvider>
+                </DeliveryProvider>
               </CurrencyProvider>
             </ConsentProvider>
           </I18nProvider>
         </ClerkProvider>
+
+        {/*
+         * The house entrance. Last in the document and outside every provider,
+         * because it consumes no context and must be able to cover all of them
+         * — including `<CartDrawer>` and the mega-menu.
+         *
+         * `fixed` and nothing else, so like `<CookieConsent>` above it it never
+         * enters the flow and cannot contribute to CLS. It plays on the first
+         * document load of a session; client-side navigation cannot replay it,
+         * because this layout persists across route changes rather than
+         * remounting.
+         */}
+        <CinematicIntro />
       </body>
     </html>
   );

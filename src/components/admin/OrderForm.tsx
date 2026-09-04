@@ -38,8 +38,10 @@ import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
 import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import { egp } from "@/src/lib/admin/money";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
+import { shippingInCents, DEFAULT_DELIVERY_TERMS } from "@/src/lib/cart";
 import { stockState } from "@/src/lib/inventory";
 import type { AdminActionResult } from "@/src/schemas/orders";
+import type { DeliverySetting } from "@/src/schemas/db/delivery";
 
 /** What the form needs to know about a sellable product. */
 export interface SellableProduct {
@@ -63,9 +65,12 @@ function newLine(): Line {
 export default function OrderForm({
   locale,
   products,
+  deliveryTerms,
 }: {
   locale: Locale;
   products: readonly SellableProduct[];
+  /** Both rows from `"DeliverySetting"`; empty if they could not be read. */
+  deliveryTerms: readonly DeliverySetting[];
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -75,7 +80,18 @@ export default function OrderForm({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [channel, setChannel] = useState("ONLINE");
-  const [shipEgp, setShipEgp] = useState("0");
+  const [shipEgp, setShipEgp] = useState("");
+  /*
+   * Whether the desk has typed a delivery figure of its own.
+   *
+   * Until it has, the field follows the house terms for the selected channel and
+   * the running subtotal — which is the point of making them editable. Once
+   * somebody types in it, it stops moving: a delivery arranged at the counter is
+   * frequently not the standard one, and a field that silently re-derived itself
+   * after a quantity change would overwrite a figure that had been agreed with a
+   * customer on the telephone.
+   */
+  const [shipTouched, setShipTouched] = useState(false);
   const [note, setNote] = useState("");
   const [lines, setLines] = useState<Line[]>([newLine()]);
 
@@ -109,7 +125,26 @@ export default function OrderForm({
     return sum + product.priceInCents * Math.trunc(quantity);
   }, 0);
 
-  const shipInCents = Math.max(0, Math.round(Number(shipEgp || "0") * 100));
+  /*
+   * The terms for the channel the desk has chosen. `DEFAULT_DELIVERY_TERMS` when
+   * the rows could not be read — the same fallback the storefront quotes, so a
+   * database the dashboard cannot reach does not make the counter charge
+   * something different from the website.
+   */
+  const terms =
+    deliveryTerms.find((row) => row.channel === channel) ??
+    DEFAULT_DELIVERY_TERMS;
+
+  const suggestedShipInCents = shippingInCents(subtotalInCents, terms);
+
+  const shipInCents = shipTouched
+    ? Math.max(0, Math.round(Number(shipEgp || "0") * 100))
+    : suggestedShipInCents;
+
+  /** What the input shows: the typed figure, or the suggestion behind it. */
+  const shipValue = shipTouched
+    ? shipEgp
+    : (suggestedShipInCents / 100).toFixed(2);
 
   const fieldErrors = result && !result.ok ? (result.fieldErrors ?? {}) : {};
 
@@ -336,10 +371,17 @@ export default function OrderForm({
             type="number"
             min={0}
             step="0.01"
-            value={shipEgp}
+            value={shipValue}
             error={fieldErrors.shipInCents}
-            onChange={setShipEgp}
-            hint="Zero for a collection at the boutique."
+            onChange={(value) => {
+              setShipTouched(true);
+              setShipEgp(value);
+            }}
+            hint={
+              shipTouched
+                ? "Your figure, and it stays: changing a line will not recompute it. Zero for a collection at the boutique."
+                : `From the ${channel === "ONLINE" ? "online" : "offline"} terms in Settings — ${egp(terms.feeInCents)} below ${egp(terms.freeThresholdInCents)}. Type over it for anything agreed at the counter.`
+            }
           />
 
           <AdminTextarea

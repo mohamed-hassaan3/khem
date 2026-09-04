@@ -2007,3 +2007,443 @@ body[data-announcement="on"] {
     transform: scaleX(1);
   }
 }
+
+/*
+ * ── Cinematic intro ─────────────────────────────────────────
+ *
+ * The document's opening frames. Markup in
+ * `src/components/intro/CinematicIntro.tsx`; the only JavaScript involved
+ * decides *when* this ends, never how it runs.
+ *
+ * ## The state machine
+ *
+ * `data-intro` on `<html>`, following the `data-header-hidden` idiom above.
+ *
+ *   (absent)  playing — the entrance runs
+ *   "off"     suppressed before first paint; already seen this session
+ *   "exit"    the field is parting
+ *   "done"    gone
+ *
+ * "off" is written by the pre-paint script in `[locale]/layout.tsx`, before
+ * React exists. That is the whole reason this is an attribute and not state: a
+ * returning visitor must never see a frame of ivory that React then removes.
+ *
+ * ## Tuning
+ *
+ * Every duration and delay in the sequence is a custom property in the block
+ * below, so the choreography can be re-timed in one place. Two of them are
+ * mirrored in `IntroCurtain.tsx` and are marked as such — change those in both
+ * or the curtain will open into an animation that has not finished.
+ *
+ * ## The house rules that apply
+ *
+ * Every curve is a tween. Zero spring, zero bounce, zero loop (AGENTS.md §2.2).
+ * The bloom rises once and stays: it is a gallery light coming up on an object,
+ * not a pulse.
+ */
+
+#khem-intro {
+  /* ── Geometry ── */
+  --khem-intro-w: clamp(260px, 62vw, 420px);
+  /*
+   * The artwork's own whitespace sits the lockup optically low when it is
+   * centred geometrically. This lifts it back onto the eye's centre.
+   *
+   * A *length* derived from the width, not the `-2.5%` this was. A percentage
+   * margin — `margin-block-start` included — resolves against the containing
+   * block's **inline** size, which here is the whole viewport: the lift was
+   * therefore 36px on a desktop and 10px on a phone, drifting with the window
+   * rather than staying fixed to the artwork it was correcting.
+   */
+  --khem-intro-lift: calc(var(--khem-intro-w) * -0.037);
+
+  /* ── Choreography ── */
+  --khem-intro-rule-delay: 120ms;
+  --khem-intro-rule-dur: 520ms;
+  --khem-intro-bloom-delay: 300ms;
+  --khem-intro-bloom-dur: 1400ms;
+  --khem-intro-wipe-delay: 420ms;
+  --khem-intro-wipe-dur: 1500ms;
+  --khem-intro-settle-dur: 1800ms;
+  --khem-intro-rule-out-delay: 1500ms;
+  --khem-intro-rule-out-dur: 700ms;
+
+  /* ── Exit. `--khem-intro-out-*` + `--khem-intro-part-*` must sum to the
+       `EXIT_MS` in `IntroCurtain.tsx`. ── */
+  --khem-intro-out-dur: 600ms;
+  --khem-intro-part-delay: 200ms;
+  --khem-intro-part-dur: 900ms;
+
+  /*
+   * `--ease-luxury-bezier` is deliberately *not* used for the wipe.
+   *
+   * That curve covers half its distance in the first 13% of its duration,
+   * which is exactly right for something arriving and settling and exactly
+   * wrong for a light travelling across a surface: it would deliver the
+   * falcon, the wordmark and the tagline in one indistinguishable rush and
+   * then crawl. This is a tween like every other curve on the site — no
+   * overshoot, no bounce — just an evenly paced one.
+   */
+  --khem-intro-sweep: cubic-bezier(0.4, 0, 0.2, 1);
+
+  position: fixed;
+  inset: 0;
+  z-index: 2000; /* above the nav (1002), the route loader (1000), the menu (998) */
+
+  /*
+   * Swallow the gesture rather than locking the document.
+   *
+   * `overflow: hidden` on `body` is banned here — it promotes `body` to a
+   * scroll container and kills every `position: sticky` child, which `<Nav>`
+   * and `<StickyPurchaseBar>` both depend on (see the `html, body` rule near
+   * the top of this file). The overlay is opaque and covers the viewport, so
+   * there is nothing to scroll toward anyway.
+   */
+  touch-action: none;
+  overscroll-behavior: contain;
+
+  /*
+   * Transparent on purpose. The two halves are the ivory ground; anything
+   * painted here would still be in the way after they had parted.
+   */
+  background: transparent;
+}
+
+@media (min-width: 768px) {
+  #khem-intro {
+    --khem-intro-w: clamp(380px, 34vw, 520px);
+  }
+}
+
+html[data-intro="off"] #khem-intro,
+html[data-intro="done"] #khem-intro {
+  display: none;
+}
+
+/* ── The field ─────────────────────────────────────────────── */
+
+/*
+ * The colour is written literally as well as through the token, for the reason
+ * the `body` ground is: this is the first thing painted on the site, and it has
+ * to be ivory before any cascade resolves.
+ */
+.khem-intro-half {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: #f7f5f0;
+  background: var(--color-ivory, #f7f5f0);
+  will-change: transform;
+}
+
+/*
+ * The halves overlap by half a pixel. Without it, subpixel rounding on a
+ * fractional-DPR display opens a hairline of live page down the middle of the
+ * curtain — visible for the whole hold, and only on some machines.
+ */
+.khem-intro-half-top {
+  top: 0;
+  bottom: calc(50% - 0.5px);
+}
+
+.khem-intro-half-bottom {
+  top: 50%;
+  bottom: 0;
+}
+
+/* ── The lockup ────────────────────────────────────────────── */
+
+.khem-intro-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.khem-intro-lockup {
+  position: relative;
+  width: var(--khem-intro-w);
+  /* Pinned to the artwork, so the box is final before the bytes arrive. */
+  aspect-ratio: 2000 / 1089;
+  margin-block-start: var(--khem-intro-lift);
+  animation: khem-intro-settle var(--khem-intro-settle-dur)
+    var(--ease-luxury-bezier) var(--khem-intro-wipe-delay) both;
+}
+
+/*
+ * The pass of light: a mask travelling down the artwork, uncovering the falcon,
+ * then the wordmark, then the tagline.
+ *
+ * ## Why this is a mask and not an opaque veil
+ *
+ * The obvious cheap trick is an ivory rectangle that slides down off the
+ * artwork — `transform` only, composited, no repaint. It was built that way
+ * first and it is **wrong**, for a reason that only shows up on screen: an
+ * opaque rectangle also hides whatever is *behind* it, and what is behind it
+ * is the bloom. The veil therefore painted a hard-edged lighter box across the
+ * glow — a rectangle of un-lit ivory sitting in the middle of a lit field, with
+ * two vertical edges nothing in the composition explains. Widening it only
+ * traded the vertical edges for a horizontal one.
+ *
+ * A mask hides the artwork and nothing else, so the bloom is continuous and
+ * there is no edge anywhere. It costs a repaint of one image for a second and a
+ * half on a page that is doing nothing else, which is the correct trade: the
+ * compositor is not worth an artefact this visible.
+ *
+ * ## The geometry
+ *
+ * The mask is three times the artwork's height, so the artwork sees exactly one
+ * third of the gradient at a time, and `mask-position` slides which third. The
+ * soft band is 6.7% of the mask — about 20% of the artwork — so each element
+ * blooms into view over roughly a fifth of the frame rather than clipping in.
+ *
+ * Two numbers here are load-bearing, and both were wrong first time:
+ *
+ * **The opaque run reaches 34%, not 33.3%.** At `mask-position: 0% 0%` the
+ * artwork occupies mask 0-33.3%, so an opaque run that stops exactly at 33.3%
+ * leaves the tagline sitting on the boundary — it arrived visibly greyed, and
+ * looked like a colour bug in the artwork rather than a masking one.
+ *
+ * **The travel starts at 66%, not 100%.** The artwork is fully hidden from 66%
+ * upward, so the first third of a 0-100% sweep moves a mask edge that is not
+ * over the artwork yet: a third of the wipe's duration spent on an empty frame,
+ * with all three beats then crammed into the remainder. Starting where the
+ * artwork actually begins to matter is what gives the falcon, the wordmark and
+ * the tagline an even share of the sweep.
+ */
+.khem-intro-art {
+  width: 100%;
+  height: auto;
+
+  --khem-intro-veil: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 34%,
+    rgba(0, 0, 0, 0.5) 37.3%,
+    transparent 40.7%,
+    transparent 100%
+  );
+
+  -webkit-mask-image: var(--khem-intro-veil);
+  mask-image: var(--khem-intro-veil);
+  -webkit-mask-size: 100% 300%;
+  mask-size: 100% 300%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  animation: khem-intro-wipe var(--khem-intro-wipe-dur) var(--khem-intro-sweep)
+    var(--khem-intro-wipe-delay) both;
+}
+
+/*
+ * Light coming up behind the object, and no more than that.
+ *
+ * Sized 1.15x the lockup rather than the 1.6x it was, and with no `blur()`
+ * filter. Spread across most of a desktop viewport, a 16%-opacity gradient
+ * quantises to visible concentric rings — the halo read as banding rather than
+ * as light, and the blur was paying for a full-screen filter layer to produce
+ * it. A radial gradient is already smooth; keeping it close to the lockup keeps
+ * every step of it below the eye's threshold.
+ */
+.khem-intro-bloom {
+  position: absolute;
+  width: calc(var(--khem-intro-w) * 1.15);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--color-gold) 0%,
+    color-mix(in srgb, var(--color-gold) 40%, transparent) 30%,
+    transparent 68%
+  );
+  opacity: 0;
+  animation: khem-intro-bloom var(--khem-intro-bloom-dur)
+    var(--ease-luxury-bezier) var(--khem-intro-bloom-delay) forwards;
+}
+
+/*
+ * The horizon the field will later part along, seeded before anything else
+ * arrives. `--color-gold-deep` and not `--color-gold`: on ivory the latter is
+ * 2.6:1, and picking the wrong one of that pair is an accessibility bug rather
+ * than a shade preference (see the token's own note above).
+ */
+.khem-intro-rule {
+  position: absolute;
+  /*
+   * Below the tagline, not across the middle of the frame.
+   *
+   * The obvious placement is the viewport's exact centre — the line the field
+   * later parts along — and it is wrong: the wordmark occupies that band, so
+   * the hairline would be drawn straight through KHEM for the second and a
+   * half it is on screen. The lockup is `--khem-intro-w` wide and 1089/2000 as
+   * tall, so half of it is `0.272w`; `0.36w` clears the tagline. On an empty
+   * ivory field a hairline six percent below centre still reads as the
+   * horizon, which is all this has to do.
+   */
+  top: calc(50% + var(--khem-intro-w) * 0.36);
+  left: 50%;
+  /* Centres the rule irrespective of the width the entrance is animating. */
+  transform: translateX(-50%);
+  height: 1px;
+  background: var(--color-gold-deep);
+  animation:
+    khem-intro-rule var(--khem-intro-rule-dur) var(--ease-luxury-bezier)
+      var(--khem-intro-rule-delay) both,
+    khem-intro-rule-out var(--khem-intro-rule-out-dur)
+      var(--ease-luxury-bezier) var(--khem-intro-rule-out-delay) forwards;
+}
+
+@keyframes khem-intro-rule {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 96px;
+    opacity: 1;
+  }
+}
+
+@keyframes khem-intro-rule-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes khem-intro-bloom {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.14;
+  }
+}
+
+@keyframes khem-intro-wipe {
+  from {
+    -webkit-mask-position: 0% 66%;
+    mask-position: 0% 66%;
+  }
+  to {
+    -webkit-mask-position: 0% 0%;
+    mask-position: 0% 0%;
+  }
+}
+
+@keyframes khem-intro-settle {
+  from {
+    opacity: 0.9;
+    transform: scale(1.035);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── The exit ──────────────────────────────────────────────── */
+
+/*
+ * The lockup leads the curtain by `--khem-intro-part-delay`, so the field is
+ * empty before it opens. A logo still fading while the halves slide would ride
+ * away on them.
+ */
+/*
+ * The exit runs on `--khem-intro-sweep`, not `--ease-luxury-bezier`, for the
+ * same reason the wipe does — and it is even more visible here. Each half
+ * travels half a viewport; on the luxury curve it covers 97% of that in the
+ * first 450ms of a 900ms animation and then crawls, which reads as the curtain
+ * being snatched away rather than opened. An evenly paced tween gives the two
+ * halves the weight of something being drawn back.
+ */
+html[data-intro="exit"] .khem-intro-stage {
+  animation: khem-intro-out var(--khem-intro-out-dur) var(--khem-intro-sweep)
+    both;
+}
+
+html[data-intro="exit"] .khem-intro-half-top {
+  animation: khem-intro-part-up var(--khem-intro-part-dur)
+    var(--khem-intro-sweep) var(--khem-intro-part-delay) both;
+}
+
+html[data-intro="exit"] .khem-intro-half-bottom {
+  animation: khem-intro-part-down var(--khem-intro-part-dur)
+    var(--khem-intro-sweep) var(--khem-intro-part-delay) both;
+}
+
+@keyframes khem-intro-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+}
+
+@keyframes khem-intro-part-up {
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes khem-intro-part-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/*
+ * Reduced motion: the sequence collapses to light coming up and going down
+ * again. No wipe, no scale, no split, no hairline drawing itself — the lockup
+ * is simply there, and then the field is not.
+ *
+ * A local block rather than an addition to the shared one further up, for the
+ * same reason the hero section at the foot of this file keeps its own: the
+ * overrides are only legible next to the rules they override.
+ *
+ * `IntroCurtain.tsx` shortens its floor and its exit to match; this whole
+ * sequence is under 1.4s.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .khem-intro-art {
+    animation: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .khem-intro-rule {
+    animation: none;
+    width: 96px;
+    opacity: 0;
+  }
+
+  .khem-intro-lockup {
+    animation: khem-fade-in 400ms ease-out both;
+  }
+
+  .khem-intro-bloom {
+    animation: none;
+    opacity: 0.14;
+  }
+
+  html[data-intro="exit"] .khem-intro-stage {
+    animation: khem-intro-out 400ms ease-out both;
+  }
+
+  /*
+   * The halves fade instead of parting. They still have to disappear
+   * *somehow* — leaving them would leave an ivory sheet over the site.
+   */
+  html[data-intro="exit"] .khem-intro-half-top,
+  html[data-intro="exit"] .khem-intro-half-bottom {
+    animation: khem-intro-veil-out 400ms ease-out 50ms both;
+  }
+}
+
+@keyframes khem-intro-veil-out {
+  to {
+    opacity: 0;
+  }
+}

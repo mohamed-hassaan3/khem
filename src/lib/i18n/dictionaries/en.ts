@@ -839,9 +839,19 @@ export const en = {
       ATTAR_OIL: "Attar Oil",
     } satisfies Record<Concentration, string>,
     trust: {
+      /*
+       * `{amount}` is the stored free-delivery minimum, formatted in the
+       * visitor's display currency by whichever component prints this badge.
+       *
+       * It used to be the literal "EGP 2,000", with a comment in
+       * `src/lib/cart.ts` asking whoever changed the threshold to remember to
+       * change this line too. Since `0053_delivery_terms.sql` the figure is a
+       * row an editor can change from the dashboard, and a promise in prose that
+       * nobody remembered to update would be a promise the checkout then broke.
+       */
       delivery: {
         title: "Complimentary Delivery",
-        desc: "On all orders over EGP 2,000",
+        desc: "On all orders over {amount}",
       },
       packaging: {
         title: "Luxury Packaging",
@@ -1135,8 +1145,16 @@ export const en = {
   cart: {
     meta: {
       title: "Shopping Bag",
+      /*
+       * No figure here at all, unlike the trust badge above.
+       *
+       * This is page metadata, rendered by `generateMetadata()` before any cart
+       * exists, and it is cached and syndicated by crawlers for as long as they
+       * please. A number in it would go stale the first time the desk changed the
+       * terms, in a place nothing revalidates and nobody looks.
+       */
       description:
-        "Review the fragrances in your KHEM bag before checkout — complimentary delivery on orders over EGP 2,000.",
+        "Review the fragrances in your KHEM bag before checkout — complimentary delivery on qualifying orders.",
     },
     eyebrow: "Your Selection",
     heading: "The Cart",

@@ -715,7 +715,9 @@ export const ar: Dictionary = {
     trust: {
       delivery: {
         title: "شحن مجاني",
-        desc: "لجميع الطلبات التي تتجاوز ٢٬٠٠٠ جنيه",
+        // `{amount}` — the stored minimum, formatted by the component. See the
+        // note on the English tree.
+        desc: "لجميع الطلبات التي تتجاوز {amount}",
       },
       packaging: {
         title: "تغليف فاخر",
@@ -973,7 +975,7 @@ export const ar: Dictionary = {
     meta: {
       title: "حقيبة التسوّق",
       description:
-        "راجع العطور في حقيبتك قبل إتمام الطلب — شحن مجاني للطلبات التي تتجاوز ٢٬٠٠٠ جنيه.",
+        "راجع العطور في حقيبتك قبل إتمام الطلب — شحن مجاني للطلبات المؤهّلة.",
     },
     eyebrow: "اختيارك",
     heading: "الحقيبة",

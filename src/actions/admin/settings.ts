@@ -33,7 +33,10 @@
  */
 
 import { requireAdmin } from "@/src/lib/admin/auth";
-import { revalidateSettings } from "@/src/lib/admin/revalidate";
+import {
+  revalidateDelivery,
+  revalidateSettings,
+} from "@/src/lib/admin/revalidate";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import {
@@ -42,6 +45,7 @@ import {
   deleteContactChannelSchema,
   deleteSocialProfileSchema,
   updateBoutiqueSettingsSchema,
+  updateDeliverySettingSchema,
   updateContactChannelSchema,
   updateSocialProfileSchema,
 } from "@/src/schemas/settings";
@@ -119,6 +123,76 @@ export async function updateBoutiqueSettings(
   console.info(`[admin] house settings updated by ${actor.email}`);
 
   return { ok: true, slug: "default", message: "House settings saved." };
+}
+
+// ── Delivery terms ────────────────────────────────────────────
+
+/**
+ * The fee and the free-delivery minimum for one channel.
+ *
+ * Updated, never inserted — the same rule the singleton above follows, and for
+ * the same reason. `0053_delivery_terms.sql` seeds both rows; an upsert here
+ * would mean that a channel somebody had deleted quietly came back with whatever
+ * figures the form happened to hold, and the site would start charging them
+ * without anyone deciding to.
+ *
+ * These two numbers are what the cart quotes and what `place_order()` is
+ * charged, so the write revalidates the layout that carries them — see
+ * `revalidateDelivery()`.
+ */
+export async function updateDeliverySetting(
+  input: unknown,
+): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = updateDeliverySettingSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Some fields need attention.",
+      fieldErrors: fieldErrorsFrom(parsed.error),
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  // The channel names the row; it is never one of the values written.
+  const { channel, ...terms } = parsed.data;
+
+  const { data, error } = await supabase
+    .from("DeliverySetting")
+    .update({ ...terms, updatedAt: new Date().toISOString() })
+    .eq("channel", channel)
+    .select("channel")
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      `[admin] updateDeliverySetting rejected (${actor.email}): ${error.message}`,
+    );
+    return postgresFailure(error as PostgresErrorLike, "collection");
+  }
+
+  if (!data) {
+    return {
+      ok: false,
+      message:
+        "There is no delivery row for that channel, so nothing was saved. Run the migrations, then try again.",
+    };
+  }
+
+  revalidateDelivery();
+  console.info(
+    `[admin] delivery terms updated by ${actor.email} → ${channel} ` +
+      `fee=${terms.feeInCents} minimum=${terms.freeThresholdInCents}`,
+  );
+
+  return {
+    ok: true,
+    slug: channel,
+    message: `${channel === "ONLINE" ? "Online" : "Offline"} delivery terms saved.`,
+  };
 }
 
 // ── Contact channels ──────────────────────────────────────────
