@@ -311,7 +311,7 @@ export default function CommentLightbox({
                 ref={trackRef}
                 tabIndex={hasMultiple ? 0 : undefined}
                 aria-roledescription={hasMultiple ? "carousel" : undefined}
-                className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain outline-none [scrollbar-width:none] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gold motion-safe:scroll-smooth [&::-webkit-scrollbar]:hidden"
+                className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain khem-scroll-track outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gold motion-safe:scroll-smooth"
               >
                 {images.map((image, index) => (
                   <li

@@ -79,6 +79,34 @@ export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
 };
 
 /**
+ * What the **storefront** calls a product of a given type, and — when no type
+ * is stored — of a given collection kind.
+ *
+ * Deliberately not {@link PRODUCT_TYPE_LABELS}, which is the dashboard's
+ * English. The storefront speaks two languages, so its labels live in the
+ * dictionaries (`product.productTypes`, `product.collectionKinds`) and arrive
+ * here as an argument rather than being reached for.
+ *
+ * The fallback is what stops a row rendering blank: `"productType"` is nullable
+ * and every product saved before the column was offered carries none, so a
+ * usage with no type states its range instead of stating nothing.
+ */
+export function usageTypeLabel(
+  usage: {
+    productType: ProductType | null;
+    collectionKind: CollectionKind;
+  },
+  labels: {
+    productTypes: Record<ProductType, string>;
+    collectionKinds: Record<CollectionKind, string>;
+  },
+): string {
+  return usage.productType === null
+    ? labels.collectionKinds[usage.collectionKind]
+    : labels.productTypes[usage.productType];
+}
+
+/**
  * The types measured in millilitres, and so required to state a volume.
  *
  * The TypeScript twin of the rule `product_type_matches_kind()` enforces since

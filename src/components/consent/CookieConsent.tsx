@@ -158,7 +158,7 @@ export default function CookieConsent() {
     <AnimatePresence>
       {visible && (
         <div
-          className="ground-ivory pointer-events-none fixed inset-x-0 bottom-0 z-990 px-4 pb-4 sm:px-6 sm:pb-6"
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-990 flex justify-center px-4 pb-4 sm:justify-end sm:px-6 sm:pb-6"
           role="region"
           aria-label={copy.regionLabel}
         >
@@ -178,7 +178,31 @@ export default function CookieConsent() {
               ease: EASE_LUXURY,
             }}
             className={[
-              "pointer-events-auto relative mx-auto w-full max-w-5xl",
+              /*
+                The ground declaration belongs on the card, not on the wrapper
+                that positions it. `.ground-ivory` does two things — it sets the
+                ground variables the card's tokens resolve against, *and* it
+                paints `background: var(--ground-bg)`. On the full-width fixed
+                wrapper that paint was invisible only because a `max-w-5xl` card
+                covered every pixel of it. A card in the corner does not, so the
+                strip showed. Declared here, the variables reach the thing that
+                reads them and the paint lands on the thing meant to be seen.
+              */
+              "ground-ivory",
+              /*
+                A card, not a bar. At `max-w-5xl` centred, this spanned the
+                whole foot of the viewport — a five-column-wide interruption
+                for a notice the visitor answers once. It is a small panel in
+                the bottom corner now, and the page behind it stays readable
+                while they decide, which is the whole premise of a banner that
+                deliberately does not trap focus or lock scroll.
+
+                `justify-end` on the wrapper is logical, so this sits bottom
+                right in English and bottom left in Arabic without a second
+                rule. A phone keeps the full width — there is no corner to
+                retreat to at 390px.
+              */
+              "pointer-events-auto relative w-full sm:max-w-md",
               "rounded-lg border border-border-gold/40",
               /*
                 Opaque ivory. This was 92% charcoal over a `blur(24px)` — and
@@ -188,7 +212,7 @@ export default function CookieConsent() {
                 the blur was nominally there for, at no per-frame cost.
               */
               "bg-ground-bg",
-              "p-6 shadow-3 focus:outline-none sm:p-8",
+              "p-5 shadow-3 focus:outline-none sm:p-6",
             ].join(" ")}
           >
             {/* Hairline gold rule along the top edge of the card. */}
@@ -206,8 +230,17 @@ export default function CookieConsent() {
               {copy.title}
             </h2>
 
-            <p className="max-w-2xl text-sm leading-relaxed text-ground-muted">
+            {/*
+              The same notice at two lengths, switched in CSS rather than in
+              JS: a media query has no hydration branch and no reflow, and both
+              strings are already in the bundle. The short one is for a phone,
+              where the long version filled a third of the screen.
+            */}
+            <p className="hidden text-sm leading-relaxed text-ground-muted sm:block">
               {copy.body}
+            </p>
+            <p className="text-sm leading-relaxed text-ground-muted sm:hidden">
+              {copy.bodyShort}
             </p>
 
             <LocaleLink
@@ -250,7 +283,7 @@ export default function CookieConsent() {
                         <p className="font-heading text-[0.72rem] uppercase tracking-[0.18em] text-ground">
                           {copy.categories.essential.name}
                         </p>
-                        <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-ground-muted">
+                        <p className="mt-1.5 text-xs leading-relaxed text-ground-muted">
                           {copy.categories.essential.description}
                         </p>
                       </div>
@@ -271,7 +304,7 @@ export default function CookieConsent() {
                           >
                             {copy.categories[category].name}
                           </p>
-                          <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-ground-muted">
+                          <p className="mt-1.5 text-xs leading-relaxed text-ground-muted">
                             {copy.categories[category].description}
                           </p>
                         </div>
@@ -303,7 +336,13 @@ export default function CookieConsent() {
             </AnimatePresence>
 
             {/* ── ACTIONS ────────────────────────────────── */}
-            <div className="mt-7 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            {/*
+              The toggle keeps its own line at every width now. The row used to
+              split at `sm:` — which was right across a `max-w-5xl` bar and is
+              wrong inside a `max-w-md` card, where "Manage Preferences" and two
+              buttons would be three controls fighting over one line.
+            */}
+            <div className="mt-7 flex flex-col gap-5">
               <button
                 type="button"
                 onClick={() => setExpanded((previous) => !previous)}
@@ -333,7 +372,7 @@ export default function CookieConsent() {
                * the thumb while keeping Decline first in DOM (and tab) order —
                * the reject path must never be harder to reach than accept.
                */}
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                 <button
                   type="button"
                   onClick={declineAll}

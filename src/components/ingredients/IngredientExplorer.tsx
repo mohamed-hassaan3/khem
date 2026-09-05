@@ -9,6 +9,7 @@ import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { LOCALE_DIRECTION } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
+import { usageTypeLabel } from "@/src/lib/product-types";
 import { productHref } from "@/src/lib/routes";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type { Ingredient } from "@/src/types/content";
@@ -359,13 +360,24 @@ export default function IngredientExplorer({
                                       page. */}
                                   <LocaleLink
                                     href={productHref(product)}
-                                    className="flex items-center gap-2 text-xs text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
+                                    className="flex items-start gap-2 text-xs text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
                                   >
                                     <span
-                                      className="h-px w-4 bg-current"
+                                      className="mt-2 h-px w-4 flex-none bg-current"
                                       aria-hidden="true"
                                     />
-                                    {product.name}
+                                    {/* Name *and* type: the house sells a
+                                        perfume, a body mist and a room spray
+                                        under one name, and a bare list of
+                                        names made those three the same row. */}
+                                    <span>
+                                      <span className="block">
+                                        {product.name}
+                                      </span>
+                                      <span className="mt-0.5 block text-[9px] uppercase tracking-[0.18em] text-ground-accent/50">
+                                        {usageTypeLabel(product, dict.product)}
+                                      </span>
+                                    </span>
                                   </LocaleLink>
                                 </li>
                               ))}

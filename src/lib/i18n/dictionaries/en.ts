@@ -11,6 +11,7 @@
  * they stay English for both locales until that content layer moves to a CMS.
  */
 
+import type { ProductType } from "@/src/lib/product-types";
 import type { CollectionKind, Concentration } from "@/src/types/catalog";
 
 export const en = {
@@ -838,6 +839,40 @@ export const en = {
       EAU_DE_PARFUM: "Eau de Parfum",
       ATTAR_OIL: "Attar Oil",
     } satisfies Record<Concentration, string>,
+    /*
+     * What an object *is*, printed wherever a name alone would be ambiguous —
+     * the "Found in" list on `/ingredients` and in the home rail's panel, where
+     * a perfume, a body mist and a room spray can all be called the same thing.
+     *
+     * Keyed by `ProductType` for the reason `concentrations` is keyed by
+     * `Concentration`: an eighth value added to the enum is a compile error
+     * here rather than a blank token on a card.
+     *
+     * `PRODUCT_TYPE_LABELS` in `src/lib/product-types.ts` is the dashboard's
+     * copy of this and stays English-only. The two are allowed to differ — one
+     * is a control's option list, the other is what a reader is told.
+     */
+    productTypes: {
+      PERFUME: "Perfume",
+      GIFT: "Gift",
+      BOX: "Gift Box",
+      ANTIQUE: "Antique",
+      DECORATIVE: "Decorative",
+      BODY_MIST: "Body Mist",
+      ROOM_SPRAY: "Room Spray",
+    } satisfies Record<ProductType, string>,
+    /*
+     * The fallback for a product whose type was never stated — the column is
+     * nullable, and everything catalogued before it existed carries none. A
+     * range is coarser than a type, but it is never nothing.
+     */
+    collectionKinds: {
+      FRAGRANCE: "Perfume",
+      BODY: "Body Care",
+      HOME: "Home Fragrance",
+      DISCOVERY: "Discovery Set",
+      GIFT: "Gift Set",
+    } satisfies Record<CollectionKind, string>,
     trust: {
       /*
        * `{amount}` is the stored free-delivery minimum, formatted in the
@@ -2080,6 +2115,14 @@ export const en = {
     eyebrow: "Privacy",
     title: "Cookies at KHEM",
     body: "We use a small number of cookies to keep your bag intact, remember your preferences, and understand which pages are read. We run no advertising cookies and work with no ad networks. Your browsing is never sold or shared.",
+    /*
+     * The same statement at phone width, where the card is the full width of
+     * the viewport and the long version is five lines of it. Not a teaser: it
+     * still says what is stored and still says nothing is sold, because a
+     * shortened consent notice that drops the second half is a worse notice.
+     */
+    bodyShort:
+      "A few cookies keep your bag intact and your preferences remembered. No advertising, no ad networks, never sold.",
     policyLink: "Read the Cookie Policy",
     settingsLink: "Cookie Settings",
     acceptAll: "Accept All",

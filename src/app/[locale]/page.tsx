@@ -9,7 +9,7 @@ import ProductCard from "@/src/components/ecommerce/ProductCard";
 import CollectionCard from "@/src/components/home/CollectionCard";
 import Hero from "@/src/components/home/Hero";
 import CollectionSlider from "@/src/components/home/CollectionSlider";
-import IngredientCard from "@/src/components/home/IngredientCard";
+import IngredientRail from "@/src/components/home/IngredientRail";
 import JournalCard from "@/src/components/home/JournalCard";
 import NewsletterForm from "@/src/components/home/NewsletterForm";
 import TestimonialCarousel from "@/src/components/home/TestimonialCarousel";
@@ -537,11 +537,34 @@ export default async function Home({
               </p>
             </Reveal>
 
-            <div className="grid grid-cols-1 gap-px bg-ground-border sm:grid-cols-2 lg:grid-cols-4">
+            {/*
+              Four pillars stacked under each other made the section as tall as
+              the phone screen four times over, and a reader scrolled past three
+              of them to reach the CTA. Sideways instead: the specimen sheet
+              becomes a specimen *drawer*, one card at a time, snapped.
+
+              The hairline `gap-px` over `bg-ground-border` survives the change
+              of axis — it rules between the cards either way — and `sm:` and up
+              are the untouched 2-up / 4-up grid.
+
+              `overflow-y-hidden` is not decoration. A box with `overflow-x:
+              auto` and a `visible` cross axis has that axis computed to `auto`
+              as well, so this row drew a *vertical* bar too — `<Reveal>` parks
+              each pending card at `translateY(48px)`, and that travel is real
+              overflow. Nothing is lost by clipping it: the card is at
+              `opacity: 0` for the whole of the journey back up.
+
+              `khem-scroll-track` then suppresses the bar itself. The snap
+              points and the card cut off at the edge already say this row
+              scrolls, and a rule drawn along the foot of a specimen sheet is
+              chrome the composition cannot absorb — the same judgement the
+              galleries make. See the class in `globals.css` for the list.
+            */}
+            <div className="khem-scroll-track flex snap-x snap-mandatory gap-px overflow-x-auto overflow-y-hidden bg-ground-border pb-1 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
               {craftPillars.map((pillar, index) => (
                 <Reveal
                   key={pillar.id}
-                  className="ground-ivory p-6 sm:p-10 md:p-12"
+                  className="ground-ivory w-[80%] flex-none snap-start p-6 sm:w-auto sm:p-10 md:p-12"
                   delay={index * STAGGER_STEP}
                 >
                   <p className="mb-8 font-heading text-xs tracking-[0.2em] text-ground-subtle">
@@ -732,16 +755,12 @@ export default async function Home({
             </Reveal>
           </div>
 
-          {/* Horizontal scroll rail */}
-          <div className="flex gap-0.5 overflow-x-auto pb-4 ps-4 md:ps-20">
-            {ingredients.map((ingredient) => (
-              <IngredientCard
-                key={ingredient.id}
-                ingredient={ingredient}
-                locale={activeLocale}
-              />
-            ))}
-          </div>
+          {/*
+            The rail, plus the detail a phone opens under it. Client, because
+            the open material is state; the rows are queried here and handed
+            down, so the service layer stays server-side.
+          */}
+          <IngredientRail ingredients={ingredients} />
         </section>
       </>
     ),

@@ -11,6 +11,7 @@
  * AGENTS.md §6) or a headless CMS. Either way the service layer absorbs it.
  */
 
+import type { ProductType } from "@/src/lib/product-types";
 import type { CollectionKind } from "@/src/types/catalog";
 
 /** A reusable image reference, matching the `url` + `alt` pair used in catalog images. */
@@ -41,6 +42,18 @@ export interface IngredientUsage {
   slug: string;
   /** Its collection's kind — the other half of a linkable product. */
   collectionKind: CollectionKind;
+  /**
+   * What the object *is* — `"Product"."productType"`.
+   *
+   * The house sells a perfume, a body mist and a room spray under one name, and
+   * the "Found in" list printed the three as three identical lines. This is the
+   * column that tells them apart; `0052_product_type_and_volume.sql` says so in
+   * its header, which is why nothing new had to be stored to answer it.
+   *
+   * `null` for a row saved before the column was offered. `usageTypeLabel()`
+   * falls back to {@link collectionKind} there rather than printing nothing.
+   */
+  productType: ProductType | null;
 }
 
 /**

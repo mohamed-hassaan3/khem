@@ -11,6 +11,7 @@
 import { z } from "zod";
 
 import type { Locale } from "@/src/lib/i18n/config";
+import { PRODUCT_TYPE_VALUES } from "@/src/lib/product-types";
 import {
   resolveList,
   resolveOptionalText,
@@ -82,12 +83,19 @@ export function toTestimonial(row: unknown): Testimonial | null {
  * material used in a candle links to `/ritual/…` instead of a `/perfume/…` URL
  * that would 404. No migration: existing tables, existing grants, one more
  * column on an embed that was already being made.
+ *
+ * `productType` rides the same embed for the same reason. A perfume, a body
+ * mist and a room spray can share one name, and the list printed all three
+ * identically; the column that tells them apart already exists
+ * (`0052_product_type_and_volume.sql`), so naming it here is one more column,
+ * not a migration.
  */
 export const INGREDIENT_COLUMNS =
   "id, name, name_ar, slug, latinName, origin, origin_ar, families, " +
   "rarity, rarity_ar, priceTier, description, description_ar, " +
   "facts, facts_ar, imageUrl, imageAlt, imageAlt_ar, " +
-  "usedIn:IngredientUsage(name, productSlug, sortOrder, product:Product(collection:Collection(kind)))";
+  "usedIn:IngredientUsage(name, productSlug, sortOrder, " +
+  "product:Product(productType, collection:Collection(kind)))";
 
 /** Mirrors `CollectionKind` — the same closed vocabulary `catalog.ts` parses. */
 const collectionKindSchema = z.enum([
@@ -107,6 +115,13 @@ const collectionKindSchema = z.enum([
 const embeddedKind = z.object({ kind: collectionKindSchema });
 
 const embeddedProduct = z.object({
+  /*
+   * Nullable and defaulted for the same reason the embed itself is: the column
+   * is nullable in the database — every row predating it carries no type — and
+   * a query made before this was selected carries nothing at all. Neither may
+   * drop a usage from the list.
+   */
+  productType: z.enum(PRODUCT_TYPE_VALUES).nullable().default(null),
   collection: z.union([embeddedKind, z.array(embeddedKind).min(1)]),
 });
 
@@ -193,6 +208,7 @@ export function toIngredient(row: unknown, locale: Locale): Ingredient | null {
         collectionKind: usage.product
           ? first(first(usage.product).collection).kind
           : "FRAGRANCE",
+        productType: usage.product ? first(usage.product).productType : null,
       })),
     image: { url: imageUrl, alt: resolveText(imageAlt, imageAlt_ar, locale) },
   };

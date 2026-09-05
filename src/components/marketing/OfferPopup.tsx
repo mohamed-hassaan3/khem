@@ -360,8 +360,16 @@ export default function OfferPopup({
               a 343px-wide panel is 429px tall on its own, which pushes the email
               field off a 667px screen and leaves the visitor scrolling a modal
               to find the thing it is asking them to do.
+
+              224px / 288px, up from 160 / 224. The house paragraph below is
+              hidden on a phone (see the copy block), and the band takes back
+              exactly the space that paragraph and its gap were occupying —
+              which is why this can grow without moving the email field. The
+              667px budget the note above sets is still the constraint, and is
+              still met: the field stays above the fold on the smallest screen
+              the site supports.
             */}
-            <div className="relative h-40 w-full shrink-0 overflow-hidden bg-sand sm:h-56 md:h-full md:min-h-[30rem] md:shrink">
+            <div className="relative h-56 w-full shrink-0 overflow-hidden bg-sand sm:h-72 md:h-full md:min-h-[30rem] md:shrink">
               {settings.offerPopupImageUrl ? (
                 <Image
                   src={settings.offerPopupImageUrl}
@@ -397,17 +405,48 @@ export default function OfferPopup({
 
                   <div className="gold-line" />
 
-                  <p dir="auto" className="text-[13px] leading-loose text-ground-muted">
-                    {settings.offerPopupBody ?? offerLine}
-                  </p>
+                  {/*
+                    The house's paragraph, and only from `md` up.
 
-                  {/* When the house wrote its own body copy the offer still has
-                      to be stated, or the panel promises nothing. */}
+                    On a phone this modal has one job — the offer and the field
+                    that claims it — and it was making that case twice: an
+                    editorial sentence, then the offer line restating it. The
+                    sentence is the half that can go, because the offer line is
+                    the half that is *true of the live campaign*: it is built
+                    from the `discounts."isWelcome"` row rather than typed, so
+                    dropping it would leave the panel promising nothing.
+
+                    Hidden, not unrendered — the copy is authored in the
+                    dashboard and still belongs to the desktop panel, so this is
+                    a layout decision at one breakpoint rather than a change to
+                    what the house said.
+                  */}
                   {settings.offerPopupBody ? (
-                    <p className="font-heading text-sm tracking-[0.12em] text-gold-soft">
-                      {offerLine}
+                    <p
+                      dir="auto"
+                      className="hidden text-[13px] leading-loose text-ground-muted md:block"
+                    >
+                      {settings.offerPopupBody}
                     </p>
                   ) : null}
+
+                  {/*
+                    The offer itself, always. It carries the muted body voice
+                    when it is the only line of copy and the gold accent when it
+                    follows the paragraph above — the two appearances the panel
+                    already had, now stated in one place instead of two branches
+                    that rendered the same string.
+                  */}
+                  <p
+                    dir="auto"
+                    className={
+                      settings.offerPopupBody
+                        ? "font-heading text-sm tracking-[0.12em] text-gold-soft"
+                        : "text-[13px] leading-loose text-ground-muted"
+                    }
+                  >
+                    {offerLine}
+                  </p>
 
                   <form onSubmit={handleSubmit} noValidate className="relative space-y-3">
                     <label htmlFor="offer-email" className="sr-only">

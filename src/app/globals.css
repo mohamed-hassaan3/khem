@@ -317,26 +317,94 @@
     color: var(--color-ivory);
   }
 
+  /*
+   * ── Scrollbars ──────────────────────────────────────────────
+   *
+   * One bar, everywhere. The page's scrollbar is the design; every internal
+   * scroller — drawer, dialog, popover, admin table, editorial rail — inherits
+   * it rather than restating it. There is exactly one deliberate exception,
+   * `.khem-scroll-track` below, and it *hides* the bar rather than drawing a
+   * second kind.
+   *
+   * `height` as well as `width`. Without it a horizontal scroller took the
+   * platform default — roughly fifteen pixels — so the page scrolled behind a
+   * 4px hairline while every rail on it carried a bar four times heavier. The
+   * two axes are one control and have to be sized as one.
+   *
+   * The colours are ground-relative, for the reason the `*` border rule above
+   * is: a scroller inside `.ground-charcoal` needs a light thumb on a dark
+   * channel, and it must get one without saying so. `--ground-fg` is ink on the
+   * three light grounds and ivory on the two dark ones, so mixing *it* into
+   * transparency is the one expression that is correct on all five. The
+   * fallbacks are the document's own values, for a scroller outside any ground.
+   */
   ::-webkit-scrollbar {
     width: 4px;
+    height: 4px;
   }
 
   /*
-   * The track follows the document, which is ivory. A dark track down the edge
-   * of a light page is the kind of leftover that makes a redesign feel
-   * half-finished — it is small, permanent, and on every single view.
+   * A channel, not a colour. This was a literal `--color-stone`, which was the
+   * right warm grey for exactly one surface — the ivory document — and a light
+   * stripe down the side of anything darker. A 5% tint of the ground's own
+   * foreground is the same faint channel on every ground there is.
    */
   ::-webkit-scrollbar-track {
-    background: var(--color-stone);
+    background: color-mix(
+      in srgb,
+      var(--ground-fg, var(--color-ink)) 5%,
+      transparent
+    );
   }
 
   ::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--color-ink) 22%, transparent);
+    background: color-mix(
+      in srgb,
+      var(--ground-fg, var(--color-ink)) 22%,
+      transparent
+    );
     border-radius: 2px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in srgb, var(--color-ink) 42%, transparent);
+    background: color-mix(
+      in srgb,
+      var(--ground-fg, var(--color-ink)) 42%,
+      transparent
+    );
+  }
+
+  /* Where the two axes meet. Left unstyled it is a default grey square. */
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /*
+   * Firefox, and only Firefox.
+   *
+   * The standard properties are deliberately behind a feature query rather than
+   * written alongside the rules above. In Chromium a non-`auto` `scrollbar-width`
+   * or `scrollbar-color` *disables* `::-webkit-scrollbar` entirely, so declaring
+   * them unconditionally would trade the 4px bar this house drew for the
+   * browser's own `thin` one — around eleven pixels — on the majority of
+   * traffic. Asking whether `::-webkit-scrollbar` can be styled at all is the
+   * precise question: Chrome and Safari answer yes and keep the rules above,
+   * Firefox answers no and takes these.
+   *
+   * `thin` is the narrowest Firefox offers and the hover state is the browser's
+   * own. Same colours, same weight class, as close as the platform allows.
+   */
+  @supports not selector(::-webkit-scrollbar) {
+    *,
+    ::backdrop {
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(
+          in srgb,
+          var(--ground-fg, var(--color-ink)) 22%,
+          transparent
+        )
+        color-mix(in srgb, var(--ground-fg, var(--color-ink)) 5%, transparent);
+    }
   }
 }
 
@@ -905,10 +973,23 @@
   /*
    * A horizontal scroll track whose scrollbar is hidden.
    *
-   * The bar is suppressed rather than styled because the track already says it
-   * scrolls in two stronger ways — the next card is visibly cut off at the
-   * edge, and there are arrows. A 4px gold scrollbar under a row of editorial
-   * photographs is the one piece of chrome the composition cannot absorb.
+   * **The only sanctioned departure from the global bar**, and it hides that
+   * bar rather than drawing a different one — there is no second scrollbar
+   * design in this application. Three surfaces qualify, and they qualify for
+   * the same reason: each already says it scrolls in two stronger ways than a
+   * bar could, so the bar is redundant chrome across a full-bleed photograph.
+   *
+   *   `home/CollectionSlider`      — next card cut off at the edge, plus arrows
+   *   `ecommerce/ProductGallery`   — snapped slides, plus dots and arrows
+   *   `ecommerce/CommentLightbox`  — snapped slides, plus counter and arrows
+   *   the home craft pillars       — snapped cards cut off at the edge, phone
+   *                                  only; from `sm` the row is a grid and
+   *                                  does not scroll at all
+   *
+   * The latter two carried this rule inline as
+   * `[scrollbar-width:none] [&::-webkit-scrollbar]:hidden`, which is this class
+   * spelled out twice. Anything that needs it now says so by name, so the list
+   * above is discoverable by grep rather than by reading every gallery.
    *
    * The content stays reachable by every other means: touch, trackpad, arrow
    * keys on the focused region, and the buttons. Hiding the bar removes an
