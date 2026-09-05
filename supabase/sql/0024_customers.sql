@@ -268,7 +268,25 @@ $$;
 -- in `src/services/account.ts` — a refunded order is not money the house kept.
 -- Those orders still count as orders *placed*, because they were.
 
-create or replace view public.customer_directory as
+/*
+ * Dropped first, not replaced.
+ *
+ * `create or replace view` cannot remove a column, and `0055` appends one
+ * (`locale`) to this view. So on any database that has reached 0055, re-running
+ * this file asks Postgres to drop that column and it refuses — "cannot drop
+ * columns from view" — which killed the whole migration run here and left every
+ * file from this one onward unapplied while reporting nothing worse than a
+ * failed command. A directory of migrations that cannot be replayed is not a
+ * migration directory.
+ *
+ * Safe because nothing depends on this view but functions, and Postgres does
+ * not track function bodies as dependencies: `customer_summary`,
+ * `customer_profile` and `customer_orders` are re-created below, and 0055
+ * re-creates the view with its extra column later in the same run.
+ */
+drop view if exists public.customer_directory;
+
+create view public.customer_directory as
 with order_customer as (
   select
     o.id                                 as order_id,

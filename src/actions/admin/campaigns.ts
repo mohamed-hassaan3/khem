@@ -310,10 +310,25 @@ export async function sendCampaignTestEmail(
 /**
  * Put a campaign in the queue for a moment in the future.
  *
- * The moment is honoured to the nearest cron run, which is daily — see
- * `src/app/api/cron/send-campaigns/route.ts`. The dashboard says so beside the
- * field; a schedule that implied a precision the plan cannot buy would be a
- * promise broken every time it was used.
+ * `scheduledAt` arrives as a UTC instant; the desk's local reading was converted
+ * in the browser, where the desk's zone is actually known. See
+ * `src/lib/campaign-schedule.ts` for why that conversion lives in exactly one
+ * place.
+ *
+ * The moment is honoured as closely as whatever triggers
+ * `src/app/api/cron/send-campaigns/route.ts` allows — a cadence the deployment
+ * sets, not this action. What this action owes the desk is that the instant
+ * stored is the instant they chose, and that a campaign which would reach
+ * nobody never gets queued at all.
+ *
+ * ## The audience is checked here, exactly as it is for "send now"
+ *
+ * Without this, the two doors into dispatch disagreed: `sendCampaignNow()`
+ * refused an empty audience, and scheduling waved it through to a cron run that
+ * claimed nothing, marked the campaign SENDING and then SENT — a campaign
+ * recorded as delivered that reached no one, discovered days later. The count
+ * comes from `campaign_audience()`, the same function the screen displays and
+ * the claim inserts from, so the three can never describe different audiences.
  */
 export async function scheduleCampaign(input: unknown): Promise<AdminActionResult> {
   const actor = await requireAdmin();
@@ -324,6 +339,15 @@ export async function scheduleCampaign(input: unknown): Promise<AdminActionResul
       ok: false,
       message: "That schedule could not be set.",
       fieldErrors: fieldErrorsFrom(parsed.error),
+    };
+  }
+
+  const audience = await audienceBreakdown(parsed.data.id);
+  if (audience.total === 0) {
+    return {
+      ok: false,
+      message:
+        "That campaign would reach nobody. Choose an audience, or add an address to send to.",
     };
   }
 

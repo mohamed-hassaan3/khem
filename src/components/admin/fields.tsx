@@ -350,21 +350,28 @@ export function AdminButton({
 }
 
 /** Result banner shown above a form after a save attempt. */
+/**
+ * `warning` is the third tone deliberately: something that will still happen,
+ * but not quite as asked. Saying that in the same red as a refusal teaches the
+ * desk to read both as noise.
+ */
 export function AdminNotice({
   tone,
   children,
 }: {
-  tone: "success" | "error";
+  tone: "success" | "warning" | "error";
   children: ReactNode;
 }) {
+  const tones = {
+    success: "border-gold/30 bg-gold/5 text-ground-accent-soft",
+    warning: "border-warning/30 bg-warning/5 text-warning",
+    error: "border-danger/40 bg-danger/5 text-danger",
+  } as const;
+
   return (
     <p
       role="status"
-      className={`border px-4 py-3 text-[12px] tracking-wide ${
-        tone === "success"
-          ? "border-gold/30 bg-gold/5 text-ground-accent-soft"
-          : "border-danger/40 bg-danger/5 text-danger"
-      }`}
+      className={`border px-4 py-3 text-[12px] tracking-wide ${tones[tone]}`}
     >
       {children}
     </p>

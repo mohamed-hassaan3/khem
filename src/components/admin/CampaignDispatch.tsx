@@ -17,6 +17,14 @@ import {
   AdminStringList,
   AdminToggle,
 } from "@/src/components/admin/fields";
+import LocalTimestamp from "@/src/components/admin/LocalTimestamp";
+import { useIsHydrated } from "@/src/hooks/use-is-hydrated";
+import {
+  fromDateTimeLocalValue,
+  localTimeZone,
+  scheduleProximity,
+  toDateTimeLocalValue,
+} from "@/src/lib/campaign-schedule";
 import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import type { CampaignWithProgress } from "@/src/types/campaign";
@@ -57,11 +65,25 @@ import type { CampaignWithProgress } from "@/src/types/campaign";
  * before the edit, and a confirmation showing a number that is no longer true is
  * worse than no confirmation at all.
  *
- * ## Scheduling says what it can honour
+ * ## Scheduling says what it can honour, in the reader's own clock
  *
- * The dispatch runs once a day. A campaign scheduled for a named hour goes at
- * the next run after it, and the hint says so — a control that implied
- * minute-precision would break that promise every time it was used.
+ * The field is a `datetime-local`, which is a wall-clock reading with no zone
+ * attached; the column behind it is a UTC instant. Every crossing between those
+ * two goes through `src/lib/campaign-schedule.ts` and none happens here — an
+ * earlier version sliced the UTC string straight into the field, which showed
+ * the desk a time three hours from the one they had chosen and moved it another
+ * three every time they pressed Schedule again.
+ *
+ * The field's value is derived, not seeded, because this component renders on
+ * the server too and "local" there is the host's zone rather than the reader's.
+ * `useIsHydrated()` is what says the browser may now be asked. The moment is
+ * then echoed back beneath the field, with its zone named, so what was stored
+ * can be checked against the clock on the wall.
+ *
+ * What the hint does *not* say is how often the dispatch runs. That is the
+ * deployment's business — a platform cron now, a server cron on another host
+ * later — and a control that quoted one host's timetable would be wrong the
+ * morning it moved.
  */
 export default function CampaignDispatch({
   campaign,
@@ -72,14 +94,34 @@ export default function CampaignDispatch({
   const { toast } = useAdminToast();
 
   const [armed, setArmed] = useState(false);
-  const [when, setWhen] = useState(
-    campaign.scheduledAt ? campaign.scheduledAt.slice(0, 16) : "",
-  );
+  /*
+   * What the desk has typed, or null while the field is still showing the
+   * stored moment. Deliberately not seeded from the prop: "local" is a fact
+   * about the browser, and computing it during a server render would produce
+   * the host's zone — a wrong time on screen and a hydration mismatch. The
+   * field is derived below instead, once the browser can be asked.
+   */
+  const [edited, setEdited] = useState<string | null>(null);
   const [toSubscribers, setToSubscribers] = useState(campaign.toSubscribers);
   const [toCustomers, setToCustomers] = useState(campaign.toCustomers);
   const [emails, setEmails] = useState<string[]>(campaign.recipients);
   const [result, setResult] = useState<AdminActionResult | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const hydrated = useIsHydrated();
+  const zone = hydrated ? localTimeZone() : "";
+
+  /*
+   * The stored instant, in the reader's zone — and whatever they have typed
+   * since, which wins until an action clears it. Derived rather than held, so
+   * the field can never drift from the row: after a schedule is set or
+   * withdrawn, `run()` drops the edit and this reads the refreshed prop again.
+   */
+  const when =
+    edited ??
+    (hydrated && campaign.scheduledAt
+      ? toDateTimeLocalValue(campaign.scheduledAt)
+      : "");
 
   const outstanding = campaign.claimed - campaign.delivered;
   const sending = campaign.status === "SENDING";
@@ -102,12 +144,29 @@ export default function CampaignDispatch({
 
   const unsaved = audienceChanged || recipientsChanged;
 
+  /** Nobody selected. The same condition that refuses a send refuses a queue. */
+  const reachesNobody = audience.total === 0;
+
+  /*
+   * How the chosen moment sits against the floor. The server refuses the first
+   * two whatever this says — this is so the desk finds out before pressing the
+   * button rather than after.
+   */
+  const proximity = scheduleProximity(when);
+  const unreachable = proximity === "past" || proximity === "too-soon";
+
   function run(action: () => Promise<AdminActionResult>) {
     startTransition(async () => {
       const outcome = await action();
       setArmed(false);
 
-      if (outcome.ok) toast(outcome.message);
+      if (outcome.ok) {
+        toast(outcome.message);
+        // The row is the truth again; the field goes back to reading it. On a
+        // refusal the typed moment stays put, next to the reason it was refused.
+        setEdited(null);
+      }
+
       setResult(outcome.ok ? null : outcome);
 
       router.refresh();
@@ -327,22 +386,66 @@ export default function CampaignDispatch({
               label="Or schedule it"
               type="datetime-local"
               value={when}
-              onChange={setWhen}
-              hint="The dispatch runs once a day, so a campaign goes out at the first run after the time you choose."
+              onChange={setEdited}
+              hint={
+                zone
+                  ? `Times are read in your own timezone (${zone}) and stored in UTC. The campaign goes out on the first dispatch at or after the moment you choose.`
+                  : "Times are read in your own timezone and stored in UTC. The campaign goes out on the first dispatch at or after the moment you choose."
+              }
             />
+
+            {/*
+              * What was actually stored, said back. A schedule the desk cannot
+              * see is a schedule they cannot check, and this line is the one
+              * that would have made the timezone bug obvious on the first day.
+              */}
+            {campaign.status === "SCHEDULED" && campaign.scheduledAt ? (
+              <p className="text-[12px] text-ground-accent-soft">
+                Scheduled for{" "}
+                <LocalTimestamp iso={campaign.scheduledAt} className="tabular-nums" />
+              </p>
+            ) : null}
+
+            {proximity === "past" ? (
+              <AdminNotice tone="error">
+                That moment has already passed. Choose a later one, or send it now.
+              </AdminNotice>
+            ) : null}
+
+            {proximity === "too-soon" ? (
+              <AdminNotice tone="error">
+                That is too close to now to be relied on. Choose a moment at least
+                five minutes ahead, or send it now.
+              </AdminNotice>
+            ) : null}
+
+            {proximity === "soon" ? (
+              <AdminNotice tone="warning">
+                That is less than an hour away. The dispatch runs on a schedule set
+                by the server, so a campaign this close may go out later than the
+                moment you chose — press Send Campaign if it has to go now.
+              </AdminNotice>
+            ) : null}
+
+            {reachesNobody ? (
+              <AdminNotice tone="error">
+                This campaign would reach nobody. Choose an audience, or add an
+                address above, before scheduling it.
+              </AdminNotice>
+            ) : null}
 
             <div className="flex flex-wrap gap-3">
               <AdminButton
                 variant="ghost"
-                disabled={isPending || when === "" || unsaved}
-                onClick={() =>
-                  run(() =>
-                    scheduleCampaign({
-                      id: campaign.id,
-                      scheduledAt: new Date(when).toISOString(),
-                    }),
-                  )
+                disabled={
+                  isPending || when === "" || unsaved || unreachable || reachesNobody
                 }
+                onClick={() => {
+                  const scheduledAt = fromDateTimeLocalValue(when);
+                  if (!scheduledAt) return;
+
+                  run(() => scheduleCampaign({ id: campaign.id, scheduledAt }));
+                }}
               >
                 Schedule
               </AdminButton>

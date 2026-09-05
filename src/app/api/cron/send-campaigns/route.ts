@@ -78,9 +78,34 @@ export async function GET(request: Request): Promise<NextResponse> {
   const sent = results.reduce((total, result) => total + result.sent, 0);
   const failed = results.reduce((total, result) => total + result.failed, 0);
 
+  /*
+   * A refusal is not a quiet no-op. The commonest one is a campaign whose
+   * audience emptied between being scheduled and being due — `0056` leaves it
+   * queued rather than filing it as sent, which is right, but it means the run
+   * will meet it again next time. Saying so is what turns a silent loop into
+   * something the desk can act on. Ids and reasons; never an address.
+   *
+   * Standing down for another run is not a refusal and is not warned about: on
+   * a scheduler that fires faster than a campaign finishes, that is the lease
+   * doing its job, several times an hour, for as long as a large send takes.
+   */
+  for (const result of results) {
+    if (!result.reason) continue;
+
+    if (result.skipped) {
+      console.info(`[cron] campaign ${result.campaignId} skipped: ${result.reason}`);
+    } else {
+      console.warn(`[cron] campaign ${result.campaignId} not sent: ${result.reason}`);
+    }
+  }
+
+  // Skipped runs are not dispatches. Counting them as such would report work
+  // that another invocation is doing, once per tick, for the length of a send.
+  const dispatched = results.filter((result) => !result.skipped).length;
+
   console.info(
-    `[cron] campaigns: ${results.length} dispatched, ${sent} sent, ${failed} failed`,
+    `[cron] campaigns: ${dispatched} dispatched, ${sent} sent, ${failed} failed`,
   );
 
-  return NextResponse.json({ dispatched: results.length, sent, failed });
+  return NextResponse.json({ dispatched, sent, failed });
 }

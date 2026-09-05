@@ -1,6 +1,7 @@
 import { Eye, Pencil, Plus } from "lucide-react";
 
 import AdminLink from "@/src/components/admin/AdminLink";
+import LocalTimestamp from "@/src/components/admin/LocalTimestamp";
 import {
   AdminCell,
   AdminEmpty,
@@ -77,7 +78,7 @@ export default async function AdminCampaignsPage({
             "Type",
             "List",
             "Status",
-            "Sent",
+            "Sent / scheduled",
             { label: "Open", hidden: true },
           ]}
         >
@@ -98,7 +99,29 @@ export default async function AdminCampaignsPage({
               <AdminCell>{campaign.type.replace(/_/g, " ").toLowerCase()}</AdminCell>
               <AdminCell>{campaign.locale === "ar" ? "Arabic" : "English"}</AdminCell>
               <AdminCell>{campaign.status.toLowerCase()}</AdminCell>
-              <AdminCell>{stamp(campaign.sentAt)}</AdminCell>
+
+              {/*
+                * One column, two facts, and which one it is is never left to be
+                * inferred: a scheduled campaign shows the moment it is due — in
+                * the reader's own zone, with the zone named — and everything
+                * else shows the day it went. A row that said only "scheduled"
+                * gave the desk no way to check what had been set.
+                */}
+              <AdminCell>
+                {campaign.status === "SCHEDULED" && campaign.scheduledAt ? (
+                  <>
+                    <span className="block text-[11px] uppercase tracking-[0.18em] text-ground-muted">
+                      Due
+                    </span>
+                    <LocalTimestamp
+                      iso={campaign.scheduledAt}
+                      className="tabular-nums text-ground-accent-soft"
+                    />
+                  </>
+                ) : (
+                  stamp(campaign.sentAt)
+                )}
+              </AdminCell>
 
               <AdminCell>
                 {/*

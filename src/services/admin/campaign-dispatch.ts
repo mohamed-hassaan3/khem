@@ -16,8 +16,11 @@ import "server-only";
  * an unsent address still has no `sentAt` stamp and is picked up by the next
  * run, while a letter that went twice cannot be recalled.
  *
- * ## Three defences against a duplicate, not one
+ * ## Four defences against a duplicate, not one
  *
+ *  - the **run lease** on the campaign row, so two invocations cannot be in the
+ *    send loop at the same time — the one the others could not provide, because
+ *    they all guard the claim and none of them guarded the sending;
  *  - the `for update` lock in `begin_campaign_dispatch()`, so two dispatches
  *    cannot both claim;
  *  - the `campaign_sends` primary key, so a claim that somehow ran twice writes
@@ -50,6 +53,8 @@ import "server-only";
  * without enrolling them in a list they never joined.
  */
 
+import { randomUUID } from "node:crypto";
+
 import { campaignEmail } from "@/src/lib/email/campaign-template";
 import { getEmailClient } from "@/src/lib/email/client";
 import { houseFromAddress, inboxAddress } from "@/src/lib/email/addresses";
@@ -65,6 +70,17 @@ const CHUNK_SIZE = 100;
 
 /** How many batches one invocation may send before leaving the rest. */
 const MAX_BATCHES = 10;
+
+/**
+ * How long one run holds the campaign, in seconds.
+ *
+ * Must comfortably outlast the longest run the host permits: a lease that
+ * lapses while letters are still going out puts a second run beside the first,
+ * which is the overlap it exists to prevent. Fifteen minutes against a run
+ * bounded at `MAX_BATCHES` batches and a five-minute function ceiling — raise
+ * it if either of those rises. See `supabase/sql/0057_campaign_dispatch_lease.sql`.
+ */
+const LEASE_SECONDS = 900;
 
 /** One claimed recipient, as the batch query returns them. */
 interface Recipient {
@@ -82,6 +98,15 @@ export interface DispatchResult {
   /** True when nothing is outstanding and the campaign is now SENT. */
   finished: boolean;
   reason?: string;
+  /**
+   * True when another run holds the lease and this one stood down.
+   *
+   * Not a failure, and not logged as one: the work is being done by somebody
+   * else. It is distinguished from a refusal so that a scheduler firing faster
+   * than a run completes does not fill the logs with warnings about the system
+   * behaving exactly as designed.
+   */
+  skipped?: boolean;
 }
 
 type Supabase = NonNullable<ReturnType<typeof getSupabaseAdmin>>;
@@ -129,11 +154,50 @@ async function nextChunk(
   });
 }
 
+/** Whether a `{ ok, … }` jsonb result from the dispatch functions said yes. */
+function saidOk(value: unknown): boolean {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "ok" in value &&
+    (value as { ok: unknown }).ok === true
+  );
+}
+
+/** The `reason` such a result carried, or the caller's own wording. */
+function saidWhy(value: unknown, fallback: string): string {
+  return typeof value === "object" && value !== null && "reason" in value
+    ? String((value as { reason: unknown }).reason)
+    : fallback;
+}
+
 /**
  * Send one campaign, as far as one invocation can take it.
  *
- * Safe to call twice: the claim is idempotent, and a recipient already stamped
- * is not in the next chunk.
+ * ## One run at a time, and why that needs saying
+ *
+ * Calling this twice *in sequence* has always been safe: the claim is
+ * idempotent and a recipient already stamped is not in the next batch. Calling
+ * it twice *at once* was not. The row lock inside `begin_campaign_dispatch()`
+ * ends with its own statement, so a second invocation arriving while the
+ * campaign is already SENDING was handed the outstanding count and walked into
+ * the send loop beside the first — and `next_campaign_batch()` reserves nothing,
+ * so both read the same unstamped rows and both wrote to them.
+ *
+ * A daily trigger made that improbable. A trigger that fires faster than a run
+ * finishes makes it routine, because any campaign past `MAX_BATCHES × 100`
+ * recipients spans runs by design.
+ *
+ * So the run takes a **lease** first — a holder and an expiry on the campaign
+ * row, written under that same lock, which is what makes taking it atomic even
+ * though holding it spans several transactions. A second run finds the lease
+ * live and declines, quietly and successfully: the run that holds it is already
+ * doing the work, and the next trigger will find whatever is left.
+ *
+ * The lease is handed back in a `finally`, so an exception cannot leave a
+ * campaign unsendable until the expiry. A process killed outright still can —
+ * and that is the intended trade, because a campaign an hour late is
+ * recoverable and a letter sent twice is not.
  */
 export async function dispatchCampaign(id: string): Promise<DispatchResult> {
   const empty: DispatchResult = {
@@ -153,6 +217,68 @@ export async function dispatchCampaign(id: string): Promise<DispatchResult> {
   const campaign = await readCampaign(supabase, id);
   if (!campaign) return { ...empty, reason: "No such campaign." };
 
+  // 0. The lease. Nothing below this line runs in two places at once.
+  const leaseId = randomUUID();
+
+  const { data: lease, error: leaseError } = await supabase.rpc(
+    "acquire_campaign_dispatch",
+    { campaign_id: id, lease_id: leaseId, lease_seconds: LEASE_SECONDS },
+  );
+
+  if (leaseError) {
+    /*
+     * Refusing is the only safe reading. The lease may or may not have been
+     * taken, and sending on the assumption that it was not is the one mistake
+     * this subsystem cannot undo.
+     */
+    console.error(`[campaign] lease failed for ${id}: ${leaseError.message}`);
+    return { ...empty, reason: "The dispatch could not be started." };
+  }
+
+  if (!saidOk(lease)) {
+    return {
+      ...empty,
+      skipped: true,
+      reason: saidWhy(lease, "That campaign is already being sent."),
+    };
+  }
+
+  try {
+    return await sendClaimed(supabase, resend, campaign, empty);
+  } finally {
+    const { error: releaseError } = await supabase.rpc(
+      "release_campaign_dispatch",
+      { campaign_id: id, lease_id: leaseId },
+    );
+
+    /*
+     * Not fatal, and not retried: the expiry releases it anyway. Worth a line,
+     * because a campaign that goes quiet for fifteen minutes should be
+     * explicable from the logs.
+     */
+    if (releaseError) {
+      console.error(
+        `[campaign] lease not released for ${id}: ${releaseError.message}`,
+      );
+    }
+  }
+}
+
+/**
+ * The run itself, inside the lease.
+ *
+ * Claim, compose, record, finish — unchanged from what it has always been. It
+ * is a separate function only so the lease can be released in one place, on
+ * every path out of it.
+ */
+async function sendClaimed(
+  supabase: Supabase,
+  resend: NonNullable<ReturnType<typeof getEmailClient>>,
+  campaign: Campaign,
+  empty: DispatchResult,
+): Promise<DispatchResult> {
+  const id = campaign.id;
+
   // 1. Claim. Returns without claiming if another dispatch got here first.
   const { data: claim, error: claimError } = await supabase.rpc(
     "begin_campaign_dispatch",
@@ -169,17 +295,8 @@ export async function dispatchCampaign(id: string): Promise<DispatchResult> {
       ? Number((claim as { claimed: unknown }).claimed) || 0
       : 0;
 
-  const claimOk =
-    typeof claim === "object" && claim !== null && "ok" in claim
-      ? (claim as { ok: unknown }).ok === true
-      : false;
-
-  if (!claimOk) {
-    const reason =
-      typeof claim === "object" && claim !== null && "reason" in claim
-        ? String((claim as { reason: unknown }).reason)
-        : "That campaign cannot be sent.";
-    return { ...empty, reason };
+  if (!saidOk(claim)) {
+    return { ...empty, reason: saidWhy(claim, "That campaign cannot be sent.") };
   }
 
   /*

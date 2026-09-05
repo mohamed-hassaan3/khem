@@ -17,6 +17,7 @@
 
 import { z } from "zod";
 
+import { MIN_SCHEDULE_LEAD_MS } from "@/src/lib/campaign-schedule";
 import { LOCALES } from "@/src/lib/i18n/config";
 
 /** A URL the house controls, or an absolute link the letter may point at. */
@@ -132,10 +133,22 @@ export const campaignIdSchema = z.object({
 /**
  * When a campaign should go.
  *
- * A moment in the future, honoured to the nearest daily cron run. The past is
- * refused: a schedule already elapsed would be sent by the very next run, which
- * is "send now" wearing a disguise — and the desk should press the button that
- * says so.
+ * A UTC instant, always: the client converts the desk's local reading before it
+ * arrives here — see `src/lib/campaign-schedule.ts` — and this schema never sees
+ * a wall-clock string without a zone.
+ *
+ * The past is refused: a schedule already elapsed would be sent by the very next
+ * run, which is "send now" wearing a disguise — and the desk should press the
+ * button that says so.
+ *
+ * The minute or two after *now* is refused for a different reason. Whatever
+ * triggers the dispatch — a platform cron today, a server cron on another host
+ * tomorrow — runs on a cadence this application does not set and cannot read,
+ * so a moment a hundred seconds away is a promise nothing here is in a position
+ * to keep. `MIN_SCHEDULE_LEAD_MS` is a floor on what may be asked for, not a
+ * description of any host's timetable, and it must stay that way: the day this
+ * number is derived from a cron expression is the day the schedule field starts
+ * lying again on the next platform.
  */
 export const scheduleCampaignSchema = z.object({
   id: z.string().trim().min(8, "Unknown campaign."),
@@ -150,6 +163,10 @@ export const scheduleCampaignSchema = z.object({
     .refine(
       (value) => Date.parse(value) > Date.now(),
       "Choose a moment in the future.",
+    )
+    .refine(
+      (value) => Date.parse(value) >= Date.now() + MIN_SCHEDULE_LEAD_MS,
+      "Choose a moment at least five minutes from now, so the dispatch has time to pick it up.",
     ),
 });
 
