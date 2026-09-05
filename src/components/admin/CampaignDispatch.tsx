@@ -20,6 +20,7 @@ import {
 import LocalTimestamp from "@/src/components/admin/LocalTimestamp";
 import { useIsHydrated } from "@/src/hooks/use-is-hydrated";
 import {
+  dispatchCadencePhrase,
   fromDateTimeLocalValue,
   localTimeZone,
   scheduleProximity,
@@ -387,11 +388,9 @@ export default function CampaignDispatch({
               type="datetime-local"
               value={when}
               onChange={setEdited}
-              hint={
-                zone
-                  ? `Times are read in your own timezone (${zone}) and stored in UTC. The campaign goes out on the first dispatch at or after the moment you choose.`
-                  : "Times are read in your own timezone and stored in UTC. The campaign goes out on the first dispatch at or after the moment you choose."
-              }
+              hint={`Times are read in your own timezone${
+                zone ? ` (${zone})` : ""
+              } and stored in UTC. The dispatch runs ${dispatchCadencePhrase()}, so the campaign goes out on the first run at or after the moment you choose.`}
             />
 
             {/*
@@ -421,9 +420,9 @@ export default function CampaignDispatch({
 
             {proximity === "soon" ? (
               <AdminNotice tone="warning">
-                That is less than an hour away. The dispatch runs on a schedule set
-                by the server, so a campaign this close may go out later than the
-                moment you chose — press Send Campaign if it has to go now.
+                That is close to now. The dispatch runs {dispatchCadencePhrase()},
+                so a campaign this near may go out a few minutes after the moment
+                you chose — press Send Campaign if it has to go immediately.
               </AdminNotice>
             ) : null}
 

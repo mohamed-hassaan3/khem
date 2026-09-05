@@ -6,14 +6,35 @@
  * both, which is what makes a bounded run safe — a list larger than one
  * invocation can carry is simply picked up by the next.
  *
- * ## Once a day, and the editor says so
+ * ## Two triggers, and neither of them is in this repository
  *
- * `vercel.json` schedules this daily, because the plan permits no finer cadence
- * — the same constraint `src/actions/checkout.ts` documents for its stale-hold
- * sweep. A campaign scheduled for 14:00 therefore goes out at the next run, not
- * at 14:00, and the dashboard tells the desk that rather than implying a
- * precision the house has not bought. "Send now" exists for when the moment
- * matters.
+ * **An external scheduler (cron-job.org) calls this endpoint every few minutes**
+ * with the bearer token below. That is what makes a scheduled campaign go out
+ * near the moment it was set for. `vercel.json` also runs it once a day at
+ * 10:00 UTC, kept as a backstop for the day the external service is down or its
+ * account lapses.
+ *
+ * Both may fire at once; that is safe, and deliberately so. The run lease in
+ * `0057_campaign_dispatch_lease.sql` means the second caller stands down rather
+ * than sending beside the first. **Do not add a faster trigger without checking
+ * that lease is still applied.**
+ *
+ * ### The dependency this creates
+ *
+ * A third party now holds a copy of `CRON_SECRET`. Two consequences worth
+ * knowing before debugging this at speed:
+ *
+ *  - **Rotating `CRON_SECRET` silently stops scheduled campaigns.** The
+ *    external caller starts receiving 401s, this endpoint does exactly what it
+ *    should, and nothing anywhere says a campaign is late. Rotate the value in
+ *    both places or not at all.
+ *  - The daily Vercel cron would still run, so the symptom is not "campaigns
+ *    stopped" but "campaigns are hours late again" — the failure this
+ *    scheduling work was undertaken to fix, wearing a different hat.
+ *
+ * `src/lib/campaign-schedule.ts` holds `DISPATCH_INTERVAL_MINUTES`, which is
+ * what the dashboard promises the desk. It is a claim about the external
+ * schedule, so the two have to be changed together.
  *
  * ## Authentication
  *

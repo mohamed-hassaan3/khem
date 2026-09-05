@@ -23,18 +23,59 @@
  *
  * ## The lead time is not a hosting limit
  *
- * `MIN_SCHEDULE_LEAD_MS` and `SCHEDULE_SOON_MS` describe how far ahead a human
- * should be asked to plan, not how often any particular host's scheduler fires.
- * The dispatcher's cadence belongs to the deployment — a Vercel cron today, a
- * Hostinger cron calling the same endpoint later — and no number in this file
- * may be derived from it.
+ * `MIN_SCHEDULE_LEAD_MS` describes how far ahead a human should be asked to
+ * plan. It is a floor on what may be *asked for*, and it does not move when the
+ * trigger does.
  */
 
 /** Nearer than this is refused: nothing can be relied on to run in the gap. */
 export const MIN_SCHEDULE_LEAD_MS = 5 * 60 * 1000;
 
-/** Nearer than this is allowed, but warned about. */
-export const SCHEDULE_SOON_MS = 60 * 60 * 1000;
+/**
+ * How often the dispatcher is actually triggered, in minutes.
+ *
+ * The application cannot discover this. The trigger lives outside it — today an
+ * external scheduler calling `/api/cron/send-campaigns` every minute, with
+ * `vercel.json`'s daily run behind it as a backstop — so this number is a
+ * statement *about* the deployment, kept in one place because three pieces of
+ * copy are derived from it rather than each restating it.
+ *
+ * **Raise it whenever the trigger becomes less frequent, and never guess it
+ * downwards.** Promising a precision nothing delivers is the exact failure this
+ * scheduling work was undertaken to fix: a campaign set for 10:00 that went at
+ * 14:09, because the only thing looking at the queue looked once a day.
+ *
+ * Five, not one, because five is what was observed. Production logs on 5 Sep
+ * 2026 showed authenticated dispatch requests 196 seconds apart, and one alone
+ * in a five-minute window — real evidence of a several-minute cadence, against
+ * an assumption of sixty seconds. If the external schedule is later confirmed
+ * to run every minute, this is the one line to change.
+ */
+// Typed `number`, not the literal `5`: the cadence phrase compares against 1,
+// and a literal type would make that comparison a compile error every time this
+// value is edited — which is a change this constant exists to invite.
+export const DISPATCH_INTERVAL_MINUTES: number = 5;
+
+/**
+ * Nearer than this is allowed, but warned about.
+ *
+ * Derived, so the warning tracks the trigger instead of contradicting it. While
+ * the dispatcher runs every minute this collapses onto the floor and the
+ * warning never fires — correctly, because a campaign twenty minutes out will
+ * go twenty minutes out. Set the interval to 60 and it starts warning about
+ * anything inside three hours again, without anybody having to remember to.
+ */
+export const SCHEDULE_SOON_MS = Math.max(
+  MIN_SCHEDULE_LEAD_MS,
+  DISPATCH_INTERVAL_MINUTES * 3 * 60 * 1000,
+);
+
+/** "every minute" / "every 15 minutes", for the copy the desk reads. */
+export function dispatchCadencePhrase(): string {
+  return DISPATCH_INTERVAL_MINUTES === 1
+    ? "every minute"
+    : `every ${DISPATCH_INTERVAL_MINUTES} minutes`;
+}
 
 function pad(value: number): string {
   return String(value).padStart(2, "0");
