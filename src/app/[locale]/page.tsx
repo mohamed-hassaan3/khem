@@ -37,8 +37,18 @@ import {
   getFeaturedProducts,
 } from "@/src/services/products";
 
-/** ISR, 1 hour — AGENTS.md §8 routing matrix. */
-export const revalidate = 3600;
+/**
+ * ISR, 24 hours — a backstop, not the freshness mechanism.
+ *
+ * `src/lib/admin/revalidate.ts` re-renders the home page on every write that
+ * reaches it — a product, a collection, an article, the hero, the craft pillars,
+ * the boutique settings — so the window only has to catch what none of them
+ * announce.
+ *
+ * It was an hour, which at this site's traffic meant most requests landed past
+ * the window and paid for a regeneration. See `prompts/vercel-usage-reduction.md`.
+ */
+export const revalidate = 86400;
 
 export async function generateMetadata({
   params,

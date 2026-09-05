@@ -154,7 +154,6 @@ export default function ProductGallery({
                 alt={image.alt || productName}
                 fill
                 priority={index === 0}
-                quality={85}
                 sizes={SIZES}
                 className="object-cover brightness-90"
               />

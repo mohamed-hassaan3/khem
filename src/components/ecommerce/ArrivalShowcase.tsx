@@ -79,7 +79,6 @@ export default async function ArrivalShowcase({
                 src={image.url}
                 alt={image.alt}
                 fill
-                quality={85}
                 sizes={IMAGE_SIZES}
                 className="object-cover"
               />

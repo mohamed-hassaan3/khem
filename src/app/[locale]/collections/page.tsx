@@ -9,11 +9,13 @@ import { getCatalogProductCards } from "@/src/services/products";
 /**
  * ISR, 1 hour.
  *
- * AGENTS.md §8 lists `/collections` as static; an hourly revalidate keeps it
+ * AGENTS.md §8 lists `/collections` as static; a daily revalidate keeps it
  * prerendered while letting a catalog edit land without a redeploy, matching
- * the other listing routes.
+ * the other listing routes. A catalog edit does not wait for it —
+ * `revalidateCollection()` and `revalidateCategory()` re-render this page on
+ * the write — so the window is only a backstop.
  */
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 const PATH = "/collections";
 

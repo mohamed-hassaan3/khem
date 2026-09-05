@@ -21,8 +21,8 @@ import {
   getSetProductSlugs,
 } from "@/src/services/products";
 
-/** ISR, 5 minutes — the same as `/perfume/[slug]` and `/ritual/[slug]`, per AGENTS.md §8. */
-export const revalidate = 300;
+/** ISR, 1 hour — the same as `/perfume/[slug]` and `/ritual/[slug]`, for the reason given there. */
+export const revalidate = 3600;
 
 /**
  * Prerender every locale × set pair. Without it the `[slug]` segment would

@@ -10,8 +10,16 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { getIngredientDetails } from "@/src/services/content";
 
-/** ISR, 1 hour — editorial copy, aligned with the other content routes. */
-export const revalidate = 3600;
+/**
+ * ISR, 24 hours — a backstop, not the freshness mechanism.
+ *
+ * `revalidateIngredients()` re-renders this page whenever a material changes,
+ * so the window only has to catch what that misses.
+ *
+ * It was an hour, which at this site's traffic meant most requests landed past
+ * the window and paid for a regeneration. See `prompts/vercel-usage-reduction.md`.
+ */
+export const revalidate = 86400;
 
 const PATH = "/ingredients";
 
@@ -91,7 +99,6 @@ export default async function Ingredients({
           alt=""
           fill
           priority
-          quality={85}
           sizes="100vw"
           className="object-cover"
         />

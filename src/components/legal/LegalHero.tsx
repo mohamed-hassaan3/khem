@@ -50,7 +50,6 @@ export default function LegalHero({
         alt={banner.alt}
         fill
         priority
-        quality={80}
         sizes="100vw"
         className="object-cover"
       />

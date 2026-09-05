@@ -36,8 +36,20 @@ import {
 import type { Category } from "@/src/types/catalog";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 
-/** ISR, 10 minutes — AGENTS.md §8 routing matrix. */
-export const revalidate = 600;
+/**
+ * ISR, 1 hour — a backstop, not the freshness mechanism.
+ *
+ * `src/lib/admin/revalidate.ts` re-renders this page on the write that changes
+ * it — a product, a collection, a category or a promotion — so the window only
+ * has to catch what no admin action announces.
+ *
+ * The window was ten minutes. At this site's traffic a page is requested far less often
+ * than that, so nearly every request landed past the window and paid for a
+ * regeneration: ISR writes tracked page views one-for-one and ran over the
+ * Vercel allowance. A short window only pays for itself under traffic dense
+ * enough to amortise it. See `prompts/vercel-usage-reduction.md`.
+ */
+export const revalidate = 3600;
 
 /**
  * Prerender every locale × collection pair. Without it the `[slug]` segment

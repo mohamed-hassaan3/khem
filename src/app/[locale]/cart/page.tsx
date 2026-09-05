@@ -7,14 +7,19 @@ import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { getProductCardsByCollection } from "@/src/services/products";
 
 /**
- * ISR, 5 minutes.
+ * ISR, 1 hour.
  *
  * AGENTS.md §8 lists `/cart` as Force Dynamic, which assumes a server-held
  * cart. Today the bag lives in the visitor's browser and this route renders no
  * per-visitor data at all — only the catalog the island resolves ids against —
  * so a dynamic render would cost a function invocation per view and buy
  * nothing. The revalidate window matches the PDP because both surfaces show
- * live catalog prices.
+ * live catalog prices — an hour, not the five minutes it began with, for the
+ * reason `/perfume/[slug]` records: at this site's traffic a five-minute window
+ * turned nearly every request into a regeneration. A catalog write does not
+ * wait for the window either — `revalidateProduct()` names this path — and the
+ * price a visitor is charged is resolved server-side in `src/actions/checkout.ts`
+ * regardless of what any cached bag shows.
  *
  * Clerk has since landed and this is still the right treatment: a guest must
  * be able to fill a bag before signing in, so `/cart` is deliberately absent
@@ -22,7 +27,7 @@ import { getProductCardsByCollection } from "@/src/services/products";
  * when the cart itself moves to Supabase**, at which point the lines become
  * server state tied to a `userId`.
  */
-export const revalidate = 300;
+export const revalidate = 3600;
 
 const PATH = "/cart";
 

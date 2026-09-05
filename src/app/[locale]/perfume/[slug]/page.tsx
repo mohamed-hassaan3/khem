@@ -24,8 +24,21 @@ import {
   getRelatedProductCards,
 } from "@/src/services/products";
 
-/** ISR, 5 minutes — AGENTS.md §8 routing matrix. */
-export const revalidate = 300;
+/**
+ * ISR, 1 hour — a backstop, not the freshness mechanism.
+ *
+ * `src/lib/admin/revalidate.ts` re-renders this page on the catalog write that
+ * changes it, `src/actions/checkout.ts` re-renders it when a sale moves the
+ * stock, and `src/actions/comments.ts` when a visitor writes on it. The window
+ * only has to catch what none of those announce.
+ *
+ * The window was five minutes. At this site's traffic a page is requested far less often
+ * than that, so nearly every request landed past the window and paid for a
+ * regeneration: ISR writes tracked page views one-for-one and ran over the
+ * Vercel allowance. A short window only pays for itself under traffic dense
+ * enough to amortise it. See `prompts/vercel-usage-reduction.md`.
+ */
+export const revalidate = 3600;
 
 /**
  * Prerender every locale × product pair. Without it the `[slug]` segment would

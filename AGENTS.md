@@ -244,20 +244,30 @@ khem/
 
 All routes must follow strict dynamic parameters, metadata definitions, and layout inheritance:
 
+> **The revalidate windows below are backstops, not the freshness mechanism.**
+> They were minutes until the site ran over its Vercel ISR-write allowance: at
+> this traffic a page is requested far less often than every five minutes, so
+> nearly every request landed past its window and paid for a regeneration —
+> writes tracked page views one-for-one. Freshness comes from
+> `src/lib/admin/revalidate.ts`, which re-renders the affected paths on the
+> write itself, and a new public surface that quotes stored data **must be added
+> to a list there**. A page that is only in this table is a page that can be a
+> day stale. See `prompts/vercel-usage-reduction.md`.
+
 | Route Path | Type | Caching | Purpose & UX Requirements |
 | :--- | :--- | :--- | :--- |
-| `/` | SSR / ISR (1h) | Revalidate | Home: Cinematic Video Hero, Fragrance Wheel, Bestsellers, Editorial Callouts |
+| `/` | SSR / ISR (24h) | Revalidate | Home: Cinematic Video Hero, Fragrance Wheel, Bestsellers, Editorial Callouts |
 | `/collections` | Static | ISR | Overview of Fragrance Collections (Signature, Egyptica, Gemstone, Noir, Royal Heritage) |
-| `/collection/[slug]` | Dynamic | ISR (10m) | Targeted Collection Page with luxury filtering and video backgrounds |
+| `/collection/[slug]` | Dynamic | ISR (1h) | Targeted Collection Page with luxury filtering and video backgrounds |
 | `/perfumes` | Dynamic | Dynamic | Full Catalog with facet filters (Scent Notes, Accord, Concentration, Season) |
-| `/perfume/[slug]` | Dynamic | ISR (5m) | Product Detail Page (PDP): 360 viewer, pyramid accords, reviews, add-to-cart |
+| `/perfume/[slug]` | Dynamic | ISR (1h) | Product Detail Page (PDP): 360 viewer, pyramid accords, reviews, add-to-cart |
 | `/discovery-set` | Static | Static | Bespoke Sample Box builder with dynamic interactive slot selector |
 | `/heritage` | Static | Static | Brand Origin, Egyptian Perfumery History, Museum-style horizontal scroll |
-| `/journal` | Dynamic | ISR (1h) | Editorial Fragrance Articles & Olfactory Essays |
-| `/journal/[slug]` | Dynamic | ISR (1h) | Article detail view with rich text typography and embedded product tags |
+| `/journal` | Dynamic | ISR (24h) | Editorial Fragrance Articles & Olfactory Essays |
+| `/journal/[slug]` | Dynamic | ISR (24h) | Article detail view with rich text typography and embedded product tags |
 | `/craftsmanship` | Static | Static | Sourcing, Rare Botanical Ingredients, Glass Blowing & Gold Leaf gilding |
 | `/stockists` | Static | Static | Store Locator for Boutique locations worldwide (Interactive Map) |
-| `/cart` | Client | ISR (5m) | Shopping Bag overview, GWP (Gift with Purchase) progress bar. Also reachable as a slide-in panel (`<CartDrawer>`) from the header bag and from every product card |
+| `/cart` | Client | ISR (1h) | Shopping Bag overview, GWP (Gift with Purchase) progress bar. Also reachable as a slide-in panel (`<CartDrawer>`) from the header bag and from every product card |
 | `/checkout` | Client | Force Dynamic | Embedded Stripe Elements checkout with auto address auto-complete |
 | `/account` | Protected | Dynamic | Customer Portal: Order History, Fragrance Profile, Saved Addresses |
 | `/admin/*` | Protected | Dynamic | Admin Flagship Suite (RBAC: `admin` role required) |

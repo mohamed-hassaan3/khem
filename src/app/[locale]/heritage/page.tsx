@@ -10,8 +10,17 @@ import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { getBrandValues, getTimeline } from "@/src/services/content";
 
-/** ISR, 1 hour — editorial copy, aligned with the other content routes. */
-export const revalidate = 3600;
+/**
+ * ISR, 24 hours — a backstop, not the freshness mechanism.
+ *
+ * `revalidateHeritage()` and `revalidateBrandValues()` re-render this page
+ * whenever the timeline or a value changes, so the window only has to catch what
+ * they miss.
+ *
+ * It was an hour, which at this site's traffic meant most requests landed past
+ * the window and paid for a regeneration. See `prompts/vercel-usage-reduction.md`.
+ */
+export const revalidate = 86400;
 
 const PATH = "/heritage";
 
@@ -128,7 +137,6 @@ export default async function Heritage({
           alt=""
           fill
           priority
-          quality={85}
           sizes="100vw"
           className="object-cover"
         />

@@ -50,7 +50,6 @@ export default function NewArrivalHero({
         alt={imageAlt}
         fill
         priority
-        quality={85}
         sizes="100vw"
         className="object-cover"
       />

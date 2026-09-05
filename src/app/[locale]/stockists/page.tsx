@@ -24,11 +24,12 @@ import type { Stockist } from "@/src/types/stockist";
  * ISR, 1 hour.
  *
  * AGENTS.md §8 lists `/stockists` as Static. The service layer is already
- * async against a future `Stockist` table, so an hourly window means a new
- * boutique appears without a redeploy — the same value the other content
- * routes use.
+ * async against a future `Stockist` table, so the window means a new boutique
+ * appears without a redeploy even if nothing announces it — though
+ * `revalidateStockists()` normally does, on the write itself, which is why a
+ * day is enough. The same value the other content routes use.
  */
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 const PATH = "/stockists";
 

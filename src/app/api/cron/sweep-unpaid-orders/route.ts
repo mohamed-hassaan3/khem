@@ -45,8 +45,10 @@
 
 import { timingSafeEqual } from "node:crypto";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
+import { revalidateProductsBySlug } from "@/src/actions/admin/shared";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 
 export const runtime = "nodejs";
@@ -74,6 +76,65 @@ function tokenMatches(provided: string, expected: string): boolean {
 
   if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);
+}
+
+/**
+ * Re-render the surfaces that print a sold-out badge for the bottles this sweep
+ * put back on the shelf.
+ *
+ * The stock moved and nothing else announced it. `src/actions/checkout.ts`
+ * revalidates the lines of the order it just placed; this is the other
+ * direction — a cancellation restocking lines nobody is looking at — and
+ * without it a card can say sold out for a full ISR window after the bottle is
+ * available again. That window used to be five minutes, which is why this was
+ * survivable; it is a day now (see `prompts/vercel-usage-reduction.md`), which
+ * is why it is not.
+ *
+ * Two reads rather than an embedded select: the join column is `"orderId"` and
+ * naming a PostgREST relationship here would couple this job to a resource name
+ * that no migration in `supabase/sql/` guarantees.
+ *
+ * Failure is logged and swallowed. The sweep already succeeded — the stock is
+ * back — and a revalidation that could not run is a stale badge, not a lost
+ * write.
+ */
+async function revalidateRestocked(
+  supabase: SupabaseClient,
+  orderNumbers: readonly string[],
+): Promise<void> {
+  const orders = await supabase
+    .from("Order")
+    .select("id")
+    .in("orderNumber", [...orderNumbers]);
+
+  if (orders.error) {
+    console.error(`[cron] Could not read swept orders: ${orders.error.message}`);
+    return;
+  }
+
+  const ids = (orders.data ?? [])
+    .map((row) => row.id)
+    .filter((id): id is string => typeof id === "string");
+
+  if (ids.length === 0) return;
+
+  const items = await supabase
+    .from("OrderItem")
+    .select("productSlug")
+    .in("orderId", ids);
+
+  if (items.error) {
+    console.error(`[cron] Could not read swept lines: ${items.error.message}`);
+    return;
+  }
+
+  const slugs = (items.data ?? [])
+    .map((row) => row.productSlug)
+    .filter((slug): slug is string => typeof slug === "string");
+
+  if (slugs.length === 0) return;
+
+  await revalidateProductsBySlug([...new Set(slugs)]);
 }
 
 export async function GET(request: Request): Promise<NextResponse> {
@@ -106,12 +167,17 @@ export async function GET(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "server" }, { status: 503 });
   }
 
-  const cancelled = Array.isArray(data) ? data.length : 0;
+  const numbers = Array.isArray(data)
+    ? (data as unknown[]).filter((row): row is string => typeof row === "string")
+    : [];
+  const cancelled = numbers.length;
 
   // The numbers are logged, not the customers. A cancellation is worth an audit
   // trail; who it belonged to is not this job's business.
   if (cancelled > 0) {
-    console.info(`[cron] Swept ${cancelled} unpaid order(s): ${(data as string[]).join(", ")}`);
+    console.info(`[cron] Swept ${cancelled} unpaid order(s): ${numbers.join(", ")}`);
+
+    await revalidateRestocked(supabase, numbers);
   }
 
   return NextResponse.json({ cancelled });

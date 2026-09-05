@@ -15,8 +15,16 @@ import {
   getSocialProfiles,
 } from "@/src/services/contact";
 
-/** ISR, 1 hour — editorial copy, aligned with the other content routes. */
-export const revalidate = 3600;
+/**
+ * ISR, 24 hours — a backstop, not the freshness mechanism.
+ *
+ * `revalidateSettings()` re-renders this page whenever a channel or a social
+ * profile changes, so the window only has to catch what that misses.
+ *
+ * It was an hour, which at this site's traffic meant most requests landed past
+ * the window and paid for a regeneration. See `prompts/vercel-usage-reduction.md`.
+ */
+export const revalidate = 86400;
 
 const PATH = "/contact";
 

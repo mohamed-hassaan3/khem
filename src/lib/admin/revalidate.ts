@@ -1,10 +1,18 @@
 /**
  * What to re-render after an admin write.
  *
- * Every public route that quotes the catalog is cached — `/perfume/[slug]` at
- * 300s, `/collections/[slug]` at 600s, `/journal` at 3600s — which is exactly
- * why the dashboard needs this file. Without it, an editor fixes a price,
- * reloads the storefront, sees the old one, and concludes the save failed.
+ * Every public route that quotes the catalog is cached — `/perfume/[slug]` and
+ * `/collections/[slug]` at an hour, the editorial pages at a day — which is
+ * exactly why the dashboard needs this file. Without it, an editor fixes a
+ * price, reloads the storefront, sees the old one, and concludes the save
+ * failed.
+ *
+ * Those windows used to be five and ten minutes, and were lengthened because at
+ * this site's traffic they turned nearly every page view into a regeneration
+ * (`prompts/vercel-usage-reduction.md`). That makes this file load-bearing in a
+ * way it was not before: it is now the *only* thing standing between a save and
+ * a day-stale page, so a surface missing from a list here is a defect, not a
+ * few minutes of lag.
  *
  * One module owns the map so no action invents its own list and forgets the
  * home page. Two rules it keeps:
@@ -26,6 +34,7 @@ import { revalidatePath } from "next/cache";
 
 import { MERCH_PAGE_FACETS, type MerchPageFacet } from "@/src/lib/facets";
 import { LOCALES } from "@/src/lib/i18n/config";
+import { productHref } from "@/src/lib/routes";
 import type { CollectionKind, ProductTag } from "@/src/types/catalog";
 
 /**
@@ -35,6 +44,18 @@ import type { CollectionKind, ProductTag } from "@/src/types/catalog";
  * articles, so it is on every list.
  */
 const HOME = "/";
+
+/**
+ * The bag renders the catalog too.
+ *
+ * `/cart` resolves the ids in the visitor's browser against a catalog
+ * projection it fetches on the server, so a price edit is as visible there as
+ * on a card. It is on the product list because its ISR window is an hour: short
+ * enough not to matter when the window was five minutes, long enough to matter
+ * now. Two entries, not a page per product — the projection is the whole
+ * catalog.
+ */
+const CART = "/cart";
 
 /** Revalidate one app path in every locale it exists under. */
 function revalidateAllLocales(path: string): void {
@@ -147,15 +168,24 @@ export function revalidateProduct(input: {
   tags: readonly ProductTag[];
 }): void {
   revalidateAllLocales(HOME);
+  revalidateAllLocales(CART);
   revalidateAllLocales("/collections");
   revalidateAllLocales(`/collections/${input.collectionSlug}`);
   revalidateAllLocales(`/collections/${input.categorySlug}`);
 
-  // A detail page exists for fragrances only; revalidating a path that was
-  // never rendered is a no-op, but naming the condition keeps the intent clear.
-  if (input.collectionKind === "FRAGRANCE") {
-    revalidateAllLocales(`/perfume/${input.slug}`);
-  }
+  /*
+   * The product's own page, whichever of the three it is.
+   *
+   * This used to revalidate `/perfume/[slug]` and only when the kind was
+   * FRAGRANCE, which left `/ritual/[slug]` and `/set/[slug]` — body care, home
+   * fragrance, discovery and gift sets — riding on their ISR window alone.
+   * `productHref()` is the same function the links are built from, so the page
+   * an editor clicks through to is by construction the page that was
+   * revalidated.
+   */
+  revalidateAllLocales(
+    productHref({ slug: input.slug, collectionKind: input.collectionKind }),
+  );
 
   if (input.tags.includes("NEW_ARRIVAL")) {
     revalidateAllLocales("/new-arrival");
@@ -172,7 +202,7 @@ export function revalidateProduct(input: {
  * The slug is optional only so an older call site cannot silently do nothing;
  * every caller in the dashboard passes one, because an editor who fixes a
  * sentence checks the article, not the index — and `/journal/[slug]` is cached
- * for an hour.
+ * for a day.
  */
 export function revalidateArticle(slug?: string): void {
   revalidateAllLocales(HOME);
@@ -188,7 +218,7 @@ export function revalidateArticle(slug?: string): void {
 /**
  * After a stockist is created, edited, published or removed.
  *
- * `/stockists` is ISR at one hour, which is exactly long enough for an editor
+ * `/stockists` is ISR at a day, which is far longer than an editor
  * to add a boutique, reload the public page, see nothing, and conclude the save
  * failed. The home page is not on this list: nothing on it quotes the
  * directory.

@@ -187,7 +187,6 @@ export default async function CollectionView({
           alt={heroAlt}
           fill
           priority
-          quality={85}
           sizes="100vw"
           /*
             A far lighter hand than the `brightness-30`/`brightness-45` this

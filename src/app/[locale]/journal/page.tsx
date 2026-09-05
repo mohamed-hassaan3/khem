@@ -17,8 +17,16 @@ import {
   getJournalCategories,
 } from "@/src/services/content";
 
-/** ISR, 1 hour — AGENTS.md §8 routing matrix. */
-export const revalidate = 3600;
+/**
+ * ISR, 24 hours — a backstop, not the freshness mechanism.
+ *
+ * `revalidateArticle()` re-renders this index whenever an article is written,
+ * published or withdrawn, so the window only has to catch what that misses.
+ *
+ * It was an hour, which at this site's traffic meant most requests landed past
+ * the window and paid for a regeneration. See `prompts/vercel-usage-reduction.md`.
+ */
+export const revalidate = 86400;
 
 const PATH = "/journal";
 

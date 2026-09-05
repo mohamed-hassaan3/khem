@@ -8,8 +8,8 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { getLegalDocument } from "@/src/services/legal";
 
-/** ISR, 24 hours — legal copy changes far less often than editorial content. */
-export const revalidate = 86400;
+/** ISR, 7 days — legal copy changes far less often than editorial content. */
+export const revalidate = 604800;
 
 const PATH = "/cookie-policy";
 

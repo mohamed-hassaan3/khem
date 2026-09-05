@@ -17,8 +17,16 @@ import {
   getRelatedArticles,
 } from "@/src/services/content";
 
-/** ISR, 1 hour — AGENTS.md §8 routing matrix, same as the journal index. */
-export const revalidate = 3600;
+/**
+ * ISR, 24 hours — a backstop, not the freshness mechanism.
+ *
+ * `revalidateArticle(slug)` re-renders this page whenever its article is saved,
+ * so the window only has to catch what that misses.
+ *
+ * It was an hour, which at this site's traffic meant most requests landed past
+ * the window and paid for a regeneration. See `prompts/vercel-usage-reduction.md`.
+ */
+export const revalidate = 86400;
 
 /**
  * Prerender every locale × article pair. Without it the `[slug]` segment would

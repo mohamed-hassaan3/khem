@@ -11,8 +11,16 @@ import { interpolate } from "@/src/lib/i18n/interpolate";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { getNewArrivals } from "@/src/services/products";
 
-/** ISR, 1 hour — a catalog listing page, matching `/collections`. */
-export const revalidate = 3600;
+/**
+ * ISR, 24 hours — a backstop, not the freshness mechanism.
+ *
+ * `revalidateProduct()` re-renders this page whenever a product carrying the
+ * NEW_ARRIVAL tag is written, so the window only has to catch what that misses.
+ *
+ * It was an hour, which at this site's traffic meant most requests landed past
+ * the window and paid for a regeneration. See `prompts/vercel-usage-reduction.md`.
+ */
+export const revalidate = 86400;
 
 const PATH = "/new-arrival";
 

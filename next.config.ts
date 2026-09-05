@@ -114,6 +114,55 @@ const nextConfig: NextConfig = {
      * whose photographs change rarely and are requested constantly.
      */
     formats: ["image/avif", "image/webp"],
+
+    /*
+     * Hold an optimized image for a month, not four hours.
+     *
+     * Next's default `minimumCacheTTL` is 14400s. Past it the next request
+     * re-optimizes an image that has not changed, and every re-optimization is
+     * a billed transformation — which is the whole of why this project was at
+     * 3.8K of its 5K allowance with a catalogue of a few hundred photographs.
+     *
+     * The documented cost is that there is no way to invalidate the optimizer's
+     * cache, so a replaced photograph needs a new URL. That is already how both
+     * upstreams work: Cloudinary versions its delivery URLs and the Supabase
+     * comment bucket stores one object per upload. Nothing here overwrites an
+     * image in place.
+     */
+    minimumCacheTTL: 2678400,
+
+    /*
+     * The widths the optimizer is allowed to produce.
+     *
+     * Every distinct width is a separate transformation of the same source, so
+     * the length of these two lists is a direct multiplier on the bill.
+     *
+     * `deviceSizes` drops Next's 2048 and 3840. They are only ever selected by
+     * a full-width image on a high-DPR desktop, and the cost of losing them is
+     * that such a screen is served 1920 rather than 2048/3840 — a difference
+     * measured on the widest hero at the closest inspection. Restore them here
+     * if the heroes ever look soft on a retina display; nothing else needs to
+     * change.
+     *
+     * `imageSizes` drops 32 and 48 because nothing can ask for them: the
+     * narrowest `sizes` prop in the codebase is `56px` (the account menu
+     * avatar), which resolves to 64 at 1x and upward from there.
+     */
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [64, 96, 128, 256, 384],
+
+    /*
+     * One quality, stated rather than inherited.
+     *
+     * Next 16 requires this allowlist and defaults it to `[75]`, which means the
+     * `quality={85}` props this codebase used to carry were never served — they
+     * were an intention the optimizer refused. Adding 85 here would have made
+     * them real and doubled the transformations for every image that carried
+     * one, so the props were removed instead and 75 is written down as the
+     * decision it always was in practice.
+     */
+    qualities: [75],
+
     remotePatterns: [
       {
         protocol: "https",
