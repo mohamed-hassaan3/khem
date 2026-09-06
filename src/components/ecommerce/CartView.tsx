@@ -1,8 +1,9 @@
 "use client";
 
 import { ShoppingBag } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { previewCartOffer } from "@/src/actions/offers";
 import CartLine from "@/src/components/ecommerce/CartLine";
 import CartSummary from "@/src/components/ecommerce/CartSummary";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
@@ -15,6 +16,7 @@ import { useCart } from "@/src/providers/cart-provider";
 import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
 import type { ProductCardData } from "@/src/types/catalog";
+import type { OfferPreview } from "@/src/types/offer";
 
 /**
  * The shopping bag — the one client island on `/cart`.
@@ -61,6 +63,50 @@ export default function CartView({ locale, catalog }: CartViewProps) {
    * same view, so the figure here and the figure charged differ only in
    * freshness.
    */
+  /*
+   * What the house is giving away on this bag.
+   *
+   * Asked of the server rather than computed here, for `src/services/offers.ts`'s
+   * reason: a TypeScript re-implementation of the group arithmetic would be a
+   * second definition of what a customer is owed. The bag lives in the browser,
+   * so an action is the only way to put the question to the rule that decides it.
+   *
+   * `cancelled` guards against a slower earlier request landing after a faster
+   * later one and re-showing an offer the current bag no longer earns.
+   */
+  const [offer, setOffer] = useState<OfferPreview | null>(null);
+
+  const offerSignature = resolved
+    .map(({ product, quantity }) => `${product.id}:${quantity}`)
+    .sort()
+    .join(",");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    // The empty bag resolves through the same `.then` rather than clearing the
+    // state outright: a synchronous `setState` in an effect body is the
+    // cascading render `react-hooks/set-state-in-effect` warns about.
+    const request =
+      offerSignature === ""
+        ? Promise.resolve(null)
+        : previewCartOffer({
+            items: offerSignature.split(",").map((entry) => {
+              const [productId, quantity] = entry.split(":");
+              return { productId, quantity: Number(quantity) };
+            }),
+            locale,
+          });
+
+    void request.then((result) => {
+      if (!cancelled) setOffer(result);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [offerSignature, locale]);
+
   const pricing = cartPricing(resolved);
   const subtotal = pricing.subtotalInCents;
 
@@ -135,7 +181,7 @@ export default function CartView({ locale, catalog }: CartViewProps) {
           </p>
         </section>
 
-        <CartSummary pricing={pricing} />
+        <CartSummary pricing={pricing} offer={offer} />
       </div>
     </div>
   );

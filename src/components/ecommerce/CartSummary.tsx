@@ -39,9 +39,21 @@ import { useDictionary } from "@/src/providers/i18n-provider";
 export interface CartSummaryProps {
   /** The whole breakdown, from `cartPricing()` — never a bare number. */
   pricing: CartPricing;
+  /**
+   * The offer the house is giving on this bag, as `resolve_offer()` priced it.
+   *
+   * Null is the ordinary answer, not a failure: most baskets earn none. The
+   * label is the campaign's own customer-facing line, already resolved to the
+   * reading language, so the row says "Choose 3, Pay for 2" rather than showing
+   * an unexplained reduction.
+   *
+   * An estimate, like every other figure on this panel — `place_order()` prices
+   * the offer again against the order it writes, and that is what is charged.
+   */
+  offer?: { label: string | null; amountInCents: number } | null;
 }
 
-export default function CartSummary({ pricing }: CartSummaryProps) {
+export default function CartSummary({ pricing, offer = null }: CartSummaryProps) {
   const dict = useDictionary();
   const { currency, formatPrice } = useCurrency();
   // The house's terms, read once in the layout — see `delivery-provider.tsx`.
@@ -54,8 +66,18 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
    * complimentary delivery on a bag that never reaches it at the till.
    */
   const shipping = shippingInCents(pricing.subtotalInCents, terms);
-  const total = cartTotalInCents(pricing.subtotalInCents, terms);
   const remaining = amountToFreeShippingInCents(pricing.subtotalInCents, terms);
+
+  /*
+   * The offer comes off the merchandise, never the courier — the rule every
+   * benefit in this system follows — and is capped at the merchandise so the
+   * total can never fall below the delivery fee.
+   */
+  const offerInCents = Math.min(
+    offer?.amountInCents ?? 0,
+    pricing.subtotalInCents,
+  );
+  const total = cartTotalInCents(pricing.subtotalInCents, terms) - offerInCents;
 
   return (
     <aside className="ground-sand px-4 py-12 transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:px-8 lg:sticky lg:top-[var(--chrome-h)] lg:h-fit lg:px-10 lg:py-14">
@@ -80,6 +102,17 @@ export default function CartSummary({ pricing }: CartSummaryProps) {
             value={
               <span className="text-ground-accent">
                 −{formatPrice(pricing.promotionSavingsInCents)}
+              </span>
+            }
+          />
+        ) : null}
+
+        {offerInCents > 0 ? (
+          <Row
+            label={offer?.label ?? dict.cart.offer}
+            value={
+              <span className="text-ground-accent">
+                −{formatPrice(offerInCents)}
               </span>
             }
           />

@@ -374,6 +374,44 @@ export function revalidatePromotions(): void {
 }
 
 /**
+ * After an offer is created, edited, activated or deleted.
+ *
+ * `revalidatePromotions()`'s reasoning, for the same reason: an offer changes
+ * what a **basket** costs, and the basket is quoted in the bag, the drawer and
+ * the checkout review, while its label is printed on collection pages and cards.
+ * Deriving the affected paths from the offer's four selections would miss the
+ * products it stops applying to — the case `revalidateMerchPages()` warns about
+ * — so the whole locale tree goes.
+ *
+ * Deliberate bluntness, and cheap for the same reason: an offer is an
+ * occasional, deliberate act by the desk, not a per-row edit.
+ */
+export function revalidateOffers(): void {
+  revalidateWholeTree();
+}
+
+/**
+ * After the Rewards settings or the Discovery Credit switch are saved.
+ *
+ * The whole tree, and this one is the least optional of the three. These
+ * switches decide what the storefront **says**, not only what it charges:
+ *
+ *   · the signup popup lives in the root layout, on every page;
+ *   · the Discovery banner, the set detail page, the comparison table and the
+ *     "Unlock Your Credit" step each print a promise conditioned on the switch;
+ *   · the bag and the checkout show a points balance that must not survive the
+ *     programme being switched off.
+ *
+ * A stale page here is not a stale price — it is the house promising something
+ * it has withdrawn, which is precisely what the specification forbids. AGENTS.md
+ * §8 is explicit that a surface quoting stored data and missing from this file
+ * is a defect rather than a few minutes of lag.
+ */
+export function revalidateBenefits(): void {
+  revalidateWholeTree();
+}
+
+/**
  * After the home page's own structure changes — a band reordered, switched off,
  * or given different media.
  *

@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import CreditCard from "@/src/components/account/CreditCard";
 import CreditLedger from "@/src/components/account/CreditLedger";
 import CreditSummary from "@/src/components/account/CreditSummary";
+import RewardLedger from "@/src/components/account/RewardLedger";
+import RewardSummary from "@/src/components/account/RewardSummary";
 import VoucherCard from "@/src/components/account/VoucherCard";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
 import { getViewer } from "@/src/lib/auth";
@@ -14,6 +16,7 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { creditLedgerForUser } from "@/src/services/credits";
+import { rewardsForUser } from "@/src/services/rewards";
 import { vouchersForUser } from "@/src/services/vouchers";
 
 /**
@@ -79,9 +82,16 @@ export default async function VouchersPage({
   if (viewer === null)
     redirect(signInPathWithReturn(activeLocale, localizePath(activeLocale, PATH)));
 
-  const [dict, ledger, vouchers] = await Promise.all([
+  const [dict, ledger, rewards, vouchers] = await Promise.all([
     getDictionary(activeLocale),
     creditLedgerForUser(viewer.id),
+    /*
+     * KHEM Points. Returns a disabled shape rather than throwing when the house
+     * is not running Rewards, so the section below simply does not render — the
+     * same "absent, not empty" treatment the credit panel gives a customer who
+     * has never earned one.
+     */
+    rewardsForUser(viewer.id),
     // The email is the session's verified primary address — a grant may have
     // been issued before this person ever had an account.
     vouchersForUser({ clerkUserId: viewer.id, email: viewer.primaryEmail }),
@@ -97,6 +107,44 @@ export default async function VouchersPage({
       <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ground sm:text-4xl">
         {copy.heading}
       </h1>
+
+      {/*
+        ── KHEM Rewards ────────────────────────────────
+        
+        Above the credit because it is the instrument a customer accumulates
+        continuously; a credit arrives once, with a Discovery Set. Rendered only
+        when the programme is running: a heading over an empty panel would
+        advertise something the house has switched off.
+      */}
+      {rewards.enabled ? (
+        <section className="mb-12 md:mb-16">
+          <h2 className="mb-6 font-heading text-base text-ground">
+            {copy.rewards.heading}
+          </h2>
+
+          {rewards.balancePoints > 0 || rewards.entries.length > 0 ? (
+            <>
+              <div className="mb-8">
+                <RewardSummary rewards={rewards} dict={copy.rewards} />
+              </div>
+
+              <h2 className="mb-6 font-heading text-base text-ground">
+                {copy.rewardLedger.heading}
+              </h2>
+
+              <RewardLedger
+                entries={rewards.entries}
+                locale={activeLocale}
+                dict={copy.rewardLedger}
+              />
+            </>
+          ) : (
+            <p className="border border-ground-border bg-stone px-6 py-8 text-[12px] leading-loose text-ground-muted">
+              {copy.rewards.empty}
+            </p>
+          )}
+        </section>
+      ) : null}
 
       {/* ── KHEM Credit ─────────────────────────────── */}
       <section className="mb-12 md:mb-16">

@@ -87,6 +87,26 @@ export const checkoutSchema = z.object({
    */
   discountCode: z.string().trim().max(40, "discount").default(""),
 
+  /*
+   * KHEM Points to redeem, or zero.
+   *
+   * A **count**, never an amount. What those points are worth is decided by
+   * `resolve_points_redemption()` from `"BenefitSetting"`, against a balance
+   * read under an advisory lock inside `place_order()` — the same reasoning as
+   * the credit id above, and the reason the browser is never told a conversion
+   * rate it could arithmetic its way around.
+   *
+   * The ceiling is a sanity bound rather than a policy: the real caps are the
+   * customer's balance, the house's per-order maximum, and what is left of the
+   * merchandise after every other benefit.
+   */
+  pointsToRedeem: z.coerce
+    .number({ error: "points" })
+    .int("points")
+    .min(0, "points")
+    .max(10_000_000, "points")
+    .default(0),
+
   // Validated rather than trusted: it decides which language every future email
   // about this order is written in, and it arrives from the client.
   locale: z.enum(LOCALES, { error: "locale" }),

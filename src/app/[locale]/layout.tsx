@@ -29,10 +29,10 @@ import { getNavigationTree } from "@/src/services/navigation";
 // which is how the root layout and every page's canonical could have come to
 // disagree about which domain KHEM lives on.
 import { SITE_URL } from "@/src/lib/i18n/metadata";
+import { getSignupBenefit } from "@/src/services/benefits";
 import {
   getLiveAnnouncements,
   getMarketingSettings,
-  getWelcomeOffer,
 } from "@/src/services/marketing";
 import { CartDrawerProvider } from "@/src/providers/cart-drawer-provider";
 import { CartProvider } from "@/src/providers/cart-provider";
@@ -249,11 +249,11 @@ export default async function RootLayout({
    * API, so this layout stays prerenderable exactly as it was; an admin write
    * revalidates it through `revalidateMarketing()`.
    */
-  const [marketing, announcements, welcomeOffer, navTree, deliveryTerms] =
+  const [marketing, announcements, signupBenefit, navTree, deliveryTerms] =
     await Promise.all([
     getMarketingSettings(locale),
     getLiveAnnouncements(locale),
-    getWelcomeOffer(),
+    getSignupBenefit(),
     /*
      * The menu, which is data now (`supabase/sql/0048_navigation.sql`). Read
      * here rather than inside `<Nav>` because that component is a client one —
@@ -470,7 +470,7 @@ export default async function RootLayout({
                      * arriving together is the aggression the brief rules out.
                      */}
                     {marketing.offerPopupEnabled ? (
-                      <OfferPopup settings={marketing} offer={welcomeOffer} />
+                      <OfferPopup settings={marketing} benefit={signupBenefit} />
                     ) : null}
                     </NavGroundProvider>
                   </CartDrawerProvider>

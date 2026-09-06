@@ -27,6 +27,15 @@ import type { ProductCardData } from "@/src/types/catalog";
 export interface DiscoveryComparisonProps {
   sets: readonly ProductCardData[];
   locale: Locale;
+  /**
+   * Whether to print the "Applies to Full Size" row.
+   *
+   * False when the house has switched the Discovery Credit off. The row is
+   * **omitted**, not shown as a no: a table saying every set does *not* apply to
+   * a full-size order advertises the absence of a benefit, which is a stranger
+   * thing to publish than simply not mentioning it.
+   */
+  showCreditRow?: boolean;
 }
 
 /**
@@ -50,6 +59,7 @@ function includesMatching(set: ProductCardData, pattern: RegExp): boolean {
 export default async function DiscoveryComparison({
   sets,
   locale,
+  showCreditRow = true,
 }: DiscoveryComparisonProps) {
   const dict = await getDictionary(locale);
   const island = ltrIsland(locale);
@@ -87,11 +97,17 @@ export default async function DiscoveryComparison({
         value: includesMatching(set, /booklet/i),
       })),
     },
-    {
-      // The KHEM promise applies to every discovery purchase, by definition.
-      label: dict.discovery.compare.rows.credit,
-      cells: sets.map(() => ({ kind: "flag" as const, value: true })),
-    },
+    // The KHEM promise applies to every discovery purchase, by definition —
+    // while the house is making it. Spread rather than filtered afterwards, so
+    // the row simply is not built when the credit is off.
+    ...(showCreditRow
+      ? [
+          {
+            label: dict.discovery.compare.rows.credit,
+            cells: sets.map(() => ({ kind: "flag" as const, value: true })),
+          },
+        ]
+      : []),
     {
       label: dict.discovery.compare.rows.price,
       cells: sets.map((set) => ({

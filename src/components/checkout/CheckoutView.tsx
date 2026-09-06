@@ -38,13 +38,14 @@
 
 import { ShoppingBag } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import NavGround from "@/src/components/NavGround";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
 import PageHeader from "@/src/components/ecommerce/PageHeader";
 import { placeCustomerOrder } from "@/src/actions/checkout";
 import { previewDiscount } from "@/src/actions/discounts";
+import { previewCartOffer } from "@/src/actions/offers";
 import { cartTotalInCents, clampQuantity, parseBuyNow } from "@/src/lib/cart";
 import { useDeliveryTerms } from "@/src/providers/delivery-provider";
 import { discountRefusalMessage } from "@/src/lib/discount-message";
@@ -63,12 +64,18 @@ import { useDictionary } from "@/src/providers/i18n-provider";
 import type { PaymentMethod } from "@/src/types/checkout";
 import type { ProductCardData } from "@/src/types/catalog";
 import type { DiscountPreview } from "@/src/types/discount";
+import type { OfferPreview } from "@/src/types/offer";
 
 import CardPaymentForm from "./CardPaymentForm";
 import ContactStep from "./ContactStep";
 import DeliveryStep, { type DeliveryField } from "./DeliveryStep";
 import CreditStep, { type SpendableCredit } from "./CreditStep";
 import DiscountStep, { type AppliedDiscount } from "./DiscountStep";
+import PointsStep, {
+  maxRedeemablePoints,
+  pointsValueInCents,
+  type PointsWallet,
+} from "./PointsStep";
 import type { CheckoutVoucher } from "./VoucherPicker";
 import OrderReview from "./OrderReview";
 import PaymentStep from "./PaymentStep";
@@ -104,6 +111,31 @@ export interface CheckoutViewProps {
    * takes, so nothing here is a shortcut past `resolve_discount()`.
    */
   vouchers: readonly CheckoutVoucher[];
+  /**
+   * This customer's KHEM Points and the house's conversion, or null.
+   *
+   * Null covers three cases that look identical to the visitor and should: a
+   * guest, a house not running Rewards, and a customer who holds nothing. In all
+   * three there is no balance to offer, so the step does not render.
+   *
+   * A **suggestion**, not a permission — `place_order()` re-reads the balance
+   * under an advisory lock and prices the redemption itself.
+   */
+  rewards: PointsWallet | null;
+  /**
+   * Which benefits the house permits beside KHEM Points.
+   *
+   * Mirrors the four `pointsStackWith*` columns on `"BenefitSetting"`, and it is
+   * an **affordance only**: `place_order()` raises on every combination these
+   * describe, so this exists to explain the refusal before the customer meets it
+   * rather than to prevent one.
+   */
+  pointsStacking: {
+    withCodes: boolean;
+    withPromotions: boolean;
+    withOffers: boolean;
+    withCredit: boolean;
+  };
 }
 
 interface PlacedOrder {
@@ -119,6 +151,8 @@ export default function CheckoutView({
   detectedCountry,
   credits,
   vouchers,
+  rewards,
+  pointsStacking,
 }: CheckoutViewProps) {
   const dict = useDictionary();
   // The house's delivery terms, read once in the layout.
@@ -222,6 +256,16 @@ export default function CheckoutView({
    */
   const [company, setCompany] = useState("");
 
+  /** How many KHEM Points the customer has chosen to spend. */
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
+
+  /**
+   * The offer the house is giving on this bag, as `resolve_offer()` priced it.
+   *
+   * Null is the ordinary answer, not a failure: most baskets earn no offer.
+   */
+  const [offer, setOffer] = useState<OfferPreview | null>(null);
+
   /** Scrolled to when the server rejects something, so the message is seen. */
   const errorRef = useRef<HTMLDivElement>(null);
 
@@ -306,9 +350,6 @@ export default function CheckoutView({
    * Applied against merchandise only, so delivery is still charged.
    */
   const selectedCredit = credits.find((credit) => credit.id === creditId) ?? null;
-  const creditAppliedInCents = selectedCredit
-    ? Math.min(selectedCredit.balanceInCents, subtotalInCents)
-    : 0;
 
   /*
    * What the applied code was priced against. Any change to the bag, the
@@ -334,9 +375,118 @@ export default function CheckoutView({
 
   const discountInCents = activeDiscount?.amountInCents ?? 0;
 
+  /*
+   * ── The offer the house is giving ──────────────────────────
+   *
+   * Asked for whenever the bag, the address the audience gate reads, the typed
+   * code or the credit selection changes — the last two because an offer that
+   * will not stack with either declines itself, and the customer must see it
+   * withdraw rather than discover at the button that it never applied.
+   *
+   * `cancelled` guards against a slower earlier request landing after a faster
+   * later one and re-showing an offer the current bag no longer earns.
+   */
+  const offerSignature = [
+    activeLines
+      .map((line) => `${line.productId}:${line.quantity}`)
+      .sort()
+      .join(","),
+    customerEmail.trim().toLowerCase(),
+    activeDiscount?.code ?? "",
+    creditId,
+  ].join("|");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    /*
+     * An empty bag resolves to `null` through the same `.then` rather than
+     * clearing the state outright. Setting it synchronously in an effect body
+     * causes the cascading render `react-hooks/set-state-in-effect` warns about,
+     * and going through a microtask both silences that and keeps one code path
+     * for "what this bag is worth".
+     */
+    const request =
+      activeLines.length === 0
+        ? Promise.resolve(null)
+        : previewCartOffer({
+            items: activeLines.map((line) => ({
+              productId: line.productId,
+              quantity: line.quantity,
+            })),
+            locale,
+            customerEmail,
+            discountCode: activeDiscount?.code ?? "",
+            usingCredit: creditId !== "",
+          });
+
+    void request.then((result) => {
+      if (!cancelled) setOffer(result);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+    // `offerSignature` is the whole of what this depends on: it is built from
+    // every input above, and listing them separately would re-run the effect on
+    // a keystroke that did not change the answer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offerSignature, locale]);
+
+  const offerInCents = Math.min(offer?.amountInCents ?? 0, subtotalInCents);
+
+  /*
+   * ── KHEM Points ────────────────────────────────────────────
+   *
+   * The ladder `place_order()` walks, in the same order and with the same caps,
+   * so the figure beside the button is the figure the order is written with.
+   * Every reduction is applied against what the one before it left.
+   *
+   * The refusals are affordances, not the boundary: the database raises on each
+   * of these combinations. Naming them here means the customer reads why the
+   * step is inert instead of losing the redemption at the payment button.
+   */
+  const pointsBlockedBy =
+    rewards === null
+      ? null
+      : activeDiscount !== null && !pointsStacking.withCodes
+        ? dict.checkout.points.blockedByCode
+        : offer !== null && !pointsStacking.withOffers
+          ? dict.checkout.points.blockedByOffer
+          : creditId !== "" && !pointsStacking.withCredit
+            ? dict.checkout.points.blockedByCredit
+            : pricing.promotionSavingsInCents > 0 && !pointsStacking.withPromotions
+              ? dict.checkout.points.blockedByPromotion
+              : null;
+
+  const remainingAfterOfferAndCode = Math.max(
+    0,
+    subtotalInCents - offerInCents - discountInCents,
+  );
+
+  const redeemablePoints =
+    rewards === null || pointsBlockedBy !== null
+      ? 0
+      : maxRedeemablePoints(rewards, remainingAfterOfferAndCode);
+
+  const spentPoints = Math.min(pointsToRedeem, redeemablePoints);
+  const pointsInCents =
+    rewards === null ? 0 : pointsValueInCents(spentPoints, rewards);
+
+  const creditCapInCents = Math.max(
+    0,
+    remainingAfterOfferAndCode - pointsInCents,
+  );
+
+  const creditAppliedInCents = selectedCredit
+    ? Math.min(selectedCredit.balanceInCents, creditCapInCents)
+    : 0;
+
   const totalInCents =
     cartTotalInCents(subtotalInCents, deliveryTerms) -
+    offerInCents -
     discountInCents -
+    pointsInCents -
     creditAppliedInCents;
 
   /*
@@ -524,6 +674,13 @@ export default function CheckoutView({
          * never charged for a code they were not shown applied.
          */
         discountCode: activeDiscount?.code ?? "",
+        /*
+         * A count, and only one the step actually offered. `redeemablePoints`
+         * is zero whenever the step is inert — a code applied, an offer running,
+         * a credit chosen — so a stale selection cannot survive the customer
+         * changing their mind and reach the order.
+         */
+        pointsToRedeem: spentPoints,
         items: activeLines.map((line) => ({
           productId: line.productId,
           quantity: line.quantity,
@@ -710,6 +867,22 @@ export default function CheckoutView({
             locale={locale}
           />
 
+          {rewards ? (
+            <PointsStep
+              wallet={rewards}
+              points={spentPoints}
+              onChange={(next) => {
+                // Inert once a card order exists: the row already carries the
+                // redemption it was written with, and the intent charges that
+                // row.
+                if (awaitingPayment) return;
+                setPointsToRedeem(next);
+              }}
+              remainingInCents={remainingAfterOfferAndCode}
+              disabledReason={pointsBlockedBy}
+            />
+          ) : null}
+
           <CreditStep
             credits={credits}
             selectedId={creditId}
@@ -727,6 +900,11 @@ export default function CheckoutView({
                 setDiscountCode("");
                 setApplied(null);
                 setDiscountRefusal(null);
+                // Same reasoning, one instrument along: unless the house has
+                // permitted the pair, `place_order()` refuses an order carrying
+                // both. Clearing it here means the customer is never told that
+                // after the fact.
+                if (!pointsStacking.withCredit) setPointsToRedeem(0);
               }
             }}
             subtotalInCents={subtotalInCents}
@@ -827,6 +1005,9 @@ export default function CheckoutView({
           pricing={pricing}
           creditAppliedInCents={creditAppliedInCents}
           discountInCents={discountInCents}
+          offerInCents={offerInCents}
+          offerLabel={offer?.label ?? null}
+          pointsInCents={pointsInCents}
         />
       </div>
     </div>

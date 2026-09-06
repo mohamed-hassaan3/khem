@@ -19,6 +19,7 @@ import FeatureTriptych from "@/src/components/ecommerce/FeatureTriptych";
 import MerchGrid from "@/src/components/ecommerce/MerchGrid";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
+import { getBenefitSettings } from "@/src/services/benefits";
 import type { Collection, ProductCardData } from "@/src/types/catalog";
 
 /**
@@ -69,6 +70,18 @@ export default async function CategoryView({
   products,
 }: CategoryViewProps) {
   const dict = await getDictionary(locale);
+
+  /*
+   * Whether the Discovery Credit is running.
+   *
+   * Read here rather than inside the DISCOVERY branch because a `switch` arm is
+   * not a place to `await`, and read for every kind because one extra
+   * request-memoised row is cheaper than a second component. When it is off,
+   * **every** sentence promising the credit disappears from this page — the
+   * banner note, the "Unlock Your Credit" step, and the comparison row — and the
+   * layout closes over them rather than leaving a gap.
+   */
+  const { discoveryCreditEnabled } = await getBenefitSettings();
 
   switch (collection.kind) {
     /* Rituals for the skin. */
@@ -147,13 +160,22 @@ export default async function CategoryView({
             titleLead={copy.titleLead}
             titleAccent={copy.titleAccent}
             description={copy.description}
-            note={copy.note}
+            // The banner promise. `note` is optional, so withholding it removes
+            // the line and its spacing together — nothing is left behind to
+            // close up.
+            note={discoveryCreditEnabled ? copy.note : undefined}
             imageUrl={collection.bannerUrl}
             imageAlt={collection.bannerAlt}
           />
 
           <SetGrid sets={products} locale={locale} emptyLabel={copy.empty} />
 
+          {/*
+            Three steps become two when the credit is off. "Unlock Your Credit"
+            is not a step that can be reworded — it describes a benefit the house
+            has withdrawn — so it is dropped, and the triptych lays out the two
+            that remain rather than reserving a column for it.
+          */}
           <FeatureTriptych
             variant="steps"
             eyebrow={copy.promise.eyebrow}
@@ -161,11 +183,17 @@ export default async function CategoryView({
             items={[
               { icon: Package, ...steps.choose },
               { icon: Clock, ...steps.discover },
-              { icon: BadgePercent, ...steps.unlock },
+              ...(discoveryCreditEnabled
+                ? [{ icon: BadgePercent, ...steps.unlock }]
+                : []),
             ]}
           />
 
-          <DiscoveryComparison sets={products} locale={locale} />
+          <DiscoveryComparison
+            sets={products}
+            locale={locale}
+            showCreditRow={discoveryCreditEnabled}
+          />
         </div>
       );
     }
