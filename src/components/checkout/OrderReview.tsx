@@ -57,6 +57,25 @@ export interface OrderReviewProps {
    * only one of these rows is ever non-zero.
    */
   discountInCents?: number;
+  /**
+   * What an offer takes off, and what the house is calling it.
+   *
+   * Also an estimate, and also one the client never computes: it is the figure
+   * `resolve_offer()` returned for this exact bag. The label is the campaign's
+   * own customer-facing line, already resolved to the reading language, so a
+   * "Choose 3, Pay for 2" order says so on its own row rather than showing an
+   * unexplained reduction.
+   */
+  offerInCents?: number;
+  offerLabel?: string | null;
+  /**
+   * What redeemed KHEM Points take off. Zero when none are being spent.
+   *
+   * Priced by the same conversion `resolve_points_redemption()` applies, and
+   * shown on its own row for the reason the three below it each get one: a
+   * customer who loses a benefit needs to know which one it was.
+   */
+  pointsInCents?: number;
 }
 
 export default function OrderReview({
@@ -64,6 +83,9 @@ export default function OrderReview({
   pricing,
   creditAppliedInCents = 0,
   discountInCents = 0,
+  offerInCents = 0,
+  offerLabel = null,
+  pointsInCents = 0,
 }: OrderReviewProps) {
   const subtotalInCents = pricing.subtotalInCents;
   const dict = useDictionary();
@@ -81,10 +103,14 @@ export default function OrderReview({
    */
   const shipping = shippingInCents(subtotalInCents, terms);
   // Never below the delivery fee: neither instrument pays the courier.
-  const total =
+  const total = Math.max(
+    shipping,
     cartTotalInCents(subtotalInCents, terms) -
-    discountInCents -
-    creditAppliedInCents;
+      offerInCents -
+      discountInCents -
+      pointsInCents -
+      creditAppliedInCents,
+  );
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
   return (
@@ -151,11 +177,15 @@ export default function OrderReview({
         />
 
         {/*
-          Three reductions can apply to one order and each gets its own line:
-          the campaign that repriced the goods, a code the customer entered, and
-          a Discovery Credit. Collapsing them into one "Discount" row would hide
-          which of the three is doing the work — and they are governed by
-          different rules, so a customer who loses one needs to know which.
+          Five reductions can apply to one order and each gets its own line: the
+          campaign that repriced the goods, an offer the house is running, a code
+          the customer entered, KHEM Points they chose to spend, and a Discovery
+          Credit. Collapsing them into one "Discount" row would hide which is
+          doing the work — and they are governed by different rules, so a
+          customer who loses one needs to know which.
+
+          In practice most orders show at most one: `place_order()` refuses the
+          combinations the house has not explicitly permitted.
         */}
         {pricing.promotionSavingsInCents > 0 ? (
           <Row
@@ -164,6 +194,15 @@ export default function OrderReview({
               <span className="text-ground-accent">
                 −{formatPrice(pricing.promotionSavingsInCents)}
               </span>
+            }
+          />
+        ) : null}
+
+        {offerInCents > 0 ? (
+          <Row
+            label={offerLabel ?? copy.offer}
+            value={
+              <span className="text-ground-accent">−{formatPrice(offerInCents)}</span>
             }
           />
         ) : null}
@@ -186,6 +225,14 @@ export default function OrderReview({
             )
           }
         />
+        {pointsInCents > 0 ? (
+          <Row
+            label={dict.checkout.points.applied}
+            value={
+              <span className="text-ground-accent">−{formatPrice(pointsInCents)}</span>
+            }
+          />
+        ) : null}
         {creditAppliedInCents > 0 ? (
           <Row
             label={dict.checkout.credit.applied}

@@ -52,6 +52,7 @@ import {
   Boxes,
   Compass,
   ExternalLink,
+  Gift,
   Landmark,
   LayoutList,
   LayoutGrid,
@@ -125,7 +126,9 @@ const GROUPS = [
        * separate rows because they are separate systems with separate records.
        */
       { path: "/admin/promotions", label: "Promotions", icon: BadgePercent },
+      { path: "/admin/offers", label: "Offers", icon: Gift },
       { path: "/admin/discounts", label: "Discounts", icon: Tag },
+      { path: "/admin/rewards", label: "Rewards", icon: Sparkles },
       { path: "/admin/credits", label: "Credits", icon: Ticket },
       { path: "/admin/campaigns", label: "Campaigns", icon: Send },
       { path: "/admin/newsletter", label: "Newsletter", icon: Mail },

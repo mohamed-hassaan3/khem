@@ -8,7 +8,9 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { detectedCountryCode } from "@/src/lib/shipping";
 import { isCardPaymentAvailable } from "@/src/lib/stripe/server";
+import { getBenefitSettings } from "@/src/services/benefits";
 import { spendableCreditsForUser } from "@/src/services/credits";
+import { rewardBalanceForUser } from "@/src/services/rewards";
 import { vouchersForUser } from "@/src/services/vouchers";
 import { getProductCardsByCollection } from "@/src/services/products";
 
@@ -97,6 +99,38 @@ export default async function CheckoutPage({
     : [];
 
   /*
+   * What this customer could spend in KHEM Points, and what the house says a
+   * point is worth.
+   *
+   * Null in three cases that look identical to the visitor and should: a guest,
+   * a house not running Rewards, and a customer holding nothing. In all three
+   * there is no balance to offer.
+   *
+   * The settings are read regardless, because the same row carries the four
+   * stacking switches — and those decide what the step *says* when it is inert,
+   * which is a sentence the visitor needs whether or not they hold points.
+   *
+   * Only the conversion and the caps cross into the bundle, never the ledger:
+   * the balance is one number, and `place_order()` re-reads it under a lock.
+   */
+  const benefits = await getBenefitSettings();
+
+  const rewards =
+    viewer && benefits.rewardsEnabled
+      ? await rewardBalanceForUser(viewer.id).then((balance) =>
+          balance.balancePoints > 0
+            ? {
+                balancePoints: balance.balancePoints,
+                minRedeemPoints: benefits.minRedeemPoints,
+                redeemPoints: benefits.redeemPoints,
+                redeemValueInCents: benefits.redeemValueInCents,
+                maxPointsPerOrder: benefits.maxPointsPerOrder,
+              }
+            : null,
+        )
+      : null;
+
+  /*
    * The vouchers this customer holds and could use today — so they can pick one
    * instead of remembering a code (§5.5 of the plan).
    *
@@ -170,6 +204,18 @@ export default async function CheckoutPage({
       // Also suggestions. `resolve_discount()` decides, twice: once when the
       // customer presses Apply, and again inside the order transaction.
       vouchers={vouchers}
+      // Also a suggestion. `resolve_points_redemption()` decides, under the
+      // advisory lock, inside the order transaction.
+      rewards={rewards}
+      // Affordances, not the boundary. `place_order()` raises on every
+      // combination these describe; naming them lets the step explain itself
+      // before the customer meets the refusal at the payment button.
+      pointsStacking={{
+        withCodes: benefits.pointsStackWithCodes,
+        withPromotions: benefits.pointsStackWithPromotions,
+        withOffers: benefits.pointsStackWithOffers,
+        withCredit: benefits.pointsStackWithCredit,
+      }}
     />
   );
 }

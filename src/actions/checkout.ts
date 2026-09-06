@@ -191,6 +191,23 @@ function placementFailure(message: string): CheckoutResult {
   }
 
   /*
+   * A refused benefit combination, or a refused redemption.
+   *
+   * `place_order()` raises these with `hint = 'BENEFIT:<code>'` beside a
+   * sentence written for the customer — points against a code, against an
+   * offer, against a promotion, against a credit, or simply more points than
+   * the balance holds. Every one is passed through as `detail` beneath the
+   * translated heading, like the stock and credit messages above.
+   *
+   * Checked before the discount branch below, because several of these
+   * sentences legitimately contain the word "code" and would otherwise be
+   * reported as a discount failure.
+   */
+  if (message.includes("KHEM Points") || message.includes("points")) {
+    return { ok: false, formError: "pointsRejected", detail: message };
+  }
+
+  /*
    * A refused discount code. `resolve_discount()` returns a different sentence
    * for each reason — unrecognised, inactive, not started, expired, below the
    * minimum, capped, already used, nothing eligible in the bag — and every one
@@ -351,6 +368,16 @@ export async function placeCustomerOrder(
        * stale between this line and that one.
        */
       discountCode: parsed.data.discountCode,
+      /*
+       * A count, forwarded unexamined for the third time and for the third
+       * identical reason: what those points are worth, whether the balance
+       * covers them, whether the house's caps permit them and whether any other
+       * benefit on this order forbids them are all decided by
+       * `resolve_points_redemption()` and the ladder around it, inside
+       * `place_order()`, under an advisory lock. A check here could go stale
+       * between this line and that one.
+       */
+      pointsToRedeem: parsed.data.pointsToRedeem,
       items: resolution.lines.map((line) => ({
         slug: line.slug,
         quantity: line.quantity,

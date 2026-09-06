@@ -210,12 +210,20 @@ export function AdminToggle({
   description,
   checked,
   onChange,
+  /**
+   * Inert while a write is in flight.
+   *
+   * Only the switches that save on their own need this — a toggle inside a form
+   * is saved by the form's own button and has nothing to wait for.
+   */
+  disabled = false,
 }: {
   id: string;
   label: string;
   description?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
     <button
@@ -223,8 +231,9 @@ export function AdminToggle({
       type="button"
       role="switch"
       aria-checked={checked}
+      disabled={disabled}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-start gap-4 border border-ground-border bg-ivory/3 px-4 py-3 text-start transition-colors duration-300 hover:border-gold/30 focus:border-gold/40 focus:outline-none"
+      className="flex w-full items-start gap-4 border border-ground-border bg-ivory/3 px-4 py-3 text-start transition-colors duration-300 hover:border-gold/30 focus:border-gold/40 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
     >
       <span
         aria-hidden

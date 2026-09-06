@@ -7,9 +7,11 @@ import {
   AdminRow,
   AdminTable,
 } from "@/src/components/admin/AdminTable";
+import DiscoveryCreditToggle from "@/src/components/admin/DiscoveryCreditToggle";
 import FilterChips from "@/src/components/admin/FilterChips";
 import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
+import { getAdminBenefitSettings } from "@/src/services/admin/benefits";
 import {
   CREDITS_PER_PAGE,
   getCreditTotals,
@@ -134,13 +136,14 @@ export default async function AdminCreditsPage({
   const statusParam = readParam(query.status);
   const status = STATUSES.find((value) => value === statusParam);
 
-  const [{ credits, total }, totals] = await Promise.all([
+  const [{ credits, total }, totals, benefits] = await Promise.all([
     listCredits({
       status,
       offset: (page - 1) * CREDITS_PER_PAGE,
       limit: CREDITS_PER_PAGE,
     }),
     getCreditTotals(),
+    getAdminBenefitSettings(),
   ]);
 
   const basePath = localizePath(activeLocale, "/admin/credits");
@@ -152,6 +155,16 @@ export default async function AdminCreditsPage({
         title="Discovery Credits"
         description="Every credit a Discovery Set has earned. Credits are created, activated and expired by order events — this screen records them, and the only thing it can change is an adjustment, which is itself written to the ledger."
       />
+
+      {/*
+        The switch sits above the ledger rather than on the Rewards screen: it
+        governs the instrument listed beneath it, and an editor looking for it
+        will look here. It is the only control on this page that changes what
+        happens next; everything below is a record of what already did.
+      */}
+      <div className="mb-10">
+        <DiscoveryCreditToggle enabled={benefits.discoveryCreditEnabled} />
+      </div>
 
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <Figure

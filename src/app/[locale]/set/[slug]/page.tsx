@@ -13,6 +13,7 @@ import RelatedProducts from "@/src/components/ecommerce/RelatedProducts";
 import { LOCALES, isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
+import { getBenefitSettings } from "@/src/services/benefits";
 import {
   SET_RELATED_KINDS,
   getCollectionBySlug,
@@ -114,7 +115,7 @@ export default async function SetPage({
   const product = await getSetProductBySlug(activeLocale, slug);
   if (!product) notFound();
 
-  const [dict, collection, related] = await Promise.all([
+  const [dict, collection, related, benefits] = await Promise.all([
     getDictionary(activeLocale),
     getCollectionBySlug(activeLocale, product.collectionSlug),
     /*
@@ -123,6 +124,7 @@ export default async function SetPage({
      * kinds are a module constant, never anything derived from the request.
      */
     getRelatedProductCards(activeLocale, product.slug, 4, SET_RELATED_KINDS),
+    getBenefitSettings(),
   ]);
 
   const gallery = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder);
@@ -160,6 +162,21 @@ export default async function SetPage({
             collectionName={collection?.name ?? "KHEM"}
             locale={activeLocale}
           />
+
+          {/*
+            The Discovery promise, on the detail page as well as on the banner.
+            
+            Two conditions, and both are necessary. `kind` keeps it off a **gift**
+            set, which earns no credit; `discoveryCreditEnabled` keeps it off
+            every page once the house withdraws the benefit. When either fails
+            nothing is rendered — not an empty paragraph — so the column's `gap`
+            closes over it and the story block moves up.
+          */}
+          {kind === "DISCOVERY" && benefits.discoveryCreditEnabled ? (
+            <p className="-mt-6 border-s-2 border-gold/40 ps-4 text-[13px] leading-relaxed text-ground-muted md:-mt-12">
+              {dict.discovery.note}
+            </p>
+          ) : null}
 
           {/* The block this page exists for. Self-guarding on an empty list. */}
           <Reveal>

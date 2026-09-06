@@ -1210,6 +1210,8 @@ export const en = {
      * customer unable to tell which reduction is which.
      */
     promotion: "Promotion",
+    /** Fallback row label when a campaign carries no customer-facing line. */
+    offer: "Offer",
     subtotal: "Subtotal",
     shipping: "Shipping",
     complimentary: "Complimentary",
@@ -1408,6 +1410,30 @@ export const en = {
       deliveryStillCharged: "Delivery is not covered by a credit.",
     },
 
+    /**
+     * Spending KHEM Points at the checkout.
+     *
+     * The four `blockedBy*` sentences each name the *other* benefit rather than
+     * saying "points cannot be used", because a customer who is told which
+     * instrument is in the way can act on it — remove the code, deselect the
+     * credit — and one who is told a bare refusal cannot.
+     */
+    points: {
+      heading: "KHEM Rewards",
+      lede: "You have {points} KHEM Points, worth {amount}.",
+      spending: "Spending {points} points",
+      max: "Up to {points}",
+      clear: "Use none",
+      applied: "KHEM Points",
+      nothingToReduce:
+        "There is nothing left on this order for points to reduce.",
+      deliveryStillCharged: "Delivery is not covered by points.",
+      blockedByCode: "KHEM Points cannot be combined with a discount code. Remove the code to spend points instead.",
+      blockedByOffer: "An offer is already applied to this bag, and points cannot be combined with one.",
+      blockedByCredit: "KHEM Points cannot be combined with a Discovery Credit. Choose one or the other.",
+      blockedByPromotion: "Your bag includes a promotional price, and points cannot be combined with one.",
+    },
+
     review: {
       heading: "Your Order",
       edit: "Edit bag",
@@ -1415,6 +1441,7 @@ export const en = {
       itemCount: "{count} items",
       subtotal: "Subtotal",
       discount: "Discount",
+      offer: "Offer",
       delivery: "Delivery",
       complimentary: "Complimentary",
       total: "Total",
@@ -1467,6 +1494,7 @@ export const en = {
         "One of your fragrances is no longer available in that quantity.",
       unavailable: "One of your fragrances is no longer available.",
       creditRejected: "Your Discovery Credit could not be applied.",
+      pointsRejected: "Your KHEM Points could not be applied.",
       discountRejected: "That discount code could not be applied.",
       /* Typed but never applied — see `handleSubmit` in `CheckoutView`. */
       discountNotApplied:
@@ -1760,6 +1788,68 @@ export const en = {
         },
       },
 
+      /**
+       * KHEM Points, in the four lines §10 of the specification asks for.
+       *
+       * `points` carries the unit because "340" alone is not a quantity of
+       * anything; `worth` is the word beside the converted figure, kept separate
+       * so `<Price>` can resolve the display currency in the browser.
+       */
+      rewards: {
+        heading: "KHEM Rewards",
+        available: "Your KHEM Rewards",
+        points: "{points} KHEM Points",
+        worth: "available",
+        toNext: "{points} points away from your next reward.",
+        readyToSpend: "Ready to spend at checkout.",
+        empty:
+          "You have not earned KHEM Points yet. They arrive with your first order.",
+        lifetimeEarned: "Earned to date",
+        lifetimeRedeemed: "Redeemed",
+        expired: "Expired",
+      },
+
+      /** The points ledger. `CreditLedger`'s twin, keyed by `PointsSource`. */
+      rewardLedger: {
+        heading: "Points Activity",
+        date: "Date",
+        description: "Description",
+        type: "Type",
+        amount: "Points",
+        empty: "Nothing has moved on your points yet.",
+        kind: {
+          PURCHASE: "Purchase",
+          SIGNUP: "Welcome",
+          FIRST_PURCHASE: "First order",
+          REVIEW: "Review",
+          REFERRAL: "Referral",
+          ADMIN_ADJUSTMENT: "Adjusted",
+          REFUND_REVERSAL: "Refund",
+          REDEMPTION: "Redeemed",
+          EXPIRATION: "Expired",
+        },
+        reason: {
+          PURCHASE: "Earned on order {order}",
+          PURCHASEPlain: "Earned on an order",
+          SIGNUP: "Welcome to KHEM",
+          SIGNUPPlain: "Welcome to KHEM",
+          FIRST_PURCHASE: "First order bonus, with order {order}",
+          FIRST_PURCHASEPlain: "First order bonus",
+          REVIEW: "Thank you for your review",
+          REVIEWPlain: "Thank you for your review",
+          REFERRAL: "Referral",
+          REFERRALPlain: "Referral",
+          ADMIN_ADJUSTMENT: "Adjusted by the house",
+          ADMIN_ADJUSTMENTPlain: "Adjusted by the house",
+          REFUND_REVERSAL: "Adjusted after order {order} was refunded",
+          REFUND_REVERSALPlain: "Adjusted after a refund",
+          REDEMPTION: "Redeemed against order {order}",
+          REDEMPTIONPlain: "Redeemed",
+          EXPIRATION: "Points lapsed",
+          EXPIRATIONPlain: "Points lapsed",
+        },
+      },
+
       ledger: {
         heading: "Credit Activity",
         date: "Date",
@@ -1924,6 +2014,14 @@ export const en = {
     eyebrow: "An Invitation",
     percentOffer: "Subscribe and receive {percent}% off your first order.",
     amountOffer: "Subscribe and receive {amount} off your first order.",
+    /**
+     * The signup benefit as KHEM Points.
+     *
+     * Rendered instead of the percentage when the house has chosen Rewards as
+     * what signing up is worth. Under the third setting — Off — no offer line is
+     * rendered at all, which is why there is no fourth string here.
+     */
+    pointsOffer: "Create your account and begin with {points} KHEM Points.",
     plainOffer:
       "Private word of new compositions, before they reach the boutique.",
     emailLabel: "Email address",
@@ -1932,6 +2030,8 @@ export const en = {
     submitting: "One moment",
     successHeading: "Welcome to the Circle",
     successBody: "Look for our letter. It carries your welcome offer.",
+    successBodyPoints: "Look for our letter. Your KHEM Points are already on your account.",
+    successBodyPlain: "Look for our letter. You are on the list.",
     successCode: "Your code is {code}. Enter it at checkout.",
     alreadyBody: "You are already with us. Nothing has changed.",
     disclaimer: "One letter a month. Leave whenever you wish.",

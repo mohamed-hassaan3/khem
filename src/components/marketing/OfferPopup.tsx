@@ -26,7 +26,8 @@ import { readStored, writeStored } from "@/src/lib/storage";
 import { useConsent } from "@/src/providers/consent-provider";
 import { useCurrency } from "@/src/providers/currency-provider";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
-import type { MarketingSettings, WelcomeOfferSummary } from "@/src/types/marketing";
+import type { SignupBenefit } from "@/src/types/benefits";
+import type { MarketingSettings } from "@/src/types/marketing";
 
 /**
  * The subscribe-and-earn offer, as a modal.
@@ -50,11 +51,14 @@ import type { MarketingSettings, WelcomeOfferSummary } from "@/src/types/marketi
  *
  * ## What crosses to the browser, and what does not
  *
- * The **percentage** does — it is printed on the panel. The **code** does not,
- * until somebody has actually subscribed and the server has written a grant in
- * their name. Nothing here computes an entitlement: `subscribeForOffer()` puts
- * the address on the list and `claim_subscriber_offer()` issues the grant, both
- * server-side, and this component renders whichever code comes back.
+ * The **promise** does — the percentage, or the points, or nothing at all,
+ * decided by `"BenefitSetting"."signupBenefit"` and handed here already resolved
+ * as a {@link SignupBenefit}. The **code** does not, until somebody has actually
+ * subscribed and the server has written a grant in their name. Nothing here
+ * computes an entitlement: `subscribeForOffer()` puts the address on the list
+ * and `claim_subscriber_offer()` issues the grant — and issues none unless the
+ * mode is `WELCOME_DISCOUNT` — both server-side, and this component renders
+ * whichever code comes back.
  *
  * ## Stacking
  *
@@ -84,11 +88,18 @@ type Phase = "form" | "done";
 
 export default function OfferPopup({
   settings,
-  offer,
+  benefit,
 }: {
   settings: MarketingSettings;
-  /** The live welcome offer, or null when the house is running none. */
-  offer: WelcomeOfferSummary | null;
+  /**
+   * What the house is currently offering a new subscriber.
+   *
+   * A discriminated union rather than a percentage, so this component cannot
+   * print a promise the house has withdrawn: under `NONE` there is no field to
+   * read, which makes stale "20% OFF" messaging a type error rather than
+   * something to remember. See `src/types/benefits.ts`.
+   */
+  benefit: SignupBenefit;
 }) {
   const dict = useDictionary();
   const locale = useLocale();
@@ -265,21 +276,36 @@ export default function OfferPopup({
   }
 
   /*
-   * The promise, in the shape the live campaign actually takes. Never a
-   * hard-coded percentage: `offer` is the `discounts."isWelcome"` row, so a
-   * house running a fixed-amount welcome says so, and one running none invites
-   * people to the list without promising anything.
+   * The promise, in the shape the house is currently making it.
+   *
+   * Never a hard-coded percentage, and now never a hard-coded *kind* either.
+   * Three branches, one per setting:
+   *
+   *   WELCOME_DISCOUNT  the `discounts."isWelcome"` row — a percentage, a fixed
+   *                     amount, or (no campaign running) the plain invitation
+   *   REWARD_POINTS     what the account will start with
+   *   NONE              **null**, and nothing is rendered
+   *
+   * `null` rather than an empty string: the paragraph is not emitted at all, so
+   * the panel's `gap-5` closes over it and no empty row is left behind. That is
+   * the same reflow the Discovery banner performs when its own switch goes off.
    */
   const offerLine =
-    offer === null
-      ? dict.offerPopup.plainOffer
-      : offer.kind === "PERCENTAGE"
-        ? interpolate(dict.offerPopup.percentOffer, {
-            percent: String(offer.value),
+    benefit.mode === "NONE"
+      ? null
+      : benefit.mode === "REWARD_POINTS"
+        ? interpolate(dict.offerPopup.pointsOffer, {
+            points: String(benefit.points),
           })
-        : interpolate(dict.offerPopup.amountOffer, {
-            amount: formatPrice(offer.value),
-          });
+        : benefit.offer === null
+          ? dict.offerPopup.plainOffer
+          : benefit.offer.kind === "PERCENTAGE"
+            ? interpolate(dict.offerPopup.percentOffer, {
+                percent: String(benefit.offer.value),
+              })
+            : interpolate(dict.offerPopup.amountOffer, {
+                amount: formatPrice(benefit.offer.value),
+              });
 
   return (
     <AnimatePresence>
@@ -437,16 +463,18 @@ export default function OfferPopup({
                     already had, now stated in one place instead of two branches
                     that rendered the same string.
                   */}
-                  <p
-                    dir="auto"
-                    className={
-                      settings.offerPopupBody
-                        ? "font-heading text-sm tracking-[0.12em] text-gold-soft"
-                        : "text-[13px] leading-loose text-ground-muted"
-                    }
-                  >
-                    {offerLine}
-                  </p>
+                  {offerLine === null ? null : (
+                    <p
+                      dir="auto"
+                      className={
+                        settings.offerPopupBody
+                          ? "font-heading text-sm tracking-[0.12em] text-gold-soft"
+                          : "text-[13px] leading-loose text-ground-muted"
+                      }
+                    >
+                      {offerLine}
+                    </p>
+                  )}
 
                   <form onSubmit={handleSubmit} noValidate className="relative space-y-3">
                     <label htmlFor="offer-email" className="sr-only">
@@ -525,9 +553,22 @@ export default function OfferPopup({
                   <div className="gold-line" />
 
                   <p dir="auto" className="text-[13px] leading-loose text-ground-muted">
+                    {/*
+                      One sentence per mode, because the three are not the same
+                      promise. "It carries your welcome offer" is only true when
+                      there is one: under the other two settings
+                      `claim_subscriber_offer()` issues no grant and returns no
+                      code. Points get their own line rather than falling through
+                      to the neutral one — the mode was chosen deliberately, and
+                      a panel that goes vague about it reads as a failure.
+                    */}
                     {alreadySubscribed
                       ? dict.offerPopup.alreadyBody
-                      : dict.offerPopup.successBody}
+                      : benefit.mode === "WELCOME_DISCOUNT"
+                        ? dict.offerPopup.successBody
+                        : benefit.mode === "REWARD_POINTS"
+                          ? dict.offerPopup.successBodyPoints
+                          : dict.offerPopup.successBodyPlain}
                   </p>
 
                   {code ? (

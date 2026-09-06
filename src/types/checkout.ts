@@ -57,6 +57,13 @@ export interface CheckoutFormInput {
    * `supabase/sql/0028_discounts.sql`.
    */
   discountCode: string;
+  /**
+   * KHEM Points to redeem, or `0`.
+   *
+   * A **count only**. The conversion rate, the caps and the balance are all read
+   * server-side inside `place_order()` — see `supabase/sql/0059_rewards.sql`.
+   */
+  pointsToRedeem: number;
   items: readonly { productId: string; quantity: number }[];
 }
 

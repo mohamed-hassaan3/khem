@@ -10,7 +10,14 @@ import {
 } from "@/src/components/admin/AdminTable";
 import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
+import PointsAdjuster from "@/src/components/admin/PointsAdjuster";
+import { getAdminBenefitSettings } from "@/src/services/admin/benefits";
+import { creditsForClerkUser } from "@/src/services/admin/credits";
 import { getAdminCustomer } from "@/src/services/admin/customers";
+import {
+  pointsLedgerForClerkUser,
+  rewardBalanceForClerkUser,
+} from "@/src/services/admin/rewards";
 import type { CustomerAddress } from "@/src/types/customer";
 
 /**
@@ -89,6 +96,24 @@ export default async function AdminCustomerPage({
 
   const customer = await getAdminCustomer(decodeURIComponent(id));
   if (!customer) notFound();
+
+  /*
+   * The two ledgers, read only for somebody with an account.
+   *
+   * Both are keyed by Clerk id — a walk-in has no account, so no points and no
+   * credit could ever have been issued to them, and asking would be two round
+   * trips for two guaranteed empty answers.
+   */
+  const clerkId = customer.clerkId;
+
+  const [benefits, rewardBalance, pointsLedger, credits] = clerkId
+    ? await Promise.all([
+        getAdminBenefitSettings(),
+        rewardBalanceForClerkUser(clerkId),
+        pointsLedgerForClerkUser(clerkId, 25),
+        creditsForClerkUser(clerkId),
+      ])
+    : [null, null, [], []];
 
   const listPath = localizePath(activeLocale, "/admin/customers");
   const ordersPath = localizePath(activeLocale, "/admin/orders");
@@ -300,6 +325,120 @@ export default async function AdminCustomerPage({
 
         {/* ── The record ───────────────────────────────── */}
         <aside className="space-y-8">
+          {/*
+            ── Rewards ────────────────────────────────────
+            
+            What support is actually asked about: "how many points do I have,
+            and where did they go". Present only for an account, and only while
+            the programme is running — a panel of zeroes for a house that does
+            not do points would be a screen full of a feature it has not bought.
+          */}
+          {clerkId && benefits?.rewardsEnabled && rewardBalance ? (
+            <div className="border border-ground-border p-5 sm:p-6">
+              <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+                Rewards
+              </h2>
+              <dl>
+                <Detail term="Current balance">
+                  <span className="font-heading text-lg tracking-[0.1em] text-ground-accent">
+                    {rewardBalance.balancePoints.toLocaleString("en-US")}
+                  </span>
+                </Detail>
+                <Detail term="Earned to date">
+                  {rewardBalance.lifetimeEarned.toLocaleString("en-US")}
+                </Detail>
+                <Detail term="Redeemed">
+                  {rewardBalance.lifetimeRedeemed.toLocaleString("en-US")}
+                </Detail>
+                <Detail term="Expired">
+                  {rewardBalance.expiredPoints.toLocaleString("en-US")}
+                </Detail>
+              </dl>
+
+              <div className="mt-4">
+                <PointsAdjuster
+                  clerkUserId={clerkId}
+                  name={customer.name ?? customer.email ?? "this customer"}
+                />
+              </div>
+
+              {pointsLedger.length > 0 ? (
+                <ul className="mt-5 space-y-2 border-t border-ground-border pt-4">
+                  {pointsLedger.slice(0, 8).map((movement) => (
+                    <li
+                      key={movement.id}
+                      className="flex items-baseline justify-between gap-3 text-[11px]"
+                    >
+                      <span className="text-ground-muted">
+                        {label(movement.source.replace(/_/g, " "))}
+                        <span className="ms-2 text-ground-subtle">
+                          {stamp(movement.occurredAt)}
+                        </span>
+                      </span>
+                      <span
+                        className={`font-heading tabular-nums ${
+                          movement.amount >= 0 ? "text-ground-accent" : "text-ground-muted"
+                        }`}
+                      >
+                        {movement.amount >= 0 ? "+" : "−"}
+                        {Math.abs(movement.amount)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-4 text-[11px] leading-relaxed text-ground-subtle">
+                  Nothing has moved on this balance yet.
+                </p>
+              )}
+            </div>
+          ) : null}
+
+          {/*
+            ── Discovery Credit ───────────────────────────
+            
+            The other instrument, kept apart because it is not the same thing: a
+            credit is spent whole against one full-size fragrance and forfeits
+            the remainder. Shown whenever the customer holds one, regardless of
+            the switch — the credits are real either way, and support has to be
+            able to see them after the house stops issuing new ones.
+          */}
+          {credits.length > 0 ? (
+            <div className="border border-ground-border p-5 sm:p-6">
+              <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+                Discovery Credit
+              </h2>
+              <dl>
+                <Detail term="Available">
+                  <span className="font-heading text-lg tracking-[0.1em] text-ground-accent">
+                    {egp(
+                      credits
+                        .filter((credit) => credit.status === "AVAILABLE")
+                        .reduce((sum, credit) => sum + credit.balanceInCents, 0),
+                    )}
+                  </span>
+                </Detail>
+                <Detail term="Earned">
+                  {egp(
+                    credits.reduce((sum, credit) => sum + credit.amountInCents, 0),
+                  )}
+                </Detail>
+                <Detail term="Credits held">{credits.length}</Detail>
+                <Detail term="Awaiting delivery">
+                  {
+                    credits.filter(
+                      (credit) => credit.status === "PENDING_DELIVERY",
+                    ).length
+                  }
+                </Detail>
+              </dl>
+              <p className="mt-4 text-[11px] leading-relaxed text-ground-subtle">
+                A credit awaiting delivery cannot be spent — the sixty days start
+                when the Discovery Set arrives. The full ledger is under Credits.
+              </p>
+            </div>
+          ) : null}
+
           <div className="border border-ground-border p-5 sm:p-6">
             <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
               Standing

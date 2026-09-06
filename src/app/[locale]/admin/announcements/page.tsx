@@ -16,6 +16,7 @@ import {
   getAdminMarketingSettings,
   listAdminAnnouncements,
 } from "@/src/services/admin/marketing";
+import { getAdminBenefitSettings } from "@/src/services/admin/benefits";
 import { getWelcomeOffer } from "@/src/services/marketing";
 
 /**
@@ -65,10 +66,11 @@ export default async function AdminAnnouncementsPage({
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  const [announcements, settings, offer] = await Promise.all([
+  const [announcements, settings, offer, benefits] = await Promise.all([
     listAdminAnnouncements(),
     getAdminMarketingSettings(),
     getWelcomeOffer(),
+    getAdminBenefitSettings(),
   ]);
 
   const basePath = localizePath(activeLocale, "/admin/announcements");
@@ -78,12 +80,24 @@ export default async function AdminAnnouncementsPage({
    * promising without opening the discount editor. Read from the live welcome
    * offer — never a number kept on this screen.
    */
+  /*
+   * Which of the three signup settings is in force comes first, because it is
+   * the answer to the question an editor actually arrives with — "why has the
+   * popup stopped promising 20%". `welcome_offer()` is itself gated on that
+   * setting, so under the other two modes it answers null and the sentence
+   * below would otherwise read as "no campaign is running", which is a
+   * different and misleading thing.
+   */
   const offerSummary =
-    offer === null
-      ? "No welcome offer is running, so the popup invites people to the list and promises nothing."
-      : offer.kind === "PERCENTAGE"
-        ? `It currently promises ${offer.value}% off a first order.`
-        : `It currently promises ${egp(offer.value)} off a first order.`;
+    benefits.signupBenefit === "REWARD_POINTS"
+      ? `The signup benefit is set to KHEM Rewards, so the popup promises ${benefits.signupPoints} points instead of a discount. Change it under Marketing → Rewards.`
+      : benefits.signupBenefit === "NONE"
+        ? "The signup benefit is switched off, so the popup invites people to the list and promises nothing. Change it under Marketing → Rewards."
+        : offer === null
+          ? "No welcome offer is running, so the popup invites people to the list and promises nothing."
+          : offer.kind === "PERCENTAGE"
+            ? `It currently promises ${offer.value}% off a first order.`
+            : `It currently promises ${egp(offer.value)} off a first order.`;
 
   return (
     <>
