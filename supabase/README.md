@@ -24,6 +24,8 @@ seed/    a generated export of the database — written by `npm run db:dump`,
 | `sql/0015_orders.sql` | `Order`, `OrderItem`, the three order enums, `place_order()` / `restock_order()` / `set_order_status()`, and the sales reports — readable with the **secret key only** |
 | `sql/0016_checkout.sql` | `PaymentMethod`, the shipping-address and `locale` columns on `Order`, the Stripe intent id, `settle_order_payment()` and `expire_unpaid_orders()` — the storefront half of `0015`, and it replaces `place_order()` in place |
 | `sql/0054_stripe_webhook_events.sql` | `StripeWebhookEvent` and `record_stripe_event()` — one row per Stripe event already acted on, so a redelivered webhook is recognised and ignored. Service-role only, like every other order table |
+| `sql/0062_sales_ledger.sql` | `"Product"."costInCents"`, `order_item_sales_ledger`, the `"SalesLedgerRow"` view and the two reporting functions — one immutable row per sold line carrying the list value, what each of the five benefits took off, what was paid, the cost snapshot and the profit. Written by `place_order()` in the same transaction as the order. Service-role only, and the cost column is revoked from the public roles by name |
+| `sql/0063_finance.sql` | `expense_categories`, `expense_recurring_rules`, `expenses`, `financial_targets`, and the six reporting functions — the operating-expense ledger, monthly targets, and the joins that turn `0062`'s gross profit into a net one. It **reads** `"SalesLedgerRow"` and writes nothing to it: revenue and COGS still come from the sales ledger, and rent is never a cost of goods. Service-role only, like every table above it |
 
 ## Commands
 
@@ -33,9 +35,26 @@ npm run db:migrate    # apply sql/*.sql — idempotent, safe to re-run
 npm run db:seed       # load seed/*.json — upserts, never deletes
 npm run db:dump       # write seed/*.json back out of the database
 npm run db:verify     # counts, integrity, and the security assertions
+npm run db:test:sales # the sales-ledger pricing scenarios — always rolls back
+npm run db:test:finance # the finance calculations — always rolls back
 npm run embed         # fill Product.embedding through the AI Gateway
 npm run embed -- --check   # non-zero exit if any product lacks a vector
 ```
+
+`db:test:sales` places real orders through `place_order()` — a coupon, a
+promotion, a Buy 2 Get 1, a Discovery Credit, a points redemption, a refund —
+and asserts what `order_item_sales_ledger` recorded for each, then rolls the
+whole transaction back. It is safe against a live database; the only trace it
+leaves is a gap in `order_number_seq`, which is a sequence and does not roll
+back.
+
+`db:test:finance` does the same for Finance: it places an order, records
+expenses, generates a recurring rule, sets a target and refunds an order, then
+asserts what each one moved — including that Finance and Sales & Profit report
+**identical** revenue for the same window, which is the guarantee that Finance
+never became a second sales engine. It also checks the pure pace and comparison
+arithmetic in `src/lib/admin/finance.ts` against the worked examples in
+`src/docs/Finance-Expenses.md`. Same rollback, same sequence caveat.
 
 A fresh project is `db:migrate`, `db:seed`, `embed`, in that order.
 

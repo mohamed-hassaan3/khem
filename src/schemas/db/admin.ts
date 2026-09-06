@@ -225,6 +225,14 @@ export const ADMIN_PRODUCT_COLUMNS =
    * the house holds *everywhere*, so it reads the two real columns and the
    * maintained total side by side.
    */
+    /*
+   * `costInCents` is read here and **nowhere on the storefront**.
+   *
+   * It is what the house pays, not what a visitor is charged, and the
+   * projections in `src/schemas/db/catalog.ts` are read with the publishable
+   * key. Adding it there would publish the boutique's margin.
+   */
+  "costInCents, " +
   "sku, inventory, inventoryOnline, inventoryOffline, isBestseller, " +
   "collectionSlug, sortOrder, isArchived, updatedAt";
 
@@ -260,6 +268,10 @@ const adminProductRowSchema = z.object({
   productType: productTypeSchema.nullable(),
   volumeMl: z.number().nullable(),
   priceInCents: z.number(),
+  // Nullable *and* defaulted: every product predates
+  // `supabase/sql/0062_sales_ledger.sql`, and null means "not stated" rather
+  // than zero — see `src/types/sales.ts`.
+  costInCents: z.number().nullable().default(null),
   sku: z.string(),
   inventory: z.number(),
   inventoryOnline: z.number(),

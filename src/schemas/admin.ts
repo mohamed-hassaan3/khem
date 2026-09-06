@@ -170,6 +170,36 @@ const priceEgpField = z
   .max(1_000_000, "That price looks like a typing mistake.")
   .transform((egp) => Math.round(egp * 100));
 
+/**
+ * A cost typed in EGP, stored in piastres. Blank means **not stated**.
+ *
+ * Deliberately not `priceEgpField`: a price is required and a cost is not, and
+ * the difference matters more than the shared arithmetic. A cost the desk has
+ * not supplied must reach the column as null, because null is what every
+ * profit figure downstream reads as "unknown" — coercing a blank field to zero
+ * would report the next sale of that product as pure profit.
+ *
+ * The conversion is `priceEgpField`'s, for `priceEgpField`'s reason: `Math.round`
+ * because `14.7 * 100` is `1469.9999999999998` in binary floating point.
+ */
+const costEgpField = z
+  .union([z.literal(""), z.coerce.number()])
+  .transform((value) => (value === "" ? null : value))
+  .nullable()
+  .default(null)
+  .superRefine((value, ctx) => {
+    if (value === null) return;
+    if (Number.isNaN(value) || value < 0) {
+      ctx.addIssue({ code: "custom", message: "A cost cannot be negative." });
+    } else if (value > 1_000_000) {
+      ctx.addIssue({
+        code: "custom",
+        message: "That cost looks like a typing mistake.",
+      });
+    }
+  })
+  .transform((value) => (value === null ? null : Math.round(value * 100)));
+
 const collectionKindField = z.enum([
   "FRAGRANCE",
   "BODY",
@@ -559,6 +589,14 @@ const productFields = {
     .default(null),
   volumeMl: volumeMlField,
   priceEgp: priceEgpField,
+  /*
+   * What the product costs the house. Optional, and blank stays blank.
+   *
+   * Not a price and never shown to a visitor: it exists so
+   * `order_item_sales_ledger` can snapshot a real COGS figure at the moment of
+   * sale, and `src/schemas/db/catalog.ts` deliberately does not select it.
+   */
+  costEgp: costEgpField,
   sku: z
     .string()
     .trim()

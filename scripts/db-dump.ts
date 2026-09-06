@@ -126,7 +126,7 @@ const PRODUCT_COLUMNS = `
   includes, includes_ar, badge, badge_ar, tags::text[] as tags,
   "topNotes", "topNotes_ar", "heartNotes", "heartNotes_ar",
   "baseNotes", "baseNotes_ar",
-  "volumeMl", "priceInCents", sku,
+  "volumeMl", "priceInCents", "costInCents", sku,
   inventory, "inventoryOnline", "inventoryOffline", "isBestseller",
   "collectionSlug"
 `;
@@ -306,6 +306,12 @@ function toProduct(
     baseNotes_ar: row.baseNotes_ar,
     volumeMl: row.volumeMl,
     priceInCents: row.priceInCents,
+    /*
+     * The house's cost, not the customer's price. Exported so a rebuilt
+     * environment can still report a margin; null where the desk has not stated
+     * one, and null is preserved rather than flattened to zero.
+     */
+    costInCents: row.costInCents,
     sku: row.sku,
     /*
      * The two counters, and the total they add up to.

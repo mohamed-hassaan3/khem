@@ -194,6 +194,262 @@ async function verifyIntegrity(client: Client): Promise<void> {
   );
 }
 
+// ── Sales ledger ──────────────────────────────────────────────
+
+/**
+ * The four things that must be true of `order_item_sales_ledger`, always.
+ *
+ * Written as assertions over whatever the database actually holds rather than
+ * over a fixture, because the interesting failure is not "the function is
+ * wrong today" — `npm run db:test:sales` covers that with real scenarios — it
+ * is "something wrote an order without one", which only real data can show.
+ *
+ * 1. **Coverage.** Every order line has a ledger row. `place_order()` writes
+ *    one in the same transaction and the migration backfilled the rest, so a
+ *    gap means an order reached the book by a path nobody has accounted for.
+ * 2. **Uniqueness.** No line has two. The unique index makes this structural;
+ *    asserting it is how a dropped index gets noticed.
+ * 3. **The line balances.** Original minus everything taken off equals what was
+ *    paid — the arithmetic the five discount columns exist to make auditable.
+ * 4. **The order sums.** An order's rows add up to its merchandise total,
+ *    delivery excluded. This is the one that would catch a benefit apportioned
+ *    to nothing, and it is the reason the allocation uses largest remainder
+ *    rather than independent rounding.
+ */
+async function verifySalesLedger(client: Client): Promise<void> {
+  const uncovered = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from public."OrderItem" i
+      where not exists (
+        select 1 from public.order_item_sales_ledger l
+         where l."orderItemId" = i.id
+      )`,
+  );
+  check(
+    Number(uncovered) === 0,
+    "every order line has a sales-ledger row",
+    `${uncovered} line(s) unrecorded`,
+  );
+
+  const duplicated = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from (
+         select l."orderItemId"
+           from public.order_item_sales_ledger l
+          group by l."orderItemId"
+         having count(*) > 1
+       ) d`,
+  );
+  check(
+    Number(duplicated) === 0,
+    "no order line has been recorded twice",
+    `${duplicated} line(s) duplicated`,
+  );
+
+  const unbalanced = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from public.order_item_sales_ledger l
+      where l."originalLineTotalInCents" - l."totalDiscountInCents"
+            <> l."paidInCents"`,
+  );
+  check(
+    Number(unbalanced) === 0,
+    "every ledger line balances: original − discounts = paid",
+    `${unbalanced} line(s) do not`,
+  );
+
+  const mismatched = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from (
+         select o.id
+           from public."Order" o
+           join public.order_item_sales_ledger l on l."orderId" = o.id
+          group by o.id, o."totalInCents", o."shipInCents"
+         having coalesce(sum(l."paidInCents"), 0)::int
+                <> o."totalInCents" - o."shipInCents"
+       ) bad`,
+  );
+  check(
+    Number(mismatched) === 0,
+    "every order's ledger sums to its merchandise total, delivery excluded",
+    `${mismatched} order(s) do not`,
+  );
+
+  const negative = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from public.order_item_sales_ledger l
+      where l."paidInCents" < 0 or l."totalDiscountInCents" < 0`,
+  );
+  check(
+    Number(negative) === 0,
+    "no ledger line carries a negative amount",
+    `${negative} line(s) do`,
+  );
+
+  // Not a failure — a boutique that has not costed its catalogue yet is in a
+  // normal state, and the dashboard says so on every screen. Reported so the
+  // gap is visible from CI rather than only from `/admin/sales`.
+  const uncosted = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from public."Product"
+      where "costInCents" is null and not "isArchived"`,
+  );
+  const live = await scalar<string>(
+    client,
+    `select count(*)::text as value from public."Product" where not "isArchived"`,
+  );
+  console.log(
+    `  note: ${uncosted}/${live} live products have no cost recorded` +
+      (Number(uncosted) > 0
+        ? " — profit reporting is incomplete until they do"
+        : ""),
+  );
+}
+
+// ── Finance ───────────────────────────────────────────────────
+
+/**
+ * The invariants that make Finance trustworthy.
+ *
+ * Three of them matter more than the rest, and all three are structural rather
+ * than behavioural — they are true of the data as it sits, so a bug that broke
+ * one is caught here even if nobody happened to open the screen it would have
+ * shown up on.
+ *
+ *   · No recurring period is ever recorded twice.
+ *   · Every expense carries the category name it was written under, so a rename
+ *     cannot rewrite a closed month.
+ *   · Finance's revenue for a window is *identical* to the sales ledger's for
+ *     the same window — the guarantee that Finance never became a second sales
+ *     engine.
+ */
+async function verifyFinance(client: Client): Promise<void> {
+  const categories = await count(client, "expense_categories");
+  check(
+    categories >= 34,
+    "the shipped expense categories are present",
+    `${categories} found, expected at least 34`,
+  );
+
+  const duplicated = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from (
+         select e."recurringRuleId", e."periodKey"
+           from public.expenses e
+          where e."recurringRuleId" is not null
+          group by e."recurringRuleId", e."periodKey"
+         having count(*) > 1
+       ) d`,
+  );
+  check(
+    Number(duplicated) === 0,
+    "no recurring expense period has been generated twice",
+    `${duplicated} period(s) duplicated`,
+  );
+
+  const halfRecurring = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from public.expenses e
+      where (e."recurringRuleId" is null) <> (e."periodKey" is null)`,
+  );
+  check(
+    Number(halfRecurring) === 0,
+    "every expense is either wholly recurring or wholly one-time",
+    `${halfRecurring} row(s) carry only half a recurrence`,
+  );
+
+  const unsnapshotted = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from public.expenses e
+      where e."categoryName" is null or btrim(e."categoryName") = ''`,
+  );
+  check(
+    Number(unsnapshotted) === 0,
+    "every expense snapshots the category name it was written under",
+    `${unsnapshotted} row(s) do not`,
+  );
+
+  const orphaned = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from public.expenses e
+      where not exists (
+        select 1 from public.expense_categories c where c.id = e."categoryId"
+      )`,
+  );
+  check(
+    Number(orphaned) === 0,
+    "every expense points at a category that exists",
+    `${orphaned} row(s) do not`,
+  );
+
+  const badMonths = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from public.financial_targets t
+      where t."periodMonth" <> date_trunc('month', t."periodMonth")::date`,
+  );
+  check(
+    Number(badMonths) === 0,
+    "every financial target is stamped on the first of its month",
+    `${badMonths} row(s) are not`,
+  );
+
+  /*
+   * The one that matters most: Finance and Sales & Profit must agree, to the
+   * piastre, about what an all-time window earned. They read the same view
+   * through different functions, and this is what proves the second one did not
+   * quietly acquire a definition of its own.
+   */
+  const drift = await scalar<string>(
+    client,
+    `select (f."revenueInCents" - s."revenueInCents")::text as value
+       from public.finance_summary(null, null, null) f
+       cross join public.sales_ledger_summary(null, null, null) s`,
+  );
+  check(
+    Number(drift) === 0,
+    "Finance and Sales & Profit report identical revenue",
+    `they differ by ${drift} piastres`,
+  );
+
+  const netDrift = await scalar<string>(
+    client,
+    `select count(*)::text as value
+       from public.finance_summary(null, null, null) f
+      where f."netProfitInCents" is distinct from
+            (f."grossProfitInCents" - f."expenseInCents")`,
+  );
+  check(
+    Number(netDrift) === 0,
+    "net profit is exactly gross profit less operating expenses",
+  );
+
+  const seriesDrift = await scalar<string>(
+    client,
+    `select (
+       (select coalesce(sum(d."expenseInCents"), 0)
+          from public.finance_daily(null, null, null) d)
+       - (select f."expenseInCents"
+            from public.finance_summary(null, null, null) f)
+     )::text as value`,
+  );
+  check(
+    Number(seriesDrift) === 0,
+    "the daily series sums to the summary it sits beside",
+    `they differ by ${seriesDrift} piastres`,
+  );
+}
+
 // ── Security ──────────────────────────────────────────────────
 
 async function verifySecurity(client: Client): Promise<void> {
@@ -304,6 +560,8 @@ async function main(): Promise<void> {
   await withClient(async (client) => {
     await verifyCounts(client);
     await verifyIntegrity(client);
+    await verifySalesLedger(client);
+    await verifyFinance(client);
     await verifySecurity(client);
   });
 

@@ -117,6 +117,19 @@ export type ProductSeedRow = Omit<Product, "images" | "promotion"> & {
    */
   inventoryOnline: number;
   inventoryOffline: number;
+  /*
+   * What the product costs the house — `"Product"."costInCents"`, added by
+   * `supabase/sql/0062_sales_ledger.sql`.
+   *
+   * Declared here rather than on `Product` for `productType`'s reason: no
+   * storefront surface reads it, and it must never reach one. It is in the
+   * export because the export is how a fresh environment is rebuilt, and a
+   * catalogue restored without its costs would silently report every future
+   * sale as unmeasurable.
+   *
+   * Null means not stated, and null round-trips as null.
+   */
+  costInCents: number | null;
   images: ProductImageSeedRow[];
 };
 

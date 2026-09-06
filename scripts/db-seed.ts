@@ -209,6 +209,10 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
       baseNotes_ar: product.baseNotes_ar,
       volumeMl: product.volumeMl,
       priceInCents: product.priceInCents,
+      // `?? null` rather than `?? 0`: an export written before
+      // `supabase/sql/0062_sales_ledger.sql` has no such key, and seeding a zero
+      // would tell the profit reports every one of these sells at pure profit.
+      costInCents: product.costInCents ?? null,
       sku: product.sku,
       /*
        * The counters, not the total. `inventory` is owned by the

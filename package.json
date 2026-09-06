@@ -15,7 +15,9 @@
     "db:migrate": "tsx --env-file-if-exists=.env.local scripts/db-migrate.ts",
     "db:seed": "tsx --env-file-if-exists=.env.local scripts/db-seed.ts",
     "db:dump": "tsx --env-file-if-exists=.env.local scripts/db-dump.ts",
-    "db:verify": "tsx --env-file-if-exists=.env.local scripts/db-verify.ts"
+    "db:verify": "tsx --env-file-if-exists=.env.local scripts/db-verify.ts",
+    "db:test:sales": "tsx --env-file-if-exists=.env.local scripts/db-test-sales.ts",
+    "db:test:finance": "tsx --env-file-if-exists=.env.local scripts/db-test-finance.ts"
   },
   "dependencies": {
     "@clerk/localizations": "^4.15.1",

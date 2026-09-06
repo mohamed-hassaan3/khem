@@ -136,6 +136,16 @@ export default function ProductForm({
   const [priceEgp, setPriceEgp] = useState(
     product ? toEgpString(product.priceInCents) : "",
   );
+  /*
+   * Blank when the desk has never stated one, and blank is a real answer.
+   *
+   * `?? ""` rather than a zero: the ledger reads a missing cost as unknown and
+   * prints "Cost unavailable", which is honest, whereas a zero would report the
+   * next sale of this bottle as pure profit.
+   */
+  const [costEgp, setCostEgp] = useState(
+    product?.costInCents != null ? toEgpString(product.costInCents) : "",
+  );
   const [sku, setSku] = useState(product?.sku ?? "");
   const [isBestseller, setIsBestseller] = useState(product?.isBestseller ?? false);
   const [sortOrder, setSortOrder] = useState(String(product?.sortOrder ?? 0));
@@ -216,6 +226,7 @@ export default function ProductForm({
     baseNotes,
     volumeMl,
     priceEgp,
+    costEgp,
     sku,
     isBestseller,
     collectionSlug,
@@ -509,6 +520,24 @@ export default function ProductForm({
               onChange={setVolumeMl}
             />
           ) : null}
+
+          {/*
+            What the bottle costs the house — never shown to a visitor.
+            Optional, and left blank it stays blank: `/admin/sales` prints
+            "Cost unavailable" against a product with no cost rather than
+            claiming a margin nobody has supplied the figures for.
+          */}
+          <AdminInput
+            id="costEgp"
+            label="Cost (EGP)"
+            type="number"
+            step="0.01"
+            min={0}
+            value={costEgp}
+            error={fieldErrors.costEgp}
+            hint="What this costs KHEM, not what it sells for. Snapshotted onto every sale for the profit reports. Leave blank if unknown."
+            onChange={setCostEgp}
+          />
 
           <AdminInput
             id="sku"

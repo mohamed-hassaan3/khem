@@ -50,6 +50,7 @@ import {
   BadgePercent,
   BarChart3,
   Boxes,
+  Coins,
   Compass,
   ExternalLink,
   Gift,
@@ -60,12 +61,17 @@ import {
   Package,
   PanelLeft,
   PanelLeftClose,
+  PieChart,
   Mail,
   MapPin,
   Megaphone,
   Tag,
+  Target,
   Ticket,
+  TrendingUp,
+  Wallet,
   Receipt,
+  ScrollText,
   Send,
   Settings,
   Sparkles,
@@ -157,14 +163,63 @@ const GROUPS = [
     ],
   },
   {
-    heading: "Analytics",
-    items: [{ path: "/admin/analytics", label: "Analytics", icon: BarChart3 }],
+    /*
+     * Three rows, and they answer three different questions.
+     *
+     * Analytics is "how are we trading" — a rolling curve of revenue and units
+     * at the prices actually charged. Sales & Profit is "are we making money" —
+     * list value, what each benefit gave away, and what is left after the goods
+     * cost. Items Sold is the line-by-line record underneath it.
+     *
+     * The last two are deliberately not folded into Orders: an order screen is
+     * for fulfilling one sale, and burying the ledger inside it would hide the
+     * only view that spans every sale ever made.
+     */
+    heading: "Sales & Analytics",
+    items: [
+      { path: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+      { path: "/admin/sales", label: "Sales & Profit", icon: TrendingUp },
+      { path: "/admin/sales/items", label: "Items Sold", icon: ScrollText },
+    ],
+  },
+  {
+    /*
+     * A fourth question, and the reason it is not a fourth row above.
+     *
+     * Sales & Analytics answers "are the goods making money" — list value, what
+     * each benefit gave away, and what is left after the goods cost. It stops
+     * at gross profit on purpose: rent is not a cost of goods, and folding it in
+     * would make every product margin on that screen wrong.
+     *
+     * Finance takes gross profit as given and asks what the house actually
+     * made after everything it costs to trade. It reads the sales ledger and
+     * never writes to it, which is exactly the relationship the two groups have.
+     */
+    heading: "Finance",
+    items: [
+      { path: "/admin/finance", label: "Finance", icon: Wallet },
+      { path: "/admin/finance/expenses", label: "Expenses", icon: Coins },
+      { path: "/admin/finance/targets", label: "Targets", icon: Target },
+      { path: "/admin/finance/reports", label: "Reports", icon: PieChart },
+    ],
   },
   {
     heading: "System",
     items: [{ path: "/admin/settings", label: "Settings", icon: Settings }],
   },
 ] as const;
+
+/**
+ * Every top-level path the rail can light, derived from `GROUPS` rather than
+ * listed again — a row added above is a row the longest-match test knows about,
+ * with nothing to keep in step.
+ */
+const ALL_PATHS: readonly string[] = GROUPS.flatMap((group) =>
+  group.items.flatMap((item) => [
+    item.path,
+    ...("children" in item ? item.children.map((child) => child.path) : []),
+  ]),
+);
 
 /**
  * Everything the Content group owns, including the two routes that do not sit
@@ -283,10 +338,28 @@ export default function AdminShell({
   }, [isDesktop]);
 
   /** `/admin` is active only on itself; every other section owns its subtree. */
-  function isActive(path: string): boolean {
+  function matchesPath(path: string): boolean {
     const href = localizePath(locale, path);
     if (path === "/admin") return pathname === href;
     return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
+  /**
+   * The **most specific** row that matches, and only that one.
+   *
+   * A prefix test alone lights every ancestor: standing on
+   * `/admin/sales/items` matches `/admin/sales` too, and two siblings in the
+   * same group both reading as current tells an editor nothing about where they
+   * are. Longest match wins, so a row that owns a subtree stays lit for
+   * everything under it — `/admin/orders/KHEM-2026-1042` is still Orders —
+   * right up until a more specific row claims the page.
+   */
+  const currentPath = ALL_PATHS.filter(matchesPath).sort(
+    (a, b) => b.length - a.length,
+  )[0];
+
+  function isActive(path: string): boolean {
+    return currentPath === path;
   }
 
   /**
@@ -295,13 +368,13 @@ export default function AdminShell({
    * always had. So the row's active state is the union, not a prefix test.
    */
   const inWorld =
-    isActive("/admin/content/world") || WORLD_PATHS.some(isActive);
+    matchesPath("/admin/content/world") || WORLD_PATHS.some(matchesPath);
 
   /**
    * The second level shows while the editor is anywhere in Content — including
    * on the `/admin/content` hub itself, which is how they got there.
    */
-  const showWorld = inWorld || isActive("/admin/content");
+  const showWorld = inWorld || matchesPath("/admin/content");
 
   const resolved = open !== null;
   /** Before resolution the CSS default decides, and it matches `true` at `lg`. */

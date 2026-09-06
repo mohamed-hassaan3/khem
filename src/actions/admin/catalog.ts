@@ -532,7 +532,7 @@ export async function createProduct(input: unknown): Promise<AdminActionResult> 
     };
   }
 
-  const { slug, priceEgp, ...rest } = parsed.data;
+  const { slug, priceEgp, costEgp, ...rest } = parsed.data;
 
   const { error } = await supabase.from("Product").insert({
     id: slug,
@@ -540,6 +540,9 @@ export async function createProduct(input: unknown): Promise<AdminActionResult> 
     // The schema has already converted EGP to piastres; the field is renamed
     // here and nowhere else.
     priceInCents: priceEgp,
+    // Null when the desk left it blank, and null it must stay: the ledger reads
+    // null as "cost unknown" and zero as "this sale was pure profit".
+    costInCents: costEgp,
     ...rest,
   });
 
@@ -586,12 +589,13 @@ export async function updateProduct(input: unknown): Promise<AdminActionResult> 
     };
   }
 
-  const { slug, priceEgp, ...rest } = parsed.data;
+  const { slug, priceEgp, costEgp, ...rest } = parsed.data;
 
   const { data, error } = await supabase
     .from("Product")
     .update({
       priceInCents: priceEgp,
+      costInCents: costEgp,
       ...rest,
       updatedAt: new Date().toISOString(),
     })
