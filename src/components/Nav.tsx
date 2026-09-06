@@ -268,7 +268,27 @@ function CollectionsList({
   );
 }
 
-export default function Nav({ tree }: { tree: NavigationTree }) {
+/**
+ * ⚠️ TEMPORARY — `prelaunch` exists only while the pre-launch cover does.
+ *
+ * When it is true the header sheds every control that leads somewhere the
+ * cover has closed: the Collections menu, the search panel and the bag. They
+ * are hidden, not disabled — a visitor browsing the World of KHEM should not be
+ * offered a door that answers with a redirect back to Coming Soon, which is
+ * exactly how this looked when it was reported as a search bug.
+ *
+ * Nothing is rewritten to achieve it: each block below is wrapped in a guard
+ * that is `false` in every normal deployment, so with the flag off this file
+ * renders precisely what it rendered before. Delete the prop and its six guards
+ * to remove the feature. See `src/docs/prelaunch.md`.
+ */
+export default function Nav({
+  tree,
+  prelaunch = false,
+}: {
+  tree: NavigationTree;
+  prelaunch?: boolean;
+}) {
   const dict = useDictionary();
   const locale = useLocale();
   const { isSignedIn } = useAuth();
@@ -530,13 +550,15 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
           </button>
 
           <div className="hidden items-center gap-5 md:gap-9 lg:flex">
-            <button
-              type="button"
-              className={`nav-link ${activeMenu === "collections" ? "active" : ""}`}
-              onClick={() => handleMenuToggle("collections")}
-            >
-              {dict.nav.collections}
-            </button>
+            {prelaunch ? null : (
+              <button
+                type="button"
+                className={`nav-link ${activeMenu === "collections" ? "active" : ""}`}
+                onClick={() => handleMenuToggle("collections")}
+              >
+                {dict.nav.collections}
+              </button>
+            )}
             <button
               type="button"
               className={`nav-link ${activeMenu === "world" ? "active" : ""}`}
@@ -590,23 +612,27 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
            * which left a phone with no way to search at all — and a phone is
            * where searching instead of browsing a mega-menu matters most.
            */}
-          <button
-            ref={searchButtonRef}
-            type="button"
-            className={`nav-link shrink-0 ${ICON_HIT}`}
-            aria-label={dict.nav.search}
-            aria-haspopup="dialog"
-            aria-expanded={searchOpen}
-            aria-controls="search-overlay"
-            onClick={openSearch}
-          >
-            <SearchIcon />
-          </button>
-          <CartButton
-            label={dict.nav.cart}
-            labelWithCount={dict.nav.cartCount}
-            labelWithOne={dict.nav.cartCountOne}
-          />
+          {prelaunch ? null : (
+            <>
+              <button
+                ref={searchButtonRef}
+                type="button"
+                className={`nav-link shrink-0 ${ICON_HIT}`}
+                aria-label={dict.nav.search}
+                aria-haspopup="dialog"
+                aria-expanded={searchOpen}
+                aria-controls="search-overlay"
+                onClick={openSearch}
+              >
+                <SearchIcon />
+              </button>
+              <CartButton
+                label={dict.nav.cart}
+                labelWithCount={dict.nav.cartCount}
+                labelWithOne={dict.nav.cartCountOne}
+              />
+            </>
+          )}
           {/*
            * Signed out, the icon leads straight to the sign-in page carrying
            * the current path as the return target. It used to point at
@@ -709,37 +735,46 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
         </div>
 
         <div className="flex flex-col gap-5 md:gap-10 px-6 pb-14">
-          <section>
-            <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
-            <CollectionsList
-              key={pathname}
-              entries={tree.collections}
-              labelClass="text-sm"
-              idPrefix="drawer-collections"
-              onNavigate={closeDrawer}
-            />
-          </section>
+          {/*
+           * ⚠️ TEMPORARY — the drawer's two shop sections, and their dividers
+           * with them. A rule left behind by a hidden section is a rule with
+           * nothing on either side of it.
+           */}
+          {prelaunch ? null : (
+            <>
+              <section>
+                <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
+                <CollectionsList
+                  key={pathname}
+                  entries={tree.collections}
+                  labelClass="text-sm"
+                  idPrefix="drawer-collections"
+                  onNavigate={closeDrawer}
+                />
+              </section>
 
-          <div className="gold-line" />
+              <div className="gold-line" />
 
-          <section>
-            <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
-            <div className="flex flex-col gap-3.5">
-              {tree.quickAccess.map((item) => (
-                <LocaleLink
-                  key={item.id}
-                  href={item.href}
-                  onClick={closeDrawer}
-                  className="group flex items-center gap-3 text-xs tracking-widest text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
-                >
-                  <span className="inline-block h-px w-5 bg-current" />
-                  {item.label}
-                </LocaleLink>
-              ))}
-            </div>
-          </section>
+              <section>
+                <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
+                <div className="flex flex-col gap-3.5">
+                  {tree.quickAccess.map((item) => (
+                    <LocaleLink
+                      key={item.id}
+                      href={item.href}
+                      onClick={closeDrawer}
+                      className="group flex items-center gap-3 text-xs tracking-widest text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
+                    >
+                      <span className="inline-block h-px w-5 bg-current" />
+                      {item.label}
+                    </LocaleLink>
+                  ))}
+                </div>
+              </section>
 
-          <div className="gold-line" />
+              <div className="gold-line" />
+            </>
+          )}
 
           <section>
             <p className="eyebrow mb-6">{dict.nav.discover}</p>
@@ -767,20 +802,22 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
                * links rather than inside the list — the drawer is the only
                * place a phone can reach the panel from besides the header.
                */}
-              <button
-                type="button"
-                onClick={() => {
-                  closeDrawer();
-                  openSearch();
-                }}
-                className="group flex cursor-pointer items-center gap-3 text-start text-xs tracking-widest text-ground-muted transition-colors duration-300 hover:text-ground-accent"
-              >
-                <span
-                  aria-hidden="true"
-                  className="inline-block h-px w-5 bg-current"
-                />
-                {dict.nav.search}
-              </button>
+              {prelaunch ? null : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeDrawer();
+                    openSearch();
+                  }}
+                  className="group flex cursor-pointer items-center gap-3 text-start text-xs tracking-widest text-ground-muted transition-colors duration-300 hover:text-ground-accent"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="inline-block h-px w-5 bg-current"
+                  />
+                  {dict.nav.search}
+                </button>
+              )}
 
               <LocaleLink
                 href="/stockists"
@@ -800,22 +837,24 @@ export default function Nav({ tree }: { tree: NavigationTree }) {
                * drawer stands down first — two overlays on a phone at once is
                * one too many, and the cart panel is the one that was asked for.
                */}
-              <button
-                type="button"
-                onClick={() => {
-                  closeDrawer();
-                  openCartDrawer();
-                }}
-                aria-haspopup="dialog"
-                aria-controls="cart-drawer"
-                className={`${BOUTIQUE_ROW} cursor-pointer text-start`}
-              >
-                <span
-                  aria-hidden="true"
-                  className="inline-block h-px w-5 bg-current"
-                />
-                {dict.nav.cart}
-              </button>
+              {prelaunch ? null : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeDrawer();
+                    openCartDrawer();
+                  }}
+                  aria-haspopup="dialog"
+                  aria-controls="cart-drawer"
+                  className={`${BOUTIQUE_ROW} cursor-pointer text-start`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="inline-block h-px w-5 bg-current"
+                  />
+                  {dict.nav.cart}
+                </button>
+              )}
 
               <LocaleLink
                 href="/account"

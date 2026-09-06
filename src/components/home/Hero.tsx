@@ -1,5 +1,6 @@
 "use client";
 
+import { Pause, Play } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -42,9 +43,28 @@ import type { Hero as HeroConfig } from "@/src/types/content";
  * second timer anywhere in this file, and no path that can leave one running:
  * the effect's cleanup is the only owner.
  *
- * The rotation pauses while the tab is hidden and while a pointer is over the
- * hero. A background tab that keeps cycling is a background tab that keeps
- * decoding images.
+ * ## What stops the rotation
+ *
+ * Two things, and they are two separate pieces of state rather than one flag
+ * written from two places — a single flag is how a stale writer comes to resume
+ * a hidden tab.
+ *
+ * - `isHidden`: the tab is in the background. A background tab that keeps
+ *   cycling is a background tab that keeps decoding images.
+ * - `isStopped`: the visitor pressed the pause control.
+ *
+ * `paused = isHidden || isStopped`. **A pointer over the hero does not stop
+ * it.** It used to, and that is a guess about intent dressed up as a courtesy:
+ * a cursor resting anywhere in a full-screen hero silently froze the campaign,
+ * with nothing on screen to say why or to undo it, and the behaviour did not
+ * exist at all for the phones most of this traffic arrives on. Now there is a
+ * button, stopping the rotation is something the visitor asks for.
+ *
+ * Resuming restarts the countdown rather than continuing it. A `setInterval`
+ * cannot be resumed mid-flight: the effect tears the old one down and the new
+ * one gets a full `slideDurationMs`. So resuming also bumps `epoch`, which
+ * remounts the progress fill and restarts it from zero at the same instant —
+ * the bar and the slide agree, which is the only reason to draw the bar.
  *
  * ## Video
  *
@@ -76,7 +96,9 @@ import type { Hero as HeroConfig } from "@/src/types/content";
  * and the content appears in place — but the *rotation* continues, for the
  * reason the announcement bar gives: which image is shown is content, and
  * freezing it would leave a reduced-motion visitor able to see only the first
- * of a campaign.
+ * of a campaign. The pause control is the escape hatch that makes that
+ * defensible: it is an instruction, not an animation, so it works identically
+ * under the preference.
  */
 
 export interface HeroLabels {
@@ -84,6 +106,10 @@ export interface HeroLabels {
   region: string;
   /** "Show slide {index} of {total}" — interpolated per control. */
   slide: string;
+  /** Names the control while the slideshow is running. */
+  pause: string;
+  /** Names the same control while it is stopped. */
+  play: string;
   /** Fallback description of the film, when the desk supplied none. */
   video: string;
 }
@@ -100,7 +126,11 @@ export default function Hero({
 
   const [index, setIndex] = useState(0);
   const [epoch, setEpoch] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  /** The visitor's own instruction, and the only thing the button writes. */
+  const [isStopped, setIsStopped] = useState(false);
+
+  const paused = isHidden || isStopped;
 
   /*
    * Pause while the tab is in the background. Registered even when the hero
@@ -109,7 +139,7 @@ export default function Hero({
    */
   useEffect(() => {
     function sync() {
-      setIsPaused(document.visibilityState === "hidden");
+      setIsHidden(document.visibilityState === "hidden");
     }
 
     document.addEventListener("visibilitychange", sync);
@@ -117,7 +147,7 @@ export default function Hero({
   }, []);
 
   useEffect(() => {
-    if (!rotates || isPaused) return;
+    if (!rotates || paused) return;
 
     const timer = window.setInterval(() => {
       setIndex((current) => (current + 1) % slides.length);
@@ -125,11 +155,17 @@ export default function Hero({
 
     return () => window.clearInterval(timer);
     // `epoch` is the reset: a manual selection restarts this interval.
-  }, [rotates, isPaused, epoch, hero.slideDurationMs, slides.length]);
+  }, [rotates, paused, epoch, hero.slideDurationMs, slides.length]);
 
   function show(next: number) {
     setIndex(next);
     setEpoch((current) => current + 1);
+  }
+
+  function toggle() {
+    setIsStopped((current) => !current);
+    // Resuming starts a fresh interval, so the fill has to start fresh too.
+    if (isStopped) setEpoch((current) => current + 1);
   }
 
   const hasContent =
@@ -142,8 +178,6 @@ export default function Hero({
   return (
     <section
       aria-label={labels.region}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
       /*
        * `ground-obsidian`, where the typographic hero is `ground-ivory`. The
        * ground is not a colour preference — it is what tells `.btn-primary`,
@@ -289,10 +323,22 @@ export default function Hero({
       {/*
         The progress indicator, which is also the manual control.
 
-        One segment per slide, each a real button — so a visitor who wants the
+        One point per slide, each a real button — so a visitor who wants the
         image they just missed can have it back, and a keyboard reaches every
-        slide. The active segment's fill is a compositor animation keyed on the
+        slide. The active point's fill is a compositor animation keyed on the
         index, which is what restarts it on every step, manual or automatic.
+
+        Only the active one is a bar. The rest are dots, and the transition
+        between the two states is the width of a single element rather than two
+        elements swapping — a dot stretches into the bar it becomes. A row where
+        every slide carried a full-width track spent most of the foot of the
+        frame drawing countdowns that are not running; this way the frame says
+        how many slides there are, and draws the clock only for the one it
+        belongs to.
+
+        The width transition is the only motion, 700ms on the house curve, and
+        `motion-reduce` drops it — under the preference the point simply is wide
+        or narrow, with nothing travelling.
 
         Centred at the foot of the frame in every configuration. It belongs to
         the slideshow rather than to the copy, so `contentPosition` does not
@@ -300,7 +346,36 @@ export default function Hero({
         of the sentence above it rather than as a description of the rotation.
       */}
       {rotates ? (
-        <div className="absolute inset-x-0 bottom-8 z-10 flex justify-center gap-2 px-6 sm:bottom-10">
+        <div className="absolute inset-x-0 bottom-8 z-10 flex items-center justify-center gap-1 px-6 sm:bottom-10">
+          {/*
+            The pause control.
+
+            First in the row, so it sits on the reading-start side in both
+            locales — the row is a flex row, and `dir="rtl"` reverses it along
+            with the document. The whole cluster stays optically centred; the
+            segments give up half a button's width to make room, which is the
+            price of the control being part of the same set rather than floating
+            somewhere else in the frame.
+
+            It is an icon and its accessible name and nothing else: the same
+            hairline vocabulary as the segments, the same 32px height, and
+            colour as the entire state change. `aria-pressed` is what makes it
+            a toggle rather than two buttons a screen reader has to infer.
+          */}
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label={paused ? labels.play : labels.pause}
+            aria-pressed={paused}
+            className="flex h-8 w-8 shrink-0 items-center justify-center text-ivory/50 transition-colors duration-500 hover:text-ivory/80 focus:outline-none focus-visible:text-gold"
+          >
+            {paused ? (
+              <Play size={14} strokeWidth={1.25} aria-hidden />
+            ) : (
+              <Pause size={14} strokeWidth={1.25} aria-hidden />
+            )}
+          </button>
+
           {slides.map((slide, at) => (
             <button
               key={slide.id}
@@ -311,13 +386,31 @@ export default function Hero({
                 total: slides.length,
               })}
               aria-current={at === index || undefined}
-              className="group h-8 w-10 shrink-0 focus:outline-none sm:w-14"
+              /*
+               * The padding is the hit area. The dot itself is 4px, which is
+               * not a tap target; 4px between two 8px flanks is a 20×32 box,
+               * which is — and it matches the height of the pause control
+               * beside it, so the whole row has one baseline.
+               */
+              className="group flex h-8 shrink-0 items-center px-2 focus:outline-none"
             >
-              <span className="relative block h-px w-full bg-ivory/30 transition-colors duration-500 group-hover:bg-ivory/60 group-focus-visible:bg-gold">
+              <span
+                className={`relative block h-1 overflow-hidden rounded-full bg-ivory/30 transition-[width,background-color] duration-700 ease-luxury-bezier group-hover:bg-ivory/60 group-focus-visible:bg-gold motion-reduce:transition-none ${
+                  at === index ? "w-10 sm:w-14" : "w-1"
+                }`}
+              >
                 {at === index ? (
                   <span
                     key={`${epoch}-${at}`}
-                    style={{ animationDuration: `${hero.slideDurationMs}ms` }}
+                    /*
+                     * The fill freezes with the rotation. Left running, it
+                     * would complete and then sit full against a slide that is
+                     * not going anywhere — a countdown that lies.
+                     */
+                    style={{
+                      animationDuration: `${hero.slideDurationMs}ms`,
+                      animationPlayState: paused ? "paused" : "running",
+                    }}
                     className="khem-hero-progress absolute inset-0 block bg-gold-soft"
                   />
                 ) : null}

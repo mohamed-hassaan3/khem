@@ -44,6 +44,19 @@ const DISALLOWED = [
   "/ar/sign-in",
   "/sign-up",
   "/ar/sign-up",
+  /*
+   * ⚠️ TEMPORARY — the pre-launch cover. Delete with the feature.
+   *
+   * One entry, not two: the route lives outside `app/[locale]/`, so there is no
+   * `/ar/prelaunch` to disallow.
+   *
+   * This blocks the *address*, not the cover. When the flag is on, a crawler
+   * asking for `/` is served the cover's HTML at `/` — a rewrite, not a redirect
+   * — and that response carries the home page's own title, description and
+   * canonical. What this line prevents is `/prelaunch` being crawled as a second
+   * URL for the same document, which is the duplicate-content problem §20 names.
+   */
+  "/prelaunch",
 ];
 
 export default function robots(): MetadataRoute.Robots {

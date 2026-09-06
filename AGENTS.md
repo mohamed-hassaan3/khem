@@ -272,6 +272,36 @@ All routes must follow strict dynamic parameters, metadata definitions, and layo
 | `/account` | Protected | Dynamic | Customer Portal: Order History, Fragrance Profile, Saved Addresses |
 | `/admin/*` | Protected | Dynamic | Admin Flagship Suite (RBAC: `admin` role required) |
 
+### 8.1 ⚠️ TEMPORARY — the pre-launch cover
+
+One boolean, `KHEM_PRELAUNCH`, closes the storefront behind a Coming Soon screen.
+**It is `false` by default and off means nothing changes** — the block in
+`src/proxy.ts` short-circuits on one string comparison, and every route in the
+table above behaves exactly as it does today.
+
+When it is `true`: `/` and `/ar` are *rewritten* to `/prelaunch`; the commerce
+routes (`/perfume`, `/collections`, `/set`, `/ritual`, `/cart`, `/checkout`,
+`/search`, `/new-arrival`) answer **307** back to `/`; the editorial routes stay
+open; and `/admin`, `/account`, the auth routes, `/unsubscribe` and `/api/*` are
+never touched.
+
+The cover is a **sibling root layout** at `src/app/prelaunch/`, outside
+`app/[locale]/` — so it inherits no Nav, Footer, CartDrawer, OfferPopup or
+provider. It reuses `subscribeToNewsletter()` for signups and `getAdminActor()`
+for its private production preview, and duplicates neither.
+
+`Nav.tsx`, `Footer.tsx` and the `[locale]` layout do carry a `prelaunch` guard,
+because the header and footer are *not* covered by the cover — a visitor reading
+`/heritage` still sees them, and left alone they went on offering search, the
+Collections menu and the bag, all of which the proxy redirects back to Coming
+Soon. While the flag is on those controls are hidden; while it is off all three
+files render exactly what they did before.
+
+**Read `src/docs/prelaunch.md` before touching it**, and do not rebuild any part
+of it from this file. Removal is one commit; that document lists the exact
+footprint.
+
+
 ---
 
 ## 9. DATABASE SCHEMA SPECIFICATIONS (PRISMA ORM)

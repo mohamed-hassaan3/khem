@@ -9,7 +9,19 @@ import {
   resolveCurrencyForCountry,
 } from "./lib/currency";
 import { signInPathWithReturn } from "./lib/auth-redirect";
-import { DEFAULT_LOCALE, LOCALES, stripLocale } from "./lib/i18n/config";
+import {
+  DEFAULT_LOCALE,
+  LOCALES,
+  localizePath,
+  stripLocale,
+} from "./lib/i18n/config";
+// ⚠️ TEMPORARY — delete this import with the pre-launch cover.
+import {
+  PRELAUNCH_PATH,
+  isGatedCommercePath,
+  isPrelaunchExempt,
+  prelaunchEnabled,
+} from "./lib/prelaunch";
 import { ACCOUNT_PATHS, ADMIN_PATH } from "./lib/routes";
 
 /**
@@ -163,6 +175,21 @@ export default clerkMiddleware(async (auth, request) => {
     return withCurrencyCookie(request, NextResponse.next());
   }
 
+  /*
+   * ⚠️ TEMPORARY — the pre-launch cover, for the same reason as above: it lives
+   * outside `app/[locale]/`, so the rewrite below would push it to
+   * `/en/prelaunch`, which does not exist and would be answered by the
+   * `[locale]/[...rest]` catch-all as a 404.
+   *
+   * Returning inside the Clerk handler rather than before it is deliberate — the
+   * page calls `getAdminActor()` for the private preview, and that needs the
+   * session context this wrapper establishes. Skipping the rewrite is all this
+   * grants; it grants no privilege.
+   */
+  if (request.nextUrl.pathname === PRELAUNCH_PATH) {
+    return withCurrencyCookie(request, NextResponse.next());
+  }
+
   // The public pathname, split into the locale it addresses and the path
   // beneath — the same function the sidebar uses to mark its active link, so
   // both agree on what "/ar/account/orders" means.
@@ -208,6 +235,49 @@ export default clerkMiddleware(async (auth, request) => {
       );
 
       return withCurrencyCookie(request, NextResponse.redirect(signInUrl));
+    }
+  }
+
+  /*
+   * ⚠️ TEMPORARY — the pre-launch cover. Delete this block at launch; see
+   * `src/lib/prelaunch.ts` for the full removal list.
+   *
+   * Placed after the account and admin shed so those routes are already spoken
+   * for, and before the locale rewrite so the decision is made on the public
+   * path rather than on the internal `/en/*` one.
+   *
+   * `prelaunchEnabled()` is false in every normal deployment, and the `&&`
+   * short-circuits before `isPrelaunchExempt` — so the cost of carrying this
+   * feature while it is switched off is one string comparison per request, and
+   * every route below behaves exactly as it did before the block existed.
+   */
+  if (prelaunchEnabled() && !isPrelaunchExempt(path)) {
+    // The front page becomes the cover. A *rewrite*, so the address bar keeps
+    // `/` and the cover never becomes a second indexable URL for the home page.
+    if (path === "/") {
+      const url = request.nextUrl.clone();
+      url.pathname = PRELAUNCH_PATH;
+      return withCurrencyCookie(request, NextResponse.rewrite(url));
+    }
+
+    /*
+     * The shop, closed — and closed with a **307**, never a 308 or a 301.
+     *
+     * A permanent redirect is cached by browsers and treated by crawlers as the
+     * page having moved; both would outlive the pre-launch period and would have
+     * to be un-taught one URL at a time. A temporary one costs the catalogue its
+     * index position for the duration and nothing after it.
+     *
+     * The destination is built from the request's own origin and a locale that
+     * came out of `stripLocale`, so it is same-origin by construction — an
+     * Arabic visitor is returned to `/ar`, not dropped into the English tree.
+     */
+    if (isGatedCommercePath(path)) {
+      const home = new URL(localizePath(locale, "/"), request.url);
+      return withCurrencyCookie(
+        request,
+        NextResponse.redirect(home, 307),
+      );
     }
   }
 

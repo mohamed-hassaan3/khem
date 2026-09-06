@@ -199,6 +199,8 @@ export default async function Home({
               labels={{
                 region: dict.home.hero.region,
                 slide: dict.home.hero.slide,
+                pause: dict.home.hero.pause,
+                play: dict.home.hero.play,
                 video: dict.home.hero.video,
               }}
             />

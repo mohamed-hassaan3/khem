@@ -206,6 +206,13 @@ export const en = {
        */
       region: "Featured campaign",
       slide: "Show slide {index} of {total}",
+      /*
+       * The one control that is not a slide. Its name changes with its state
+       * rather than staying "Play/pause" — a screen reader announces what
+       * pressing it will do, not what it is.
+       */
+      pause: "Pause slideshow",
+      play: "Resume slideshow",
       /** Read by assistive technology in place of the film itself. */
       video: "KHEM campaign film",
     },

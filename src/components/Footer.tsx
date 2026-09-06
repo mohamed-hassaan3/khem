@@ -36,7 +36,19 @@ const legalLinkClass =
 /** Platform names are proper nouns — the same in both locales. */
 const socialLinks = ["Instagram", "Facebook", "Pinterest"] as const;
 
-export default async function Footer({ locale }: { locale: Locale }) {
+/**
+ * ⚠️ TEMPORARY — `prelaunch` exists only while the pre-launch cover does; it
+ * drops the Collections column, whose every destination the cover has closed.
+ * The World of KHEM, boutique, account and legal columns are untouched, because
+ * those routes stay open. Delete the prop and its one guard to remove it.
+ */
+export default async function Footer({
+  locale,
+  prelaunch = false,
+}: {
+  locale: Locale;
+  prelaunch?: boolean;
+}) {
   const dict = await getDictionary(locale);
   const year = new Date().getFullYear();
 
@@ -139,95 +151,97 @@ export default async function Footer({ locale }: { locale: Locale }) {
           </div>
         </div>
 
-        <FooterGroup title={dict.footer.collections}>
-          {/*
-           * Two renderings of the same destinations, one per width — the shape
-           * `<FooterGroup>` itself already uses for its heading, and for the
-           * same reason: what is right on a phone is wrong on a desktop.
-           *
-           * On a phone the group is a disclosure the visitor opened on purpose,
-           * and a flat run of links inside it is the shortest thing to thumb
-           * through. Subheadings there would add rows to a panel whose whole
-           * value is that it is closed by default. **Unchanged.**
-           *
-           * On a desktop it is a column that is always open, and fifteen
-           * undifferentiated links is a wall — the menu prints the same shelf
-           * in three parts and is legible because of it. So from `md` up the
-           * column is walked in its *native* shape, groups included, and reads
-           * the way the navigation reads.
-           *
-           * Both are the same table (`collections` / `quickAccess`), so the two
-           * widths cannot come to disagree about which collections exist.
-           */}
-          <nav
-            className="flex flex-col gap-3.5 md:hidden"
-            aria-label={dict.footer.collections}
-          >
-            {collectionLinks.map((item) => (
-              <LocaleLink
-                key={item.id}
-                href={item.href}
-                className={footerLinkClass}
-              >
-                {item.label}
-              </LocaleLink>
-            ))}
-          </nav>
-
-          <nav
-            className="hidden flex-col gap-3.5 md:flex"
-            aria-label={dict.footer.collections}
-          >
-            {tree.collections.map((entry) =>
-              entry.kind === "group" ? (
-                /*
-                 * A group is a disclosure, not a link: there is no page at
-                 * "Fragrances" for it to lead to — the rows beneath it say it
-                 * better — and the column is long enough that being able to
-                 * close the parts you are not reading is the point. Each one
-                 * is independent; opening Scent Profiles leaves Fragrances
-                 * exactly as the reader left it.
-                 */
-                <FooterDisclosure key={entry.id} title={entry.label}>
-                  {entry.children.map((child) => (
-                    <LocaleLink
-                      key={child.id}
-                      href={child.href}
-                      className={`${footerLinkClass} ps-3`}
-                    >
-                      {child.label}
-                    </LocaleLink>
-                  ))}
-                </FooterDisclosure>
-              ) : (
-                <LocaleLink
-                  key={entry.id}
-                  href={entry.href}
-                  className={footerLinkClass}
-                >
-                  {entry.label}
-                </LocaleLink>
-              ),
-            )}
-
+        {prelaunch ? null : (
+          <FooterGroup title={dict.footer.collections}>
             {/*
-              The ways in close the column, as they do on a phone — and as a
-              disclosure too, because it is a group of the same kind even
-              though it comes from a different table.
-            */}
-            <FooterDisclosure title={dict.nav.quickAccess}>
-              {tree.quickAccess.map((item) => (
+             * Two renderings of the same destinations, one per width — the shape
+             * `<FooterGroup>` itself already uses for its heading, and for the
+             * same reason: what is right on a phone is wrong on a desktop.
+             *
+             * On a phone the group is a disclosure the visitor opened on purpose,
+             * and a flat run of links inside it is the shortest thing to thumb
+             * through. Subheadings there would add rows to a panel whose whole
+             * value is that it is closed by default. **Unchanged.**
+             *
+             * On a desktop it is a column that is always open, and fifteen
+             * undifferentiated links is a wall — the menu prints the same shelf
+             * in three parts and is legible because of it. So from `md` up the
+             * column is walked in its *native* shape, groups included, and reads
+             * the way the navigation reads.
+             *
+             * Both are the same table (`collections` / `quickAccess`), so the two
+             * widths cannot come to disagree about which collections exist.
+             */}
+            <nav
+              className="flex flex-col gap-3.5 md:hidden"
+              aria-label={dict.footer.collections}
+            >
+              {collectionLinks.map((item) => (
                 <LocaleLink
                   key={item.id}
                   href={item.href}
-                  className={`${footerLinkClass} ps-3`}
+                  className={footerLinkClass}
                 >
                   {item.label}
                 </LocaleLink>
               ))}
-            </FooterDisclosure>
-          </nav>
-        </FooterGroup>
+            </nav>
+
+            <nav
+              className="hidden flex-col gap-3.5 md:flex"
+              aria-label={dict.footer.collections}
+            >
+              {tree.collections.map((entry) =>
+                entry.kind === "group" ? (
+                  /*
+                   * A group is a disclosure, not a link: there is no page at
+                   * "Fragrances" for it to lead to — the rows beneath it say it
+                   * better — and the column is long enough that being able to
+                   * close the parts you are not reading is the point. Each one
+                   * is independent; opening Scent Profiles leaves Fragrances
+                   * exactly as the reader left it.
+                   */
+                  <FooterDisclosure key={entry.id} title={entry.label}>
+                    {entry.children.map((child) => (
+                      <LocaleLink
+                        key={child.id}
+                        href={child.href}
+                        className={`${footerLinkClass} ps-3`}
+                      >
+                        {child.label}
+                      </LocaleLink>
+                    ))}
+                  </FooterDisclosure>
+                ) : (
+                  <LocaleLink
+                    key={entry.id}
+                    href={entry.href}
+                    className={footerLinkClass}
+                  >
+                    {entry.label}
+                  </LocaleLink>
+                ),
+              )}
+
+              {/*
+                The ways in close the column, as they do on a phone — and as a
+                disclosure too, because it is a group of the same kind even
+                though it comes from a different table.
+              */}
+              <FooterDisclosure title={dict.nav.quickAccess}>
+                {tree.quickAccess.map((item) => (
+                  <LocaleLink
+                    key={item.id}
+                    href={item.href}
+                    className={`${footerLinkClass} ps-3`}
+                  >
+                    {item.label}
+                  </LocaleLink>
+                ))}
+              </FooterDisclosure>
+            </nav>
+          </FooterGroup>
+        )}
 
         <FooterGroup title={dict.footer.worldOfKhem}>
           <nav
@@ -273,7 +287,6 @@ export default async function Footer({ locale }: { locale: Locale }) {
                 // href="tel:+20000000000"
                 className="text-ground-accent/80 no-underline transition-colors hover:text-ground-accent"
               >
-                {/* +20 00 000 0000 */} {dict.common.comingSoon}
               </a>
             </p>
           </div>

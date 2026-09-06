@@ -1,0 +1,438 @@
+/*
+ * ⚠️ TEMPORARY — styles for the pre-launch cover only. Delete with the folder.
+ *
+ * `layout.tsx` imports `../globals.css` before this file, so everything here is
+ * written against the real KHEM tokens — `--color-ivory`, `--color-sand`,
+ * `--color-ink`, `--color-gold`, `--ease-luxury-bezier`. Nothing is redefined
+ * and no token is invented: the cover is the existing design system arranged
+ * differently, not a second one.
+ *
+ * ── THE LIGHT FIELD ─────────────────────────────────────────────
+ *
+ * The cover's moving background, authored here rather than filmed. Six layers:
+ * a warm ivory-to-sand ground, a sun drifting across it on a 48s arc, a
+ * champagne bloom counter-drifting on 64s, near-invisible vertical fluting
+ * panning on 90s, a sand haze holding the corners, and film grain.
+ *
+ * The reference is light moving across limestone, and pleated linen — Egyptian
+ * heritage as *material* rather than as iconography, which is what §2 of the
+ * brief rules out when it says no tourist-style imagery.
+ *
+ * ## Why this is not a video
+ *
+ * It costs no network payload against roughly 1.5 MB for a compressed film, it
+ * cannot flash black while it loads, and it needs no poster asset. When a film
+ * *is* configured (`KHEM_PRELAUNCH_VIDEO_URL`) it renders on top of this and
+ * fades in when it can play — so the field becomes the poster, and the cover has
+ * a finished first frame at every moment of loading.
+ *
+ * ## What every animation obeys
+ *
+ * Only `transform` and `opacity`, so nothing here reads back layout or paints
+ * off the compositor. Durations are 48-90s and alternate, which is slow enough
+ * that no single viewing shows a loop. There is no spring, no bounce and no
+ * keyframe that changes direction sharply — §21's "the UI should feel almost
+ * invisible", applied to the background as well as to the type.
+ */
+
+/* ── The film box ───────────────────────────────────────────── */
+
+.khem-cover-film {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /*
+   * The ground, and the only layer that is not animated. Ivory at the top-left
+   * falling to sand at the bottom-right: the light in this composition arrives
+   * from above, so the warm weight belongs underneath.
+   */
+  background: linear-gradient(
+    158deg,
+    #fbf9f5 0%,
+    #f4efe6 34%,
+    #e9e1d3 70%,
+    #dbcfba 100%
+  );
+}
+
+/*
+ * Sized in `vmax` and centred by negative margin rather than stretched with
+ * `inset`, so the layer keeps its circular falloff at every aspect ratio. A
+ * percentage-sized radial on a 21:9 monitor becomes an ellipse and reads as a
+ * lens flare instead of as light.
+ */
+.khem-cover-sun,
+.khem-cover-bloom {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.khem-cover-sun {
+  width: 118vmax;
+  height: 118vmax;
+  margin: -59vmax 0 0 -59vmax;
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 253, 248, 0.52),
+    rgba(255, 253, 248, 0.26) 40%,
+    rgba(255, 253, 248, 0) 70%
+  );
+  animation: khem-cover-sun 48s ease-in-out infinite alternate;
+}
+
+/*
+ * The champagne accent, and the only gold in the field.
+ *
+ * `soft-light` rather than a flat fill: gold painted on top reads as a colour
+ * wash, gold blended as light reads as a warm reflection off something outside
+ * the frame. The difference is most of what separates this from a cheap gold
+ * gradient, which §2 names explicitly.
+ */
+.khem-cover-bloom {
+  width: 82vmax;
+  height: 82vmax;
+  margin: -41vmax 0 0 -41vmax;
+  background: radial-gradient(
+    closest-side,
+    rgba(203, 170, 110, 0.42),
+    rgba(203, 170, 110, 0.18) 45%,
+    rgba(203, 170, 110, 0) 72%
+  );
+  mix-blend-mode: soft-light;
+  animation: khem-cover-bloom 64s ease-in-out infinite alternate;
+}
+
+/*
+ * Fluting — temple columns, or the pleats in linen, at the threshold of
+ * visibility. 3.4% ink on a 140px period, masked to fade well before it reaches
+ * edge so it never resolves into stripes. It pans 48px over 90 seconds, which
+ * is slow enough to be felt rather than seen.
+ */
+.khem-cover-flutes {
+  position: absolute;
+  inset: -10% -20%;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(36, 35, 33, 0) 0 138px,
+    rgba(36, 35, 33, 0.034) 138px 140px
+  );
+  /*
+   * The mask is what keeps this relief rather than stripes. It has to fade well
+   * before the frame edge: a repeating gradient that runs to the border reads as
+   * a pattern laid over a photograph, which is the one thing this layer must not
+   * look like.
+   */
+  -webkit-mask-image: radial-gradient(
+    62% 54% at 50% 46%,
+    #000 0%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(62% 54% at 50% 46%, #000 0%, transparent 72%);
+  animation: khem-cover-flutes 90s linear infinite alternate;
+}
+
+/* Warmth gathering in the corners, so the frame closes without a dark vignette. */
+.khem-cover-haze {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(219, 207, 186, 0) 55%,
+      rgba(206, 190, 163, 0.34) 100%
+    ),
+    radial-gradient(
+      120% 100% at 50% 38%,
+      rgba(247, 245, 240, 0) 42%,
+      rgba(207, 193, 170, 0.42) 100%
+    );
+}
+
+/*
+ * Grain.
+ *
+ * An inline `feTurbulence` tile — no asset, no request. At 5% under `multiply`
+ * it is invisible as texture and audible as film: it is what keeps the wide
+ * smooth gradients above from banding on an 8-bit panel, which is the actual
+ * engineering reason a still gradient of this size needs it.
+ */
+.khem-cover-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  animation: khem-cover-grain 0.5s steps(1, end) infinite;
+}
+
+/*
+ * A configured film, over the field.
+ *
+ * Starts transparent and is revealed by `data-playing`, which `PrelaunchFilm`
+ * sets on `canplay`. Until then the visitor is looking at the light field, which
+ * is why this feature ships no poster image and cannot show a black rectangle.
+ */
+.khem-cover-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-luxury-bezier);
+}
+
+.khem-cover-video[data-playing="true"] {
+  opacity: 1;
+}
+
+/* ── The veil ───────────────────────────────────────────────── */
+
+/*
+ * Legibility insurance — and it is applied in two strengths, because the two
+ * cases genuinely differ.
+ *
+ * **No film (the default).** The background is the light field, authored right
+ * here, so its luminance is known and already correct for charcoal type. The
+ * veil only has to seat the type and close the frame. Anything heavier washes
+ * the field out to paper and throws away the ivory-to-sand depth it exists to
+ * provide — which is exactly what a first pass at full strength did.
+ *
+ * **A film is configured (`data-film`).** Now the background is arbitrary and
+ * unknown: it may be bright, busy, or busy exactly where the words sit. The veil
+ * goes to full strength — an ivory pool behind the type column, a vertical wash,
+ * and a restrained ink vignette — so a replacement film needs no re-tuning of
+ * anything. This is what keeps the composition from being hardcoded around one
+ * frame of one video.
+ *
+ * Ink never exceeds 16% and never approaches the middle: §4's "do not hide the
+ * entire video behind an opaque overlay", and §2's rule against heavy black
+ * overlays on a light-first brand.
+ */
+.khem-cover-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      62% 50% at 50% 46%,
+      rgba(250, 248, 244, 0.34) 0%,
+      rgba(250, 248, 244, 0.14) 58%,
+      rgba(250, 248, 244, 0) 100%
+    ),
+    radial-gradient(
+      124% 92% at 50% 44%,
+      rgba(36, 35, 33, 0) 46%,
+      rgba(36, 35, 33, 0.1) 100%
+    );
+}
+
+.khem-cover-veil[data-film="true"] {
+  background:
+    /*
+     * A bottom band, and it is here because the real film needed it: the
+     * Cloudinary reel darkens toward the foot of the frame, and the copyright
+     * line — the smallest, quietest type on the page — was sitting on roughly
+     * 1.4:1 against it. A film's *average* brightness says nothing about the
+     * strip the smallest text happens to occupy, so the fix belongs in the veil
+     * rather than in a colour chosen for one video.
+     */
+    linear-gradient(
+      0deg,
+      rgba(247, 245, 240, 0.74) 0%,
+      rgba(247, 245, 240, 0.36) 9%,
+      rgba(247, 245, 240, 0) 17%
+    ),
+    radial-gradient(
+      58% 46% at 50% 46%,
+      rgba(247, 245, 240, 0.62) 0%,
+      rgba(247, 245, 240, 0.3) 55%,
+      rgba(247, 245, 240, 0) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(247, 245, 240, 0.52) 0%,
+      rgba(247, 245, 240, 0.22) 38%,
+      rgba(232, 225, 213, 0.5) 100%
+    ),
+    radial-gradient(
+      120% 90% at 50% 45%,
+      rgba(36, 35, 33, 0) 42%,
+      rgba(36, 35, 33, 0.16) 100%
+    );
+}
+
+/* ── The entrance ───────────────────────────────────────────── */
+
+/*
+ * Four beats, 140ms apart, all opacity and an 8px rise. The delay is a custom
+ * property so the markup states the order and this file states the motion.
+ *
+ * `backwards` matters: without it every element paints at full opacity for one
+ * frame before its delay elapses, which is the flash the staging exists to
+ * prevent.
+ */
+.khem-rise {
+  animation: khem-cover-rise 0.7s var(--ease-luxury-bezier) backwards;
+  animation-delay: var(--rise-delay, 0ms);
+}
+
+/* ── Links ──────────────────────────────────────────────────── */
+
+/*
+ * The underline sweep. `scaleX` from the leading edge rather than a width
+ * transition, so it composites; 300ms ease-out, the top of §21's range for a
+ * hover.
+ */
+.khem-cover-link {
+  position: relative;
+}
+
+.khem-cover-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.55em;
+  height: 1px;
+  background: var(--color-gold);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.3s ease-out;
+}
+
+.khem-cover-link:hover::after,
+.khem-cover-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/*
+ * One focus treatment for every control on the cover.
+ *
+ * `--color-gold-deep`, not `--color-gold`: the ring sits on a light ground, and
+ * `globals.css` is explicit that the lighter gold fails contrast there. A focus
+ * ring nobody can see is the accessibility bug this rule exists to avoid.
+ */
+.khem-cover-focus:focus-visible {
+  outline: 2px solid var(--color-gold-deep);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/*
+ * The Inner Circle input, which is `.field` from `globals.css` with two
+ * variables re-pointed. The class is reused rather than reimplemented so the
+ * cover inherits its padding, its 16px type (the iOS zoom fix) and its focus
+ * ring; only the fill changes, because a solid stone field would punch a hole in
+ * the film behind it.
+ */
+.khem-cover-field {
+  --field-bg: rgba(247, 245, 240, 0.72);
+  --ground-border: rgba(36, 35, 33, 0.16);
+}
+
+/* ── Keyframes ──────────────────────────────────────────────── */
+
+@keyframes khem-cover-sun {
+  0% {
+    transform: translate3d(-16%, -12%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, -2%, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(18%, 8%, 0) scale(1.02);
+  }
+}
+
+@keyframes khem-cover-bloom {
+  0% {
+    transform: translate3d(14%, 10%, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(-12%, -8%, 0) scale(1);
+  }
+}
+
+@keyframes khem-cover-flutes {
+  from {
+    transform: translate3d(-24px, 0, 0);
+  }
+  to {
+    transform: translate3d(24px, 0, 0);
+  }
+}
+
+@keyframes khem-cover-grain {
+  0%,
+  100% {
+    background-position: 0 0;
+  }
+  25% {
+    background-position: -60px 40px;
+  }
+  50% {
+    background-position: 40px -60px;
+  }
+  75% {
+    background-position: -40px -30px;
+  }
+}
+
+@keyframes khem-cover-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Reduced motion ─────────────────────────────────────────── */
+
+/*
+ * Stillness, not absence.
+ *
+ * Every drifting layer is frozen at roughly its mid-point rather than at
+ * `translate(0)`, so what a visitor gets is the composition as designed with the
+ * movement removed — a photograph of the field. Snapping to the keyframe origin
+ * would leave the sun parked off-centre in the corner, which is not the same
+ * picture.
+ *
+ * Any configured film is paused in `PrelaunchFilm`, since CSS cannot stop video
+ * playback.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .khem-cover-sun {
+    animation: none;
+    transform: translate3d(4%, -2%, 0) scale(1.06);
+  }
+
+  .khem-cover-bloom {
+    animation: none;
+    transform: translate3d(0, 0, 0) scale(1.02);
+  }
+
+  .khem-cover-flutes,
+  .khem-cover-grain {
+    animation: none;
+  }
+
+  .khem-rise {
+    animation: none;
+  }
+
+  .khem-cover-video,
+  .khem-cover-link::after {
+    transition: none;
+  }
+}

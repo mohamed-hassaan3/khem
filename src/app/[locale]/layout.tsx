@@ -13,6 +13,8 @@ import AnnouncementBar from "@/src/components/marketing/AnnouncementBar";
 import OfferPopup from "@/src/components/marketing/OfferPopup";
 import { khemClerkAppearance } from "@/src/lib/clerk-appearance";
 import { getFontVariables } from "@/src/lib/fonts";
+// ⚠️ TEMPORARY — delete this import with the pre-launch cover.
+import { prelaunchEnabled } from "@/src/lib/prelaunch";
 import {
   LOCALES,
   LOCALE_DIRECTION,
@@ -288,6 +290,21 @@ export default async function RootLayout({
   const showAnnouncements =
     marketing.announcementsEnabled && announcements.length > 0;
 
+  /*
+   * ⚠️ TEMPORARY — the pre-launch cover, read once and handed to the two
+   * surfaces that advertise the shop.
+   *
+   * The header and footer are not covered by the cover — a visitor reading
+   * `/heritage` while the storefront is closed still sees them — so while the
+   * flag is on they must stop offering routes the proxy answers with a redirect
+   * back to Coming Soon. Without this, searching a perfume found the perfume,
+   * priced it, and then bounced you to the cover when you clicked it.
+   *
+   * `false` in every normal deployment, and both components render exactly what
+   * they render today when it is. See `src/docs/prelaunch.md`.
+   */
+  const prelaunch = prelaunchEnabled();
+
   return (
     /*
      * `data-scroll-behavior="smooth"` is required, not decorative.
@@ -446,7 +463,7 @@ export default async function RootLayout({
                         intervalMs={marketing.announcementIntervalMs}
                       />
                     ) : null}
-                    <Nav tree={navTree} />
+                    <Nav tree={navTree} prelaunch={prelaunch} />
                     {/*
                      * The offset for the whole fixed header stack — the
                      * announcement bar *and* the nav bar, not just the bar
@@ -464,7 +481,7 @@ export default async function RootLayout({
                      * announcement bar is rendered. See `globals.css`.
                      */}
                     <div className="pt-[var(--header-h)]">{children}</div>
-                    <Footer locale={locale} />
+                    <Footer locale={locale} prelaunch={prelaunch} />
                     {/*
                      * Mounted once here rather than inside `<Nav>`: it is a
                      * modal dialog over the whole document, and it is opened
