@@ -145,6 +145,18 @@ export async function generateMetadata({
       },
     },
 
+    /*
+     * Pinterest domain claim. Renders `<meta name="p:domain_verify" ...>` on
+     * every page of both locale trees, which keeps the claim valid however
+     * Pinterest re-crawls `khemperfumes.com` — `/` redirects into `/en`, so a
+     * tag placed only on one page would be a tag Pinterest can miss.
+     */
+    verification: {
+      other: {
+        "p:domain_verify": "6d744990dcb6f69ab9d2afc87047f4a5",
+      },
+    },
+
     openGraph: {
       type: "website",
       locale: OG_LOCALE[locale],
