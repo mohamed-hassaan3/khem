@@ -13,6 +13,8 @@ import RelatedProducts from "@/src/components/ecommerce/RelatedProducts";
 import { LOCALES, isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
+import { jsonLdHtml } from "@/src/lib/json-ld";
+import { productGraph } from "@/src/lib/structured-data";
 import { getIngredientsForProduct } from "@/src/services/content";
 import {
   RITUAL_RELATED_KINDS,
@@ -123,8 +125,33 @@ export default async function RitualPage({
    */
   const kind = collection?.kind === "HOME" ? "HOME" : "BODY";
 
+  /*
+   * The trail `<ProductBreadcrumb>` renders below, as data — Home →
+   * Collections → collection → product. Shared inputs are what keep the
+   * markup and the visible trail from drifting apart.
+   */
+  const crumbs = [
+    { name: dict.product.home, path: "/" },
+    { name: dict.product.collections, path: "/collections" },
+    ...(collection
+      ? [{ name: collection.name, path: `/collections/${collection.slug}` }]
+      : []),
+    { name: product.name, path: `/ritual/${product.slug}` },
+  ];
+
   return (
     <div className="ground-ivory min-h-screen">
+      {/*
+       * `Product` + `Offer` + the trail. The price is the stored EGP
+       * figure, never a display-currency conversion — see
+       * `src/lib/structured-data.ts`.
+       */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdHtml(
+          productGraph({ locale: activeLocale, product, crumbs, route: "ritual" }),
+        )}
+      />
       {/* §13: the product needs room and light. The story block below keeps
           its own dark ground. */}
       <NavGround ground="ivory" />

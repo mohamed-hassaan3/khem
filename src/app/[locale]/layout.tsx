@@ -32,6 +32,9 @@ import { getNavigationTree } from "@/src/services/navigation";
 // disagree about which domain KHEM lives on.
 import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { getSignupBenefit } from "@/src/services/benefits";
+import { getSocialProfiles } from "@/src/services/contact";
+import { jsonLdHtml } from "@/src/lib/json-ld";
+import { organizationGraph } from "@/src/lib/structured-data";
 import {
   getLiveAnnouncements,
   getMarketingSettings,
@@ -263,8 +266,14 @@ export default async function RootLayout({
    * API, so this layout stays prerenderable exactly as it was; an admin write
    * revalidates it through `revalidateMarketing()`.
    */
-  const [marketing, announcements, signupBenefit, navTree, deliveryTerms] =
-    await Promise.all([
+  const [
+    marketing,
+    announcements,
+    signupBenefit,
+    navTree,
+    deliveryTerms,
+    socialProfiles,
+  ] = await Promise.all([
     getMarketingSettings(locale),
     getLiveAnnouncements(locale),
     getSignupBenefit(),
@@ -285,6 +294,20 @@ export default async function RootLayout({
      * cannot fail — it falls back to the terms in `src/lib/cart.ts`.
      */
     getDeliveryTerms("ONLINE"),
+    /*
+     * The house's real social accounts, for the `Organization` entity below.
+     *
+     * Read from `"SocialProfile"` rather than written into the structured data
+     * as constants, because a `sameAs` claim is an assertion that the house
+     * runs that account: if a profile is retired the row goes and the claim
+     * goes with it. It also keeps one answer for the Footer's icons and the
+     * markup a crawler reads.
+     *
+     * Cannot fail in a way that matters — an error yields an empty list and
+     * `organizationGraph()` omits `sameAs` entirely rather than emitting a
+     * broken one.
+     */
+    getSocialProfiles(),
   ]);
 
   const showAnnouncements =
@@ -376,6 +399,23 @@ export default async function RootLayout({
             __html:
               "try{if(sessionStorage.getItem('khem:intro:seen'))document.documentElement.dataset.intro='off'}catch(e){}",
           }}
+        />
+
+        {/*
+         * Who KHEM is, and what this site is — stated once, on every page.
+         *
+         * Emitted from the root layout rather than from the home page alone so
+         * that whichever URL a crawler reaches first carries the brand
+         * definition. It is not duplicate content: `@id` is identical on every
+         * page, so the statements merge into one entity instead of counting as
+         * many.
+         *
+         * `jsonLdHtml()` and not `JSON.stringify` — see `src/lib/json-ld.ts`
+         * for what that difference prevents.
+         */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={jsonLdHtml(organizationGraph(socialProfiles))}
         />
 
         {/*

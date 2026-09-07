@@ -1,6 +1,22 @@
 -- KHEM — take back the write privileges Supabase hands out by default.
 --
--- Applied last by `npm run db:migrate`, after every table exists.
+-- Applied **sixth of sixty-four**, not last: `scripts/db-migrate.ts` sorts by
+-- filename. That matters for reading this file correctly, and it is fine —
+-- but for a reason worth stating rather than assuming.
+--
+-- The blanket `revoke` below only reaches tables that exist when it runs, i.e.
+-- those from `0001`–`0005`. Every table created afterwards — the orders,
+-- customers, credits, discounts, campaigns and finance schemas, some
+-- fifty-seven of them — is covered instead by the `alter default privileges`
+-- clauses at the bottom, which apply to tables created *later* by the same
+-- role. The audit in `src/docs/SECURITY-AUDIT-STAGE-1.md` §3.2 confirmed the
+-- outcome against the live catalog: all 71 tables have RLS on, and not one
+-- holds a write grant for `anon` or `authenticated`.
+--
+-- ⚠ So do not "fix" a later table by adding it to the `revoke` at line 27 —
+-- that statement has already run by then. A table needing narrower access than
+-- the default `select` revokes it in its own migration, as `0015`, `0024`,
+-- `0025` and `0026` do.
 --
 -- ## The problem this fixes
 --

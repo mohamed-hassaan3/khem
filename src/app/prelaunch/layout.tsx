@@ -9,8 +9,7 @@ import "./prelaunch.css";
  * A **sibling root layout**, and the reason this feature can be switched off
  * without a scar. There is no `app/layout.tsx` in this project;
  * `app/[locale]/layout.tsx` is the root layout for the entire application, and
- * this is a second one for a single branch of the tree — the same arrangement
- * `app/design-preview/` already uses.
+ * this is a second one for a single branch of the tree.
  *
  * ## What that buys
  *

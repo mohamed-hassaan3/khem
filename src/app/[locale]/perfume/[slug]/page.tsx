@@ -15,6 +15,8 @@ import RelatedProducts from "@/src/components/ecommerce/RelatedProducts";
 import { LOCALES, isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
+import { jsonLdHtml } from "@/src/lib/json-ld";
+import { productGraph } from "@/src/lib/structured-data";
 import { productScentProfiles } from "@/src/lib/scent-profiles";
 import { getIngredientsForProduct } from "@/src/services/content";
 import {
@@ -122,8 +124,41 @@ export default async function PerfumePage({
     { label: dict.product.baseNotes, notes: product.baseNotes },
   ];
 
+  /*
+   * The breadcrumb trail, built from the same three values `<ProductBreadcrumb>`
+   * renders below — Home → Collections → collection → product.
+   *
+   * Assembled here and passed into the markup rather than derived from the URL,
+   * because Google requires that a `BreadcrumbList` describe the trail the
+   * reader can actually see. Sharing the inputs is what stops the two drifting:
+   * a collection that fails to resolve drops out of both at once.
+   */
+  const crumbs = [
+    { name: dict.product.home, path: "/" },
+    { name: dict.product.collections, path: "/collections" },
+    ...(collection
+      ? [{ name: collection.name, path: `/collections/${collection.slug}` }]
+      : []),
+    { name: product.name, path: `/perfume/${product.slug}` },
+  ];
+
   return (
     <div className="ground-ivory min-h-screen">
+      {/*
+       * `Product`, its `Offer`, and the trail above it.
+       *
+       * The price is the stored EGP figure — never a display-currency
+       * conversion, which would advertise a price the checkout will not honour.
+       * See `src/lib/structured-data.ts` for the full reasoning, including why
+       * no rating markup is emitted from the comments feature.
+       */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdHtml(
+          productGraph({ locale: activeLocale, product, crumbs }),
+        )}
+      />
+
       {/* §13: the product needs room and light. The story block below keeps
           its own dark ground. */}
       <NavGround ground="ivory" />
