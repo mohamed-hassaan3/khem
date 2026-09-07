@@ -11,6 +11,7 @@ import { LOCALES, isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { SITE_URL, localeMetadata } from "@/src/lib/i18n/metadata";
 import { backArrow } from "@/src/lib/i18n/rtl";
+import { jsonLdHtml } from "@/src/lib/json-ld";
 import {
   getArticleBySlug,
   getArticleSlugs,
@@ -98,9 +99,17 @@ export default async function JournalArticlePage({
   ]);
 
   /*
-   * `Article` structured data. Every value is a stored string serialised by
-   * `JSON.stringify`, which escapes what needs escaping — nothing an editor can
-   * type reaches the page as markup.
+   * `Article` structured data.
+   *
+   * Four of these values — the title, the excerpt, the category and the image
+   * URL — are typed into the dashboard and rendered here for the public, so
+   * they are untrusted input however trusted their author is.
+   *
+   * They are serialised by `jsonLdHtml()` rather than by `JSON.stringify`,
+   * which is **not** sufficient on its own: it does not escape `<`, so a stored
+   * `</script>` would end this element early and everything after it would be
+   * parsed as markup. That module carries the full explanation, and it is the
+   * only correct way to fill a JSON-LD block in this app.
    */
   const jsonLd = {
     "@context": "https://schema.org",
@@ -125,7 +134,7 @@ export default async function JournalArticlePage({
       <NavGround ground="ivory" />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={jsonLdHtml(jsonLd)}
       />
 
       <ArticleHero article={article} locale={activeLocale} />

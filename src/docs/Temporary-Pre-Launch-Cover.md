@@ -342,37 +342,34 @@ Do not rely on a developer remembering to change one boolean before launch.
 
 Use an explicit environment/configuration strategy.
 
-Recommended approach:
+> ⚠️ **Superseded — this section proposed `NEXT_PUBLIC_KHEM_PRELAUNCH`, and the
+> shipped implementation deliberately does not use it.** Corrected by the
+> pre-launch security audit (finding F7,
+> `src/docs/SECURITY-AUDIT-STAGE-1.md`). The variable below is the one that
+> exists; `src/lib/prelaunch.ts` is the authority.
+
+The flag is **`KHEM_PRELAUNCH`**, server-only, with no `NEXT_PUBLIC_` prefix:
 
 ```env
-NEXT_PUBLIC_KHEM_PRELAUNCH=false
+KHEM_PRELAUNCH=false
 ```
 
-Production must default to:
+`NEXT_PUBLIC_` was rejected rather than overlooked. Anything carrying that
+prefix is inlined into the JavaScript bundle every visitor downloads, which
+would publish the fact that a launch is pending, and when it flips, to anyone
+who opens devtools. The only reader is `src/proxy.ts`, which runs on the
+server and has no need of a public value — see `src/lib/prelaunch.ts:11`.
 
-```text
-false
-```
+Production defaults to `false`: the variable is read as "on" only for the exact
+string `true` (or `1`), so unset, empty, `false` and every typo all mean the
+normal website. Fail-safe is the default state, not an added condition.
 
-Development can use:
-
-```env
-NEXT_PUBLIC_KHEM_PRELAUNCH=true
-```
-
-However, add an additional safety condition so a production deployment cannot accidentally expose the pre-launch page merely because the environment variable was mistakenly set.
-
-Example concept:
-
-```ts
-const showPrelaunch =
-  process.env.NODE_ENV === "development" &&
-  process.env.NEXT_PUBLIC_KHEM_PRELAUNCH === "true";
-```
-
-Adapt this to the actual Next.js architecture and deployment environment.
-
-The exact implementation should prioritize **fail-safe production behavior**.
+**Do not add a `NODE_ENV === "development"` guard.** The concept sketched here
+originally would make the cover *impossible to use in production*, which is the
+one place it is for — the whole feature exists to hold a live domain closed
+before launch day. What keeps production safe is that the flag must be set
+deliberately, and that an administrator can preview the cover privately at
+`/prelaunch` while it is off, without covering the site for anybody else.
 
 ---
 

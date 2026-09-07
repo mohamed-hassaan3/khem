@@ -29,6 +29,28 @@ import { notificationsForUser } from "@/src/services/notifications";
  * reach their account.
  */
 
+/**
+ * Nothing under `/account` may be indexed.
+ *
+ * Declared on the layout so it covers the whole subtree, including panels added
+ * later. Each panel used to state it individually and two of them —
+ * `addresses` and `preferences` — had been missed, which is exactly the
+ * failure a per-page rule invites; found by the pre-launch audit (finding F14,
+ * `src/docs/SECURITY-AUDIT-STAGE-3.md`).
+ *
+ * This is a crawler instruction, not a protection: the gate is `getViewer()`
+ * below and again in every panel. A page that needed `noindex` to stay private
+ * would already be broken. What it prevents is a customer's account URL sitting
+ * in a search index, and `follow: false` keeps crawlers from walking deeper
+ * into a tree that will only answer them with a redirect.
+ *
+ * Next merges `robots` field-by-field from the nearest declaration, so a panel
+ * may still tighten this; none currently needs to.
+ */
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function AccountLayout({
   children,
   params,

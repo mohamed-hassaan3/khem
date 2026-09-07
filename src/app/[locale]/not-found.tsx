@@ -28,12 +28,37 @@ import { useDictionary } from "@/src/providers/i18n-provider";
  *
  * The height is `100vh` minus the 5rem Nav rather than `100vh` plus 5rem of
  * padding, so the page fills the viewport instead of overflowing it.
+ *
+ * ## Why this page states `noindex` itself
+ *
+ * Because the response it arrives in says `200 OK`.
+ *
+ * `app/[locale]/[...rest]/page.tsx` calls `notFound()` correctly, but
+ * `app/[locale]/loading.tsx` puts a Suspense boundary above the whole locale
+ * tree, so the shell starts streaming — and the status is committed — before
+ * the route resolves. The 404 body is then rendered inside an already-sent 200.
+ * Proven during the pre-launch audit: with that `loading.tsx` removed the same
+ * URLs answer 404, and `/api/*`, which has no loading boundary, answers 404
+ * today. See finding F13 in `src/docs/SECURITY-AUDIT-STAGE-3.md`.
+ *
+ * A soft 404 invites a search engine to index every mistyped and retired URL as
+ * a thin duplicate of the home page — it inherits the root layout's title. This
+ * tag is the mitigation, not the cure: it removes the indexing harm while
+ * leaving the loading screen, which is a deliberate part of the arrival
+ * experience, exactly where it is.
+ *
+ * The cure is to move that Suspense boundary down to the segments that need it,
+ * which is a change to how every route on the site loads and therefore a
+ * decision rather than a fix. `follow` stays on so the links below still pass
+ * a lost crawler back into the catalogue.
  */
 export default function NotFound() {
   const dict = useDictionary();
 
   return (
     <div className="ground-ivory relative flex min-h-[calc(100svh-var(--header-h))] items-center justify-center overflow-hidden px-6 text-center">
+      {/* React hoists this into <head>. See the header. */}
+      <meta name="robots" content="noindex, follow" />
       {/*
         The gold radial wash is gone with the ground that carried it. A 4% gold
         bloom is a light source, and it only reads as one against near-black;

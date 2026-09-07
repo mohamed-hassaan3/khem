@@ -172,7 +172,35 @@ export function getSupabasePublic(): SupabaseClient | null {
  * The privileged client, or `null` when unconfigured.
  *
  * ⚠ Bypasses row level security. Reach for {@link getSupabasePublic} unless the
- * caller is writing — today that is `src/actions/comments.ts` alone.
+ * caller genuinely needs to write, or to read something no policy publishes.
+ *
+ * ## Who holds it, and what authorises each one
+ *
+ * Seven modules, and the list is deliberately short enough to audit. Every one
+ * establishes authority *before* the client is used — none of them infers it
+ * from having been reached:
+ *
+ *   `actions/admin/*` (21 modules, via `./shared`)
+ *        `requireAdmin()` as the first statement of every exported action.
+ *   `actions/checkout.ts`
+ *        Rate limit, then Zod, then identity from `getUserId()` — never from
+ *        the request body. Calls `place_order()`, which is revoked from the
+ *        public roles.
+ *   `app/api/webhooks/stripe/route.ts`
+ *        Stripe signature verified against the raw body first.
+ *   `services/discounts.ts`, `services/offers.ts`, `services/rewards.ts`
+ *        Reached only through rate-limited actions that pass a session-derived
+ *        `clerkUserId`; the SQL re-checks ownership under a row lock.
+ *   `services/welcome.ts`
+ *        Reached only from the signature-verified Clerk webhook.
+ *
+ * ⚠ Adding an eighth is a security decision, not a convenience one. If a read
+ * can go through {@link getSupabasePublic}, it should — that is what keeps the
+ * policies in `supabase/sql/` load-bearing rather than decorative.
+ *
+ * (This list previously named `src/actions/comments.ts` as the only caller,
+ * which stopped being true some time ago. Corrected by the pre-launch audit,
+ * finding F9 — see `src/docs/SECURITY-AUDIT-STAGE-1.md` §3.4.)
  */
 export function getSupabaseAdmin(): SupabaseClient | null {
   if (adminClient) return adminClient;

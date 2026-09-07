@@ -67,7 +67,197 @@ function commentImagePattern() {
   }
 }
 
+/**
+ * The Clerk frontend API host, decoded from the publishable key.
+ *
+ * Clerk encodes it into the key itself — `pk_test_<base64 of host>$` — so this
+ * derives the right origin for whichever instance a deployment is pointed at
+ * instead of hard-coding one. That matters because the host differs between
+ * environments (`*.clerk.accounts.dev` on a development instance, the custom
+ * domain on a production one), and a CSP naming the wrong one does not degrade
+ * — it breaks sign-in completely.
+ *
+ * Returns an empty list rather than throwing when the key is absent or
+ * malformed, on the same terms as `commentImagePattern()` below: a checkout
+ * without credentials must still build.
+ */
+function clerkOrigins(): string[] {
+  const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
+  if (key.length === 0) return [];
+
+  try {
+    const encoded = key.replace(/^pk_(test|live)_/, "");
+    const host = Buffer.from(encoded, "base64").toString("utf8").replace(/\$$/, "");
+
+    // A decoded value that is not a hostname means the key was not a Clerk key.
+    if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(host)) return [];
+
+    // Clerk serves its script from the frontend API host and talks to it over
+    // XHR; both need naming. The wildcard covers the account portal Clerk
+    // redirects to on a development instance.
+    return [`https://${host}`, "https://*.clerk.accounts.dev"];
+  } catch {
+    return [];
+  }
+}
+
+/** The Supabase origin — Storage images and the Data API both live on it. */
+function supabaseOrigin(): string[] {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  if (url.length === 0) return [];
+
+  try {
+    return [`https://${new URL(url).hostname}`];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * The Content Security Policy, assembled from the origins this repository
+ * actually talks to rather than from a template.
+ *
+ * ## Enforcing, after measurement
+ *
+ * This shipped as `Content-Security-Policy-Report-Only` first, deliberately,
+ * and was promoted to enforcing only once a real browser had been driven across
+ * the site and reported nothing. What was actually measured, with a
+ * `securitypolicyviolation` listener whose sensitivity was proved by injecting
+ * a deliberate violation first (a script from `cdn.jsdelivr.net`, correctly
+ * reported as `script-src-elem`):
+ *
+ *   · 14 routes — home, collections, all three product detail routes, journal,
+ *     heritage, search, cart, checkout, sign-in, account, contact, stockists —
+ *     each loaded, settled to network idle, and scrolled. **Zero violations.**
+ *   · `https://js.stripe.com/v3/` loaded and allowed to build its own
+ *     infrastructure: the controller-with-preconnect frame, the outer-logger
+ *     frame and the m-outer fraud-detection frame. **Zero violations.**
+ *   · A `fetch()` to `https://api.stripe.com`. Allowed.
+ *   · Every external origin appearing in the delivered HTML of those 14 routes,
+ *     enumerated and reconciled against the directives below.
+ *
+ * ⚠ **One path could not be exercised here and should be smoke-tested on the
+ * first preview deploy that has live Stripe keys:** mounting a real Payment
+ * Element and completing a 3-D Secure challenge. This machine has no
+ * publishable key, so Elements refuses to initialise and the card-input iframe
+ * and the `hooks.stripe.com` challenge frame never render. Both origins are in
+ * `frame-src` below and match what Stripe.js was observed to use, so this is a
+ * confirmation step rather than an expected failure.
+ *
+ * If checkout ever misbehaves in a way that smells like a blocked resource,
+ * reverting is one word: rename the header key back to
+ * `Content-Security-Policy-Report-Only`. Diagnose, fix the directive, re-promote.
+ *
+ * ## `'unsafe-inline'` in `script-src`
+ *
+ * Required today by the inline `sessionStorage` probe in
+ * `app/[locale]/layout.tsx` — which must run before first paint, so it cannot
+ * become an external file — and by the JSON-LD blocks. Removing it means
+ * threading a nonce through both, which is a change to rendering rather than to
+ * this file, and is the natural next hardening step once the policy enforces.
+ *
+ * `style-src` keeps `'unsafe-inline'` for longer: React inlines style
+ * attributes and Motion animates through them.
+ */
+function contentSecurityPolicy(): string {
+  const clerk = clerkOrigins();
+  const supabase = supabaseOrigin();
+
+  const directives: Record<string, string[]> = {
+    "default-src": ["'self'"],
+    "script-src": [
+      "'self'",
+      "'unsafe-inline'",
+      ...clerk,
+      "https://js.stripe.com",
+      // Clerk's bot protection, when the instance has it enabled.
+      "https://challenges.cloudflare.com",
+    ],
+    "style-src": ["'self'", "'unsafe-inline'"],
+    "img-src": [
+      "'self'",
+      "data:",
+      "blob:",
+      "https://res.cloudinary.com",
+      "https://images.unsplash.com",
+      "https://img.clerk.com",
+      ...clerk,
+      ...supabase,
+    ],
+    // The pre-launch cover's film, and any Cloudinary-hosted video.
+    "media-src": ["'self'", "https://res.cloudinary.com", ...supabase],
+    "font-src": ["'self'", "data:"],
+    "connect-src": ["'self'", ...clerk, ...supabase, "https://api.stripe.com"],
+    // Stripe Elements and Clerk's challenge both render in iframes.
+    "frame-src": [
+      "https://js.stripe.com",
+      "https://hooks.stripe.com",
+      "https://challenges.cloudflare.com",
+      ...clerk,
+    ],
+    "worker-src": ["'self'", "blob:"],
+    // Nothing here may be framed — the clickjacking half of the policy, and the
+    // modern spelling of the X-Frame-Options header set beside it.
+    "frame-ancestors": ["'none'"],
+    "base-uri": ["'self'"],
+    // Forms post to this origin only. Clerk's flows are XHR, not form posts.
+    "form-action": ["'self'"],
+    "object-src": ["'none'"],
+    "upgrade-insecure-requests": [],
+  };
+
+  return Object.entries(directives)
+    .map(([name, values]) => (values.length > 0 ? `${name} ${values.join(" ")}` : name))
+    .join("; ");
+}
+
 const nextConfig: NextConfig = {
+  /**
+   * Browser-side hardening.
+   *
+   * None of these existed before the pre-launch security audit
+   * (`src/docs/SECURITY-AUDIT-STAGE-1.md`, finding F3). Applied to every route
+   * — the API routes included, since a JSON response benefits from `nosniff`
+   * exactly as much as a document does.
+   *
+   * HSTS is **not** set here. Vercel already issues it for the apex domain and
+   * its certificates, and a `max-age` written into application code is one that
+   * outlives the reason it was chosen; getting it wrong locks visitors out of
+   * the domain for the length of the directive. It belongs to the platform.
+   */
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            // Enforcing. See the reasoning above `contentSecurityPolicy()` for
+            // what was measured before this was promoted, and for the one-word
+            // revert if a blocked resource is ever suspected.
+            key: "Content-Security-Policy",
+            value: contentSecurityPolicy(),
+          },
+          // Stops a browser second-guessing a declared media type — the
+          // defence that matters most for the visitor-uploaded comment images
+          // served out of Supabase Storage.
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // Send the full URL within KHEM, only the origin when leaving it, and
+          // nothing at all when downgrading to HTTP. Keeps order numbers and
+          // account paths out of third-party referrer logs.
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // The site asks for none of these. Saying so stops an embedded frame
+          // asking on its behalf.
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
+          // Belt to `frame-ancestors`' braces, for older browsers.
+          { key: "X-Frame-Options", value: "DENY" },
+        ],
+      },
+    ];
+  },
+
   /**
    * Files the bundler cannot see being read, but that a function needs anyway.
    *

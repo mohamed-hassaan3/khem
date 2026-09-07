@@ -29,12 +29,32 @@
 
 import { NextResponse } from "next/server";
 
+import { clientKey, isRateLimited } from "@/src/lib/email/rate-limit";
 import { getStripe, isCardPaymentAvailable } from "@/src/lib/stripe/server";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { z } from "zod";
 
 /** Beyond this, the sweeper may already have cancelled and restocked the order. */
 const PAYMENT_WINDOW_MINUTES = 30;
+
+/**
+ * Twenty attempts per ten minutes per client.
+ *
+ * Higher than the checkout action's eight, because this route is reached
+ * repeatedly for one legitimate order: the payment step asks on mount, again
+ * after a declined card, and again on every refresh of the confirmation page.
+ * The reuse branch below means most of those cost nothing.
+ *
+ * What it stops is a script holding a valid order id and hammering Stripe —
+ * each miss is a metered API call, and the route is otherwise the only public
+ * endpoint that reaches a payment provider without a signature or a session.
+ * Added by the pre-launch audit (finding F5); before it this route had no
+ * limiter at all.
+ *
+ * The limiter is per-instance process memory — see `src/lib/email/rate-limit.ts`
+ * for what that does and does not buy.
+ */
+const LIMIT = { limit: 20, windowMs: 10 * 60 * 1_000 };
 
 const bodySchema = z.object({
   orderId: z.string().trim().min(8).max(64),
@@ -71,6 +91,15 @@ export async function POST(request: Request): Promise<NextResponse> {
   if (!isCardPaymentAvailable()) {
     console.error("[checkout] intent refused; the card rail is off.");
     return refuse(503, "unconfigured");
+  }
+
+  // Before the body is read and before Stripe is touched, on the same reasoning
+  // as `src/actions/checkout.ts`: nothing that costs a metered call runs ahead
+  // of the throttle. 429 rather than the uniform refusal shape, because unlike
+  // the guards below this one is not hiding anything — the caller is meant to
+  // learn they are going too fast, and to come back.
+  if (isRateLimited("checkout-intent", await clientKey(), LIMIT)) {
+    return refuse(429, "rateLimited");
   }
 
   const stripe = getStripe();

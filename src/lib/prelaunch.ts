@@ -83,8 +83,8 @@ export function prelaunchEnabled(): boolean {
  * front says Coming Soon. The auth routes because they are how anyone reaches
  * those. `/unsubscribe` because it is the address printed in every marketing
  * email already sent, and covering it would turn a temporary presentation layer
- * into a compliance problem. `/design-preview` and `/prelaunch` because they sit
- * outside the locale tree and answer for themselves.
+ * into a compliance problem. `/prelaunch` because it sits outside the locale
+ * tree and answers for itself.
  */
 const EXEMPT_PREFIXES = [
   "/admin",
@@ -93,7 +93,6 @@ const EXEMPT_PREFIXES = [
   "/sign-up",
   "/unsubscribe",
   PRELAUNCH_PATH,
-  "/design-preview",
 ] as const;
 
 /**
