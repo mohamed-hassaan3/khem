@@ -1,5 +1,5 @@
 /**
- * English dictionary — the reference locale.
+ * English dictionary , the reference locale.
  *
  * This file defines the `Dictionary` shape. Every other locale is typed
  * against it, so adding a key here is a compile error everywhere else until
@@ -7,7 +7,7 @@
  *
  * Scope is UI chrome and page-level editorial copy that lives in JSX. The
  * long-form records in Postgres (testimonials, timeline, craft steps,
- * ingredient detail, legal documents, products) are NOT translated here —
+ * ingredient detail, legal documents, products) are NOT translated here ,
  * they stay English for both locales until that content layer moves to a CMS.
  */
 
@@ -66,7 +66,7 @@ export const en = {
      * The "Our Collections" column, in the order it is printed: the whole shelf
      * first, then the three fragrance chapters, the five olfactive cuts, and the
      * two non-perfume ranges. New Arrival and the sets sit in Quick Access
-     * instead — a way of buying is not a chapter of the library.
+     * instead , a way of buying is not a chapter of the library.
      */
     collectionItems: {
       allProducts: {
@@ -87,7 +87,7 @@ export const en = {
       },
       oriental: {
         label: "Oriental",
-        desc: "Resin, amber and incense — warmth that stays",
+        desc: "Resin, amber and incense , warmth that stays",
       },
       floral: {
         label: "Floral",
@@ -99,7 +99,7 @@ export const en = {
       },
       woody: {
         label: "Woody",
-        desc: "Oud, sandalwood and cedar — the bones of a scent",
+        desc: "Oud, sandalwood and cedar , the bones of a scent",
       },
       gourmand: {
         label: "Gourmand",
@@ -123,7 +123,7 @@ export const en = {
       },
     },
     /*
-     * The label of the one collection *group* — a disclosure in the menu, not a
+     * The label of the one collection *group* , a disclosure in the menu, not a
      * destination, so it has no `desc` and no path and cannot be a
      * `collectionItems` entry.
      */
@@ -141,7 +141,7 @@ export const en = {
       about: { label: "About KHEM" },
     },
     /*
-     * Quick Access, in the order it is printed — the ways in. The newest work
+     * Quick Access, in the order it is printed , the ways in. The newest work
      * first, then the two set categories, which are ways of buying rather than
      * chapters of the library, and Best Sellers, which crosses every collection
      * at once. See `src/constants/navigation-pages.ts` for why Key Ingredients
@@ -166,7 +166,7 @@ export const en = {
     boutiqueAddress: "New Cairo\nCairo, Egypt",
     rights: "© {year} KHEM Fragrance House. All rights reserved.",
     craftedIn: "Crafted with reverence in Cairo",
-    logoAlt: "KHEM Perfumes — Essence of Heritage",
+    logoAlt: "KHEM Perfumes , Essence of Heritage",
     /*
      * The Collections column is no longer listed here: it is rendered from the
      * same `collections` / `quickAccess` tables the Nav uses, so the two
@@ -199,8 +199,8 @@ export const en = {
       scroll: "Scroll",
       /*
        * The campaign hero's chrome, used only when the house has configured
-       * one. `slide` names each progress segment for a screen reader —
-       * "Show slide 2 of 5" — because the segments are real buttons, not
+       * one. `slide` names each progress segment for a screen reader ,
+       * "Show slide 2 of 5" , because the segments are real buttons, not
        * decoration, and a hero whose only heading is switched off would
        * otherwise ship a page with an unlabelled control on it.
        */
@@ -208,7 +208,7 @@ export const en = {
       slide: "Show slide {index} of {total}",
       /*
        * The one control that is not a slide. Its name changes with its state
-       * rather than staying "Play/pause" — a screen reader announces what
+       * rather than staying "Play/pause" , a screen reader announces what
        * pressing it will do, not what it is.
        */
       pause: "Pause slideshow",
@@ -240,9 +240,9 @@ export const en = {
       headingLine1: "Born from the",
       headingLine2: "Cradle of Civilization",
       body1:
-        "KHEM takes its name from the ancient Egyptian word for black earth — the fertile soil of the Nile delta that gave birth to one of history's greatest civilizations. In this spirit, we transform the sacred ingredients, architectural forms, and mythological symbols of Ancient Egypt into modern luxury fragrances.",
+        "KHEM takes its name from the ancient Egyptian word for black earth , the fertile soil of the Nile delta that gave birth to one of history's greatest civilizations. In this spirit, we transform the sacred ingredients, architectural forms, and mythological symbols of Ancient Egypt into modern luxury fragrances.",
       body2:
-        "Every fragrance is a meditation on memory — a bridge between the timeless and the contemporary, the sacred and the sensual.",
+        "Every fragrance is a meditation on memory , a bridge between the timeless and the contemporary, the sacred and the sensual.",
       cta: "Discover Our Story",
       imageAlt: "Ancient Egyptian relief carvings in warm low light",
     },
@@ -288,24 +288,24 @@ export const en = {
     meta: {
       title: "Collections",
       description:
-        "The complete KHEM catalogue — browse by collection: Signature, Noir, and Gemstone alongside body care, home fragrance, discovery sets, and gift sets.",
+        "The complete KHEM catalogue , browse by collection: Signature, Noir, and Gemstone alongside body care, home fragrance, discovery sets, and gift sets.",
       ogTitle: "Collections | The Complete KHEM Library",
       ogDescription:
-        "Browse everything KHEM makes in one place — three fragrance collections, body care, home fragrance, and sets.",
+        "Browse everything KHEM makes in one place , three fragrance collections, body care, home fragrance, and sets.",
     },
     all: {
       name: "The Complete Library",
       description:
-        "Every piece the house makes, in one place — fragrance, body care, home, and the sets composed for giving.",
+        "Every piece the house makes, in one place , fragrance, body care, home, and the sets composed for giving.",
     },
     home: "Home",
     countLabel: "{count} Fragrances",
     /** The overview lists more than fragrances, so it counts neutrally. */
     countLabelAll: "{count} Pieces",
-    /** Accessible name for the one filter row — the facet chips. */
+    /** Accessible name for the one filter row , the facet chips. */
     filterLabel: "Filter the catalogue",
     /*
-     * Keyed by `ProductFacet` (`src/lib/facets.ts`) — kebab-case because the
+     * Keyed by `ProductFacet` (`src/lib/facets.ts`) , kebab-case because the
      * key is also the `?facet=` value, and one spelling for both is one fewer
      * mapping to keep in step. Declared in chip order, which `FACET_ORDER`
      * owns; this object only supplies the words.
@@ -315,7 +315,7 @@ export const en = {
      *
      * The seven collection labels that used to sit here are gone: the chips in
      * between these two are `"Category"` rows now, and their names come from
-     * the rows themselves in both languages — so a category created in the
+     * the rows themselves in both languages , so a category created in the
      * dashboard is a chip immediately, and one renamed is renamed everywhere.
      * See `facetVocabulary()` in `src/lib/facets.ts`.
      */
@@ -325,8 +325,8 @@ export const en = {
     },
     /*
      * The state line above the grid on `/collections`. Both the filter and the
-     * sort can be arrived at rather than chosen — a shared `?facet=` URL, a sort
-     * left set from earlier in the visit — so the page says what it is showing
+     * sort can be arrived at rather than chosen , a shared `?facet=` URL, a sort
+     * left set from earlier in the visit , so the page says what it is showing
      * instead of leaving a two-thirds shorter catalogue unexplained.
      */
     activeState: {
@@ -335,7 +335,7 @@ export const en = {
       clear: "Clear",
     },
     /*
-     * The merchandising cut that has a page of its own — see
+     * The merchandising cut that has a page of its own , see
      * `MERCH_PAGE_FACETS` in `src/lib/facets.ts`. Keyed by facet, like
      * `facets` above, and carrying what a `Collection` row would have supplied
      * for a seeded collection: a name, a description, and the alt text of a
@@ -345,12 +345,12 @@ export const en = {
       "best-sellers": {
         name: "Best Sellers",
         description:
-          "The pieces the house cannot keep on the shelf — chosen by our customers rather than by us, and drawn from every collection we make.",
+          "The pieces the house cannot keep on the shelf , chosen by our customers rather than by us, and drawn from every collection we make.",
         bannerAlt: "Black marble lit from one side, veined with pale gold",
         meta: {
           title: "Best Sellers",
           description:
-            "The most sought-after KHEM pieces, across every collection — fragrance, body care, home fragrance, and the sets composed for giving.",
+            "The most sought-after KHEM pieces, across every collection , fragrance, body care, home fragrance, and the sets composed for giving.",
           ogTitle: "Best Sellers | KHEM",
           ogDescription:
             "What our customers reach for most, drawn from every KHEM collection.",
@@ -358,7 +358,7 @@ export const en = {
       },
     },
     /*
-     * The five scent-profile pages — see `src/lib/scent-profiles.ts`. Keyed by
+     * The five scent-profile pages , see `src/lib/scent-profiles.ts`. Keyed by
      * slug, and carrying what a `Collection` row would have supplied: a name, a
      * description, and the alt text of a hero it has no column to store.
      *
@@ -367,7 +367,7 @@ export const en = {
      * rewrite a profile's story without a deploy.
      */
     /*
-     * The product-type pages — `/collections/body-mist`, `/collections/room-spray`.
+     * The product-type pages , `/collections/body-mist`, `/collections/room-spray`.
      *
      * A type is what the object *is*, where the range above is where it is
      * sold; `src/lib/product-types.ts` explains why that distinction is a typed
@@ -406,12 +406,12 @@ export const en = {
       oriental: {
         name: "Oriental",
         description:
-          "Warmth with something withheld in it. Resins, amber and incense that settle into the skin and stay there — the register KHEM was founded on, and the one a room notices an hour after you have left it.",
+          "Warmth with something withheld in it. Resins, amber and incense that settle into the skin and stay there , the register KHEM was founded on, and the one a room notices an hour after you have left it.",
         bannerAlt: "A carved temple relief of offering bearers with their vessels",
         meta: {
           title: "Oriental Fragrances",
           description:
-            "KHEM compositions built on resin, amber and incense — the warm, long-staying register the house was founded on.",
+            "KHEM compositions built on resin, amber and incense , the warm, long-staying register the house was founded on.",
           ogTitle: "Oriental | KHEM",
           ogDescription:
             "Resin, amber and incense. The warmest register in the KHEM library.",
@@ -420,12 +420,12 @@ export const en = {
       floral: {
         name: "Floral",
         description:
-          "Flowers taken seriously. Jasmine picked before dawn, rose distilled the same day it is cut — petals treated as material rather than as decoration, and composed with enough shadow to keep them from turning sweet.",
+          "Flowers taken seriously. Jasmine picked before dawn, rose distilled the same day it is cut , petals treated as material rather than as decoration, and composed with enough shadow to keep them from turning sweet.",
         bannerAlt: "A single crocus in bloom against deep shadow",
         meta: {
           title: "Floral Fragrances",
           description:
-            "KHEM compositions built on jasmine, rose and orange blossom — petals treated as material, and given shadow enough to stay serious.",
+            "KHEM compositions built on jasmine, rose and orange blossom , petals treated as material, and given shadow enough to stay serious.",
           ogTitle: "Floral | KHEM",
           ogDescription:
             "Jasmine picked before dawn, rose distilled the day it is cut.",
@@ -434,12 +434,12 @@ export const en = {
       fresh: {
         name: "Fresh",
         description:
-          "The first breath of the composition, and the reason you lean in again. Citrus peel, sea air and cut green stems — light, but never thin: every one of these is built over something that holds.",
+          "The first breath of the composition, and the reason you lean in again. Citrus peel, sea air and cut green stems , light, but never thin: every one of these is built over something that holds.",
         bannerAlt: "Turquoise surf breaking over pale sand, seen from above",
         meta: {
           title: "Fresh Fragrances",
           description:
-            "KHEM compositions built on citrus, sea air and green stems — light on the skin, and built over something that holds.",
+            "KHEM compositions built on citrus, sea air and green stems , light on the skin, and built over something that holds.",
           ogTitle: "Fresh | KHEM",
           ogDescription:
             "Citrus peel, sea air and cut green stems. Light, but never thin.",
@@ -448,12 +448,12 @@ export const en = {
       woody: {
         name: "Woody",
         description:
-          "The bones of a fragrance. Oud, sandalwood and cedar — the materials the house travels furthest for, and the ones that decide how a perfume behaves in its last hour rather than its first.",
+          "The bones of a fragrance. Oud, sandalwood and cedar , the materials the house travels furthest for, and the ones that decide how a perfume behaves in its last hour rather than its first.",
         bannerAlt: "Low sunlight through a stand of pines",
         meta: {
           title: "Woody Fragrances",
           description:
-            "KHEM compositions built on oud, sandalwood and cedar — the materials that decide how a perfume behaves in its last hour.",
+            "KHEM compositions built on oud, sandalwood and cedar , the materials that decide how a perfume behaves in its last hour.",
           ogTitle: "Woody | KHEM",
           ogDescription:
             "Oud, sandalwood and cedar. The bones of a KHEM composition.",
@@ -462,12 +462,12 @@ export const en = {
       gourmand: {
         name: "Gourmand",
         description:
-          "Edible in the way a memory is edible. Honey, vanilla, dried fruit and roasted almond, kept dry and kept adult — appetite rather than dessert, and worn closer to the skin than any other register we make.",
+          "Edible in the way a memory is edible. Honey, vanilla, dried fruit and roasted almond, kept dry and kept adult , appetite rather than dessert, and worn closer to the skin than any other register we make.",
         bannerAlt: "A glass of honey beside blossom and dried fruit in low light",
         meta: {
           title: "Gourmand Fragrances",
           description:
-            "KHEM compositions built on honey, vanilla and dried fruit — appetite rather than dessert, worn close to the skin.",
+            "KHEM compositions built on honey, vanilla and dried fruit , appetite rather than dessert, worn close to the skin.",
           ogTitle: "Gourmand | KHEM",
           ogDescription:
             "Honey, vanilla and dried fruit, kept dry and kept adult.",
@@ -495,7 +495,7 @@ export const en = {
         "KHEM was founded in Cairo in 2019 to create extraordinary fragrances from extraordinary ingredients, inspired by the civilization that gave the world perfume.",
       ogTitle: "About KHEM | A House of Ancient Futures",
       ogDescription:
-        "The founders, the mission, and the vision behind KHEM — a luxury Egyptian fragrance house bridging five millennia of perfumery and the modern world.",
+        "The founders, the mission, and the vision behind KHEM , a luxury Egyptian fragrance house bridging five millennia of perfumery and the modern world.",
     },
     hero: {
       eyebrow: "About KHEM",
@@ -509,7 +509,7 @@ export const en = {
       body1:
         "Mohamed Hassaan is an award-winning perfumer trained in Grasse with twenty years of experience creating for the world's finest houses. Dr. Karim Mansour is an Egyptologist and cultural historian at Cairo University, with particular expertise in ancient Egyptian ritual practices.",
       body2:
-        "Together, they met at an exhibition on ancient Egyptian cosmetics in 2017. “We both understood immediately,” Mohamed recalls, “that this was the most profound fragrance tradition in human history — and that nobody had yet done it justice.”",
+        "Together, they met at an exhibition on ancient Egyptian cosmetics in 2017. “We both understood immediately,” Mohamed recalls, “that this was the most profound fragrance tradition in human history , and that nobody had yet done it justice.”",
       quote:
         "We are not recreating history. We are translating it into a language the present can feel.",
       quoteAuthor: "Mohamed Hassaan, Co-Founder",
@@ -529,7 +529,7 @@ export const en = {
         "Contact KHEM for fragrance enquiries, order support, bespoke commissions, or to arrange a private consultation at our Cairo boutique.",
       ogTitle: "Contact KHEM",
       ogDescription:
-        "Reach the KHEM team in Cairo — enquiries, order support, press, wholesale, and private fragrance consultations.",
+        "Reach the KHEM team in Cairo , enquiries, order support, press, wholesale, and private fragrance consultations.",
     },
     hero: {
       eyebrow: "We Are Here",
@@ -558,7 +558,7 @@ export const en = {
     meta: {
       title: "Craftsmanship",
       description:
-        "Six stages, four continents, one uncompromising standard — sourcing, formulation, mouth-blown flacons, hand filling, packaging, and a final assessment by a human nose.",
+        "Six stages, four continents, one uncompromising standard sourcing, formulation, mouth-blown flacons, hand filling, packaging, and a final assessment by a human nose.",
       ogTitle: "Craftsmanship | Mastery in Every Drop",
       ogDescription:
         "How a KHEM fragrance is made: sixteen months, hundreds of formulation trials, and a bottle assembled entirely by hand.",
@@ -567,7 +567,7 @@ export const en = {
       eyebrow: "The Art of KHEM",
       headingLine1: "Mastery in",
       headingLine2: "Every Drop",
-      lede: "Six stages. Four continents. One uncompromising standard. The creation of a KHEM fragrance is a devotional act — a process that takes months and demands perfection at every step.",
+      lede: "Six stages. Four continents. One uncompromising standard. The creation of a KHEM fragrance is a devotional act a process that takes months and demands perfection at every step.",
       scrollHint: "Explore the Process",
     },
     steps: {
@@ -586,23 +586,23 @@ export const en = {
     meta: {
       title: "Our Heritage",
       description:
-        "KHEM takes its name from Kemet, the ancient Egyptian name for the Black Land. Five thousand years of Egyptian perfumery, from the first kyphi to the Noir chapter.",
+        "KHEM takes its name from Kemet, the ancient Egyptian name for the Black Land. Five thousand years of Egyptian perfumery, from the first KYPHI to the Noir chapter.",
       ogTitle: "Our Heritage | The Land of Black Earth",
       ogDescription:
-        "A timeline of scent spanning five millennia — from temple kyphi and the Ebers Papyrus to the founding of KHEM in Cairo.",
+        "A timeline of scent spanning five millennia , from temple KYPHI and the Ebers Papyrus to the founding of KHEM in Cairo.",
     },
     hero: {
       eyebrow: "Our Heritage",
       headingLine1: "The Land of",
       headingLine2: "Black Earth",
-      lede: "KHEM takes its name from Kemet — the ancient Egyptian name for Egypt itself, meaning “the Black Land” — a reference to the fertile dark soil left by the Nile's annual flood. In this spirit, we cultivate something extraordinary from the richest cultural soil in human history.",
+      lede: "KHEM takes its name from Kemet, the ancient Egyptian name for Egypt itself, meaning “the Black Land”. a reference to the fertile dark soil left by the Nile's annual flood. In this spirit, we cultivate something extraordinary from the richest cultural soil in human history.",
     },
     philosophy: {
       eyebrow: "Philosophy",
       heading:
         "“We do not recreate the past. We invoke its spirit within the present.”",
       body1:
-        "Ancient Egypt did not merely use fragrance as adornment. Scent was woven into the fabric of spiritual practice, healing, ritual, and identity. The temples burned kyphi at sunset. The dead were anointed with precious oils. Fragrance was the language of divinity.",
+        "Ancient Egypt did not merely use fragrance as adornment. Scent was woven into the fabric of spiritual practice, healing, ritual, and identity. The temples burned KYPHI at sunset. The dead were anointed with precious oils. Fragrance was the language of divinity.",
       body2:
         "At KHEM, we approach this legacy with reverence. We study ancient formulas, work with Egyptologists, source our ingredients from the same regions that supplied the ancient perfumers, and apply modern perfumery techniques to create something that honors the past without being trapped by it.",
     },
@@ -628,7 +628,7 @@ export const en = {
     meta: {
       title: "Ingredients",
       description:
-        "Oud, frankincense, saffron, neroli, ambergris, and black iris — the rare natural materials behind every KHEM fragrance, and where each one comes from.",
+        "Oud, frankincense, saffron, neroli, ambergris, and black iris , the rare natural materials behind every KHEM fragrance, and where each one comes from.",
       ogTitle: "Ingredients | Nature's Finest",
       ogDescription:
         "The raw materials of KHEM: their origin, olfactive family, rarity, and the perfumes they build.",
@@ -651,7 +651,7 @@ export const en = {
     meta: {
       title: "Journal",
       description:
-        "The KHEM Journal — olfactory essays on Egyptian perfumery, rare ingredients, and the craft behind every flacon.",
+        "The KHEM Journal , olfactory essays on Egyptian perfumery, rare ingredients, and the craft behind every flacon.",
       ogTitle: "The KHEM Journal | Stories of Scent",
       ogDescription:
         "Editorial essays on ancient Egyptian perfumery, the sourcing of rare materials, and life inside the KHEM atelier.",
@@ -664,7 +664,7 @@ export const en = {
     empty: "No essays in this category yet. Please return shortly.",
 
     /* The detail page at `/journal/[slug]`. Article text itself is stored in
-     * Postgres and is English-only — only the chrome around it is translated. */
+     * Postgres and is English-only , only the chrome around it is translated. */
     article: {
       journal: "Journal",
       breadcrumbLabel: "Breadcrumb",
@@ -683,7 +683,7 @@ export const en = {
         "Find KHEM in person. Our flagship boutique and retail partners, with addresses, opening hours, and directions.",
       ogTitle: "Stockists | Find KHEM",
       ogDescription:
-        "Where to experience KHEM in person — the flagship boutique in Cairo and every retail partner that carries the house.",
+        "Where to experience KHEM in person , the flagship boutique in Cairo and every retail partner that carries the house.",
     },
     hero: {
       eyebrow: "Find KHEM",
@@ -760,7 +760,7 @@ export const en = {
     cookiePolicy: {
       title: "Cookie Policy",
       description:
-        "Every cookie KHEM uses and what it does — essential, preferences, and anonymous analytics. No advertising cookies, no ad networks.",
+        "Every cookie KHEM uses and what it does , essential, preferences, and anonymous analytics. No advertising cookies, no ad networks.",
       ogTitle: "Cookie Policy | KHEM",
       ogDescription:
         "A short page, because we use few cookies. Here is every one of them and what it does.",
@@ -768,7 +768,7 @@ export const en = {
     privacyPolicy: {
       title: "Privacy Policy",
       description:
-        "What KHEM collects, why we collect it, and the control you keep over it — including who we share data with and how long we keep it.",
+        "What KHEM collects, why we collect it, and the control you keep over it , including who we share data with and how long we keep it.",
       ogTitle: "Privacy Policy | KHEM",
       ogDescription:
         "How KHEM Fragrance House handles your personal information, and the rights you hold over it.",
@@ -779,12 +779,12 @@ export const en = {
         "How to cancel, return, or exchange a KHEM order, and what to do if a parcel arrives damaged or incorrect.",
       ogTitle: "Returns & Exchanges | KHEM",
       ogDescription:
-        "Cancellations, returns, exchanges, refunds, and damaged orders — the full KHEM customer care procedure.",
+        "Cancellations, returns, exchanges, refunds, and damaged orders , the full KHEM customer care procedure.",
     },
     termsConditions: {
       title: "Terms & Conditions",
       description:
-        "The agreement between you and KHEM Fragrance House when you place an order — pricing, delivery, product information, fragrance safety, and governing law.",
+        "The agreement between you and KHEM Fragrance House when you place an order , pricing, delivery, product information, fragrance safety, and governing law.",
       ogTitle: "Terms & Conditions | KHEM",
       ogDescription:
         "What we owe you and what we ask in return when you order from KHEM Fragrance House, Cairo.",
@@ -795,8 +795,8 @@ export const en = {
     collectionLabel: "{name} Collection",
     /*
      * The offer line under the price on a product page. Two figures rather than
-     * one because they answer different questions — "how much less do I pay"
-     * and "how deep is the cut" — and a shopper comparing houses reads the
+     * one because they answer different questions , "how much less do I pay"
+     * and "how deep is the cut" , and a shopper comparing houses reads the
      * second while a shopper comparing bottles reads the first.
      */
     promotion: {
@@ -816,7 +816,7 @@ export const en = {
     inStock: "In stock. Ships within 48 hours",
     lowStock: "Only {count} remaining",
     storyHeading: "The Story",
-    /* `/set/[slug]` only — the contents of a discovery or gift set. */
+    /* `/set/[slug]` only , the contents of a discovery or gift set. */
     includesHeading: "What Is Inside",
     pyramidHeading: "Fragrance Pyramid",
     topNotes: "Top Notes",
@@ -825,7 +825,7 @@ export const en = {
     ingredientsHeading: "Key Ingredients",
     ingredientOrigin: "From {origin}",
     /*
-     * The "Scent Profile" line — one profile, or two at the most. Derived from
+     * The "Scent Profile" line , one profile, or two at the most. Derived from
      * the materials the perfume is built on rather than stored on the product;
      * `productScentProfiles()` in `src/lib/scent-profiles.ts` explains the count.
      * The names themselves come from `collections.scentProfiles`, so the chip
@@ -847,7 +847,7 @@ export const en = {
       ATTAR_OIL: "Attar Oil",
     } satisfies Record<Concentration, string>,
     /*
-     * What an object *is*, printed wherever a name alone would be ambiguous —
+     * What an object *is*, printed wherever a name alone would be ambiguous ,
      * the "Found in" list on `/ingredients` and in the home rail's panel, where
      * a perfume, a body mist and a room spray can all be called the same thing.
      *
@@ -856,7 +856,7 @@ export const en = {
      * here rather than a blank token on a card.
      *
      * `PRODUCT_TYPE_LABELS` in `src/lib/product-types.ts` is the dashboard's
-     * copy of this and stays English-only. The two are allowed to differ — one
+     * copy of this and stays English-only. The two are allowed to differ , one
      * is a control's option list, the other is what a reader is told.
      */
     productTypes: {
@@ -869,7 +869,7 @@ export const en = {
       ROOM_SPRAY: "Room Spray",
     } satisfies Record<ProductType, string>,
     /*
-     * The fallback for a product whose type was never stated — the column is
+     * The fallback for a product whose type was never stated , the column is
      * nullable, and everything catalogued before it existed carries none. A
      * range is coarser than a type, but it is never nothing.
      */
@@ -918,7 +918,7 @@ export const en = {
       heading: "Explore the Collection",
     },
     /*
-     * Visitor comments. `guest` is the attribution for anyone not signed in —
+     * Visitor comments. `guest` is the attribution for anyone not signed in ,
      * it is a *label*, never stored text, so the same row reads "Guest" here
      * and "ضيف" in the Arabic tree.
      */
@@ -938,8 +938,8 @@ export const en = {
       contentRequired: "Leave a rating, or a few words, or both",
 
       /*
-       * Stars. `ratingOutOf` is the accessible name of every star row —
-       * readonly or interactive — so a screen reader hears a number rather
+       * Stars. `ratingOutOf` is the accessible name of every star row ,
+       * readonly or interactive , so a screen reader hears a number rather
        * than five unlabelled controls.
        */
       ratingLabel: "Your Rating",
@@ -981,7 +981,7 @@ export const en = {
     titleLead: "Body",
     titleAccent: "Care",
     description:
-      "Ancient Egyptians understood that beauty was ritual. Our body care range extends the KHEM fragrance experience beyond the flacon — layering scent into the very fabric of the skin.",
+      "Ancient Egyptians understood that beauty was ritual. Our body care range extends the KHEM fragrance experience beyond the flacon , layering scent into the very fabric of the skin.",
     ritual: {
       layering: {
         title: "Fragrance Layering",
@@ -1012,14 +1012,14 @@ export const en = {
     titleLead: "Home",
     titleAccent: "Fragrances",
     description:
-      "In Ancient Egypt, a scented space was a sacred space. Our home fragrance range extends the KHEM world into your interiors — transforming rooms into temples of olfactory experience.",
+      "In Ancient Egypt, a scented space was a sacred space. Our home fragrance range extends the KHEM world into your interiors , transforming rooms into temples of olfactory experience.",
     filterLabel: "Filter by type",
     filterAll: "All",
     empty: "New home fragrances are being prepared. Please return shortly.",
   },
 
   /**
-   * `/ritual/[slug]` — the body-care and home-fragrance detail page.
+   * `/ritual/[slug]` , the body-care and home-fragrance detail page.
    *
    * One section for two collection kinds, because they are one page shape. Only
    * the eyebrow differs, and it is keyed by `CollectionKind` so a renamed member
@@ -1030,7 +1030,7 @@ export const en = {
     meta: {
       title: "The Ritual",
       description:
-        "Body care and home fragrance from KHEM — each object presented with the materials it is made from and the story behind it.",
+        "Body care and home fragrance from KHEM , each object presented with the materials it is made from and the story behind it.",
       ogTitle: "The Ritual | KHEM",
       ogDescription:
         "Three photographs and a short story for every mist and every room spray the house makes.",
@@ -1043,7 +1043,7 @@ export const en = {
   },
 
   /**
-   * `/set/[slug]` — the discovery and gift-set detail page.
+   * `/set/[slug]` , the discovery and gift-set detail page.
    *
    * Its own block rather than entries under `ritual`, for the same reason the
    * route is its own: the two pages carry different goods and their copy should
@@ -1053,7 +1053,7 @@ export const en = {
     meta: {
       title: "The Sets",
       description:
-        "Discovery and gift sets from KHEM — every composition presented in full, with the pieces it contains.",
+        "Discovery and gift sets from KHEM , every composition presented in full, with the pieces it contains.",
       ogTitle: "The Sets | KHEM",
       ogDescription:
         "A boxed introduction to the house, and the gifts built from it.",
@@ -1069,7 +1069,7 @@ export const en = {
     meta: {
       title: "New Arrivals",
       description:
-        "The newest KHEM compositions — presented in full, with their stories, their pyramids, and the run they were released in.",
+        "The newest KHEM compositions , presented in full, with their stories, their pyramids, and the run they were released in.",
       ogTitle: "New Arrivals | KHEM",
       ogDescription:
         "Two new extraits from the Cairo atelier. Seen first, here.",
@@ -1078,9 +1078,9 @@ export const en = {
     titleLead: "The New",
     titleAccent: "Compositions",
     description:
-      "Twice a year the atelier releases what it has been working on. These are the newest additions to the house — each one presented in full, as it deserves to be.",
+      "Twice a year the atelier releases what it has been working on. These are the newest additions to the house , each one presented in full, as it deserves to be.",
     heroImageAlt: "Dark marble veined with pale mineral light",
-    /** Small counter under the hero — "Two new compositions". */
+    /** Small counter under the hero , "Two new compositions". */
     count: "{count} new compositions",
     countOne: "One new composition",
     indexLabel: "Release",
@@ -1093,7 +1093,7 @@ export const en = {
     closing: {
       eyebrow: "The Full Library",
       heading: "Everything else the house makes",
-      body: "Three fragrance collections, body care, home fragrance, and the sets composed for giving — all in one place.",
+      body: "Three fragrance collections, body care, home fragrance, and the sets composed for giving , all in one place.",
       cta: "Browse the Collection",
     },
     empty: "The next release is being prepared. Please return shortly.",
@@ -1103,7 +1103,7 @@ export const en = {
     meta: {
       title: "Gift Sets",
       description:
-        "Full-size flacons, ritual objects, and hand-finished presentation — composed for the moment a fragrance is given.",
+        "Full-size flacons, ritual objects, and hand-finished presentation , composed for the moment a fragrance is given.",
       ogTitle: "Gift Sets | KHEM",
       ogDescription:
         "The house presented as an offering. Lacquered boxes, wax seals, and cards written by hand.",
@@ -1112,7 +1112,7 @@ export const en = {
     titleLead: "Gift",
     titleAccent: "Sets",
     description:
-      "A gift of fragrance is a gift of memory. Each set pairs full-size flacons and ritual objects with presentation finished by hand at the atelier — the box, the seal, and the card are part of the composition.",
+      "A gift of fragrance is a gift of memory. Each set pairs full-size flacons and ritual objects with presentation finished by hand at the atelier , the box, the seal, and the card are part of the composition.",
     note: "Complimentary wrapping and a hand-written card with every set.",
     ritual: {
       presentation: {
@@ -1121,7 +1121,7 @@ export const en = {
       },
       message: {
         title: "Written by Hand",
-        body: "Your message is written onto a gold-embossed card at the atelier — never printed, never machine-lettered.",
+        body: "Your message is written onto a gold-embossed card at the atelier , never printed, never machine-lettered.",
       },
       delivery: {
         title: "Discreet Delivery",
@@ -1135,7 +1135,7 @@ export const en = {
     meta: {
       title: "Discovery Sets",
       description:
-        "Curated sample sets — explore the full KHEM olfactory world before committing to a full-size flacon.",
+        "Curated sample sets , explore the full KHEM olfactory world before committing to a full-size flacon.",
       ogTitle: "Discovery Sets | KHEM",
       ogDescription:
         "Every journey into KHEM should begin with discovery. Each purchase may be applied to a full-size order.",
@@ -1196,7 +1196,7 @@ export const en = {
        * terms, in a place nothing revalidates and nobody looks.
        */
       description:
-        "Review the fragrances in your KHEM bag before checkout — complimentary delivery on qualifying orders.",
+        "Review the fragrances in your KHEM bag before checkout , complimentary delivery on qualifying orders.",
     },
     eyebrow: "Your Selection",
     heading: "The Cart",
@@ -1234,8 +1234,8 @@ export const en = {
     updated: "Bag updated. {count} items, {total}.",
     /**
      * The slide-in panel. It shares every other string on this block with
-     * `/cart` — the two surfaces list the same bag and must not drift into
-     * two vocabularies for it — and adds only what a panel needs that a page
+     * `/cart` , the two surfaces list the same bag and must not drift into
+     * two vocabularies for it , and adds only what a panel needs that a page
      * does not.
      */
     drawer: {
@@ -1256,8 +1256,8 @@ export const en = {
    * Checkout.
    *
    * `errors` is keyed by what `src/schemas/checkout.ts` puts in a Zod message.
-   * That file writes **keys**, not sentences — unlike the admin schemas, whose
-   * one reader is an English-only dashboard — so a validation message with no
+   * That file writes **keys**, not sentences , unlike the admin schemas, whose
+   * one reader is an English-only dashboard , so a validation message with no
    * entry here is a lookup miss the client shows as `errors.server`. Adding a
    * rule there means adding a line here and in `ar.ts`.
    */
@@ -1265,7 +1265,7 @@ export const en = {
     meta: {
       title: "Checkout",
       description:
-        "Complete your KHEM order — card or cash on delivery, wrapped and sealed in Cairo.",
+        "Complete your KHEM order , card or cash on delivery, wrapped and sealed in Cairo.",
     },
     eyebrow: "Final Step",
     heading: "Checkout",
@@ -1341,7 +1341,7 @@ export const en = {
       saved: "You saved",
       /*
        * Shown when the bag, the email, or the credit selection has moved since
-       * the code was checked — the estimate no longer describes the order that
+       * the code was checked , the estimate no longer describes the order that
        * would be placed, so it is dropped rather than quietly kept.
        */
       stale: "Your order changed. Apply your code again to use it.",
@@ -1352,7 +1352,7 @@ export const en = {
        * Keyed by the `DiscountRefusalCode` union, which
        * `supabase/sql/0029_discount_preview.sql` returns beside its English
        * sentence. A refusal this build cannot name falls back to that sentence
-       * rather than to a generic apology — see `DiscountStep`.
+       * rather than to a generic apology , see `DiscountStep`.
        */
       reason: {
         NO_CODE: "Enter a code first.",
@@ -1371,7 +1371,7 @@ export const en = {
 
       /*
        * The fuller sentence, shown when `resolve_discount()` sent the
-       * specifics — see `src/lib/discount-message.ts`. Only a code whose terms
+       * specifics , see `src/lib/discount-message.ts`. Only a code whose terms
        * are public ever reaches these; an invitation-only code keeps the plain
        * sentence above, which is what stops a private campaign being read off a
        * refusal.
@@ -1422,8 +1422,8 @@ export const en = {
      *
      * The four `blockedBy*` sentences each name the *other* benefit rather than
      * saying "points cannot be used", because a customer who is told which
-     * instrument is in the way can act on it — remove the code, deselect the
-     * credit — and one who is told a bare refusal cannot.
+     * instrument is in the way can act on it , remove the code, deselect the
+     * credit , and one who is told a bare refusal cannot.
      */
     points: {
       heading: "KHEM Rewards",
@@ -1503,7 +1503,7 @@ export const en = {
       creditRejected: "Your Discovery Credit could not be applied.",
       pointsRejected: "Your KHEM Points could not be applied.",
       discountRejected: "That discount code could not be applied.",
-      /* Typed but never applied — see `handleSubmit` in `CheckoutView`. */
+      /* Typed but never applied , see `handleSubmit` in `CheckoutView`. */
       discountNotApplied:
         "Apply your discount code before placing the order, or clear the field.",
       cartChanged:
@@ -1574,7 +1574,7 @@ export const en = {
       label: "Email me with news and offers",
       note: "New releases, private events, and seasonal editions. You may unsubscribe at any time.",
     },
-    /** Guest routes offered beneath the form — neither needs a session. */
+    /** Guest routes offered beneath the form , neither needs a session. */
     guestLead: "No account yet? You can still browse.",
     guestCart: "Your Bag",
   },
@@ -1659,7 +1659,7 @@ export const en = {
       /*
        * The station rail. Keyed by the `OrderStatus` union like `status`
        * above, so a seventh status is a compile error rather than a blank
-       * stop — but worded as *stops on a journey* rather than as states: a
+       * stop , but worded as *stops on a journey* rather than as states: a
        * customer reads "On Its Way", not "Shipped".
        */
       tracker: {
@@ -1705,18 +1705,18 @@ export const en = {
         body: "Addresses you use at checkout will be kept here for next time.",
         cta: "Explore Collections",
       },
-      /* The panel's own empty line — shorter than the page's, because the
+      /* The panel's own empty line , shorter than the page's, because the
          "Add" control is directly beneath it. */
       none: "You have not saved an address yet.",
       form: {
         addHeading: "New address",
         editHeading: "Edit address",
         label: "Label",
-        labelHint: "What you call this place — Home, Office.",
+        labelHint: "What you call this place , Home, Office.",
         recipient: "Recipient",
         line1: "Street address",
         line2: "Landmark",
-        line2Placeholder: "Optional — beside, behind, opposite",
+        line2Placeholder: "Optional , beside, behind, opposite",
         city: "City",
         state: "Governorate",
         postalCode: "Postal code",
@@ -1729,7 +1729,7 @@ export const en = {
         cancel: "Cancel",
         failed: "That could not be saved. Please try again.",
         removeFailed: "That could not be removed. Please try again.",
-        /* Keyed by `AddressErrorCode` — a fifth code is a compile error. */
+        /* Keyed by `AddressErrorCode` , a fifth code is a compile error. */
         errors: {
           required: "This is needed.",
           tooShort: "That is too short.",
@@ -1936,7 +1936,7 @@ export const en = {
       markAll: "Mark all as read",
       unread: "{count} new",
       unreadOne: "1 new",
-      /* Keyed by `CustomerNotificationKind` — a fourth kind is a compile error. */
+      /* Keyed by `CustomerNotificationKind` , a fourth kind is a compile error. */
       kind: {
         ORDER_STATUS: "Your order",
         CREDIT_EARNED: "KHEM Credit",
@@ -2011,7 +2011,7 @@ export const en = {
    * The subscribe-and-earn popup.
    *
    * Three different offer sentences because the welcome campaign may be a
-   * percentage, a fixed amount, or absent entirely — and a popup that promised
+   * percentage, a fixed amount, or absent entirely , and a popup that promised
    * "10% off" while the house was running "EGP 200 off" would be advertising a
    * campaign the checkout does not honour. The percentage is never written into
    * this file; it is interpolated from the live discount row.
@@ -2025,7 +2025,7 @@ export const en = {
      * The signup benefit as KHEM Points.
      *
      * Rendered instead of the percentage when the house has chosen Rewards as
-     * what signing up is worth. Under the third setting — Off — no offer line is
+     * what signing up is worth. Under the third setting , Off , no offer line is
      * rendered at all, which is why there is no fourth string here.
      */
     pointsOffer: "Create your account and begin with {points} KHEM Points.",
@@ -2090,7 +2090,7 @@ export const en = {
       title: "Search",
       titleWithQuery: "Search: {query}",
       description:
-        "Search the KHEM library by name, note, or feeling — the Signature, Noir, and Gemstone fragrances alongside body care, home fragrance, and sets.",
+        "Search the KHEM library by name, note, or feeling , the Signature, Noir, and Gemstone fragrances alongside body care, home fragrance, and sets.",
       ogTitle: "Search | KHEM Perfumes",
       ogDescription: "Find a fragrance by its name, its notes, or the mood you are after.",
     },
@@ -2154,20 +2154,20 @@ export const en = {
    * The one control that carries both the language the site is read in and the
    * country its prices are drawn for.
    *
-   * They were two controls in two places — a language rail in the header and a
-   * currency select in the footer — which asked the visitor to know that the
+   * They were two controls in two places , a language rail in the header and a
+   * currency select in the footer , which asked the visitor to know that the
    * currency lives at the bottom of the page, and that it is really a question
    * about where they are. One trigger, two lists, one decision.
    *
    * The country *names* are not written here: `Intl.DisplayNames` produces them
    * in the reading locale, the same way `src/lib/shipping.ts` names countries
-   * at checkout — so this block holds only what a formatter cannot supply.
+   * at checkout , so this block holds only what a formatter cannot supply.
    */
   regionSwitcher: {
     label: "Language and country",
     language: "Language",
     country: "Country",
-    /** Neither a country nor a claim about one — see `INTERNATIONAL`. */
+    /** Neither a country nor a claim about one , see `INTERNATIONAL`. */
     international: "International",
     /*
      * The countries this house calls by their short name.
@@ -2176,7 +2176,7 @@ export const en = {
      * Emirates" in a header, and a trigger sized by the longest member of the
      * list is a trigger that wobbles. Everything absent from this map keeps the
      * name CLDR gives it (`Intl.DisplayNames`), which already shortens what it
-     * can — "UK" for GB — and leaves "Germany" and "Saudi Arabia" alone,
+     * can , "UK" for GB , and leaves "Germany" and "Saudi Arabia" alone,
      * because those *are* the short names.
      */
     shortNames: {
@@ -2190,7 +2190,7 @@ export const en = {
 
   /*
    * Display currency. The names are the visitor's own words for their currency,
-   * not the ISO code — "Egyptian Pound", not "EGP" — because the switcher is
+   * not the ISO code , "Egyptian Pound", not "EGP" , because the switcher is
    * chrome, and chrome is translated. The prices themselves keep the ISO symbol
    * Intl gives them (`src/lib/format.ts`).
    */
@@ -2204,7 +2204,7 @@ export const en = {
       SAR: "Saudi Riyal",
     },
     /*
-     * Shown wherever a non-USD price is committed to — the buy block and the
+     * Shown wherever a non-USD price is committed to , the buy block and the
      * bag. Prices outside USD are converted at an indicative rate, and saying
      * so is not optional: the card is charged in dollars.
      */
@@ -2214,7 +2214,7 @@ export const en = {
 
   /*
    * Cookie consent. The category names and descriptions deliberately echo the
-   * table in the published Cookie Policy (the `"LegalDocument"` row) — the banner and
+   * table in the published Cookie Policy (the `"LegalDocument"` row) , the banner and
    * the policy must never describe different sets of cookies.
    */
   cookieConsent: {

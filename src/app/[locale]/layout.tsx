@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import "../globals.css";
 import { Analytics } from '@vercel/analytics/next';
+// import Script from "next/script";
 
 import Footer from "@/src/components/Footer";
 import Nav from "@/src/components/Nav";
@@ -395,6 +396,9 @@ export default async function RootLayout({
          * First child of `<body>` rather than a hand-written `<head>`, which
          * the App Router owns.
          */}
+             {/* <Script id="khem-intro-session-probe" strategy="beforeInteractive">
+          {"try{if(sessionStorage.getItem('khem:intro:seen'))document.documentElement.dataset.intro='off'}catch(e){}"}
+        </Script> */}
         <script
           dangerouslySetInnerHTML={{
             __html:

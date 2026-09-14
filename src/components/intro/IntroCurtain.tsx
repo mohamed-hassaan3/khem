@@ -58,14 +58,30 @@ const SKIP_AFTER_MS = 600;
  * document-level event, it must finish once started, and this flag is what
  * makes starting it twice impossible.
  */
-let launched = false;
+// let launched = false;
 
 export default function IntroCurtain() {
-  useEffect(() => {
-    if (launched) return;
-    launched = true;
+     useEffect(() => {
+       const root = document.documentElement;
 
-    const root = document.documentElement;
+      //  let seen: string | null = null;
+      //  try {
+      //    seen = sessionStorage.getItem(SEEN_KEY);
+      //  } catch {
+      //    seen = null;
+      //  }
+
+      //  // Already played this session — covers a real prior load AND a
+      //  // locale-driven remount of this component (module-scope `launched`
+      //  // survives a remount, so it can't be relied on alone here).
+      //  if (seen === "1" || root.dataset.intro === "off" || root.dataset.intro === "done") {
+      //    root.dataset.intro = "done";
+      //    return;
+      //  }
+
+      //  if (launched) return;
+      //  launched = true;
+
 
     // Already seen this session — the pre-paint script has hidden the overlay
     // and there is nothing to end.
