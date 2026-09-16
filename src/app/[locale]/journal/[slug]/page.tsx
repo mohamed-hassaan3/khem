@@ -52,7 +52,7 @@ export async function generateMetadata({
 
   const [dict, article] = await Promise.all([
     getDictionary(activeLocale),
-    getArticleBySlug(slug),
+    getArticleBySlug(slug, activeLocale),
   ]);
 
   // An unknown slug renders the 404 below; its metadata falls back to the
@@ -90,12 +90,12 @@ export default async function JournalArticlePage({
   // The segment is untrusted input: it is only ever matched against stored
   // slugs, and an unknown value — or an unpublished draft, which RLS makes
   // indistinguishable from a missing row — 404s.
-  const article = await getArticleBySlug(slug);
+  const article = await getArticleBySlug(slug, activeLocale);
   if (!article) notFound();
 
   const [dict, related] = await Promise.all([
     getDictionary(activeLocale),
-    getRelatedArticles(article.slug),
+    getRelatedArticles(article.slug, activeLocale),
   ]);
 
   /*
@@ -119,7 +119,7 @@ export default async function JournalArticlePage({
     image: article.image.url,
     datePublished: article.publishedAt,
     articleSection: article.category,
-    inLanguage: "en",
+    inLanguage: activeLocale,
     mainEntityOfPage: `${SITE_URL}${localizePath(activeLocale, `/journal/${article.slug}`)}`,
     publisher: {
       "@type": "Organization",

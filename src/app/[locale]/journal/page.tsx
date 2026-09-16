@@ -10,7 +10,7 @@ import { isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { interpolate } from "@/src/lib/i18n/interpolate";
-import { ltrIsland, readingArrow } from "@/src/lib/i18n/rtl";
+import { readingArrow } from "@/src/lib/i18n/rtl";
 import {
   getFeaturedArticle,
   getJournalArticles,
@@ -53,16 +53,16 @@ export default async function Journal({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const [{ locale }, articles, featured, categories] = await Promise.all([
-    params,
-    getJournalArticles(),
-    getFeaturedArticle(),
-    getJournalCategories(),
+  const { locale } = await params;
+  const activeLocale = isLocale(locale) ? locale : "en";
+
+  const [articles, featured, categories] = await Promise.all([
+    getJournalArticles(activeLocale),
+    getFeaturedArticle(activeLocale),
+    getJournalCategories(activeLocale),
   ]);
 
-  const activeLocale = isLocale(locale) ? locale : "en";
   const dict = await getDictionary(activeLocale);
-  const island = ltrIsland(activeLocale);
 
   const rest = articles.filter((article) => article.id !== featured?.id);
 
@@ -100,7 +100,7 @@ export default async function Journal({
 
               <div className="flex flex-col justify-center p-8 md:p-15">
                 {/* Article metadata and copy come from the database — English only. */}
-                <div className="mb-7 flex flex-wrap items-center gap-4" {...island}>
+                <div className="mb-7 flex flex-wrap items-center gap-4" dir="auto">
                   <span className="eyebrow">{featured.category}</span>
                   <span className="h-3 w-px bg-ivory/15" aria-hidden="true" />
                   <span className="text-[10px] tracking-widest text-ground-muted/70">
@@ -121,7 +121,7 @@ export default async function Journal({
                   <span aria-hidden="true">✦</span> {dict.journal.featured}
                 </span>
 
-                <div {...island}>
+                <div dir="auto">
                   <h2 className="mb-6 font-heading text-xl font-normal leading-snug text-ground sm:text-2xl md:text-3xl">
                     {featured.title}
                   </h2>

@@ -1,7 +1,6 @@
 import Reveal from "@/src/components/animation/Reveal";
 import type { Locale } from "@/src/lib/i18n/config";
 import { parseArticleBody, parseInline } from "@/src/lib/journal/body";
-import { ltrIsland } from "@/src/lib/i18n/rtl";
 import type { JournalArticle } from "@/src/types/content";
 
 /**
@@ -59,16 +58,15 @@ function Inline({ text }: { text: string }) {
   );
 }
 
-export default function ArticleBody({ article, locale }: ArticleBodyProps) {
+export default function ArticleBody({ article }: ArticleBodyProps) {
   const blocks = parseArticleBody(article.body);
-  const island = ltrIsland(locale);
 
   // The drop cap belongs on the first *paragraph*, which is not necessarily the
   // first block — an essay may open on a subheading.
   const firstParagraph = blocks.findIndex((block) => block.kind === "paragraph");
 
   return (
-    <section className="mx-auto max-w-3xl px-4 md:px-6 py-12 md:py-28" {...island}>
+    <section className="mx-auto max-w-3xl px-4 md:px-6 py-12 md:py-28" dir="auto">
       {/* ── LEAD ────────────────────────────────────── */}
       <Reveal>
         <p className="font-heading text-lg italic leading-relaxed text-ground-muted md:text-xl">

@@ -57,17 +57,45 @@ export const ingredientFamilySchema = z.enum([
 
 // ── Testimonial ───────────────────────────────────────────────
 
-export const TESTIMONIAL_COLUMNS = "id, quote, author, authorTitle";
+export const TESTIMONIAL_COLUMNS =
+  "id, quote, quote_ar, author, author_ar, authorTitle, authorTitle_ar";
 
 const testimonialRowSchema = z.object({
   id: z.string(),
   quote: z.string(),
+  quote_ar: z.string().nullable().default(null),
   author: z.string(),
+  author_ar: z.string().nullable().default(null),
   authorTitle: z.string(),
+  authorTitle_ar: z.string().nullable().default(null),
 });
 
-export function toTestimonial(row: unknown): Testimonial | null {
+export function toTestimonial(row: unknown, locale: Locale): Testimonial | null {
   const parsed = testimonialRowSchema.safeParse(row);
+  if (!parsed.success) return null;
+
+  const { quote_ar, author_ar, authorTitle_ar, ...testimonial } = parsed.data;
+  return {
+    ...testimonial,
+    quote: resolveText(testimonial.quote, quote_ar, locale),
+    author: resolveText(testimonial.author, author_ar, locale),
+    authorTitle: resolveText(testimonial.authorTitle, authorTitle_ar, locale),
+  };
+}
+
+export const ADMIN_TESTIMONIAL_COLUMNS =
+  "id, quote, quote_ar, author, author_ar, authorTitle, authorTitle_ar, " +
+  "isPublished, sortOrder";
+
+const adminTestimonialRowSchema = testimonialRowSchema.extend({
+  isPublished: z.boolean().default(true),
+  sortOrder: z.coerce.number().default(0),
+});
+
+export type AdminTestimonial = z.infer<typeof adminTestimonialRowSchema>;
+
+export function toAdminTestimonial(row: unknown): AdminTestimonial | null {
+  const parsed = adminTestimonialRowSchema.safeParse(row);
   return parsed.success ? parsed.data : null;
 }
 
@@ -266,18 +294,21 @@ export function toAdminIngredient(row: unknown): AdminIngredient | null {
  * discipline at each call site.
  */
 export const ARTICLE_CARD_COLUMNS =
-  "id, slug, title, category, excerpt, publishedAt, readTimeMinutes, isFeatured, " +
-  "imageUrl, imageAlt";
+  "id, slug, title, title_ar, category, category_ar, excerpt, excerpt_ar, " +
+  "publishedAt, readTimeMinutes, isFeatured, imageUrl, imageAlt, imageAlt_ar";
 
 /** The card projection plus the essay. Only `getArticleBySlug()` asks for it. */
-export const ARTICLE_COLUMNS = `${ARTICLE_CARD_COLUMNS}, body`;
+export const ARTICLE_COLUMNS = `${ARTICLE_CARD_COLUMNS}, body, body_ar`;
 
 const articleRowSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
+  title_ar: z.string().nullable().default(null),
   category: z.string(),
+  category_ar: z.string().nullable().default(null),
   excerpt: z.string(),
+  excerpt_ar: z.string().nullable().default(null),
   /* A `date` column; PostgREST renders it as `YYYY-MM-DD`, which is the ISO-8601
    * the type promises and `formatArticleDate()` parses. */
   publishedAt: z.string(),
@@ -285,6 +316,7 @@ const articleRowSchema = z.object({
   isFeatured: z.boolean(),
   imageUrl: z.string(),
   imageAlt: z.string(),
+  imageAlt_ar: z.string().nullable().default(null),
   /*
    * Absent from a card projection and present on the detail one, which is why
    * it defaults rather than being required. The column itself is
@@ -296,14 +328,31 @@ const articleRowSchema = z.object({
    * a page rather than a type check.
    */
   body: z.string().default(""),
+  body_ar: z.string().nullable().default(null),
 });
 
-export function toArticle(row: unknown): JournalArticle | null {
+export function toArticle(row: unknown, locale: Locale): JournalArticle | null {
   const parsed = articleRowSchema.safeParse(row);
   if (!parsed.success) return null;
 
-  const { imageUrl, imageAlt, ...article } = parsed.data;
-  return { ...article, image: { url: imageUrl, alt: imageAlt } };
+  const {
+    imageUrl,
+    imageAlt,
+    imageAlt_ar,
+    title_ar,
+    category_ar,
+    excerpt_ar,
+    body_ar,
+    ...article
+  } = parsed.data;
+  return {
+    ...article,
+    title: resolveText(article.title, title_ar, locale),
+    category: resolveText(article.category, category_ar, locale),
+    excerpt: resolveText(article.excerpt, excerpt_ar, locale),
+    body: resolveText(article.body, body_ar, locale),
+    image: { url: imageUrl, alt: resolveText(imageAlt, imageAlt_ar, locale) },
+  };
 }
 
 // ── Heritage and About ────────────────────────────────────────

@@ -60,17 +60,22 @@ export default function ArticleForm({
   const isEdit = article !== null;
 
   const [title, setTitle] = useState(article?.title ?? "");
+  const [titleAr, setTitleAr] = useState(article?.title_ar ?? "");
   const [slug, setSlug] = useState(article?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(isEdit);
   const [category, setCategory] = useState(article?.category ?? "");
+  const [categoryAr, setCategoryAr] = useState(article?.category_ar ?? "");
   const [excerpt, setExcerpt] = useState(article?.excerpt ?? "");
+  const [excerptAr, setExcerptAr] = useState(article?.excerpt_ar ?? "");
   const [body, setBody] = useState(article?.body ?? "");
+  const [bodyAr, setBodyAr] = useState(article?.body_ar ?? "");
   const [publishedAt, setPublishedAt] = useState(article?.publishedAt ?? today());
   const [readTimeMinutes, setReadTimeMinutes] = useState(
     String(article?.readTimeMinutes ?? 5),
   );
   const [imageUrl, setImageUrl] = useState(article?.imageUrl ?? "");
   const [imageAlt, setImageAlt] = useState(article?.imageAlt ?? "");
+  const [imageAltAr, setImageAltAr] = useState(article?.imageAlt_ar ?? "");
   const [isFeatured, setIsFeatured] = useState(article?.isFeatured ?? false);
   const [isPublished, setIsPublished] = useState(article?.isPublished ?? false);
 
@@ -88,15 +93,20 @@ export default function ArticleForm({
   const payload = {
     slug,
     title,
+    title_ar: titleAr,
     category,
+    category_ar: categoryAr,
     excerpt,
+    excerpt_ar: excerptAr,
     body,
+    body_ar: bodyAr,
     publishedAt,
     readTimeMinutes,
     isFeatured,
     isPublished,
     imageUrl,
     imageAlt,
+    imageAlt_ar: imageAltAr,
   };
 
   const { toast } = useAdminToast();
@@ -170,6 +180,14 @@ export default function ArticleForm({
         />
 
         <AdminInput
+          id="title_ar"
+          label="Title — Arabic"
+          value={titleAr}
+          error={fieldErrors.title_ar}
+          onChange={setTitleAr}
+        />
+
+        <AdminInput
           id="slug"
           label="Slug"
           required
@@ -198,6 +216,13 @@ export default function ArticleForm({
           hint="Becomes a filter tab on /journal. Reuse an existing one where it fits."
           onChange={setCategory}
         />
+        <AdminInput
+          id="category_ar"
+          label="Category — Arabic"
+          value={categoryAr}
+          error={fieldErrors.category_ar}
+          onChange={setCategoryAr}
+        />
         {categories.length > 0 ? (
           <p className="mt-2 text-[11px] tracking-wide text-ground-subtle">
             In use: {categories.join(" · ")}
@@ -217,6 +242,15 @@ export default function ArticleForm({
       />
 
       <AdminTextarea
+        id="excerpt_ar"
+        label="Excerpt — Arabic"
+        rows={4}
+        value={excerptAr}
+        error={fieldErrors.excerpt_ar}
+        onChange={setExcerptAr}
+      />
+
+      <AdminTextarea
         id="body"
         label="Body"
         rows={22}
@@ -228,6 +262,15 @@ export default function ArticleForm({
           "HTML is never rendered as markup."
         }
         onChange={setBody}
+      />
+
+      <AdminTextarea
+        id="body_ar"
+        label="Body — Arabic"
+        rows={22}
+        value={bodyAr}
+        error={fieldErrors.body_ar}
+        onChange={setBodyAr}
       />
 
       <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
@@ -271,6 +314,14 @@ export default function ArticleForm({
           value={imageAlt}
           error={fieldErrors.imageAlt}
           onChange={setImageAlt}
+        />
+
+        <AdminInput
+          id="imageAlt_ar"
+          label="Image alt text — Arabic"
+          value={imageAltAr}
+          error={fieldErrors.imageAlt_ar}
+          onChange={setImageAltAr}
         />
       </div>
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import ArticleCard from "@/src/components/journal/ArticleCard";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
+import type { JournalCategory } from "@/src/services/content";
 import type { JournalArticle } from "@/src/types/content";
 
 /**
@@ -18,18 +19,18 @@ import type { JournalArticle } from "@/src/types/content";
 export interface JournalGridProps {
   articles: JournalArticle[];
   /** Filter options, `"All"` first. Derived server-side from the records. */
-  categories: string[];
+  categories: JournalCategory[];
 }
 
 export default function JournalGrid({ articles, categories }: JournalGridProps) {
   const dict = useDictionary();
   const locale = useLocale();
-  const allLabel = categories[0] ?? "All";
-  const [activeCategory, setActiveCategory] = useState(allLabel);
+  const allCategory = categories[0] ?? { key: "All", label: "All" };
+  const [activeCategory, setActiveCategory] = useState(allCategory.key);
 
   const visible = articles.filter(
     (article) =>
-      activeCategory === allLabel || article.category === activeCategory,
+      activeCategory === allCategory.key || article.category === activeCategory,
   );
 
   return (
@@ -39,17 +40,17 @@ export default function JournalGrid({ articles, categories }: JournalGridProps) 
         <div className="mx-auto flex max-w-350 gap-5 md:gap-9 overflow-x-auto px-4 md:px-20">
           {categories.map((category) => (
             <button
-              key={category}
+              key={category.key}
               type="button"
-              aria-pressed={activeCategory === category}
-              onClick={() => setActiveCategory(category)}
+              aria-pressed={activeCategory === category.key}
+              onClick={() => setActiveCategory(category.key)}
               className={`whitespace-nowrap border-b-2 py-5 font-heading text-[11px] tracking-[0.2em] transition-colors duration-300 ease-out ${
-                activeCategory === category
+                activeCategory === category.key
                   ? "border-gold text-ground-accent"
                   : "border-transparent text-ground-muted hover:text-ground-muted"
               }`}
             >
-              {category}
+              <span dir="auto">{category.label}</span>
             </button>
           ))}
         </div>

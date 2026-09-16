@@ -6,7 +6,6 @@ import { formatArticleDate } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
-import { ltrIsland } from "@/src/lib/i18n/rtl";
 import type { JournalArticle } from "@/src/types/content";
 
 /**
@@ -31,7 +30,6 @@ export default async function ArticleHero({
   locale,
 }: ArticleHeroProps) {
   const dict = await getDictionary(locale);
-  const island = ltrIsland(locale);
 
   return (
     <header className="relative h-[70vh] min-h-125 w-full overflow-hidden">
@@ -70,10 +68,10 @@ export default async function ArticleHero({
               <span className="mx-3 text-ground-muted" aria-hidden="true">
                 /
               </span>
-              <span {...island}>{article.category}</span>
+              <span dir="auto">{article.category}</span>
             </nav>
 
-            <div {...island}>
+            <div dir="auto">
               <p className="eyebrow mb-5">{article.category}</p>
 
               <h1 className="font-heading text-3xl font-normal leading-tight text-balance text-ground sm:text-5xl md:text-6xl">

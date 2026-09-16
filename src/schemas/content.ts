@@ -129,6 +129,25 @@ const booleanField = z
   .transform((value) => (typeof value === "boolean" ? value : value === "true"))
   .default(true);
 
+// ── Testimonial — home page ──────────────────────────────────
+
+const testimonialFields = z.object({
+  quote: requiredText(2, 1_000, "What was said?", "That quote is too long."),
+  quote_ar: optionalText(1_000, "That quote is too long."),
+  author: requiredText(2, 120, "Who said it?", "That name is too long."),
+  author_ar: optionalText(120, "That name is too long."),
+  authorTitle: requiredText(2, 160, "What is their role?", "That is too long."),
+  authorTitle_ar: optionalText(160, "That is too long."),
+  isPublished: booleanField,
+  sortOrder: sortOrderField,
+});
+
+export const {
+  create: createTestimonialSchema,
+  update: updateTestimonialSchema,
+  remove: deleteTestimonialSchema,
+} = pair(testimonialFields);
+
 // ── BrandValue — /heritage ────────────────────────────────────
 
 const brandValueFields = z.object({

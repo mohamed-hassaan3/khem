@@ -27,6 +27,7 @@ import {
   ADMIN_HERO_SLIDE_COLUMNS,
   ADMIN_INGREDIENT_COLUMNS,
   ADMIN_MISSION_STATEMENT_COLUMNS,
+  ADMIN_TESTIMONIAL_COLUMNS,
   ADMIN_TIMELINE_COLUMNS,
   toAdminBrandValue,
   toAdminCraftPillar,
@@ -36,6 +37,7 @@ import {
   toAdminHero,
   toAdminIngredient,
   toAdminMissionStatement,
+  toAdminTestimonial,
   toAdminTimelineEvent,
   type AdminBrandValue,
   type AdminCraftPillar,
@@ -44,6 +46,7 @@ import {
   type AdminCraftStep,
   type AdminIngredient,
   type AdminMissionStatement,
+  type AdminTestimonial,
   type AdminTimelineEvent,
 } from "@/src/schemas/db/content";
 import type { AdminHero } from "@/src/types/content";
@@ -113,6 +116,15 @@ export async function listAdminMissionStatements(): Promise<
     "MissionStatement",
     ADMIN_MISSION_STATEMENT_COLUMNS,
     toAdminMissionStatement,
+  );
+}
+
+export async function listAdminTestimonials(): Promise<AdminTestimonial[]> {
+  return listContent(
+    "listAdminTestimonials",
+    "Testimonial",
+    ADMIN_TESTIMONIAL_COLUMNS,
+    toAdminTestimonial,
   );
 }
 
