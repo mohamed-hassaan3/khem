@@ -109,8 +109,8 @@ export default async function Home({
     shown.has("featured") ? getFeaturedProduct(activeLocale) : null,
     shown.has("craft") ? getCraftPillars(activeLocale) : [],
     shown.has("ingredients") ? getIngredients(activeLocale) : [],
-    shown.has("journal") ? getLatestArticles() : [],
-    shown.has("testimonials") ? getTestimonials() : [],
+    shown.has("journal") ? getLatestArticles(activeLocale) : [],
+    shown.has("testimonials") ? getTestimonials(activeLocale) : [],
     shown.has("hero") ? getHero(activeLocale) : null,
   ]);
   const dict = await getDictionary(activeLocale);

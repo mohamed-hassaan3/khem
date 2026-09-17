@@ -15,8 +15,8 @@ export interface CategoryHeroProps {
   eyebrow: string;
   /** First line of the display title — ivory. */
   titleLead: string;
-  /** Second line — gold. */
-  titleAccent: string;
+  /** Optional second line — gold. */
+  titleAccent?: string;
   description: string;
   /** Optional single line under the description, e.g. the discovery promise. */
   note?: string;
@@ -93,8 +93,12 @@ export default function CategoryHero({
 
             <h1 className="font-heading text-4xl font-normal leading-tight text-ground sm:text-6xl md:text-7xl">
               {titleLead}
-              <br />
-              <span className="text-ground-accent">{titleAccent}</span>
+              {titleAccent ? (
+                <>
+                  <br />
+                  <span className="text-ground-accent">{titleAccent}</span>
+                </>
+              ) : null}
             </h1>
 
             <div className="gold-line my-7" />

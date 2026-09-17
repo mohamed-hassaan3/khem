@@ -18,6 +18,7 @@ import {
   toLandingSection,
 } from "@/src/schemas/db/landing";
 import type { Locale } from "@/src/lib/i18n/config";
+import { resolveText } from "@/src/lib/i18n/resolve";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { parseList } from "@/src/schemas/db/catalog";
 import {
@@ -63,11 +64,6 @@ import type {
 /** Filter label meaning "no filter". Shared by the ingredient and journal tab bars. */
 export const ALL_FILTER = "All";
 
-/** Distinct values across records, in first-seen order, prefixed with `ALL_FILTER`. */
-function toFilterOptions(values: string[]): string[] {
-  return [ALL_FILTER, ...new Set(values)];
-}
-
 function logFailure(query: string, message: string): void {
   console.error(`[content] ${query} failed: ${message}`);
 }
@@ -96,8 +92,10 @@ async function list<T>(
   return parseList(data as unknown[] | null, parse);
 }
 
-export async function getTestimonials(): Promise<Testimonial[]> {
-  return list("getTestimonials", "Testimonial", TESTIMONIAL_COLUMNS, toTestimonial);
+export async function getTestimonials(locale: Locale): Promise<Testimonial[]> {
+  return list("getTestimonials", "Testimonial", TESTIMONIAL_COLUMNS, (row) =>
+    toTestimonial(row, locale),
+  );
 }
 
 export async function getIngredients(locale: Locale): Promise<Ingredient[]> {
@@ -156,7 +154,10 @@ export async function getIngredientsForProduct(
 }
 
 /** Latest journal articles, newest first. */
-export async function getLatestArticles(limit = 3): Promise<JournalArticle[]> {
+export async function getLatestArticles(
+  locale: Locale,
+  limit = 3,
+): Promise<JournalArticle[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
@@ -171,11 +172,11 @@ export async function getLatestArticles(limit = 3): Promise<JournalArticle[]> {
     return [];
   }
 
-  return parseList(data as unknown[] | null, toArticle);
+  return parseList(data as unknown[] | null, (row) => toArticle(row, locale));
 }
 
 /** Every journal article, newest first. */
-export async function getJournalArticles(): Promise<JournalArticle[]> {
+export async function getJournalArticles(locale: Locale): Promise<JournalArticle[]> {
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
@@ -189,7 +190,7 @@ export async function getJournalArticles(): Promise<JournalArticle[]> {
     return [];
   }
 
-  return parseList(data as unknown[] | null, toArticle);
+  return parseList(data as unknown[] | null, (row) => toArticle(row, locale));
 }
 
 /**
@@ -200,7 +201,7 @@ export async function getJournalArticles(): Promise<JournalArticle[]> {
  * last` that would also survive an empty featured set without a second round
  * trip on the common path.
  */
-export async function getFeaturedArticle(): Promise<JournalArticle | null> {
+export async function getFeaturedArticle(locale: Locale): Promise<JournalArticle | null> {
   const supabase = getSupabasePublic();
   if (!supabase) return null;
 
@@ -217,10 +218,10 @@ export async function getFeaturedArticle(): Promise<JournalArticle | null> {
     return null;
   }
 
-  const featured = toArticle(data);
+  const featured = toArticle(data, locale);
   if (featured) return featured;
 
-  const [newest] = await getLatestArticles(1);
+  const [newest] = await getLatestArticles(locale, 1);
   return newest ?? null;
 }
 
@@ -236,6 +237,7 @@ export async function getFeaturedArticle(): Promise<JournalArticle | null> {
  */
 export async function getArticleBySlug(
   slug: string,
+  locale: Locale,
 ): Promise<JournalArticle | null> {
   const supabase = getSupabasePublic();
   if (!supabase) return null;
@@ -251,7 +253,7 @@ export async function getArticleBySlug(
     return null;
   }
 
-  return toArticle(data);
+  return toArticle(data, locale);
 }
 
 /** Published article slugs, for `generateStaticParams()`. */
@@ -288,6 +290,7 @@ export async function getArticleSlugs(): Promise<string[]> {
  */
 export async function getRelatedArticles(
   slug: string,
+  locale: Locale,
   limit = 3,
 ): Promise<JournalArticle[]> {
   const supabase = getSupabasePublic();
@@ -302,7 +305,12 @@ export async function getRelatedArticles(
     return [];
   }
 
-  return parseList(data as unknown[] | null, toArticle);
+  return parseList(data as unknown[] | null, (row) => toArticle(row, locale));
+}
+
+export interface JournalCategory {
+  key: string;
+  label: string;
 }
 
 /**
@@ -311,25 +319,37 @@ export async function getRelatedArticles(
  * Derived rather than listed, so a category gains its chip the moment an
  * article uses it and loses it when the last one goes.
  */
-export async function getJournalCategories(): Promise<string[]> {
+export async function getJournalCategories(locale: Locale): Promise<JournalCategory[]> {
   const supabase = getSupabasePublic();
-  if (!supabase) return [ALL_FILTER];
+  if (!supabase) return [{ key: ALL_FILTER, label: locale === "ar" ? "الكل" : ALL_FILTER }];
 
   const { data, error } = await supabase
     .from("Article")
-    .select("category")
+    .select("category, category_ar")
     .order("publishedAt", { ascending: false });
 
   if (error) {
     logFailure("getJournalCategories", error.message);
-    return [ALL_FILTER];
+    return [{ key: ALL_FILTER, label: locale === "ar" ? "الكل" : ALL_FILTER }];
   }
 
-  return toFilterOptions(
-    (data ?? [])
-      .map((row) => (typeof row.category === "string" ? row.category : null))
-      .filter((category): category is string => category !== null),
-  );
+  const categories = new Map<string, string>();
+  for (const row of data ?? []) {
+    if (typeof row.category !== "string") continue;
+    categories.set(
+      row.category,
+      resolveText(
+        row.category,
+        typeof row.category_ar === "string" ? row.category_ar : null,
+        locale,
+      ),
+    );
+  }
+
+  return [
+    { key: ALL_FILTER, label: locale === "ar" ? "الكل" : ALL_FILTER },
+    ...[...categories].map(([key, label]) => ({ key, label })),
+  ];
 }
 
 export async function getCraftPillars(locale: Locale): Promise<CraftPillar[]> {

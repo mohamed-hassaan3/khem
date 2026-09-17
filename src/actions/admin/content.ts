@@ -36,6 +36,7 @@ import {
   revalidateHeritage,
   revalidateHero,
   revalidateIngredients,
+  revalidateHome,
 } from "@/src/lib/admin/revalidate";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import type { AdminActionResult } from "@/src/schemas/admin";
@@ -48,6 +49,7 @@ import {
   createIngredientSchema,
   createMissionStatementSchema,
   createTimelineEventSchema,
+  createTestimonialSchema,
   deleteIngredientSchema,
   setIngredientProductsSchema,
   updateIngredientSchema,
@@ -58,6 +60,7 @@ import {
   deleteCraftStepSchema,
   deleteMissionStatementSchema,
   deleteTimelineEventSchema,
+  deleteTestimonialSchema,
   heroSchema,
   updateBrandValueSchema,
   updateCraftPillarSchema,
@@ -66,6 +69,7 @@ import {
   updateCraftStepSchema,
   updateMissionStatementSchema,
   updateTimelineEventSchema,
+  updateTestimonialSchema,
 } from "@/src/schemas/content";
 
 import {
@@ -170,6 +174,46 @@ function invalid(error: Parameters<typeof fieldErrorsFrom>[0]): AdminActionResul
     message: "Some fields need attention.",
     fieldErrors: fieldErrorsFrom(error),
   };
+}
+
+// ── Testimonial ──────────────────────────────────────────────
+
+export async function createTestimonial(input: unknown): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+  const parsed = createTestimonialSchema.safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+
+  return insertRow(
+    "Testimonial",
+    parsed.data,
+    actor.email,
+    revalidateHome,
+    `“${parsed.data.author}” added.`,
+  );
+}
+
+export async function updateTestimonial(input: unknown): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+  const parsed = updateTestimonialSchema.safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+
+  const { id, ...values } = parsed.data;
+  return updateRow(
+    "Testimonial",
+    id,
+    values,
+    actor.email,
+    revalidateHome,
+    `“${parsed.data.author}” saved.`,
+  );
+}
+
+export async function deleteTestimonial(input: unknown): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+  const parsed = deleteTestimonialSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, message: "That is not a valid row." };
+
+  return deleteRow("Testimonial", parsed.data.id, actor.email, revalidateHome);
 }
 
 // ── TimelineEvent ─────────────────────────────────────────────

@@ -135,7 +135,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       getRitualProductSlugs(),
       getSetProductSlugs(),
       getLegalDocuments("en"),
-      getJournalArticles(),
+      getJournalArticles("en"),
     ]);
 
   /*

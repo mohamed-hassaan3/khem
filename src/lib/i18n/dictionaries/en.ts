@@ -71,7 +71,7 @@ export const en = {
     collectionItems: {
       allProducts: {
         label: "All Products",
-        desc: "Every fragrance, ritual and set in one place",
+        desc: "The World of KHEM, Revealed",
       },
       signature: {
         label: "Signature Collection",
@@ -87,23 +87,27 @@ export const en = {
       },
       oriental: {
         label: "Oriental",
-        desc: "Resin, amber and incense , warmth that stays",
+        desc: "Where Mystery Becomes Scent",
       },
       floral: {
         label: "Floral",
-        desc: "Petals treated as material, never as decoration",
+        desc: "Where Petals Hold Their Secrets",
       },
       fresh: {
         label: "Fresh",
-        desc: "Citrus peel, sea air and cut green stems",
+        desc: "A Breath of Timeless Clarity",
       },
       woody: {
         label: "Woody",
-        desc: "Oud, sandalwood and cedar , the bones of a scent",
+        desc: "Where Earth Meets Eternity",
       },
       gourmand: {
         label: "Gourmand",
-        desc: "Honey and vanilla, kept dry and kept adult",
+        desc: "An Indulgence Worth Remembering",
+      },
+      allFragrances: {
+        label: "All Fragrances",
+        desc: "The complete KHEM fragrance collection",
       },
       bodyCare: {
         label: "All Body Care",
@@ -406,7 +410,7 @@ export const en = {
       oriental: {
         name: "Oriental",
         description:
-          "Warmth with something withheld in it. Resins, amber and incense that settle into the skin and stay there , the register KHEM was founded on, and the one a room notices an hour after you have left it.",
+          "A world of warmth, depth, and intrigue. Oriental fragrances unfold through rich resins, precious woods, spices, amber, and sensual musks—creating an alluring trail where ancient elegance meets modern sophistication",
         bannerAlt: "A carved temple relief of offering bearers with their vessels",
         meta: {
           title: "Oriental Fragrances",
@@ -420,7 +424,7 @@ export const en = {
       floral: {
         name: "Floral",
         description:
-          "Flowers taken seriously. Jasmine picked before dawn, rose distilled the same day it is cut , petals treated as material rather than as decoration, and composed with enough shadow to keep them from turning sweet.",
+          "An expression of beauty in bloom. Floral fragrances reveal layers of rose, jasmine, iris, orange blossom, and delicate petals, moving from luminous freshness to deep, captivating elegance",
         bannerAlt: "A single crocus in bloom against deep shadow",
         meta: {
           title: "Floral Fragrances",
@@ -434,7 +438,7 @@ export const en = {
       fresh: {
         name: "Fresh",
         description:
-          "The first breath of the composition, and the reason you lean in again. Citrus peel, sea air and cut green stems , light, but never thin: every one of these is built over something that holds.",
+          "Light, vibrant, and effortlessly refined. Fresh fragrances awaken the senses with citrus, aromatic herbs, aquatic notes, and crisp green accords—capturing the feeling of open air, sunlit landscapes, and renewed energy",
         bannerAlt: "Turquoise surf breaking over pale sand, seen from above",
         meta: {
           title: "Fresh Fragrances",
@@ -448,7 +452,7 @@ export const en = {
       woody: {
         name: "Woody",
         description:
-          "The bones of a fragrance. Oud, sandalwood and cedar , the materials the house travels furthest for, and the ones that decide how a perfume behaves in its last hour rather than its first.",
+          "Rooted in nature, shaped by time. Woody fragrances reveal the character of cedar, sandalwood, vetiver, oud, and earthy woods, creating a refined composition of warmth, strength, and quiet sophistication",
         bannerAlt: "Low sunlight through a stand of pines",
         meta: {
           title: "Woody Fragrances",
@@ -462,7 +466,7 @@ export const en = {
       gourmand: {
         name: "Gourmand",
         description:
-          "Edible in the way a memory is edible. Honey, vanilla, dried fruit and roasted almond, kept dry and kept adult , appetite rather than dessert, and worn closer to the skin than any other register we make.",
+          "A celebration of irresistible richness. Gourmand fragrances transform notes of vanilla, caramel, cocoa, praline, honey, and warm spices into sophisticated compositions that evoke pleasure, comfort, and unforgettable desire",
         bannerAlt: "A glass of honey beside blossom and dried fruit in low light",
         meta: {
           title: "Gourmand Fragrances",
@@ -492,7 +496,7 @@ export const en = {
     meta: {
       title: "About",
       description:
-        "KHEM was founded in Cairo in 2019 to create extraordinary fragrances from extraordinary ingredients, inspired by the civilization that gave the world perfume.",
+        "KHEM was founded in Cairo in 2025 to create extraordinary fragrances from extraordinary ingredients, inspired by the civilization that gave the world perfume.",
       ogTitle: "About KHEM | A House of Ancient Futures",
       ogDescription:
         "The founders, the mission, and the vision behind KHEM , a luxury Egyptian fragrance house bridging five millennia of perfumery and the modern world.",
@@ -501,15 +505,15 @@ export const en = {
       eyebrow: "About KHEM",
       headingLine1: "A House of",
       headingLine2: "Ancient Futures",
-      lede: "KHEM was founded in Cairo in 2019 with a single mission: to create the world's most extraordinary fragrances using the most extraordinary ingredients, inspired by the most extraordinary civilization in human history.",
+      lede: "KHEM was founded in Cairo in 2025 with a single mission: to create the world's most extraordinary fragrances using the most extraordinary ingredients, inspired by the most extraordinary civilization in human history.",
     },
     founders: {
-      eyebrow: "The Founders",
-      heading: "Mohamed Hassaan & Dr. Karim Mansour",
+      eyebrow: "The Founder",
+      heading: "Mohamed Hassaan",
       body1:
-        "Mohamed Hassaan is an award-winning perfumer trained in Grasse with twenty years of experience creating for the world's finest houses. Dr. Karim Mansour is an Egyptologist and cultural historian at Cairo University, with particular expertise in ancient Egyptian ritual practices.",
+        "Mohamed Hassaan is an award-winning perfumer and the founder of KHEM, beginning his professional journey from Dubai where he collaborated with global clients and developed extensive experience creating for the world's finest houses.",
       body2:
-        "Together, they met at an exhibition on ancient Egyptian cosmetics in 2017. “We both understood immediately,” Mohamed recalls, “that this was the most profound fragrance tradition in human history , and that nobody had yet done it justice.”",
+        "He dedicated his passion to exploring the most profound fragrance tradition in human history, reviving the legacy of ancient Egyptian perfumery to infuse it with contemporary luxury.",
       quote:
         "We are not recreating history. We are translating it into a language the present can feel.",
       quoteAuthor: "Mohamed Hassaan, Co-Founder",
@@ -975,13 +979,13 @@ export const en = {
         "Dry oils and rituals for the skin, carrying the KHEM fragrance signature beyond the flacon.",
       ogTitle: "Body Care | KHEM",
       ogDescription:
-        "Ancient Egyptians understood that beauty was ritual. Layer scent into the very fabric of the skin.",
+        "KHEM Body Mists offer a refreshing veil of fragrance for effortless moments throughout the day.",
     },
     eyebrow: "The Ritual",
     titleLead: "Body",
     titleAccent: "Care",
     description:
-      "Ancient Egyptians understood that beauty was ritual. Our body care range extends the KHEM fragrance experience beyond the flacon , layering scent into the very fabric of the skin.",
+      "Extend the KHEM experience beyond perfume. Discover refined body rituals created to envelop the skin in softness, elegance, and beautifully lingering fragrance.",
     ritual: {
       layering: {
         title: "Fragrance Layering",
@@ -1006,13 +1010,13 @@ export const en = {
         "Room sprays and home scents that turn an interior into a temple of olfactory experience.",
       ogTitle: "Home Fragrances | KHEM",
       ogDescription:
-        "In Ancient Egypt, a scented space was a sacred space. Bring the KHEM world into your interiors.",
+        "KHEM Room Sprays create an immediate impression through refined fragrance, turning everyday spaces into beautifully scented surroundings.",
     },
     eyebrow: "Scent Your Sanctuary",
     titleLead: "Home",
     titleAccent: "Fragrances",
     description:
-      "In Ancient Egypt, a scented space was a sacred space. Our home fragrance range extends the KHEM world into your interiors , transforming rooms into temples of olfactory experience.",
+      "Bring the essence of KHEM into your surroundings. Discover fragrances created to transform rooms and rituals into atmospheric expressions of warmth, character, and heritage.",
     filterLabel: "Filter by type",
     filterAll: "All",
     empty: "New home fragrances are being prepared. Please return shortly.",

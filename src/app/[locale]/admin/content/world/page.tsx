@@ -60,6 +60,11 @@ export default async function AdminWorldPage({
           title="About KHEM"
           description="The labelled mission and vision sections on /about."
         />
+        <ContentHubCard
+          href={localizePath(activeLocale, "/admin/content/world/testimonials")}
+          title="Testimonials"
+          description="The customer voices shown in the Testimonials band on the home page."
+        />
       </div>
     </>
   );

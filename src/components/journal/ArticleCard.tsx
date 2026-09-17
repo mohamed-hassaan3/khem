@@ -4,7 +4,7 @@ import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { formatArticleDate } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
-import { ltrIsland, readingArrow } from "@/src/lib/i18n/rtl";
+import { readingArrow } from "@/src/lib/i18n/rtl";
 import type { JournalArticle } from "@/src/types/content";
 
 /**
@@ -43,10 +43,6 @@ export default function ArticleCard({
   labels,
   sizes = DEFAULT_SIZES,
 }: ArticleCardProps) {
-  // Title, excerpt and category are English records; the chrome around them is
-  // translated, so the record itself is re-anchored to `ltr`.
-  const island = ltrIsland(locale);
-
   return (
     <LocaleLink
       href={`/journal/${article.slug}`}
@@ -62,7 +58,7 @@ export default function ArticleCard({
         />
       </div>
 
-      <div className="px-7 pb-9 pt-7" {...island}>
+      <div className="px-7 pb-9 pt-7" dir="auto">
         <div className="mb-4 flex items-center justify-between gap-3">
           <span className="eyebrow text-[9px]">{article.category}</span>
           <span className="text-[10px] tracking-wide text-ground-muted/70">

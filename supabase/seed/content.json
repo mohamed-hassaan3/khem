@@ -3,21 +3,21 @@
     {
       "id": "yasmine-al-rashid",
       "quote": "KHEM has redefined what it means to wear a fragrance. Each bottle is a piece of history.",
-      "quote_ar": null,
+      "quote_ar": "أعادت كيم تعريف معنى ارتداء العطر. كل قارورة تحمل قطعة من التاريخ.",
       "author": "Yasmine Al-Rashid",
-      "author_ar": null,
+      "author_ar": "ياسمين الراشد",
       "authorTitle": "Perfume Critic, Cairo",
-      "authorTitle_ar": null,
+      "authorTitle_ar": "ناقدة عطور، القاهرة",
       "isPublished": true
     },
     {
       "id": "james-whitmore",
       "quote": "Onyx Night is unlike anything I have encountered. Ancient yet wholly modern. Extraordinary.",
-      "quote_ar": null,
+      "quote_ar": "أونيكس نايت مختلف عن كل ما عرفت. قديم وحديث في آن واحد، واستثنائي.",
       "author": "James Whitmore",
-      "author_ar": null,
+      "author_ar": "جيمس ويتمور",
       "authorTitle": "Luxury Editor, Condé Nast",
-      "authorTitle_ar": null,
+      "authorTitle_ar": "محرر رفاهية، كوندي ناست",
       "isPublished": true
     },
     {
@@ -459,13 +459,13 @@
       "id": "alchemy-of-ancient-egyptian-perfumery",
       "slug": "alchemy-of-ancient-egyptian-perfumery",
       "title": "The Alchemy of Ancient Egyptian Perfumery",
-      "title_ar": null,
+      "title_ar": "كيمياء صناعة العطور في مصر القديمة",
       "category": "Heritage",
-      "category_ar": null,
+      "category_ar": "التراث",
       "excerpt": "How a civilization 5,000 years old developed perfume formulas so sophisticated that modern chemists still struggle to fully replicate them.",
-      "excerpt_ar": null,
+      "excerpt_ar": "كيف طوّرت حضارة عمرها خمسة آلاف عام تركيبات عطرية متقدمة لا يزال الكيميائيون المعاصرون يجدون صعوبة في محاكاتها كاملة.",
       "body": "Long before the word *chemistry* existed, the priests of Egypt were practising it. In the temple laboratories at Edfu and Dendera, in rooms whose walls still carry the recipes carved into limestone, they macerated, decanted, filtered and aged. They kept records. They standardised. They failed, adjusted, and tried again. What they produced was not a pleasant smell for a pleasant afternoon , it was a technology of the sacred, and it was made with a rigour that would not look out of place in a modern laboratory.\n\n## The problem of fixation\n\nEvery perfumer since has faced the same difficulty: the beautiful part evaporates first. Citrus, herbs, the green top of a composition , these are volatile molecules that lift, announce themselves, and vanish within the hour. The Egyptians solved this four thousand years before anyone could explain why the solution worked.\n\nTheir answer was fat. Rather than alcohol, which they did not have in any usable concentration, they built their perfumes on a base of balanite oil, moringa oil, or animal fat rendered to a pale, near-odourless cream. Aromatic material was pressed into this base and left, sometimes for months, in sealed alabaster vessels. The oil held the volatile molecules in suspension and released them slowly against the warmth of the skin.\n\nA modern fixative does exactly this, with a mechanism we can now name. The Egyptians had no vocabulary for molecular weight or vapour pressure. They simply observed, over generations, that a perfume made this way lasted from dawn until well after dark, and one made carelessly did not.\n\n## Kyphi, and the difficulty of copying it\n\nThe most famous Egyptian composition is *kyphi*, burned in the temples at nightfall and taken internally as a medicine. Several recipes survive , from Edfu, from Philae, and in the accounts of Plutarch and Dioscorides , and no two agree. Depending on the source it contains between ten and sixteen materials: raisins steeped in wine, honey, resins of frankincense and myrrh, mastic, juniper, calamus, cyperus, mint, cinnamon-like barks, and a quantity of aromatic wood.\n\n> The materials were not merely mixed. They were combined in a sequence, over days, each stage given time to complete before the next began.\n\nThat sequence is what makes kyphi difficult to reproduce. The raisins were left in wine until they fermented. The resins were ground separately and worked with honey into a paste. Only then were the two brought together, and the whole left to mature. Reconstructions that combine everything at once produce something recognisably related and unmistakably inferior , flat where the original should be layered, sweet where it should be balsamic and dry.\n\n## What the analyses found\n\nWhen a sealed vessel from the tomb of Tutankhamun was opened in the 1920s, the contents still carried a detectable scent after three and a half thousand years. Chemical analysis of residues from that and later finds has confirmed a consistent picture: plant oils as carriers, high concentrations of resin, and traces of materials that had to be traded across enormous distances , cinnamon-like barks from Asia, and frankincense from Punt, which required a sea expedition to obtain.\n\nThe sophistication was not only in the formula but in the supply chain that fed it. Hatshepsut's expedition to Punt, recorded in relief at Deir el-Bahari, brought back living myrrh trees, roots wrapped in baskets, to be planted in temple gardens. A civilisation does not organise a naval expedition for a luxury it takes lightly.\n\n## Why it still matters\n\nThe reason a perfumer reads these texts is not nostalgia. It is that the Egyptians were working with a constraint we have engineered our way out of, and that constraint made them better at something we are worse at.\n\nWith no alcohol to carry a composition, everything had to be built for the skin, at body temperature, over hours. Structure could not be faked with a bright volatile opening. The materials themselves had to be worth living with, and the arrangement had to hold together as they unfolded.\n\nAt KHEM, every composition is tested first as an oil on skin, before it is ever assessed on a blotter. It is not a ceremonial gesture towards the past. It is the more demanding test, and it is the one the people who invented this craft would have recognised.",
-      "body_ar": null,
+      "body_ar": "قبل ظهور كلمة الكيمياء بزمن طويل، مارس كهنة مصر فنّها في مختبرات المعابد. كانوا ينقّعون المواد العطرية ويفصلونها ويرشّحونها ثم يتركونها تنضج في أوعية محكمة.",
       "publishedAt": "2024-12-01",
       "readTimeMinutes": 8,
       "isFeatured": true,
@@ -473,20 +473,20 @@
       "image": {
         "url": "https://images.unsplash.com/photo-1762530211537-011645caef57?w=800&h=500&fit=crop&auto=format",
         "alt": "Ancient Egyptian vessels used for blending sacred oils",
-        "alt_ar": null
+        "alt_ar": "أوانٍ مصرية قديمة لخلط الزيوت المقدسة"
       }
     },
     {
       "id": "following-oud-along-the-silk-road",
       "slug": "following-oud-along-the-silk-road",
       "title": "Following Oud Along the Silk Road",
-      "title_ar": null,
+      "title_ar": "تتبّع العود على طريق الحرير",
       "category": "Ingredients",
-      "category_ar": null,
+      "category_ar": "المكوّنات",
       "excerpt": "A journey through the agarwood forests of Laos and Cambodia, where the world's most precious aromatic wood is harvested with extraordinary care.",
-      "excerpt_ar": null,
+      "excerpt_ar": "رحلة عبر غابات العود في لاوس وكمبوديا، حيث يُحصد أثمن خشب عطري في العالم بعناية استثنائية.",
       "body": "There is no such thing as a healthy oud tree. That sentence is the first thing a buyer learns, and it takes some time to accept, because it inverts every instinct about agriculture. The aromatic resin the world calls oud, agarwood, or *oudh* does not exist in an unharmed *Aquilaria*. It is a wound response , the tree's answer to a mould infection that begins in a break in the bark and spreads slowly through the heartwood over years.\n\n## What the wood becomes\n\nAn uninfected *Aquilaria* is pale, light, almost worthless. Where the infection takes hold, the tree floods the affected tissue with a dark, dense resin to seal it off. The wood there turns from cream to caramel to near-black, and grows heavy enough to sink in water , which is why the finest grade has been called *chén xiāng*, sinking incense, in Chinese sources for well over a thousand years.\n\nThe process cannot be rushed. A commercially interesting infection takes eight to twelve years; the pieces that make collectors travel are the product of decades. In wild forests, perhaps one tree in a hundred carries any resin at all, and only a fraction of those carry it in quantity.\n\n> Every gram of wild agarwood represents a specific tree, in a specific place, that suffered a specific injury at a moment nobody witnessed.\n\n## The route\n\nWe buy in two places. In the mountains of Laos, harvesting is still largely a family occupation: a man who learned from his father which slopes hold infected trees, who carries a small axe and takes a section rather than the trunk, and who can tell by the sound of the blade whether the wood beneath is worth opening. In Cambodia, plantations now supply the majority of the market, trees deliberately inoculated at eight or ten years old and harvested on a schedule.\n\nPlantation oud is not inferior by definition. It is different , cleaner, more uniform, less complicated. Wild Laotian wood carries a barnyard edge, a leathery, almost fermented note that a novice reads as a fault and an experienced nose reads as depth. What the plantations have genuinely delivered is a supply chain that does not depend on stripping a forest, and *Aquilaria* has been on CITES Appendix II since 1995 for reasons that were entirely earned.\n\n## Distillation, and the cost of patience\n\nThe wood is soaked, sometimes for a week or more, then ground and distilled , traditionally in copper *deg* over a wood fire, increasingly in steel with steam. A single kilogram of high-grade chips yields a few millilitres of oil. The first distillate is sharp and green; the character everyone is paying for arrives in the later fractions, hours in, when the still is barely producing.\n\nRushing the fire ruins it. Heat too high and the oil takes on a burnt, acrid quality that no amount of blending will lift back out. A distiller who has spent three days on a batch will not risk the fourth to save an afternoon, and this is why the best material comes from people who are, temperamentally, unhurried.\n\n## Ageing\n\nFresh oud oil is not finished. Left sealed for a year, two years, five, it loses its rawness and gains a rounded, resinous sweetness that cannot be manufactured. Houses that hold stock hold it for this reason, and the oldest bottle in a distiller's cabinet is usually not for sale at any price.\n\nWe hold our Laotian material for a minimum of eighteen months before it enters a composition. It is capital sitting still, which is a difficult thing to justify on a spreadsheet and an easy thing to justify with a blotter in each hand.\n\n## Using it honestly\n\nThe temptation with a material this expensive is to announce it , to build a fragrance that shouts its own ingredient list. Oud rewards the opposite approach. It is a base note of enormous persistence and very little subtlety, and used at full volume it flattens everything above it.\n\nIn our compositions it sits underneath, at a concentration most buyers would consider modest, doing the work that resin has always done in Egyptian perfumery: holding the structure together and giving the volatile materials above it something to rest on. You are meant to notice it late, on the second wearing, as the reason the fragrance is still there at midnight.",
-      "body_ar": null,
+      "body_ar": "لا توجد شجرة عود سليمة. فالراتنج العطري الذي نعرفه باسم العود هو استجابة الشجرة لجرح وعدوى فطرية تمتد ببطء داخل خشبها.",
       "publishedAt": "2024-11-01",
       "readTimeMinutes": 12,
       "isFeatured": false,
@@ -494,20 +494,20 @@
       "image": {
         "url": "https://images.unsplash.com/photo-1654612514062-7cc235e7b68c?w=800&h=500&fit=crop&auto=format",
         "alt": "A caravan route at dusk, tracing the historic oud trade",
-        "alt_ar": null
+        "alt_ar": "طريق قافلة عند الغروب يتتبع تجارة العود القديمة"
       }
     },
     {
       "id": "inside-the-atelier-onyx-night",
       "slug": "inside-the-atelier-onyx-night",
       "title": "Inside the Atelier: The Making of Onyx Night",
-      "title_ar": null,
+      "title_ar": "داخل الأتيليه: صناعة أونيكس نايت",
       "category": "Craftsmanship",
-      "category_ar": null,
+      "category_ar": "الحِرفة",
       "excerpt": "Master perfumer Mohamed Hassaan opens the doors of the KHEM atelier to share how our most complex fragrance took three years and 200 iterations to perfect.",
-      "excerpt_ar": null,
+      "excerpt_ar": "يفتح العطّار الرئيسي محمد حسّان أبواب أتيليه كيم ليحكي كيف احتاج عطرنا الأكثر تعقيدًا إلى ثلاثة أعوام ومئتي تجربة حتى اكتمل.",
       "body": "The formula sheet for Onyx Night runs to four pages. The version we sell is numbered 214. Between the first trial and that one lies three years, several hundred blotters, and one decision , made eighteen months in , to throw out the entire structure and begin again.\n\n## The brief\n\nThe brief was a single sentence, and it was written before any material was weighed: *the smell of a temple after the fire has gone out*.\n\nThat is not a list of notes. It is a set of conditions. Something has burned and stopped burning. There is resin in the stone, smoke in the air but no flame, cold coming in, and a residue of something sweet that was there before the fire and outlasted it. Every trial for three years was assessed against that sentence and nothing else.\n\n## The first eighteen months, and why they were wasted\n\nThe early trials were built the obvious way: incense accord on top, resins in the heart, woods and animalic materials in the base. Frankincense, black pepper, labdanum, oud, vanilla. They smelled expensive. Several were, by any ordinary standard, good.\n\nThey were also wrong, and it took a long time to name why. A conventional pyramid announces itself in the correct order , bright, then warm, then deep. But a room after a fire does not arrive in that order. The smoke is already old when you walk in. The sweetness is underneath from the first second, not a reward for waiting.\n\n> We were composing a fragrance about the fire. The brief was about the silence afterwards.\n\nTrial 96 was the last of that generation. We stopped, cleared the bench, and started from the base.\n\n## Building downward\n\nThe second structure was assembled in reverse: base first, and nothing added above it until the base could stand alone for eight hours on skin and remain interesting.\n\nThat base took four months. It is built on aged Laotian oud at a low concentration, labdanum absolute, a small quantity of birch tar for the cold ash quality, and benzoin for the sweetness that has to be present from the beginning. Getting the birch tar right consumed most of that time , a fraction of a percent too much and the whole thing smells like a fireplace, which is a completely different and much less interesting idea.\n\nOnly then came the heart: Egyptian jasmine absolute, saffron, and a rose that had to be dark enough not to brighten the composition. And the top, which is deliberately quiet , pink pepper and a trace of elemi, present mostly to keep the first ten minutes from feeling abrupt.\n\n## Two hundred iterations is not two hundred good ideas\n\nMost of the numbered trials differ from their predecessor by one material at one concentration. Trials 141 through 158 are the same formula with the saffron moving in increments between 0.4% and 1.1%. Fourteen of those eighteen are indistinguishable to almost everyone. Two of them are not, and one of them is in the bottle.\n\nThis is the part of the work that photographs badly and matters most. A perfume is not discovered in a moment of inspiration. It is converged upon, slowly, by someone willing to smell the same thing forty times and be honest about the differences.\n\n## Knowing when to stop\n\nTrial 214 was not obviously final. Trials 215 through 219 exist; they are marginally different and none is better. What made 214 the one was a test we run on everything: the composition is worn for a full day by someone who was not in the room while it was made, and at the end of the day they are asked what it reminded them of.\n\nThe answer we were waiting for, for three years, was: *somewhere I've been before*.",
-      "body_ar": null,
+      "body_ar": "تتألف ورقة تركيبة أونيكس نايت من أربع صفحات. أما النسخة التي نقدّمها اليوم فتحمل الرقم ٢١٤، وبين المحاولة الأولى وتلك النسخة ثلاثة أعوام من التجارب.",
       "publishedAt": "2024-10-01",
       "readTimeMinutes": 10,
       "isFeatured": false,
@@ -515,7 +515,7 @@
       "image": {
         "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=800&h=500&fit=crop&auto=format",
         "alt": "A perfumer's organ of raw materials inside the KHEM atelier",
-        "alt_ar": null
+        "alt_ar": "مجموعة مواد خام للعطّار داخل أتيليه كيم"
       }
     },
     {
@@ -588,9 +588,9 @@
       "year": "3000 BC",
       "year_ar": "٣٠٠٠ ق.م",
       "title": "The Birth of Kyphi",
-      "title_ar": "ولادة الكيفي",
+      "title_ar": "ولادة الْكِيفِي",
       "description": "Ancient Egyptians develop the first complex perfume formula , Kyphi , from sixteen sacred ingredients. It is burned in temples at sunset as an offering to the gods.",
-      "description_ar": "طوّر المصريون القدماء أول تركيبة عطرية معقّدة، الكيفي، من ستة عشر مكوّنًا مقدّسًا. كان يُحرق في المعابد عند الغروب قربانًا للآلهة."
+      "description_ar": "طوّر المصريون القدماء أول تركيبة عطرية معقّدة، الْكِيفِي، من ستة عشر مكوّنًا مقدّسًا. كان يُحرق في المعابد عند الغروب قربانًا للآلهة."
     },
     {
       "id": "great-papyrus-formulas",

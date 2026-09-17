@@ -560,7 +560,9 @@ const productFields = {
     .trim()
     .min(10, "Write at least a sentence of description.")
     .max(LONG_TEXT_MAX, "That description is too long."),
+  description_ar: optionalText(LONG_TEXT_MAX),
   story: optionalText(LONG_TEXT_MAX),
+  story_ar: optionalText(LONG_TEXT_MAX),
   concentration: z
     .union([concentrationField, z.literal("")])
     .transform((value) => (value === "" ? null : value))
@@ -770,16 +772,19 @@ export type SaveProductImagesInput = z.input<typeof saveProductImagesSchema>;
 
 const articleFields = {
   title: z.string().trim().min(3, "An article needs a title.").max(200, "That title is too long."),
+  title_ar: optionalText(200),
   category: z
     .string()
     .trim()
     .min(2, "An article needs a category.")
     .max(60, "That category is too long."),
+  category_ar: optionalText(60),
   excerpt: z
     .string()
     .trim()
     .min(10, "Write at least a sentence of excerpt.")
     .max(LONG_TEXT_MAX, "That excerpt is too long."),
+  excerpt_ar: optionalText(LONG_TEXT_MAX),
   /*
    * The essay. Optional, because an article is routinely created from a
    * headline and an image and written afterwards — and because the column is
@@ -795,6 +800,7 @@ const articleFields = {
     .trim()
     .max(ARTICLE_BODY_MAX, "That body is longer than the journal can store.")
     .default(""),
+  body_ar: optionalText(ARTICLE_BODY_MAX),
   /* A `date` column. Stored as `YYYY-MM-DD`; `formatArticleDate()` owns display. */
   publishedAt: z
     .string()
@@ -814,6 +820,7 @@ const articleFields = {
     .trim()
     .min(3, "Describe the image for screen readers.")
     .max(200, "That alt text is too long."),
+  imageAlt_ar: optionalText(200),
 };
 
 export const createArticleSchema = z.object({ slug: slugField, ...articleFields });
