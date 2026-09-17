@@ -425,6 +425,7 @@ export const en = {
         name: "Floral",
         description:
           "An expression of beauty in bloom. Floral fragrances reveal layers of rose, jasmine, iris, orange blossom, and delicate petals, moving from luminous freshness to deep, captivating elegance",
+        bannerAlt: "A single crocus in bloom against deep shadow",
         meta: {
           title: "Floral Fragrances",
           description:
@@ -452,6 +453,7 @@ export const en = {
         name: "Woody",
         description:
           "Rooted in nature, shaped by time. Woody fragrances reveal the character of cedar, sandalwood, vetiver, oud, and earthy woods, creating a refined composition of warmth, strength, and quiet sophistication",
+        bannerAlt: "Low sunlight through a stand of pines",
         meta: {
           title: "Woody Fragrances",
           description:
