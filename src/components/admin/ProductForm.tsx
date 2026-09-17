@@ -117,7 +117,9 @@ export default function ProductForm({
   const [slugTouched, setSlugTouched] = useState(isEdit);
   const [subtitle, setSubtitle] = useState(product?.subtitle ?? "");
   const [description, setDescription] = useState(product?.description ?? "");
+  const [descriptionAr, setDescriptionAr] = useState(product?.description_ar ?? "");
   const [story, setStory] = useState(product?.story ?? "");
+  const [storyAr, setStoryAr] = useState(product?.story_ar ?? "");
   const [collectionSlug, setCollectionSlug] = useState(
     product?.collectionSlug ?? collections[0]?.slug ?? "",
   );
@@ -214,7 +216,9 @@ export default function ProductForm({
     name,
     subtitle,
     description,
+    description_ar: descriptionAr,
     story,
+    story_ar: storyAr,
     productType,
     concentration,
     format,
@@ -377,6 +381,15 @@ export default function ProductForm({
         />
 
         <AdminTextarea
+          id="description_ar"
+          label="Description — Arabic"
+          rows={4}
+          value={descriptionAr}
+          error={fieldErrors.description_ar}
+          onChange={setDescriptionAr}
+        />
+
+        <AdminTextarea
           id="story"
           label="Story"
           rows={6}
@@ -384,6 +397,16 @@ export default function ProductForm({
           error={fieldErrors.story}
           hint="The editorial passage on the detail page. Optional; leave empty for goods with no detail page."
           onChange={setStory}
+        />
+
+        <AdminTextarea
+          id="story_ar"
+          label="Story — Arabic"
+          rows={6}
+          value={storyAr}
+          error={fieldErrors.story_ar}
+          hint="The Arabic editorial passage on the detail page. Optional; blank falls back to English."
+          onChange={setStoryAr}
         />
       </section>
 

@@ -117,6 +117,7 @@ export const collections: ReadonlyArray<CollectionEntry> = [
     kind: "group",
     key: "fragrances",
     children: [
+      { key: "allFragrances", path: "/collections/fragrances" },
       { key: "signature", path: "/collections/signature" },
       { key: "gemstone", path: "/collections/gemstone" },
       { key: "noir", path: "/collections/noir" },

@@ -560,7 +560,9 @@ const productFields = {
     .trim()
     .min(10, "Write at least a sentence of description.")
     .max(LONG_TEXT_MAX, "That description is too long."),
+  description_ar: optionalText(LONG_TEXT_MAX),
   story: optionalText(LONG_TEXT_MAX),
+  story_ar: optionalText(LONG_TEXT_MAX),
   concentration: z
     .union([concentrationField, z.literal("")])
     .transform((value) => (value === "" ? null : value))

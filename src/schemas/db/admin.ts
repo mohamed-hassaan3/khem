@@ -204,7 +204,8 @@ export function toAdminMerchPage(row: unknown): AdminMerchPage | null {
  * of which would ride into the page payload.
  */
 export const ADMIN_PRODUCT_COLUMNS =
-  "id, name, slug, subtitle, description, story, concentration, format, includes, " +
+  "id, name, slug, subtitle, description, description_ar, story, story_ar, " +
+  "concentration, format, includes, " +
   "badge, tags, topNotes, heartNotes, baseNotes, volumeMl, priceInCents, " +
   /*
    * `productType` is read here and nowhere on the storefront.
@@ -256,7 +257,9 @@ const adminProductRowSchema = z.object({
   slug: z.string(),
   subtitle: z.string().nullable(),
   description: z.string(),
+  description_ar: z.string().nullable().default(null),
   story: z.string().nullable(),
+  story_ar: z.string().nullable().default(null),
   concentration: concentrationSchema.nullable(),
   format: z.string().nullable(),
   includes: z.array(z.string()),

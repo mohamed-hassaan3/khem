@@ -88,15 +88,16 @@ export default async function CategoryView({
     case "BODY": {
       const copy = dict.bodyCare;
       const ritual = copy.ritual;
+      const isBodyCareCategory = collection.slug === "body-care";
 
       return (
         <div className="ground-ivory min-h-screen">
       <NavGround ground="ivory" />
           <CategoryHero
             eyebrow={copy.eyebrow}
-            titleLead={copy.titleLead}
-            titleAccent={copy.titleAccent}
-            description={copy.description}
+            titleLead={isBodyCareCategory ? copy.titleLead : collection.name}
+            titleAccent={isBodyCareCategory ? copy.titleAccent : undefined}
+            description={collection.description}
             imageUrl={collection.bannerUrl}
             imageAlt={collection.bannerAlt}
           />
@@ -126,14 +127,19 @@ export default async function CategoryView({
      */
     case "HOME": {
       const copy = dict.homeFragrance;
+      const isHomeFragranceCategory = collection.slug === "home-fragrance";
 
       return (
         <div className="ground-ivory min-h-screen">
           <CategoryHero
             eyebrow={copy.eyebrow}
-            titleLead={copy.titleLead}
-            titleAccent={copy.titleAccent}
-            description={copy.description}
+            titleLead={
+              isHomeFragranceCategory ? copy.titleLead : collection.name
+            }
+            titleAccent={
+              isHomeFragranceCategory ? copy.titleAccent : undefined
+            }
+            description={collection.description}
             imageUrl={collection.bannerUrl}
             imageAlt={collection.bannerAlt}
           />
