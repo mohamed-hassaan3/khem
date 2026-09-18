@@ -64,6 +64,7 @@ export type CategorySeedRow = Omit<Category, "sortOrder"> & {
 export type CollectionSeedRow = Omit<Collection, "cardUrl" | "cardAlt"> & {
   name_ar: string | null;
   description_ar: string | null;
+  subdescription_ar: string | null;
   bannerAlt_ar: string | null;
   cardUrl: string | null;
   cardAlt: string | null;

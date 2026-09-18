@@ -87,7 +87,7 @@ export default async function CollectionCard({
           dir="auto"
           className="mb-8 max-w-md text-xs leading-relaxed text-ground-muted md:text-sm"
         >
-          {collection.description}
+          {collection.subdescription}
         </p>
         <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
           {dict.common.explore} {readingArrow(locale)}

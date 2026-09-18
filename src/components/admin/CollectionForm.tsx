@@ -71,6 +71,9 @@ export default function CollectionForm({
   const [slug, setSlug] = useState(collection?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(isEdit);
   const [description, setDescription] = useState(collection?.description ?? "");
+    const [subdescription, setSubdescription] = useState(
+      collection?.subdescription ?? "",
+    );
   const [bannerUrl, setBannerUrl] = useState(collection?.bannerUrl ?? "");
   const [bannerAlt, setBannerAlt] = useState(collection?.bannerAlt ?? "");
   // Empty means "reuse the banner". `AdminCollection` deliberately keeps the
@@ -99,6 +102,7 @@ export default function CollectionForm({
     slug,
     name,
     description,
+    subdescription,
     bannerUrl,
     bannerAlt,
     cardUrl,
@@ -211,6 +215,17 @@ export default function CollectionForm({
         value={description}
         error={fieldErrors.description}
         onChange={setDescription}
+      />
+
+      <AdminTextarea
+        id="subdescription"
+        label="Card subdescription"
+        required
+        rows={2}
+        value={subdescription}
+        error={fieldErrors.subdescription}
+        hint="Short copy shown on collection cards. Keep it to roughly 15 words; the banner uses the longer description above."
+        onChange={setSubdescription}
       />
 
       {/*

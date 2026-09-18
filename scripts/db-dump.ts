@@ -105,7 +105,8 @@ interface ImageRow extends ProductImageSeedRow {
  * every export a noisy diff and hand the seeder columns it does not write.
  */
 const COLLECTION_COLUMNS = `
-  id, name, name_ar, slug, description, description_ar,
+  id, name, name_ar, slug, description, description_ar, subdescription,
+  subdescription_ar,
   "bannerUrl", "bannerAlt", "bannerAlt_ar",
   "cardUrl", "cardAlt", "cardAlt_ar",
   "isFeatured", kind, "categorySlug"
@@ -257,6 +258,8 @@ function toCollection(row: CollectionRow): CollectionSeedRow {
     slug: row.slug,
     description: row.description,
     description_ar: row.description_ar,
+    subdescription: row.subdescription,
+    subdescription_ar: row.subdescription_ar,
     bannerUrl: row.bannerUrl,
     bannerAlt: row.bannerAlt,
     bannerAlt_ar: row.bannerAlt_ar,

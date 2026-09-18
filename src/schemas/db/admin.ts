@@ -125,7 +125,8 @@ export function toAdminCategory(row: unknown): AdminCategory | null {
 }
 
 export const ADMIN_COLLECTION_COLUMNS =
-  "id, name, slug, description, bannerUrl, bannerAlt, cardUrl, cardAlt, " +
+  "id, name, slug, description, subdescription, bannerUrl, bannerAlt, " +
+  "cardUrl, cardAlt, " +
   "isFeatured, kind, categorySlug, sortOrder";
 
 /**
@@ -140,6 +141,7 @@ const adminCollectionRowSchema = z.object({
   name: z.string(),
   slug: z.string(),
   description: z.string(),
+  subdescription: z.string().nullable().default(null),
   bannerUrl: z.string(),
   bannerAlt: z.string(),
   cardUrl: z.string().nullable().default(null),

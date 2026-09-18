@@ -115,6 +115,8 @@ export interface Collection {
   name: string;
   slug: string;
   description: string;
+  /** Short card copy, resolved with the banner description as fallback. */
+  subdescription: string;
   /** Landscape. The hero on `/collections/[slug]` and the category routes. */
   bannerUrl: string;
   bannerAlt: string;

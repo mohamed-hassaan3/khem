@@ -116,6 +116,8 @@ export const collectionRowSchema = z.object({
   slug: z.string(),
   description: z.string(),
   description_ar: z.string().nullable().default(null),
+  subdescription: z.string().nullable().default(null),
+  subdescription_ar: z.string().nullable().default(null),
   bannerUrl: z.string(),
   bannerAlt: z.string(),
   bannerAlt_ar: z.string().nullable().default(null),
@@ -138,8 +140,9 @@ export const collectionRowSchema = z.object({
 });
 
 export const COLLECTION_COLUMNS =
-  "id, name, name_ar, slug, description, description_ar, bannerUrl, bannerAlt, " +
-  "bannerAlt_ar, cardUrl, cardAlt, cardAlt_ar, isFeatured, kind, categorySlug";
+  "id, name, name_ar, slug, description, description_ar, subdescription, " +
+  "subdescription_ar, bannerUrl, bannerAlt, bannerAlt_ar, cardUrl, cardAlt, " +
+  "cardAlt_ar, isFeatured, kind, categorySlug";
 
 export function toCollection(row: unknown, locale: Locale): Collection | null {
   const parsed = collectionRowSchema.safeParse(row);
@@ -148,6 +151,8 @@ export function toCollection(row: unknown, locale: Locale): Collection | null {
   const {
     name_ar,
     description_ar,
+    subdescription,
+    subdescription_ar,
     bannerAlt_ar,
     cardUrl,
     cardAlt,
@@ -161,6 +166,11 @@ export function toCollection(row: unknown, locale: Locale): Collection | null {
     ...collection,
     name: resolveText(collection.name, name_ar, locale),
     description: resolveText(collection.description, description_ar, locale),
+    subdescription: resolveText(
+      subdescription ?? collection.description,
+      subdescription_ar,
+      locale,
+    ),
     bannerAlt: bannerAltResolved,
     /*
      * The fallback is resolved here rather than at the two call sites, so

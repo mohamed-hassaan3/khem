@@ -160,6 +160,8 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
       slug: collection.slug,
       description: collection.description,
       description_ar: collection.description_ar,
+      subdescription: collection.subdescription,
+      subdescription_ar: collection.subdescription_ar,
       bannerUrl: collection.bannerUrl,
       bannerAlt: collection.bannerAlt,
       bannerAlt_ar: collection.bannerAlt_ar,
