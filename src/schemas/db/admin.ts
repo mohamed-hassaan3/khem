@@ -22,7 +22,7 @@
 
 import { z } from "zod";
 
-import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
+import { MERCH_PAGE_SLUGS } from "@/src/lib/facets";
 import { PRODUCT_TYPE_VALUES } from "@/src/lib/product-types";
 
 import { parseList } from "./catalog";
@@ -180,7 +180,7 @@ export const ADMIN_MERCH_PAGE_COLUMNS =
  * projection.
  */
 const adminMerchPageRowSchema = z.object({
-  slug: z.enum(MERCH_PAGE_FACETS),
+  slug: z.enum(MERCH_PAGE_SLUGS),
   name: z.string(),
   description: z.string(),
   bannerUrl: z.string(),

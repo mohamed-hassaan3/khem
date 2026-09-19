@@ -4,7 +4,7 @@ import CollectionView from "@/src/components/ecommerce/CollectionView";
 import { isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
-import { getCatalogProductCards } from "@/src/services/products";
+import { getCatalogProductCards, getMerchPage } from "@/src/services/products";
 
 /**
  * ISR, 1 hour.
@@ -25,15 +25,19 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const dict = await getDictionary(locale);
+  const activeLocale = isLocale(locale) ? locale : "en";
+  const [dict, page] = await Promise.all([
+    getDictionary(activeLocale),
+    getMerchPage(activeLocale, "all-collections"),
+  ]);
 
   return localeMetadata({
-    locale: isLocale(locale) ? locale : "en",
+    locale: activeLocale,
     path: PATH,
-    title: dict.collections.meta.title,
-    description: dict.collections.meta.description,
-    ogTitle: dict.collections.meta.ogTitle,
-    ogDescription: dict.collections.meta.ogDescription,
+    title: page?.name ?? dict.collections.meta.title,
+    description: page?.description ?? dict.collections.meta.description,
+    ogTitle: page?.name ?? dict.collections.meta.ogTitle,
+    ogDescription: page?.description ?? dict.collections.meta.ogDescription,
   });
 }
 
@@ -61,7 +65,10 @@ export default async function Collections({
   const activeLocale = isLocale(locale) ? locale : "en";
 
   // Fetched after the locale, which now decides what comes back.
-  const products = await getCatalogProductCards(activeLocale);
+  const [products, page] = await Promise.all([
+    getCatalogProductCards(activeLocale),
+    getMerchPage(activeLocale, "all-collections"),
+  ]);
 
   /*
    * No collection list is fetched: the chips come from `FACET_ORDER` and their
@@ -73,6 +80,7 @@ export default async function Collections({
       locale={activeLocale}
       collection={null}
       products={products}
+      overviewPage={page}
       countsEverything
     />
   );

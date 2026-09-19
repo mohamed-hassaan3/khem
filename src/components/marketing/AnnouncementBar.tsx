@@ -270,6 +270,7 @@ function MarqueeRun({
     <span
       aria-hidden={duplicate || undefined}
       className="flex shrink-0 items-center"
+      inert={duplicate || undefined}
     >
       {announcements.map((announcement) => (
         <span
@@ -277,7 +278,7 @@ function MarqueeRun({
           className="flex shrink-0 items-center"
         >
           <span className="px-8 sm:px-12">
-            <Message announcement={announcement} />
+            <Message announcement={announcement} inert={duplicate} />
           </span>
           {/* A hairline diamond between messages, not a bullet. */}
           <span aria-hidden className="text-ground-accent/30">
@@ -297,15 +298,19 @@ function MarqueeRun({
  * decide which way it runs — the rule `src/lib/i18n/rtl.ts` sets out.
  */
 function Message({
+  inert,
   announcement,
   fade = false,
 }: {
   announcement: Announcement;
   fade?: boolean;
+  inert?: boolean;
 }) {
   const body = (
     <>
-      <span className="truncate">{announcement.message}</span>
+      <span className="truncate" inert={inert}>
+        {announcement.message}
+      </span>
       {announcement.ctaLabel ? (
         <span className="ms-2 shrink-0 border-b border-ground-accent/40 pb-px text-ground-accent">
           {announcement.ctaLabel}

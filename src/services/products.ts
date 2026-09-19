@@ -26,7 +26,7 @@ import "server-only";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { getProductPromotions } from "@/src/services/marketing";
-import type { MerchPageFacet } from "@/src/lib/facets";
+import type { MerchPageSlug } from "@/src/lib/facets";
 import type { ScentProfileSlug } from "@/src/lib/scent-profiles";
 import type { LinkableProduct } from "@/src/lib/routes";
 import {
@@ -361,7 +361,7 @@ export async function getCollectionBySlug(
  */
 export async function getMerchPage(
   locale: Locale,
-  facet: MerchPageFacet,
+  facet: MerchPageSlug,
 ): Promise<MerchPage | null> {
   const supabase = getSupabasePublic();
   if (!supabase) return null;

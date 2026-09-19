@@ -32,7 +32,10 @@ import "server-only";
 
 import { revalidatePath } from "next/cache";
 
-import { MERCH_PAGE_FACETS, type MerchPageFacet } from "@/src/lib/facets";
+import {
+  MERCH_PAGE_FACETS,
+  type MerchPageSlug,
+} from "@/src/lib/facets";
 import { LOCALES } from "@/src/lib/i18n/config";
 import { productHref } from "@/src/lib/routes";
 import type { CollectionKind, ProductTag } from "@/src/types/catalog";
@@ -89,8 +92,10 @@ function revalidateMerchPages(): void {
 }
 
 /** After the copy or the hero of one merchandising page is edited. */
-export function revalidateMerchPage(slug: MerchPageFacet): void {
-  revalidateAllLocales(`/collections/${slug}`);
+export function revalidateMerchPage(slug: MerchPageSlug): void {
+  revalidateAllLocales(
+    slug === "all-collections" ? "/collections" : `/collections/${slug}`,
+  );
 }
 
 /**

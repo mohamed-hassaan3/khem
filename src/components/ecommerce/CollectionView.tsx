@@ -15,6 +15,7 @@ import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import type { ProductCardData } from "@/src/types/catalog";
+import type { MerchPage } from "@/src/types/catalog";
 
 /**
  * The body shared by `/collections` and `/collections/[slug]` — Server
@@ -57,6 +58,8 @@ export interface CollectionViewProps {
   locale: Locale;
   /** `null` renders the whole-catalogue overview. */
   collection: CollectionHeader | null;
+  /** Editable presentation for the `/collections` overview. */
+  overviewPage?: MerchPage | null;
   products: ProductCardData[];
   /**
    * Count the goods as "pieces" rather than as fragrances. True wherever the
@@ -82,16 +85,20 @@ const CARD_SIZES = "(min-width: 1024px) 33vw, 50vw";
 export default async function CollectionView({
   locale,
   collection,
+  overviewPage = null,
   products,
   countsEverything = false,
 }: CollectionViewProps) {
   const dict = await getDictionary(locale);
 
   const isDark = collection !== null && DARK_COLLECTIONS.has(collection.slug);
-  const heroImage = collection?.bannerUrl ?? ALL_HERO_IMAGE;
-  const heroAlt = collection?.bannerAlt ?? "";
-  const title = collection?.name ?? dict.collections.all.name;
-  const description = collection?.description ?? dict.collections.all.description;
+  const heroImage = collection?.bannerUrl ?? overviewPage?.bannerUrl ?? ALL_HERO_IMAGE;
+  const heroAlt = collection?.bannerAlt ?? overviewPage?.bannerAlt ?? "";
+  const title = collection?.name ?? overviewPage?.name ?? dict.collections.all.name;
+  const description =
+    collection?.description ??
+    overviewPage?.description ??
+    dict.collections.all.description;
 
   const items: CollectionGridItem[] = products.map((product) => ({
     id: product.id,

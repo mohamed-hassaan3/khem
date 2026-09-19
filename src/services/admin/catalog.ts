@@ -29,7 +29,11 @@ import "server-only";
 
 import { cache } from "react";
 
-import { MERCH_PAGE_FACETS, type MerchPageFacet } from "@/src/lib/facets";
+import {
+  MERCH_PAGE_SLUGS,
+  type MerchPageFacet,
+  type MerchPageSlug,
+} from "@/src/lib/facets";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
   ADMIN_CATEGORY_COLUMNS,
@@ -231,12 +235,12 @@ export async function listAdminMerchPages(): Promise<AdminMerchPage[]> {
   const pages = parseList(data, toAdminMerchPage);
 
   return [...pages].sort(
-    (a, b) => MERCH_PAGE_FACETS.indexOf(a.slug) - MERCH_PAGE_FACETS.indexOf(b.slug),
+    (a, b) => MERCH_PAGE_SLUGS.indexOf(a.slug) - MERCH_PAGE_SLUGS.indexOf(b.slug),
   );
 }
 
 export async function getAdminMerchPage(
-  slug: string,
+  slug: MerchPageSlug,
 ): Promise<AdminMerchPage | null> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;

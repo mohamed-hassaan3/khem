@@ -160,6 +160,11 @@ export function parseFacet(
  */
 export const MERCH_PAGE_FACETS = ["best-sellers"] as const;
 
+/** Fixed presentation rows edited from the collections dashboard. */
+export const MERCH_PAGE_SLUGS = ["best-sellers", "all-collections"] as const;
+
+export type MerchPageSlug = (typeof MERCH_PAGE_SLUGS)[number];
+
 export type MerchPageFacet = (typeof MERCH_PAGE_FACETS)[number];
 
 /**
@@ -170,6 +175,10 @@ export type MerchPageFacet = (typeof MERCH_PAGE_FACETS)[number];
  */
 export function parseMerchPageFacet(slug: string): MerchPageFacet | null {
   return MERCH_PAGE_FACETS.find((facet) => facet === slug) ?? null;
+}
+
+export function parseMerchPageSlug(slug: string): MerchPageSlug | null {
+  return MERCH_PAGE_SLUGS.find((page) => page === slug) ?? null;
 }
 
 /**

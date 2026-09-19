@@ -35,6 +35,8 @@ import type { AdminMerchPage } from "@/src/schemas/db/admin";
 const MEMBERSHIP_HINT: Record<AdminMerchPage["slug"], string> = {
   "best-sellers":
     "Products appear here when their Bestseller toggle is on — set it on the product, not on this page.",
+  "all-collections":
+    "This page includes every live product in the catalogue. Product membership is managed on the product itself.",
 };
 
 export default function MerchPageForm({ page }: { page: AdminMerchPage }) {

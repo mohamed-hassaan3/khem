@@ -5,7 +5,7 @@ import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import CollectionForm from "@/src/components/admin/CollectionForm";
 import DeleteCollectionButton from "@/src/components/admin/DeleteCollectionButton";
 import MerchPageForm from "@/src/components/admin/MerchPageForm";
-import { parseMerchPageFacet } from "@/src/lib/facets";
+import { parseMerchPageSlug } from "@/src/lib/facets";
 import { isLocale, localizePath, type Locale } from "@/src/lib/i18n/config";
 import {
   countMerchPageProducts,
@@ -96,23 +96,26 @@ export default async function EditCollectionPage({
  * the save is about to miss.
  */
 async function renderMerchPage(locale: Locale, slug: string) {
-  const facet = parseMerchPageFacet(slug);
+  const facet = parseMerchPageSlug(slug);
   if (!facet) notFound();
 
-  const [page, counts] = await Promise.all([
-    getAdminMerchPage(facet),
-    countMerchPageProducts(),
-  ]);
+  const page = await getAdminMerchPage(facet);
 
   if (!page) notFound();
 
-  const count = counts[facet];
+  const count = facet === "best-sellers"
+    ? (await countMerchPageProducts())[facet]
+    : null;
 
   return (
     <>
       <AdminPageHeader
         title={page.name}
-        description={`${count} live product${count === 1 ? "" : "s"} currently in this cut.`}
+        description={
+          count === null
+            ? "The complete catalogue overview shown at /collections."
+            : `${count} live product${count === 1 ? "" : "s"} currently in this cut.`
+        }
         action={
           <Link
             href={localizePath(locale, `/collections/${page.slug}`)}

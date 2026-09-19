@@ -26,7 +26,7 @@
 
 import { z } from "zod";
 
-import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
+import { MERCH_PAGE_SLUGS } from "@/src/lib/facets";
 import {
   PRODUCT_TYPE_VALUES,
   typeHasContents,
@@ -82,7 +82,7 @@ const slugField = z
  * the field instead of a constraint name in a failed save.
  */
 const RESERVED_SLUGS: readonly string[] = [
-  ...MERCH_PAGE_FACETS,
+  ...MERCH_PAGE_SLUGS,
   ...SCENT_PROFILE_SLUGS,
 ];
 
@@ -531,7 +531,7 @@ export type UpdateCollectionInput = z.input<typeof updateCollectionSchema>;
  * The Arabic columns are absent by design — no dashboard screen writes them.
  */
 export const updateMerchPageSchema = z.object({
-  slug: z.enum(MERCH_PAGE_FACETS),
+  slug: z.enum(MERCH_PAGE_SLUGS),
   name: z
     .string()
     .trim()

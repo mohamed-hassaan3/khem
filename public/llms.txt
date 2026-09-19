@@ -1,0 +1,10 @@
+# KHEM
+
+> Luxury Egyptian fragrance and perfume house - Essence of Heritage.
+
+KHEM is a luxury ecommerce brand rooted in Ancient Egyptian heritage,
+offering fragrances, collections, and craftsmanship stories.
+
+## Pages
+- [Collections](https://khemperfumes.com/collections): Fragrance collections
+- [Journal](https://khemperfumes.com/journal): Heritage and craftsmanship stories

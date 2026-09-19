@@ -13,7 +13,7 @@
 
 import { z } from "zod";
 
-import { MERCH_PAGE_FACETS } from "@/src/lib/facets";
+import { MERCH_PAGE_SLUGS } from "@/src/lib/facets";
 import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 import type { Locale } from "@/src/lib/i18n/config";
 import { resolveList, resolveOptionalText, resolveText } from "@/src/lib/i18n/resolve";
@@ -202,7 +202,7 @@ export function toCollection(row: unknown, locale: Locale): Collection | null {
  * is ignored, which is the correct outcome — the code decides which pages exist.
  */
 const merchPageRowSchema = z.object({
-  slug: z.enum(MERCH_PAGE_FACETS),
+  slug: z.enum(MERCH_PAGE_SLUGS),
   name: z.string(),
   name_ar: z.string().nullable().default(null),
   description: z.string(),

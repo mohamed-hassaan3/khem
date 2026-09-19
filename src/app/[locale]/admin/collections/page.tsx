@@ -56,7 +56,7 @@ export default async function AdminCollectionsPage({
     <>
       <AdminPageHeader
         title="Collections"
-        description="A collection decides where its products are sold: fragrances get their own detail pages, everything else sells from a category grid. The last row is a merchandising page — a cut across the whole catalogue rather than somewhere a product belongs."
+        description="A collection decides where its products are sold. The merchandising rows below edit fixed catalogue pages, including the complete /collections overview."
         action={
           <AdminLinkButton href={localizePath(activeLocale, "/admin/collections/new")}>
             <Plus size={13} strokeWidth={1.25} />
