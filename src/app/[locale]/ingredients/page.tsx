@@ -95,8 +95,8 @@ export default async function Ingredients({
       */}
       <section className="ground-ivory relative flex h-[60vh] min-h-140 items-center overflow-hidden bg-sand">
         <Image
-          src="https://images.unsplash.com/photo-1615885108069-7d5bef9a7e22?w=1800&h=900&fit=crop&auto=format"
-          alt=""
+          src="https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-banner.webp"
+          alt="ingredients-banner"
           fill
           priority
           sizes="100vw"
