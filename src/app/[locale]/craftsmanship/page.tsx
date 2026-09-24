@@ -106,7 +106,7 @@ export default async function Craftsmanship({
       */}
       <section className="ground-ivory relative flex h-[70vh] min-h-165 items-center overflow-hidden bg-sand">
         <Image
-          src="https://images.unsplash.com/photo-1709666414115-47ecd5143293?w=1800&h=1100&fit=crop&auto=format"
+          src="https://res.cloudinary.com/co1xzkhf/image/upload/craftsmanship-hero-banner.png"
           alt=""
           fill
           priority
@@ -239,7 +239,7 @@ export default async function Craftsmanship({
       {quote ? (
         <section className="relative min-h-100 border-t border-ground-border md:h-[60vh]">
           <Image
-            src="https://images.unsplash.com/photo-1738664926458-d8ca7f56549f?w=1800&h=700&fit=crop&auto=format"
+            src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790240635/MASTER-PERFUMER-QUOTE.jpg"
             alt=""
             fill
             sizes="100vw"

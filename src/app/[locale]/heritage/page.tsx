@@ -133,7 +133,7 @@ export default async function Heritage({
       */}
       <section className="ground-ivory relative flex h-[72vh] min-h-175 items-center overflow-hidden bg-sand">
         <Image
-          src="https://images.unsplash.com/photo-1678287714479-adaa0cfbe6c6?w=1800&h=1000&fit=crop&auto=format"
+          src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790154048/heritage-hero-banner.webp"
           alt=""
           fill
           priority
@@ -181,7 +181,7 @@ export default async function Heritage({
       {/* ── QUOTE BAND ──────────────────────────────── */}
       <section className="relative h-[60vh] min-h-100 overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1762530211537-011645caef57?w=1800&h=700&fit=crop&auto=format"
+          src="https://res.cloudinary.com/co1xzkhf/image/upload/HERITAGE-QUOTE-BAND.webp"
           alt=""
           fill
           sizes="100vw"
