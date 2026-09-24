@@ -197,7 +197,7 @@ export type IngredientSeedRow = Omit<Ingredient, "image" | "usedIn"> & {
   image: { url: string; alt: string; alt_ar: string | null };
 };
 
-export type ArticleSeedRow = Omit<JournalArticle, "image"> & {
+export type ArticleSeedRow = Omit<JournalArticle, "image" | "categoryLabel"> & {
   title_ar: string | null;
   category_ar: string | null;
   excerpt_ar: string | null;
