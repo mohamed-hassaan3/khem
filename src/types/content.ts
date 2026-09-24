@@ -112,6 +112,7 @@ export interface JournalArticle {
   title: string;
   category: string;
   excerpt: string;
+  categoryLabel: string;
   /**
    * The essay itself, as stored: blank lines separate blocks, `## ` opens a
    * subheading, `> ` opens a pull quote. Never HTML —

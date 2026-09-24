@@ -68,11 +68,13 @@ export default async function ArticleHero({
               <span className="mx-3 text-ground-muted" aria-hidden="true">
                 /
               </span>
-              <span dir="auto">{article.category}</span>
+              {/* <span dir="auto">{article.category}</span> */}
+              <span dir="auto">{article.categoryLabel}</span>
             </nav>
 
             <div dir="auto">
-              <p className="eyebrow mb-5">{article.category}</p>
+              {/* <p className="eyebrow mb-5">{article.category}</p> */}
+               <p className="eyebrow mb-5">{article.categoryLabel}</p>
 
               <h1 className="font-heading text-3xl font-normal leading-tight text-balance text-ground sm:text-5xl md:text-6xl">
                 {article.title}

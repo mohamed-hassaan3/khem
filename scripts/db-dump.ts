@@ -525,6 +525,7 @@ async function readContent(client: Client): Promise<ContentSeed> {
       category_ar: row.category_ar,
       excerpt: row.excerpt,
       excerpt_ar: row.excerpt_ar,
+      
       body: row.body,
       body_ar: row.body_ar,
       publishedAt: row.publishedAt,

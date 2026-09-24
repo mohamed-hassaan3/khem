@@ -348,7 +348,8 @@ export function toArticle(row: unknown, locale: Locale): JournalArticle | null {
   return {
     ...article,
     title: resolveText(article.title, title_ar, locale),
-    category: resolveText(article.category, category_ar, locale),
+    // category: resolveText(article.category, category_ar, locale),
+    categoryLabel: resolveText(article.category, category_ar, locale),
     excerpt: resolveText(article.excerpt, excerpt_ar, locale),
     body: resolveText(article.body, body_ar, locale),
     image: { url: imageUrl, alt: resolveText(imageAlt, imageAlt_ar, locale) },
