@@ -60,8 +60,7 @@ export default function ArticleCard({
 
       <div className="px-7 pb-9 pt-7" dir="auto">
         <div className="mb-4 flex items-center justify-between gap-3">
-          {/* <span className="eyebrow text-[9px]">{article.category}</span> */}
-          <span className="eyebrow text-[9px]">{article.categoryLabel}</span>
+          <span className="eyebrow text-[9px]">{article.category}</span>
           <span className="text-[10px] tracking-wide text-ground-muted/70">
             {interpolate(labels.minRead, { minutes: article.readTimeMinutes })}
           </span>

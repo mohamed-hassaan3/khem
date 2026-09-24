@@ -40,8 +40,7 @@ export default async function JournalCard({
         <div dir="auto">
           <div className="mb-4 flex items-center justify-between">
             <span className="text-[9px] uppercase tracking-[0.2em] text-ground-accent">
-              {/* {article.category} */}
-              {article.categoryLabel}
+              {article.category}
             </span>
             <time
               dateTime={article.publishedAt}
