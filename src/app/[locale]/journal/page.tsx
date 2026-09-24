@@ -101,7 +101,7 @@ export default async function Journal({
               <div className="flex flex-col justify-center p-8 md:p-15">
                 {/* Article metadata and copy come from the database — English only. */}
                 <div className="mb-7 flex flex-wrap items-center gap-4" dir="auto">
-                  <span className="eyebrow">{featured.category}</span>
+                  <span className="eyebrow">{featured.categoryLabel}</span>
                   <span className="h-3 w-px bg-ivory/15" aria-hidden="true" />
                   <span className="text-[10px] tracking-widest text-ground-muted/70">
                     {interpolate(dict.common.minRead, {
