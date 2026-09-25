@@ -96,8 +96,8 @@ export default async function About({
       */}
       <section className="ground-ivory relative flex h-[70vh] min-h-165 items-center overflow-hidden bg-sand">
         <Image
-          src="https://images.unsplash.com/photo-1747696766706-5485b39bf358?w=1800&h=1000&fit=crop&auto=format"
-          alt=""
+          src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790357791/About-KHEM-banner.jpg"
+          alt="A House of Ancient Futures"
           fill
           priority
           sizes="100vw"
@@ -110,7 +110,9 @@ export default async function About({
           <h1 className="mb-8 font-heading text-5xl font-normal leading-none text-ground sm:text-6xl md:text-7xl lg:text-8xl">
             {dict.about.hero.headingLine1}
             <br />
-            <span className="text-ground-accent">{dict.about.hero.headingLine2}</span>
+            <span className="text-ground-accent">
+              {dict.about.hero.headingLine2}
+            </span>
           </h1>
           <div className="gold-line mb-8" />
           <p className="max-w-lg text-sm leading-loose text-ground-muted">
@@ -124,7 +126,7 @@ export default async function About({
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 md:gap-12 lg:grid-cols-2 lg:gap-20">
           <Reveal className="relative aspect-4/5 w-full overflow-hidden">
             <Image
-              src="https://images.unsplash.com/photo-1738664926482-1a986adb3e6c?w=700&h=800&fit=crop&auto=format"
+              src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790357882/KHEM_profile.jpg"
               alt={dict.about.founders.imageAlt}
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"
@@ -150,7 +152,7 @@ export default async function About({
                 &ldquo;{dict.about.founders.quote}&rdquo;
               </p>
               <cite className="text-[11px] not-italic tracking-widest text-ground-accent/60">
-                — {dict.about.founders.quoteAuthor}
+                {dict.about.founders.quoteAuthor}
               </cite>
             </blockquote>
           </Reveal>
@@ -193,10 +195,7 @@ export default async function About({
             {dict.about.cta.heading}
           </h2>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <LocaleLink
-              href="/collections"
-              className="btn btn-primary"
-            >
+            <LocaleLink href="/collections" className="btn btn-primary">
               {dict.about.cta.primary}
             </LocaleLink>
             <LocaleLink href="/heritage" className="btn btn-outline">
