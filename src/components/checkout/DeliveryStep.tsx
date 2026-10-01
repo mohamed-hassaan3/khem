@@ -29,13 +29,21 @@
  * and nothing else changes.
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { HOUSE_EMAIL } from "@/src/constants/contact";
+import { DELIVERY_CITIES } from "@/src/constants/delivery-cities";
 import { countryOptions } from "@/src/lib/shipping";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 
 import { CheckoutField, CheckoutSection, CheckoutSelect } from "./CheckoutField";
+
+/**
+ * The dropdown's "Other city" entry. A value the select holds and nothing else
+ * ever sees: choosing it empties the city and reveals a text field, so this
+ * string cannot reach the order.
+ */
+const OTHER_CITY = "__other__";
 
 export type DeliveryField =
   | "line1"
@@ -77,6 +85,9 @@ export default function DeliveryStep({
   const locale = useLocale();
   const copy = dict.checkout.delivery;
 
+  // True while the visitor has chosen "Other city" and is typing their own.
+  const [otherCity, setOtherCity] = useState(false);
+
   /*
    * Two hundred and fifty names, sorted for this language. Built once per
    * locale rather than on every keystroke in the address fields above — the
@@ -90,6 +101,53 @@ export default function DeliveryStep({
       })),
     [locale],
   );
+
+  /*
+   * The cities on offer for the chosen country, or `null` when the house has
+   * not listed any, in which case the field stays free text.
+   */
+  const cities = useMemo(() => {
+    const list = DELIVERY_CITIES[values.country];
+    if (!list) return null;
+
+    return [
+      { value: "", label: copy.cityPlaceholder },
+      ...list.map((city) => ({
+        value: city.value,
+        label: locale === "ar" ? city.ar : city.value,
+      })),
+      // For a city the house has not listed. Delivery to it is not promised
+      // here: the order is still the house's to accept or refuse.
+      { value: OTHER_CITY, label: copy.cityOther },
+    ];
+  }, [values.country, locale, copy.cityPlaceholder, copy.cityOther]);
+
+  function handleCitySelect(next: string) {
+    if (next === OTHER_CITY) {
+      setOtherCity(true);
+      onChange("city", "");
+      return;
+    }
+
+    setOtherCity(false);
+    onChange("city", next);
+  }
+
+  /*
+   * Changing country empties the city when it is not one that country offers.
+   * Otherwise a visitor who switches country keeps a city that no longer
+   * belongs to it, and the dropdown would show a blank for a value it does not
+   * hold.
+   */
+  function handleCountryChange(next: string) {
+    onChange("country", next);
+    setOtherCity(false);
+
+    const offered = DELIVERY_CITIES[next];
+    if (values.city !== "" && !offered?.some((c) => c.value === values.city)) {
+      onChange("city", "");
+    }
+  }
 
   return (
     <CheckoutSection index="02" title={dict.checkout.steps.delivery} complete={complete}>
@@ -116,17 +174,43 @@ export default function DeliveryStep({
         wide
       />
 
-      <CheckoutField
-        id="checkout-city"
-        label={copy.city}
-        value={values.city}
-        onChange={(value) => onChange("city", value)}
-        error={errors.city}
-        autoComplete="address-level2"
-        required
-      />
+      {cities ? (
+        <>
+          <CheckoutSelect
+            id="checkout-city"
+            label={copy.city}
+            value={otherCity ? OTHER_CITY : values.city}
+            onChange={handleCitySelect}
+            options={cities}
+            error={otherCity ? undefined : errors.city}
+            autoComplete="address-level2"
+          />
 
-      <CheckoutField
+          {otherCity ? (
+            <CheckoutField
+              id="checkout-city-other"
+              label={copy.cityOtherLabel}
+              placeholder={copy.cityOtherPlaceholder}
+              value={values.city}
+              onChange={(value) => onChange("city", value)}
+              error={errors.city}
+              required
+            />
+          ) : null}
+        </>
+      ) : (
+        <CheckoutField
+          id="checkout-city"
+          label={copy.city}
+          value={values.city}
+          onChange={(value) => onChange("city", value)}
+          error={errors.city}
+          autoComplete="address-level2"
+          required
+        />
+      )}
+
+     {/*  <CheckoutField
         id="checkout-state"
         label={copy.state}
         value={values.state}
@@ -134,9 +218,9 @@ export default function DeliveryStep({
         error={errors.state}
         autoComplete="address-level1"
         required
-      />
+      /> */}
 
-      <CheckoutField
+{/*       <CheckoutField
         id="checkout-postal"
         label={copy.postalCode}
         placeholder={copy.postalCodePlaceholder}
@@ -144,13 +228,13 @@ export default function DeliveryStep({
         onChange={(value) => onChange("postalCode", value)}
         error={errors.postalCode}
         autoComplete="postal-code"
-      />
+      /> */}
 
       <CheckoutSelect
         id="checkout-country"
         label={copy.country}
         value={values.country}
-        onChange={(value) => onChange("country", value)}
+        onChange={handleCountryChange}
         options={countries}
         error={errors.country}
         hint={countryDetected ? copy.countryDetected : undefined}

@@ -32,11 +32,11 @@
 
 delete from public."MerchPage" where slug = 'limited-edition';
 
-alter table public."MerchPage"
-  drop constraint if exists merch_page_known_slug;
+-- alter table public."MerchPage"
+--   drop constraint if exists merch_page_known_slug;
 
-alter table public."MerchPage"
-  add constraint merch_page_known_slug check (slug in ('best-sellers'));
+-- alter table public."MerchPage"
+--   add constraint merch_page_known_slug check (slug in ('best-sellers'));
 
 -- ── 2. The free-text badges ─────────────────────────────────
 --

@@ -262,6 +262,7 @@ export async function placeCustomerOrder(
   const parsed = checkoutSchema.safeParse(input);
 
   if (!parsed.success) {
+    console.error("[checkout] validation failed:", parsed.error.issues);
     return {
       ok: false,
       formError: "validation",

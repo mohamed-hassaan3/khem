@@ -79,7 +79,8 @@ export async function previewDiscount(
 
   const parsed = discountPreviewSchema.safeParse(input);
   if (!parsed.success) {
-    return refuse("NO_CODE", "That code cannot be checked.");
+    console.error("[discounts] preview rejected:", parsed.error.issues);
+    return refuse("UNKNOWN", "That code cannot be checked right now.");
   }
 
   /*

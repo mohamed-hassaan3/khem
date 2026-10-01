@@ -37,7 +37,7 @@ import { LOCALES } from "@/src/lib/i18n/config";
  * is the only place that can answer the question.
  */
 const checkoutItemSchema = z.object({
-  productId: z.string().trim().min(8, "items").max(64, "items"),
+  productId: z.string().trim().min(1, "items").max(64, "items"),
   quantity: z.coerce
     .number({ error: "quantity" })
     .int("quantity")
@@ -115,7 +115,7 @@ export const checkoutSchema = z.object({
   line2: z.string().trim().max(200, "line2Long").default(""),
   city: z.string().trim().min(2, "city").max(80, "cityLong"),
   // Governorate in Egypt, state or province elsewhere.
-  state: z.string().trim().min(2, "state").max(80, "stateLong"),
+    state: z.string().trim().max(80, "stateLong").default(""),
   // Optional on purpose. Egyptian addresses frequently carry no postal code,
   // and demanding one is how a checkout loses a domestic sale.
   postalCode: z.string().trim().max(20, "postalCodeLong").default(""),

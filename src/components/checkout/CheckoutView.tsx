@@ -502,7 +502,7 @@ export default function CheckoutView({
   const deliveryComplete =
     address.line1.trim().length >= 4 &&
     address.city.trim().length >= 2 &&
-    address.state.trim().length >= 2 &&
+    // address.state.trim().length >= 2 &&
     address.country.trim().length >= 2;
 
   /*
@@ -983,6 +983,20 @@ export default function CheckoutView({
            * that button has to live where `useStripe()` is reachable. So this
            * one is for cash, and for the moment before a card order exists.
            */}
+          {/*
+           * Says why the button below is disabled. A greyed-out button with
+           * the reason three screens up is a button that looks broken to
+           * anyone who scrolled past it.
+           */}
+          {!awaitingPayment && !shipsHere ? (
+            <p
+              role="note"
+              className="mt-6 border border-ground-accent/30 bg-gold/5 px-5 py-3 text-[12px] leading-relaxed text-ground-muted"
+            >
+              {dict.checkout.errors.outsideEgypt}
+            </p>
+          ) : null}
+
           {!awaitingPayment ? (
             <button
               type="submit"
