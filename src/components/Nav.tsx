@@ -950,7 +950,7 @@ export default function Nav({
                 caption this menu carried while the panel was obsidian.
               */}
               <Image
-                src="https://images.unsplash.com/photo-1709662217788-6a8a1b31562a?w=400&h=240&fit=crop&auto=format"
+                src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790357791/About-KHEM-banner.jpg"
                 alt={dict.nav.featuredCollectionAlt}
                 width={400}
                 height={200}
@@ -1017,7 +1017,7 @@ export default function Nav({
               className="relative block overflow-hidden rounded-sm no-underline"
             >
               <Image
-                src="https://images.unsplash.com/photo-1678287714479-adaa0cfbe6c6?w=700&h=220&fit=crop&auto=format"
+                src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790938160/nav-heritage.jpg"
                 alt={dict.nav.featuredArticleAlt}
                 width={700}
                 height={180}

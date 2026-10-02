@@ -53,6 +53,8 @@
  * stricter than it was, not looser.
  */
 
+import { after } from "next/server";
+
 import { getUserId } from "@/src/lib/auth";
 import { shippingInCents } from "@/src/lib/cart";
 import { clientKey, isRateLimited } from "@/src/lib/email/rate-limit";
@@ -322,16 +324,21 @@ export async function placeCustomerOrder(
   //    tampered payload cannot buy cheap delivery, and a bag priced before an
   //    editor changed the fee is charged the fee in force at the moment the
   //    order is written.
-  const deliveryTerms = await getDeliveryTerms("ONLINE");
-  const shipInCents = shippingInCents(resolution.subtotalInCents, deliveryTerms);
-
+  //
+  //    Steps 5, 6 and 7 do not depend on one another, so they run together
+  //    rather than one after the other: three round trips become one wait.
+  //
   // 6. Free anything abandoned before asking for stock, so a bottle held by a
   //    basket nobody paid for is available to the person standing here now.
-  await sweepStaleHolds(supabase);
-
+  //
   // 7. Identity from the session, never from the body. A guest gets null here
   //    and their order correctly never appears in anybody's portal.
-  const clerkUserId = await getUserId();
+  const [deliveryTerms, , clerkUserId] = await Promise.all([
+    getDeliveryTerms("ONLINE"),
+    sweepStaleHolds(supabase),
+    getUserId(),
+  ]);
+  const shipInCents = shippingInCents(resolution.subtotalInCents, deliveryTerms);
 
   const { data, error } = await supabase.rpc("place_order", {
     payload: {
@@ -414,40 +421,65 @@ export async function placeCustomerOrder(
     `[checkout] ${orderNumber} placed — ${parsed.data.paymentMethod}, ${resolution.lines.length} line(s)`,
   );
 
-  // Stock just moved, so every surface printing a sold-out badge or a remaining
-  // count is stale. Awaited but never allowed to change the outcome — the sale
-  // is already recorded.
-  await revalidateProductsBySlug(resolution.lines.map((line) => line.slug));
+  /*
+   * Stock just moved, so every surface printing a sold-out badge or a remaining
+   * count is stale. Done after the response has gone: it reads the whole
+   * catalogue, and the customer has no reason to wait for it. The sale is
+   * already recorded, so a failure here only logs.
+   */
+  const soldSlugs = resolution.lines.map((line) => line.slug);
+  after(async () => {
+    try {
+      await revalidateProductsBySlug(soldSlugs);
+    } catch (cause) {
+      console.error(
+        `[checkout] ${orderNumber} revalidation failed:`,
+        cause instanceof Error ? cause.message : "unknown error",
+      );
+    }
+  });
 
+  if (parsed.data.paymentMethod === "CASH") {
+    /*
+     * The order is PROCESSING, and both emails go now, but not before the
+     * customer is answered. Reading the order back and sending two emails is
+     * the slowest part of this action and nothing the customer sees depends on
+     * it, so it runs after the response. A failure is logged and never reaches
+     * them: the order is already written.
+     */
+    after(async () => {
+      try {
+        const order = await getOrderForMailByNumber(orderNumber);
+
+        if (!order) {
+          console.error(`[checkout] ${orderNumber} placed but could not be read back.`);
+          return;
+        }
+
+        await announceOrder(order);
+      } catch (cause) {
+        console.error(
+          `[checkout] ${orderNumber} announce failed:`,
+          cause instanceof Error ? cause.message : "unknown error",
+        );
+      }
+    });
+
+    return { ok: true, orderNumber, paymentMethod: "CASH" };
+  }
+
+  // Card: the order id is needed for the payment intent, so it is read now.
   const order = await getOrderForMailByNumber(orderNumber);
 
   if (!order) {
     // The row exists — `place_order()` returned its number — so this is a read
-    // failure, not a write one. The customer is not told a successful order
-    // failed over an email that did not send.
+    // failure, not a write one.
     console.error(`[checkout] ${orderNumber} placed but could not be read back.`);
     return {
       ok: true,
       orderNumber,
       paymentMethod: parsed.data.paymentMethod,
     };
-  }
-
-  if (parsed.data.paymentMethod === "CASH") {
-    /*
-     * The order is PROCESSING, and both emails go now.
-     *
-     * There was an argument for a stage in front of this one — PROCESSING means
-     * somebody in Cairo has begun preparing the parcel, and thirty seconds
-     * after checkout nobody has. But the interval it described is the desk's
-     * response time, and `"Order"."firstOpenedAt"` (0023) measures that without
-     * spending a fulfilment stage on it. The desk sees the order either way,
-     * because `OPEN_STATUSES` in `src/services/admin/orders.ts` counts
-     * PROCESSING as owed.
-     */
-    await announceOrder(order);
-
-    return { ok: true, orderNumber, paymentMethod: "CASH" };
   }
 
   // Card: the order is PROCESSING and its stock is held. No customer email — an

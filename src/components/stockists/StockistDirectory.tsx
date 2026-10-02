@@ -40,7 +40,7 @@ import type { Stockist, StockistRegion } from "@/src/types/stockist";
  * list beside it.
  */
 const MAP_TEXTURE =
-  "https://images.unsplash.com/photo-1678287714479-adaa0cfbe6c6?w=1200&h=700&fit=crop&auto=format";
+  "https://res.cloudinary.com/co1xzkhf/image/upload/v1790357791/About-KHEM-banner.jpg";
 
 /** The `stockists` dictionary block, passed down rather than re-read per row. */
 type StockistLabels = Dictionary["stockists"];
