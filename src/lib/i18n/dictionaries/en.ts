@@ -56,7 +56,7 @@ export const en = {
     signOut: "Sign Out",
     openMenu: "Open menu",
     closeMenu: "Close menu",
-    featuredProduct: "Sunlit Citrine",
+    featuredProduct: "NOIR",
     featuredCollectionAlt: "Signature Collection",
     fromTheJournal: "From the Journal",
     journalLabel: "Journal",

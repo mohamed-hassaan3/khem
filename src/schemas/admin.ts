@@ -397,7 +397,7 @@ const categoryFields = {
     .trim()
     .min(10, "Write at least a sentence of description.")
     .max(LONG_TEXT_MAX, "That description is too long."),
-    // subdescription: optionalText(240),
+    subdescription: optionalText(240),
   bannerUrl: imageUrlField,
   bannerAlt: z
     .string()
