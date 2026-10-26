@@ -90,7 +90,10 @@ export interface ProductImageSeedRow {
  * desk starts and stops — so a dump that carried one would restore last
  * November's prices onto a fresh database.
  */
-export type ProductSeedRow = Omit<Product, "images" | "promotion"> & {
+export type ProductSeedRow = Omit<
+  Product,
+  "images" | "promotion" | "inventory"
+> & {
   subtitle_ar: string | null;
   description_ar: string | null;
   story_ar: string | null;
@@ -111,13 +114,8 @@ export type ProductSeedRow = Omit<Product, "images" | "promotion"> & {
    * having to be edited a second time.
    */
   productType: ProductType | null;
-  /*
-   * The two stock counters. `inventory` on the base `Product` type is the
-   * trigger-maintained total and is not what the seeder writes — see
-   * `scripts/db-seed.ts`.
-   */
-  inventoryOnline: number;
-  inventoryOffline: number;
+  // Inventory is volatile operational state, not seed data. Fresh products
+  // start with the database default stock; existing stock is never upserted.
   /*
    * What the product costs the house — `"Product"."costInCents"`, added by
    * `supabase/sql/0062_sales_ledger.sql`.
@@ -150,7 +148,8 @@ export interface CatalogSeed {
   categories: CategorySeedRow[];
   collections: CollectionSeedRow[];
   products: ProductSeedRow[];
-  featuredProductSlug: string;
+  /** Null when the live BoutiqueSetting has no featured product selected. */
+  featuredProductSlug: string | null;
 }
 
 /*

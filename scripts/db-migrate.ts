@@ -16,6 +16,11 @@
  * exactly what `supabase/README.md` warns against. This script applies the
  * reviewed SQL and nothing else.
  *
+ * Every run re-applies every SQL file; there is no history table. In particular,
+ * `0068_collection_subdescription_seed.sql` can overwrite collection text an
+ * editor changed after its first application. This runner does not solve either
+ * behavior; review the SQL before confirming a remote target.
+ *
  * ## Transactions
  *
  * All files run inside **one** transaction: a half-applied schema is worse than
@@ -27,6 +32,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
 import { connectionString, redactUrl, withClient, withTransaction } from "./db";
+import { confirmDatabaseTarget } from "./db-target";
 
 const SQL_DIR = path.join(process.cwd(), "supabase", "sql");
 
@@ -36,6 +42,7 @@ async function sqlFiles(): Promise<string[]> {
 }
 
 async function main(): Promise<void> {
+  await confirmDatabaseTarget(connectionString(), "migrate");
   const files = await sqlFiles();
 
   if (files.length === 0) {

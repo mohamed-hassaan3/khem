@@ -139,14 +139,17 @@ async function verifyIntegrity(client: Client): Promise<void> {
   );
   check(Number(unknownFamilies) === 0, "ingredient families are in the taxonomy");
 
-  const featured = await scalar<string | null>(
+  const featuredIsValid = await scalar<boolean>(
     client,
-    `select p.slug as value
+    `select (
+              s."featuredProductSlug" is null
+              or p.slug is not null
+            ) as value
        from public."BoutiqueSetting" s
-       join public."Product" p on p.slug = s."featuredProductSlug"
+       left join public."Product" p on p.slug = s."featuredProductSlug"
       where s.id = 'default'`,
   );
-  check(Boolean(featured), "the featured product resolves to a real fragrance");
+  check(featuredIsValid === true, "a non-null featured product resolves to a real fragrance");
 
   const fragranceless = await scalar<string>(
     client,

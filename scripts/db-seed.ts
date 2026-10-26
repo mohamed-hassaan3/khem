@@ -15,8 +15,9 @@
  * Editing content means editing the database — the Supabase table editor, or
  * the admin dashboard. Supabase is the source of truth; these files are not.
  * When you have edited content on the platform, run `npm run db:dump` to bring
- * the export back into line and commit the diff. `db-dump.ts` is the exact
- * inverse of this script for `catalog.json`.
+ * the export back into line and review the diff before any seed run. Inventory
+ * is intentionally absent: new products begin with the database default stock,
+ * while seeding never overwrites stock already managed in the live system.
  *
  * ## Safety
  *
@@ -40,14 +41,13 @@
  * editor has fixed since the export was taken, replaced by the frozen JSON, in
  * one transaction that succeeds.
  *
- * So a remote target has to be named out loud:
+ * A remote target must be confirmed by typing its exact host. Non-interactive
+ * runs must set that host in `KHEM_SEED_CONFIRM`, for example:
  *
  *     KHEM_SEED_CONFIRM=<host> npm run db:seed
  *
- * A local database needs nothing. The variable is deliberately the *host* rather
- * than a yes: typing `db.abcd.supabase.co` is a moment spent reading which
- * project is about to be written to, and copying `KHEM_SEED_CONFIRM=yes` out of
- * a runbook is not.
+ * Local confirmation is limited to exact loopback hosts: `localhost`,
+ * `127.0.0.1`, and `::1`.
  */
 
 import { readFile } from "node:fs/promises";
@@ -56,7 +56,8 @@ import path from "node:path";
 import type { Client } from "pg";
 
 import { ENQUIRY_SUBJECTS } from "../src/constants/contact";
-import { redactUrl, connectionString, withTransaction } from "./db";
+import { connectionString, redactUrl, withTransaction } from "./db";
+import { confirmDatabaseTarget } from "./db-target";
 import type { CatalogSeed, ContentSeed, DirectorySeed } from "./seed-types";
 
 const SEED_DIR = path.join(process.cwd(), "supabase", "seed");
@@ -216,14 +217,6 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
       // would tell the profit reports every one of these sells at pure profit.
       costInCents: product.costInCents ?? null,
       sku: product.sku,
-      /*
-       * The counters, not the total. `inventory` is owned by the
-       * `sync_inventory_total` trigger from 0042 and is recomputed on every
-       * write, so sending it would be ignored — and sending *only* it would
-       * seed every product at zero.
-       */
-      inventoryOnline: product.inventoryOnline ?? product.inventory ?? 0,
-      inventoryOffline: product.inventoryOffline ?? 0,
       isBestseller: product.isBestseller,
       collectionSlug: product.collectionSlug,
       sortOrder: index,
@@ -467,7 +460,7 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
 async function seedDirectory(
   client: Client,
   seed: DirectorySeed,
-  featuredProductSlug: string,
+  featuredProductSlug: string | null,
 ): Promise<void> {
   await upsert(
     client,
@@ -591,61 +584,8 @@ async function seedDirectory(
   );
 }
 
-/**
- * Hosts that are unambiguously a developer's own machine.
- *
- * Everything else — a Supabase project, a staging box, anything reached over a
- * network — is treated as data somebody could be looking at.
- */
-const LOCAL_HOSTS = new Set([
-  "localhost",
-  "127.0.0.1",
-  "::1",
-  "[::1]",
-  "host.docker.internal",
-]);
-
-/**
- * Refuse a remote database unless it was named.
- *
- * Throws rather than returning a boolean: the only correct response to "this
- * might be production" is to not run, and a caller cannot forget to check the
- * result of something that throws.
- */
-function guardTarget(url: string): void {
-  let host: string;
-
-  try {
-    host = new URL(url).hostname;
-  } catch {
-    throw new Error("The database URL could not be parsed. Refusing to seed.");
-  }
-
-  if (LOCAL_HOSTS.has(host)) return;
-
-  const confirmed = (process.env.KHEM_SEED_CONFIRM ?? "").trim();
-
-  if (confirmed !== host) {
-    throw new Error(
-      [
-        `Refusing to seed ${redactUrl(url)} — it is not a local database.`,
-        "",
-        "This script upserts the frozen JSON export over whatever is there. On a",
-        "database anyone is using, that overwrites content edited since the export",
-        "was taken. Production is deployed with `npm run db:migrate`, never with this.",
-        "",
-        "If this really is the database you mean, name its host:",
-        "",
-        `    KHEM_SEED_CONFIRM=${host} npm run db:seed`,
-      ].join("\n"),
-    );
-  }
-
-  console.log(`Confirmed target ${host} — seeding a remote database.`);
-}
-
 async function main(): Promise<void> {
-  guardTarget(connectionString());
+  await confirmDatabaseTarget(connectionString(), "seed");
 
   const catalog = await readSeed<CatalogSeed>("catalog.json");
   const content = await readSeed<ContentSeed>("content.json");
