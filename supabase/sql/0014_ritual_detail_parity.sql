@@ -101,44 +101,5 @@ grant execute on function public.related_products(
 ) to anon, authenticated;
 
 -- ── Key Ingredients for the ritual goods ────────────────────
---
--- `<ProductIngredients>` renders from `"IngredientUsage"`, which had rows for
--- the fragrances only — so the section was silently absent on every ritual
--- page. These are not new editorial claims: each product's `description`
--- already names its accord, and these are the catalogued materials behind those
--- names. Ambergris carries the "red amber" and "white amber" bases; Black Iris
--- carries the "silver iris" and "blue iris" hearts.
---
--- `on conflict do nothing` against the `(ingredientId, productSlug)` unique
--- constraint, so a re-run cannot disturb an ordering an editor has changed.
--- Ids follow `db-seed.ts`'s scheme — `<ingredientId>-<productSlug>` — so
--- seeding a fresh database from `supabase/seed/content.json` converges on
--- exactly these rows.
-
--- `"sortOrder"` is the position within the *ingredient's* usage list, not
--- within the product's — that is what `db-seed.ts` writes from
--- `usedIn`'s array index, and these values are generated from the same
--- file so a later `npm run db:seed` is a no-op rather than a rewrite.
--- Nothing reads it here: `getIngredientsForProduct()` orders by the
--- ingredient's own `"sortOrder"`, so the taxonomy order is what a
--- product page prints.
-
-insert into public."IngredientUsage" (id, "ingredientId", "productSlug", name, "sortOrder")
-values
-  ('frankincense-amber-body-mist',     'frankincense',    'amber-body-mist',      'Amber', 2),
-  ('frankincense-amber-room-spray',    'frankincense',    'amber-room-spray',     'Amber', 3),
-  ('neroli-turquoise-body-mist',       'neroli',          'turquoise-body-mist',  'Turquoise', 3),
-  ('neroli-turquoise-room-spray',      'neroli',          'turquoise-room-spray', 'Turquoise', 4),
-  ('ambergris-amber-body-mist',        'ambergris',       'amber-body-mist',      'Amber', 2),
-  ('ambergris-amber-room-spray',       'ambergris',       'amber-room-spray',     'Amber', 3),
-  ('ambergris-opal-body-mist',         'ambergris',       'opal-body-mist',       'Opal', 4),
-  ('ambergris-opal-room-spray',        'ambergris',       'opal-room-spray',      'Opal', 5),
-  ('ambergris-turquoise-body-mist',    'ambergris',       'turquoise-body-mist',  'Turquoise', 6),
-  ('ambergris-turquoise-room-spray',   'ambergris',       'turquoise-room-spray', 'Turquoise', 7),
-  ('haitian-vetiver-lapis-body-mist',  'haitian-vetiver', 'lapis-body-mist',      'Lapis', 3),
-  ('haitian-vetiver-lapis-room-spray', 'haitian-vetiver', 'lapis-room-spray',     'Lapis', 4),
-  ('black-iris-opal-body-mist',        'black-iris',      'opal-body-mist',       'Opal', 2),
-  ('black-iris-opal-room-spray',       'black-iris',      'opal-room-spray',      'Opal', 3),
-  ('black-iris-lapis-body-mist',       'black-iris',      'lapis-body-mist',      'Lapis', 4),
-  ('black-iris-lapis-room-spray',      'black-iris',      'lapis-room-spray',     'Lapis', 5)
-on conflict ("ingredientId", "productSlug") do nothing;
+-- Superseded by the product rename. Live `IngredientUsage` data is managed
+-- through the admin dashboard.
