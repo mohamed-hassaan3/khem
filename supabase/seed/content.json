@@ -79,16 +79,7 @@
       "priceTier": 5,
       "description": "Known as \"liquid gold,\" oud is the most expensive natural ingredient in perfumery. It is the dark, resinous heartwood formed when the Aquilaria tree becomes infected with a specific mold. The result of this natural alchemy is a rich, complex material , simultaneously smoky, sweet, animalic, and sacred.",
       "description_ar": null,
-      "usedIn": [
-        {
-          "name": "Onyx Night",
-          "slug": "onyx-night"
-        },
-        {
-          "name": "Sapphire",
-          "slug": "sapphire"
-        }
-      ],
+      "usedIn": [],
       "facts": [
         "Wild Aquilaria trees take 100+ years to form oud",
         "Only 2% of wild trees are infected",
@@ -120,20 +111,12 @@
       "description_ar": null,
       "usedIn": [
         {
-          "name": "Onyx Night",
-          "slug": "onyx-night"
-        },
-        {
-          "name": "Kyphi",
-          "slug": "kyphi"
+          "name": "Amber",
+          "slug": "onyx-night-body-mist"
         },
         {
           "name": "Amber",
-          "slug": "amber-body-mist"
-        },
-        {
-          "name": "Amber",
-          "slug": "amber-room-spray"
+          "slug": "ivory-temple-room-spray"
         }
       ],
       "facts": [
@@ -164,20 +147,7 @@
       "priceTier": 4,
       "description": "The world's most expensive spice by weight, saffron adds an incomparable warmth and subtle spiciness to fine fragrance. Each strand is the stigma of the Crocus sativus flower, hand-harvested at dawn before the blooms open. A single gram requires 150 flowers.",
       "description_ar": null,
-      "usedIn": [
-        {
-          "name": "Ivory Temple",
-          "slug": "ivory-temple"
-        },
-        {
-          "name": "Crimson Sun",
-          "slug": "crimson-sun"
-        },
-        {
-          "name": "Sunlit Citrine",
-          "slug": "sunlit-citrine"
-        }
-      ],
+      "usedIn": [],
       "facts": [
         "150 flowers yield just 1 gram of saffron",
         "Harvested exclusively at dawn",
@@ -209,24 +179,12 @@
       "description_ar": null,
       "usedIn": [
         {
-          "name": "Ivory Temple",
-          "slug": "ivory-temple"
-        },
-        {
-          "name": "Desert Lily",
-          "slug": "desert-lily"
+          "name": "Turquoise",
+          "slug": "silk-serenity-body-mist"
         },
         {
           "name": "Turquoise",
-          "slug": "turquoise"
-        },
-        {
-          "name": "Turquoise",
-          "slug": "turquoise-body-mist"
-        },
-        {
-          "name": "Turquoise",
-          "slug": "turquoise-room-spray"
+          "slug": "sunlit-citrine-room-spray"
         }
       ],
       "facts": [
@@ -260,36 +218,28 @@
       "description_ar": null,
       "usedIn": [
         {
-          "name": "Mendesian",
-          "slug": "mendesian"
-        },
-        {
-          "name": "Lapis",
-          "slug": "lapis"
+          "name": "Amber",
+          "slug": "onyx-night-body-mist"
         },
         {
           "name": "Amber",
-          "slug": "amber-body-mist"
-        },
-        {
-          "name": "Amber",
-          "slug": "amber-room-spray"
+          "slug": "ivory-temple-room-spray"
         },
         {
           "name": "Opal",
-          "slug": "opal-body-mist"
+          "slug": "sunlit-citrine-body-mist"
         },
         {
           "name": "Opal",
-          "slug": "opal-room-spray"
+          "slug": "onyx-night-room-spray"
         },
         {
           "name": "Turquoise",
-          "slug": "turquoise-body-mist"
+          "slug": "silk-serenity-body-mist"
         },
         {
           "name": "Turquoise",
-          "slug": "turquoise-room-spray"
+          "slug": "sunlit-citrine-room-spray"
         }
       ],
       "facts": [
@@ -323,24 +273,12 @@
       "description_ar": null,
       "usedIn": [
         {
-          "name": "Sunlit Citrine",
-          "slug": "sunlit-citrine"
-        },
-        {
-          "name": "Emerald",
-          "slug": "emerald"
-        },
-        {
-          "name": "Sapphire",
-          "slug": "sapphire"
+          "name": "Lapis",
+          "slug": "ivory-temple-body-mist"
         },
         {
           "name": "Lapis",
-          "slug": "lapis-body-mist"
-        },
-        {
-          "name": "Lapis",
-          "slug": "lapis-room-spray"
+          "slug": "silk-serenity-room-spray"
         }
       ],
       "facts": [
@@ -372,20 +310,7 @@
       "priceTier": 3,
       "description": "The queen of flowers, Rosa damascena has been cultivated in Grasse for fragrance production for over 300 years. Our rose absolue comes from a single family-owned estate in the Vallée des Fleurs. It is a full, honeyed, almost wine-like rose , nothing like the synthetic approximations found in most fragrances.",
       "description_ar": null,
-      "usedIn": [
-        {
-          "name": "Desert Lily",
-          "slug": "desert-lily"
-        },
-        {
-          "name": "Onyx Night",
-          "slug": "onyx-night"
-        },
-        {
-          "name": "Amber",
-          "slug": "amber"
-        }
-      ],
+      "usedIn": [],
       "facts": [
         "4 tonnes of flowers yield 1 kg of rose absolue",
         "Harvested between 5 and 10 AM when concentration is highest",
@@ -417,28 +342,20 @@
       "description_ar": null,
       "usedIn": [
         {
-          "name": "Kyphi",
-          "slug": "kyphi"
-        },
-        {
-          "name": "Sapphire",
-          "slug": "sapphire"
+          "name": "Opal",
+          "slug": "sunlit-citrine-body-mist"
         },
         {
           "name": "Opal",
-          "slug": "opal-body-mist"
-        },
-        {
-          "name": "Opal",
-          "slug": "opal-room-spray"
+          "slug": "onyx-night-room-spray"
         },
         {
           "name": "Lapis",
-          "slug": "lapis-body-mist"
+          "slug": "ivory-temple-body-mist"
         },
         {
           "name": "Lapis",
-          "slug": "lapis-room-spray"
+          "slug": "silk-serenity-room-spray"
         }
       ],
       "facts": [
