@@ -1,12 +1,18 @@
 /**
  * Export the live database into `supabase/seed/*.json`.
  *
- *     npm run db:dump
+ * Seed files go stale after admin edits. Re-export and review the diff before
+ * any seed run so an old snapshot cannot put previous edits back into the DB.
  *
- * The exact inverse of `db-seed.ts`, and the half that was missing while that
- * script's header told you to "dump it back".
+ *     npm run db:dump
+ *     npm run db:dump -- --catalog-and-ingredient-usages
+ *
+ * Seed-compatible exporter for the catalog, editorial content, and directory.
  *
  * ## Why it exists
+ *
+ * The focused option above updates only the catalog and ingredient `usedIn`
+ * links, leaving directory data and other content untouched.
  *
  * Supabase is the source of truth for everything the site renders — the
  * catalog, the journal, the ingredients, the stockists, the legal documents.
@@ -38,14 +44,16 @@
  *
  * ## Round trip
  *
- * `dump → seed → dump` is a fixed point. Key order comes from the object
- * literals below rather than from Postgres, formatting matches the committed
- * file (two-space indent, trailing newline), and rows come back in `"sortOrder"`
+ * `dump → seed → dump` is a fixed point for exported editorial/catalog fields.
+ * Inventory is deliberately excluded: new products begin at the database's
+ * default stock, and seeding never changes existing stock. Key order comes
+ * from the object literals below rather than from Postgres; formatting matches
+ * the committed file (two-space indent, trailing newline), and rows come back in `"sortOrder"`
  * order — so dumping an unedited database produces an empty `git diff`, and any
  * diff at all is a real change.
  */
 
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { Client } from "pg";
@@ -99,10 +107,11 @@ interface ImageRow extends ProductImageSeedRow {
 /**
  * The columns to read, in the order the committed file already prints them.
  *
- * Server-managed columns are absent by design — `createdAt`, `updatedAt`, the
- * search vectors from `0004_search.sql`, the embedding, and `ProductImage.id`,
- * which `db-seed.ts` derives from the product slug. Dumping them would make
- * every export a noisy diff and hand the seeder columns it does not write.
+ * Server-managed and volatile columns are absent by design — `createdAt`,
+ * `updatedAt`, inventory counts, the search vectors from `0004_search.sql`, the
+ * embedding, and `ProductImage.id`, which `db-seed.ts` derives from the product
+ * slug. Dumping them would make exports stale/noisy or hand the seeder columns
+ * it must not write.
  */
 const COLLECTION_COLUMNS = `
   id, name, name_ar, slug, description, description_ar, subdescription,
@@ -128,7 +137,7 @@ const PRODUCT_COLUMNS = `
   "topNotes", "topNotes_ar", "heartNotes", "heartNotes_ar",
   "baseNotes", "baseNotes_ar",
   "volumeMl", "priceInCents", "costInCents", sku,
-  inventory, "inventoryOnline", "inventoryOffline", "isBestseller",
+  "isBestseller",
   "collectionSlug"
 `;
 
@@ -166,11 +175,18 @@ async function readCatalog(client: Client): Promise<CatalogSeed> {
       order by "productSlug", "sortOrder"`,
   );
 
-  const setting = await client.query<{ featuredProductSlug: string }>(
+  const setting = await client.query<{ featuredProductSlug: string | null }>(
     `select "featuredProductSlug"
        from public."BoutiqueSetting"
       where id = 'default'`,
   );
+  const settingRow = setting.rows[0];
+  if (!settingRow) {
+    throw new Error(
+      "No BoutiqueSetting row with id = 'default' exists; cannot export the catalog.",
+    );
+  }
+  const featuredProductSlug = settingRow.featuredProductSlug;
 
   /*
    * Guard before building anything. An empty catalog is never a legitimate
@@ -183,17 +199,6 @@ async function readCatalog(client: Client): Promise<CatalogSeed> {
       `Refusing to write an empty catalog: ${redactUrl(connectionString())} ` +
         `returned ${collections.rowCount} collections and ${products.rowCount} products. ` +
         `Check SUPABASE_DB_URL points at a seeded project.`,
-    );
-  }
-
-  const featuredProductSlug = setting.rows[0]?.featuredProductSlug;
-
-  // The home page's hero product. A missing row would emit a file that seeds a
-  // broken home page, which is worse than not emitting one.
-  if (!featuredProductSlug) {
-    throw new Error(
-      `No BoutiqueSetting row with id = 'default', so there is no ` +
-        `featuredProductSlug to export. Seed it before dumping.`,
     );
   }
 
@@ -316,20 +321,6 @@ function toProduct(
      */
     costInCents: row.costInCents,
     sku: row.sku,
-    /*
-     * The two counters, and the total they add up to.
-     *
-     * `supabase/sql/0042_inventory_channels.sql` split stock in two and made
-     * `inventory` a trigger-maintained total. Exporting only the total would
-     * make this file unable to restore stock at all: a seeded row gets
-     * online = offline = 0, the trigger recomputes the total as 0, and a fresh
-     * environment comes up with the whole catalogue silently sold out. The
-     * total is still exported because it is readable, but the counters are what
-     * `db-seed.ts` actually writes.
-     */
-    inventory: row.inventory,
-    inventoryOnline: row.inventoryOnline,
-    inventoryOffline: row.inventoryOffline,
     isBestseller: row.isBestseller,
     collectionSlug: row.collectionSlug,
     images: [...images],
@@ -600,6 +591,52 @@ async function readContent(client: Client): Promise<ContentSeed> {
   };
 }
 
+/** Read only the live ingredient-to-product links for the focused export. */
+async function readIngredientUsages(
+  client: Client,
+): Promise<{ ingredientId: string; productSlug: string; name: string }[]> {
+  const result = await client.query<{
+    ingredientId: string;
+    productSlug: string;
+    name: string;
+  }>(`select "ingredientId", "productSlug", name
+        from public."IngredientUsage"
+       order by "ingredientId", "sortOrder", id`);
+  return result.rows;
+}
+
+/** Replace only `usedIn`, retaining every other content field and its order. */
+function withLiveIngredientUsages(
+  content: ContentSeed,
+  usages: readonly { ingredientId: string; productSlug: string; name: string }[],
+): ContentSeed {
+  const knownIngredients = new Set(content.ingredients.map(({ id }) => id));
+  const linksByIngredient = new Map<string, { name: string; slug: string }[]>();
+
+  for (const usage of usages) {
+    const links = linksByIngredient.get(usage.ingredientId) ?? [];
+    links.push({ name: usage.name, slug: usage.productSlug });
+    linksByIngredient.set(usage.ingredientId, links);
+  }
+
+  const missingIngredientIds = [...linksByIngredient.keys()]
+    .filter((id) => !knownIngredients.has(id))
+    .sort();
+  if (missingIngredientIds.length > 0) {
+    throw new Error(
+      `Cannot export ingredient usages; content.json has no entries for: ${missingIngredientIds.join(", ")}`,
+    );
+  }
+
+  return {
+    ...content,
+    ingredients: content.ingredients.map((ingredient) => ({
+      ...ingredient,
+      usedIn: linksByIngredient.get(ingredient.id) ?? [],
+    })),
+  };
+}
+
 async function readDirectory(client: Client): Promise<DirectorySeed> {
   const stockists = await rows<Omit<StockistSeedRow, "image"> & {
     imageUrl: string;
@@ -744,7 +781,45 @@ async function writeSeed(name: string, value: unknown): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  const focused = args.length === 1 && args[0] === "--catalog-and-ingredient-usages";
+  if (args.length > 0 && !focused) {
+    throw new Error(
+      "Usage: npm run db:dump [-- --catalog-and-ingredient-usages]",
+    );
+  }
+
   console.log(`Dumping ${redactUrl(connectionString())}`);
+
+  if (focused) {
+    const existingContent = JSON.parse(
+      await readFile(path.join(SEED_DIR, "content.json"), "utf8"),
+    ) as ContentSeed;
+    const { catalog, usages } = await withClient(async (client) => ({
+      catalog: await readCatalog(client),
+      usages: await readIngredientUsages(client),
+    }));
+    const content = withLiveIngredientUsages(existingContent, usages);
+
+    // Construct and validate both outputs before touching either file.
+    const catalogJson = `${JSON.stringify(catalog, null, 2)}\n`;
+    const contentJson = `${JSON.stringify(content, null, 2)}\n`;
+    await writeFile(path.join(SEED_DIR, "catalog.json"), catalogJson, "utf8");
+    await writeFile(path.join(SEED_DIR, "content.json"), contentJson, "utf8");
+
+    const images = catalog.products.reduce(
+      (total, product) => total + product.images.length,
+      0,
+    );
+    console.log(`  ${String(catalog.collections.length).padStart(4)}  Collection`);
+    console.log(`  ${String(catalog.products.length).padStart(4)}  Product`);
+    console.log(`  ${String(images).padStart(4)}  ProductImage`);
+    console.log(`  ${String(usages.length).padStart(4)}  IngredientUsage`);
+    console.log(
+      "Wrote supabase/seed/catalog.json and ingredient usedIn links in content.json. Review `git diff` before committing.",
+    );
+    return;
+  }
 
   const { catalog, content, directory } = await withClient(async (client) => ({
     catalog: await readCatalog(client),
