@@ -51,11 +51,14 @@ export async function getViewer(): Promise<Viewer | null> {
 
   const fullName = user.fullName ?? null;
   const primaryEmail = user.primaryEmailAddress?.emailAddress ?? null;
+  const primaryEmailVerified =
+    user.primaryEmailAddress?.verification?.status === "verified";
 
   return {
     id: user.id,
     fullName,
     primaryEmail,
+    primaryEmailVerified,
     imageUrl: user.imageUrl ?? null,
     initial: initialFor(fullName, primaryEmail),
   };

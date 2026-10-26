@@ -62,6 +62,7 @@ import { sendWelcomeMail } from "@/src/lib/email/send-welcome-mail";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/src/lib/i18n/config";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { subscribe, unsubscribeByClerkUser } from "@/src/services/newsletter";
+import { claimGuestOrdersForIdentity } from "@/src/services/order-claims";
 import { claimWelcome, releaseWelcome } from "@/src/services/welcome";
 
 /** Node, not Edge: the signature check needs Node's crypto. */
@@ -118,6 +119,19 @@ function primaryEmail(data: ClerkUserData): string | null {
 
   const primary = entries.find((entry) => entry.id === data.primary_email_address_id);
   return text(primary?.email_address) ?? text(entries[0]?.email_address);
+}
+
+/** True only when Clerk marks the pointed-to primary address verified. */
+function primaryEmailIsVerified(data: ClerkUserData): boolean {
+  if (!Array.isArray(data.email_addresses)) return false;
+
+  const entries = data.email_addresses as readonly {
+    id?: unknown;
+    verification?: { status?: unknown } | null;
+  }[];
+  const primary = entries.find((entry) => entry.id === data.primary_email_address_id);
+
+  return primary?.verification?.status === "verified";
 }
 
 /** The primary phone, or the first. Optional everywhere it is used. */
@@ -235,6 +249,14 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (error) {
       console.error(`[clerk] sync_clerk_user failed: ${error.message}`);
       return NextResponse.json({ error: "Sync failed." }, { status: 500 });
+    }
+
+    if (event.type === "user.created" && primaryEmailIsVerified(event.data as ClerkUserData)) {
+      await claimGuestOrdersForIdentity({
+        clerkUserId: payload.clerkId,
+        email: payload.email,
+        emailVerified: true,
+      });
     }
 
     /*

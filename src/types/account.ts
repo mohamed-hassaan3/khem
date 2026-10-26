@@ -100,6 +100,7 @@ export interface Viewer {
   /** Full name when Clerk holds one; `null` when the account is email-only. */
   fullName: string | null;
   primaryEmail: string | null;
+  primaryEmailVerified: boolean;
   imageUrl: string | null;
   /** Uppercase first letter of the name, falling back to the email. */
   initial: string;

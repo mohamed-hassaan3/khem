@@ -14,7 +14,12 @@ import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { readingArrow } from "@/src/lib/i18n/rtl";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
-import { getAccountSummary, getOrdersForUser } from "@/src/services/account";
+import {
+  ensureUserRowId,
+  getAccountSummary,
+  getOrdersForUser,
+} from "@/src/services/account";
+import { claimGuestOrdersForIdentity } from "@/src/services/order-claims";
 import { creditLedgerForUser } from "@/src/services/credits";
 import { vouchersForUser } from "@/src/services/vouchers";
 
@@ -70,6 +75,15 @@ export default async function AccountPage({
   // returns them here rather than to the portal index.
   if (viewer === null)
     redirect(signInPathWithReturn(activeLocale, localizePath(activeLocale, PATH)));
+
+  // Backfill the Clerk customer row for accounts whose creation webhook was
+  // missed, then claim only when Clerk confirms this primary email.
+  await ensureUserRowId(viewer);
+  await claimGuestOrdersForIdentity({
+    clerkUserId: viewer.id,
+    email: viewer.primaryEmail,
+    emailVerified: viewer.primaryEmailVerified,
+  });
 
   const [dict, summary, orders, ledger, vouchers] = await Promise.all([
     getDictionary(activeLocale),

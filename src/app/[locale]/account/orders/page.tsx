@@ -10,7 +10,8 @@ import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
-import { getOrdersForUser } from "@/src/services/account";
+import { ensureUserRowId, getOrdersForUser } from "@/src/services/account";
+import { claimGuestOrdersForIdentity } from "@/src/services/order-claims";
 
 /**
  * Order history, and where "Track Your Order" in the emails lands.
@@ -58,6 +59,15 @@ export default async function OrdersPage({
   // returns them here rather than to the portal index.
   if (viewer === null)
     redirect(signInPathWithReturn(activeLocale, localizePath(activeLocale, PATH)));
+
+  // Backfill the Clerk customer row for accounts whose creation webhook was
+  // missed, then claim only when Clerk confirms this primary email.
+  await ensureUserRowId(viewer);
+  await claimGuestOrdersForIdentity({
+    clerkUserId: viewer.id,
+    email: viewer.primaryEmail,
+    emailVerified: viewer.primaryEmailVerified,
+  });
 
   const [dict, orders] = await Promise.all([
     getDictionary(activeLocale),
