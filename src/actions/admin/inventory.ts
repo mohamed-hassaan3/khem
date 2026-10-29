@@ -25,6 +25,7 @@
  */
 
 import { requireAdmin } from "@/src/lib/admin/auth";
+import { addStockMovement } from "@/src/lib/admin/stock-movement";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
   adjustInventorySchema,
@@ -157,21 +158,15 @@ export async function receiveStock(input: unknown): Promise<AdminActionResult> {
     };
   }
 
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return UNCONFIGURED;
-
-  const { error } = await supabase.rpc("receive_stock", {
-    p_slug: parsed.data.slug,
-    p_channel: parsed.data.channel,
-    p_quantity: parsed.data.quantity,
-    p_reason: parsed.data.reason ?? null,
-    p_actor: actor.email,
+  const movement = await addStockMovement({
+    slug: parsed.data.slug,
+    channel: parsed.data.channel,
+    quantity: parsed.data.quantity,
+    reason: "restock",
+    actor: actor.email,
   });
 
-  if (error) {
-    console.error(`[admin] receiveStock failed: ${error.message}`);
-    return postgresFailure(error, "product");
-  }
+  if (!movement.ok) return { ok: false, message: movement.message };
 
   console.info(
     `[admin] ${actor.email} received ${parsed.data.quantity} into ${parsed.data.channel} for ${parsed.data.slug}`,

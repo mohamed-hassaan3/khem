@@ -135,6 +135,12 @@ const movementQuantity = z.coerce
   .min(1, "Quantity must be at least 1.")
   .max(1_000_000, "That quantity looks like a typing mistake.");
 
+/** Strict string boundary: Number("") is zero, which must not make a blank addition valid. */
+const positiveMovementQuantity = z.string().trim()
+  .regex(/^[1-9]\d*$/, "Enter a positive whole number.")
+  .transform(Number)
+  .pipe(z.number().int().positive().max(1_000_000, "That quantity looks like a typing mistake."));
+
 const productSlug = z
   .string()
   .trim()
@@ -155,11 +161,11 @@ export const adjustInventorySchema = z.object({
    * counting the shelf, and "set it to what I just counted" is the only
    * instruction that survives a page they left open for an hour.
    */
-  inventory: z.coerce
-    .number({ error: "Enter a stock count." })
-    .int("Stock must be a whole number.")
-    .min(0, "Stock cannot be negative.")
-    .max(1_000_000, "That stock count looks like a typing mistake."),
+  inventory: z.string()
+    .trim()
+    .regex(/^(0|[1-9]\d*)$/, "Enter zero or a positive whole number.")
+    .transform(Number)
+    .pipe(z.number().int().min(0).max(1_000_000, "That stock count looks like a typing mistake.")),
   /**
    * Which counter is being corrected. Stock is two independent numbers since
    * `supabase/sql/0042_inventory_channels.sql` — see `channel` below.
@@ -178,7 +184,7 @@ export const offlineSaleSchema = z.object({
 export const receiveStockSchema = z.object({
   slug: productSlug,
   channel: inventoryChannel,
-  quantity: movementQuantity,
+  quantity: positiveMovementQuantity,
   reason: movementReason,
 });
 

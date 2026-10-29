@@ -21,7 +21,7 @@
  */
 
 import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { saveProductImages } from "@/src/actions/admin/catalog";
@@ -35,7 +35,7 @@ import {
 import type { AdminActionResult } from "@/src/schemas/admin";
 import type { AdminProductImage } from "@/src/schemas/db/admin";
 
-interface Row {
+export interface ProductImageDraftRow {
   /** `null` for a row added in this session; the server mints an id. */
   id: string | null;
   url: string;
@@ -43,7 +43,7 @@ interface Row {
   isPrimary: boolean;
 }
 
-function toRows(images: readonly AdminProductImage[]): Row[] {
+function toRows(images: readonly AdminProductImage[]): ProductImageDraftRow[] {
   return images.map((image) => ({
     id: image.id,
     url: image.url,
@@ -55,18 +55,32 @@ function toRows(images: readonly AdminProductImage[]): Row[] {
 export default function ProductImageEditor({
   productSlug,
   images,
+  draft = false,
+  onChange,
+  validationErrors,
+  validationMessage,
 }: {
-  productSlug: string;
+  productSlug?: string;
   images: readonly AdminProductImage[];
+  draft?: boolean;
+  onChange?: (rows: ProductImageDraftRow[]) => void;
+  validationErrors?: Record<string, string>;
+  validationMessage?: string;
 }) {
   const router = useRouter();
-  const [rows, setRows] = useState<Row[]>(toRows(images));
+  const [rows, setRows] = useState<ProductImageDraftRow[]>(toRows(images));
   const [result, setResult] = useState<AdminActionResult | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const fieldErrors = result && !result.ok ? (result.fieldErrors ?? {}) : {};
 
-  function update(index: number, patch: Partial<Row>) {
+  // Draft rows belong to the parent create form and participate in its dirty
+  // guard. The edit page omits this callback and keeps its existing behavior.
+  useEffect(() => {
+    if (draft) onChange?.(rows);
+  }, [draft, onChange, rows]);
+
+  function update(index: number, patch: Partial<ProductImageDraftRow>) {
     setRows((current) =>
       current.map((row, at) => (at === index ? { ...row, ...patch } : row)),
     );
@@ -92,6 +106,8 @@ export default function ProductImageEditor({
   function submit() {
     setResult(null);
 
+    if (draft || !productSlug) return;
+
     startTransition(async () => {
       const outcome = await saveProductImages({ productSlug, images: rows });
       setResult(outcome);
@@ -104,6 +120,11 @@ export default function ProductImageEditor({
       {result ? (
         <AdminNotice tone={result.ok ? "success" : "error"}>{result.message}</AdminNotice>
       ) : null}
+      {validationMessage ? (
+        <p className={ERROR_CLASS} role="alert">
+          {validationMessage}
+        </p>
+      ) : null}
 
       {rows.length === 0 ? (
         <p className="border border-ground-border px-6 py-10 text-center text-[12px] tracking-wide text-ground-muted">
@@ -112,7 +133,13 @@ export default function ProductImageEditor({
       ) : null}
 
       <ul className="space-y-4">
-        {rows.map((row, index) => (
+        {rows.map((row, index) => {
+          const urlError =
+            validationErrors?.[`images.${index}.url`] ?? fieldErrors[`images.${index}.url`];
+          const altError =
+            validationErrors?.[`images.${index}.alt`] ?? fieldErrors[`images.${index}.alt`];
+
+          return (
           <li key={row.id ?? `new-${index}`} className="border border-ground-border p-4">
             <div className="flex gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -131,10 +158,14 @@ export default function ProductImageEditor({
                     id={`image-url-${index}`}
                     value={row.url}
                     onChange={(event) => update(index, { url: event.target.value })}
+                    aria-invalid={urlError ? true : undefined}
+                    aria-describedby={urlError ? `image-url-error-${index}` : undefined}
                     className={FIELD_CLASS}
                   />
-                  {fieldErrors[`images.${index}.url`] ? (
-                    <p className={ERROR_CLASS}>{fieldErrors[`images.${index}.url`]}</p>
+                  {urlError ? (
+                    <p id={`image-url-error-${index}`} className={ERROR_CLASS} role="alert">
+                      {urlError}
+                    </p>
                   ) : null}
                 </div>
 
@@ -146,10 +177,14 @@ export default function ProductImageEditor({
                     id={`image-alt-${index}`}
                     value={row.alt}
                     onChange={(event) => update(index, { alt: event.target.value })}
+                    aria-invalid={altError ? true : undefined}
+                    aria-describedby={altError ? `image-alt-error-${index}` : undefined}
                     className={FIELD_CLASS}
                   />
-                  {fieldErrors[`images.${index}.alt`] ? (
-                    <p className={ERROR_CLASS}>{fieldErrors[`images.${index}.alt`]}</p>
+                  {altError ? (
+                    <p id={`image-alt-error-${index}`} className={ERROR_CLASS} role="alert">
+                      {altError}
+                    </p>
                   ) : null}
                 </div>
 
@@ -187,7 +222,15 @@ export default function ProductImageEditor({
                     <button
                       type="button"
                       aria-label="Remove image"
-                      onClick={() => setRows((current) => current.filter((_, at) => at !== index))}
+                      onClick={() =>
+                        setRows((current) => {
+                          const next = current.filter((_, at) => at !== index);
+                          if (draft && next.length > 0 && !next.some((row) => row.isPrimary)) {
+                            next[0] = { ...next[0], isPrimary: true };
+                          }
+                          return next;
+                        })
+                      }
                       className="border border-ground-border p-2 text-ground-muted transition-colors duration-300 hover:border-danger/50 hover:text-danger"
                     >
                       <X size={13} strokeWidth={1.25} />
@@ -197,7 +240,8 @@ export default function ProductImageEditor({
               </div>
             </div>
           </li>
-        ))}
+          );
+        })}
       </ul>
 
       <div className="flex flex-wrap gap-3 border-t border-ground-border pt-6">
@@ -214,9 +258,11 @@ export default function ProductImageEditor({
           Add image
         </AdminButton>
 
-        <AdminButton onClick={submit} disabled={isPending}>
-          {isPending ? "Saving…" : "Save gallery"}
-        </AdminButton>
+        {!draft ? (
+          <AdminButton onClick={submit} disabled={isPending}>
+            {isPending ? "Saving…" : "Save gallery"}
+          </AdminButton>
+        ) : null}
       </div>
     </div>
   );

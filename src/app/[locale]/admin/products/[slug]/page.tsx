@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import ProductForm from "@/src/components/admin/ProductForm";
 import ProductImageEditor from "@/src/components/admin/ProductImageEditor";
+import { AdminNotice } from "@/src/components/admin/fields";
 import StatusToggle from "@/src/components/admin/StatusToggle";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
+import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { hasDetailPage, productHref } from "@/src/lib/routes";
 import { getAdminProduct, listAdminCollections } from "@/src/services/admin/catalog";
 
@@ -13,15 +15,18 @@ export const dynamic = "force-dynamic";
 
 export default async function EditProductPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { locale, slug } = await params;
+  const [{ locale, slug }, query] = await Promise.all([params, searchParams]);
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  const [product, collections] = await Promise.all([
+  const [product, collections, dictionary] = await Promise.all([
     getAdminProduct(slug),
     listAdminCollections(),
+    getDictionary(activeLocale),
   ]);
 
   if (!product) notFound();
@@ -56,6 +61,12 @@ export default async function EditProductPage({
           ) : null
         }
       />
+
+      {query.gallery === "save-failed" ? (
+        <div className="mb-6 max-w-3xl">
+          <AdminNotice tone="error">{dictionary.adminProduct.gallerySaveFailed}</AdminNotice>
+        </div>
+      ) : null}
 
       <ProductForm product={product} collections={collections} locale={activeLocale} />
 

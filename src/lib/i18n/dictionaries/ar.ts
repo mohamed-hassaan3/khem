@@ -16,6 +16,27 @@
 import type { Dictionary } from "./en";
 
 export const ar: Dictionary = {
+  adminInventory: {
+    initialStock: "المخزون الأولي",
+    initialStockHelper: "يُسجَّل المخزون الأولي في سجل المخزون بوصفه الحركة الأولى. لإضافة المزيد لاحقًا، استخدم صفحة المخزون.",
+    online: "المتجر الإلكتروني",
+    offline: "المتجر الفعلي",
+    addStock: "إضافة مخزون",
+    quantityToAdd: "الكمية المراد إضافتها",
+    correctStock: "تصحيح المخزون",
+    saveCorrection: "حفظ التصحيح",
+    quantityWhole: "أدخل عددًا صحيحًا.",
+    quantityPositive: "أدخل عددًا صحيحًا أكبر من صفر.",
+    quantityNonNegative: "أدخل صفرًا أو عددًا صحيحًا موجبًا.",
+    saved: "تم تسجيل حركة المخزون.",
+    failed: "تعذّر تحديث المخزون. يُرجى المحاولة مجددًا.",
+  },
+  adminProduct: {
+    newDescription: "الصور اختيارية هنا، ويمكن إضافتها أو تغييرها لاحقًا من صفحة المنتج.",
+    gallerySaveFailed: "تم إنشاء المنتج، لكن تعذّر حفظ الصور. أضفها من هنا.",
+    regenerateSku: "إعادة إنشاء الرمز من الاسم",
+    skuChangedWarning: "يؤثر تغيير الرمز في تقارير المبيعات المستقبلية. وتحتفظ سجلات المبيعات السابقة بالرمز المسجّل وقت البيع.",
+  },
   common: {
     readMore: "اقرأ المزيد",
     discover: "اكتشف",

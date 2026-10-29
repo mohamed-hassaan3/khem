@@ -119,7 +119,7 @@ export default async function AdminInventoryPage({
             `Sold (${range}d)`,
             "Online",
             "Offline",
-            { label: "Set stock", hidden: true },
+            "Add stock / correct",
           ]}
         >
           {rows.map((row) => (

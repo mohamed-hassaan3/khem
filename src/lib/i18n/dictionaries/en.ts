@@ -15,6 +15,27 @@ import type { ProductType } from "@/src/lib/product-types";
 import type { CollectionKind, Concentration } from "@/src/types/catalog";
 
 export const en = {
+  adminInventory: {
+    initialStock: "Initial stock",
+    initialStockHelper: "Initial stock is recorded in Stock History as the first movement. To add more later, use Inventory.",
+    online: "Online",
+    offline: "Offline",
+    addStock: "Add stock",
+    quantityToAdd: "Quantity to add",
+    correctStock: "Correct stock",
+    saveCorrection: "Save correction",
+    quantityWhole: "Enter a whole number.",
+    quantityPositive: "Enter a positive whole number.",
+    quantityNonNegative: "Enter zero or a positive whole number.",
+    saved: "Stock movement recorded.",
+    failed: "Stock could not be updated. Please try again.",
+  },
+  adminProduct: {
+    newDescription: "Photographs are optional here and can be added or changed later from the product page.",
+    gallerySaveFailed: "Product created, but the photographs could not be saved. Add them here.",
+    regenerateSku: "Regenerate from name",
+    skuChangedWarning: "Changing the SKU affects future sales reporting. Past sales-ledger entries keep the SKU recorded at sale.",
+  },
   common: {
     readMore: "Read More",
     discover: "Discover",

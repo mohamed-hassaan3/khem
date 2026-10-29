@@ -1,34 +1,11 @@
 "use client";
 
-/**
- * Setting a product's stock from the inventory table — one field per counter.
- *
- * Stock is two independent numbers since
- * `supabase/sql/0042_inventory_channels.sql`: the website sells from online,
- * the desk from offline, and neither borrows. Both are corrected here, and each
- * writes its own `"InventoryMovement"` row recording the delta it implied.
- *
- * An absolute count, not a delta: this is the control used after counting the
- * shelf, and on a page left open while sales came in "set it to 4" stays
- * correct where "subtract 1" would double-apply. The *ledger* still gets a
- * delta — the database computes it inside `set_channel_stock()`, so the audit
- * trail explains the jump without the editor having to do arithmetic.
- *
- * Save is explicit and only offered once the number has actually changed —
- * a stock field that wrote on every keystroke would fire a request per digit,
- * and `4` typed over `40` passes through `4` on its way to `41`.
- *
- * The confirmation is deliberately quiet and short-lived: an editor correcting
- * twenty rows should get an acknowledgement, not twenty banners.
- */
-
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-import { adjustInventory } from "@/src/actions/admin/inventory";
+import { adjustInventory, receiveStock } from "@/src/actions/admin/inventory";
 import { FIELD_CLASS } from "@/src/components/admin/fields";
-
-const CONFIRMATION_MS = 2_500;
+import { useDictionary } from "@/src/providers/i18n-provider";
 
 export default function InventoryEditor({
   slug,
@@ -40,14 +17,13 @@ export default function InventoryEditor({
   inventoryOffline: number;
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <ChannelField slug={slug} channel="ONLINE" inventory={inventoryOnline} />
       <ChannelField slug={slug} channel="OFFLINE" inventory={inventoryOffline} />
     </div>
   );
 }
 
-/** One counter's field. Two of these make the row. */
 function ChannelField({
   slug,
   channel,
@@ -58,83 +34,132 @@ function ChannelField({
   inventory: number;
 }) {
   const router = useRouter();
-  const [value, setValue] = useState(String(inventory));
-  const [saved, setSaved] = useState(false);
+  const dictionary = useDictionary().adminInventory;
+  const [quantity, setQuantity] = useState("");
+  const [correction, setCorrection] = useState(String(inventory));
+  const [correcting, setCorrecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // A server refresh brings a new count — after a sale, or after somebody else
-  // corrected it — and the input must follow rather than keep showing a figure
-  // that is no longer true.
-  //
-  // Adjusted during render rather than in an effect: React re-runs this
-  // component with the new prop and the corrected input in one pass, where an
-  // effect would paint the stale number first and then replace it.
-  const [serverValue, setServerValue] = useState(inventory);
-  if (serverValue !== inventory) {
-    setServerValue(inventory);
-    setValue(String(inventory));
-  }
+  const label = channel === "ONLINE" ? dictionary.online : dictionary.offline;
 
-  useEffect(() => {
-    if (!saved) return;
-    const timer = setTimeout(() => setSaved(false), CONFIRMATION_MS);
-    return () => clearTimeout(timer);
-  }, [saved]);
-
-  const changed = value.trim() !== String(inventory);
-
-  function save() {
+  function add() {
     setError(null);
-
+    if (!/^[1-9]\d*$/.test(quantity)) {
+      setError(dictionary.quantityPositive);
+      return;
+    }
     startTransition(async () => {
-      const outcome = await adjustInventory({ slug, channel, inventory: value });
-
+      const outcome = await receiveStock({ slug, channel, quantity, reason: "restock" });
       if (!outcome.ok) {
-        setError(outcome.fieldErrors?.inventory ?? outcome.message);
+        setError(outcome.fieldErrors?.quantity ?? dictionary.failed);
         return;
       }
+      setQuantity("");
+      router.refresh();
+    });
+  }
 
-      setSaved(true);
+  function correct() {
+    setError(null);
+    if (!/^(0|[1-9]\d*)$/.test(correction)) {
+      setError(dictionary.quantityNonNegative);
+      return;
+    }
+    startTransition(async () => {
+      const outcome = await adjustInventory({ slug, channel, inventory: correction });
+      if (!outcome.ok) {
+        setError(outcome.fieldErrors?.inventory ?? dictionary.failed);
+        return;
+      }
+      setCorrecting(false);
       router.refresh();
     });
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <label
-        className="w-14 font-heading text-[9px] uppercase tracking-[0.15em] text-ground-subtle"
-        htmlFor={`stock-${channel}-${slug}`}
-      >
-        {channel === "ONLINE" ? "Online" : "Offline"}
-      </label>
-
-      <input
-        id={`stock-${channel}-${slug}`}
-        type="number"
-        min={0}
-        value={value}
-        disabled={isPending}
-        onChange={(event) => setValue(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            if (changed) save();
-          }
-        }}
-        className={`${FIELD_CLASS} w-24 px-3 py-2 text-[12px]`}
-      />
+    <div className="min-w-48 space-y-2">
+      <div className="flex items-center gap-2">
+        <label
+          className="w-14 shrink-0 font-heading text-[9px] uppercase tracking-[0.15em] text-ground-subtle"
+          htmlFor={`add-stock-${channel}-${slug}`}
+        >
+          {dictionary.addStock}
+        </label>
+        <input
+          id={`add-stock-${channel}-${slug}`}
+          type="number"
+          min={1}
+          step={1}
+          inputMode="numeric"
+          placeholder={dictionary.quantityToAdd}
+          aria-label={`${dictionary.addStock}: ${label}`}
+          value={quantity}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `stock-error-${channel}-${slug}` : undefined}
+          disabled={isPending}
+          onChange={(event) => setQuantity(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              add();
+            }
+          }}
+          className={`${FIELD_CLASS} min-w-0 flex-1 px-3 py-2 text-[12px]`}
+        />
+        <button
+          type="button"
+          onClick={add}
+          disabled={isPending}
+          className="rounded-none border border-ground-border px-2 py-2 font-heading text-[9px] uppercase tracking-[0.12em] text-ground-muted transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent disabled:opacity-40"
+        >
+          {label}
+        </button>
+      </div>
 
       <button
         type="button"
-        onClick={save}
-        disabled={!changed || isPending}
-        className="rounded-none border border-ground-border px-3 py-2 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-muted transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/40 hover:text-ground-accent disabled:pointer-events-none disabled:opacity-25"
+        onClick={() => {
+          setError(null);
+          setCorrection(String(inventory));
+          setCorrecting((value) => !value);
+        }}
+        className="ms-16 font-heading text-[9px] uppercase tracking-[0.15em] text-ground-subtle transition-colors duration-300 hover:text-ground-accent"
       >
-        {isPending ? "…" : saved && !changed ? "Saved" : "Save"}
+        {dictionary.correctStock}
       </button>
 
-      {error ? <span className="text-[10px] text-danger">{error}</span> : null}
+      {correcting ? (
+        <div className="flex items-center gap-2 ps-16">
+          <input
+            type="number"
+            min={0}
+            step={1}
+            inputMode="numeric"
+            aria-label={`${dictionary.correctStock}: ${label}`}
+            value={correction}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `stock-error-${channel}-${slug}` : undefined}
+            disabled={isPending}
+            onChange={(event) => setCorrection(event.target.value)}
+            className={`${FIELD_CLASS} w-20 px-3 py-2 text-[12px]`}
+          />
+          <button
+            type="button"
+            onClick={correct}
+            disabled={isPending}
+            className="rounded-none border border-ground-border px-2 py-2 font-heading text-[9px] uppercase tracking-[0.12em] text-ground-muted transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent disabled:opacity-40"
+          >
+            {dictionary.saveCorrection}
+          </button>
+        </div>
+      ) : null}
+
+      {error ? (
+        <p id={`stock-error-${channel}-${slug}`} className="ps-16 text-[10px] text-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
