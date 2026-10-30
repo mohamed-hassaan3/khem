@@ -35,6 +35,7 @@ import {
   type MerchPageSlug,
 } from "@/src/lib/facets";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
+import { SCENT_PROFILE_SLUGS, type ScentProfileSlug } from "@/src/lib/scent-profiles";
 import {
   ADMIN_CATEGORY_COLUMNS,
   ADMIN_NAV_LINK_COLUMNS,
@@ -57,6 +58,86 @@ import {
 
 function logFailure(query: string, message: string): void {
   console.error(`[admin] ${query} failed: ${message}`);
+}
+
+export interface AdminScentProfile {
+  slug: ScentProfileSlug;
+  name: string;
+  name_ar: string | null;
+  description: string;
+  description_ar: string | null;
+  bannerUrl: string;
+  bannerAlt: string;
+  bannerAlt_ar: string | null;
+  sortOrder: number;
+}
+
+export interface AdminScentProfileMember { slug: string; name: string; }
+
+const ADMIN_SCENT_PROFILE_COLUMNS = "slug, name, name_ar, description, description_ar, bannerUrl, bannerAlt, bannerAlt_ar, sortOrder";
+
+function parseAdminScentProfile(row: unknown): AdminScentProfile | null {
+  if (!row || typeof row !== "object") return null;
+  const value = row as Record<string, unknown>;
+  if (!SCENT_PROFILE_SLUGS.includes(value.slug as ScentProfileSlug)) return null;
+  if (typeof value.name !== "string" || typeof value.description !== "string" || typeof value.bannerUrl !== "string" || typeof value.bannerAlt !== "string") return null;
+  return {
+    slug: value.slug as ScentProfileSlug,
+    name: value.name,
+    name_ar: typeof value.name_ar === "string" ? value.name_ar : null,
+    description: value.description,
+    description_ar: typeof value.description_ar === "string" ? value.description_ar : null,
+    bannerUrl: value.bannerUrl,
+    bannerAlt: value.bannerAlt,
+    bannerAlt_ar: typeof value.bannerAlt_ar === "string" ? value.bannerAlt_ar : null,
+    sortOrder: typeof value.sortOrder === "number" ? value.sortOrder : 0,
+  };
+}
+
+export async function listAdminScentProfiles(): Promise<(AdminScentProfile & { memberCount: number })[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+  const [{ data: profiles, error: profileError }, { data: members, error: memberError }] = await Promise.all([
+    supabase.from("ScentProfile").select(ADMIN_SCENT_PROFILE_COLUMNS),
+    supabase.from("ScentProfileProduct").select("profileSlug"),
+  ]);
+  if (profileError || memberError) {
+    logFailure("listAdminScentProfiles", profileError?.message ?? memberError?.message ?? "unknown error");
+    return [];
+  }
+  const counts = new Map<string, number>();
+  for (const member of members ?? []) if (typeof member.profileSlug === "string") counts.set(member.profileSlug, (counts.get(member.profileSlug) ?? 0) + 1);
+  return (profiles ?? []).flatMap((row) => {
+    const parsed = parseAdminScentProfile(row);
+    return parsed ? [{ ...parsed, memberCount: counts.get(parsed.slug) ?? 0 }] : [];
+  }).sort((a, b) => SCENT_PROFILE_SLUGS.indexOf(a.slug) - SCENT_PROFILE_SLUGS.indexOf(b.slug));
+}
+
+export async function getAdminScentProfile(slug: ScentProfileSlug): Promise<{ profile: AdminScentProfile; members: AdminScentProfileMember[] } | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+  const [{ data: profileRow, error: profileError }, { data: links, error: linkError }] = await Promise.all([
+    supabase.from("ScentProfile").select(ADMIN_SCENT_PROFILE_COLUMNS).eq("slug", slug).maybeSingle(),
+    supabase.from("ScentProfileProduct").select("productSlug, sortOrder").eq("profileSlug", slug).order("sortOrder"),
+  ]);
+  if (profileError || linkError) {
+    logFailure("getAdminScentProfile", profileError?.message ?? linkError?.message ?? "unknown error");
+    return null;
+  }
+  const profile = parseAdminScentProfile(profileRow);
+  if (!profile) return null;
+  const orderedSlugs = (links ?? []).flatMap((link) => typeof link.productSlug === "string" ? [link.productSlug] : []);
+  if (!orderedSlugs.length) return { profile, members: [] };
+  const { data: products, error } = await supabase.from("Product").select("slug, name").in("slug", orderedSlugs);
+  if (error) {
+    logFailure("getAdminScentProfile members", error.message);
+    return { profile, members: [] };
+  }
+  const bySlug = new Map((products ?? []).map((product) => [product.slug, product.name]));
+  return { profile, members: orderedSlugs.flatMap((productSlug) => {
+    const name = bySlug.get(productSlug);
+    return typeof name === "string" ? [{ slug: productSlug, name }] : [];
+  }) };
 }
 
 /**
@@ -337,6 +418,17 @@ export async function getAdminProduct(slug: string): Promise<AdminProduct | null
   }
 
   return toAdminProduct(data);
+}
+
+export async function getAdminProductScentProfileSlugs(productSlug: string): Promise<string[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+  const { data, error } = await supabase.from("ScentProfileProduct").select("profileSlug").eq("productSlug", productSlug);
+  if (error) {
+    logFailure("getAdminProductScentProfileSlugs", error.message);
+    return [];
+  }
+  return (data ?? []).flatMap((row) => typeof row.profileSlug === "string" ? [row.profileSlug] : []);
 }
 
 /**

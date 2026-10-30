@@ -27,6 +27,7 @@ import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { getProductPromotions } from "@/src/services/marketing";
 import type { MerchPageSlug } from "@/src/lib/facets";
+import { isScentItem } from "@/src/lib/product-types";
 import type { ScentProfileSlug } from "@/src/lib/scent-profiles";
 import type { LinkableProduct } from "@/src/lib/routes";
 import {
@@ -383,7 +384,7 @@ export async function getMerchPage(
 }
 
 /**
- * The stored presentation of a scent-profile page, and the families it spans.
+ * The stored presentation of a scent-profile page.
  *
  * `null` on a missing row, an unparseable row, or a failed read — the route
  * treats all three alike and falls back to the dictionary copy and the constants
@@ -414,47 +415,21 @@ export async function getScentProfile(
   return toScentProfile(data, locale);
 }
 
-/**
- * The product slugs built on materials of the given olfactive families.
- *
- * Two hops of a relation that already exists: `"Ingredient".families` overlaps
- * the profile's families, and `"IngredientUsage"` names the perfumes each of
- * those materials is used in — a real foreign key to `"Product".slug`
- * (`supabase/sql/0002_content.sql`). Nothing derives membership from the note
- * pyramid, which names accords rather than sourced materials.
- *
- * `!inner` is deliberately *not* used: a catalogued material with no usage rows
- * yet should contribute nothing rather than exclude the query, and an empty
- * embedded array does exactly that.
- */
-async function scentProfileProductSlugs(
-  families: readonly string[],
-): Promise<string[]> {
+export async function getProductScentProfileSlugs(productSlug: string): Promise<string[]> {
   const supabase = getSupabasePublic();
-  if (!supabase || families.length === 0) return [];
+  if (!supabase) return [];
 
   const { data, error } = await supabase
-    .from("Ingredient")
-    // The same embedded-relation alias `INGREDIENT_COLUMNS` uses, narrowed to
-    // the one column this needs — the profile page renders products, not
-    // materials.
-    .select("usedIn:IngredientUsage(productSlug)")
-    .overlaps("families", [...families]);
+    .from("ScentProfileProduct")
+    .select("profileSlug")
+    .eq("productSlug", productSlug);
 
   if (error) {
-    logFailure("scentProfileProductSlugs", error.message);
+    logFailure("getProductScentProfileSlugs", error.message);
     return [];
   }
 
-  const slugs = new Set<string>();
-
-  for (const row of (data ?? []) as { usedIn?: { productSlug?: unknown }[] }[]) {
-    for (const usage of row.usedIn ?? []) {
-      if (typeof usage.productSlug === "string") slugs.add(usage.productSlug);
-    }
-  }
-
-  return [...slugs];
+  return (data ?? []).flatMap((row) => typeof row.profileSlug === "string" ? [row.profileSlug] : []);
 }
 
 /**
@@ -467,19 +442,41 @@ async function scentProfileProductSlugs(
  */
 export async function getProductCardsByScentProfile(
   locale: Locale,
-  families: readonly string[],
+  profileSlug: ScentProfileSlug,
 ): Promise<ProductCardData[]> {
-  const slugs = await scentProfileProductSlugs(families);
-  if (slugs.length === 0) return [];
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+  const { data: memberships, error } = await supabase
+    .from("ScentProfileProduct")
+    .select("productSlug, sortOrder")
+    .eq("profileSlug", profileSlug)
+    .order("sortOrder");
+  if (error) {
+    logFailure("getProductCardsByScentProfile", error.message);
+    return [];
+  }
+  const orderedSlugs = (memberships ?? []).flatMap((row) => typeof row.productSlug === "string" ? [row.productSlug] : []);
+  if (orderedSlugs.length === 0) return [];
 
   const query = cardQuery();
   if (!query) return [];
 
-  return toCards(
+  const cards = await toCards(
     locale,
     "getProductCardsByScentProfile",
-    await query.in("slug", slugs).order("sortOrder"),
+    await query.in("slug", orderedSlugs),
   );
+
+  const bySlug = new Map(cards.filter((card) =>
+    isScentItem({
+      productType: card.productType,
+      collectionKind: card.collectionKind,
+    }),
+  ).map((card) => [card.slug, card]));
+  return orderedSlugs.flatMap((productSlug) => {
+    const card = bySlug.get(productSlug);
+    return card ? [card] : [];
+  });
 }
 
 

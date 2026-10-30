@@ -765,6 +765,8 @@ export const en = {
     closeDetails: "Close {name} details",
     foundIn: "Found in",
     rareFacts: "Rare Facts",
+    showAll: "Show all {count}",
+    showLess: "Show less",
   },
 
   contactForm: {
@@ -850,9 +852,7 @@ export const en = {
     ingredientsHeading: "Key Ingredients",
     ingredientOrigin: "From {origin}",
     /*
-     * The "Scent Profile" line , one profile, or two at the most. Derived from
-     * the materials the perfume is built on rather than stored on the product;
-     * `productScentProfiles()` in `src/lib/scent-profiles.ts` explains the count.
+     * The "Scent Profile" line lists the profiles assigned directly to the product.
      * The names themselves come from `collections.scentProfiles`, so the chip
      * and the page it links to cannot disagree.
      */

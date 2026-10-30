@@ -14,7 +14,6 @@ import {
 
 import {
   SCENT_PROFILE_BANNERS,
-  SCENT_PROFILE_FAMILIES,
   SCENT_PROFILE_SLUGS,
   parseScentProfileSlug,
 } from "@/src/lib/scent-profiles";
@@ -409,17 +408,12 @@ async function renderMerchPage(locale: Locale, slug: string) {
 /**
  * One scent profile, as a collection page.
  *
- * The products built on materials of this profile's olfactive families —
- * `"ScentProfile".families` meets `"Ingredient".families`, and
- * `"IngredientUsage"` names the perfumes each material is used in. Membership is
- * derived from that relation and stored nowhere, which is why recataloguing an
- * ingredient moves every page that depends on it at once. See
- * `src/lib/scent-profiles.ts`.
+ * The products explicitly assigned to this profile through
+ * `ScentProfileProduct`.
  *
  * The stored row wins whole or not at all, exactly as it does above: with the
  * table empty, unparseable, or unreachable, the page renders the dictionary copy
- * and the banner constant, and the families fall back to
- * {@link SCENT_PROFILE_FAMILIES} so the grid still fills.
+ * and the banner constant, so the page still renders.
  *
  * An empty result renders the hero and the grid's empty state rather than a 404,
  * for the reason `renderMerchPage()` gives: five menu links point here, and none
@@ -448,14 +442,10 @@ async function renderScentProfile(locale: Locale, slug: string) {
   };
 
   /*
-   * The families come from the row where there is one — an editor who widens
-   * "fresh" to take in herbal materials must be able to do it without a deploy —
-   * and from the constant otherwise. A row with an empty array is treated as
-   * having none, not as missing: emptying the column is a decision.
+   * Editorial copy and banner still fall back to the dictionaries/constants if
+   * the profile row is unavailable. Membership has no inferred fallback.
    */
-  const families = stored?.families ?? SCENT_PROFILE_FAMILIES[profileSlug];
-
-  const products = await getProductCardsByScentProfile(locale, families);
+  const products = await getProductCardsByScentProfile(locale, profileSlug);
 
   return (
     <CollectionView

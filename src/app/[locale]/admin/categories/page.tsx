@@ -3,7 +3,6 @@ import { Plus } from "lucide-react";
 
 import {
   AdminCell,
-  AdminEmpty,
   AdminLinkButton,
   AdminPageHeader,
   AdminRow,
@@ -11,7 +10,9 @@ import {
   AdminTable,
 } from "@/src/components/admin/AdminTable";
 import AdminSearch from "@/src/components/admin/AdminSearch";
-import { matchesTerm, searchTerm } from "@/src/lib/admin/filter";
+import { searchTerm } from "@/src/lib/admin/filter";
+import { withScentFamiliesRow } from "@/src/lib/admin/category-rows";
+import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import {
   listAdminCategories,
@@ -43,9 +44,7 @@ export default async function AdminCategoriesPage({
     listAdminCollections(),
   ]);
 
-  const categories = all.filter((category) =>
-    matchesTerm(term, [category.name, category.slug, category.kind]),
-  );
+  const rows = withScentFamiliesRow(all, term);
 
   const counts = new Map<string, number>();
   for (const collection of collections) {
@@ -75,25 +74,7 @@ export default async function AdminCategoriesPage({
         label="Search categories by name, slug or kind"
       />
 
-      {categories.length === 0 ? (
-        <AdminEmpty
-          message={
-            term.length > 0
-              ? `Nothing matches “${term}”.`
-              : "No categories yet. A collection cannot exist without one."
-          }
-          action={
-            term.length > 0 ? undefined : (
-              <AdminLinkButton
-                href={localizePath(activeLocale, "/admin/categories/new")}
-              >
-                Create the first category
-              </AdminLinkButton>
-            )
-          }
-        />
-      ) : (
-        <AdminTable
+      <AdminTable
           headers={[
             "Name",
             "Slug",
@@ -104,26 +85,40 @@ export default async function AdminCategoriesPage({
             { label: "Edit", hidden: true },
           ]}
         >
-          {categories.map((category) => (
-            <AdminRow key={category.slug}>
-              <AdminCell>{category.name}</AdminCell>
-              <AdminCell muted>{category.slug}</AdminCell>
-              <AdminCell muted>{category.kind}</AdminCell>
-              <AdminCell muted>{counts.get(category.slug) ?? 0}</AdminCell>
+          {rows.map((row) => row.type === "scent-families" ? (
+            <AdminRow key={row.slug}>
+              <AdminCell>{row.name}</AdminCell>
+              <AdminCell muted>{row.slug}</AdminCell>
+              <AdminCell muted>{row.kind}</AdminCell>
+              <AdminCell muted>{SCENT_PROFILE_SLUGS.length}</AdminCell>
+              <AdminCell><AdminStatus live liveLabel="Offered" offLabel="Withdrawn" /></AdminCell>
+              <AdminCell muted>—</AdminCell>
+              <AdminCell>
+                <Link
+                  href={localizePath(activeLocale, "/admin/categories/scent-families")}
+                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
+                >
+                  Edit
+                </Link>
+              </AdminCell>
+            </AdminRow>
+          ) : (
+            <AdminRow key={row.category.slug}>
+              <AdminCell>{row.category.name}</AdminCell>
+              <AdminCell muted>{row.category.slug}</AdminCell>
+              <AdminCell muted>{row.category.kind}</AdminCell>
+              <AdminCell muted>{counts.get(row.category.slug) ?? 0}</AdminCell>
               <AdminCell>
                 <AdminStatus
-                  live={category.isEnabled}
+                  live={row.category.isEnabled}
                   liveLabel="Offered"
                   offLabel="Withdrawn"
                 />
               </AdminCell>
-              <AdminCell muted>{category.sortOrder}</AdminCell>
+              <AdminCell muted>{row.category.sortOrder}</AdminCell>
               <AdminCell>
                 <Link
-                  href={localizePath(
-                    activeLocale,
-                    `/admin/categories/${category.slug}`,
-                  )}
+                  href={localizePath(activeLocale, `/admin/categories/${row.category.slug}`)}
                   className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
                 >
                   Edit
@@ -132,7 +127,6 @@ export default async function AdminCategoriesPage({
             </AdminRow>
           ))}
         </AdminTable>
-      )}
     </>
   );
 }

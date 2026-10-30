@@ -24,6 +24,7 @@
  */
 
 import type { ProductType } from "../src/lib/product-types";
+import type { ScentProfileSlug } from "../src/lib/scent-profiles";
 import type { Category, Collection, Product } from "../src/types/catalog";
 import type { ContactChannel, SocialProfile } from "../src/types/contact";
 import type {
@@ -178,6 +179,23 @@ export interface IngredientFamilySeedRow {
   label_ar: string | null;
 }
 
+export interface ScentProfileSeedRow {
+  slug: ScentProfileSlug;
+  name: string;
+  name_ar: string | null;
+  description: string;
+  description_ar: string | null;
+  bannerUrl: string;
+  bannerAlt: string;
+  bannerAlt_ar: string | null;
+}
+
+export interface ScentProfileProductSeedRow {
+  profileSlug: ScentProfileSeedRow["slug"];
+  productSlug: string;
+  sortOrder: number;
+}
+
 export type IngredientSeedRow = Omit<Ingredient, "image" | "usedIn"> & {
   /*
    * The `"IngredientUsage"` row as stored, not as rendered. `IngredientUsage`
@@ -249,6 +267,8 @@ export type CraftQuoteSeedRow = CraftQuote & {
 export interface ContentSeed {
   testimonials: TestimonialSeedRow[];
   ingredientFamilies: IngredientFamilySeedRow[];
+  scentProfiles: ScentProfileSeedRow[];
+  scentProfileProducts: ScentProfileProductSeedRow[];
   ingredients: IngredientSeedRow[];
   articles: ArticleSeedRow[];
   timeline: TimelineEventSeedRow[];

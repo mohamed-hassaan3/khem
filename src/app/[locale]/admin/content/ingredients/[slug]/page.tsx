@@ -6,7 +6,8 @@ import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import IngredientForm from "@/src/components/admin/IngredientForm";
 import IngredientProductsPanel from "@/src/components/admin/IngredientProductsPanel";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
-import { listAdminProducts } from "@/src/services/admin/catalog";
+import { isScentItem } from "@/src/lib/product-types";
+import { listAdminCollections, listAdminProducts } from "@/src/services/admin/catalog";
 import { getAdminIngredient } from "@/src/services/admin/content";
 
 /**
@@ -26,22 +27,39 @@ export default async function EditIngredientPage({
   const { locale, slug } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  const [ingredient, products] = await Promise.all([
+  const [ingredient, products, collections] = await Promise.all([
     getAdminIngredient(decodeURIComponent(slug)),
     listAdminProducts(),
+    listAdminCollections(),
   ]);
 
   if (!ingredient) notFound();
 
   // Archived products are excluded: printing a material on something nobody can
   // buy would put a dead link on the ingredients page.
-  const options = products
-    .filter((product) => !product.isArchived)
-    .map((product) => ({
-      slug: product.slug,
-      name: product.name,
-      collectionSlug: product.collectionSlug,
-    }));
+  const collectionKinds = new Map(
+    collections.map((collection) => [collection.slug, collection.kind]),
+  );
+  const options = products.flatMap((product) => {
+    const collectionKind = collectionKinds.get(product.collectionSlug);
+    if (
+      product.isArchived ||
+      !collectionKind ||
+      !isScentItem({ productType: product.productType, collectionKind })
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        slug: product.slug,
+        name: product.name,
+        collectionSlug: product.collectionSlug,
+        productType: product.productType,
+        collectionKind,
+      },
+    ];
+  });
 
   return (
     <>
@@ -66,7 +84,7 @@ export default async function EditIngredientPage({
             Printed on
           </h2>
           <p className="mt-2 text-[12px] leading-relaxed text-ground-muted">
-            The perfumes whose detail page lists this material under Key
+            The products whose detail page lists this material under Key
             Ingredients. Saved separately from the record above.
           </p>
         </div>

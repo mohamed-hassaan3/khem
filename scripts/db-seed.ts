@@ -89,7 +89,7 @@ const written = new Map<string, number>();
 async function upsert(
   client: Client,
   table: string,
-  conflict: string,
+  conflict: string | readonly string[],
   rows: readonly Row[],
 ): Promise<void> {
   if (rows.length === 0) return;
@@ -106,14 +106,16 @@ async function upsert(
     return `(${placeholders.join(", ")})`;
   });
 
+  const conflictColumns = typeof conflict === "string" ? [conflict] : conflict;
+  const conflictSql = conflictColumns.map((column) => `"${column}"`).join(", ");
   const updates = columns
-    .filter((column) => column !== conflict)
+    .filter((column) => !conflictColumns.includes(column))
     .map((column) => `"${column}" = excluded."${column}"`)
     .join(", ");
 
   await client.query(
     `insert into public."${table}" (${quoted}) values ${tuples.join(", ")}
-       on conflict ("${conflict}") do update set ${updates}`,
+       on conflict (${conflictSql}) do update set ${updates}`,
     values,
   );
 
@@ -245,7 +247,7 @@ async function seedCatalog(client: Client, seed: CatalogSeed): Promise<void> {
   );
 }
 
-async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
+async function seedContent(client: Client, seed: ContentSeed, seededProductSlugs: ReadonlySet<string>): Promise<void> {
   await upsert(
     client,
     "Testimonial",
@@ -278,6 +280,24 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
     })),
   );
 
+  // Catalog products were seeded first. Keep these rows after products and
+  // after taxonomy rows, because legacy profile triggers read that taxonomy
+  // until 0072b has been applied.
+  await upsert(client, "ScentProfile", "slug", ordered(seed.scentProfiles, (profile, index) => ({
+    slug: profile.slug,
+    name: profile.name,
+    name_ar: profile.name_ar,
+    description: profile.description,
+    description_ar: profile.description_ar,
+    bannerUrl: profile.bannerUrl,
+    bannerAlt: profile.bannerAlt,
+    bannerAlt_ar: profile.bannerAlt_ar,
+    sortOrder: index,
+  })));
+  await upsert(client, "ScentProfileProduct", ["profileSlug", "productSlug"], seed.scentProfileProducts
+    .filter((membership) => seededProductSlugs.has(membership.productSlug))
+    .map((membership) => ({ profileSlug: membership.profileSlug, productSlug: membership.productSlug, sortOrder: membership.sortOrder })));
+
   await upsert(
     client,
     "Ingredient",
@@ -290,7 +310,6 @@ async function seedContent(client: Client, seed: ContentSeed): Promise<void> {
       latinName: ingredient.latinName,
       origin: ingredient.origin,
       origin_ar: ingredient.origin_ar,
-      families: ingredient.families,
       rarity: ingredient.rarity,
       rarity_ar: ingredient.rarity_ar,
       priceTier: ingredient.priceTier,
@@ -595,7 +614,7 @@ async function main(): Promise<void> {
 
   await withTransaction(async (client) => {
     await seedCatalog(client, catalog);
-    await seedContent(client, content);
+    await seedContent(client, content, new Set(catalog.products.map((product) => product.slug)));
     await seedDirectory(client, directory, catalog.featuredProductSlug);
   });
 

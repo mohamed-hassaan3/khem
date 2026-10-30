@@ -38,6 +38,7 @@ import {
 } from "@/src/lib/facets";
 import { LOCALES } from "@/src/lib/i18n/config";
 import { productHref } from "@/src/lib/routes";
+import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 import type { CollectionKind, ProductTag } from "@/src/types/catalog";
 
 /**
@@ -310,9 +311,8 @@ export function revalidateCraftsmanship(): void {
 /**
  * After a material is created, edited, removed, or re-linked to a perfume.
  *
- * Three surfaces, and the third is the one easy to forget: a material is
- * printed on the detail page of every product it is used in, so changing its
- * name or its photograph makes those pages stale too.
+ * The ingredient index, the home rail, explicit scent-profile pages, and the
+ * detail pages of products the ingredient is printed on.
  *
  * Both `/perfume/[slug]` and `/ritual/[slug]` are revalidated for each slug
  * without checking which kind of product it is. Revalidating a path that was
@@ -323,9 +323,22 @@ export function revalidateIngredients(productSlugs: readonly string[] = []): voi
   revalidateAllLocales(HOME);
   revalidateAllLocales("/ingredients");
 
+  for (const profile of SCENT_PROFILE_SLUGS) {
+    revalidateAllLocales(`/collections/${profile}`);
+  }
+
   for (const slug of new Set(productSlugs)) {
     revalidateAllLocales(`/perfume/${slug}`);
     revalidateAllLocales(`/ritual/${slug}`);
+  }
+}
+
+/** Profile editorial and explicit membership changes affect the admin screens and public profile pages. */
+export function revalidateScentProfile(profileSlug: string): void {
+  for (const locale of LOCALES) {
+    revalidatePath(`/${locale}/collections/${profileSlug}`);
+    revalidatePath(`/${locale}/admin/categories/scent-families`);
+    revalidatePath(`/${locale}/admin/categories/scent-families/${profileSlug}`);
   }
 }
 

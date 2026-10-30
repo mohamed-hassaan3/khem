@@ -3,27 +3,27 @@
     {
       "id": "yasmine-al-rashid",
       "quote": "KHEM has redefined what it means to wear a fragrance. Each bottle is a piece of history.",
-      "quote_ar": "أعادت كيم تعريف معنى ارتداء العطر. كل قارورة تحمل قطعة من التاريخ.",
+      "quote_ar": "أعادت \"كِيم\" (KHEM) تعريف معنى ارتداء العطر، فكل زجاجة هي قطعة من التاريخ.",
       "author": "Yasmine Al-Rashid",
-      "author_ar": "ياسمين الراشد",
+      "author_ar": null,
       "authorTitle": "Perfume Critic, Cairo",
-      "authorTitle_ar": "ناقدة عطور، القاهرة",
+      "authorTitle_ar": null,
       "isPublished": true
     },
     {
       "id": "james-whitmore",
       "quote": "Onyx Night is unlike anything I have encountered. Ancient yet wholly modern. Extraordinary.",
-      "quote_ar": "أونيكس نايت مختلف عن كل ما عرفت. قديم وحديث في آن واحد، واستثنائي.",
+      "quote_ar": "عطر \"أونيكس نايت\" لا يشبه أي شيء واجهته من قبل؛ فهو عتيق وفي الوقت ذاته عصري بالكامل، واستثنائي بحق.",
       "author": "James Whitmore",
-      "author_ar": "جيمس ويتمور",
+      "author_ar": null,
       "authorTitle": "Luxury Editor, Condé Nast",
-      "authorTitle_ar": "محرر رفاهية، كوندي ناست",
+      "authorTitle_ar": null,
       "isPublished": true
     },
     {
       "id": "sofia-marchetti",
-      "quote": "The attention to detail , from the bottle to the scent , signals a new era of Egyptian luxury.",
-      "quote_ar": null,
+      "quote": "The attention to detail from the bottle to the scent signals a new era of Egyptian luxury.",
+      "quote_ar": "إن الاهتمام بالتفاصيل، بدءاً من زجاجة العطر وحتى شذاه، ينبئ بفجر حقبة جديدة من الفخامة المصرية.",
       "author": "Sofia Marchetti",
       "author_ar": null,
       "authorTitle": "Creative Director, Dubai",
@@ -61,62 +61,434 @@
       "label_ar": null
     }
   ],
+  "scentProfiles": [
+    {
+      "slug": "oriental",
+      "name": "Oriental",
+      "name_ar": "شرقي",
+      "description": "Warmth with something withheld in it. Resins, amber and incense that settle into the skin and stay there — the register KHEM was founded on, and the one a room notices an hour after you have left it.",
+      "description_ar": "عالم من الدفء والعمق والغموض. تتكشف العطور الشرقية عبر الراتنجات الغنية، والأخشاب النفيسة، والتوابل، والعنبر، والمسك الحسي؛ لتصنع أثراً آسراً يلتقي فيه سحر الماضي برقيّ الحاضر.",
+      "bannerUrl": "https://res.cloudinary.com/co1xzkhf/image/upload/scent-profile-oriental.webp",
+      "bannerAlt": "A carved temple relief of offering bearers with their vessels",
+      "bannerAlt_ar": "نقش معبد محفور لحاملي القرابين بأوانيهم"
+    },
+    {
+      "slug": "floral",
+      "name": "Floral",
+      "name_ar": "زهري",
+      "description": "An expression of beauty in bloom. Floral fragrances reveal layers of rose, jasmine, iris, orange blossom, and delicate petals, moving from luminous freshness to deep, captivating elegance",
+      "description_ar": "تعبير عن الجمال في أبهى لحظاته. تكشف العطور الزهرية عن طبقات من الورد والياسمين والسوسن وزهر البرتقال والبتلات الرقيقة، لتنتقل من إشراقة ناعمة إلى أناقة عميقة آسرة.",
+      "bannerUrl": "https://res.cloudinary.com/co1xzkhf/image/upload/scent-profile-floarl.webp",
+      "bannerAlt": "A single crocus in bloom against deep shadow",
+      "bannerAlt_ar": "زهرة زعفران متفتّحة في ظلّ عميق"
+    },
+    {
+      "slug": "fresh",
+      "name": "Fresh",
+      "name_ar": "منعش",
+      "description": "Light, vibrant, and effortlessly refined. Fresh fragrances awaken the senses with citrus, aromatic herbs, aquatic notes, and crisp green accords—capturing the feeling of open air, sunlit landscapes, and renewed energy.",
+      "description_ar": "خفيف، نابض بالحياة، وراقٍ بلا تكلّف. توقظ العطور المنعشة الحواس بنفحات الحمضيات والأعشاب العطرية واللمسات المائية والخضراء؛ مستحضرةً إحساس الهواء النقي، والضوء، والبدايات المتجددة.",
+      "bannerUrl": "https://res.cloudinary.com/co1xzkhf/image/upload/scent-profile-fresh.webp",
+      "bannerAlt": "Turquoise surf breaking over pale sand, seen from above",
+      "bannerAlt_ar": "موج فيروزي ينكسر على رمل شاحب، مرئيًّا من علٍ"
+    },
+    {
+      "slug": "woody",
+      "name": "Woody",
+      "name_ar": "خشبي",
+      "description": "Rooted in nature, shaped by time. Woody fragrances reveal the character of cedar, sandalwood, vetiver, oud, and earthy woods, creating a refined composition of warmth, strength, and quiet sophistication.",
+      "description_ar": "متجذّر في الطبيعة، صاغه الزمن. تكشف العطور الخشبية عن شخصية الأرز والصندل والفيتيفر والعود والأخشاب العميقة، في تركيبات تعبّر عن الدفء والقوة والرقي الهادئ.",
+      "bannerUrl": "https://res.cloudinary.com/co1xzkhf/image/upload/scent-profile-woody.webp",
+      "bannerAlt": "Low sunlight through a stand of pines",
+      "bannerAlt_ar": "ضوء شمس منخفض يتخلّل غابة صنوبر"
+    },
+    {
+      "slug": "gourmand",
+      "name": "Gourmand",
+      "name_ar": "حلو",
+      "description": "A celebration of irresistible richness. Gourmand fragrances transform notes of vanilla, caramel, cocoa, praline, honey, and warm spices into sophisticated compositions that evoke pleasure, comfort, and unforgettable desire.",
+      "description_ar": "احتفاء بالثراء والإغراء. تحوّل نفحات الفانيليا والكراميل والكاكاو والبرالين والعسل والتوابل الدافئة إلى تركيبات عطرية راقية تستحضر المتعة والدفء ورغبةً يصعب نسيانها.",
+      "bannerUrl": "https://res.cloudinary.com/co1xzkhf/image/upload/scent-profile-gourmand.webp",
+      "bannerAlt": "A glass of honey beside blossom and dried fruit in low light",
+      "bannerAlt_ar": "كوب عسل إلى جانب زهر وفاكهة مجفّفة في ضوء خافت"
+    }
+  ],
+  "scentProfileProducts": [
+    {
+      "profileSlug": "floral",
+      "productSlug": "kyphi",
+      "sortOrder": 0
+    },
+    {
+      "profileSlug": "floral",
+      "productSlug": "ivory-temple",
+      "sortOrder": 1
+    },
+    {
+      "profileSlug": "floral",
+      "productSlug": "desert-lily",
+      "sortOrder": 2
+    },
+    {
+      "profileSlug": "floral",
+      "productSlug": "turquoise",
+      "sortOrder": 3
+    },
+    {
+      "profileSlug": "floral",
+      "productSlug": "sunlit-citrine-body-mist",
+      "sortOrder": 4
+    },
+    {
+      "profileSlug": "floral",
+      "productSlug": "ivory-temple-body-mist",
+      "sortOrder": 5
+    },
+    {
+      "profileSlug": "floral",
+      "productSlug": "silk-serenity-body-mist",
+      "sortOrder": 6
+    },
+    {
+      "profileSlug": "floral",
+      "productSlug": "ivory-temple-room-spray",
+      "sortOrder": 7
+    },
+    {
+      "profileSlug": "floral",
+      "productSlug": "onyx-night-room-spray",
+      "sortOrder": 8
+    },
+    {
+      "profileSlug": "floral",
+      "productSlug": "silk-serenity-room-spray",
+      "sortOrder": 9
+    },
+    {
+      "profileSlug": "floral",
+      "productSlug": "sunlit-citrine-room-spray",
+      "sortOrder": 10
+    },
+    {
+      "profileSlug": "fresh",
+      "productSlug": "onyx-night-body-mist",
+      "sortOrder": 0
+    },
+    {
+      "profileSlug": "fresh",
+      "productSlug": "sunlit-citrine-body-mist",
+      "sortOrder": 1
+    },
+    {
+      "profileSlug": "fresh",
+      "productSlug": "ivory-temple-body-mist",
+      "sortOrder": 2
+    },
+    {
+      "profileSlug": "fresh",
+      "productSlug": "silk-serenity-body-mist",
+      "sortOrder": 3
+    },
+    {
+      "profileSlug": "fresh",
+      "productSlug": "ivory-temple-room-spray",
+      "sortOrder": 4
+    },
+    {
+      "profileSlug": "fresh",
+      "productSlug": "onyx-night-room-spray",
+      "sortOrder": 5
+    },
+    {
+      "profileSlug": "fresh",
+      "productSlug": "silk-serenity-room-spray",
+      "sortOrder": 6
+    },
+    {
+      "profileSlug": "fresh",
+      "productSlug": "sunlit-citrine-room-spray",
+      "sortOrder": 7
+    },
+    {
+      "profileSlug": "gourmand",
+      "productSlug": "kyphi",
+      "sortOrder": 0
+    },
+    {
+      "profileSlug": "gourmand",
+      "productSlug": "ivory-temple",
+      "sortOrder": 1
+    },
+    {
+      "profileSlug": "gourmand",
+      "productSlug": "desert-lily",
+      "sortOrder": 2
+    },
+    {
+      "profileSlug": "gourmand",
+      "productSlug": "turquoise",
+      "sortOrder": 3
+    },
+    {
+      "profileSlug": "gourmand",
+      "productSlug": "ivory-temple-body-mist",
+      "sortOrder": 4
+    },
+    {
+      "profileSlug": "gourmand",
+      "productSlug": "ivory-temple-room-spray",
+      "sortOrder": 5
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "kyphi",
+      "sortOrder": 0
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "sunlit-citrine",
+      "sortOrder": 1
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "mendesian",
+      "sortOrder": 2
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "sapphire",
+      "sortOrder": 3
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "onyx-night",
+      "sortOrder": 4
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "ivory-temple",
+      "sortOrder": 5
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "crimson-sun",
+      "sortOrder": 6
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "onyx-night-body-mist",
+      "sortOrder": 7
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "sunlit-citrine-body-mist",
+      "sortOrder": 8
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "ivory-temple-body-mist",
+      "sortOrder": 9
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "silk-serenity-body-mist",
+      "sortOrder": 10
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "ivory-temple-room-spray",
+      "sortOrder": 11
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "onyx-night-room-spray",
+      "sortOrder": 12
+    },
+    {
+      "profileSlug": "oriental",
+      "productSlug": "sunlit-citrine-room-spray",
+      "sortOrder": 13
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "kyphi",
+      "sortOrder": 0
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "sunlit-citrine",
+      "sortOrder": 1
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "mendesian",
+      "sortOrder": 2
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "sapphire",
+      "sortOrder": 3
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "onyx-night",
+      "sortOrder": 4
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "ivory-temple",
+      "sortOrder": 5
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "crimson-sun",
+      "sortOrder": 6
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "onyx-night-body-mist",
+      "sortOrder": 7
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "sunlit-citrine-body-mist",
+      "sortOrder": 8
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "ivory-temple-body-mist",
+      "sortOrder": 9
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "ivory-temple-room-spray",
+      "sortOrder": 10
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "onyx-night-room-spray",
+      "sortOrder": 11
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "silk-serenity-room-spray",
+      "sortOrder": 12
+    },
+    {
+      "profileSlug": "woody",
+      "productSlug": "sunlit-citrine-room-spray",
+      "sortOrder": 13
+    }
+  ],
   "ingredients": [
     {
       "id": "oud",
       "name": "Oud",
-      "name_ar": null,
+      "name_ar": "عود",
       "slug": "oud",
       "latinName": "Aquilaria malaccensis",
       "origin": "Laos & Cambodia",
-      "origin_ar": null,
-      "families": [
-        "Woody Aromas",
-        "Oriental Aromas"
-      ],
+      "origin_ar": "لاوس و كمبودي",
       "rarity": "Extremely Rare",
-      "rarity_ar": null,
+      "rarity_ar": "نادر للغاية",
       "priceTier": 5,
-      "description": "Known as \"liquid gold,\" oud is the most expensive natural ingredient in perfumery. It is the dark, resinous heartwood formed when the Aquilaria tree becomes infected with a specific mold. The result of this natural alchemy is a rich, complex material , simultaneously smoky, sweet, animalic, and sacred.",
-      "description_ar": null,
-      "usedIn": [],
+      "description": "Known as \"liquid gold,\" oud is the most expensive natural ingredient in perfumery. It is the dark, resinous heartwood formed when the Aquilaria tree becomes infected with a specific mold. The result of this natural alchemy is a rich, complex material, simultaneously smoky, sweet, animalic, and sacred.",
+      "description_ar": "يُعرف العود بـ \"الذهب السائل\"، وهو أغلى مكون طبيعي في صناعة العطور. وهو خشب القلب الداكن والصمغي الذي يتشكل عندما تصاب شجرة \"أكيلاريا\" بنوع معين من الفطريات. وتكون نتيجة هذه الكيمياء الطبيعية مادة غنية ومعقدة، تجمع في آن واحد بين الدخان، والحلاوة، والطابع الحيواني، والقداسة.",
+      "usedIn": [
+        {
+          "name": "Mendesian",
+          "slug": "mendesian"
+        },
+        {
+          "name": "Kyphi",
+          "slug": "kyphi"
+        },
+        {
+          "name": "Sapphire",
+          "slug": "sapphire"
+        },
+        {
+          "name": "ONYX NIGHT",
+          "slug": "onyx-night-body-mist"
+        }
+      ],
       "facts": [
         "Wild Aquilaria trees take 100+ years to form oud",
         "Only 2% of wild trees are infected",
         "A kilo of premium oud can exceed $30,000"
       ],
-      "facts_ar": null,
+      "facts_ar": [
+        "تحتاج أشجار العود البرية إلى أكثر من 100 عام لتكوين العود",
+        "2% فقط من الأشجار البرية تتعرض للإصابة",
+        "قد يتجاوز سعر الكيلوجرام الواحد من العود الفاخر 30,000 دولار"
+      ],
       "image": {
-        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-oud.jpg",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-oud.webp",
         "alt": "Aged oud wood chips resting on dark stone",
-        "alt_ar": null
+        "alt_ar": "رقائق خشب العود المعتقة تستقر على الحجر الداكن"
       }
     },
     {
       "id": "frankincense",
       "name": "Frankincense",
-      "name_ar": null,
+      "name_ar": "اللُّبَانُ",
       "slug": "frankincense",
       "latinName": "Boswellia sacra",
       "origin": "Dhofar, Oman",
-      "origin_ar": null,
-      "families": [
-        "Oriental Aromas",
-        "Woody Aromas"
-      ],
+      "origin_ar": "ظفار، عُمان",
       "rarity": "Rare",
-      "rarity_ar": null,
+      "rarity_ar": "نادر",
       "priceTier": 4,
-      "description": "The most sacred of all ancient aromatics, frankincense has been burned in temples and used in ritual for over 5,000 years. The finest grade , Hojari from Oman , is hand-harvested by tapping the Boswellia sacra tree, which grows exclusively in the mountains of Dhofar.",
-      "description_ar": null,
+      "description": "The most sacred of all ancient aromatics, frankincense has been burned in temples and used in ritual for over 5,000 years. The finest grade Hojari from Oman is hand-harvested by tapping the Boswellia sacra tree, which grows exclusively in the mountains of Dhofar.",
+      "description_ar": "يُعد اللبان، وهو أقدس العطور القديمة قاطبةً، مُحرقاً في المعابد ومُستخدماً في الطقوس منذ أكثر من خمسة آلاف سنة. أما أجود درجاته، وهو لبان \"الحوجري\" من عمان، فيُحصد يدوياً عن طريق جرح شجرة *بوسويليا ساكرا* (Boswellia sacra) التي تنمو حصرياً في جبال ظفار.",
       "usedIn": [
         {
           "name": "Amber",
           "slug": "onyx-night-body-mist"
         },
         {
+          "name": "Onyx Night",
+          "slug": "onyx-night"
+        },
+        {
           "name": "Amber",
           "slug": "ivory-temple-room-spray"
+        },
+        {
+          "name": "Sapphire",
+          "slug": "sapphire"
+        },
+        {
+          "name": "IVORY TEMPLE",
+          "slug": "ivory-temple-body-mist"
+        },
+        {
+          "name": "SUNLIT CITRINE",
+          "slug": "sunlit-citrine-body-mist"
+        },
+        {
+          "name": "Crimson Sun",
+          "slug": "crimson-sun"
+        },
+        {
+          "name": "Kyphi",
+          "slug": "kyphi"
+        },
+        {
+          "name": "Ivory Temple",
+          "slug": "ivory-temple"
+        },
+        {
+          "name": "ONYX NIGHT",
+          "slug": "onyx-night-room-spray"
+        },
+        {
+          "name": "Sunlit Citrine",
+          "slug": "sunlit-citrine"
+        },
+        {
+          "name": "SUNLIT CITRINE",
+          "slug": "sunlit-citrine-room-spray"
         }
       ],
       "facts": [
@@ -124,59 +496,60 @@
         "The tree \"bleeds\" resin when scored with a blade",
         "Hojari frankincense is traded at luxury auction"
       ],
-      "facts_ar": null,
+      "facts_ar": [
+        "استُخدم بواسطة المصريين القدماء في طقوس التحنيط",
+        "\"تنزف\" الشجرة الصمغ عند جرحها بشفرة حادة",
+        "يُتداول لُبان الهوجاري الفاخر في المزادات الفاخرة."
+      ],
       "image": {
-        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-Frankincense.jpg",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-Frankincense.webp",
         "alt": "Frankincense resin tears in low golden light",
-        "alt_ar": null
+        "alt_ar": "دموع راتينج اللبان في الضوء الذهبي المنخفض"
       }
     },
     {
       "id": "saffron",
       "name": "Saffron",
-      "name_ar": null,
+      "name_ar": "الزعفران",
       "slug": "saffron",
       "latinName": "Crocus sativus",
       "origin": "Khorasan, Iran",
-      "origin_ar": null,
-      "families": [
-        "Oriental Aromas"
-      ],
+      "origin_ar": "خراسان، إيران",
       "rarity": "Very Rare",
-      "rarity_ar": null,
+      "rarity_ar": "نادر جداً",
       "priceTier": 4,
       "description": "The world's most expensive spice by weight, saffron adds an incomparable warmth and subtle spiciness to fine fragrance. Each strand is the stigma of the Crocus sativus flower, hand-harvested at dawn before the blooms open. A single gram requires 150 flowers.",
-      "description_ar": null,
+      "description_ar": "يُعد الزعفران أثلى التوابل وزناً في العالم، ويضفي دفئاً لا يُضاهى وتوابل خفيفة على العطور الراقية. وكل خيط منه هو مياسم زهرة *الكرعوس ساتيفوس* (*Crocus sativus*)، التي تُحصد يدوياً عند الفجر قبل أن تتفتح الزهور، حيث يتطلب الجرام الواحد منها 150 زهرة.",
       "usedIn": [],
       "facts": [
         "150 flowers yield just 1 gram of saffron",
         "Harvested exclusively at dawn",
         "Used in ancient Egyptian cosmetics for over 3,500 years"
       ],
-      "facts_ar": null,
+      "facts_ar": [
+        "تنتج 150 زهرة جراماً واحداً فقط من الزعفران",
+        "يحصد حصرياً عند الفجر",
+        "استخدم في المستحضرات المصرية القديمة لأكثر من 3,500 عام"
+      ],
       "image": {
-        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-saffron.jpg",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-saffron.webp",
         "alt": "Hand-picked saffron threads gathered in a dark bowl",
-        "alt_ar": null
+        "alt_ar": "خيوط الزعفران المقطوفة يدوياً المجمعة في وعاء داكن"
       }
     },
     {
       "id": "neroli",
       "name": "Neroli",
-      "name_ar": null,
+      "name_ar": "زهرة النيرولي",
       "slug": "neroli",
       "latinName": "Citrus aurantium",
       "origin": "Nile Delta, Egypt",
-      "origin_ar": null,
-      "families": [
-        "Floral",
-        "Fresh / Citrus"
-      ],
+      "origin_ar": "دلتا النيل، مصر",
       "rarity": "Precious",
-      "rarity_ar": null,
+      "rarity_ar": "ثمينة",
       "priceTier": 3,
-      "description": "Distilled from the blossom of the bitter orange tree, neroli has an achingly beautiful quality , simultaneously honeyed, green, and almost metallic. We source exclusively from the orange groves of Egypt's Nile Delta, where the combination of soil and climate produces a neroli of exceptional complexity.",
-      "description_ar": null,
+      "description": "Distilled from the blossom of the bitter orange tree, neroli has an achingly beautiful quality, simultaneously honeyed, green, and almost metallic. We source exclusively from the orange groves of Egypt's Nile Delta, where the combination of soil and climate produces a neroli of exceptional complexity.",
+      "description_ar": "يُستخلص النيرولي من زهور شجرة البرتقال المر، ويمتاز بجودة فاتنة تجمع في آن واحد بين العبير العسلي، والطابع الأخضر، ولمسة تقارب المعدنية. ونحن نستخلصه حصرياً من بساتين البرتقال في دلتا النيل بمصر، حيث تنتج توليفة التربة والمناخ نيرولياً فائق التعقيد.",
       "usedIn": [
         {
           "name": "Turquoise",
@@ -192,30 +565,30 @@
         "1 tonne of blossoms yields 1 kg of neroli",
         "Cleopatra reportedly bathed in neroli-infused water"
       ],
-      "facts_ar": null,
+      "facts_ar": [
+        "سُميت تيمناً بالأميرة آن ماري أورسيني من مدينة نيرولا",
+        "طن واحد من الزهور ينتج كيلوجراماً واحداً من النيرولي",
+        "يُقال إن الملكة كليوباترا كانت تستحم في ماء مُشبع بعبير النيرولي"
+      ],
       "image": {
-        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-neroli.jpg",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-neroli.webp",
         "alt": "Neroli blossoms from the Egyptian bitter orange harvest",
-        "alt_ar": null
+        "alt_ar": "أزهار النيرولي من محصول البرتقال المر المصري"
       }
     },
     {
       "id": "ambergris",
       "name": "Ambergris",
-      "name_ar": null,
+      "name_ar": "العنبر الخام",
       "slug": "ambergris",
       "latinName": "Physeter macrocephalus",
       "origin": "Atlantic Ocean",
-      "origin_ar": null,
-      "families": [
-        "Aquatic Aromas",
-        "Oriental Aromas"
-      ],
+      "origin_ar": "المحيط الأطلسي",
       "rarity": "Extremely Rare",
-      "rarity_ar": null,
+      "rarity_ar": "نادر للغاية",
       "priceTier": 5,
       "description": "The rarest fixative in all of perfumery, ambergris is produced in the digestive system of sperm whales and found floating in ocean waters after decades of natural transformation. It adds an incomparable depth and radiance to fragrance, fixing all other notes and making them last significantly longer on skin.",
-      "description_ar": null,
+      "description_ar": "يُعد العنبر الأغلى والأندر بين جميع مثبتات العطور، حيث يتشكل داخل الجهاز الهضمي لحيتان العنبر ويُعثر عليه طافياً في مياه المحيطات بعد عقود من التحول الطبيعي. وهو يضفي عمقاً وإشراقاً لا يُضاهيان على العطر، ليثبت جميع النوتات الأخرى ويجعلها تدوم لفترة أطول بكثير على البشرة.",
       "usedIn": [
         {
           "name": "Amber",
@@ -244,33 +617,63 @@
       ],
       "facts": [
         "Ages in the ocean for up to 30 years before use",
-        "Entirely natural , ethically found, never hunted",
+        "Entirely natural ethically found, never hunted",
         "A gram of fine ambergris exceeds the price of gold"
       ],
-      "facts_ar": null,
+      "facts_ar": [
+        "يتأرجح وينضج في مياه المحيط لمدة تصل إلى 30 عاماً قبل الاستخدام",
+        "طبيعي تماماً ومُستخلص بطرق أخلاقية، دون أي صيد أو أذى للحيتان",
+        "يتجاوز سعر الجرام الواحد من العنبر الفاخر سعر الذهب"
+      ],
       "image": {
-        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-amber.jpg",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-amber.webp",
         "alt": "A weathered piece of ambergris against deep shadow",
-        "alt_ar": null
+        "alt_ar": "قطعة من العنبر الرمادي عفتها عوامل الزمن، تبرز وسط ظلالٍ عميقة."
+      }
+    },
+    {
+      "id": "blue-iris",
+      "name": "Blue Iris",
+      "name_ar": "السوسن الأزرق",
+      "slug": "blue-iris",
+      "latinName": "Aquilaria malaccensis",
+      "origin": "Nile Delta & Historic Palestine",
+      "origin_ar": "دلتا النيل وفلسطين التاريخية",
+      "rarity": "Extremely Rare",
+      "rarity_ar": "نادر للغاية",
+      "priceTier": 3,
+      "description": "The blue iris (Iris pallida) is among the most precious botanical ingredients in fine perfumery, native to the Mediterranean basin. Its roots require years of maturation and slow drying before its aromatic butter can be extracted. It imparts a luxurious, velvety, and warm powdery character to fragrance that envelops the senses with unmatched elegance.",
+      "description_ar": "تُعد السوسنة الزرقاء (*Iris pallida*) واحدة من أثمن المكونات النباتية في صناعة العطور الراقية، وهي موطنها الأصلي حوض البحر الأبيض المتوسط. تتطلب جذورها سنوات من التعتيق والتجفيف البطيء قبل استخراج زبدتها العطرية، لتضفي على العطر طابعاً فاخرْا ومخملياً ودافئاً يشبه البودرة يلف الحواس بأناقة لا تُضاهى.",
+      "usedIn": [],
+      "facts": [
+        "Roots age 3 to 5 years for their unique aroma.",
+        "Called \"eternal gold\" for its complex extraction.",
+        "Symbolized royalty and immortality in ancient Nile and Levant."
+      ],
+      "facts_ar": [
+        "تتطلب الجذور 3 إلى 5 سنوات تعتيقاً لعطرها الفريد.",
+        "تُدعى \"الذهب الخالد\" لصعوبة استخلاصها.",
+        "رمزت للملكية والخلود بنيل الشام قديماً."
+      ],
+      "image": {
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-blue-iris.webp",
+        "alt": "Blue iris",
+        "alt_ar": "زهره السوسن الازرق"
       }
     },
     {
       "id": "haitian-vetiver",
       "name": "Haitian Vetiver",
-      "name_ar": null,
+      "name_ar": "نجيل الهند الهايتي",
       "slug": "haitian-vetiver",
       "latinName": "Chrysopogon zizanioides",
       "origin": "Haiti",
-      "origin_ar": null,
-      "families": [
-        "Woody Aromas",
-        "Herbal"
-      ],
+      "origin_ar": "هايتي",
       "rarity": "Precious",
-      "rarity_ar": null,
+      "rarity_ar": "ثمينة",
       "priceTier": 3,
-      "description": "Distilled from the roots of vetiver grass, Haitian vetiver is widely considered the finest in the world , deeper, smokier, and more complex than its Javanese or Indian counterparts. It is an extraordinary material that anchors fragrances, providing extraordinary longevity and a sense of ancient earth.",
-      "description_ar": null,
+      "description": "Distilled from the roots of vetiver grass, Haitian vetiver is widely considered the finest in the world deeper, smokier, and more complex than its Javanese or Indian counterparts. It is an extraordinary material that anchors fragrances, providing extraordinary longevity and a sense of ancient earth.",
+      "description_ar": "يُستخلص نجاح الهند (الفيتيفر) من جذور عشب الفيتيفر، ويُعتبر نجاح هايتي الأجود في العالم. فهو أعمق وأكثر دخانية وتعقيداً مقارنة بنظيره الجاوي أو الهندي. إنه مادة استثنائية تثبت العطور، وتمنحها ثباتاً فائقاً وإحساساً بالأرض العريقة.",
       "usedIn": [
         {
           "name": "Lapis",
@@ -286,60 +689,85 @@
         "Haitian vetiver has a distinctive smoky quality unique to its terroir",
         "Used in ancient temples throughout the Middle East"
       ],
-      "facts_ar": null,
+      "facts_ar": [
+        "يمكن لجذور النشر أن تنمو بعمق يصل إلى 3 أمتار تحت الأرض",
+        "يتميز نجيل الهند الهايتي بطابع دخاني فريد خاص ببيئته وتربته (التروار)",
+        "استُخدم في المعابد القديمة في جميع أنحاء الشرق الأوسط"
+      ],
       "image": {
-        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-vetiver.jpg",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-vetiver.webp",
         "alt": "Vetiver roots drying before distillation",
-        "alt_ar": null
+        "alt_ar": "جذور نجيل الهند تجف قبل التقطير"
       }
     },
     {
       "id": "rose-absolute",
       "name": "Rose Absolue",
-      "name_ar": null,
+      "name_ar": "مستخلص الورد",
       "slug": "rose-absolue",
       "latinName": "Rosa damascena",
       "origin": "Grasse, France",
-      "origin_ar": null,
-      "families": [
-        "Floral",
-        "Gourmand"
-      ],
+      "origin_ar": "غراس، فرنسا",
       "rarity": "Precious",
-      "rarity_ar": null,
+      "rarity_ar": "ثمينة",
       "priceTier": 3,
-      "description": "The queen of flowers, Rosa damascena has been cultivated in Grasse for fragrance production for over 300 years. Our rose absolue comes from a single family-owned estate in the Vallée des Fleurs. It is a full, honeyed, almost wine-like rose , nothing like the synthetic approximations found in most fragrances.",
-      "description_ar": null,
-      "usedIn": [],
+      "description": "The queen of flowers, Rosa damascena, has been cultivated in Grasse for fragrance production for over 300 years. Our rose absolue comes from a single family-owned estate in the Vallée des Fleurs. It is a full, honeyed rose, nothing like the synthetic approximations found in most fragrances.",
+      "description_ar": "تُعد الوردة الدمشقية (*Rosa damascena*)، التي تُلقب بملكة الزهور، مُستزرعة في مدينة غراس الفرنسية لإنتاج العطور منذ أكثر من ثلاثمائة عام. ويأتي مُستخلص الورد (أبسولوت) الخاص بنا من إمبراطورية عائلية واحدة تقع في وادي الزهور (Vallée des Fleurs). إنها وردة غنية وعسلية المذاق، لا تشبه أبداً البدائل الاصطناعية الموجودة في معظم العطور.",
+      "usedIn": [
+        {
+          "name": "IVORY TEMPLE",
+          "slug": "ivory-temple-room-spray"
+        },
+        {
+          "name": "Desert Lily",
+          "slug": "desert-lily"
+        },
+        {
+          "name": "Turquoise",
+          "slug": "turquoise"
+        },
+        {
+          "name": "IVORY TEMPLE",
+          "slug": "ivory-temple-body-mist"
+        },
+        {
+          "name": "Kyphi",
+          "slug": "kyphi"
+        },
+        {
+          "name": "Ivory Temple",
+          "slug": "ivory-temple"
+        }
+      ],
       "facts": [
         "4 tonnes of flowers yield 1 kg of rose absolue",
         "Harvested between 5 and 10 AM when concentration is highest",
         "The Damascus rose was brought to Europe by crusaders returning from Egypt"
       ],
-      "facts_ar": null,
+      "facts_ar": [
+        "4 أطنان من الزهور تنتج كيلوجراماً واحداً من مستخلص الورد",
+        "تُحصد الزهور بين الساعة 5 و10 صباحاً عندما تكون تركيزات الزيوت في ذروتها",
+        "جلب الصليبيون الوردة الدمشقية إلى أوروبا أثناء عودتهم من مصر"
+      ],
       "image": {
-        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-rose.jpg",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-rose.webp",
         "alt": "Rose petals from Grasse awaiting extraction",
-        "alt_ar": null
+        "alt_ar": "بتلات الورد من غراس في انتظار الاستخراج"
       }
     },
     {
       "id": "black-iris",
       "name": "Black Iris",
-      "name_ar": null,
+      "name_ar": "السوسن الأسود",
       "slug": "black-iris",
       "latinName": "Iris nigricans",
       "origin": "Jordan Valley",
-      "origin_ar": null,
-      "families": [
-        "Floral",
-        "Woody Aromas"
-      ],
+      "origin_ar": "وادي الأردن",
       "rarity": "Exceptionally Rare",
-      "rarity_ar": null,
+      "rarity_ar": "نادر استثنائياً",
       "priceTier": 5,
-      "description": "The national flower of Jordan, the black iris (Iris nigricans) is among the rarest botanical ingredients in all of perfumery. Its extraction is extraordinarily complex and yield minimal. The result is a singular, dark, almost unearthly note , simultaneously powdery, woody, and strangely metallic.",
-      "description_ar": null,
+      "description": "The national flower of Jordan, the black iris (Iris nigricans) is among the rarest botanical ingredients in all of perfumery. Its extraction is extraordinarily complex and yield minimal. The result is a singular, dark, almost unearthly note, simultaneously powdery, woody, and strangely metallic.",
+      "description_ar": "الزهرة الوطنية للأردن، سوسن الأردن تُعد من أندر المكونات النباتية في عالم العطور قاطبة. استخلاصها معقد للغاية وحصيلتها ضئيلة. والنتيجة هي نفحة فريدة، داكنة، وغير عادية، تجمع في آن واحد بين البودرة، والأخشاب، ولمسات معدنية غريبة.",
       "usedIn": [
         {
           "name": "Opal",
@@ -363,11 +791,15 @@
         "Wild specimens are legally protected",
         "Considered sacred in Levantine tradition"
       ],
-      "facts_ar": null,
+      "facts_ar": [
+        "الزهرة الوطنية للمملكة الأردنية الهاشمية",
+        "العينات البرية محمية بموجب القانون",
+        "تُعتبر مقدسة في التراث الشامي"
+      ],
       "image": {
-        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-black-iris.jpg",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-card-black-iris.webp",
         "alt": "A dark iris bloom against deep shadow",
-        "alt_ar": null
+        "alt_ar": "تتفتح القزحية الداكنة ضد الظل العميق"
       }
     }
   ],
@@ -376,126 +808,126 @@
       "id": "alchemy-of-ancient-egyptian-perfumery",
       "slug": "alchemy-of-ancient-egyptian-perfumery",
       "title": "The Alchemy of Ancient Egyptian Perfumery",
-      "title_ar": "كيمياء صناعة العطور في مصر القديمة",
+      "title_ar": "كيمياء صناعة العطور المصرية القديمة",
       "category": "Heritage",
-      "category_ar": "التراث",
+      "category_ar": "تراثنا",
       "excerpt": "How a civilization 5,000 years old developed perfume formulas so sophisticated that modern chemists still struggle to fully replicate them.",
-      "excerpt_ar": "كيف طوّرت حضارة عمرها خمسة آلاف عام تركيبات عطرية متقدمة لا يزال الكيميائيون المعاصرون يجدون صعوبة في محاكاتها كاملة.",
-      "body": "Long before the word *chemistry* existed, the priests of Egypt were practising it. In the temple laboratories at Edfu and Dendera, in rooms whose walls still carry the recipes carved into limestone, they macerated, decanted, filtered and aged. They kept records. They standardised. They failed, adjusted, and tried again. What they produced was not a pleasant smell for a pleasant afternoon , it was a technology of the sacred, and it was made with a rigour that would not look out of place in a modern laboratory.\n\n## The problem of fixation\n\nEvery perfumer since has faced the same difficulty: the beautiful part evaporates first. Citrus, herbs, the green top of a composition , these are volatile molecules that lift, announce themselves, and vanish within the hour. The Egyptians solved this four thousand years before anyone could explain why the solution worked.\n\nTheir answer was fat. Rather than alcohol, which they did not have in any usable concentration, they built their perfumes on a base of balanite oil, moringa oil, or animal fat rendered to a pale, near-odourless cream. Aromatic material was pressed into this base and left, sometimes for months, in sealed alabaster vessels. The oil held the volatile molecules in suspension and released them slowly against the warmth of the skin.\n\nA modern fixative does exactly this, with a mechanism we can now name. The Egyptians had no vocabulary for molecular weight or vapour pressure. They simply observed, over generations, that a perfume made this way lasted from dawn until well after dark, and one made carelessly did not.\n\n## Kyphi, and the difficulty of copying it\n\nThe most famous Egyptian composition is *kyphi*, burned in the temples at nightfall and taken internally as a medicine. Several recipes survive , from Edfu, from Philae, and in the accounts of Plutarch and Dioscorides , and no two agree. Depending on the source it contains between ten and sixteen materials: raisins steeped in wine, honey, resins of frankincense and myrrh, mastic, juniper, calamus, cyperus, mint, cinnamon-like barks, and a quantity of aromatic wood.\n\n> The materials were not merely mixed. They were combined in a sequence, over days, each stage given time to complete before the next began.\n\nThat sequence is what makes kyphi difficult to reproduce. The raisins were left in wine until they fermented. The resins were ground separately and worked with honey into a paste. Only then were the two brought together, and the whole left to mature. Reconstructions that combine everything at once produce something recognisably related and unmistakably inferior , flat where the original should be layered, sweet where it should be balsamic and dry.\n\n## What the analyses found\n\nWhen a sealed vessel from the tomb of Tutankhamun was opened in the 1920s, the contents still carried a detectable scent after three and a half thousand years. Chemical analysis of residues from that and later finds has confirmed a consistent picture: plant oils as carriers, high concentrations of resin, and traces of materials that had to be traded across enormous distances , cinnamon-like barks from Asia, and frankincense from Punt, which required a sea expedition to obtain.\n\nThe sophistication was not only in the formula but in the supply chain that fed it. Hatshepsut's expedition to Punt, recorded in relief at Deir el-Bahari, brought back living myrrh trees, roots wrapped in baskets, to be planted in temple gardens. A civilisation does not organise a naval expedition for a luxury it takes lightly.\n\n## Why it still matters\n\nThe reason a perfumer reads these texts is not nostalgia. It is that the Egyptians were working with a constraint we have engineered our way out of, and that constraint made them better at something we are worse at.\n\nWith no alcohol to carry a composition, everything had to be built for the skin, at body temperature, over hours. Structure could not be faked with a bright volatile opening. The materials themselves had to be worth living with, and the arrangement had to hold together as they unfolded.\n\nAt KHEM, every composition is tested first as an oil on skin, before it is ever assessed on a blotter. It is not a ceremonial gesture towards the past. It is the more demanding test, and it is the one the people who invented this craft would have recognised.",
-      "body_ar": "قبل ظهور كلمة الكيمياء بزمن طويل، مارس كهنة مصر فنّها في مختبرات المعابد. كانوا ينقّعون المواد العطرية ويفصلونها ويرشّحونها ثم يتركونها تنضج في أوعية محكمة.",
-      "publishedAt": "2024-12-01",
+      "excerpt_ar": "كيف طوَّرت حضارة عمرها خمسة آلاف سنة تركيبات عطرية بالغة التعقيد لدرجة تجعل الكيميائيين المعاصرين يكافحون حتى اليوم لتقليدها بدقة",
+      "body": "Long before the word *chemistry* existed, the priests of Egypt were practising it. In the temple laboratories at Edfu and Dendera, in rooms whose walls still carry the recipes carved into limestone, they macerated, decanted, filtered and aged. They kept records. They standardised. They failed, adjusted, and tried again. What they produced was not a pleasant smell for a pleasant afternoon; it was a technology of the sacred, and it was made with a rigour that would not look out of place in a modern laboratory.\n\n## The problem of fixation\n\nEvery perfumer since has faced the same difficulty: the beautiful part evaporates first. Citrus, herbs, the green top of a composition these are volatile molecules that lift, announce themselves, and vanish within the hour. The Egyptians solved this four thousand years before anyone could explain why the solution worked.\n\nTheir answer was fat. Rather than alcohol, which they did not have in any usable concentration, they built their perfumes on a base of balanite oil, moringa oil, or animal fat rendered to a pale, near-odourless cream. Aromatic material was pressed into this base and left, sometimes for months, in sealed alabaster vessels. The oil held the volatile molecules in suspension and released them slowly against the warmth of the skin.\n\nA modern fixative does exactly this, with a mechanism we can now name. The Egyptians had no vocabulary for molecular weight or vapour pressure. They simply observed, over generations, that a perfume made this way lasted from dawn until well after dark, and one made carelessly did not.\n\n## Kyphi, and the difficulty of copying it\n\nThe most famous Egyptian composition is *kyphi*, burned in the temples at nightfall and taken internally as a medicine. Several recipes survive from Edfu, from Philae, and in the accounts of Plutarch and Dioscorides, and no two agree. Depending on the source, it contains between ten and sixteen materials: raisins steeped in wine, honey, resins of frankincense and myrrh, mastic, juniper, calamus, cyperus, mint, cinnamon-like barks, and a quantity of aromatic wood.\n\n> The materials were not merely mixed. They were combined in a sequence, over days, each stage given time to complete before the next began.\n\nThat sequence is what makes kyphi difficult to reproduce. The raisins were left in wine until they fermented. The resins were ground separately and worked with honey into a paste. Only then were the two brought together, and the whole left to mature. Reconstructions that combine everything at once produce something recognisably related and unmistakably inferior, flat where the original should be layered, sweet where it should be balsamic and dry.\n\n## What the analyses found\n\nWhen a sealed vessel from the tomb of Tutankhamun was opened in the 1920s, the contents still carried a detectable scent after three and a half thousand years. Chemical analysis of residues from that and later finds has confirmed a consistent picture: plant oils as carriers, high concentrations of resin, and traces of materials that had to be traded across enormous distances: cinnamon-like barks from Asia, and frankincense from Punt, which required a sea expedition to obtain.\n\nThe sophistication was not only in the formula but in the supply chain that fed it. Hatshepsut's expedition to Punt, recorded in relief at Deir el-Bahari, brought back living myrrh trees, roots wrapped in baskets, to be planted in temple gardens. A civilisation does not organise a naval expedition for a luxury it takes lightly.\n\n## Why it still matters\n\nThe reason a perfumer reads these texts is not nostalgia. It is that the Egyptians were working with a constraint we have engineered our way out of, and that constraint made them better at something we are worse at.\n\nWith no alcohol to carry a composition, everything had to be built for the skin, at body temperature, over hours. Structure could not be faked with a bright volatile opening. The materials themselves had to be worth living with, and the arrangement had to hold together as they unfolded.\n\nAt KHEM, every composition is tested first as an oil on skin, before it is ever assessed on a blotter. It is not a ceremonial gesture towards the past. It is the more demanding test, and it is the one the people who invented this craft would have recognised.",
+      "body_ar": "قبل ظهور كلمة \"كيمياء\" بدهور طويلة، كان كهنة مصر يمارسونها. ففي مختبرات معبدي إدفو ودندرة، في غرف لا تزال جدرانها تحتفظ بالوصفات المنقوشة في الحجر الجيري، كانوا ينقعون، ويروقون، ويصفون، ويراكمون الخبرات عبر الزمن. لقد دوّنوا السجلات. ووضعوا المعايير. وأخفقوا، وعدّلوا، ثم أعادوا المحاولة. لم يكن ما أنتجوه مجرد رائحة زكية لأمسية لطيفة، بل كان تقنية من صميم المقدسات، نُفذت بدقة لا تبدو غريبة عن أي مختبر معاصر.\n\n## معضلة التثبيت\n\nواجه كل صانع عطور جاء بعدهم التحدي ذاته: الجزء الجميل يتبخر أولاً. الحمضيات، والأعشاب، والقمم الخضراء لأي تركيب عطرية كلها جزيئات متطايرة تنطلق وتعلن عن نفسها وتتلاشى في غضون ساعة. وقد حل المصريون هذه المعضلة قبل أربعة آلاف سنة من أن يتمكن أي شخص من تفسير سبب نجاح الحل.\n\nكانت إجابتهم هي الدهون. فبدلاً من الكحول، الذي لم تكن تتوفر لديهم منه أي تركيبة قابلة للاستخدام، بنوا عطورهم على أساس من زيت البلانايت، أو زيت المورينغا، أو الدهون الحيوانية المُذابَة لتصبح كريماً شاحباً شبه عديم الرائحة. وكانت المواد العطرية تُضغط في هذا الأساس وتُترك، أحياناً لأشهر، في أوعية محكمة الغلق من الألباستر. كان الزيت يحتفظ بالجزيئات المتطايرة معلقة ويطلقها ببطء مع حرارة البشرة.\n\nإن المثبت الحديث يفعل الشيء ذاته، بآلية بات بإمكاننا تسميتها اليوم. لم يكن لدى المصريين أي مصطلح علمي للوزن الجزيئي أو ضغط البخار. لقد لاحظوا ببساطة، على مدى أجيال، أن العطر المصنوع بهذه الطريقة يدوم من الفجر وحتى ما بعد الغلام، بينما العطر المصنوع بلا مبالاة لا يدوم.\n\n## الكِيفِي، وصعوبة نسخه\n\nأشهر التركيبات المصرية هي \"الكِيفِي\" (Kyphi)، التي كانت تُحرق في المعابد عند حلول الظلام وتُتناول داخلياً كدواء. وقد نجت عدة وصفات منها من إدفو، وفيلة، وفي كتابات بلوتارخ وديوسكوريدس ولا توجد وصفة تتطابق مع الأخرى تماماً. وبحسب المصدر، فهو يحتوي على ما بين عشر إلى ست عشرة مادة: الزبيب المنقوع، والعسل، وصموغ اللبان والمر، والمستكة، والعرعر، والقصب، والسعد، والنعناع، ولحاءات شبيهة بالقرفة، وكمية من الخشب العطري.\n\n> لم تكن المواد تُخلط مجرد خلط عابر، بل كانت تدمج في تسلسل دقيق على مدى أيام، مع إعطاء كل مرحلة وقتها الكافي لتكتمل قبل أن تبدأ التي تليها.\n\nهذا التسلسل هو ما يجعل عطر الكيبي صعب الاستنساخ. فقد كان الزبيب يُترك حتى يتخمر. وكانت الصموغ تُطحن بشكل منفصل وتُمزج مع العسل لتشكل عجينة. وفقط بعد ذلك يُجمع الطرفان معاً، ويُترك المزيج بأكمله لينضج. أما عمليات إعادة البناء التي تدمج كل شيء دفعة واحدة فتنتج شيئاً مرتبطاً بالأصل ظاهرياً لكنه أدنى جودة بلا شك مسطحاً حيث يجب أن يكون الأصلي متعدد الطبقات، وحلواً حيث يجب أن يكون بلسمياً وجافاً.\n\n## ما كشفت عنه التحليلات\n\nعندما فتحت وعاءً مختوماً من مقبرة توت عنخ آمون في عشرينيات القرن الماضي، كان محتواه لا يزال يحمل رائحة واضحة بعد ثلاثة آلاف وخمسمائة عام. وقد أكد التحليل الكيميائي للبقايا المأخوذة من ذلك الاكتشاف وغيره لاحقاً صورة متسقة: زيوت نباتية كحاملات، وتركيزات عالية من الصموغ، وآثار لمواد كان لا بد من جلبها عبر مسافات هائلة لحاءات شبيهة بالقرفة من آسيا، ولبان من أرض بونت، وهو ما استدعى تنظيم رحلة بحرية للحصول عليها.\n\nلم تكن البراعة تكمن في الوصفة وحدها بل في سلاسل الإمداد التي غذتها. فرحلة حتشبسوت إلى بونت، الموثقة على جدران معبد الدير البحري، عادت بأشجار مر حية بجذورها المغلفة في سلال لتُزرع في حدائق المعابد. إن الحضارة لا تنظم حملة بحرية كاملة من أجل رفاهية تستهين بها.\n\n## لماذا لا يزال الأمر مهمّاً\n\nإن السبب الذي يجعل صانع العطور يقرأ هذه النصوص ليس الحنين إلى الماضي. بل لأن المصريين كانوا يتعاملون مع قيود هندسية تخلصنا منها، وتلك القيود جعلتهم أكثر براعة في أمر نحن اليوم أسوأ فيه.\n\nفي غياب الكحول لحمل التركيبة، كان يجب بناء كل شيء ليتفاعل مع البشرة، في درجة حرارة الجسم، وعلى مدار ساعات. لم يكن بالإمكان تزييف البنية عبر افتتاحية متطايرة وبراقة. كان يجب أن تكون المواد نفسها جديرة بأن يعيش المرء معها، وكان يجب أن تتماسك البنية مع تفتح نوتاتها بمرور الوقت.\n\nفي دار \"كِيم\"، يُختبر كل عطر أولاً كزيت على البشرة، قبل تقييمه على أي ورقة تجفيف عطرية. ليس هذا مجرد لفتة احتفالية تجاه الماضي، بل هو الاختبار الأكثر صعوبة، وهو الاختبار الذي كان سيألفه تماماً أولئك الذين ابتكروا هذه الحرفة.",
+      "publishedAt": "2026-07-01",
       "readTimeMinutes": 8,
       "isFeatured": true,
       "isPublished": true,
       "image": {
-        "url": "https://images.unsplash.com/photo-1762530211537-011645caef57?w=800&h=500&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/v1790355540/The-Alchemy-of-Ancient-Egyptian-Perfumery.jpg",
         "alt": "Ancient Egyptian vessels used for blending sacred oils",
-        "alt_ar": "أوانٍ مصرية قديمة لخلط الزيوت المقدسة"
+        "alt_ar": "الأواني المصرية القديمة المستخدمة لمزج الزيوت المقدسة"
       }
     },
     {
       "id": "following-oud-along-the-silk-road",
       "slug": "following-oud-along-the-silk-road",
       "title": "Following Oud Along the Silk Road",
-      "title_ar": "تتبّع العود على طريق الحرير",
+      "title_ar": "على خطى العود عبر طريق الحساء والحرير",
       "category": "Ingredients",
-      "category_ar": "المكوّنات",
+      "category_ar": "المكونات",
       "excerpt": "A journey through the agarwood forests of Laos and Cambodia, where the world's most precious aromatic wood is harvested with extraordinary care.",
-      "excerpt_ar": "رحلة عبر غابات العود في لاوس وكمبوديا، حيث يُحصد أثمن خشب عطري في العالم بعناية استثنائية.",
-      "body": "There is no such thing as a healthy oud tree. That sentence is the first thing a buyer learns, and it takes some time to accept, because it inverts every instinct about agriculture. The aromatic resin the world calls oud, agarwood, or *oudh* does not exist in an unharmed *Aquilaria*. It is a wound response , the tree's answer to a mould infection that begins in a break in the bark and spreads slowly through the heartwood over years.\n\n## What the wood becomes\n\nAn uninfected *Aquilaria* is pale, light, almost worthless. Where the infection takes hold, the tree floods the affected tissue with a dark, dense resin to seal it off. The wood there turns from cream to caramel to near-black, and grows heavy enough to sink in water , which is why the finest grade has been called *chén xiāng*, sinking incense, in Chinese sources for well over a thousand years.\n\nThe process cannot be rushed. A commercially interesting infection takes eight to twelve years; the pieces that make collectors travel are the product of decades. In wild forests, perhaps one tree in a hundred carries any resin at all, and only a fraction of those carry it in quantity.\n\n> Every gram of wild agarwood represents a specific tree, in a specific place, that suffered a specific injury at a moment nobody witnessed.\n\n## The route\n\nWe buy in two places. In the mountains of Laos, harvesting is still largely a family occupation: a man who learned from his father which slopes hold infected trees, who carries a small axe and takes a section rather than the trunk, and who can tell by the sound of the blade whether the wood beneath is worth opening. In Cambodia, plantations now supply the majority of the market, trees deliberately inoculated at eight or ten years old and harvested on a schedule.\n\nPlantation oud is not inferior by definition. It is different , cleaner, more uniform, less complicated. Wild Laotian wood carries a barnyard edge, a leathery, almost fermented note that a novice reads as a fault and an experienced nose reads as depth. What the plantations have genuinely delivered is a supply chain that does not depend on stripping a forest, and *Aquilaria* has been on CITES Appendix II since 1995 for reasons that were entirely earned.\n\n## Distillation, and the cost of patience\n\nThe wood is soaked, sometimes for a week or more, then ground and distilled , traditionally in copper *deg* over a wood fire, increasingly in steel with steam. A single kilogram of high-grade chips yields a few millilitres of oil. The first distillate is sharp and green; the character everyone is paying for arrives in the later fractions, hours in, when the still is barely producing.\n\nRushing the fire ruins it. Heat too high and the oil takes on a burnt, acrid quality that no amount of blending will lift back out. A distiller who has spent three days on a batch will not risk the fourth to save an afternoon, and this is why the best material comes from people who are, temperamentally, unhurried.\n\n## Ageing\n\nFresh oud oil is not finished. Left sealed for a year, two years, five, it loses its rawness and gains a rounded, resinous sweetness that cannot be manufactured. Houses that hold stock hold it for this reason, and the oldest bottle in a distiller's cabinet is usually not for sale at any price.\n\nWe hold our Laotian material for a minimum of eighteen months before it enters a composition. It is capital sitting still, which is a difficult thing to justify on a spreadsheet and an easy thing to justify with a blotter in each hand.\n\n## Using it honestly\n\nThe temptation with a material this expensive is to announce it , to build a fragrance that shouts its own ingredient list. Oud rewards the opposite approach. It is a base note of enormous persistence and very little subtlety, and used at full volume it flattens everything above it.\n\nIn our compositions it sits underneath, at a concentration most buyers would consider modest, doing the work that resin has always done in Egyptian perfumery: holding the structure together and giving the volatile materials above it something to rest on. You are meant to notice it late, on the second wearing, as the reason the fragrance is still there at midnight.",
-      "body_ar": "لا توجد شجرة عود سليمة. فالراتنج العطري الذي نعرفه باسم العود هو استجابة الشجرة لجرح وعدوى فطرية تمتد ببطء داخل خشبها.",
-      "publishedAt": "2024-11-01",
+      "excerpt_ar": "رحلة استكشافية في غابات خشب العود في لاوس وكامبوديا، حيث يُحصد أثمن خشب عطري في العالم بعناية فائقة استثنائية",
+      "body": "There is no such thing as a healthy oud tree. That sentence is the first thing a buyer learns, and it takes some time to accept, because it inverts every instinct about agriculture. The aromatic resin the world calls oud, agarwood, or *oudh* does not exist in an unharmed *Aquilaria*. It is a wound response, the tree's answer to a mould infection that begins in a break in the bark and spreads slowly through the heartwood over years.\n\n## What the wood becomes\n\nAn uninfected *Aquilaria* is pale, light, almost worthless. Where the infection takes hold, the tree floods the affected tissue with a dark, dense resin to seal it off. The wood there turns from cream to caramel to near-black, and grows heavy enough to sink in water, which is why the finest grade has been called *chén xiāng*, sinking incense, in Chinese sources for well over a thousand years.\n\nThe process cannot be rushed. A commercially interesting infection takes eight to twelve years; the pieces that make collectors travel are the product of decades. In wild forests, perhaps one tree in a hundred carries any resin at all, and only a fraction of those carry it in quantity.\n\n> Every gram of wild agarwood represents a specific tree, in a specific place, that suffered a specific injury at a moment nobody witnessed.\n\n## The route\n\nWe buy in two places. In the mountains of Laos, harvesting is still largely a family occupation: a man who learned from his father which slopes hold infected trees, who carries a small axe and takes a section rather than the trunk, and who can tell by the sound of the blade whether the wood beneath is worth opening. In Cambodia, plantations now supply the majority of the market, trees deliberately inoculated at eight or ten years old and harvested on a schedule.\n\nPlantation oud is not inferior by definition. It is different: cleaner, more uniform, less complicated. Wild Laotian wood carries a barnyard edge, a leathery, almost fermented note that a novice reads as a fault and an experienced nose reads as depth. What the plantations have genuinely delivered is a supply chain that does not depend on stripping a forest, and *Aquilaria* has been on CITES Appendix II since 1995 for reasons that were entirely earned.\n\n## Distillation, and the cost of patience\n\nThe wood is soaked, sometimes for a week or more, then ground and distilled traditionally in copper *deg* over a wood fire, increasingly in steel with steam. A single kilogram of high-grade chips yields a few millilitres of oil. The first distillate is sharp and green; the character everyone is paying for arrives in the later fractions, hours in, when the still is barely producing.\n\nRushing the fire ruins it. Heat too high and the oil takes on a burnt, acrid quality that no amount of blending will lift back out. A distiller who has spent three days on a batch will not risk the fourth to save an afternoon, and this is why the best material comes from people who are, temperamentally, unhurried.\n\n## Ageing\n\nFresh oud oil is not finished. Left sealed for a year, two years, five, it loses its rawness and gains a rounded, resinous sweetness that cannot be manufactured. Houses that hold stock hold it for this reason, and the oldest bottle in a distiller's cabinet is usually not for sale at any price.\n\nWe hold our Laotian material for a minimum of eighteen months before it enters a composition. It is capital sitting still, which is a difficult thing to justify on a spreadsheet and an easy thing to justify with a blotter in each hand.\n\n## Using it honestly\n\nThe temptation with a material this expensive is to announce it to build a fragrance that shouts its own ingredient list. Oud rewards the opposite approach. It is a base note of enormous persistence and very little subtlety, and used at full volume it flattens everything above it.\n\nIn our compositions it sits underneath, at a concentration most buyers would consider modest, doing the work that resin has always done in Egyptian perfumery: holding the structure together and giving the volatile materials above it something to rest on. You are meant to notice it late, on the second wearing, as the reason the fragrance is still there at midnight.",
+      "body_ar": "**ما يؤول إليه الخشب:**\nإن شجرة \"أكيلاريا\" السليمة تبدو باهتة، خفيفة، وشبه عديمة القيمة. أما في الموضع الذي تتمكن فيه العدوى، تغمر الشجرة النسيج المتضرر بصمغ داكن وكثيف لحمايته وعزله. ويتحول الخشب هناك من اللون الكريمي إلى الكراميلي ثم إلى ما يقارب السواد، ليصبح ثقيلاً لدرجة تجعله يغوص في الماء وهذا هو السبب في أن أجود الأنواع عُرفت في المصادر الصينية منذ أكثر من ألف عام باسم *تشن شيانغ*، أي البخور الغاطس.\n\nلا يمكن الاستعجال في هذه العملية؛ فالعدوى ذات الجدوى التجارية تستغرق من ثماني إلى اثنتي عشرة سنة، أما القطع التي تدفع الهواة للسفر فثمرة عقود متتالية من الزمن. وفي الغابات البرية، ربما تحمل شجرة واحدة من بين كل مئة شجرة أي صمغ على الإطلاق، ولا يحمل منه بالكمية المطلوبة سوى جزء يسير.\n\n> كل جرام من خشب العود البري يمثل شجرة بعينها، في مكان محدد، تعرضت لإصابة معينة في لحظة لم يشهدها أحد.\n\n**المسار:**\nنحن نشتري من مصدرين أساسيين. ففي جبال لاوس، لا يزال الحصاد مهنة عائلية في معظمه: رجل ورث عن أبيه معرفة المنحدرات التي تضم الأشجار المصابة، يحمل فأساً صغيرة ويأخذ قسماً من الشجرة لا الجذع بأكمله، ويمكنه أن يتبين من صوت النصل ما إذا كان الخشب الكامن تحته يستحق الفتح أم لا. أما في كمبوديا، فتغطي المزارع اليوم غالبية السوق، وهي أشجار جرى تلقيحها عمداً في عامها الثامن أو العاشر لتُحصد وفق جدول زمني منضبط.\n\nإن عود المزارع ليس أدنى جودة بحكم التعريف، بل هو مختلف أكثر نقاءً، وأكثر تجانساً، وأقل تعقيداً. فالخشب اللاوسي البري يحمل نفحة حيوانية خفيفة، ونوتة جلدية أقرب إلى التخمر قد يراها المبتدئ عيباً بينما يقرؤها الأنف الخبير على أنها عمق حقيقي. وما قدمته المزارع حقاً هو سلسلة إمداد لا تعتمد على تجريف الغابات، علماً بأن شجر \"أكيلاريا\" أُدرج ضمن الملحق الثاني لاتفاقية \"سايتس\" (CITES) منذ عام 1995 لأسباب مبررة تماماً.\n\n**التقطير، وثمن التمهل:**\nيُنقع الخشب، أحياناً لأسبوع أو أكثر، ثم يُطحن ويُقطّر تقليدياً في قدور نحاسية تُسمى *ديغ* فوق حطب النار، وبشكل متزايد في قدور فولاذية تعمل بالبخار. الكيلوجرام الواحد من رقائق العود عالية الجودة ينتج بضع ملليلترات فقط من الزيت. التقطير الأول يكون حاداً وأخضر، أما الطابع الحقيقي الذي يدفع الجميع ثمنه فيظهر في المراحل المتأخرة، بعد ساعات، عندما تكاد القدر تتوقف عن الإنتاج.\n\nالاستعجال في إيقاد النار يفسد الزيت. فالحرارة المرتفعة جداً تضفي على الزيت طابعاً محروقاً ولاذعاً لا يمكن لأي مزج أن يمحوه. والصانع الذي قضى ثلاثة أيام في إعداد دفعة لن يخاطر باليوم الرابع ليختصر ظهيرة يوم، ولهذا فإن أجود المواد يأتي دائماً من أشخاص يتميزون بطبيعتهم بالتأني وعدم الاستعجال.\n\n**التعتيق:**\nزيت العود الطازج ليس تام الإنضاج. فعندما يُترك مغلقاً لسنة، أو سنتين، أو خمس، يفقد حدته ليكتسب حلاوة صمغية مستديرة لا يمكن اصطناعها. والبيوت العطرية التي تحتفظ بمخزون تفعل ذلك لهذا السبب، وغالباً ما تكون أقدم زجاجة في خزانة الصانع غير قابلة للبيع بأي ثمن.\n\nنحن نحتفظ بمادتنا اللاوسية لمدة لا تقل عن ثمانية عشر شهراً قبل إدخالها في أي تركيبة عطرية. إنها رأس مال جامد، وهو أمر يصعب تبريره على جدول بيانات إكسل، ولكنه سهل للغاية حين تضع ورقة اختبار عطري (بلوتر) في كلتا يديك.\n\n**الاستخدام النزيه:**\nالإغراء الأكبر مع مادة باهظة الثمن كهذه هو الإعلان عن وجودها أي بناء عطر يصيح بقائمة مكوناته. غير أن العود يجازف بالعكس تماماً. فهو قاعدة عطرية ذات ثبات هائل وقدر ضئيل للغاية من التكلف، وإذا استُخدم بكامل طاقته فإنه يسحق كل ما يعلوه.\n\nفي تركيباتنا، يستقر العود في الطبقات السفلى، بتركيز يعده معظم المشترين ضئيلاً، ليؤدي المهمة التي طالما أداها الصمغ في صناعة العطور المصرية: تثبيت هيكل العطر مع منح المواد المتطايرة التي تعلوه أساساً ترتكز عليه. المفترض ألا تلاحظه إلا متأخراً، في الارتداء الثاني، باعتباره السر وراء بقاء العطر حياً حتى منتصف الليل.",
+      "publishedAt": "2026-06-01",
       "readTimeMinutes": 12,
       "isFeatured": false,
       "isPublished": true,
       "image": {
-        "url": "https://images.unsplash.com/photo-1654612514062-7cc235e7b68c?w=800&h=500&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/v1790355541/Following-Oud-Along-the-Silk.jpg",
         "alt": "A caravan route at dusk, tracing the historic oud trade",
-        "alt_ar": "طريق قافلة عند الغروب يتتبع تجارة العود القديمة"
-      }
-    },
-    {
-      "id": "inside-the-atelier-onyx-night",
-      "slug": "inside-the-atelier-onyx-night",
-      "title": "Inside the Atelier: The Making of Onyx Night",
-      "title_ar": "داخل الأتيليه: صناعة أونيكس نايت",
-      "category": "Craftsmanship",
-      "category_ar": "الحِرفة",
-      "excerpt": "Master perfumer Mohamed Hassaan opens the doors of the KHEM atelier to share how our most complex fragrance took three years and 200 iterations to perfect.",
-      "excerpt_ar": "يفتح العطّار الرئيسي محمد حسّان أبواب أتيليه كيم ليحكي كيف احتاج عطرنا الأكثر تعقيدًا إلى ثلاثة أعوام ومئتي تجربة حتى اكتمل.",
-      "body": "The formula sheet for Onyx Night runs to four pages. The version we sell is numbered 214. Between the first trial and that one lies three years, several hundred blotters, and one decision , made eighteen months in , to throw out the entire structure and begin again.\n\n## The brief\n\nThe brief was a single sentence, and it was written before any material was weighed: *the smell of a temple after the fire has gone out*.\n\nThat is not a list of notes. It is a set of conditions. Something has burned and stopped burning. There is resin in the stone, smoke in the air but no flame, cold coming in, and a residue of something sweet that was there before the fire and outlasted it. Every trial for three years was assessed against that sentence and nothing else.\n\n## The first eighteen months, and why they were wasted\n\nThe early trials were built the obvious way: incense accord on top, resins in the heart, woods and animalic materials in the base. Frankincense, black pepper, labdanum, oud, vanilla. They smelled expensive. Several were, by any ordinary standard, good.\n\nThey were also wrong, and it took a long time to name why. A conventional pyramid announces itself in the correct order , bright, then warm, then deep. But a room after a fire does not arrive in that order. The smoke is already old when you walk in. The sweetness is underneath from the first second, not a reward for waiting.\n\n> We were composing a fragrance about the fire. The brief was about the silence afterwards.\n\nTrial 96 was the last of that generation. We stopped, cleared the bench, and started from the base.\n\n## Building downward\n\nThe second structure was assembled in reverse: base first, and nothing added above it until the base could stand alone for eight hours on skin and remain interesting.\n\nThat base took four months. It is built on aged Laotian oud at a low concentration, labdanum absolute, a small quantity of birch tar for the cold ash quality, and benzoin for the sweetness that has to be present from the beginning. Getting the birch tar right consumed most of that time , a fraction of a percent too much and the whole thing smells like a fireplace, which is a completely different and much less interesting idea.\n\nOnly then came the heart: Egyptian jasmine absolute, saffron, and a rose that had to be dark enough not to brighten the composition. And the top, which is deliberately quiet , pink pepper and a trace of elemi, present mostly to keep the first ten minutes from feeling abrupt.\n\n## Two hundred iterations is not two hundred good ideas\n\nMost of the numbered trials differ from their predecessor by one material at one concentration. Trials 141 through 158 are the same formula with the saffron moving in increments between 0.4% and 1.1%. Fourteen of those eighteen are indistinguishable to almost everyone. Two of them are not, and one of them is in the bottle.\n\nThis is the part of the work that photographs badly and matters most. A perfume is not discovered in a moment of inspiration. It is converged upon, slowly, by someone willing to smell the same thing forty times and be honest about the differences.\n\n## Knowing when to stop\n\nTrial 214 was not obviously final. Trials 215 through 219 exist; they are marginally different and none is better. What made 214 the one was a test we run on everything: the composition is worn for a full day by someone who was not in the room while it was made, and at the end of the day they are asked what it reminded them of.\n\nThe answer we were waiting for, for three years, was: *somewhere I've been before*.",
-      "body_ar": "تتألف ورقة تركيبة أونيكس نايت من أربع صفحات. أما النسخة التي نقدّمها اليوم فتحمل الرقم ٢١٤، وبين المحاولة الأولى وتلك النسخة ثلاثة أعوام من التجارب.",
-      "publishedAt": "2024-10-01",
-      "readTimeMinutes": 10,
-      "isFeatured": false,
-      "isPublished": true,
-      "image": {
-        "url": "https://images.unsplash.com/photo-1718728593303-94ec0352cf3d?w=800&h=500&fit=crop&auto=format",
-        "alt": "A perfumer's organ of raw materials inside the KHEM atelier",
-        "alt_ar": "مجموعة مواد خام للعطّار داخل أتيليه كيم"
+        "alt_ar": "طريق القوافل عند الغسق، يتتبع تجارة العود التاريخية"
       }
     },
     {
       "id": "hieroglyphs-of-the-nose",
       "slug": "hieroglyphs-of-the-nose",
       "title": "Hieroglyphs of the Nose: Reading Ancient Scent Formulas",
-      "title_ar": null,
+      "title_ar": "هيروغليفية الأنف: قراءة وصفات العطور المصرية القديمة",
       "category": "Heritage",
-      "category_ar": null,
+      "category_ar": "تراثنا",
       "excerpt": "With the help of Egyptologist Dr. Amira Soltan, we decode the scent formulas carved into the walls of the Temple of Edfu.",
-      "excerpt_ar": null,
-      "body": "The perfume laboratory at the Temple of Edfu is a small room, roughly four metres by three, off the southern corridor of the sanctuary. It is not much to look at. What makes it one of the most remarkable rooms in the ancient world is that its walls are covered, floor to ceiling, in recipes.\n\nWe spent four days there with Dr. Amira Soltan, an Egyptologist who has worked on the Ptolemaic temple texts for two decades, trying to answer a question that turns out to be much harder than it sounds: what did these formulas actually smell like?\n\n## What is written on the wall\n\nThe inscriptions are procedural. They name materials, give quantities, specify sequence, and state the vessel and the duration. In form they are closer to a pharmacopoeia than to a poem, which is itself significant , these are working documents, carved permanently because the knowledge was too valuable to trust to papyrus.\n\nSeveral complete formulas survive at Edfu, including versions of kyphi and of the sacred unguents used to anoint cult statues. The quantities are given in *hin* and fractions of *hin*, a volume measure of roughly half a litre, and the proportions are internally consistent across texts recorded centuries apart at different temples.\n\n> These were not local traditions. They were a standard, maintained across a country, over a period longer than the interval separating us from the Roman Empire.\n\n## The identification problem\n\nHere the difficulty begins. A recipe is only as useful as your ability to identify what it lists, and Egyptian aromatic vocabulary resists translation with remarkable stubbornness.\n\nSome terms are secure. *Antyu* is myrrh, or a class of myrrh-like resins; *sntr* is frankincense. Others are contested in ways that change the result completely. *Tj-shps* is variously rendered as camphor, cinnamon, or an unidentified aromatic bark from a tree no longer growing in the region. *Nkftt* may be a resin, a flower, or a preparation rather than a raw material.\n\nDr. Soltan is careful about this in a way that reconstructions in the popular press are not. \"We can be confident about perhaps sixty per cent of any given formula by weight,\" she told us in the corridor outside the laboratory. \"The remaining forty per cent includes materials that, if we have them wrong, would change the character entirely. An honest reconstruction says so.\"\n\n## Reading between the operations\n\nWhere the vocabulary fails, the verbs help. The texts are unusually specific about process, and process constrains the material.\n\nA substance that is *ground before combining* is a solid resin, not a gum. A substance *left in wine until it swells* is a dried fruit or a bark, not a flower. Something that is *added last, when the vessel has cooled* is volatile and would be destroyed by heat , which narrows it to a small family of possibilities regardless of what its name meant.\n\nThis is how the reconstruction actually proceeds: not by translating a word list, but by asking what class of material would behave the way the text says this one behaves. It is slow, and it produces ranges rather than answers, and it is very much more reliable than the alternative.\n\n## What was clearly deliberate\n\nSeveral structural decisions in the Edfu formulas are unmistakable, whatever the ambiguities.\n\nResins dominate by weight, in every formula, without exception. The compositions are built to last and to be released by heat , on skin, on a warm statue, over coals. Sweet materials are always present but never dominant; honey and dried fruit appear in quantities that round the resins rather than confect them. And in the longer preparations, maturation is not optional. Formulas specify rest periods of weeks. One specifies a full year.\n\nA perfumer reading this recognises the shape immediately. It is a composition designed around fixation and time, by people who had thought carefully about both.\n\n## The scent we did not reproduce\n\nWe came back with a great deal of material and one honest conclusion, which Dr. Soltan had offered on the first afternoon and which we spent the rest of the week confirming.\n\nThe Edfu formulas were made for a room, not a wrist. They were burned, or melted over a lamp, or applied to stone. Reconstructing one as a wearable perfume produces something that is at best a translation and at worst a misrepresentation , a claim of authenticity that the chemistry does not support.\n\nWhat we took from the wall was not a formula. It was a set of proportions, a philosophy of structure, and a reminder that the people who wrote it expected their work to be smelled two thousand years later.",
-      "body_ar": null,
-      "publishedAt": "2024-09-01",
+      "excerpt_ar": "بمعاونة عالمة الآثار المصرية الدكتورة أميرة سلطان، نفك شيفرة تركيبات العطور المنقوشة على جدران معبد إدفو",
+      "body": "The perfume laboratory at the Temple of Edfu is a small room, roughly four metres by three, off the southern corridor of the sanctuary. It is not much to look at. What makes it one of the most remarkable rooms in the ancient world is that its walls are covered, floor to ceiling, in recipes.\n\nWe spent four days there with Dr. Amira Soltan, an Egyptologist who has worked on the Ptolemaic temple texts for two decades, trying to answer a question that turns out to be much harder than it sounds: what did these formulas actually smell like?\n\n## What is written on the wall\n\nThe inscriptions are procedural. They name materials, give quantities, specify sequence, and state the vessel and the duration. In form they are closer to a pharmacopoeia than to a poem, which is itself significant: these are working documents, carved permanently because the knowledge was too valuable to trust to papyrus.\n\nSeveral complete formulas survive at Edfu, including versions of kyphi and of the sacred unguents used to anoint cult statues. The quantities are given in *hin* and fractions of *hin*, a volume measure of roughly half a litre, and the proportions are internally consistent across texts recorded centuries apart at different temples.\n\n> These were not local traditions. They were a standard, maintained across a country, over a period longer than the interval separating us from the Roman Empire.\n\n## The identification problem\n\nHere the difficulty begins. A recipe is only as useful as your ability to identify what it lists, and Egyptian aromatic vocabulary resists translation with remarkable stubbornness.\n\nSome terms are secure. *Antyu* is myrrh, or a class of myrrh-like resins; *sntr* is frankincense. Others are contested in ways that change the result completely. *Tj-shps* is variously rendered as camphor, cinnamon, or an unidentified aromatic bark from a tree no longer growing in the region. *Nkftt* may be a resin, a flower, or a preparation rather than a raw material.\n\nDr. Soltan is careful about this in a way that reconstructions in the popular press are not. \"We can be confident about perhaps sixty per cent of any given formula by weight,\" she told us in the corridor outside the laboratory. \"The remaining forty per cent includes materials that, if we have them wrong, would change the character entirely. An honest reconstruction says so.\"\n\n## Reading between the operations\n\nWhere the vocabulary fails, the verbs help. The texts are unusually specific about process, and process constrains the material.\n\nA substance that is *ground before combining* is a solid resin, not a gum. A substance *left in wine until it swells* is a dried fruit or a bark, not a flower. Something that is *added last, when the vessel has cooled* is volatile and would be destroyed by heat, which narrows it to a small family of possibilities regardless of what its name meant.\n\nThis is how the reconstruction actually proceeds: not by translating a word list, but by asking what class of material would behave the way the text says this one behaves. It is slow, and it produces ranges rather than answers, and it is very much more reliable than the alternative.\n\n## What was clearly deliberate\n\nSeveral structural decisions in the Edfu formulas are unmistakable, whatever the ambiguities.\n\nResins dominate by weight, in every formula, without exception. The compositions are built to last and to be released by heat on skin, on a warm statue, over coals. Sweet materials are always present but never dominant; honey and dried fruit appear in quantities that round the resins rather than confect them. And in the longer preparations, maturation is not optional. Formulas specify rest periods of weeks. One specifies a full year.\n\nA perfumer reading this recognises the shape immediately. It is a composition designed around fixation and time, by people who had thought carefully about both.\n\n## The scent we did not reproduce\n\nWe came back with a great deal of material and one honest conclusion, which Dr. Soltan had offered on the first afternoon and which we spent the rest of the week confirming.\n\nThe Edfu formulas were made for a room, not a wrist. They were burned, or melted over a lamp, or applied to stone. Reconstructing one as a wearable perfume produces something that is at best a translation and at worst a misrepresentation a claim of authenticity that the chemistry does not support.\n\nWhat we took from the wall was not a formula. It was a set of proportions, a philosophy of structure, and a reminder that the people who wrote it expected their work to be smelled two thousand years later.",
+      "body_ar": "**غرفة الوصفات في معبد إدفو:**\nمختبر العطور في معبد إدفو مساحة صغيرة لا تتجاوز أربعة أمتار في ثلاثة، تقع قبالة الممر الجنوبي للمقدس. لا يبدو المكان مبهراً للوهلة الأولى، وما يجعله أحد أكثر غرف العالم القديم استثنائية هو جدرانه المغطاة بالكامل من الأرض إلى السقف بالوصفات المدونة.\n\nقضينا أربعة أيام هناك رفقة الدكتورة أميرة سلطان، وهي عالمة آثار مصرية عملت على نصوص معابد العصر البطلمي لعقدين من الزمن، في محاولة للإجابة عن سؤال يبدو أبسط بكثير مما هو عليه في الواقع: كيف كانت رائحة هذه التركيبات حقاً؟\n\n## ما هو مكتوب على الجدار\n\nالنقوش ذات طبيعة إجرائية بحتة؛ فهي تسمي المواد، وتحدد الكميات، وتفصل التسلسل، وتعيين الوعاء والمدة الزمنية اللازمة. وفي شكلها، هي أقرب إلى دستور الأدوية (الفهرس الدوائي) منها إلى القصائد الشعرية، وهو أمر ذو دلالة عميقة: فهذه وثائق عمل حقيقية، نُقشت بصفة دائمة لأن المعرفة كانت أغلى من أن تُترك عُرضة للتلف على أوراق البردي.\n\nنجت عدة وصفات كاملة في إدفو، بما في ذلك نسخ من الكِيفِي (Kyphi) والدهون المقدسة التي كانت تُستخدم لمسح تماثيل الآلهة. وقد أُعطيت الكميات بوحدة \"الهين\" (Hin) وكسورها، وهي وحدة قياس حجمية تعادل نصف لتر تقريبا، وتتسم النسب باتساق داخلي عبر نصوص سُجلت على مدى قرون متتابعة في معابد مختلفة.\n\n> لم تكن هذه تقاليد محلية، بل كانت معياراً موحداً جرى الحفاظ عليه في عموم البلاد طوال فترة زمنية تتجاوز الفاصل الزمني بيننا وبين الإمبراطورية الرومانية.\n\n## معضلة التحديد\n\nهنا تبرز الصعوبة الحقيقية؛ فالوصفة تكون مفيدة بمقدار قدرتك على تحديد المواد التي تدرجها، ومفردات العطور المصرية تعاند الترجمة بعناد ملحوظ.\n\nبعض المصطلحات مؤكدة تماماً؛ فكلمة *أنتيو* (Antyu) تعني المر، أو طائفة من الصموغ الشبيهة بالمر، بينما تعني *سنتري* (Sntr) اللبان. أما مصطلحات أخرى فمحل جدل يغير النتائج كلياً؛ فمصطلح *تي-شپس* (Tj-shps) يُترجم أحياناً على أنه كافور، أو قرفة، أو لحاء عطري مجهول لشجرة لم يعد لها وجود في المنطقة. وكلمة *نكفيت* (Nkftt) قد تكون صمغاً، أو زهرة، أو مستحضراً مركباً بدلاً من كونها مادة خاماً مجردة.\n\nالدكتورة أميرة سلطان حذرة للغاية حيال هذا الأمر على نحو يختلف عن التسهيلات الرائجة في الصحافة الشعبية. إذ أخبرتنا في الممر الخارجي للمختبر قائلة: \"يمكننا الوثوق بنسبة ستين بالمائة تقريباً من أي وصفة معينة حسب الوزن. أما الأربعون بالمائة الباقية فتتضمن مواد لو أخطأنا في تقديرها لتغير الطابع العام للعطر كلياً. والترميم النزيه يعترف بذلك صراحة\".\n\n## القراءة بين السطور والإجراءات\n\nحين تعجز المفردات، تتدخل الأفعال لتساعدنا. فالتصوص بالغة الدقة فيما يتعلق بالعمليات، والعملية بحد ذاتها تقيد المادة.\n\nالمادة التي تُطحن قبل المزج هي صمغ صلب وليست صمغاً سائلاً. والمادة التي تُترك في النبيذ حتى تنتفخ هي فاكهة مجففة أو لحاء وليست زهرة. أما ما يُضاف في اللحظة الأخيرة بعد أن يبرد الوعاء فهي مادة متطايرة تدمرها الحرارة، وهو ما حصر الاحتمالات في عائلة صغيرة بصرف النظر عما يعنيه اسمها اللفظي.\n\nوهكذا تُجرى عملية الاستنساخ فعلياً: ليس عبر ترجمة قائمة كلمات، بل بالتسائل عن صنف المادة التي ستتسلّك بالطريقة نفسها التي تصفها النصوص. إنها عملية بطيئة، وتنتج نطاقات احتمالية بدلاً من إجابات قاطعة، وهي مع ذلك أكثر موثوقية بكثير من أي بديل آخر.\n\n## ما كان متعمداً بوضوح\n\nثمة قرارات هيكلية عدة في وصفات إدفو لا تقبل الشك، بغض النظر عن الغموض اللفظي.\n\nالصموغ تهيمن وزناً في كل وصفة ودون استثناء؛ فقد صُممت التركيبات لتدوم وتتحرر بفعل حرارة البشرة، أو فوق تمثال دافئ، أو فوق الجمر. المواد الحلية حاضرة دوماً ولكن دون هيمنة؛ فالعسل والفاكهة المجففة يظهران بكميات تستدير بالصموغ وتلطفها بدلاً من تحويلها إلى حلوى مصطنعة. وفي التحضيرات طويلة الأمد، يعد التعتيق أمراً غير قابل للتفاوض، إذ تحدد الوصفات فترات راحة تمتد لأشهر، بينما تتطلب إحداها سنة كاملة.\n\nصانع العطور الذي يقرأ هذا يدرك هيكل العمل فوراً؛ فهو تركيب مصمم حول التثبيت والزمن، وضعه أشخاص فكروا بعمق بالغ في كلا الأمرين.\n\n## العطر الذي لم نعِد إنتاجه\n\nعُدنا بالكثير من المواد ومعها خلاصة واحدة نزيهة، وهي التي قدمتها الدكتورة أميرة في الظهيرة الأولى وقضينا بقية الأسبوع في تأكيدها.\n\nصُممت وصفات إدفو للغرف لا للمعصم؛ فقد كانت تُحرق، أو تُذاب فوق المصباح، أو تُدهن على الحجر. وإنتاج إحداها كعطر قابل للارتداء ينتج في أفضل الأحوال ترجمة وفي أسوأ الأحوال تحريفاً ومزاعم أصالة لا تدعمها الكيمياء البحتة.\n\nما أخذناه من على الجدار لم يكن مجرد وصفة، بل مجموعة من النسب، وفلسفة في البناء الهيكلي، وتذكيراً بأن أولئك الذين خطوا تلك الكلمات توقعوا أن تُشم رائحة أعمالهم بعد ألفي عام.",
+      "publishedAt": "2026-03-01",
       "readTimeMinutes": 15,
       "isFeatured": false,
       "isPublished": true,
       "image": {
-        "url": "https://images.unsplash.com/photo-1667070796007-185faecdf8a1?w=800&h=500&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/v1790355540/Hieroglyphs_of_the_Nose-Reading-Ancient-Scent-Formulas.jpg",
         "alt": "Carved hieroglyphs lit by low raking light",
-        "alt_ar": null
+        "alt_ar": "الحروف الهيروغليفية المنحوتة مضاءة بالضوء المنخفض"
+      }
+    },
+    {
+      "id": "inside-the-atelier-onyx-night",
+      "slug": "inside-the-atelier-onyx-night",
+      "title": "Inside the Atelier: The Making of Onyx Night",
+      "title_ar": "داخل المرسم: كواليس صناعة أونيكس نايت",
+      "category": "Craftsmanship",
+      "category_ar": "الحرافيه",
+      "excerpt": "Master perfumer Mohamed Hassaan opens the doors of the KHEM atelier to share how our most complex fragrance took three years and 200 iterations to perfect.",
+      "excerpt_ar": "يفتح صانع العطور الرئيسي محمد حسان أبواب مرسم كِيم ليشاركنا كيف تطلبت أعقد عطورنا ثلاث سنوات ومئتي تجربة حتى بلغ حد الكمال",
+      "body": "The formula sheet for Onyx Night runs to four pages. The version we sell is numbered 214. Between the first trial and that one lies three years, several hundred blotters, and one decision made eighteen months in to throw out the entire structure and begin again.\n\n## The brief\n\nThe brief was a single sentence, and it was written before any material was weighed: *the smell of a temple after the fire has gone out*.\n\nThat is not a list of notes. It is a set of conditions. Something has burned and stopped burning. There is resin in the stone, smoke in the air but no flame, cold coming in, and a residue of something sweet that was there before the fire and outlasted it. Every trial for three years was assessed against that sentence and nothing else.\n\n## The first eighteen months, and why they were wasted\n\nThe early trials were built the obvious way: incense accord on top, resins in the heart, woods and animalic materials in the base. Frankincense, black pepper, labdanum, oud, vanilla. They smelled expensive. Several were, by any ordinary standard, good.\n\nThey were also wrong, and it took a long time to name why. A conventional pyramid announces itself in the correct order: bright, then warm, then deep. But a room after a fire does not arrive in that order. The smoke is already old when you walk in. The sweetness is underneath from the first second, not a reward for waiting.\n\n> We were composing a fragrance about the fire. The brief was about the silence afterwards.\n\nTrial 96 was the last of that generation. We stopped, cleared the bench, and started from the base.\n\n## Building downward\n\nThe second structure was assembled in reverse: base first, and nothing added above it until the base could stand alone for eight hours on skin and remain interesting.\n\nThat base took four months. It is built on aged Laotian oud at a low concentration, labdanum absolute, a small quantity of birch tar for the cold ash quality, and benzoin for the sweetness that has to be present from the beginning. Getting the birch tar right consumed most of that time; a fraction of a percent too much and the whole thing smells like a fireplace, which is a completely different and much less interesting idea.\n\nOnly then came the heart: Egyptian jasmine absolute, saffron, and a rose that had to be dark enough not to brighten the composition. And the top, which is deliberately quiet: pink pepper and a trace of elemi, present mostly to keep the first ten minutes from feeling abrupt.\n\n## Two hundred iterations is not two hundred good ideas\n\nMost of the numbered trials differ from their predecessor by one material at one concentration. Trials 141 through 158 are the same formula with the saffron moving in increments between 0.4% and 1.1%. Fourteen of those eighteen are indistinguishable to almost everyone. Two of them are not, and one of them is in the bottle.\n\nThis is the part of the work that photographs badly and matters most. A perfume is not discovered in a moment of inspiration. It is converged upon, slowly, by someone willing to smell the same thing forty times and be honest about the differences.\n\n## Knowing when to stop\n\nTrial 214 was not obviously final. Trials 215 through 219 exist; they are marginally different and none is better. What made 214 the one was a test we run on everything: the composition is worn for a full day by someone who was not in the room while it was made, and at the end of the day they are asked what it reminded them of.\n\nThe answer we were waiting for, for three years, was: *somewhere I've been before*.",
+      "body_ar": "**مخاض عطر \"أونيكس نايت\":**\nتمتد ورقة تركيبة عطر \"أونيكس نايت\" على مدى أربع صفحات كاملة. والنسخة التي نطرحها اليوم تحمل الرقم 214. بين التجربة الأولى وتلك النسخة تفصلنا ثلاث سنوات، ومئات من أوراق التجفيف العطرية (البلوتر)، وقرار حاسم اتُخذ بعد مرور ثمانية عشر شهراً بالتخلص من الهيكل العطري بأكمله والبدء من جديد.\n\n## الموجز العطري\n\nكان الموجز يتكون من جملة واحدة فقط، وقد كُتِب قبل وزن أي مادة: *رائحة معبد بعد انطفاء النار*.\n\nتلك ليست قائمة من النوتات العطرية، بل هي مجموعة من الشروط؛ فشيء ما قد احترق وتوقف عن الاحتراق، وهناك صمغ مستقر في الحجر، ودخان معلق في الهواء بلا لهب، وبرودة متسللة، وبقية من أثر حلو كان موجوداً قبل النار وبقي بعدها. وقد أُخضعت كل تجربة على مدار ثلاث سنوات لتلك الجملة وحدها لا غير.\n\n## الشهور الثمانية عشر الأولى، ولماذا ضاعت سدى\n\nبُنيت التجارب المبكرة بالطريقة البديهية: اتفاق بخوري في القمة، صموغ في القلب، أخشاب ومواد حيوانية في القاعدة. لبان، فلفل أسود، لابدانو، عود، وفانيليا. كانت رائحتها توحي بالثراء، وبمعايير العطور العادية كانت بعضها جيدة بالفعل.\n\nلكنها كانت خاطئة أيضاً، واستغرق الأمر وقتاً طويلاً لتسمية سبب الخطأ. فالهرم العطري التقليدي يعلن عن نفسه بالترتيب المعتاد: مشرق، ثم دافئ، ثم عميق. غير أن الغرفة بعد حريق هامد لا تصل رائحتها بهذا الترتيب؛ فالدخان يكون قد تقادم منذ لحظة دخولك، والنفحة الحلوة تكون حاضرة في الخلفية منذ الثانية الأولى وليست مجرد مكافأة لانتظار انقضاء الوقت.\n\n> كنا نؤلف عطراً يدور حول النار، بينما كان الموجز يدور حول الصمت الذي يعقبها.\n\nكانت التجربة رقم 96 هي الأخيرة من ذلك الجيل؛ فتوقفنا، وأفرغنا الطاولة، وبدأنا من القاعدة.\n\n## البناء العكسي نحو الأسفل\n\nبُني الهيكل الثاني بشكل معكوس: القاعدة أولاً، دون إضافة أي شيء فوقها حتى أصبحت القاعدة قادرة وحدها على الثبات ثماني ساعات على البشرة مع الحفاظ على جاذبيتها.\n\nتطلبت تلك القاعدة أربعة أشهر من العمل؛ فهي قائمة على عود لاوسي معتق بتركيز منخفض، ومطلق اللابدانو، وكمية ضئيلة من قطران البتولا لمحاكاة طابع الرماد البارد، والجاوي (البيزوين) لتلك الحلاوة التي يجب أن تكون حاضرة منذ البداية. وقد استهلك ضبط قطران البتولا بالنسب الصحيحة معظم ذلك الوقت، إذ إن زيادة جزء من بالمئة تعني أن الرائحة ستتحول برمتها لتشبه موقد حريق، وهي فكرة مختلفة تماماً وأقل جاذبية بكثير.\n\nبعد ذلك فقط وُلد القلب العطري: مطلق الياسمين المصري، والزعفران، ووردة كان لابد أن تكون حالكة بما يكفي كي لا تضفي إشراقاً يفسد التركيبة. وأخيراً جاءت القمة العطرية بهدوء متعمد: الفلفل الوردي وأثر خفيف من الإليمي، ووجودهما مقصور أساساً على منع الدقائق العشر الأولى من الشعور بالحدة المفاجئة.\n\n## مئتا محاولة لا تعني مئتي فكرة صائبة\n\nمعظم التجارب المرقمة لا تختلف عن سابقتها إلا بمادة واحدة عند تركيز مختلف. فالتجارب من 141 إلى 158 هي ذات التركيبة مع تحريك نسب الزعفران بفوارق طفيفة تتراوح بين 0.4% و1.1%. أربع عشرة تجربة من تلك الثماني عشرة تبدو متطابقة تماماً لتقريباً أي شخص، واثنتان منها ليست كذلك، وواحدة فقط هي التي استقرت داخل الزجاجة.\n\nهذا هو الجزء من العمل الذي يظهر سيئاً في الصور ولكنه الأهم إطلاقاً؛ فالعطر لا يُكتشف في لحظة إلهام عابرة، بل يُقترب منه ببطء، على يد شخص مستعد لشم الشيء نفسه أربعين مرة والتحلي بالنزاهة في إدراك الفوارق بينها.\n\n## معرفة متى يجب التوقف\n\nلم تكن التجربة 214 بديهية النهاية بالضرورة؛ فالتجارب من 215 إلى 219 موجودة بالفعل، وهي تختلف بفوارق هامشية ضئيلة ودون أن تكون أي منها أفضل. وما جعل الرقم 214 هو الخيار النهائي هو اختبار نجخده مع كل شيء: إذ يرتدي شخص لم يكن موجوداً في الغرفة أثناء تصنيع العطر التركيبة طوال اليوم، وفي نهايته يُسأل عما تذكره به.\n\nالإجابة التي كنا ننتظرها طوال ثلاث سنوات كانت: *مكان سبق لي زيارته من قبل*.",
+      "publishedAt": "2025-12-01",
+      "readTimeMinutes": 10,
+      "isFeatured": false,
+      "isPublished": true,
+      "image": {
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/Inside-the-Atelier.jpg",
+        "alt": "A perfumer's organ of raw materials inside the KHEM atelier",
+        "alt_ar": "عضو العطور من المواد الخام داخل مشغل KHEM"
       }
     },
     {
       "id": "sacred-ritual-of-egyptian-perfume",
       "slug": "sacred-ritual-of-egyptian-perfume",
       "title": "The Sacred Ritual of Applying Egyptian Perfume",
-      "title_ar": null,
+      "title_ar": "الطقس المقدس للتطيب بالعطور المصرية",
       "category": "Culture",
-      "category_ar": null,
+      "category_ar": "ثقافه",
       "excerpt": "In ancient Egypt, fragrance was never merely aesthetic. It was a spiritual practice, a daily ceremony of connection with the divine.",
-      "excerpt_ar": null,
-      "body": "An Egyptian noblewoman did not apply perfume in the morning and forget about it. She began the day with it, in a sequence of acts that was closer to prayer than to grooming, and the sequence mattered as much as the substance.\n\n## Washing first, always\n\nNothing was applied to unwashed skin. The morning began with water and *natron* , a naturally occurring mix of sodium carbonate and bicarbonate collected from the dry lake beds of Wadi El Natrun, the same material used in mummification.\n\nThis was not incidental. Cleanliness was a condition of approaching anything sacred, and perfume was sacred by definition; it was made in temples, by priests, from materials owned by gods. To put it on a body that had not been prepared was to misuse it.\n\n## The unguent cone\n\nThe image is familiar from tomb painting: guests at a banquet with a pale cone balanced on the crown of the head. Egyptologists have argued for a century about whether these were literal objects or a pictorial convention for \"this person is perfumed\", and the evidence now points, cautiously, to both.\n\nWhere they were physical, they were made of fat impregnated with aromatic material , the same fat-based technology that made Egyptian perfume last. Body heat softened the cone through the evening. The scent descended over the hair and shoulders continuously, for hours, rather than being applied once and left to fade.\n\n> The design is quietly brilliant. The wearer becomes the diffuser, and the fragrance is renewed by the warmth of the person wearing it.\n\n## Seven points\n\nRitual application texts and grave goods point consistently to a small number of anointing points: the crown of the head, the forehead, behind each ear, the hollow of the throat, the inside of each wrist, and the soles of the feet.\n\nSix of these are places where blood runs close to the surface and heat lifts the scent. The seventh is the feet, which have nothing to do with diffusion and everything to do with meaning , a person who has been anointed at the feet walks on ground that has been made ready. Anointing was frequently the last act performed for the dead before burial, and it began at the feet and moved upward.\n\n## The materials belonged to the temple\n\nPerfume was not a consumer good. Production was a temple monopoly, the formulas were controlled, and the finest preparations were reserved for cult use , for anointing statues of the gods each morning, dressing them, and presenting offerings.\n\nWhat reached private hands did so as a gift, a payment, or a privilege of rank. Jars of unguent appear in tomb inventories alongside gold and lapis, listed by name and quantity, because they were treated as treasure and accounted for as treasure.\n\n## What survives of it\n\nThe ritual is gone. The instinct behind it is not, and it is worth naming precisely, because it is not the instinct most modern fragrance is sold on.\n\nEgyptian perfume was not a projection of the self outward. It was a preparation of the self for something , for the day, for an obligation, for the presence of a god. It was applied deliberately, in silence, in a fixed order, and its purpose was to change the state of the person wearing it before anyone else encountered them.\n\nThat is a use for fragrance that survives any change in materials or fashion. The cone is not coming back. The two quiet minutes before the day begins are available to anyone.",
-      "body_ar": null,
-      "publishedAt": "2024-08-01",
+      "excerpt_ar": "لم تكن العطور في مصر القديمة مجرد مظهر جمالي، بل كانت ممارسة روحية وطقساً يومياً للاتصال بالمعبودات",
+      "body": "An Egyptian noblewoman did not apply perfume in the morning and forget about it. She began the day with it, in a sequence of acts that was closer to prayer than to grooming, and the sequence mattered as much as the substance.\n\n## Washing first, always\n\nNothing was applied to unwashed skin. The morning began with water and *natron*, a naturally occurring mix of sodium carbonate and bicarbonate collected from the dry lake beds of Wadi El Natrun, the same material used in mummification.\n\nThis was not incidental. Cleanliness was a condition of approaching anything sacred, and perfume was sacred by definition; it was made in temples, by priests, from materials owned by gods. To put it on a body that had not been prepared was to misuse it.\n\n## The unguent cone\n\nThe image is familiar from tomb painting: guests at a banquet with a pale cone balanced on the crown of the head. Egyptologists have argued for a century about whether these were literal objects or a pictorial convention for \"this person is perfumed\", and the evidence now points, cautiously, to both.\n\nWhere they were physical, they were made of fat impregnated with aromatic material the same fat-based technology that made Egyptian perfume last. Body heat softened the cone through the evening. The scent descended over the hair and shoulders continuously, for hours, rather than being applied once and left to fade.\n\n> The design is quietly brilliant. The wearer becomes the diffuser, and the fragrance is renewed by the warmth of the person wearing it.\n\n## Seven points\n\nRitual application texts and grave goods point consistently to a small number of anointing points: the crown of the head, the forehead, behind each ear, the hollow of the throat, the inside of each wrist, and the soles of the feet.\n\nSix of these are places where blood runs close to the surface and heat lifts the scent. The seventh is the feet, which have nothing to do with diffusion and everything to do with meaning a person who has been anointed at the feet walks on ground that has been made ready. Anointing was frequently the last act performed for the dead before burial, and it began at the feet and moved upward.\n\n## The materials belonged to the temple\n\nPerfume was not a consumer good. Production was a temple monopoly, the formulas were controlled, and the finest preparations were reserved for cult use for anointing statues of the gods each morning, dressing them, and presenting offerings.\n\nWhat reached private hands did so as a gift, a payment, or a privilege of rank. Jars of unguent appear in tomb inventories alongside gold and lapis, listed by name and quantity, because they were treated as treasure and accounted for as treasure.\n\n## What survives of it\n\nThe ritual is gone. The instinct behind it is not, and it is worth naming precisely, because it is not the instinct most modern fragrance is sold on.\n\nEgyptian perfume was not a projection of the self outward. It was a preparation of the self for something — for the day, for an obligation, for the presence of a god. It was applied deliberately, in silence, in a fixed order, and its purpose was to change the state of the person wearing it before anyone else encountered them.\n\nThat is a use for fragrance that survives any change in materials or fashion. The cone is not coming back. The two quiet minutes before the day begins are available to anyone.",
+      "body_ar": "**طقوس التطيب عند النبيلات المصريات:**\n\nلم تكن النبيلة المصرية تكتفي بوضع العطر صباحاً ثم تنسى أمره؛ بل كانت تستهل يومها بتسلسل من الأفعال أقرب إلى العبادة منه إلى التزين، حيث كانت للخطوات أولوية تضاهي أهمية المادة نفسها.\n\n## الطهارة أولاً ودائماً\n\nلم يكن يُوضع أي عطر على بشرة غير مغسولة. كان الصباح يبدأ بالماء وملح النطرون وهو مزيج طبيعي من كربونات الصوديوم وبيكربونات الصوديوم المُستخرج من قيعان البحيرات الجافة في وادي النطرون، وهو ذاته المادة المستخدمة في التحنيط.\n\nلم يكن ذلك أمراً عابراً؛ فالنظافة كانت شرطاً أساسياً للتقرب من أي أمر مقدَّس، والعطر كان مقدساً بحكم التعريف؛ فقد كان يُصنع في المعابد على أيدي الكهنة ومن مواد تملكها الآلهة. وضع العطر على جسد لم يتم إعداده كان يُعد سوء استخدام له.\n\n## مخروط الدهن العطري\n\nالصورة مألوفة من رسوم المقابر: ضيوف في وليمة يعتلي رؤوسهم مخروط شاحب مستقر على قمم هاماتهم. لقد اختلف علماء الآثار المصرية طوال قرن كامل حول ما إذا كانت هذه المخروطات أشياء مادية حقيقية أم مجرد تعبير تصويري يعني \"هذا الشخص متعطر\"، وتشير الأدلة الآن، بحذر، إلى الأمرين معاً.\n\nحين كانت هذه المخروطات مادية، كانت تُصنع من الدهون المُتشبعة بالمواد العطرية وهي تقنية الدهون ذاتها التي جعلت العطر المصري يدوم طويلاً. كان حرارة الجسم تذيب المخروط ببطء طوال الأمسية؛ فينساب العطر وينزل على الشعر والأكتاف باستمرار لساعات، بدلاً من وضعه مرة واحدة ثم تركه يخفت.\n\n> التصميم عبقري بهدوء؛ إذ يتحول مرتديه إلى ناشر للعطر، وتتجدد الرائحة باستمرار بفضل حرارة جسم صاحبه.\n\n## النقاط السبع\n\nتشير نصوص التطيب الطقسية ومقتنيات المقابر باستمرار إلى عدد محدود من نقاط المسح: قمة الرأس، الجبهة، خلف الأذنين، تجويف الحلق، باطن المعصمين، وباطن القدمين.\n\nستة من هذه المواضع تجري فيها الدورة الدموية بالقرب من السطح وتعمل حرارة الجسم على تصعيد العطر. أما النقطة السابعة فهي القدمان، اللتان لا علاقة لهما بانتشار الرائحة بل بكل ما يتعلق المعنى؛ فالشخص الذي مُسح عطراً عند قدميه يمشي على أرض مُهيأة. وغالباً ما كان المسح بالدهون آخر ما يُنفذ للمتوفى قبل الدفن، وكان يبدأ من القدمين ويتحرك صعوداً.\n\n## المواد ملك للمعبد\n\nلم يكن العطر سلعة استهلاكية عادية. كان الإنتاج حكراً على المعابد، وتخضع التركيبات لرقابة صارمة، وكانت أفخر المستحضرات مخصصة للعبادة لمسح تماثيل الآلهة كل صباح، وتزيينها، وتقديم القرابين.\n\nوما وصل إلى الأيدي الخاصة كان يصل إما كهدية، أو أجر، أو امتياز للجاه والمكانة. ولهذا تظهر جرار الدهون العطرية في قوائم ممتلكات المقابر جنباً إلى جنب مع الذهب واللازورد، مسجلة بالاسم والكمية، لأنه كان يُنظر إليها ككنوز ويُحاسب عليها ككنوز.\n\n## ما تبقى من هذا الإرث\n\nالطقوس ولت، لكن الغريزة الكامنة خلفها باقية، وتستحق التسمية بدقة لأنها تختلف تماماً عن الأسس التي تُباع عليها معظم العطور الحديثة.\n\nلم يكن العطر المصري إسقاطاً للذات نحو الخارج، بل كان إعداداً للنفس لغاية ما لليوم، للواجب، أو لحضور الإله. كان يُوضع بوعي، في صمت، ووفق ترتيب ثابت، وكان هدفه تغيير حالة مرتديه قبل أن يلتقي بأي شخص آخر.\n\nتلك غاية لعطر تتجاوز أي تغيير في المواد أو صيحات الموضة. قد لا يعود المخروط العطري، لكن دقيقتين من الهدوء قبل أن يبدأ اليوم تظل متاحة لكل من يريدها.",
+      "publishedAt": "2025-11-01",
       "readTimeMinutes": 6,
       "isFeatured": false,
       "isPublished": true,
       "image": {
-        "url": "https://images.unsplash.com/photo-1678287714479-adaa0cfbe6c6?w=800&h=500&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/v1790355540/The-Sacred-Ritual-of-Applying-Egyptian-Perfume.jpg",
         "alt": "Ancient Egyptian relief carvings in warm low light",
-        "alt_ar": null
+        "alt_ar": "نقوش بارزة مصرية قديمة في ضوء خافت ودافئ"
       }
     },
     {
       "id": "saffron-the-golden-thread",
       "slug": "saffron-the-golden-thread",
       "title": "Saffron: The Golden Thread of KHEM",
-      "title_ar": null,
+      "title_ar": "الزعفران: خيط كِيم الذهبي",
       "category": "Ingredients",
-      "category_ar": null,
+      "category_ar": "المكونات",
       "excerpt": "A gram of saffron requires 150 flowers, each hand-harvested at dawn. We trace the journey of this extraordinary ingredient from the Iranian plateau to our atelier.",
-      "excerpt_ar": null,
-      "body": "*Crocus sativus* flowers for two weeks a year. It opens before dawn, and it must be picked before the sun is high enough to wilt the stigmas , so the harvest happens in the dark, by hand, by people who will bend to the ground several thousand times before breakfast.\n\nEach flower yields three crimson threads. A single gram of dried saffron requires roughly a hundred and fifty of them. A kilogram requires a field.\n\n## Khorasan\n\nWe buy from the Khorasan plateau in north-eastern Iran, which produces the overwhelming majority of the world's saffron and has done for as long as the trade has been recorded. The reasons are climatic and unromantic: hot, dry summers; cold winters; and a soil that drains fast enough to keep the corms from rotting.\n\nThe grade that matters is *sargol* , pure red stigma, with the pale style cut away entirely. Cheaper grades leave the style attached because it adds weight and costs nothing to produce; it also contributes no aroma and no colour, which is precisely why it is left on.\n\n> Saffron is among the most adulterated substances in the world. Safflower, turmeric, dyed corn silk, and threads of the plant's own worthless style are all sold as the real material.\n\nWe buy by lab report and by nose, in that order, and we have rejected more lots than we have bought.\n\n## Two different materials\n\nWhat confuses people new to saffron is that the kitchen version and the perfumer's version behave nothing alike.\n\nIn food, saffron is used at a few threads per dish, infused in warm liquid, and reads as honeyed, floral, faintly metallic. In perfumery it is used as an absolute or a tincture at fractions of a per cent, and at that concentration the dominant impression is leather , dry, slightly bitter, with a hay-like warmth underneath and an almost medicinal edge at the top.\n\nThe molecule responsible for most of the aroma is safranal. It is unstable in light and heat, which is why saffron is stored in the dark and why old saffron smells like nothing much at all.\n\n## Where the line is\n\nSaffron is unforgiving of overdose in a way that few materials are. Below its threshold it does something no other ingredient does: it gives a composition a dry, glowing warmth that reads as expensive without being identifiable. Above that threshold it becomes conspicuous, medicinal, and slightly harsh, and it drags everything around it toward the same register.\n\nThe working range in most of our compositions is between four and eight parts in ten thousand. In Onyx Night, eighteen consecutive trials were spent finding the point in that range where the saffron stopped being a note and became a quality of light.\n\n## An old debt\n\nSaffron in Egyptian perfumery is not a modern flourish. It appears in temple formulas, in medical papyri, and in the residues recovered from sealed vessels. It travelled, expensively, from the same eastern trade routes that brought cinnamon-like barks and precious woods, and it was used in the same way we use it now: sparingly, low in the structure, to give resin and wood a warmth they cannot generate on their own.\n\nThe harvest still happens at four in the morning, by hand, exactly as it did then. Some parts of this craft have not been improved upon because they cannot be.",
-      "body_ar": null,
-      "publishedAt": "2024-07-01",
+      "excerpt_ar": "يتطلب الجرام الواحد من الزعفران مئوية وخمسين زهرة، تُحصد كل واحدة منها يدوياً عند الفجر؛ لنتتبع معاً رحلة هذا المكون الاستثنائي من الهضبة الإيرانية حتى مرسمنا",
+      "body": "*Crocus sativus* flowers for two weeks a year. It opens before dawn, and it must be picked before the sun is high enough to wilt the stigmas, so the harvest happens in the dark, by hand, by people who will bend to the ground several thousand times before breakfast.\n\nEach flower yields three crimson threads. A single gram of dried saffron requires roughly a hundred and fifty of them. A kilogram requires a field.\n\n## Khorasan\n\nWe buy from the Khorasan plateau in north-eastern Iran, which produces the overwhelming majority of the world's saffron and has done for as long as the trade has been recorded. The reasons are climatic and unromantic: hot, dry summers; cold winters; and a soil that drains fast enough to keep the corms from rotting.\n\nThe grade that matters is *sargol*, pure red stigma, with the pale style cut away entirely. Cheaper grades leave the style attached because it adds weight and costs nothing to produce; it also contributes no aroma and no colour, which is precisely why it is left on.\n\n> Saffron is among the most adulterated substances in the world. Safflower, turmeric, dyed corn silk, and threads of the plant's own worthless style are all sold as the real material.\n\nWe buy by lab report and by nose, in that order, and we have rejected more lots than we have bought.\n\n## Two different materials\n\nWhat confuses people new to saffron is that the kitchen version and the perfumer's version behave nothing alike.\n\nIn food, saffron is used at a few threads per dish, infused in warm liquid, and reads as honeyed, floral, faintly metallic. In perfumery it is used as an absolute or a tincture at fractions of a per cent, and at that concentration the dominant impression is leather dry, slightly bitter, with a hay-like warmth underneath and an almost medicinal edge at the top.\n\nThe molecule responsible for most of the aroma is safranal. It is unstable in light and heat, which is why saffron is stored in the dark and why old saffron smells like nothing much at all.\n\n## Where the line is\n\nSaffron is unforgiving of overdose in a way that few materials are. Below its threshold it does something no other ingredient does: it gives a composition a dry, glowing warmth that reads as expensive without being identifiable. Above that threshold it becomes conspicuous, medicinal, and slightly harsh, and it drags everything around it toward the same register.\n\nThe working range in most of our compositions is between four and eight parts in ten thousand. In Onyx Night, eighteen consecutive trials were spent finding the point in that range where the saffron stopped being a note and became a quality of light.\n\n## An old debt\n\nSaffron in Egyptian perfumery is not a modern flourish. It appears in temple formulas, in medical papyri, and in the residues recovered from sealed vessels. It travelled, expensively, from the same eastern trade routes that brought cinnamon-like barks and precious woods, and it was used in the same way we use it now: sparingly, low in the structure, to give resin and wood a warmth they cannot generate on their own.\n\nThe harvest still happens at four in the morning, by hand, exactly as it did then. Some parts of this craft have not been improved upon because they cannot be.",
+      "body_ar": "تزهر زهرة الكرعوس ساتيفوس (*Crocus sativus*) لمدة أسبوعين فقط في العام. تنفتح الزهرة قبيل الفجر، ويجب قطف مياسمها قبل أن ترتفع الشمس بما يكفي لتذبل؛ ولهذا السبب تتم عملية الحصاد في الظلام، يدوياً، على أيدي أشخاص ينحني الواحد منهم نحو الأرض عدة آلاف من المرات قبل تناول الإفطار.\n\nتمنح كل زهرة ثلاثة خيوط قرميدية اللون. ويتطلب جرام واحد من الزعفران المجفف نحو مئة وخمسين زهرة منها. أما الكيلوجرام الواحد فيتطلب حقلاً بأكمله.\n\n## خراسان\n\nنشتري الزعفران من هضبة خراسان الواقعة في شمال شرق إيران، والتي تنتج النسبة الأكبر من زعفران العالم وظلت تفعل ذلك منذ أن بدأ تدوين التجارة. الأسباب مناخية وخالية من العاطفة: صيف حار وجاف؛ وشتاء بارد؛ وتربة تصرف المياه بسرعة كافية لحماية البصلات من التعفن.\n\nالدرجة التي تعنينا هي *سركل* (Sargol) — وهي المياسم الحمراء النقية، مع قص الجزء الأصفر الباهت تماماً. الدرجات الأرخص تبقي الجزء السفلي متصلاً لأنه يضيف وزناً ولا يكلف شيئاً في إنتاجه؛ كما أنه لا يساهم بأي رائحة أو لون، وهذا هو التحديداً السبب في أنهم يبقونه ملتصقاً.\n\n> يُعد الزعفران من أكثر المواد تعرضاً للغش في العالم. فقرطم العفص، والكركم، وخيوط حرير الذرة الملونة، وخيوط الجزء السفلي عديمة الفائدة للنبات نفسه، كلها تُباع على أنها المادة الأصلية.\n\nنحن نشتري بناءً على تقارير المختبر وبالأنف، بهذا الترتيب، وقد رفضنا من الدفعات أكثر بكثير مما اشترينا.\n\n## مادتان مختلفتان\n\nما يربك الوافدين الجدد على عالم الزعفران هو أن نسخة المطبخ ونسخة صانع العطور لا تتصرفان على الإطلاق بالطريقة ذاتها.\n\nفي الطهي، يُستخدم الزعفران بعدة خيوط لكل طبق، ويُنقع في سائل دافئ، ويُقرأ كعنصر عسلي، زهري، وفيه لمسة معدنية خفيفة. أما في صناعة العطور فيُستخدم كمستخلص مطلق أو مستخلص كحولي بنسب ضئيلة للغاية لا تتجاوز كسور بالمائة، وعند هذا التركيز يصبح الانطباع المهيمن هو الجلد الفاخر — جاف، مر قليلاً، مع دفء شبيه بالتبن في القاعدة ولمسة طبية شبه حادة في المقدمة.\n\nالجزيء المسؤول عن معظم الرائحة هو \"السافرنال\" (Safranal). وهو مركب غير مستقر في الضوء والحرارة، ولهذا يُحفظ الزعفران في الظلام، وهو السبب أيضاً في أن الزعفران القديم لا رائحة له تقريباً.\n\n## أين يقف الحد الفاصل؟\n\nلا يغفر الزعفران أبداً لمن يتجاوز جرعته بطريقة لا تشابهها أي مادة أخرى. فهو دون عتبته يفعل شيئاً لا تفعله أي مكونة أخرى: يمنح التركيبة العطرية دفئاً جافاً ومشرقاً يوحي بالثراء دون أن يكون قابلاً للتمييز بوضوح. أما فوق تلك العتبة فيصبح نافذاً، وطبياً، وقاسياً قليلاً، ويسحب كل ما حوله نحو النبرة ذاتها.\n\nيتراوح نطاق العمل في معظم تركيباتنا بين أربعة وثمانية أجزاء من كل عشرة آلاف. وفي عطر \"أونيكس نايت\"، قضينا ثمانية عشر اختباراً متتالياً في إيجاد النقطة ضمن ذلك النطاق حيث كف الزعفران عن أن يكون مجرد نوتة وأصبح صفةً من صفات الضوء.\n\n## دين قديم\n\nلم يكن الزعفران في صناعة العطور المصرية نزوة عصرية. فهو يظهر في وصفات المعابد، والبرديات الطبية، والبقايا المستخرجة من الأواني المختومة. لقد سافر، بأسعار باهظة، عبر طرق التجارة الشرقية ذاتها التي جلبت اللحاء الشبيه بالقرفة والأخشاب الثمينة، واستُخدم بالطريقة التي نستخدمه بها الآن: باعتدال، في طبقات عميقة من الهيكل العطري، ليمنح الصمغ والأخشاب دفئاً تعجز عن توليده بمفردها.\n\nما زال الحصاد يتم في تمام الساعة الرابعة صباحاً، يدوياً، تماماً كما كان يحدث في السابق. بعض جوانب هذه الحرفة لم يتم تحسينها لسبب بسيط وهو أن ذلك مستحيل.",
+      "publishedAt": "2025-10-01",
       "readTimeMinutes": 9,
       "isFeatured": false,
       "isPublished": true,
       "image": {
-        "url": "https://images.unsplash.com/photo-1640975972263-1f73398e943b?w=800&h=500&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/v1790355541/Saffron.jpg",
         "alt": "Saffron threads gathered after the dawn harvest",
-        "alt_ar": null
+        "alt_ar": "خيوط الزعفران المتجمعة بعد حصاد الفجر"
       }
     }
   ],
@@ -505,9 +937,9 @@
       "year": "3000 BC",
       "year_ar": "٣٠٠٠ ق.م",
       "title": "The Birth of Kyphi",
-      "title_ar": "ولادة الْكِيفِي",
-      "description": "Ancient Egyptians develop the first complex perfume formula , Kyphi , from sixteen sacred ingredients. It is burned in temples at sunset as an offering to the gods.",
-      "description_ar": "طوّر المصريون القدماء أول تركيبة عطرية معقّدة، الْكِيفِي، من ستة عشر مكوّنًا مقدّسًا. كان يُحرق في المعابد عند الغروب قربانًا للآلهة."
+      "title_ar": "ولادة كيفي",
+      "description": "Ancient Egyptians develop the first complex perfume formula. Kyphi, from sixteen sacred ingredients. It is burned in temples at sunset as an offering to the gods.",
+      "description_ar": "طوّر المصريون القدماء أول تركيبة عطرية معقّدة، الكيفي، من ستة عشر مكوّنًا مقدّسًا. كان يُحرق في المعابد عند الغروب قربانًا للآلهة"
     },
     {
       "id": "great-papyrus-formulas",
@@ -516,7 +948,7 @@
       "title": "The Great Papyrus Formulas",
       "title_ar": "تركيبات البردية العظيمة",
       "description": "The Ebers Papyrus records hundreds of scent formulas using frankincense, myrrh, cinnamon, and rare resins. Perfumery becomes a sacred art form.",
-      "description_ar": "تسجّل بردية إيبرس مئات التركيبات العطرية باللبان والمرّ والقرفة والراتنجات النادرة، فتغدو صناعة العطر فنًّا مقدّسًا."
+      "description_ar": "تسجّل بردية إيبرس مئات التركيبات العطرية باللبان والمرّ والقرفة والراتنجات النادرة، فتغدو صناعة العطر فنًّا مقدّسًا"
     },
     {
       "id": "the-scented-queen",
@@ -525,77 +957,86 @@
       "title": "The Scented Queen",
       "title_ar": "الملكة المعطَّرة",
       "description": "Cleopatra VII saturates the sails of her ships in rose and jasmine perfume so that her arrival is announced by scent before she appears. Fragrance becomes power.",
-      "description_ar": "تُشبِع كليوباترا السابعة أشرعة سفنها بعطر الورد والياسمين، فيسبق عبيرها وصولها. هكذا صار العطر قوّة."
+      "description_ar": "تُشبِع كليوباترا السابعة أشرعة سفنها بعطر الورد والياسمين، ليُعلن وصولها بالرائحة قبل ظهورها. العطر يصبح قوة"
     },
     {
       "id": "khem-is-founded",
-      "year": "2019 AD",
-      "year_ar": "٢٠١٩ م",
+      "year": "2025 AD",
+      "year_ar": "٢٠٢٥ م",
       "title": "KHEM is Founded",
       "title_ar": "تأسيس كيم",
-      "description": "A gathering of Egyptian perfumers, historians, and craftspeople in Cairo establish KHEM , a fragrance house dedicated to transforming ancient wisdom into modern luxury.",
-      "description_ar": "يؤسّس نخبة من صانعي العطور والمؤرخين والحرفيين المصريين في القاهرة دار كيم، وهي دار عطور تكرّس عملها لتحويل الحكمة القديمة إلى فخامة معاصرة."
+      "description": "A gathering of Egyptian perfumers, historians, and craftspeople in Cairo establishes KHEM. A fragrance house dedicated to transforming ancient wisdom into modern luxury.",
+      "description_ar": "يؤسّس نخبة من صانعي العطور والمؤرخين والحرفيين المصريين في القاهرة دار كيم، وهي دار عطور تكرّس عملها لتحويل الحكمة القديمة إلى فخامة معاصره"
     },
     {
       "id": "the-first-collection",
-      "year": "2021 AD",
-      "year_ar": "٢٠٢١ م",
-      "title": "The First Collection",
-      "title_ar": "المجموعة الأولى",
-      "description": "The Signature Collection launches to critical acclaim, including Onyx Night , KHEM's defining fragrance and the most complex formula in the house.",
-      "description_ar": "تُطلق مجموعة سيغنتشر وتلقى إشادة النقاد، ومنها Onyx Night، عطر كيم الأبرز وأكثر تركيبات الدار تعقيدًا."
+      "year": "2025 AD",
+      "year_ar": "٢٠٢٥ م",
+      "title": "The SIGNATURE Chapter",
+      "title_ar": "الفصل الاولي مجموعه سيجنتشر",
+      "description": "The Signature Collection launches to critical acclaim, including Onyx Night. KHEM's defining fragrance and the most complex formula in the house.",
+      "description_ar": "تُطلق مجموعة سيجنتشر وتلقى إشادة النقاد، ومنها Onyx Night، عطر كيم الأبرز وأكثر تركيبات الدار تعقيدًا"
     },
     {
       "id": "the-noir-chapter",
-      "year": "2024 AD",
-      "year_ar": "٢٠٢٤ م",
-      "title": "The Noir Chapter",
-      "title_ar": "فصل نور",
-      "description": "The second collection , Noir , explores the darker, more esoteric aspects of Egyptian heritage. Small runs. Museum-grade packaging.",
-      "description_ar": "تستكشف المجموعة الثانية، نور، الجوانب الأكثر عتمةً وباطنيةً في التراث المصري. إصدارات محدودة، وتغليف بمستوى المتاحف."
+      "year": "2026 AD",
+      "year_ar": "٢٠٢٦ م",
+      "title": "The NOIR Chapter",
+      "title_ar": "الفصل الثاني مجموعه نور",
+      "description": "The second collection NOIR explores the darker, more esoteric aspects of Egyptian heritage. Small runs. Museum-grade packaging.",
+      "description_ar": "تستكشف المجموعة الثانية، نور، الجوانب الأكثر عتمةً وباطنيةً في التراث المصري. إصدارات محدودة، وتغليف بمستوى المتاحف"
+    },
+    {
+      "id": "the-gemstone-chapter",
+      "year": "2026 AD",
+      "year_ar": "٢٠٢٦ م",
+      "title": "The GEMSTONE Chapter",
+      "title_ar": "الفصل الثالث مجموعه الاحجار الكريمه",
+      "description": "Throughout history, gemstones have been shaped by time, earth, pressure, and light, becoming precious through the story within them. KHEM transforms this timeless idea into fragrance. Each composition is crafted like a rare gem, revealing new facets with every moment. Precious by nature. Distinctive by character. Meant to be discovered.",
+      "description_ar": "على مرّ التاريخ، صاغ الزمن والأرض والضغط والضوء الأحجار الكريمة، فازدادت قيمتها بما تحمله من حكاية.\nومن هذه الفكرة تستلهم KHEM عطورها؛ كل تركيبة صيغت كحجر نادر، تكشف عن وجوه جديدة مع كل لحظة.\nنفيسة بطبيعتها. متفرّدة بطابعها. صُممت لتُكتشف"
     }
   ],
   "brandValues": [
     {
       "id": "reverence",
       "title": "Reverence",
-      "title_ar": null,
+      "title_ar": "الوقار",
       "description": "We approach Egyptian cultural heritage with deep respect, working with historians, archaeologists, and cultural scholars to ensure our interpretations are accurate and honoring.",
-      "description_ar": null
+      "description_ar": "نتناول التراث الثقافي المصري باحترام عميق، متعاونين مع المؤرخين، وعلماء الآثار، والباحثين الثقافيين لضمان أن تكون تفسيراتنا دقيقة ومُكْرِمة لهذا الإرث"
     },
     {
       "id": "mastery",
       "title": "Mastery",
-      "title_ar": null,
+      "title_ar": "الإتقان",
       "description": "We work only with the finest master perfumers from Grasse, Cairo, and Dubai. Every formula undergoes years of refinement before we consider it worthy of a KHEM bottle.",
-      "description_ar": null
+      "description_ar": "لا نتعامل إلا مع أبراع صناعة العطور من غراس، والقاهرة، ودبي. تخضع كل تركيبة لسنوات من التطوير والتدقيق قبل أن نراها جديرة بأن تحتضنها زجاجة من كيم"
     },
     {
       "id": "sustainability",
       "title": "Sustainability",
-      "title_ar": null,
+      "title_ar": "الاستدامة",
       "description": "Our ingredients are sourced through fair-trade partnerships. Our packaging uses recycled materials. We plant a tree for every bottle sold through our Egyptian reforestation program.",
-      "description_ar": null
+      "description_ar": "نحصل على مكوناتنا من خلال شراكات تجارية عادلة، وتعتمد عبواتنا على مواد مُعاد تدويرها بالكامل. كما نلتزم بزراعة شجرة مقابل كل زجاجة يتم بيعها من خلال برنامجنا المصري لإعادة التشجير"
     }
   ],
   "missionStatements": [
     {
       "id": "mission",
       "label": "Mission",
-      "label_ar": null,
+      "label_ar": "الرسالة",
       "title": "To Honor the Ancient",
-      "title_ar": null,
-      "text": "To create modern luxury fragrances that serve as a bridge between the extraordinary cultural heritage of Ancient Egypt and the contemporary world , treating history not as nostalgia, but as a living source of inspiration.",
-      "text_ar": null
+      "title_ar": "تكريم العصور القديمة",
+      "text": "To create modern luxury fragrances that serve as a bridge between the extraordinary cultural heritage of Ancient Egypt and the contemporary world, treating history not as nostalgia, but as a living source of inspiration.",
+      "text_ar": "ابتكار عطور فاخرة معاصرة تشكل جسراً بين التراث الثقافي الاستثنائي لمصر القديمة والعالم الحديث، مع التعامل مع التاريخ لا بوصفه حنيناً عابراً، بل كمصدر إلهام حي ينبض بالحياة"
     },
     {
       "id": "vision",
       "label": "Vision",
-      "label_ar": null,
+      "label_ar": "الرؤية",
       "title": "A New Egyptian Luxury",
-      "title_ar": null,
-      "text": "To establish Egypt as a preeminent source of global luxury , proving that the civilization that gave the world fragrance, cosmetics, and beauty can once again lead the world in the art of perfumery.",
-      "text_ar": null
+      "title_ar": "فخامة مصرية جديدة",
+      "text": "To establish Egypt as a preeminent source of global luxury, proving that the civilization that gave the world fragrance, cosmetics, and beauty can once again lead the world in the art of perfumery.",
+      "text_ar": "إرساء مكانة مصر كمصدر رائد للفخامة العالمية، وإثبات أن الحضارة التي وهبت العالم فنون العطور ومستحضرات التجميل والجمال قادرة على تصدر مشهد فن صناعة العطور العالمي من جديد"
     }
   ],
   "craftPillars": [
@@ -603,33 +1044,33 @@
       "id": "rare-ingredients",
       "number": "01",
       "title": "Rare Ingredients",
-      "title_ar": null,
+      "title_ar": "مكوّنات نادرة",
       "description": "Sourced from the finest terroirs across Egypt, France, India, and Oman. Oud, frankincense, saffron, and neroli of the highest grade.",
-      "description_ar": null
+      "description_ar": "مستخلصة من أثمن بقاع مصر، فرنسا، الهند، وعُمان. عود، لبان، زعفران، ونيرولي من الدرجة الأنقى على الإطلاق."
     },
     {
       "id": "master-perfumers",
       "number": "02",
       "title": "Master Perfumers",
-      "title_ar": null,
+      "title_ar": "كبار خبراء العطور",
       "description": "Crafted in collaboration with the world's foremost noses. Each fragrance is refined over months until perfect equilibrium is achieved.",
-      "description_ar": null
+      "description_ar": "أُبدعت بالتعاون مع أبرز خبراء العطور عالمياً، وصُقلت على مدى أشهر لبلوغ التوازن العطري المثالي."
     },
     {
       "id": "crystal-flacons",
       "number": "03",
       "title": "Crystal Flacons",
-      "title_ar": null,
+      "title_ar": "زجاجات كريستالية",
       "description": "Hand-blown in collaboration with artisan glassmakers. Each bottle is a sculptural object inspired by ancient Egyptian vessels.",
-      "description_ar": null
+      "description_ar": "صُنعت يدوياً بالتعاون مع حرفيي الزجاج؛ زجاجة أيقونية تُحاكي منحوتة فنية مستوحاة من الأواني الفرعونية العتيقة."
     },
     {
       "id": "ritual-packaging",
       "number": "04",
       "title": "Ritual Packaging",
-      "title_ar": null,
+      "title_ar": "طقوس التغليف",
       "description": "Wrapped in hand-marbled paper, sealed with black wax, and housed in lacquered boxes that become part of your home.",
-      "description_ar": null
+      "description_ar": "مغلّفة بورق رُخم يدوياً، ومختومة بالشمع الأسود داخل صناديق فاخرة مصقولة تُصبح جزءاً من منزلك."
     }
   ],
   "craftSteps": [
@@ -637,90 +1078,90 @@
       "id": "ingredient-sourcing",
       "number": "01",
       "title": "Ingredient Sourcing",
-      "title_ar": null,
+      "title_ar": "مصادر المكونات",
       "subtitle": "Four Continents. One Standard.",
-      "subtitle_ar": null,
+      "subtitle_ar": "أربع قارات بمعيار واحد",
       "body": "Our master perfumer travels personally to source every key ingredient. Frankincense from the Dhofar mountains of Oman. Oud from the forest reserves of Laos. Saffron from the highlands of Iran. Rose absolute from the valleys of Grasse. Only the finest grade reaches our atelier.",
-      "body_ar": null,
+      "body_ar": "يسافر صانع العطور الرئيسي لدينا شخصياً ليحصل على كل مكون أساسي؛ اللبان من جبال ظفار في عمان، العود من محميات الغابات في لاوس، الزعفران من مرتفعات إيران، وخلاصة الورد من وديان غراس وحدها الدرجات الأجود تصل إلى محترفنا العطري",
       "image": {
-        "url": "https://images.unsplash.com/photo-1615885108069-7d5bef9a7e22?w=900&h=700&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/craftsmanship-ingerdients.png",
         "alt": "Raw botanical materials laid out for grading before selection",
-        "alt_ar": null
+        "alt_ar": "مواد نباتية خام مفرودة لتصنيف جودتها قبل الانتقاء."
       }
     },
     {
       "id": "formulation",
       "number": "02",
       "title": "Formulation",
-      "title_ar": null,
+      "title_ar": "التركيبة",
       "subtitle": "Months of Refinement. Hundreds of Trials.",
-      "subtitle_ar": null,
-      "body": "Each KHEM fragrance undergoes between 80 and 300 formulation trials before it is deemed worthy of production. Our head perfumer works in silence, revising, adjusting, layering , searching for the precise balance that honors both the ancient inspiration and the modern wearer.",
-      "body_ar": null,
+      "subtitle_ar": "أَشْهُرٌ مِنَ الصَّقْلِ. مِئَاتُ التَّجَارِبِ",
+      "body": "Each KHEM fragrance undergoes between 80 and 300 formulation trials before it is deemed worthy of production. Our head perfumer works in silence, revising, adjusting, layering and searching for the precise balance that honors both the ancient inspiration and the modern wearer.",
+      "body_ar": "تخضع كل عطور \"كِيم\" لما يتراوح بين ثمانين إلى ثلاثمائة تجربة صياغة قبل أن تُعتبر جديرة بالإنتاج. يعمل خبير العطور الرئيسي لدينا في هدوء، مُعدِّلاً ومُدققاً ومُطابقاً للطبقات، بَاحِثاً عن التوازن الدقيق الذي يُكرِم كلاً من الإلهام القديم ومُرتدي العِطر المعاصر",
       "image": {
-        "url": "https://images.unsplash.com/photo-1709666414115-47ecd5143293?w=900&h=700&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/craftsmanship-formulation.png",
         "alt": "The perfumer's organ, ranked with trial vials mid-formulation",
-        "alt_ar": null
+        "alt_ar": "عضو العطار، مُصنف مع قوارير تجريبية في منتصف التركيبة"
       }
     },
     {
       "id": "crystal-flacon-creation",
       "number": "03",
       "title": "Crystal Flacon Creation",
-      "title_ar": null,
+      "title_ar": "صَنْع الزجاجه الكريستالية",
       "subtitle": "Mouth-Blown. Hand-Polished. Singular.",
-      "subtitle_ar": null,
-      "body": "Each KHEM bottle is conceived as a sculptural object , a vessel worthy of its contents. Inspired by ancient Egyptian alabaster canopic jars and the geometry of temple columns, they are mouth-blown by master glassmakers in Murano, then hand-polished to optically flawless clarity.",
-      "body_ar": null,
+      "subtitle_ar": "منفوخة يدوياً. مصقولة باليد. فريدة من نوعها",
+      "body": "Each KHEM bottle is conceived as a sculptural object, a vessel worthy of its contents. Inspired by ancient Egyptian alabaster canopic jars and the geometry of temple columns, they are mouth-blown by master glassmakers in Murano, then hand-polished to optically flawless clarity.",
+      "body_ar": "كل زجاجة لعطر \"كِيم\" متصممة كأنها تحفة فنية، وعاء يليق باللي جواه. ومُستوحاة من جرار الكانوب المصري القديم وهندسة أعمدة المعابد؛ بتتعمل نفخ يدوي على إيد كبار صنّاع الزجاج في مورانو، وبعدين بتتصقل باليد لحد ما توصل لنقاء بصري من غير أي شائبة",
       "image": {
-        "url": "https://images.unsplash.com/photo-1618994492420-b4f4d6b4890c?w=900&h=700&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/craftsmanship-crystal.jpg",
         "alt": "A mouth-blown crystal flacon resting after hand-polishing",
-        "alt_ar": null
+        "alt_ar": "زجاجه كريستالية منفوخة يدوياً تستريح بعد صقلها يدوياً."
       }
     },
     {
       "id": "filling-and-sealing",
       "number": "04",
       "title": "Filling & Sealing",
-      "title_ar": null,
+      "title_ar": "التعبئة والختم",
       "subtitle": "A Ritual, Not a Process.",
-      "subtitle_ar": null,
-      "body": "Fragrance is introduced to each bottle by hand, measured to the microgram. The stopper , weighted black onyx for Signature, obsidian for Noir , is fitted individually and sealed with black wax stamped with the KHEM falcon sigil. No two bottles are identical.",
-      "body_ar": null,
+      "subtitle_ar": "طَقْس.. مش مجرد عملية",
+      "body": "Fragrance is introduced to each bottle by hand, measured to the microgram. The stopper - weighted black onyx for Signature, obsidian for NOIR is fitted individually and sealed with black wax stamped with the KHEM falcon sigil. No two bottles are identical.",
+      "body_ar": "العطر بيضع جوه كل زجاجة باليد، وبمقاييس دقيقة جداً لحد الميكروجرام. السدادة – أونيكس (عقيق أسود) ثقيل لعطور \"سيجنتشر\"، وأوبسيديان لعطور \"نور\" – بتتصنع وتتركب لكل زجاجة لوحدها، وتتختم بشمع أسود مدموغ بشعار صقر \"كِيم\". لا يوجد زجاجتين شبه بعض أبداً",
       "image": {
-        "url": "https://images.unsplash.com/photo-1709662217788-6a8a1b31562a?w=900&h=700&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/craftsmanship-filling.jpg",
         "alt": "A bottle being filled by hand and fitted with its onyx stopper",
-        "alt_ar": null
+        "alt_ar": "زجاجة يتم ملؤها يدويًا ومزودة بسدادة من العقيق"
       }
     },
     {
       "id": "packaging-and-presentation",
       "number": "05",
       "title": "Packaging & Presentation",
-      "title_ar": null,
+      "title_ar": "التَّغْلِيفُ وَالعَرْضُ",
       "subtitle": "The Unboxing as an Event.",
-      "subtitle_ar": null,
-      "body": "KHEM packaging is designed to be kept. The outer box is lacquered matte black, embossed with hieroglyphic-inspired geometry in cold-pressed gold foil. Inside: hand-marbled tissue in ivory and champagne, a printed vellum story card, and a wax seal bearing the KHEM falcon.",
-      "body_ar": null,
+      "subtitle_ar": "فَتْحُ العُلْبَةِ.. حَدَثٌ بِحَدِّ ذَاتِهِ",
+      "body": "KHEM packaging is designed to be kept. The outer box is lacquered matte black, embossed with hieroglyphic-inspired geometry in cold-pressed gold foil. Inside: hand-marbled tissue in ivory, a printed vellum story card, and a wax seal bearing the KHEM falcon.",
+      "body_ar": "تغليف عطور \"كِيم\" مصمم ليبقى محفوظاً ولا يُستغنى عنه. العلبة الخارجية مطليّة باللون الأسود المطفي، ومطبوع عليها بهندسة مستوحاة من الهيروغليفية برقاقة الذهب البارد. وفي الداخل: ورق تيشو منقوش يدوياً بلون العاج، وبطاقة قصة مطبوعة على ورق شفاف، وخاتم من الشمع يحمل شعار صقر كِيم",
       "image": {
-        "url": "https://images.unsplash.com/photo-1674620213535-9b2a2553ef40?w=900&h=700&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/craftsmanship-packaging.jpg",
         "alt": "A lacquered black presentation box lined with hand-marbled tissue",
-        "alt_ar": null
+        "alt_ar": "علبة عرض سوداء مطلية ومبطنة بقماش رخامي يدوياً"
       }
     },
     {
       "id": "quality-control",
       "number": "06",
       "title": "Quality Control",
-      "title_ar": null,
+      "title_ar": "رقابة الجودة",
       "subtitle": "Passed by a Human Nose. Every Time.",
-      "subtitle_ar": null,
+      "subtitle_ar": "مُختبرة بأنف بشرية.. في كل مرة",
       "body": "Before any KHEM bottle leaves the atelier, it is evaluated by our master perfumer. Not by machine. Not by algorithm. The scent is assessed cold, warm, and aged. Only bottles that meet every criterion of the original formula are released. Imperfect bottles are destroyed.",
-      "body_ar": null,
+      "body_ar": "قبل أن تغادر أي زجاجة لعطر \"كِيم\" من المعمل، يجري تقييمها من قبل خبير العطور الرئيسي لدينَا. ليس بآلة، ولا بخوارزمية. تقاس الرائحة حالة البرد، والدفء، وبعد أن تعتق. وحدها الزجاجات التي تحقق كل معايير التركيبة الأصلية هي التي تنزل إلى السوق. وأي زجاجة غير مثالية.. يقضى عليها وتتلف.",
       "image": {
-        "url": "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?w=900&h=700&fit=crop&auto=format",
+        "url": "https://res.cloudinary.com/co1xzkhf/image/upload/craftsmanship-quality.jpg",
         "alt": "A finished bottle assessed on a blotter before release",
-        "alt_ar": null
+        "alt_ar": "يتم تقييم الزجاجة النهائية على ورق النشاف قبل إطلاقها"
       }
     }
   ],
@@ -730,38 +1171,38 @@
       "value": "300+",
       "value_ar": null,
       "label": "Formulation Trials Per Fragrance",
-      "label_ar": null
+      "label_ar": "تجارب التركيبة لكل عطر"
     },
     {
       "id": "continents-sourced",
       "value": "4",
       "value_ar": null,
       "label": "Continents Sourced",
-      "label_ar": null
+      "label_ar": "الزجاجات التي تُستورد منها المكونات"
     },
     {
       "id": "creation-months",
       "value": "16",
       "value_ar": null,
       "label": "Months Average Creation Time",
-      "label_ar": null
+      "label_ar": "متوسط وقت الابتكار"
     },
     {
       "id": "hand-assembled",
       "value": "100%",
       "value_ar": null,
       "label": "Hand-Assembled Bottles",
-      "label_ar": null
+      "label_ar": "الزجاجات المجمعة يدوياً"
     }
   ],
   "craftQuote": {
     "id": "mohamed-hassaan",
-    "quote": "A fragrance is not made. It is discovered , through patience, silence, and an absolute refusal to compromise.",
-    "quote_ar": null,
+    "quote": "A fragrance is not made. It is discovered through patience, silence, and an absolute refusal to compromise.",
+    "quote_ar": "العطر لا يُصنع، بل يُكتشف. وذلك بالصبر، والهدوء، والرفض القاطع لأي تنازل",
     "author": "Mohamed Hassaan",
-    "author_ar": null,
+    "author_ar": "محمد حسان",
     "authorTitle": "Head Perfumer & Co-Founder, KHEM",
-    "authorTitle_ar": null,
+    "authorTitle_ar": "رئيس صانعي العطور ومؤسس كِيم",
     "isPublished": true
   }
 }

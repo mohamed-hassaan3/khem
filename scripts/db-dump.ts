@@ -80,6 +80,8 @@ import type {
   ProductImageSeedRow,
   ProductSeedRow,
   StockistSeedRow,
+  ScentProfileSeedRow,
+  ScentProfileProductSeedRow,
   TestimonialSeedRow,
   TimelineEventSeedRow,
 } from "./seed-types";
@@ -377,6 +379,9 @@ async function readContent(client: Client): Promise<ContentSeed> {
     '"sortOrder", name',
   );
 
+  const scentProfiles = await rows<ScentProfileSeedRow>(client, "ScentProfile", `slug, name, name_ar, description, description_ar, "bannerUrl", "bannerAlt", "bannerAlt_ar"`, '"sortOrder", slug');
+  const scentProfileProducts = await rows<ScentProfileProductSeedRow>(client, "ScentProfileProduct", `"profileSlug" as "profileSlug", "productSlug" as "productSlug", "sortOrder"`, '"profileSlug", "sortOrder", "productSlug"');
+
   const ingredientRows = await rows<
     Omit<IngredientSeedRow, "usedIn" | "image"> & {
       imageUrl: string;
@@ -387,7 +392,7 @@ async function readContent(client: Client): Promise<ContentSeed> {
     client,
     "Ingredient",
     `id, name, name_ar, slug, "latinName", origin, origin_ar,
-     families::text[] as families, rarity, rarity_ar, "priceTier",
+     rarity, rarity_ar, "priceTier",
      description, description_ar, facts, facts_ar,
      "imageUrl", "imageAlt", "imageAlt_ar"`,
   );
@@ -486,6 +491,8 @@ async function readContent(client: Client): Promise<ContentSeed> {
       name: row.name,
       label_ar: row.label_ar,
     })),
+    scentProfiles,
+    scentProfileProducts,
     ingredients: ingredientRows.map((row) => ({
       id: row.id,
       name: row.name,
@@ -494,7 +501,6 @@ async function readContent(client: Client): Promise<ContentSeed> {
       latinName: row.latinName,
       origin: row.origin,
       origin_ar: row.origin_ar,
-      families: row.families,
       rarity: row.rarity,
       rarity_ar: row.rarity_ar,
       priceTier: row.priceTier,

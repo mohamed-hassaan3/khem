@@ -17,6 +17,7 @@
  */
 
 import type { ProductPromotion } from "./marketing";
+import type { ProductType } from "@/src/lib/product-types";
 
 /** Mirrors the `Concentration` enum in AGENTS.md §9. */
 export type Concentration =
@@ -173,18 +174,8 @@ export interface MerchPage {
  * The presentation of a scent-profile page — `/collections/oriental` and its
  * four siblings.
  *
- * Mirrors `"ScentProfile"` (`supabase/sql/0020_scent_profile.sql`), which stores
- * how such a page introduces itself and **which olfactive families it spans**,
- * and nothing about what is in it: membership is derived by walking
- * `families → "Ingredient" → "IngredientUsage" → "Product"`, because a product
- * already points at exactly one collection and a profile runs across all of
- * them.
- *
- * `slug` and `families` are plain strings here, for the reason {@link MerchPage}
- * gives at length: the narrow unions live in `src/lib/scent-profiles.ts` and
- * `src/types/content.ts`, and importing the first of those back into this module
- * would close a cycle. `toScentProfile()` narrows the slug at the boundary,
- * which is where the guarantee belongs.
+ * Mirrors `"ScentProfile"`; explicit product membership lives in
+ * `ScentProfileProduct`.
  */
 export interface ScentProfile {
   slug: string;
@@ -193,8 +184,6 @@ export interface ScentProfile {
   /** Landscape. The hero on the profile page. */
   bannerUrl: string;
   bannerAlt: string;
-  /** The olfactive families this profile gathers — see `"IngredientFamily"`. */
-  families: string[];
   sortOrder: number;
 }
 
@@ -351,6 +340,8 @@ export type ProductCardData = Pick<
    */
   | "promotion"
 > & {
+  /** Catalog discriminator needed to keep non-scent objects off profile pages. */
+  productType: ProductType | null;
   /** Resolved display name of the parent collection (a join in SQL terms). */
   collectionName: string;
   /**

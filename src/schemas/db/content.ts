@@ -35,26 +35,6 @@ import type {
   TimelineEvent,
 } from "@/src/types/content";
 
-/**
- * The closed olfactive vocabulary, mirroring `IngredientFamily`.
- *
- * Exported so the dashboard's ingredient form offers exactly these seven and
- * cannot invent an eighth. That matters more than it looks: an `Ingredient`
- * carrying a family outside this enum fails `safeParse` and is **dropped by
- * `parseList`** — the whole material vanishes from `/ingredients`, silently.
- * The `"IngredientFamily"` table's trigger would happily allow it, so this enum
- * is the tighter of the two constraints and the one a form must respect.
- */
-export const ingredientFamilySchema = z.enum([
-  "Woody Aromas",
-  "Floral",
-  "Fresh / Citrus",
-  "Gourmand",
-  "Oriental Aromas",
-  "Aquatic Aromas",
-  "Herbal",
-]);
-
 // ── Testimonial ───────────────────────────────────────────────
 
 export const TESTIMONIAL_COLUMNS =
@@ -119,7 +99,7 @@ export function toAdminTestimonial(row: unknown): AdminTestimonial | null {
  * not a migration.
  */
 export const INGREDIENT_COLUMNS =
-  "id, name, name_ar, slug, latinName, origin, origin_ar, families, " +
+  "id, name, name_ar, slug, latinName, origin, origin_ar, " +
   "rarity, rarity_ar, priceTier, description, description_ar, " +
   "facts, facts_ar, imageUrl, imageAlt, imageAlt_ar, " +
   "usedIn:IngredientUsage(name, productSlug, sortOrder, " +
@@ -183,9 +163,6 @@ const ingredientRowSchema = z.object({
   latinName: z.string(),
   origin: z.string(),
   origin_ar: z.string().nullable().default(null),
-  // Not translated per row: the seven families are a closed vocabulary, and the
-  // `label_ar` on `"IngredientFamily"` is unread — see `toIngredient` below.
-  families: z.array(ingredientFamilySchema),
   rarity: z.string(),
   rarity_ar: z.string().nullable().default(null),
   priceTier: z.number(),
@@ -250,7 +227,7 @@ export function toIngredient(row: unknown, locale: Locale): Ingredient | null {
  * which perfumes a material is in, not what kind of collection each belongs to.
  */
 export const ADMIN_INGREDIENT_COLUMNS =
-  "id, name, name_ar, slug, latinName, origin, origin_ar, families, " +
+  "id, name, name_ar, slug, latinName, origin, origin_ar, " +
   "rarity, rarity_ar, priceTier, description, description_ar, " +
   "facts, facts_ar, imageUrl, imageAlt, imageAlt_ar, sortOrder, " +
   "usedIn:IngredientUsage(id, name, productSlug, sortOrder)";

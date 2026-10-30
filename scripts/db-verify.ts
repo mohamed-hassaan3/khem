@@ -4,7 +4,7 @@
  *     npm run db:verify
  *
  * Exits non-zero on the first failed assertion, so it is safe to put in CI or
- * in a deploy gate. Three families of check:
+ * in a deploy gate. Three kinds of check:
  *
  *   counts     — every table holds what `supabase/seed/*.json` says it should.
  *   integrity  — the joins the UI performs all resolve, and the invariants the
@@ -65,6 +65,9 @@ async function verifyCounts(client: Client): Promise<void> {
   const directory = await readSeed("directory.json");
 
   const products = catalog.products as { images: unknown[] }[];
+  const catalogProductSlugs = new Set(
+    (catalog.products as { slug: string }[]).map((product) => product.slug),
+  );
   const ingredients = content.ingredients as { usedIn: unknown[] }[];
 
   const expected: Record<string, number> = {
@@ -75,6 +78,9 @@ async function verifyCounts(client: Client): Promise<void> {
     IngredientFamily: (content.ingredientFamilies as unknown[]).length,
     Ingredient: ingredients.length,
     IngredientUsage: ingredients.reduce((total, i) => total + i.usedIn.length, 0),
+    ScentProfile: (content.scentProfiles as unknown[]).length,
+    ScentProfileProduct: (content.scentProfileProducts as { productSlug: string }[])
+      .filter((membership) => catalogProductSlugs.has(membership.productSlug)).length,
     Article: (content.articles as unknown[]).length,
     TimelineEvent: (content.timeline as unknown[]).length,
     BrandValue: (content.brandValues as unknown[]).length,
@@ -131,13 +137,19 @@ async function verifyIntegrity(client: Client): Promise<void> {
   );
   check(Number(orphanUsages) === 0, "every ingredient usage resolves", `${orphanUsages} orphans`);
 
-  const unknownFamilies = await scalar<string>(
+  const ineligibleProfileMembers = await scalar<string>(
     client,
     `select count(*)::text as value
-       from public."Ingredient" i, unnest(i.families) as f
-      where not exists (select 1 from public."IngredientFamily" v where v.name = f)`,
+       from public."ScentProfileProduct" sp
+       join public."Product" p on p.slug = sp."productSlug"
+       join public."Collection" c on c.slug = p."collectionSlug"
+      where c.kind in ('DISCOVERY', 'GIFT')
+         or not (
+           p."productType"::text in ('PERFUME', 'BODY_MIST', 'ROOM_SPRAY')
+           or (p."productType" is null and c.kind in ('FRAGRANCE', 'BODY', 'HOME'))
+         )`,
   );
-  check(Number(unknownFamilies) === 0, "ingredient families are in the taxonomy");
+  check(Number(ineligibleProfileMembers) === 0, "all scent-profile members are eligible scent items", `${ineligibleProfileMembers} ineligible rows`);
 
   const featuredIsValid = await scalar<boolean>(
     client,

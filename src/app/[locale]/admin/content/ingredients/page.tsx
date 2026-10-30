@@ -104,7 +104,6 @@ export default async function AdminIngredientsPage({
           headers={[
             "Material",
             "Origin",
-            "Families",
             "Tier",
             "Used in",
             { label: "Edit", hidden: true },
@@ -128,10 +127,6 @@ export default async function AdminIngredientsPage({
               </AdminCell>
 
               <AdminCell muted>{ingredient.origin}</AdminCell>
-
-              <AdminCell muted>
-                {ingredient.families.join(" · ")}
-              </AdminCell>
 
               <AdminCell muted>{"$".repeat(ingredient.priceTier)}</AdminCell>
 

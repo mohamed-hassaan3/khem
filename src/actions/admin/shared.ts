@@ -38,6 +38,8 @@ export type AdminEntity =
   | "menu entry"
   | "merchandising page"
   | "product"
+  | "scent profile"
+  | "scent profile order"
   | "article"
   | "image"
   | "hero"

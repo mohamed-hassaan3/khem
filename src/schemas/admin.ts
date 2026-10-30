@@ -84,6 +84,7 @@ const slugField = z
 const RESERVED_SLUGS: readonly string[] = [
   ...MERCH_PAGE_SLUGS,
   ...SCENT_PROFILE_SLUGS,
+  "scent-families",
 ];
 
 const shelfSlugField = slugField.refine(
@@ -550,6 +551,22 @@ export const updateMerchPageSchema = z.object({
     .max(200, "That alt text is too long."),
 });
 
+export const updateScentProfileSchema = z.object({
+  slug: z.enum(SCENT_PROFILE_SLUGS),
+  name: z.string().trim().min(2).max(120),
+  name_ar: optionalText(120),
+  description: z.string().trim().min(10).max(LONG_TEXT_MAX),
+  description_ar: optionalText(LONG_TEXT_MAX),
+  bannerUrl: imageUrlField,
+  bannerAlt: z.string().trim().min(3).max(200),
+  bannerAlt_ar: optionalText(200),
+});
+
+export const setScentProfileOrderSchema = z.object({
+  profileSlug: z.enum(SCENT_PROFILE_SLUGS),
+  productSlugs: z.array(slugField).max(500),
+});
+
 export type UpdateMerchPageInput = z.input<typeof updateMerchPageSchema>;
 
 // ── Product ───────────────────────────────────────────────────
@@ -622,6 +639,7 @@ const productFields = {
    */
   isBestseller: z.boolean().default(false),
   collectionSlug: slugField,
+  scentProfiles: z.array(z.enum(SCENT_PROFILE_SLUGS)).max(SCENT_PROFILE_SLUGS.length).transform((slugs) => [...new Set(slugs)]).default([]),
   sortOrder: z.coerce.number().int().min(0).max(9_999).default(0),
 };
 

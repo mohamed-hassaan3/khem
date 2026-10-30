@@ -651,6 +651,8 @@ export const ar: Dictionary = {
     closeDetails: "إغلاق تفاصيل {name}",
     foundIn: "يدخل في",
     rareFacts: "حقائق نادرة",
+    showAll: "عرض الكل ({count})",
+    showLess: "عرض أقل",
   },
 
   contactForm: {

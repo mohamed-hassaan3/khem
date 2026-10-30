@@ -14,6 +14,7 @@
 import { z } from "zod";
 
 import { MERCH_PAGE_SLUGS } from "@/src/lib/facets";
+import { PRODUCT_TYPE_VALUES } from "@/src/lib/product-types";
 import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 import type { Locale } from "@/src/lib/i18n/config";
 import { resolveList, resolveOptionalText, resolveText } from "@/src/lib/i18n/resolve";
@@ -235,9 +236,7 @@ export function toMerchPage(row: unknown, locale: Locale): MerchPage | null {
  * `slug` is validated against {@link SCENT_PROFILE_SLUGS} for the reason the
  * merch-page schema above gives: the table carries a check constraint saying the
  * same thing, and a row for a profile that no longer has a route parses to
- * `null` and is ignored. `families` is left as free strings — the closed
- * vocabulary is enforced by a trigger on the table, and a family the storefront
- * has not heard of should narrow the query, not drop the page.
+ * `null` and is ignored.
  */
 const scentProfileRowSchema = z.object({
   slug: z.enum(SCENT_PROFILE_SLUGS),
@@ -248,13 +247,12 @@ const scentProfileRowSchema = z.object({
   bannerUrl: z.string(),
   bannerAlt: z.string(),
   bannerAlt_ar: z.string().nullable().default(null),
-  families: z.array(z.string()).default([]),
   sortOrder: z.number().default(0),
 });
 
 export const SCENT_PROFILE_COLUMNS =
   "slug, name, name_ar, description, description_ar, bannerUrl, bannerAlt, " +
-  "bannerAlt_ar, families, sortOrder";
+  "bannerAlt_ar, sortOrder";
 
 export function toScentProfile(
   row: unknown,
@@ -517,6 +515,7 @@ export const productCardRowSchema = productRowSchema
     tags: true,
   })
   .extend({
+    productType: z.enum(PRODUCT_TYPE_VALUES).nullable(),
     collection: embeddedCollection,
     images: z.array(imageRowSchema).default([]),
   });
@@ -525,7 +524,7 @@ export const PRODUCT_CARD_COLUMNS =
   "id, name, slug, subtitle, subtitle_ar, description, description_ar, " +
   "topNotes, topNotes_ar, heartNotes, heartNotes_ar, baseNotes, baseNotes_ar, " +
   "volumeMl, priceInCents, collectionSlug, inventory:inventoryOnline, concentration, " +
-  "format, format_ar, includes, includes_ar, badge, badge_ar, isBestseller, tags, " +
+  "format, format_ar, includes, includes_ar, badge, badge_ar, isBestseller, tags, productType, " +
   "collection:Collection!inner(name, name_ar, kind, categorySlug), " +
   `images:ProductImage(${IMAGE_COLUMNS})`;
 

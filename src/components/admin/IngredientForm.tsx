@@ -6,11 +6,6 @@
  * Not a `ContentRowsEditor` row, and the three reasons are the whole shape of
  * this screen:
  *
- *  - **`families` is a closed multi-select.** Seven checkboxes, and only seven.
- *    A material carrying a family outside `ingredientFamilySchema` fails the
- *    read parse and is dropped from `/ingredients` entirely — the material
- *    disappears with nothing to say why. A free-text field could produce that;
- *    checkboxes cannot.
  *  - **`facts` and `facts_ar` are lists.** They fall back *as a whole* through
  *    `resolveList()`, so the form says so: a half-translated list would render
  *    half in each script.
@@ -31,7 +26,6 @@ import {
 } from "@/src/actions/admin/content";
 import {
   AdminButton,
-  AdminField,
   AdminInput,
   AdminNotice,
   AdminStringList,
@@ -41,7 +35,6 @@ import { localizePath, type Locale } from "@/src/lib/i18n/config";
 import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
 import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
-import { ingredientFamilyValues } from "@/src/schemas/content";
 import type { AdminIngredient } from "@/src/schemas/db/content";
 
 function slugify(value: string): string {
@@ -71,7 +64,6 @@ export default function IngredientForm({
   const [latinName, setLatinName] = useState(ingredient?.latinName ?? "");
   const [origin, setOrigin] = useState(ingredient?.origin ?? "");
   const [originAr, setOriginAr] = useState(ingredient?.origin_ar ?? "");
-  const [families, setFamilies] = useState<string[]>(ingredient?.families ?? []);
   const [rarity, setRarity] = useState(ingredient?.rarity ?? "");
   const [rarityAr, setRarityAr] = useState(ingredient?.rarity_ar ?? "");
   const [priceTier, setPriceTier] = useState(String(ingredient?.priceTier ?? 3));
@@ -98,14 +90,6 @@ export default function IngredientForm({
     factsAr.filter((fact) => fact.trim().length > 0).length !==
       facts.filter((fact) => fact.trim().length > 0).length;
 
-  function toggleFamily(family: string) {
-    setFamilies((current) =>
-      current.includes(family)
-        ? current.filter((value) => value !== family)
-        : [...current, family],
-    );
-  }
-
   /*
    * Hoisted out of `submit()` so it can be compared as well as posted: this
    * one object is both what the action receives and what `useUnsavedGuard`
@@ -120,7 +104,6 @@ export default function IngredientForm({
     latinName,
     origin,
     origin_ar: originAr,
-    families,
     rarity,
     rarity_ar: rarityAr,
     priceTier,
@@ -311,35 +294,6 @@ export default function IngredientForm({
             error={fieldErrors.sortOrder}
           />
         </div>
-
-        <AdminField
-          label="Olfactive families"
-          error={fieldErrors.families}
-          hint="At least one. These seven are the only families the site can filter or render."
-          required
-        >
-          <div className="flex flex-wrap gap-2">
-            {ingredientFamilyValues.map((family) => {
-              const active = families.includes(family);
-
-              return (
-                <button
-                  key={family}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => toggleFamily(family)}
-                  className={`border px-4 py-2 font-heading text-[9px] uppercase tracking-[0.2em] transition-colors duration-300 ${
-                    active
-                      ? "border-gold/50 bg-gold/10 text-ground-accent"
-                      : "border-ground-border text-ground-muted hover:border-gold/30 hover:text-ground"
-                  }`}
-                >
-                  {family}
-                </button>
-              );
-            })}
-          </div>
-        </AdminField>
 
         <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           <AdminTextarea

@@ -48,6 +48,7 @@ import {
   typeHasContents,
   typeIsScented,
   typeTakesVolume,
+  isScentItem,
   type ProductType,
 } from "@/src/lib/product-types";
 import { useUnsavedGuard } from "@/src/hooks/useUnsavedGuard";
@@ -56,6 +57,7 @@ import { useDictionary } from "@/src/providers/i18n-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import { saveProductImagesSchema } from "@/src/schemas/admin";
 import type { AdminCollection, AdminProduct } from "@/src/schemas/db/admin";
+import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 
 /**
  * What the object is, in the order an editor is most likely to want.
@@ -109,11 +111,13 @@ export default function ProductForm({
   product,
   collections,
   locale,
+  scentProfileSlugs = [],
 }: {
   /** `null` when creating. */
   product: AdminProduct | null;
   collections: readonly AdminCollection[];
   locale: Locale;
+  scentProfileSlugs?: readonly string[];
 }) {
   const router = useRouter();
   const dictionary = useDictionary();
@@ -130,6 +134,7 @@ export default function ProductForm({
   const [collectionSlug, setCollectionSlug] = useState(
     product?.collectionSlug ?? collections[0]?.slug ?? "",
   );
+  const [selectedScentProfiles, setSelectedScentProfiles] = useState<string[]>([...scentProfileSlugs]);
   const [productType, setProductTypeState] = useState<string>(
     product?.productType ?? "",
   );
@@ -188,6 +193,8 @@ export default function ProductForm({
    * worth asking for in the first place.
    */
   const asType = (productType === "" ? null : productType) as ProductType | null;
+  const selectedCollection = collections.find((collection) => collection.slug === collectionSlug);
+  const scentEligible = isScentItem({ productType: asType, collectionKind: selectedCollection?.kind ?? null });
   const takesVolume = typeTakesVolume(asType);
   const isScented = typeIsScented(asType);
   const hasContents = typeHasContents(asType);
@@ -252,6 +259,7 @@ export default function ProductForm({
     }
 
     if (!typeHasContents(nextType)) setIncludes([]);
+    if (!isScentItem({ productType: nextType, collectionKind: selectedCollection?.kind ?? null })) setSelectedScentProfiles([]);
   }
 
   function toggleTag(tag: string) {
@@ -289,6 +297,7 @@ export default function ProductForm({
     sku,
     isBestseller,
     collectionSlug,
+    scentProfiles: scentEligible ? selectedScentProfiles : [],
     sortOrder,
     initialInventoryOnline,
     initialInventoryOffline,
@@ -478,6 +487,8 @@ export default function ProductForm({
           hint="Decides where this product is sold and whether it gets a detail page."
           onChange={(value) => {
             setCollectionSlug(value);
+            const nextCollection = collections.find((collection) => collection.slug === value);
+            if (!isScentItem({ productType: asType, collectionKind: nextCollection?.kind ?? null })) setSelectedScentProfiles([]);
             rebuildSkuIfUntouched({ collectionSlug: value });
           }}
         />
@@ -559,6 +570,28 @@ export default function ProductForm({
           hint="What the object is. A Perfume, Body Mist or Room Spray states a volume; a Gift, Box, Antique or Decorative item does not. Body Mist and Room Spray also decide which range page lists it."
           onChange={setProductType}
         />
+
+        {scentEligible ? (
+          <fieldset className="space-y-3 border-t border-ground-border pt-5">
+            <legend className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent">Scent profiles</legend>
+            <div className="flex flex-wrap gap-2">
+              {SCENT_PROFILE_SLUGS.map((profile) => {
+                const active = selectedScentProfiles.includes(profile);
+                return (
+                  <button
+                    key={profile}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setSelectedScentProfiles((current) => active ? current.filter((slug) => slug !== profile) : [...current, profile])}
+                    className={`border px-3 py-2 font-heading text-[9px] uppercase tracking-[0.18em] transition-colors ${active ? "border-gold/50 bg-gold/10 text-ground-accent" : "border-ground-border text-ground-muted hover:border-gold/30 hover:text-ground"}`}
+                  >
+                    {profile}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+        ) : null}
 
         <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
           {isScented ? (

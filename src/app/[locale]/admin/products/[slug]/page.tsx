@@ -9,7 +9,7 @@ import StatusToggle from "@/src/components/admin/StatusToggle";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { hasDetailPage, productHref } from "@/src/lib/routes";
-import { getAdminProduct, listAdminCollections } from "@/src/services/admin/catalog";
+import { getAdminProduct, getAdminProductScentProfileSlugs, listAdminCollections } from "@/src/services/admin/catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -23,10 +23,11 @@ export default async function EditProductPage({
   const [{ locale, slug }, query] = await Promise.all([params, searchParams]);
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  const [product, collections, dictionary] = await Promise.all([
+  const [product, collections, dictionary, scentProfileSlugs] = await Promise.all([
     getAdminProduct(slug),
     listAdminCollections(),
     getDictionary(activeLocale),
+    getAdminProductScentProfileSlugs(slug),
   ]);
 
   if (!product) notFound();
@@ -68,7 +69,7 @@ export default async function EditProductPage({
         </div>
       ) : null}
 
-      <ProductForm product={product} collections={collections} locale={activeLocale} />
+      <ProductForm product={product} collections={collections} locale={activeLocale} scentProfileSlugs={scentProfileSlugs} />
 
       <section className="mt-10 md:mt-16 max-w-3xl border-t border-ground-border pt-10">
         <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.25em] text-ground-accent">

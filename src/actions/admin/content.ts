@@ -28,6 +28,8 @@
  */
 
 import { requireAdmin } from "@/src/lib/admin/auth";
+import { partitionScentProductSlugs } from "@/src/lib/admin/ingredient-product-groups";
+import { PRODUCT_TYPE_VALUES } from "@/src/lib/product-types";
 import {
   revalidateAbout,
   revalidateBrandValues,
@@ -40,6 +42,7 @@ import {
 } from "@/src/lib/admin/revalidate";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import type { AdminActionResult } from "@/src/schemas/admin";
+import { z } from "zod";
 import {
   createBrandValueSchema,
   createCraftPillarSchema,
@@ -78,6 +81,25 @@ import {
   postgresFailure,
   type PostgresErrorLike,
 } from "./shared";
+
+const collectionKindValues = [
+  "FRAGRANCE",
+  "BODY",
+  "HOME",
+  "DISCOVERY",
+  "GIFT",
+] as const;
+const collectionKindRow = z.object({ kind: z.enum(collectionKindValues) });
+const submittedProductFacts = z.array(
+  z.object({
+    slug: z.string(),
+    productType: z.enum(PRODUCT_TYPE_VALUES).nullable(),
+    collection: z.union([
+      collectionKindRow,
+      z.array(collectionKindRow).min(1),
+    ]),
+  }),
+);
 
 /**
  * The three statements every content row shares.
@@ -546,30 +568,10 @@ export async function deleteCraftQuote(input: unknown): Promise<AdminActionResul
 /**
  * Materials are not `insertRow`/`updateRow` like the rows above.
  *
- * Two things make them their own case. The write can fail inside a **trigger**
- * — `assert_ingredient_families()` raises for a family that is not in
- * `"IngredientFamily"` — and that message is written for a developer, not for
- * the desk. And the surfaces to revalidate depend on the row: a material is
+ * The surfaces to revalidate depend on the row: a material is
  * printed on the detail page of every product it is used in.
  */
 function ingredientFailure(error: PostgresErrorLike): AdminActionResult {
-  const message = error.message ?? "";
-
-  // Raised by `assert_ingredient_families()` in `0002_content.sql`. The schema
-  // restricts the form to the seven known families, so reaching this means the
-  // enum and the table have drifted apart — worth saying plainly rather than
-  // surfacing "unknown olfactive family: X" from a trigger.
-  if (message.includes("unknown olfactive family")) {
-    return {
-      ok: false,
-      message: "Some fields need attention.",
-      fieldErrors: {
-        families:
-          "That olfactive family is not in the database's vocabulary. The seven offered here are the only ones the site can render.",
-      },
-    };
-  }
-
   if (error.code === "23505") {
     return {
       ok: false,
@@ -721,19 +723,53 @@ export async function setIngredientProducts(
 
   const parsed = setIngredientProductsSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, message: "That is not a valid set of perfumes." };
+    return { ok: false, message: "That is not a valid set of products." };
   }
 
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
 
   const { ingredientId, productSlugs } = parsed.data;
+  let eligibleSlugs = productSlugs;
+  let droppedSlugs: string[] = [];
+
+  if (productSlugs.length > 0) {
+    const { data, error } = await supabase
+      .from("Product")
+      .select("slug, productType, collection:Collection!inner(kind)")
+      .in("slug", productSlugs);
+
+    if (error) {
+      console.error(`[admin] product eligibility lookup failed (${actor.email}): ${error.message}`);
+      return postgresFailure(error as PostgresErrorLike, "product");
+    }
+
+    const parsedFacts = submittedProductFacts.safeParse(data);
+    if (!parsedFacts.success || parsedFacts.data.length !== productSlugs.length) {
+      return {
+        ok: false,
+        message: "One of those products no longer exists. Reload and try again.",
+      };
+    }
+
+    const facts = parsedFacts.data.map((fact) => ({
+      slug: fact.slug,
+      productType: fact.productType,
+      collectionKind: Array.isArray(fact.collection)
+        ? fact.collection[0].kind
+        : fact.collection.kind,
+    }));
+    const partitioned = partitionScentProductSlugs(productSlugs, facts);
+    eligibleSlugs = partitioned.eligibleSlugs;
+    droppedSlugs = partitioned.droppedSlugs;
+  }
+
   const existing = await productSlugsFor(ingredientId);
 
-  const wanted = new Set(productSlugs);
+  const wanted = new Set(eligibleSlugs);
   const held = new Set(existing);
 
-  const toAdd = productSlugs.filter((slug) => !held.has(slug));
+  const toAdd = eligibleSlugs.filter((slug) => !held.has(slug));
   const toRemove = existing.filter((slug) => !wanted.has(slug));
 
   if (toRemove.length > 0) {
@@ -773,7 +809,7 @@ export async function setIngredientProducts(
     if (rows.length !== toAdd.length) {
       return {
         ok: false,
-        message: "One of those perfumes no longer exists. Reload and try again.",
+        message: "One of those products no longer exists. Reload and try again.",
       };
     }
 
@@ -786,18 +822,19 @@ export async function setIngredientProducts(
   }
 
   // Both the pages it left and the pages it joined are now stale.
-  revalidateIngredients([...existing, ...productSlugs]);
+  revalidateIngredients([...existing, ...eligibleSlugs]);
   console.info(
-    `[admin] ${actor.email} set ${ingredientId} on ${productSlugs.length} product(s)`,
+    `[admin] ${actor.email} set ${ingredientId} on ${eligibleSlugs.length} product(s)`,
   );
 
   return {
     ok: true,
     slug: ingredientId,
-    message:
-      productSlugs.length === 0
-        ? "This material is no longer printed on any perfume."
-        : `Printed on ${productSlugs.length} perfume${productSlugs.length === 1 ? "" : "s"}.`,
+    message: droppedSlugs.length > 0
+      ? `Ignored ${droppedSlugs.length} ineligible product${droppedSlugs.length === 1 ? "" : "s"}. ${eligibleSlugs.length === 0 ? "No products are linked." : `Saved ${eligibleSlugs.length} eligible product${eligibleSlugs.length === 1 ? "" : "s"}.`}`
+      : eligibleSlugs.length === 0
+        ? "This material is no longer printed on any product."
+        : `Printed on ${eligibleSlugs.length} product${eligibleSlugs.length === 1 ? "" : "s"}.`,
   };
 }
 

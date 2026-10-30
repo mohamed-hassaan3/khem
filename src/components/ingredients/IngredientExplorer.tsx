@@ -10,6 +10,7 @@ import { LOCALE_DIRECTION } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { usageTypeLabel } from "@/src/lib/product-types";
+import { orderedFoundInProducts, visibleFoundInProducts } from "@/src/lib/ingredient-found-in";
 import { productHref } from "@/src/lib/routes";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type { Ingredient } from "@/src/types/content";
@@ -23,9 +24,8 @@ import type { Ingredient } from "@/src/types/content";
  *
  * The olfactive-family filter bar that used to sit above the grid is gone: the
  * catalog is short enough to read whole, and a bar that mostly showed "All" was
- * a control asking to be operated rather than a way in. The families themselves
- * are untouched — they still badge every card, and they still gather the five
- * scent profile pages (`src/lib/scent-profiles.ts`).
+ * a control asking to be operated rather than a way in. Profile membership is
+ * assigned directly to products in the admin.
  *
  * ## Why the detail lives inside the card
  *
@@ -89,6 +89,7 @@ export default function IngredientExplorer({
   const prefersReducedMotion = useReducedMotion();
 
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [expandedFoundIn, setExpandedFoundIn] = useState<string | null>(null);
   /** Resolved after mount; `1` server-side, which is the narrowest layout. */
   const [columns, setColumns] = useState(1);
 
@@ -274,16 +275,6 @@ export default function IngredientExplorer({
                           origin: ingredient.origin,
                         })}
                       </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {ingredient.families.map((family) => (
-                          <span
-                            key={family}
-                            className="border border-ground-accent/15 px-2 py-0.5 text-[9px] tracking-widest text-gold/45"
-                          >
-                            {family}
-                          </span>
-                        ))}
-                      </div>
                     </div>
                   )}
                 </button>
@@ -350,8 +341,11 @@ export default function IngredientExplorer({
                             <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/50">
                               {dict.ingredientsExplorer.foundIn}
                             </p>
-                            <ul className="flex flex-col gap-2">
-                              {ingredient.usedIn.map((product) => (
+                            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                              {visibleFoundInProducts(
+                                orderedFoundInProducts(ingredient.usedIn),
+                                expandedFoundIn === ingredient.slug,
+                              ).map((product) => (
                                 <li key={product.slug}>
                                   {/* `productHref()`, never a hardcoded
                                       `/perfume/…`: a material used in a
@@ -382,6 +376,18 @@ export default function IngredientExplorer({
                                 </li>
                               ))}
                             </ul>
+                            {orderedFoundInProducts(ingredient.usedIn).length > 6 ? (
+                              <button
+                                type="button"
+                                aria-expanded={expandedFoundIn === ingredient.slug}
+                                onClick={() => setExpandedFoundIn((current) => current === ingredient.slug ? null : ingredient.slug)}
+                                className="mt-4 font-heading text-[9px] uppercase tracking-[0.18em] text-ground-accent transition-colors hover:text-ground"
+                              >
+                                {expandedFoundIn === ingredient.slug
+                                  ? dict.ingredientsExplorer.showLess
+                                  : interpolate(dict.ingredientsExplorer.showAll, { count: orderedFoundInProducts(ingredient.usedIn).length })}
+                              </button>
+                            ) : null}
                           </div>
 
                           <div>

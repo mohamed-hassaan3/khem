@@ -10,11 +10,7 @@ import type { ScentProfileSlug } from "@/src/lib/scent-profiles";
  * customer asks in.* It answers the question the note pyramid above it does not,
  * because a pyramid names nine materials and a shopper wants one word.
  *
- * Derived, never authored per product: the page reads it off the materials the
- * perfume is actually built on with `productScentProfiles()` — the same
- * `getIngredientsForProduct()` payload `<ProductIngredients>` renders — so a
- * recatalogued ingredient moves this line and the profile pages together. See
- * `src/lib/scent-profiles.ts` for why the answer is capped at two.
+ * Assigned directly to the product through `ScentProfileProduct`.
  *
  * The derivation is the page's rather than this component's so the call site can
  * skip the `<Reveal>` wrapper entirely on a fragrance with no catalogued
@@ -29,7 +25,7 @@ import type { ScentProfileSlug } from "@/src/lib/scent-profiles";
  */
 
 export interface ProductScentProfileProps {
-  /** One, or two at the most — see `productScentProfiles()`. */
+  /** Product profile assignments in canonical display order. */
   profiles: ScentProfileSlug[];
   locale: Locale;
 }

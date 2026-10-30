@@ -23,7 +23,6 @@
 
 import { z } from "zod";
 
-import { ingredientFamilySchema } from "./db/content";
 
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -261,17 +260,6 @@ export const {
 
 // ── Ingredient — /ingredients, the home rail, and every PDP ───
 
-/**
- * The seven olfactive families, offered as checkboxes.
- *
- * Sourced from the same enum the *read* path validates against, not from the
- * `"IngredientFamily"` table. The two are meant to agree, and if they ever
- * drift the enum is the one that matters: a material carrying a family outside
- * it fails `safeParse` and is dropped from `/ingredients` entirely — the
- * material disappears, with nothing in the UI to say why.
- */
-export const ingredientFamilyValues = ingredientFamilySchema.options;
-
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
@@ -308,9 +296,6 @@ const ingredientFields = z.object({
    * At least one family, and only from the closed seven. An empty array would
    * make the material unreachable through every filter on `/ingredients`.
    */
-  families: z
-    .array(ingredientFamilySchema)
-    .min(1, "Choose at least one olfactive family."),
 
   rarity: requiredText(2, 60, "How scarce is it?", "That is too long."),
   rarity_ar: optionalText(60, "That is too long."),

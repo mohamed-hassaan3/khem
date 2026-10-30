@@ -56,26 +56,6 @@ export interface IngredientUsage {
   productType: ProductType | null;
 }
 
-/**
- * The closed olfactive vocabulary an ingredient is catalogued against.
- *
- * A union rather than free-form strings: the badges on each card and the scent
- * profile pages (`src/lib/scent-profiles.ts`) read from the same seven labels,
- * so a typo in a record must fail typecheck instead of silently producing an
- * eighth family no profile can ever gather.
- *
- * The display order lives in the `"IngredientFamily"` table, whose rows a
- * trigger validates every `Ingredient.families` value against.
- */
-export type IngredientFamily =
-  | "Woody Aromas"
-  | "Floral"
-  | "Fresh / Citrus"
-  | "Gourmand"
-  | "Oriental Aromas"
-  | "Aquatic Aromas"
-  | "Herbal";
-
 export interface Ingredient {
   id: string;
   name: string;
@@ -84,16 +64,6 @@ export interface Ingredient {
   latinName: string;
   /** Sourcing region, e.g. "Laos & Cambodia". */
   origin: string;
-  /**
-   * Olfactive families, e.g. `["Woody Aromas", "Oriental Aromas"]`. An array
-   * rather than a " · "-joined display string so filtering is a predicate, not
-   * a substring match — this maps directly onto a Prisma `String[]` like
-   * `Product.topNotes`.
-   *
-   * Finer descriptors (resinous, powdery, leathery…) deliberately live in
-   * `description`, not here: badges stay inside the seven filterable families.
-   */
-  families: IngredientFamily[];
   /** Scarcity label, e.g. "Extremely Rare". */
   rarity: string;
   /** Relative cost, 1 (least) to 5 (most). Rendered as "$"×n. */

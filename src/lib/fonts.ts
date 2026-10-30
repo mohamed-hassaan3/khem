@@ -1,83 +1,57 @@
-import { Amiri, Cinzel, IBM_Plex_Sans_Arabic, Inter } from "next/font/google";
+import localFont from "next/font/local";
 
 import { DEFAULT_LOCALE, type Locale } from "./i18n/config";
 
 /**
- * `preload: false` on every face is deliberate.
- *
- * `next/font` emits `<link rel="preload">` for each font reachable from a
- * route's module graph. This module declares all four faces and the `[locale]`
- * layout serves both locales, so preloading made *every* page fetch all eight
- * woff2 files — English visitors downloading Amiri and IBM Plex Sans Arabic,
- * Arabic visitors downloading Cinzel and Inter. Splitting the module does not
- * help: the layout's imports are static, so both pairs are always in scope.
- *
- * Without preload hints the browser fetches only the faces the rendered text
- * actually uses. The cost is that those faces are discovered after CSS parse
- * rather than from the document head; `display: "swap"` keeps text visible
- * throughout, so this trades a small FOUT window for halving the font payload.
+ * These fonts are checked in under `src/app/fonts` so a production build does
+ * not depend on the shape or availability of a Google Fonts response.
+ * `preload: false` remains deliberate: both locale trees are statically
+ * reachable from the shared layout, and preloading here would fetch both
+ * language families on every page.
  */
 
 /* ── Latin (en) ─────────────────────────────────────── */
 
-/*
- * Three weights, not four.
- *
- * 700 was reachable from exactly two places, both oversized watermark numerals
- * set at 10-15% opacity where it is visually identical to 600. Each weight is
- * its own woff2 file on a font that is not preloaded, so dropping it removes a
- * request from the critical path of every page for no visible change.
- */
-export const headingFont = Cinzel({
-  subsets: ["latin"],
+export const headingFont = localFont({
+  src: "../app/fonts/cinzel-variable.woff2",
+  weight: "400 600",
   variable: "--font-heading",
-  weight: ["400", "500", "600"],
   display: "swap",
   preload: false,
 });
 
-export const bodyFont = Inter({
-  subsets: ["latin"],
+export const bodyFont = localFont({
+  src: "../app/fonts/inter-variable.woff2",
+  weight: "400 600",
   variable: "--font-body",
-  weight: ["400", "500", "600"],
   display: "swap",
   preload: false,
 });
 
 /* ── Arabic (ar) ────────────────────────────────────── */
 
-/**
- * Cinzel and Inter carry no Arabic glyphs, so the Arabic tree needs its own
- * pair. Amiri is a classical Naskh with the same editorial, inscriptional
- * register as Cinzel; IBM Plex Sans Arabic is the neutral UI companion Inter
- * plays in English.
- *
- * Both are declared under the *same* CSS variable names as their Latin
- * counterparts, so `globals.css` needs no locale-aware font rules — the layout
- * simply mounts one pair or the other.
- */
-export const arHeadingFont = Amiri({
-  subsets: ["arabic"],
+export const arHeadingFont = localFont({
+  src: [
+    { path: "../app/fonts/amiri-regular.woff2", weight: "400" },
+    { path: "../app/fonts/amiri-bold.woff2", weight: "700" },
+  ],
   variable: "--font-heading",
-  weight: ["400", "700"],
   display: "swap",
   preload: false,
 });
 
-export const arBodyFont = IBM_Plex_Sans_Arabic({
-  subsets: ["arabic"],
+export const arBodyFont = localFont({
+  src: [
+    { path: "../app/fonts/ibm-plex-sans-arabic-regular.woff2", weight: "400" },
+    { path: "../app/fonts/ibm-plex-sans-arabic-medium.woff2", weight: "500" },
+    { path: "../app/fonts/ibm-plex-sans-arabic-semibold.woff2", weight: "600" },
+  ],
   variable: "--font-body",
-  weight: ["400", "500", "600"],
   display: "swap",
   preload: false,
 });
 
-/**
- * The font variable classes for a locale.
- *
- * Only the active locale's fonts are mounted, so an English visitor never
- * downloads Amiri and an Arabic visitor never downloads Cinzel.
- */
+/** The font variable classes for a locale. */
 export function getFontVariables(locale: Locale): string {
   return locale === DEFAULT_LOCALE
     ? `${headingFont.variable} ${bodyFont.variable}`

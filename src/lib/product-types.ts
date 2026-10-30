@@ -58,6 +58,31 @@ export const PRODUCT_TYPE_VALUES = [
 
 export type ProductType = (typeof PRODUCT_TYPE_VALUES)[number];
 
+/** Whether a catalog object is allowed in scent usage and scent-profile surfaces. */
+export function isScentItem(input: {
+  productType: ProductType | null;
+  collectionKind: CollectionKind | null;
+}): boolean {
+  if (input.collectionKind === "DISCOVERY" || input.collectionKind === "GIFT") {
+    return false;
+  }
+
+  if (
+    input.productType === "PERFUME" ||
+    input.productType === "BODY_MIST" ||
+    input.productType === "ROOM_SPRAY"
+  ) {
+    return true;
+  }
+
+  return (
+    input.productType === null &&
+    (input.collectionKind === "FRAGRANCE" ||
+      input.collectionKind === "BODY" ||
+      input.collectionKind === "HOME")
+  );
+}
+
 /** The two that name a range, and so answer to a collection kind. */
 export type RangeProductType = Extract<ProductType, "BODY_MIST" | "ROOM_SPRAY">;
 
@@ -77,6 +102,15 @@ export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
   BODY_MIST: "Body Mist",
   ROOM_SPRAY: "Room Spray",
 };
+
+/** Product type label for the admin ingredient picker, with a safe range fallback. */
+export function adminTypeLabel(
+  productType: ProductType | null,
+  collectionSlug: string,
+): string {
+  if (productType !== null) return PRODUCT_TYPE_LABELS[productType];
+  return collectionSlug.trim() || "Unknown collection";
+}
 
 /**
  * What the **storefront** calls a product of a given type, and — when no type

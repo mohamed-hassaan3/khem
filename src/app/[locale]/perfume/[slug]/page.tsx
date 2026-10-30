@@ -17,12 +17,13 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { jsonLdHtml } from "@/src/lib/json-ld";
 import { productGraph } from "@/src/lib/structured-data";
-import { productScentProfiles } from "@/src/lib/scent-profiles";
+import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 import { getIngredientsForProduct } from "@/src/services/content";
 import {
   getCollectionBySlug,
   getProductBySlug,
   getProductSlugs,
+  getProductScentProfileSlugs,
   getRelatedProductCards,
 } from "@/src/services/products";
 
@@ -103,20 +104,19 @@ export default async function PerfumePage({
   const product = await getProductBySlug(activeLocale, slug);
   if (!product) notFound();
 
-  const [dict, collection, related, ingredients] = await Promise.all([
+  const [dict, collection, related, ingredients, productProfileSlugs] = await Promise.all([
     getDictionary(activeLocale),
     getCollectionBySlug(activeLocale, product.collectionSlug),
     getRelatedProductCards(activeLocale, product.slug),
     getIngredientsForProduct(product.slug, activeLocale),
+    getProductScentProfileSlugs(product.slug),
   ]);
 
   const gallery = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder);
 
   // One word for the whole bottle, or two — read off the materials it is built
   // on. Empty for a fragrance with nothing catalogued, which drops the section.
-  const scentProfiles = productScentProfiles(
-    ingredients.map((ingredient) => ingredient.families),
-  );
+  const scentProfiles = SCENT_PROFILE_SLUGS.filter((profile) => productProfileSlugs.includes(profile));
 
   const tiers = [
     { label: dict.product.topNotes, notes: product.topNotes },
