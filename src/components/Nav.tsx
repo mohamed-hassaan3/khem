@@ -586,13 +586,15 @@ export default function Nav({
            * the current URL, so `"logo/…"` became `/logo/…` on `/ar` (which
            * sits at the root and worked by accident) but `/ar/logo/…` on every
            * deeper prefixed route — a 404 the catch-all answered with a full
-           * page render, on a `priority` image preloaded on every page.
+           * page render, on a `priority` image preloaded on every page. It is `loading="eager"`
+           * rather than `priority` for the same reason in reverse: a preload
+           * hint on every route competes with the hero for the LCP bandwidth.
            * Importing the asset makes a relative path unrepresentable.
            */}
           <Image
             src={nameLogo}
             alt="KHEM Perfumes"
-            priority
+            loading="eager"
             sizes="(min-width: 1024px) 132px, (min-width: 640px) 113px, 94px"
             className="h-10 w-auto sm:h-12 lg:h-14"
           />

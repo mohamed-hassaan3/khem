@@ -8,11 +8,10 @@ import { Analytics } from '@vercel/analytics/next';
 
 import Footer from "@/src/components/Footer";
 import Nav from "@/src/components/Nav";
-import CookieConsent from "@/src/components/consent/CookieConsent";
 import CinematicIntro from "@/src/components/intro/CinematicIntro";
 import CartDrawer from "@/src/components/ecommerce/CartDrawer";
 import AnnouncementBar from "@/src/components/marketing/AnnouncementBar";
-import OfferPopup from "@/src/components/marketing/OfferPopup";
+import DeferredOverlays from "@/src/components/marketing/DeferredOverlays";
 import { khemClerkAppearance } from "@/src/lib/clerk-appearance";
 import { getFontVariables } from "@/src/lib/fonts";
 // ⚠️ TEMPORARY — delete this import with the pre-launch cover.
@@ -534,18 +533,18 @@ export default async function RootLayout({
                      */}
                     <CartDrawer />
                     {/*
-                     * Last in the tree, and `fixed`, so it never participates
-                     * in document flow and cannot contribute to CLS.
+                     * The cookie banner and the offer popup, mounted after the
+                     * page is idle (see `DeferredOverlays`). Both are `fixed`,
+                     * so neither participates in flow or CLS, and the popup
+                     * still waits for the banner to be answered.
                      */}
-                    <CookieConsent />
-                    {/*
-                     * After the cookie banner in the tree, and gated on it
-                     * having been answered — see `OfferPopup.tsx`. Two modals
-                     * arriving together is the aggression the brief rules out.
-                     */}
-                    {marketing.offerPopupEnabled ? (
-                      <OfferPopup settings={marketing} benefit={signupBenefit} />
-                    ) : null}
+                    <DeferredOverlays
+                      offerPopup={
+                        marketing.offerPopupEnabled
+                          ? { settings: marketing, benefit: signupBenefit }
+                          : null
+                      }
+                    />
                     </NavGroundProvider>
                   </CartDrawerProvider>
                 </CartProvider>

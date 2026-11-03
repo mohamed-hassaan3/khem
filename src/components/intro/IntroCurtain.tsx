@@ -11,15 +11,19 @@ import { useEffect } from "react";
  *
  * ## The readiness rule
  *
- *   open when  (hydrated AND the document has finished loading)
+ *   open when  (hydrated AND the above-the-fold media has decoded)
  *              but not before `MIN_HOLD_MS`
  *              and never later than `MIN_HOLD_MS + MAX_HOLD_MS`
  *
+ * "Above-the-fold media" is every non-lazy `<img>` outside the intro itself
+ * (next/image `priority` ones, i.e. the hero's first slide) plus any video
+ * poster. It deliberately is NOT `window.load`: that waits on every
+ * subresource — Clerk, fonts, analytics, lazy-ish images — and on a slow
+ * first visit it is what held the curtain for 5s+.
+ *
  * The floor is what stops a warm cache from cutting the sequence off mid-reveal
  * — an intro that plays half of itself is worse than none. The ceiling is what
- * stops the home page's hero video from holding the curtain shut: `window.load`
- * waits on every subresource, and on a slow connection that is a hostage
- * situation, not a loading state.
+ * stops a slow hero image from holding the curtain shut.
  *
  * ## Why the state machine lives on `<html>`
  *
@@ -37,7 +41,7 @@ const MIN_HOLD_MS = 2200;
 const MIN_HOLD_REDUCED_MS = 600;
 
 /** How long readiness may be waited for beyond the floor. */
-const MAX_HOLD_MS = 4500;
+const MAX_HOLD_MS = 1000;
 
 /** The exit's length. Must match `globals.css`. */
 const EXIT_MS = 1100;
@@ -48,39 +52,33 @@ const EXIT_REDUCED_MS = 450;
  */
 const SKIP_AFTER_MS = 600;
 
-/*
- * Module scope, not a ref.
- *
- * Under React 19 StrictMode the effect runs mount → unmount → mount in
- * development. A ref guard would survive that, but the *cleanup* would not: it
- * would clear the timers that open the curtain, and the overlay would stay up
- * for ever. So this sequence deliberately owns no cleanup — it is a one-shot
- * document-level event, it must finish once started, and this flag is what
- * makes starting it twice impossible.
+/**
+ * Resolves once the media the visitor will see first under the curtain has
+ * decoded. Never rejects: a failed image must not hold the curtain.
  */
-// let launched = false;
+function aboveTheFoldMediaReady(): Promise<void> {
+  const tasks: Promise<unknown>[] = [];
+
+  document.querySelectorAll<HTMLImageElement>("img").forEach((img) => {
+    if (img.closest("#khem-intro")) return; // the intro's own artwork
+    if (img.loading === "lazy") return; // below the fold by construction
+    if (img.complete && img.naturalWidth > 0) return;
+    tasks.push(img.decode().catch(() => undefined));
+  });
+
+  document.querySelectorAll<HTMLVideoElement>("video[poster]").forEach((v) => {
+    if (!v.poster) return;
+    const poster = new Image();
+    poster.src = v.poster;
+    tasks.push(poster.decode().catch(() => undefined));
+  });
+
+  return Promise.all(tasks).then(() => undefined);
+}
 
 export default function IntroCurtain() {
-     useEffect(() => {
-       const root = document.documentElement;
-
-      //  let seen: string | null = null;
-      //  try {
-      //    seen = sessionStorage.getItem(SEEN_KEY);
-      //  } catch {
-      //    seen = null;
-      //  }
-
-      //  // Already played this session — covers a real prior load AND a
-      //  // locale-driven remount of this component (module-scope `launched`
-      //  // survives a remount, so it can't be relied on alone here).
-      //  if (seen === "1" || root.dataset.intro === "off" || root.dataset.intro === "done") {
-      //    root.dataset.intro = "done";
-      //    return;
-      //  }
-
-      //  if (launched) return;
-      //  launched = true;
+  useEffect(() => {
+    const root = document.documentElement;
 
 
     // Already seen this session — the pre-paint script has hidden the overlay
@@ -120,14 +118,8 @@ export default function IntroCurtain() {
       }, exitMs);
     }
 
-    /** Resolves when the document and its subresources have finished. */
-    const loaded = new Promise<void>((resolve) => {
-      if (document.readyState === "complete") {
-        resolve();
-        return;
-      }
-      window.addEventListener("load", () => resolve(), { once: true });
-    });
+    /** Resolves when the above-the-fold media is ready (not `window.load`). */
+    const loaded = aboveTheFoldMediaReady();
 
     const floor = new Promise<void>((resolve) => {
       window.setTimeout(resolve, floorMs);

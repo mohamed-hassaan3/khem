@@ -269,7 +269,7 @@ export default async function Home({
 
             <div className="relative z-10 px-4 text-center">
               <div className="mb-7 flex justify-center">
-                <Image src={logo} width={40} height={40} alt="KHEM" priority />
+                <Image src={logo} width={40} height={40} alt="KHEM" />
               </div>
 
               {/*

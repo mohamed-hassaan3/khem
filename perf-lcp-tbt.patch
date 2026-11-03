@@ -1,0 +1,181 @@
+diff --git a/src/app/[locale]/layout.tsx b/src/app/[locale]/layout.tsx
+index fe31d21..aaa355e 100644
+--- a/src/app/[locale]/layout.tsx
++++ b/src/app/[locale]/layout.tsx
+@@ -8,11 +8,10 @@ import { Analytics } from '@vercel/analytics/next';
+ 
+ import Footer from "@/src/components/Footer";
+ import Nav from "@/src/components/Nav";
+-import CookieConsent from "@/src/components/consent/CookieConsent";
+ import CinematicIntro from "@/src/components/intro/CinematicIntro";
+ import CartDrawer from "@/src/components/ecommerce/CartDrawer";
+ import AnnouncementBar from "@/src/components/marketing/AnnouncementBar";
+-import OfferPopup from "@/src/components/marketing/OfferPopup";
++import DeferredOverlays from "@/src/components/marketing/DeferredOverlays";
+ import { khemClerkAppearance } from "@/src/lib/clerk-appearance";
+ import { getFontVariables } from "@/src/lib/fonts";
+ // ⚠️ TEMPORARY — delete this import with the pre-launch cover.
+@@ -534,18 +533,18 @@ export default async function RootLayout({
+                      */}
+                     <CartDrawer />
+                     {/*
+-                     * Last in the tree, and `fixed`, so it never participates
+-                     * in document flow and cannot contribute to CLS.
++                     * The cookie banner and the offer popup, mounted after the
++                     * page is idle (see `DeferredOverlays`). Both are `fixed`,
++                     * so neither participates in flow or CLS, and the popup
++                     * still waits for the banner to be answered.
+                      */}
+-                    <CookieConsent />
+-                    {/*
+-                     * After the cookie banner in the tree, and gated on it
+-                     * having been answered — see `OfferPopup.tsx`. Two modals
+-                     * arriving together is the aggression the brief rules out.
+-                     */}
+-                    {marketing.offerPopupEnabled ? (
+-                      <OfferPopup settings={marketing} benefit={signupBenefit} />
+-                    ) : null}
++                    <DeferredOverlays
++                      offerPopup={
++                        marketing.offerPopupEnabled
++                          ? { settings: marketing, benefit: signupBenefit }
++                          : null
++                      }
++                    />
+                     </NavGroundProvider>
+                   </CartDrawerProvider>
+                 </CartProvider>
+diff --git a/src/app/[locale]/page.tsx b/src/app/[locale]/page.tsx
+index 8a45a9a..214ca5d 100644
+--- a/src/app/[locale]/page.tsx
++++ b/src/app/[locale]/page.tsx
+@@ -269,7 +269,7 @@ export default async function Home({
+ 
+             <div className="relative z-10 px-4 text-center">
+               <div className="mb-7 flex justify-center">
+-                <Image src={logo} width={40} height={40} alt="KHEM" priority />
++                <Image src={logo} width={40} height={40} alt="KHEM" />
+               </div>
+ 
+               {/*
+diff --git a/src/components/Nav.tsx b/src/components/Nav.tsx
+index 8a4cf9a..646894c 100644
+--- a/src/components/Nav.tsx
++++ b/src/components/Nav.tsx
+@@ -586,13 +586,15 @@ export default function Nav({
+            * the current URL, so `"logo/…"` became `/logo/…` on `/ar` (which
+            * sits at the root and worked by accident) but `/ar/logo/…` on every
+            * deeper prefixed route — a 404 the catch-all answered with a full
+-           * page render, on a `priority` image preloaded on every page.
++           * page render, on a `priority` image preloaded on every page. It is `loading="eager"`
++           * rather than `priority` for the same reason in reverse: a preload
++           * hint on every route competes with the hero for the LCP bandwidth.
+            * Importing the asset makes a relative path unrepresentable.
+            */}
+           <Image
+             src={nameLogo}
+             alt="KHEM Perfumes"
+-            priority
++            loading="eager"
+             sizes="(min-width: 1024px) 132px, (min-width: 640px) 113px, 94px"
+             className="h-10 w-auto sm:h-12 lg:h-14"
+           />
+diff --git a/src/components/home/Hero.tsx b/src/components/home/Hero.tsx
+index 034993d..428bbe8 100644
+--- a/src/components/home/Hero.tsx
++++ b/src/components/home/Hero.tsx
+@@ -2,6 +2,7 @@
+ 
+ import { Pause, Play } from "lucide-react";
+ import Image from "next/image";
++import { preload } from "react-dom";
+ import { useEffect, useState } from "react";
+ 
+ import LocaleLink from "@/src/components/i18n/LocaleLink";
+@@ -122,6 +123,17 @@ export default function Hero({
+   labels: HeroLabels;
+ }) {
+   const slides = hero.slides;
++
++  /*
++   * A video hero's LCP is its poster, and a `<video poster>` is invisible to
++   * the preload scanner until the element is parsed — so it was fetched after
++   * Clerk, fonts and every `priority` image had already queued. Hinting it
++   * here puts it at the front. (Image heroes need nothing: `priority` below
++   * already preloads the first slide at high fetch priority.)
++   */
++  if (hero.mediaType === "VIDEO" && hero.videoUrl && hero.videoPosterUrl) {
++    preload(hero.videoPosterUrl, { as: "image", fetchPriority: "high" });
++  }
+   const rotates = hero.mediaType === "IMAGES" && slides.length > 1;
+ 
+   const [index, setIndex] = useState(0);
+diff --git a/src/components/marketing/DeferredOverlays.tsx b/src/components/marketing/DeferredOverlays.tsx
+new file mode 100644
+index 0000000..410a4e3
+--- /dev/null
++++ b/src/components/marketing/DeferredOverlays.tsx
+@@ -0,0 +1,63 @@
++"use client";
++
++import dynamic from "next/dynamic";
++import { useEffect, useState } from "react";
++
++import type { SignupBenefit } from "@/src/types/benefits";
++import type { MarketingSettings } from "@/src/types/marketing";
++
++/**
++ * The cookie banner and the offer popup, loaded after the page is interactive.
++ *
++ * Both are modal chrome that nobody needs in the first second, but as static
++ * imports of the root layout they ship in the first-load JS bundle and hydrate
++ * with the page — which is main-thread time (TBT) spent before the visitor can
++ * do anything. `ssr: false` keeps them out of the server HTML as well; both
++ * are `fixed`, so mounting them late cannot shift layout.
++ *
++ * `<OfferPopup>` already waits for the consent banner to be answered, so
++ * deferring both preserves that ordering: the banner mounts first.
++ */
++const CookieConsent = dynamic(
++  () => import("@/src/components/consent/CookieConsent"),
++  { ssr: false },
++);
++const OfferPopup = dynamic(
++  () => import("@/src/components/marketing/OfferPopup"),
++  { ssr: false },
++);
++
++/** Idle, with a timeout so a busy main thread cannot defer it for ever. */
++function whenIdle(cb: () => void): () => void {
++  if (typeof window.requestIdleCallback === "function") {
++    const id = window.requestIdleCallback(cb, { timeout: 3000 });
++    return () => window.cancelIdleCallback(id);
++  }
++  const id = window.setTimeout(cb, 2000);
++  return () => window.clearTimeout(id);
++}
++
++export default function DeferredOverlays({
++  offerPopup,
++}: {
++  /** `null` when the popup is switched off in the admin. */
++  offerPopup: { settings: MarketingSettings; benefit: SignupBenefit } | null;
++}) {
++  const [ready, setReady] = useState(false);
++
++  useEffect(() => whenIdle(() => setReady(true)), []);
++
++  if (!ready) return null;
++
++  return (
++    <>
++      <CookieConsent />
++      {offerPopup ? (
++        <OfferPopup
++          settings={offerPopup.settings}
++          benefit={offerPopup.benefit}
++        />
++      ) : null}
++    </>
++  );
++}

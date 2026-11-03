@@ -2,6 +2,7 @@
 
 import { Pause, Play } from "lucide-react";
 import Image from "next/image";
+import { preload } from "react-dom";
 import { useEffect, useState } from "react";
 
 import LocaleLink from "@/src/components/i18n/LocaleLink";
@@ -122,6 +123,17 @@ export default function Hero({
   labels: HeroLabels;
 }) {
   const slides = hero.slides;
+
+  /*
+   * A video hero's LCP is its poster, and a `<video poster>` is invisible to
+   * the preload scanner until the element is parsed — so it was fetched after
+   * Clerk, fonts and every `priority` image had already queued. Hinting it
+   * here puts it at the front. (Image heroes need nothing: `priority` below
+   * already preloads the first slide at high fetch priority.)
+   */
+  if (hero.mediaType === "VIDEO" && hero.videoUrl && hero.videoPosterUrl) {
+    preload(hero.videoPosterUrl, { as: "image", fetchPriority: "high" });
+  }
   const rotates = hero.mediaType === "IMAGES" && slides.length > 1;
 
   const [index, setIndex] = useState(0);
