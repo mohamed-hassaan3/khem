@@ -282,6 +282,10 @@ export function luxuryShell({
               <td style="padding:0 40px;text-align:${align};">${body}</td>
             </tr>
 
+            <tr>
+              <td style="padding:0 40px;text-align:${align};">${mutedParagraph(SIGNATURE_COPY[locale].junkNotice, align)}</td>
+            </tr>
+
             <!-- Signature -->
             <tr>
               <td style="padding:38px 40px 44px 40px;">${signatureBlock(locale, socials, logoSrc)}</td>

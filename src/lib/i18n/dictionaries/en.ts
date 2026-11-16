@@ -1567,6 +1567,7 @@ export const en = {
       cash: "Cash on delivery",
       emailSent: "A confirmation is on its way to {email}.",
       emailSentGeneric: "A confirmation is on its way to you.",
+      junkNotice: "A confirmation email is on its way. If you don't see it, check your Junk or Spam folder and mark it as “Not junk”.",
       trackCta: "Track Your Order",
       createAccountCta: "Create an Account to Track It",
       continueCta: "Continue Exploring",

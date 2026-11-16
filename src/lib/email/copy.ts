@@ -14,6 +14,7 @@
  */
 
 import type { Locale } from "@/src/lib/i18n/config";
+import { HOUSE_EMAIL } from "@/src/constants/contact";
 
 export interface AcknowledgementCopy {
   /** Inbox subject line. Fixed per locale — never built from user input. */
@@ -54,6 +55,7 @@ export interface SignatureCopy {
   /** Alt text for the seal, for the many clients that block images. */
   logoAlt: string;
   rights: string;
+  junkNotice: string;
 }
 
 export const ACKNOWLEDGEMENT_COPY: Record<Locale, AcknowledgementCopy> = {
@@ -137,6 +139,7 @@ export const SIGNATURE_COPY: Record<Locale, SignatureCopy> = {
     officialHouse: "Official House",
     logoAlt: "KHEM — Essence of Heritage",
     rights: "New Cairo City, Cairo Governorate, Egypt",
+    junkNotice: `If this email reached your Junk or Spam folder, please mark it as “Not junk” and add ${HOUSE_EMAIL} to your contacts, so your order updates always reach your inbox.`,
   },
   ar: {
     house: "عطور كيم",
@@ -144,5 +147,6 @@ export const SIGNATURE_COPY: Record<Locale, SignatureCopy> = {
     officialHouse: "الموقع الرسمي",
     logoAlt: "كيم — عبق التراث",
     rights: "القاهرة الجديدة، محافظة القاهرة، مصر",
+    junkNotice: `إذا وصلتك هذه الرسالة في مجلد الرسائل غير المرغوب فيها، يُرجى تحديدها كـ «ليست رسالة غير مرغوب فيها» وإضافة ${HOUSE_EMAIL} إلى جهات الاتصال حتى تصلك تحديثات طلبك دائمًا.`,
   },
 };
