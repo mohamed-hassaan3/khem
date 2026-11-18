@@ -63,7 +63,24 @@ cd "${REL}"
 log "npm ci"
 npm ci --no-audit --no-fund --loglevel=error
 log "next build (NEXT_PUBLIC_* values are inlined now)"
-NODE_OPTIONS=--max-old-space-size=4096 NEXT_TELEMETRY_DISABLED=1 npm run build
+# NEXT_DEPLOYMENT_ID = this commit. It is how a browser tab opened before this
+# deploy learns that the server has moved on: Next tags every navigation
+# response with the ID, and on a mismatch the client does a full page load.
+# Without it, a stale tab's client navigations asked the new build for route
+# data that does not exist and got empty 404s (Vercel sets this for you; a VPS
+# has to). See node_modules/next/dist/docs/.../deploymentId.md.
+NEXT_DEPLOYMENT_ID="${SHORT}" NODE_OPTIONS=--max-old-space-size=4096 NEXT_TELEMETRY_DISABLED=1 npm run build
+
+# Keep the previous release's recent static assets reachable. A tab opened on
+# the old build still lazy-loads its own content-hashed chunks; those names
+# never collide with the new build's, so copying them in (without overwriting)
+# lets the old tab keep working until it reloads. `cp -a` keeps mtimes, so a
+# chunk older than 7 days is not carried forward again and the set stays small.
+if [[ -n "${PREV}" && -d "${PREV}/.next/static" ]]; then
+  log "carrying forward recent static assets from $(basename "${PREV}")"
+  (cd "${PREV}/.next/static" && find . -type f -mtime -7 -print0 \
+    | xargs -0 -r cp -an --parents -t "${REL}/.next/static/")
+fi
 
 switch_to() {
   ln -sfn "$1" "${ROOT}/current.next"
