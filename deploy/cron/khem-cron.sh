@@ -2,7 +2,7 @@
 #
 # Call one KHEM cron route over loopback with the bearer token.
 #
-#   khem-cron.sh send-campaigns | sweep-unpaid-orders | order-feedback | expire-credits
+#   khem-cron.sh send-campaigns | sweep-unpaid-orders | order-feedback | expire-credits | purge-search-events
 #
 # Loopback, not https://khemperfumes.com: the secret never leaves the box, and
 # the jobs keep running even if DNS or TLS is broken.
@@ -15,8 +15,8 @@ set -euo pipefail
 
 JOB="${1:-}"
 case "${JOB}" in
-  send-campaigns|sweep-unpaid-orders|order-feedback|expire-credits) ;;
-  *) echo "usage: $0 <send-campaigns|sweep-unpaid-orders|order-feedback|expire-credits>" >&2; exit 2 ;;
+  send-campaigns|sweep-unpaid-orders|order-feedback|expire-credits|purge-search-events) ;;
+  *) echo "usage: $0 <send-campaigns|sweep-unpaid-orders|order-feedback|expire-credits|purge-search-events>" >&2; exit 2 ;;
 esac
 
 set -a

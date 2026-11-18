@@ -72,6 +72,7 @@ import {
   Wallet,
   Receipt,
   ScrollText,
+  Search,
   Send,
   Settings,
   Sparkles,
@@ -178,6 +179,7 @@ const GROUPS = [
     heading: "Sales & Analytics",
     items: [
       { path: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+      { path: "/admin/search", label: "Search", icon: Search },
       { path: "/admin/sales", label: "Sales & Profit", icon: TrendingUp },
       { path: "/admin/sales/items", label: "Items Sold", icon: ScrollText },
     ],

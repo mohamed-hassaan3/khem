@@ -1,5 +1,7 @@
 import { SearchX } from "lucide-react";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { after } from "next/server";
 
 import EmptyState from "@/src/components/ecommerce/EmptyState";
 import NavGround from "@/src/components/NavGround";
@@ -13,7 +15,9 @@ import { interpolate } from "@/src/lib/i18n/interpolate";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { RESULTS_LIMIT, SEARCH_PARAM } from "@/src/lib/search/config";
 import { isSearchable, normalizeQuery, searchHref } from "@/src/lib/search/text";
+import { isAutomatedAgent } from "@/src/lib/search/privacy";
 import { searchCatalog } from "@/src/services/search";
+import { recordSearch } from "@/src/services/search-log";
 
 /**
  * `/search` — the canonical results page.
@@ -85,9 +89,33 @@ export default async function Search({
   const dict = await getDictionary(activeLocale);
 
   const query = normalizeQuery(firstValue(resolvedParams[SEARCH_PARAM]));
-  const { products } = isSearchable(query)
+  const searchable = isSearchable(query);
+  const { products, mode } = searchable
     ? await searchCatalog(activeLocale, query, { limit: RESULTS_LIMIT })
-    : { products: [] };
+    : { products: [], mode: "lexical" as const };
+
+  /*
+   * Search tracking — prompts/search-tracking.md. This page is the *committed*
+   * search (Enter, a popular-search chip, a shared link); the overlay's
+   * as-you-type suggestions are never recorded. Prefetches and automated
+   * agents are skipped, and the write happens in `after()`, once the page has
+   * been sent, so it can neither slow nor break the search. Nothing that
+   * identifies the visitor is read for storage — the user agent is only
+   * checked here, in memory.
+   */
+  if (searchable) {
+    const requestHeaders = await headers();
+    const isPrefetch =
+      requestHeaders.get("next-router-prefetch") !== null ||
+      requestHeaders.get("purpose") === "prefetch";
+
+    if (!isPrefetch && !isAutomatedAgent(requestHeaders.get("user-agent"))) {
+      const resultCount = products.length;
+      after(() =>
+        recordSearch({ query, locale: activeLocale, resultCount, mode }),
+      );
+    }
+  }
 
   const count = products.length;
   const meta = isSearchable(query)

@@ -26,6 +26,7 @@ seed/    a generated export of the database — written by `npm run db:dump`,
 | `sql/0054_stripe_webhook_events.sql` | `StripeWebhookEvent` and `record_stripe_event()` — one row per Stripe event already acted on, so a redelivered webhook is recognised and ignored. Service-role only, like every other order table |
 | `sql/0062_sales_ledger.sql` | `"Product"."costInCents"`, `order_item_sales_ledger`, the `"SalesLedgerRow"` view and the two reporting functions — one immutable row per sold line carrying the list value, what each of the five benefits took off, what was paid, the cost snapshot and the profit. Written by `place_order()` in the same transaction as the order. Service-role only, and the cost column is revoked from the public roles by name |
 | `sql/0063_finance.sql` | `expense_categories`, `expense_recurring_rules`, `expenses`, `financial_targets`, and the six reporting functions — the operating-expense ledger, monthly targets, and the joins that turn `0062`'s gross profit into a net one. It **reads** `"SalesLedgerRow"` and writes nothing to it: revenue and COGS still come from the sales ledger, and rent is never a cost of goods. Service-role only, like every table above it |
+| `sql/0074_search_events.sql` | `search_events` — one anonymous row per committed search (query, locale, result count, mode, time; no identity), the three `/admin/search` report functions and `purge_search_events()` (90-day retention, daily cron). Service-role only |
 | `sql/0070_claim_guest_orders.sql` | `claim_guest_orders()` — atomic, service-role-only claim of unowned online orders matching an explicitly verified Clerk primary email |
 
 `manual/claim-guest-orders.sql` is a separate, preview-only legacy backfill
@@ -114,9 +115,11 @@ On the Frankfurt database `schema_migrations` ends at `0071`, but:
 - `0073_product_embedding_invalidation.sql` **is applied** directly with
   `psql --single-transaction` (2026-11-18) and not recorded, so that applying it
   did not also run `0072b`. It is idempotent.
+- `0074_search_events.sql` (search tracking) **is applied** the same way
+  (2026-11-18). It is idempotent.
 
-So the next `npm run db:migrate` runs `0072a`, `0072b` and `0073` and records
-all three. Run it only once `0072b` is wanted; until then, apply any new
+So the next `npm run db:migrate` runs `0072a`, `0072b`, `0073` and `0074` and
+records all four. Run it only once `0072b` is wanted; until then, apply any new
 migration the same direct way.
 
 ## After a migration: reload the schema cache

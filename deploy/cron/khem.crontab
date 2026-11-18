@@ -5,6 +5,8 @@
 # schedule vercel.json carried. send-campaigns runs every minute: it replaces the
 # external cron-job.org trigger as well as Vercel's daily backstop, and the run
 # lease in supabase/sql/0057_campaign_dispatch_lease.sql makes overlap safe.
+# purge-search-events (04:00) enforces the 90-day retention of search_events
+# (supabase/sql/0074_search_events.sql).
 # flock -n additionally stops a slow run queueing another behind it.
 
 SHELL=/bin/bash
@@ -16,3 +18,4 @@ LOG=/srv/khem/logs/cron.log
 0  3  * * *  flock -n /tmp/khem-sweep.lock           $CRON sweep-unpaid-orders >> $LOG 2>&1
 30 3  * * *  flock -n /tmp/khem-credits.lock         $CRON expire-credits      >> $LOG 2>&1
 0  9  * * *  flock -n /tmp/khem-feedback.lock        $CRON order-feedback      >> $LOG 2>&1
+0  4  * * *  flock -n /tmp/khem-search-purge.lock    $CRON purge-search-events >> $LOG 2>&1
