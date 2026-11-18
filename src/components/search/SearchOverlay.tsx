@@ -13,7 +13,9 @@ import {
   type KeyboardEvent,
 } from "react";
 
+import AiBadge, { RankedByMeaning } from "./AiBadge";
 import HighlightedText from "./HighlightedText";
+import MatchLine from "./MatchLine";
 import {
   addRecentSearch,
   clearRecentSearches,
@@ -35,6 +37,7 @@ import {
 import { LOCALE_PARAM } from "@/src/lib/search/config";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type {
+  SearchMode,
   CollectionSuggestion,
   ProductSuggestion,
   SearchSuggestionsPayload,
@@ -76,6 +79,14 @@ export interface SearchOverlayProps {
    * and a renamed one would have pointed at a dead address.
    */
   shortcuts: readonly NavLinkEntry[];
+  /**
+   * Whether meaning-based search is configured on the server
+   * (`hasEmbeddingCredentials()`, read in the `[locale]` layout). Gates the
+   * idle AI-powered badge and the descriptive prompts. Results carry their own
+   * `mode`; the "Ranked by meaning" mark and "Matches" lines follow *that*, so
+   * a keyword fallback never wears an AI label.
+   */
+  semanticSearch?: boolean;
 }
 
 const DEBOUNCE_MS = 350;
@@ -91,6 +102,7 @@ export default function SearchOverlay({
   open,
   onClose,
   shortcuts,
+  semanticSearch = false,
 }: SearchOverlayProps) {
   const dict = useDictionary();
   const locale = useLocale();
@@ -112,6 +124,7 @@ export default function SearchOverlay({
     query: string;
     products: ProductSuggestion[];
     collections: CollectionSuggestion[];
+    mode: SearchMode;
   } | null>(null);
   /** The query whose *request* failed, so the error is scoped to it too. */
   const [failedQuery, setFailedQuery] = useState<string | null>(null);
@@ -224,6 +237,7 @@ export default function SearchOverlay({
           query: normalized,
           products: payload.products,
           collections: payload.collections,
+          mode: payload.mode,
         });
       } catch (error) {
         if (ignore || controller.signal.aborted) return;
@@ -324,6 +338,15 @@ export default function SearchOverlay({
         : interpolate(dict.search.resultCount, { count: suggestions.length })
     : "";
 
+  /** Meaning-based for *this* result set — the only licence for AI wording. */
+  const isHybrid = current !== null && current.mode === "hybrid";
+  const announcement =
+    isHybrid && suggestions.length > 0
+      ? `${countLabel} ${dict.search.ai.rankedByMeaningAnnouncement}`
+      : countLabel;
+  /** A description rather than a word: worth saying we are reading it. */
+  const isDescription = semanticSearch && normalized.split(" ").length >= 3;
+
   return (
     <>
       {/* ── BACKDROP ───────────────────────────────── */}
@@ -415,6 +438,7 @@ export default function SearchOverlay({
                 activeIndex >= 0 ? optionId(activeIndex) : undefined
               }
               aria-label={dict.search.inputLabel}
+              aria-describedby={semanticSearch ? `${panelId}-help` : undefined}
               placeholder={dict.search.placeholder}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -441,17 +465,27 @@ export default function SearchOverlay({
                 <X width={16} height={16} strokeWidth={1.25} aria-hidden="true" />
               </button>
             ) : null}
+
+            {semanticSearch ? <AiBadge label={dict.search.ai.badge} /> : null}
           </div>
+          {/* The gold sweep under the field while a query is in flight. */}
+          {isLoading ? <div aria-hidden="true" className="khem-search-line -mt-px" /> : null}
+          {semanticSearch && !active ? (
+            <p id={`${panelId}-help`} className="mt-4 max-w-2xl text-[13px] leading-relaxed text-ground-muted">
+              {dict.search.ai.help}
+            </p>
+          ) : null}
         </div>
 
         {/* Body */}
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-10 md:px-12">
           <p aria-live="polite" className="sr-only">
-            {countLabel}
+            {announcement}
           </p>
 
           {!active ? (
             <IdleState
+              semanticSearch={semanticSearch}
               shortcuts={shortcuts}
               recent={recent}
               onClearRecent={clearRecentSearches}
@@ -462,11 +496,23 @@ export default function SearchOverlay({
               onClose={onClose}
             />
           ) : isLoading ? (
-            <SuggestionSkeleton />
+            <>
+              <p className="mb-5 text-[12px] tracking-wide text-ground-muted">
+                {isDescription ? dict.search.ai.reading : dict.search.loading}
+              </p>
+              <SuggestionSkeleton />
+            </>
           ) : suggestions.length > 0 ? (
             <div id={listboxId} role="listbox" aria-label={dict.search.products}>
               {current !== null && current.products.length > 0 ? (
-                <p className="eyebrow mb-6">{dict.search.products}</p>
+                <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+                  <p className="eyebrow">{dict.search.products}</p>
+                  {isHybrid ? (
+                    <p className="text-[11px] tracking-wide">
+                      <RankedByMeaning label={dict.search.ai.rankedByMeaning} />
+                    </p>
+                  ) : null}
+                </div>
               ) : null}
 
               <div className="flex flex-col">
@@ -487,6 +533,7 @@ export default function SearchOverlay({
                         suggestion.item,
                         dict.product.concentrations,
                       )}
+                      matchesLabel={dict.search.ai.matches}
                     />
                   );
                 })}
@@ -521,15 +568,26 @@ export default function SearchOverlay({
               <p className="font-heading text-xl text-ground sm:text-2xl" dir="auto">
                 {hasFailed
                   ? dict.search.error
-                  : interpolate(dict.search.noResults, { query: normalized })}
+                  : semanticSearch
+                    ? interpolate(dict.search.ai.noResultsHeading, { query: normalized })
+                    : interpolate(dict.search.noResults, { query: normalized })}
               </p>
               <p className="mt-4 text-[13px] leading-loose text-ground-muted">
-                {dict.search.noResultsHint}
+                {semanticSearch ? dict.search.ai.noResultsBody : dict.search.noResultsHint}
               </p>
 
-              <p className="eyebrow mb-5 mt-8 md:mt-12">{dict.search.popular}</p>
+              <p className="eyebrow mb-5 mt-8 md:mt-12">
+                {semanticSearch ? dict.search.ai.tryDifferently : dict.search.popular}
+              </p>
               <TermChips
-                terms={dict.search.popularTerms}
+                terms={
+                  semanticSearch
+                    ? dict.search.ai.examplesGroups.map((group) => ({
+                        label: group.items[0],
+                        term: group.items[0],
+                      }))
+                    : dict.search.popularTerms
+                }
                 onPick={(value) => {
                   setQuery(value);
                   inputRef.current?.focus();
@@ -576,7 +634,9 @@ function IdleState({
   onPick,
   onClose,
   shortcuts,
+  semanticSearch,
 }: {
+  semanticSearch: boolean;
   recent: string[];
   onClearRecent: () => void;
   onPick: (value: string) => void;
@@ -620,10 +680,37 @@ function IdleState({
         </section>
       ) : null}
 
-      <section>
-        <p className="eyebrow mb-5">{dict.search.popular}</p>
-        <TermChips terms={dict.search.popularTerms} onPick={onPick} />
-      </section>
+      {semanticSearch ? (
+        /*
+         * Mood · Occasion · Season — natural-language phrases in the page
+         * language, searched as written (Arabic queries match Arabic copy since
+         * 0075). Each group is a labelled set of real buttons.
+         */
+        <section className="flex flex-col gap-8 lg:col-span-2">
+          {dict.search.ai.examplesGroups.map((group) => (
+            <div key={group.heading} role="group" aria-label={group.heading}>
+              <p className="eyebrow mb-4">{group.heading}</p>
+              <div className="flex flex-wrap gap-2.5">
+                {group.items.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => onPick(item)}
+                    className="min-h-11 cursor-pointer border border-ground-border px-4 py-2 text-start font-body text-[13px] tracking-wide text-ground transition-all duration-400 ease-luxury-bezier hover:border-gold/50 hover:text-ground-accent"
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : (
+        <section>
+          <p className="eyebrow mb-5">{dict.search.popular}</p>
+          <TermChips terms={dict.search.popularTerms} onPick={onPick} />
+        </section>
+      )}
 
       <section>
         <p className="eyebrow mb-5">{dict.search.collections}</p>
@@ -705,6 +792,7 @@ function ProductRow({
   onHighlight,
   onSelect,
   typeLabel,
+  matchesLabel,
 }: {
   id: string;
   product: ProductSuggestion;
@@ -714,6 +802,7 @@ function ProductRow({
   onHighlight: () => void;
   onSelect: () => void;
   typeLabel: string;
+  matchesLabel: string;
 }) {
   return (
     <button
@@ -747,6 +836,8 @@ function ProductRow({
         <span className="mt-1 block truncate text-[11px] tracking-wider text-ground-muted">
           {typeLabel ? `${product.collectionName} · ${typeLabel}` : product.collectionName}
         </span>
+        {/* Present only when the meaning-based pass ran for this query. */}
+        <MatchLine label={matchesLabel} notes={product.matchNotes} className="mt-1 line-clamp-2" />
       </span>
 
       {/*

@@ -52,6 +52,13 @@ export interface ProductSuggestion {
    */
   promotion: ProductPromotion | null;
   image: ProductImage;
+  /**
+   * Notes this product really contains that are closest to the query, in the
+   * page language — present only when the meaning-based pass ran (`mode ===
+   * "hybrid"`) and a note cleared `NOTE_MATCH_FLOOR`. Absent means "say
+   * nothing", never "matched on nothing".
+   */
+  matchNotes?: string[];
 }
 
 /** One collection row in the overlay panel. */

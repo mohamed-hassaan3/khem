@@ -18,7 +18,8 @@
     "db:verify": "tsx --env-file-if-exists=.env.local scripts/db-verify.ts",
     "db:test:sales": "tsx --env-file-if-exists=.env.local scripts/db-test-sales.ts",
     "db:test:finance": "tsx --env-file-if-exists=.env.local scripts/db-test-finance.ts",
-    "db:copy-storage": "tsx --env-file-if-exists=.env.local scripts/db-copy-storage.ts"
+    "db:copy-storage": "tsx --env-file-if-exists=.env.local scripts/db-copy-storage.ts",
+    "search:eval": "tsx --env-file-if-exists=.env.local scripts/search-eval.ts"
   },
   "dependencies": {
     "@clerk/localizations": "^4.15.1",

@@ -45,6 +45,7 @@ import { ConsentProvider } from "@/src/providers/consent-provider";
 import { CurrencyProvider } from "@/src/providers/currency-provider";
 import { DeliveryProvider } from "@/src/providers/delivery-provider";
 import { I18nProvider } from "@/src/providers/i18n-provider";
+import { hasEmbeddingCredentials } from "@/src/lib/search/embed";
 import { NavGroundProvider } from "@/src/providers/nav-ground-provider";
 
 /**
@@ -506,7 +507,17 @@ export default async function RootLayout({
                         intervalMs={marketing.announcementIntervalMs}
                       />
                     ) : null}
-                    <Nav tree={navTree} prelaunch={prelaunch} />
+                    <Nav
+                      tree={navTree}
+                      prelaunch={prelaunch}
+                      /*
+                       * A boolean, read on the server: whether the AI Gateway
+                       * key is configured. The key itself never leaves the
+                       * server; the overlay only learns whether to offer the
+                       * descriptive, AI-powered prompts.
+                       */
+                      semanticSearch={hasEmbeddingCredentials()}
+                    />
                     {/*
                      * The offset for the whole fixed header stack — the
                      * announcement bar *and* the nav bar, not just the bar

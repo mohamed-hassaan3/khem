@@ -17,6 +17,9 @@ import { RESULTS_LIMIT, SEARCH_PARAM } from "@/src/lib/search/config";
 import { isSearchable, normalizeQuery, searchHref } from "@/src/lib/search/text";
 import { isAutomatedAgent } from "@/src/lib/search/privacy";
 import { searchCatalog } from "@/src/services/search";
+import { RankedByMeaning } from "@/src/components/search/AiBadge";
+import SearchNoResults from "@/src/components/search/SearchNoResults";
+import { hasEmbeddingCredentials } from "@/src/lib/search/embed";
 import { recordSearch } from "@/src/services/search-log";
 
 /**
@@ -90,9 +93,17 @@ export default async function Search({
 
   const query = normalizeQuery(firstValue(resolvedParams[SEARCH_PARAM]));
   const searchable = isSearchable(query);
-  const { products, mode } = searchable
+  const { products, mode, reasons } = searchable
     ? await searchCatalog(activeLocale, query, { limit: RESULTS_LIMIT })
-    : { products: [], mode: "lexical" as const };
+    : { products: [], mode: "lexical" as const, reasons: undefined };
+
+  /*
+   * Meaning-based for *this* query — the only licence for the AI mark, the
+   * "Matches" lines and the refine chips (prompts/ai-search-redesign.md).
+   * A keyword fallback renders the plain page.
+   */
+  const isHybrid = mode === "hybrid";
+  const semanticSearch = hasEmbeddingCredentials();
 
   /*
    * Search tracking — prompts/search-tracking.md. This page is the *committed*
@@ -139,9 +150,17 @@ export default async function Search({
         heading={query || dict.search.headingEmpty}
         headingDir={query ? "auto" : undefined}
         meta={meta}
+        metaExtra={
+          isHybrid && count > 0 ? (
+            <RankedByMeaning
+              label={dict.search.ai.rankedByMeaning}
+              badge={dict.search.ai.badge}
+            />
+          ) : undefined
+        }
       />
 
-      <SearchForm defaultValue={query} />
+      <SearchForm defaultValue={query} semanticSearch={semanticSearch} />
 
       {count > 0 ? (
         <section className="mx-auto max-w-350 px-4 py-10 md:py-16 md:px-20">
@@ -152,10 +171,28 @@ export default async function Search({
                 product={product}
                 locale={activeLocale}
                 sizes={CARD_SIZES}
+                matchNotes={isHybrid ? reasons?.[product.id] : undefined}
               />
             ))}
           </div>
+
+          {isHybrid ? (
+            <div className="mt-14 flex flex-wrap items-center gap-3 border-t border-ground-border pt-8 md:mt-16">
+              <p className="eyebrow me-3">{dict.search.ai.refineHeading}</p>
+              {dict.search.ai.refinements.map((refinement) => (
+                <LocaleLink
+                  key={refinement.label}
+                  href={searchHref(`${query}${refinement.suffix}`)}
+                  className="inline-flex min-h-11 items-center border border-ground-border px-4 font-body text-[13px] tracking-wide text-ground no-underline transition-all duration-400 ease-luxury-bezier hover:border-gold/50 hover:text-ground-accent"
+                >
+                  {refinement.label}
+                </LocaleLink>
+              ))}
+            </div>
+          ) : null}
         </section>
+      ) : searchable ? (
+        <SearchNoResults locale={activeLocale} query={query} semanticSearch={semanticSearch} />
       ) : (
         <section className="px-4 md:px-6 pb-14 md:pb-24 pt-4">
           <EmptyState

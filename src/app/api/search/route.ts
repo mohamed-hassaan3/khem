@@ -18,6 +18,7 @@ import { isLocale } from "@/src/lib/i18n/config";
 import {
   COLLECTION_SUGGESTION_LIMIT,
   LOCALE_PARAM,
+  MATCH_NOTES_PER_ROW,
   SEARCH_PARAM,
   SUGGESTION_LIMIT,
 } from "@/src/lib/search/config";
@@ -129,6 +130,11 @@ export async function GET(request: NextRequest) {
         priceInCents: product.priceInCents,
         promotion: product.promotion,
         image: product.primaryImage,
+        // Hybrid mode only — `reasons` is absent on a keyword search, so a
+        // keyword result can never carry an AI explanation.
+        ...(result.reasons?.[product.id]
+          ? { matchNotes: result.reasons[product.id].slice(0, MATCH_NOTES_PER_ROW) }
+          : {}),
       })),
       collections: collections.slice(0, COLLECTION_SUGGESTION_LIMIT).map((collection) => ({
         id: collection.id,

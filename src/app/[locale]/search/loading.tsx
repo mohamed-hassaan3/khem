@@ -29,10 +29,11 @@ export default function Loading() {
         <Bar className="mt-4 h-2.5 w-24" />
       </div>
 
-      {/* Field — mirrors <SearchForm>. */}
-      <div className="border-b border-ground-border px-4 py-6 sm:px-8 lg:px-14 xl:px-20">
+      {/* Field — mirrors <SearchForm>, with the gold sweep under it. */}
+      <div className="px-4 py-6 sm:px-8 lg:px-14 xl:px-20">
         <Bar className="h-7 w-full max-w-md" />
       </div>
+      <div aria-hidden="true" className="khem-search-line" />
 
       {/* Grid — mirrors the results section. */}
       <div className="mx-auto max-w-350 px-4 py-10 md:py-16 md:px-20">

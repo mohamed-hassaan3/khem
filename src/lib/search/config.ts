@@ -90,8 +90,40 @@ export const MAX_QUERY_LENGTH = 120;
  *
  * Embeddings always return a nearest neighbour — without a floor, every query
  * matches every product to some degree and "no results" becomes unreachable.
+ *
+ * 0.20, chosen by `npm run search:eval` on 2026-11-18 (cohere/embed-v4.0,
+ * after 0075's Arabic folding) — the lowest floor at which no nonsense query
+ * returns anything:
+ *
+ *   floor  notes (EN+AR)  moods  nonsense returning results
+ *   0.18   18/18          7/8    1/4   ← lets noise through
+ *   0.20   18/18          6/8    0/4   ← chosen
+ *   0.28   18/18          5/8    0/4   (the old OpenAI-era value)
+ *
+ * The SQL default in `hybrid_search_products()` is the same value.
  */
-export const SIMILARITY_FLOOR = 0.28;
+export const SIMILARITY_FLOOR = 0.2;
+
+/**
+ * How close a *note* must be to the query before a result says it matched on
+ * that note (`search_match_notes()`, 0076). Higher than the product floor on
+ * purpose: a "Matches" line is a claim to the visitor, and a weak one is left
+ * off rather than stretched. Calibrated with `npm run search:eval`.
+ */
+export const NOTE_MATCH_FLOOR = 0.22;
+
+/**
+ * …and within this distance of the product's best-matching note. Without it a
+ * single-note query borrows neighbours: "oud" scored Black Oud 0.59 but also
+ * Labdanum and Frankincense 0.42, which the visitor never asked about.
+ * Calibrated 2026-11-18: "oud" → Black Oud; "warm smoky evening" → Kyphi:
+ * Incense Smoke · Burnt Wood · Dark Musk.
+ */
+export const NOTE_MATCH_WINDOW = 0.12;
+
+/** Notes named on a result card's "Matches" line, and on an overlay row. */
+export const MATCH_NOTES_PER_CARD = 3;
+export const MATCH_NOTES_PER_ROW = 2;
 
 /**
  * Reciprocal Rank Fusion damping. 60 is the value from the original RRF paper

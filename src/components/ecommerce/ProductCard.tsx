@@ -7,6 +7,7 @@ import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { productFlag } from "@/src/lib/facets";
 import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
+import MatchLine from "@/src/components/search/MatchLine";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
@@ -54,6 +55,14 @@ export interface ProductCardProps {
   locale: Locale;
   /** Drives the `sizes` hint; the grid is 2 → 2 → 4 columns. */
   sizes?: string;
+  /**
+   * Search results only, and only in meaning-based mode: the notes this
+   * product really contains that are closest to the query
+   * (`search_match_notes()`, 0076). When present they take the note-pill slot
+   * as a "Matches · …" line, so the card neither grows nor claims a reason it
+   * lacks. Every other caller omits it and the card is unchanged.
+   */
+  matchNotes?: readonly string[];
 }
 
 /*
@@ -74,6 +83,7 @@ export default async function ProductCard({
   product,
   locale,
   sizes = DEFAULT_SIZES,
+  matchNotes,
 }: ProductCardProps) {
   const dict = await getDictionary(locale);
 
@@ -228,6 +238,13 @@ export default async function ProductCard({
           keeps every card in the grid the same height, which is the property
           being protected here.
         */}
+        {matchNotes && matchNotes.length > 0 ? (
+          <MatchLine
+            label={dict.search.ai.matches}
+            notes={matchNotes}
+            className="mb-2 line-clamp-2 sm:mb-3"
+          />
+        ) : (
         <div
           dir="auto"
           className="mb-2 flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden sm:mb-3"
@@ -254,6 +271,7 @@ export default async function ProductCard({
             </span>
           ) : null}
         </div>
+        )}
 
         {/*
           The spacer that bottom-aligns the price row across a grid of cards

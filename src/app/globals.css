@@ -1824,6 +1824,50 @@
   }
 }
 
+/*
+ * The search field's loading line (prompts/ai-search-redesign.md): a 1px gold
+ * segment sweeping under the field while a query is in flight. One element,
+ * transform only, the house easing; still and faint under reduced motion.
+ */
+.khem-search-line {
+  position: relative;
+  height: 1px;
+  overflow: hidden;
+  background: var(--color-ground-border);
+}
+
+.khem-search-line::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 40%;
+  background: var(--color-gold);
+  animation: khemSearchSweep 1.6s var(--ease-luxury-bezier) infinite;
+}
+
+[dir="rtl"] .khem-search-line::after {
+  animation-name: khemSearchSweepRtl;
+}
+
+@keyframes khemSearchSweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+@keyframes khemSearchSweepRtl {
+  from { transform: translateX(100%); }
+  to { transform: translateX(-250%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .khem-search-line::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.35;
+  }
+}
+
 @keyframes khemFade {
   from {
     opacity: 0;

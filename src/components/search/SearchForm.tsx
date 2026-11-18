@@ -3,6 +3,7 @@
 import { Search, X } from "lucide-react";
 import { useRef, useState } from "react";
 
+import AiBadge from "./AiBadge";
 import { localizePath } from "@/src/lib/i18n/config";
 import { MAX_QUERY_LENGTH, SEARCH_PARAM } from "@/src/lib/search/config";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
@@ -21,9 +22,11 @@ import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 
 export interface SearchFormProps {
   defaultValue: string;
+  /** Meaning-based search is configured: show the AI-powered badge. */
+  semanticSearch?: boolean;
 }
 
-export default function SearchForm({ defaultValue }: SearchFormProps) {
+export default function SearchForm({ defaultValue, semanticSearch = false }: SearchFormProps) {
   const dict = useDictionary();
   const locale = useLocale();
 
@@ -74,6 +77,12 @@ export default function SearchForm({ defaultValue }: SearchFormProps) {
           >
             <X width={16} height={16} strokeWidth={1.25} aria-hidden="true" />
           </button>
+        ) : null}
+
+        {semanticSearch ? (
+          <span className="hidden sm:inline-flex">
+            <AiBadge label={dict.search.ai.badge} />
+          </span>
         ) : null}
 
         {/*

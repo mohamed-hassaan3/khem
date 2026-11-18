@@ -2127,7 +2127,7 @@ export const en = {
 
     dialogLabel: "Search KHEM",
     inputLabel: "Search fragrances, notes, and collections",
-    placeholder: "Oud, amber, something for winter…",
+    placeholder: "Describe the scent you’re looking for…",
     close: "Close search",
     closeHint: "ESC",
     clear: "Clear search",
@@ -2157,6 +2157,49 @@ export const en = {
     emptyPromptBody:
       "Search by name, by note, or by the mood you want to wear. “Something smoky for a winter night” works as well as “oud”.",
     browseCta: "Browse the Collections",
+
+    /*
+     * AI search (prompts/ai-search-redesign.md). The badge and every
+     * meaning-based line render only when the semantic pass actually ran.
+     */
+    ai: {
+      badge: "AI-powered",
+      help: "Understands descriptions as well as names — a mood, an occasion, a season, or a note you love. In English or Arabic.",
+      rankedByMeaning: "Ranked by meaning",
+      rankedByMeaningAnnouncement: "Ranked by meaning.",
+      matches: "Matches",
+      reading: "Reading your description…",
+      howItWorksHeading: "How this works",
+      howItWorksBody:
+        "KHEM read your description and ranked the collection by what it means, not only the words. Each match names the notes in the bottle that are closest to what you asked for.",
+      seeAll: "See all {count} results",
+      seeAllOne: "See the result",
+      examplesGroups: [
+        {
+          heading: "Mood",
+          items: ["warm smoky evening", "soft, clean and powdery", "dark, resinous and mysterious"],
+        },
+        {
+          heading: "Occasion",
+          items: ["a rich scent for a wedding night", "quiet and elegant for the office", "a gift for someone who loves oud"],
+        },
+        {
+          heading: "Season",
+          items: ["fresh summer day", "something warm for winter nights", "green and bright for spring"],
+        },
+      ],
+      refineHeading: "Refine your description",
+      refinements: [
+        { label: "…with oud", suffix: " with oud" },
+        { label: "…lighter, for daytime", suffix: " lighter, for daytime" },
+        { label: "…for a gift", suffix: " for a gift" },
+      ],
+      noResultsHeading: "Nothing in the collection matches “{query}” yet.",
+      noResultsBody: "Search understands descriptions as well as names. Try telling us how you want it to feel, or begin with one of these.",
+      tryDifferently: "Try describing it differently",
+      orCollection: "Or begin with a collection",
+      favourites: "House favourites",
+    },
 
     /*
      * The chip's `term` is what gets searched and the `label` is what is shown.

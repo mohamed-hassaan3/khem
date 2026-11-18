@@ -285,9 +285,12 @@ function CollectionsList({
 export default function Nav({
   tree,
   prelaunch = false,
+  semanticSearch = false,
 }: {
   tree: NavigationTree;
   prelaunch?: boolean;
+  /** Meaning-based search is configured on the server; see `<SearchOverlay>`. */
+  semanticSearch?: boolean;
 }) {
   const dict = useDictionary();
   const locale = useLocale();
@@ -680,6 +683,7 @@ export default function Nav({
       <SearchOverlay
         open={searchOpen}
         onClose={closeSearch}
+        semanticSearch={semanticSearch}
         /*
           The shelves from the menu the header is already holding, capped at
           six. Filtering on `isShelf` is what keeps the scent profiles and Best

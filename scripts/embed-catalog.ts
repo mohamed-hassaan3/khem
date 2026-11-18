@@ -65,6 +65,10 @@ interface PendingRow {
 interface EmbedTarget {
   /** Table name. Interpolated into SQL — every value is a literal below, never input. */
   table: string;
+  /** The row's unique key column (a literal below, never input). */
+  key: string;
+  /** SQL expression for the text that is embedded (a literal below, never input). */
+  document: string;
   /** Plural noun, for the log lines an operator reads. */
   plural: string;
   /**
@@ -79,15 +83,66 @@ interface EmbedTarget {
 const TARGETS: readonly EmbedTarget[] = [
   {
     table: "Product",
+    key: "slug",
+    document: "search_document",
     plural: "products",
     scope: `"isArchived" = false and "deletedAt" is null`,
   },
   {
     table: "Article",
+    key: "slug",
+    document: "search_document",
     plural: "articles",
     scope: `"isPublished"`,
   },
+  {
+    /*
+     * The bilingual notes glossary (0075). Embedded as "Black Oud · العود
+     * الأسود", so a note is close to a query in either language. The AI search
+     * redesign compares a query with the notes of each result to say *why* it
+     * matched — only ever notes the product really contains.
+     */
+    table: "fragrance_notes",
+    key: "name_en",
+    document: `name_en || coalesce(' · ' || name_ar, '')`,
+    plural: "notes",
+    scope: "true",
+  },
 ];
+
+/**
+ * The free AI Gateway tier allows five embedding requests a minute for the
+ * whole team. Batches are spaced so a full run never trips it.
+ */
+const MIN_MS_BETWEEN_CALLS = 13_000;
+let lastCallAt = 0;
+
+async function paced<T>(call: () => Promise<T>): Promise<T> {
+  const wait = lastCallAt + MIN_MS_BETWEEN_CALLS - Date.now();
+  if (lastCallAt > 0 && wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+  try {
+    return await call();
+  } finally {
+    lastCallAt = Date.now();
+  }
+}
+
+/**
+ * A note that appears on a product but not yet in the glossary is added,
+ * unnamed in Arabic, so it is embedded and listed by `--check` for naming.
+ */
+async function syncNoteGlossary(client: Client): Promise<number> {
+  const { rowCount } = await client.query(
+    `insert into public.fragrance_notes (name_en)
+     select distinct n
+       from public."Product" p,
+            unnest(p."topNotes" || p."heartNotes" || p."baseNotes") as n
+      where p."isArchived" = false and p."deletedAt" is null
+        and n is not null and btrim(n) <> ''
+     on conflict (name_en) do nothing`,
+  );
+  return rowCount ?? 0;
+}
 
 /** Rows still waiting for a vector, oldest-stable-order first. */
 async function pendingFor(
@@ -95,11 +150,11 @@ async function pendingFor(
   target: EmbedTarget,
 ): Promise<PendingRow[]> {
   const { rows } = await client.query<PendingRow>(
-    `select slug, search_document as document
+    `select ${target.key} as slug, ${target.document} as document
        from public."${target.table}"
       where embedding is null
         and ${target.scope}
-      order by slug`,
+      order by ${target.key}`,
   );
 
   return rows;
@@ -132,12 +187,12 @@ async function embedTarget(
   for (let offset = 0; offset < pending.length; offset += BATCH_SIZE) {
     const batch = pending.slice(offset, offset + BATCH_SIZE);
 
-    const { embeddings } = await embedMany({
+    const { embeddings } = await paced(() => embedMany({
       model: embeddingModel(),
       values: batch.map((row) => row.document),
       maxRetries: 2,
       providerOptions: DOCUMENT_EMBEDDING_OPTIONS,
-    });
+    }));
 
     if (embeddings.length !== batch.length) {
       throw new Error(
@@ -156,7 +211,7 @@ async function embedTarget(
       await client.query(
         `update public."${target.table}"
             set embedding = $1::extensions.vector
-          where slug = $2`,
+          where ${target.key} = $2`,
         [toVectorLiteral(embedding), batch[index].slug],
       );
     }
@@ -199,6 +254,18 @@ async function main(): Promise<void> {
       }
     }
 
+    if (!checkOnly) {
+      const added = await syncNoteGlossary(client);
+      if (added > 0) console.log(`  added ${added} new note(s) to the glossary`);
+    }
+
+    const { rows: unnamed } = await client.query<{ name_en: string }>(
+      `select name_en from public.fragrance_notes where name_ar is null order by name_en`,
+    );
+    if (unnamed.length > 0) {
+      console.log(`  ${unnamed.length} note(s) have no Arabic name: ${unnamed.map((r) => r.name_en).join(", ")}`);
+    }
+
     const backlog = await Promise.all(
       TARGETS.map(async (target) => ({
         target,
@@ -221,6 +288,9 @@ async function main(): Promise<void> {
     if (checkOnly) {
       if (outstanding > 0) {
         console.error(`\n${outstanding} row(s) have no vector. Run \`npm run embed\`.`);
+        process.exitCode = 1;
+      } else if (unnamed.length > 0) {
+        console.error(`\nEverything is embedded, but ${unnamed.length} note(s) need an Arabic name in fragrance_notes.`);
         process.exitCode = 1;
       } else {
         console.log("Everything is embedded.");

@@ -43,6 +43,9 @@ import {
   RRF_K,
   SEMANTIC_WEIGHT,
   SIMILARITY_FLOOR,
+  MATCH_NOTES_PER_CARD,
+  NOTE_MATCH_FLOOR,
+  NOTE_MATCH_WINDOW,
 } from "@/src/lib/search/config";
 import { rankLexical } from "@/src/lib/search/lexical";
 import { embedQuery } from "@/src/lib/search/semantic";
@@ -58,8 +61,59 @@ import type { SearchMode } from "@/src/types/search";
 
 export interface SearchResult {
   products: ProductCardData[];
-  /** Which passes contributed — recorded for observability, never displayed. */
+  /**
+   * Which passes contributed. `"hybrid"` means the meaning-based pass ran for
+   * this query, and is the *only* condition under which the UI may show the
+   * AI-powered label or "Matches" lines.
+   */
   mode: SearchMode;
+  /**
+   * Product id → the notes it really contains that are closest to the query,
+   * in the page language. Hybrid mode only; a product absent here gets no
+   * "Matches" line.
+   */
+  reasons?: Record<string, string[]>;
+}
+
+/**
+ * Why each result matched — `search_match_notes()` (0076). Fails soft to no
+ * reasons: an explanation is a nicety, never a reason to fail a search.
+ */
+async function matchReasons(
+  locale: Locale,
+  query: string,
+  queryVector: number[],
+  productIds: string[],
+): Promise<Record<string, string[]>> {
+  if (productIds.length === 0) return {};
+  const supabase = getSupabasePublic();
+  if (!supabase) return {};
+
+  const { data, error } = await supabase.rpc("search_match_notes", {
+    query_embedding: JSON.stringify(queryVector),
+    query_text: query,
+    product_ids: productIds,
+    search_locale: locale,
+    per_product: MATCH_NOTES_PER_CARD,
+    note_floor: NOTE_MATCH_FLOOR,
+    note_window: NOTE_MATCH_WINDOW,
+  });
+
+  if (error || !Array.isArray(data)) {
+    if (error) console.warn(`[search] search_match_notes failed: ${error.message}`);
+    return {};
+  }
+
+  const reasons: Record<string, string[]> = {};
+  for (const row of data as unknown[]) {
+    if (typeof row !== "object" || row === null) continue;
+    const { product_id: id, notes } = row as { product_id?: unknown; notes?: unknown };
+    if (typeof id === "string" && Array.isArray(notes)) {
+      const labels = notes.filter((n): n is string => typeof n === "string" && n.length > 0);
+      if (labels.length > 0) reasons[id] = labels;
+    }
+  }
+  return reasons;
 }
 
 /**
@@ -173,10 +227,16 @@ export async function searchCatalog(
     return fallbackSearch(locale, normalized, limit);
   }
 
-  return {
-    products,
-    mode: queryVector ? "hybrid" : "lexical",
-  };
+  if (!queryVector) return { products, mode: "lexical" };
+
+  const reasons = await matchReasons(
+    locale,
+    normalized,
+    queryVector,
+    products.map((product) => product.id),
+  );
+
+  return { products, mode: "hybrid", reasons };
 }
 
 /**

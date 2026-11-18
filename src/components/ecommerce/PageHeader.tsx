@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 /**
  * The bar a utility page opens on — eyebrow, title, and an optional count line.
  *
@@ -24,6 +26,8 @@ export interface PageHeaderProps {
    * Dictionary headings leave it unset and inherit the page direction.
    */
   headingDir?: "auto";
+  /** Rendered after `meta` on the same line — `/search`'s "Ranked by meaning". */
+  metaExtra?: ReactNode;
 }
 
 export default function PageHeader({
@@ -32,6 +36,7 @@ export default function PageHeader({
   meta,
   metaLive = false,
   headingDir,
+  metaExtra,
 }: PageHeaderProps) {
   return (
     <header className="border-b border-ground-border px-4 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
@@ -45,11 +50,14 @@ export default function PageHeader({
       </h1>
 
       {meta ? (
-        <p
-          {...(metaLive ? { "aria-live": "polite" as const } : {})}
-          className="mt-3 text-xs tracking-[0.08em] text-ground-muted"
-        >
-          {meta}
+        <p className="mt-3 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-xs tracking-[0.08em] text-ground-muted">
+          <span {...(metaLive ? { "aria-live": "polite" as const } : {})}>{meta}</span>
+          {metaExtra ? (
+            <>
+              <span aria-hidden="true" className="h-3 w-px bg-ground-border" />
+              {metaExtra}
+            </>
+          ) : null}
         </p>
       ) : null}
     </header>
