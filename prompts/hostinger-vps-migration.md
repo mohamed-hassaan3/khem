@@ -61,7 +61,12 @@ served by Next. Metadata and the sitemap hard-code `https://khemperfumes.com`.
 
 ## Decisions (owner to confirm; recommendation first)
 
-- **A. Embeddings provider.**
+- **A. Embeddings provider.** *Amended 2026-11-18 by the owner:* stay on the
+  **AI Gateway** with `AI_GATEWAY_API_KEY` (no OIDC), switching to the free-tier
+  **`cohere/embed-v4.0`** at 1536 d, which was verified through the gateway first.
+  `openai/text-embedding-3-small` is not on the free tier. This means
+  `EMBEDDING_VERSION` 2 and `npm run embed -- --reembed` on Frankfurt after
+  phase 2. The original options follow for the record.
   - **(Recommended) Direct OpenAI** via `@ai-sdk/openai` with an `OPENAI_API_KEY`.
     It is the same `text-embedding-3-small` at 1536 dimensions, so stored vectors
     stay valid: **no re-embed, `EMBEDDING_VERSION` unchanged**. This removes the

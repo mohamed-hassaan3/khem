@@ -2,7 +2,7 @@
  * The semantic half of the engine — query embedding and vector similarity.
  *
  * SERVER ONLY — `import "server-only"` below is the guard. This module reads
- * `OPENAI_API_KEY` and must never reach a Client Component.
+ * `AI_GATEWAY_API_KEY` and must never reach a Client Component.
  *
  * Two rules govern everything here:
  *
@@ -30,6 +30,7 @@ import {
   EMBEDDING_MODEL,
   EMBEDDING_VERSION,
   EMBED_TIMEOUT_MS,
+  QUERY_EMBEDDING_OPTIONS,
 } from "./config";
 import { embeddingModel, hasEmbeddingCredentials } from "./embed";
 import { fold } from "./text";
@@ -67,7 +68,7 @@ function warnOnce(message: string, error?: unknown): void {
  */
 export async function embedQuery(query: string): Promise<number[] | null> {
   if (!hasEmbeddingCredentials()) {
-    warnOnce("No OPENAI_API_KEY.");
+    warnOnce("No AI_GATEWAY_API_KEY.");
     return null;
   }
 
@@ -82,7 +83,7 @@ export async function embedQuery(query: string): Promise<number[] | null> {
       abortSignal: AbortSignal.timeout(EMBED_TIMEOUT_MS),
       // A retry storm behind a 2.5s deadline just burns the budget.
       maxRetries: 1,
-      providerOptions: { openai: { dimensions: EMBEDDING_DIMENSIONS } },
+      providerOptions: QUERY_EMBEDDING_OPTIONS,
     });
 
     if (embedding.length !== EMBEDDING_DIMENSIONS) {

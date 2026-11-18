@@ -16,7 +16,8 @@ replaces §1–§3 and §11 of this report. Three facts below are now out of dat
   Tokyo cost ~220–250 ms per database round trip.
 - **The repository no longer depends on Vercel.** `vercel.json`, `@vercel/
   analytics`, `x-vercel-ip-country` and `VERCEL_OIDC_TOKEN` are gone. Search
-  embeddings call OpenAI directly (`OPENAI_API_KEY`), and the country header is
+  embeddings use the Vercel AI Gateway with an explicit `AI_GATEWAY_API_KEY`
+  and `cohere/embed-v4.0` (free tier, multilingual), and the country header is
   `x-khem-country`, set only by nginx (`src/lib/geo.ts`).
 - **`send-campaigns` runs every minute from the VPS crontab**, replacing both the
   external cron-job.org trigger and the daily Vercel backstop. `CRON_SECRET` is

@@ -24,7 +24,7 @@
  *
  * The engine has three parts and degrades one at a time rather than failing:
  *
- *   no OPENAI_API_KEY / provider error → `query_embedding` is null, the
+ *   no AI_GATEWAY_API_KEY / provider error → `query_embedding` is null, the
  *     semantic CTE contributes nothing, and Postgres returns the full-text
  *     ranking alone (`mode: "lexical"`).
  *   no embeddings written yet → same, from the other side: every stored vector

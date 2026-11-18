@@ -1,5 +1,5 @@
 /**
- * Embedder — `npm run embed` (and `npm run embed -- --check`).
+ * Embedder — `npm run embed` (and `-- --check`, `-- --reembed`).
  *
  * Fills `embedding` for every row where it is null, in both tables that carry
  * one: `"Product"` and `"Article"`. Those vectors are what
@@ -27,7 +27,7 @@
  * ## Cost and credentials
  *
  * Batched, and only ever over rows with no vector, so a re-run after adding one
- * article embeds one article. Needs `OPENAI_API_KEY` for the embeddings and
+ * article embeds one article. Needs `AI_GATEWAY_API_KEY` for the embeddings and
  * `SUPABASE_DB_URL` for the write, which is why this
  * is a script and not something a request can trigger.
  */
@@ -36,6 +36,7 @@ import { embedMany } from "ai";
 import type { Client } from "pg";
 
 import {
+  DOCUMENT_EMBEDDING_OPTIONS,
   EMBEDDING_DIMENSIONS,
   EMBEDDING_MODEL,
   EMBEDDING_VERSION,
@@ -147,7 +148,7 @@ async function embedTarget(
       model: embeddingModel(),
       values: batch.map((row) => row.document),
       maxRetries: 2,
-      providerOptions: { openai: { dimensions: EMBEDDING_DIMENSIONS } },
+      providerOptions: DOCUMENT_EMBEDDING_OPTIONS,
     });
 
     if (embeddings.length !== batch.length) {
@@ -181,12 +182,34 @@ async function embedTarget(
 
 async function main(): Promise<void> {
   const checkOnly = process.argv.includes("--check");
+  const reembed = process.argv.includes("--reembed");
 
   await withClient(async (client) => {
     console.log(
       `${redactUrl(connectionString())} ` +
         `(${EMBEDDING_MODEL}, ${EMBEDDING_DIMENSIONS}d, v${EMBEDDING_VERSION})`,
     );
+
+    /*
+     * `--reembed`: after a model change, every stored vector is in the old
+     * model's space and ranks as noise against the new model's queries. Null
+     * the in-scope rows so the normal pass below refills them all. Refused
+     * without credentials, so it can never leave the catalog vector-less by
+     * accident; an interrupted run just leaves rows null, which degrade to
+     * lexical and are picked up by the next `npm run embed`.
+     */
+    if (reembed && !checkOnly) {
+      if (!hasEmbeddingCredentials()) {
+        throw new Error("--reembed needs AI_GATEWAY_API_KEY; nothing was cleared.");
+      }
+      for (const target of TARGETS) {
+        const { rowCount } = await client.query(
+          `update public."${target.table}" set embedding = null
+            where embedding is not null and ${target.scope}`,
+        );
+        console.log(`  cleared ${rowCount ?? 0} ${target.plural} vector(s) for re-embedding`);
+      }
+    }
 
     const backlog = await Promise.all(
       TARGETS.map(async (target) => ({
@@ -221,7 +244,7 @@ async function main(): Promise<void> {
 
     if (!hasEmbeddingCredentials()) {
       throw new Error(
-        "No OPENAI_API_KEY. Set it in .env.local (locally) or /srv/khem/shared/.env.production (VPS).",
+        "No AI_GATEWAY_API_KEY. Set it in .env.local (locally) or /srv/khem/shared/.env.production (VPS).",
       );
     }
 

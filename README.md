@@ -48,7 +48,7 @@ Actual installed versions (`package.json`):
 | Database | Supabase Postgres via `@supabase/supabase-js` | **2.109.0** (pinned) |
 | Payments | `stripe` + `@stripe/react-stripe-js` | ^22.5.0 / ^6.8.2 |
 | Email | `resend` | ^6.20.0 |
-| AI | `ai` (Vercel AI SDK) + `@ai-sdk/openai` | ^7.0.173 |
+| AI | `ai` (Vercel AI SDK) via AI Gateway — `cohere/embed-v4.0` | ^7.0.173 |
 | Validation | `zod` | ^4.4.3 |
 | Charts | `lightweight-charts` | ^5.2.1 |
 | Hosting | Hostinger KVM 2 VPS (Germany) — nginx + PM2 | Node **24.x** |
@@ -526,7 +526,7 @@ belong in `/srv/khem/shared/.env.production` on the VPS
 | `CONTACT_INBOX_EMAIL` | no | server | Where enquiries land |
 | `ORDER_NOTIFICATION_EMAIL` | no | server | Where order slips land |
 | `EMAIL_ASSET_BASE_URL` | no | server | Absolute base for email images |
-| `OPENAI_API_KEY` | no | **server** | Search embeddings (`text-embedding-3-small`) |
+| `AI_GATEWAY_API_KEY` | no | **server** | Search embeddings (`cohere/embed-v4.0` via the AI Gateway) |
 | `CRON_SECRET` | yes | **server** | Bearer token for all 4 cron routes |
 | `KHEM_PRELAUNCH` | no | **server** | ⚠️ Coming Soon cover. `true` = on |
 | `KHEM_PRELAUNCH_VIDEO_URL` | no | server | Optional cover film |

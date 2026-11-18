@@ -21,7 +21,6 @@
     "db:copy-storage": "tsx --env-file-if-exists=.env.local scripts/db-copy-storage.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai": "4.0.118",
     "@clerk/localizations": "^4.15.1",
     "@clerk/nextjs": "^7.7.4",
     "@stripe/react-stripe-js": "^6.8.2",

@@ -222,7 +222,7 @@ ordering. `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS` and `EMBEDDING_VERSION` in
 changing the model to one of a different width is an `alter` plus a full
 re-embed.
 
-Credentials: `OPENAI_API_KEY` — in `.env.local` locally, and in
+Credentials: `AI_GATEWAY_API_KEY` (model `cohere/embed-v4.0`) — in `.env.local` locally, and in
 `/srv/khem/shared/.env.production` on the VPS.
 
 ## Editing content
