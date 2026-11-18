@@ -220,10 +220,11 @@ const nextConfig: NextConfig = {
    * — the API routes included, since a JSON response benefits from `nosniff`
    * exactly as much as a document does.
    *
-   * HSTS is **not** set here. Vercel already issues it for the apex domain and
-   * its certificates, and a `max-age` written into application code is one that
-   * outlives the reason it was chosen; getting it wrong locks visitors out of
-   * the domain for the length of the directive. It belongs to the platform.
+   * HSTS is **not** set here. nginx issues it on the VPS
+   * (`deploy/nginx/khemperfumes.conf`, HTTPS server only, no `preload`), next to
+   * the certificate it describes. A `max-age` written into application code is
+   * one that outlives the reason it was chosen; getting it wrong locks visitors
+   * out of the domain for the length of the directive. It belongs to the edge.
    */
   async headers() {
     return [
@@ -256,23 +257,6 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
-  },
-
-  /**
-   * Files the bundler cannot see being read, but that a function needs anyway.
-   *
-   * `src/lib/email/logo.ts` reads `public/email/khem-logo.png` at send time and
-   * attaches it inline, so the mark renders before the reader has allowed
-   * remote images. The path is built with `path.join(process.cwd(), …)`, which
-   * no static analysis can follow, so without this entry the file is left out
-   * of the deployed function and every email quietly falls back to a remote URL.
-   *
-   * `public/` being served over HTTP is a separate mechanism entirely and does
-   * not make the file readable from a lambda's filesystem.
-   */
-  outputFileTracingIncludes: {
-    "/api/**": ["./public/email/khem-logo.png"],
-    "/[locale]/**": ["./public/email/khem-logo.png"],
   },
 
   async redirects() {

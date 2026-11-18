@@ -17,7 +17,8 @@
     "db:dump": "tsx --env-file-if-exists=.env.local scripts/db-dump.ts",
     "db:verify": "tsx --env-file-if-exists=.env.local scripts/db-verify.ts",
     "db:test:sales": "tsx --env-file-if-exists=.env.local scripts/db-test-sales.ts",
-    "db:test:finance": "tsx --env-file-if-exists=.env.local scripts/db-test-finance.ts"
+    "db:test:finance": "tsx --env-file-if-exists=.env.local scripts/db-test-finance.ts",
+    "db:copy-storage": "tsx --env-file-if-exists=.env.local scripts/db-copy-storage.ts"
   },
   "dependencies": {
     "@clerk/localizations": "^4.15.1",
@@ -25,8 +26,7 @@
     "@stripe/react-stripe-js": "^6.8.2",
     "@stripe/stripe-js": "^9.14.0",
     "@supabase/supabase-js": "2.109.0",
-    "@vercel/analytics": "^2.0.1",
-    "ai": "^7.0.64",
+    "ai": "^7.0.173",
     "lightweight-charts": "^5.2.1",
     "lucide-react": "^1.30.0",
     "motion": "^13.0.0",

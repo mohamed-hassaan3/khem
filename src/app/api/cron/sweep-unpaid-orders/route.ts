@@ -10,10 +10,11 @@
  *
  * ## The schedule, and why it is only a backstop
  *
- * `vercel.json` runs this **once a day**, because the Hobby plan permits no
- * more than that — a quarter-hourly expression makes Vercel refuse the entire
- * deployment, which is exactly what kept the first version of this feature out
- * of production.
+ * The VPS crontab (`deploy/cron/khem.crontab`) runs this **once a day** — the
+ * cadence inherited from the Vercel Hobby plan, where a quarter-hourly
+ * expression refused the entire deployment and kept the first version of this
+ * feature out of production. The VPS has no such limit; every fifteen minutes is the natural
+ * tightening when wanted.
  *
  * Once a day is too slow to be the only sweep, so it is not the only sweep:
  * `sweepStaleHolds()` in `src/actions/checkout.ts` runs the same function
@@ -38,8 +39,8 @@
  *
  * ## Authentication
  *
- * A bearer token compared in constant time. Vercel sends `CRON_SECRET`
- * automatically on scheduled invocations; without the guard this endpoint would
+ * A bearer token compared in constant time. The VPS cron wrapper
+ * (`deploy/cron/khem-cron.sh`) sends `CRON_SECRET` on every scheduled call; without the guard this endpoint would
  * let anyone on the internet cancel orders that are mid-payment.
  */
 

@@ -18,9 +18,9 @@
  * Withdrawn and exceptional reservations are excluded on purpose — `SU`, `YU`,
  * `AN` and the rest name states that no longer exist, `EU`/`UN`/`QO` are not
  * countries, and `UK` is not the ISO code for the United Kingdom (`GB` is).
- * `XK` is kept: Kosovo has no ISO assignment, but it is what Vercel's
- * geolocation returns for that traffic, and a code the edge can send must be a
- * code the form can show.
+ * `XK` is kept: Kosovo has no ISO assignment, but it is what GeoIP databases
+ * (MaxMind's included) return for that traffic, and a code the proxy can send
+ * must be a code the form can show.
  *
  * The house delivers to exactly one of these — see `SHIPPING_COUNTRY` in
  * `src/lib/shipping.ts`. The rest are here so that somebody the edge has placed

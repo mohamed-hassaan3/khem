@@ -13,17 +13,22 @@
 
 /**
  * Embedding model, addressed through the Vercel AI Gateway as `provider/model`
- * so no provider package has to be installed.
+ * and authenticated with `AI_GATEWAY_API_KEY` — which works from the VPS; the
+ * gateway is a hosted API and needs no Vercel deployment.
  *
- * `text-embedding-3-small` is the cost/quality default and its 1536 dimensions
- * match every pgvector example. Its weak spot is cross-lingual retrieval — an
- * Arabic query against this catalog's English text — which is why the Arabic
- * popular-search chips carry an English `term` beside their Arabic label.
- * Switching to a stronger multilingual model (`cohere/embed-v4.0`,
- * `voyage/voyage-3.5`) is this constant, {@link EMBEDDING_DIMENSIONS}, a bump of
- * {@link EMBEDDING_VERSION}, and a re-run of `npm run embed`.
+ * `cohere/embed-v4.0` since Nov 2026 (v2), replacing `openai/text-embedding-3-
+ * small` (v1). Two reasons: it is on the gateway's free tier and the OpenAI
+ * model is not, and it is multilingual — an Arabic query now lands near this
+ * catalog's English text, which `text-embedding-3-small` did poorly. Verified
+ * through the gateway before switching: 1536-d vectors for documents, English
+ * queries and Arabic queries, with `outputDimension` demonstrably honoured.
+ *
+ * Changing the model is this constant, the two `*_EMBEDDING_OPTIONS` below,
+ * {@link EMBEDDING_DIMENSIONS} if the width moves, a bump of
+ * {@link EMBEDDING_VERSION}, and `npm run embed -- --reembed` — stored vectors
+ * from another model live in a different space and rank as noise.
  */
-export const EMBEDDING_MODEL = "openai/text-embedding-3-small";
+export const EMBEDDING_MODEL = "cohere/embed-v4.0";
 
 /** Vector width. Becomes the `vector(N)` column type. */
 export const EMBEDDING_DIMENSIONS = 1536;
@@ -38,7 +43,22 @@ export const EMBEDDING_DIMENSIONS = 1536;
  * lexical instead of silently ranking against vectors that describe text which
  * no longer exists.
  */
-export const EMBEDDING_VERSION = 1;
+export const EMBEDDING_VERSION = 2;
+
+/**
+ * Cohere embeds a stored document and a search query differently, and ranks
+ * best when each side says which it is. Every write path (the batch script, the
+ * one-row admin saves) uses the document options; the visitor's query uses the
+ * query options. `outputDimension` pins the width to the `vector(1536)` column
+ * rather than trusting the model default.
+ */
+export const DOCUMENT_EMBEDDING_OPTIONS = {
+  cohere: { inputType: "search_document", outputDimension: EMBEDDING_DIMENSIONS },
+} as const;
+
+export const QUERY_EMBEDDING_OPTIONS = {
+  cohere: { inputType: "search_query", outputDimension: EMBEDDING_DIMENSIONS },
+} as const;
 
 /** The query parameter, so a search is linkable and shareable. */
 export const SEARCH_PARAM = "q";

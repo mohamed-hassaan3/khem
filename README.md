@@ -48,10 +48,10 @@ Actual installed versions (`package.json`):
 | Database | Supabase Postgres via `@supabase/supabase-js` | **2.109.0** (pinned) |
 | Payments | `stripe` + `@stripe/react-stripe-js` | ^22.5.0 / ^6.8.2 |
 | Email | `resend` | ^6.20.0 |
-| AI | `ai` (Vercel AI SDK) via AI Gateway | ^7.0.64 |
+| AI | `ai` (Vercel AI SDK) via AI Gateway — `cohere/embed-v4.0` | ^7.0.173 |
 | Validation | `zod` | ^4.4.3 |
 | Charts | `lightweight-charts` | ^5.2.1 |
-| Hosting | Vercel | Node **24.x** |
+| Hosting | Hostinger KVM 2 VPS (Germany) — nginx + PM2 | Node **24.x** |
 
 **No Prisma. No Tiptap. No test framework.** AGENTS.md mentions the first two;
 they were never adopted. The absence of the third is a known gap (§23).
@@ -109,7 +109,7 @@ Browser
   ├─► src/proxy.ts  (clerkMiddleware wrapper)
   │     · pre-launch cover gate      · locale rewrite  /x → /en/x
   │     · /account + /admin early redirect (a cost optimisation, NOT the gate)
-  │     · currency cookie from x-vercel-ip-country
+  │     · currency cookie from x-khem-country (set by nginx; src/lib/geo.ts)
   │
   ├─► app/[locale]/**  Server Components — auth verified per route
   ├─► app/api/**       Route handlers — each protects itself
@@ -502,7 +502,8 @@ analytics, finance, settings.
 ## 16. Environment variables
 
 Copy `.env.example` → `.env.local`. **Never commit `.env.local`.** Real values
-belong in the Vercel project settings.
+belong in `/srv/khem/shared/.env.production` on the VPS
+(`deploy/env.production.example` lists the names).
 
 | Variable | Required | Scope | Purpose |
 |---|---|---|---|
@@ -525,7 +526,7 @@ belong in the Vercel project settings.
 | `CONTACT_INBOX_EMAIL` | no | server | Where enquiries land |
 | `ORDER_NOTIFICATION_EMAIL` | no | server | Where order slips land |
 | `EMAIL_ASSET_BASE_URL` | no | server | Absolute base for email images |
-| `AI_GATEWAY_API_KEY` | no | **server** | Search embeddings. Prefer OIDC on Vercel |
+| `AI_GATEWAY_API_KEY` | no | **server** | Search embeddings (`cohere/embed-v4.0` via the AI Gateway) |
 | `CRON_SECRET` | yes | **server** | Bearer token for all 4 cron routes |
 | `KHEM_PRELAUNCH` | no | **server** | ⚠️ Coming Soon cover. `true` = on |
 | `KHEM_PRELAUNCH_VIDEO_URL` | no | server | Optional cover film |
@@ -573,11 +574,13 @@ Available scripts:
 
 ## 18. Production deployment
 
-**Vercel**, Node 24.x, domain `khemperfumes.com`.
+**Hostinger KVM 2 VPS**, Node 24.x, domain `khemperfumes.com`. Operator runbook:
+`src/docs/hostinger-vps.md`; server files: `deploy/`.
 
-1. Set every variable from §16 in the Vercel project. Env vars are bound at
-   **build** time — a change takes effect on the next deploy, not immediately.
-2. Point the domain at the project; confirm HTTPS and HSTS at the platform.
+1. Set every variable from §16 in `/srv/khem/shared/.env.production`.
+   `NEXT_PUBLIC_*` values are inlined at **build** time — a change needs a
+   redeploy (`deploy/deploy.sh`); other values need only `pm2 reload khem`.
+2. Point the domain at the VPS; nginx terminates TLS (Let's Encrypt) and sends HSTS.
 3. **Clerk** — production instance; set the webhook to
    `https://khemperfumes.com/api/webhooks/clerk` with exactly `user.created`,
    `user.updated`, `user.deleted`; copy the signing secret.
@@ -590,9 +593,9 @@ Available scripts:
    Copy the signing secret. Then set `STRIPE_PAYMENT_ENABLED=true` — keys alone
    do **not** enable cards. Full procedure: `STRIPE-SETUP.md`.
 6. **Resend** — verify `khemperfumes.com`; set the sender addresses.
-7. **Cron** — `CRON_SECRET` on the project; Vercel sends it automatically. Note
-   `vercel.json` uses daily schedules because Hobby allows one run per day. On
-   Pro, tighten `sweep-unpaid-orders` to `*/15 * * * *`.
+7. **Cron** — `CRON_SECRET` in both `/srv/khem/shared/.env.production` and
+   `.cron.env` on the VPS; schedule in `deploy/cron/khem.crontab`. See
+   `src/docs/hostinger-vps.md`.
 8. Turn `KHEM_PRELAUNCH=false` to open the storefront.
 
 ---
@@ -632,7 +635,7 @@ internal links · mobile · production URL. And add it to
 - **Copy that is not in the database** → `src/lib/i18n/dictionaries/{en,ar}.ts`.
   Both files, or the Arabic tree falls back to English.
 - **Business rules** → `src/actions/`, `src/services/`, or SQL. Deploy/migrate.
-- **Secrets and endpoints** → Vercel env. Redeploy.
+- **Secrets and endpoints** → `/srv/khem/shared/.env.production` on the VPS. Reload or redeploy.
 
 ---
 
@@ -711,7 +714,7 @@ Both locales, and a real mobile device.
 | Deploy failed with `timed out after 60000ms` / `fetch failed` | Known — F17 (§24). Retry; it is not your commit |
 | `permission denied for table X` | Missing grant, or a `setof "Product"` invoker function (§6) |
 
-Logs: Vercel runtime logs. Supabase: the SQL editor and Postgres logs.
+Logs: `pm2 logs khem` and `/srv/khem/logs/` on the VPS. Supabase: the SQL editor and Postgres logs.
 
 ---
 

@@ -5,7 +5,27 @@ against the codebase as it stands. Audited 5 Sep 2026.
 
 ---
 
-## STATUS — PAUSED, 5 Sep 2026
+## STATUS — RESUMED, 17 Nov 2026 (supersedes the pause below)
+
+The owner bought a **Hostinger KVM 2 VPS in Germany**, and the migration is now
+being carried out under `prompts/hostinger-vps-migration.md`. That prompt
+replaces §1–§3 and §11 of this report. Three facts below are now out of date:
+
+- **Supabase moves from Tokyo (`ap-northeast-1`) to Frankfurt (`eu-central-1`)**
+  in the same operation (`prompts/supabase-region-migration.md`). From Europe,
+  Tokyo cost ~220–250 ms per database round trip.
+- **The repository no longer depends on Vercel.** `vercel.json`, `@vercel/
+  analytics`, `x-vercel-ip-country` and `VERCEL_OIDC_TOKEN` are gone. Search
+  embeddings use the Vercel AI Gateway with an explicit `AI_GATEWAY_API_KEY`
+  and `cohere/embed-v4.0` (free tier, multilingual), and the country header is
+  `x-khem-country`, set only by nginx (`src/lib/geo.ts`).
+- **`send-campaigns` runs every minute from the VPS crontab**, replacing both the
+  external cron-job.org trigger and the daily Vercel backstop. `CRON_SECRET` is
+  newly generated, so the external trigger must be switched off.
+
+Operations: `src/docs/hostinger-vps.md`. Server files: `deploy/`.
+
+## STATUS — PAUSED, 5 Sep 2026 (historical)
 
 **The migration is on hold by the owner's decision. Production stays on Vercel.**
 Nothing was changed on Vercel, in DNS, in Clerk, or on the Hostinger box.

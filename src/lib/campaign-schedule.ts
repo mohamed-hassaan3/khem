@@ -35,8 +35,8 @@ export const MIN_SCHEDULE_LEAD_MS = 5 * 60 * 1000;
  * How often the dispatcher is actually triggered, in minutes.
  *
  * The application cannot discover this. The trigger lives outside it — today an
- * external scheduler calling `/api/cron/send-campaigns` every minute, with
- * `vercel.json`'s daily run behind it as a backstop — so this number is a
+ * VPS crontab calling `/api/cron/send-campaigns` every minute
+ * (`deploy/cron/khem.crontab`) — so this number is a
  * statement *about* the deployment, kept in one place because three pieces of
  * copy are derived from it rather than each restating it.
  *

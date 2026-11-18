@@ -33,8 +33,8 @@
  * ## Authentication
  *
  * A bearer token compared in constant time, exactly as
- * `sweep-unpaid-orders` does. Vercel sends `CRON_SECRET` on scheduled
- * invocations; without the guard, anyone on the internet could expire the
+ * `sweep-unpaid-orders` does. The VPS cron wrapper (`deploy/cron/khem-cron.sh`)
+ * sends `CRON_SECRET` on every scheduled call; without the guard, anyone on the internet could expire the
  * house's outstanding credits.
  */
 
@@ -98,10 +98,10 @@ export async function GET(request: Request): Promise<NextResponse> {
    * The same job on the other instrument, in the same request rather than in a
    * cron of its own. Two reasons, and the first is the binding one:
    *
-   *  1. **The Hobby plan allows one run per day per cron**, and a more frequent
-   *     expression makes Vercel refuse the deployment outright. A fifth entry
-   *     would be competing for the same nightly allowance to do a job that is
-   *     already being done here.
+   *  1. It was written under the Vercel Hobby plan's one-run-per-day limit,
+   *     where a fifth entry would have competed for the same nightly allowance.
+   *     The VPS crontab has no such limit, but a separate job would still only
+   *     repeat work already being done here.
    *  2. They are the same job. Both close a window that nothing in the ordinary
    *     flow of the site would notice passing, both are idempotent by
    *     construction, and neither is urgent — `reward_balances` and

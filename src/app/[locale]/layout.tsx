@@ -3,7 +3,6 @@ import { arSA } from "@clerk/localizations";
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import "../globals.css";
-import { Analytics } from '@vercel/analytics/next';
 // import Script from "next/script";
 
 import Footer from "@/src/components/Footer";
@@ -566,7 +565,6 @@ export default async function RootLayout({
          * remounting.
          */}
         <CinematicIntro />
-        <Analytics />
       </body>
     </html>
   );

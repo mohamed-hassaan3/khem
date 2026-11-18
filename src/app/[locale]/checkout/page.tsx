@@ -6,7 +6,7 @@ import { getViewer } from "@/src/lib/auth";
 import { isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
-import { detectedCountryCode } from "@/src/lib/shipping";
+import { visitorCountry } from "@/src/lib/geo";
 import { isCardPaymentAvailable } from "@/src/lib/stripe/server";
 import { getBenefitSettings } from "@/src/services/benefits";
 import { spendableCreditsForUser } from "@/src/services/credits";
@@ -166,17 +166,16 @@ export default async function CheckoutPage({
     : [];
 
   /*
-   * Where the visitor is, as Vercel's edge sees it — the same header
-   * `src/proxy.ts` reads to pick a display currency. Null off Vercel, and the
+   * Where the visitor is, as nginx's GeoIP lookup sees it — the same header
+   * `src/proxy.ts` reads to pick a display currency (`src/lib/geo.ts`). Null
+   * when no GeoIP database is installed, and the
    * form treats null as *unknown* rather than as *elsewhere*; see
    * `src/lib/shipping.ts`.
    *
    * Free to read here: this route is already `force-dynamic` for the session,
    * so nothing is opted out of caching that was not already.
    */
-  const detectedCountry = detectedCountryCode(
-    requestHeaders.get("x-vercel-ip-country"),
-  );
+  const detectedCountry = visitorCountry(requestHeaders);
 
   return (
     <CheckoutView

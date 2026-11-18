@@ -188,7 +188,7 @@ async function refreshProductEmbedding(slug: string): Promise<void> {
    * Verified against the live database: the same statement succeeds with the
    * trigger disabled and stores nothing with it enabled. `npm run embed` runs
    * the identical UPDATE and is affected identically; it has simply never been
-   * observed, because the AI Gateway account has issued no vectors yet.
+   * observed, because the embedding provider has issued no vectors yet.
    *
    * The fix is one line in that trigger — guard on
    * `tg_op = 'UPDATE' and new.embedding is not distinct from old.embedding`, or

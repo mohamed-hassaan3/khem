@@ -64,6 +64,45 @@ arithmetic in `src/lib/admin/finance.ts` against the worked examples in
 
 A fresh project is `db:migrate`, `db:seed`, `embed`, in that order.
 
+## Moving the project to another region
+
+`npm run db:dump` is **not** a migration tool: it exports the catalog, content
+and directory only, and would lose orders, customers, finance and campaigns.
+Supabase's "Restore to a new project" keeps the source region. A region move is
+a whole-schema `pg_dump`/`psql` of `public` plus a file copy of Storage:
+
+```bash
+PG=/Applications/Postgres.app/Contents/Versions/17/bin   # pg_dump 17 for Postgres 17
+$PG/pg_dump "$SOURCE" --schema=public --schema-only --no-owner --no-publications -f schema.sql
+$PG/pg_dump "$SOURCE" --schema=public --data-only   --no-owner --no-publications -f data.sql
+# drop CREATE SCHEMA public / COMMENT ON SCHEMA public from schema.sql, enable
+# vector + pg_trgm in schema `extensions` on the target, then:
+$PG/psql "$TARGET" --single-transaction -v ON_ERROR_STOP=1 -f schema.sql \
+     -c 'SET session_replication_role = replica' -f data.sql \
+     -c "notify pgrst, 'reload schema'"
+npm run db:copy-storage            # files; `-- --check` to compare
+```
+
+**Then restore the grants.** A new project's default privileges give `anon`
+and `authenticated` `TRUNCATE`, `REFERENCES`, `TRIGGER` and `MAINTAIN` on every
+table created by the restore, and the dump does not revoke them. `TRUNCATE`
+ignores RLS. Revoke them on existing tables and for future ones, then diff
+`pg_class.relacl` and `pg_default_acl` against the source. Both must be identical:
+
+```sql
+revoke truncate, references, trigger, maintain on all tables in schema public from anon, authenticated;
+alter default privileges for role postgres in schema public
+  revoke truncate, references, trigger, maintain on tables from anon, authenticated;
+notify pgrst, 'reload schema';
+```
+
+Also strip the `ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin` lines from
+`schema.sql`: the new project already has them, and `postgres` may not set them.
+
+Use **session-pooler (port 5432)** URLs for both. Dumps contain customer PII:
+write them outside the repository and delete them afterwards. The Tokyo →
+Frankfurt move of Nov 2026 is written up in `prompts/supabase-region-migration.md`.
+
 ## After a migration: reload the schema cache
 
 `npm run db:migrate` changes Postgres. It does **not** tell Supabase's API layer
@@ -199,8 +238,8 @@ ordering. `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS` and `EMBEDDING_VERSION` in
 changing the model to one of a different width is an `alter` plus a full
 re-embed.
 
-Credentials: `AI_GATEWAY_API_KEY` locally, or Vercel's OIDC token in a
-deployment (`vercel env pull` brings it to a local checkout).
+Credentials: `AI_GATEWAY_API_KEY` (model `cohere/embed-v4.0`) — in `.env.local` locally, and in
+`/srv/khem/shared/.env.production` on the VPS.
 
 ## Editing content
 

@@ -8,10 +8,9 @@
  *
  * ## The schedule, and what "24 hours" honestly means
  *
- * `vercel.json` runs this **once a day**, because the Hobby plan permits no
- * more than that — the same constraint `sweep-unpaid-orders` documents, and the
- * same one that would refuse the whole deployment if an hourly expression were
- * written here. So the letter goes out on the first scheduled pass at or after
+ * The VPS crontab (`deploy/cron/khem.crontab`) runs this **once a day** — the
+ * cadence inherited from the Vercel Hobby plan, which refused anything more
+ * frequent; the VPS has no such limit, so it can be tightened there. So the letter goes out on the first scheduled pass at or after
  * the twenty-four hour mark: in practice between one and two days after
  * delivery, which is well inside the window where the question is still worth
  * asking. On Pro, tighten the schedule to something hourly and the wording
@@ -28,8 +27,8 @@
  * ## Authentication
  *
  * Identical to the sweeper: a bearer token compared in constant time, checked
- * before any database call. Vercel sends `CRON_SECRET` automatically on
- * scheduled invocations. Without the guard this would be a public "mail every
+ * before any database call. The VPS cron wrapper (`deploy/cron/khem-cron.sh`)
+ * sends `CRON_SECRET` on every scheduled call. Without the guard this would be a public "mail every
  * recent customer" button.
  */
 
