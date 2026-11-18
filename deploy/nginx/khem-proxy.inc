@@ -2,6 +2,10 @@
 # Included from khemperfumes.conf and khemperfumes.bootstrap.conf.
 
 proxy_pass http://khem_next;
+
+# Do not advertise software versions.
+server_tokens off;
+proxy_hide_header X-Powered-By;
 proxy_http_version 1.1;
 proxy_set_header Connection "";
 
