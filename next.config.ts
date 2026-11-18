@@ -212,6 +212,29 @@ function contentSecurityPolicy(): string {
 }
 
 const nextConfig: NextConfig = {
+  experimental: {
+    /*
+     * Off, because `src/proxy.ts` rewrites unprefixed English URLs into the
+     * `/[locale]` tree (`/about` → `/en/about`).
+     *
+     * Next 16's optimistic routing predicts a route's segment tree from the
+     * *shape* of URLs it has already seen, instead of asking the server. Having
+     * learned that `/` is `/[locale]` (with the `en` hidden by the rewrite), it
+     * predicted that `/about` is `/[locale]` too — with `locale = "about"` — and
+     * requested the segment `/$d$locale/__PAGE__`. That segment does not exist
+     * (the real one is `$d$locale/about/__PAGE__`), so every hover prefetch and
+     * client navigation to a page reached that way answered an empty 404, and
+     * the router fell back to a full page reload. Verified on 2026-11-18 from
+     * the nginx RSC log (`Next-Router-Segment-Prefetch: /$d$locale/__PAGE__`)
+     * and reproduced in Chrome.
+     *
+     * With prediction off, the router learns each URL's real tree from the
+     * server, which knows about the rewrite. Prefetching and per-segment caching
+     * stay on; only the guessing stops.
+     */
+    optimisticRouting: false,
+  },
+
   /**
    * Browser-side hardening.
    *
