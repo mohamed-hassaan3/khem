@@ -147,8 +147,8 @@ fi
 
 log "PM2 under systemd for ${APP_USER} (survives reboot)"
 env PATH="$PATH:/usr/bin" pm2 startup systemd -u "${APP_USER}" --hp "/home/${APP_USER}" >/dev/null
-sudo -u "${APP_USER}" -H bash -lc 'pm2 describe pm2-logrotate >/dev/null 2>&1 || pm2 install pm2-logrotate >/dev/null'
-sudo -u "${APP_USER}" -H bash -lc 'pm2 set pm2-logrotate:max_size 20M >/dev/null && pm2 set pm2-logrotate:retain 10 >/dev/null'
+sudo -u "${APP_USER}" -H bash -lc 'cd ~ && pm2 describe pm2-logrotate >/dev/null 2>&1 || pm2 install pm2-logrotate >/dev/null'
+sudo -u "${APP_USER}" -H bash -lc 'cd ~ && pm2 set pm2-logrotate:max_size 20M >/dev/null && pm2 set pm2-logrotate:retain 10 >/dev/null'
 
 log "Log rotation for cron.log"
 cat > /etc/logrotate.d/khem <<EOF
