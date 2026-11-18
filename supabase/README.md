@@ -83,6 +83,22 @@ $PG/psql "$TARGET" --single-transaction -v ON_ERROR_STOP=1 -f schema.sql \
 npm run db:copy-storage            # files; `-- --check` to compare
 ```
 
+**Then restore the grants.** A new project's default privileges give `anon`
+and `authenticated` `TRUNCATE`, `REFERENCES`, `TRIGGER` and `MAINTAIN` on every
+table created by the restore, and the dump does not revoke them. `TRUNCATE`
+ignores RLS. Revoke them on existing tables and for future ones, then diff
+`pg_class.relacl` and `pg_default_acl` against the source. Both must be identical:
+
+```sql
+revoke truncate, references, trigger, maintain on all tables in schema public from anon, authenticated;
+alter default privileges for role postgres in schema public
+  revoke truncate, references, trigger, maintain on tables from anon, authenticated;
+notify pgrst, 'reload schema';
+```
+
+Also strip the `ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin` lines from
+`schema.sql`: the new project already has them, and `postgres` may not set them.
+
 Use **session-pooler (port 5432)** URLs for both. Dumps contain customer PII:
 write them outside the repository and delete them afterwards. The Tokyo →
 Frankfurt move of Nov 2026 is written up in `prompts/supabase-region-migration.md`.

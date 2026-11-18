@@ -38,7 +38,14 @@ git -C "${REPO}" fetch --quiet --prune origin "+refs/heads/${BRANCH}:refs/remote
 SHA="$(git -C "${REPO}" rev-parse "refs/remotes/origin/${BRANCH}")"
 SHORT="${SHA:0:12}"
 REL="${ROOT}/releases/${SHORT}"
-PREV="$(readlink -f "${ROOT}/current" 2>/dev/null || true)"
+# Only a real symlink counts as a previous release. On the first deploy there is
+# no `current`, and `readlink -f` would still print the path itself — which the
+# rollback below then pointed `current` at, making it a link to itself.
+PREV=""
+if [[ -L "${ROOT}/current" ]]; then
+  PREV="$(readlink -f "${ROOT}/current" 2>/dev/null || true)"
+  [[ -d "${PREV}" && "${PREV}" == "${ROOT}/releases/"* ]] || PREV=""
+fi
 
 if [[ "${PREV}" == "${REL}" ]]; then
   log "${SHORT} is already live; nothing to do"
@@ -78,10 +85,12 @@ switch_to "${REL}"
 
 if ! healthy; then
   log "health check FAILED for ${SHORT}"
-  if [[ -n "${PREV}" && -d "${PREV}" ]]; then
+  if [[ -n "${PREV}" ]]; then
     log "rolling back to $(basename "${PREV}")"
     switch_to "${PREV}"
     healthy && log "previous release is serving again" || log "previous release is ALSO unhealthy — check: pm2 logs khem"
+  else
+    log "no previous release to fall back to — check: pm2 logs khem"
   fi
   exit 1
 fi

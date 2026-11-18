@@ -175,7 +175,7 @@ Layout:
 Repo files:
 
 - **`deploy/ecosystem.config.cjs`**: one app `khem`, `cwd: /srv/khem/current`,
-  `next start -p 3000 -H 127.0.0.1` (never public), **`instances: 1`, fork
+  `next start --hostname localhost` bound to 127.0.0.1 via `--dns-result-order=ipv4first` (never public), **`instances: 1`, fork
   mode** (single process, so the on-demand ISR invalidation stays coherent),
   `kill_timeout: 30000` (drains `after()`), `max_memory_restart: 1500M`, and env
   from `shared/.env.production`.
