@@ -103,6 +103,22 @@ Use **session-pooler (port 5432)** URLs for both. Dumps contain customer PII:
 write them outside the repository and delete them afterwards. The Tokyo →
 Frankfurt move of Nov 2026 is written up in `prompts/supabase-region-migration.md`.
 
+## Migrations applied out of order (Nov 2026)
+
+On the Frankfurt database `schema_migrations` ends at `0071`, but:
+
+- `0072a_scent_profile_product.sql` **is applied** (by hand, before the move) and
+  not recorded. It is idempotent.
+- `0072b_drop_ingredient_families.sql` is **not applied**. It is destructive and
+  waits until the scent-profile code is verified.
+- `0073_product_embedding_invalidation.sql` **is applied** directly with
+  `psql --single-transaction` (2026-11-18) and not recorded, so that applying it
+  did not also run `0072b`. It is idempotent.
+
+So the next `npm run db:migrate` runs `0072a`, `0072b` and `0073` and records
+all three. Run it only once `0072b` is wanted; until then, apply any new
+migration the same direct way.
+
 ## After a migration: reload the schema cache
 
 `npm run db:migrate` changes Postgres. It does **not** tell Supabase's API layer
@@ -228,8 +244,10 @@ smell alike rather than whichever three share a collection.
 What gets embedded is `Product.search_document`, a **generated column**. The
 full-text index reads the same column, so both halves of a hybrid search
 describe the same text — and there is no TypeScript twin of that string to drift
-out of step. A trigger nulls `embedding` whenever `search_document` changes, so
-editing a product marks it for re-embedding; `npm run embed` picks up the nulls.
+out of step. An AFTER UPDATE trigger (`0073_product_embedding_invalidation.sql`)
+nulls `embedding` only when `search_document` really changes — never on stock,
+price or status updates — so editing a product's text marks it for re-embedding
+and `npm run embed` picks up the nulls.
 
 Until `npm run embed` has run, everything still works: search returns the
 full-text ranking and the related rail falls back to own-collection-first

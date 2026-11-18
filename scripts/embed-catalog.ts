@@ -121,20 +121,8 @@ async function totalFor(
 /**
  * Embed one table's backlog.
  *
- * ⚠ For `"Product"`, the write below currently does not persist, and the fault
- * is in the schema rather than here. `product_embedding_invalidation`
- * (supabase/sql/0004_search.sql) is a BEFORE UPDATE trigger comparing
- * `new.search_document` with `old.search_document`, and Postgres computes
- * STORED generated columns *after* BEFORE triggers — so `new.search_document`
- * is NULL inside it on every update, the `is distinct from` test always passes,
- * and the vector this statement just wrote is nulled again before the row is
- * stored. Verified against the live database: identical write, trigger
- * disabled, value persists.
- *
- * `article_embedding_invalidation` (supabase/sql/0009_journal.sql) also compares
- * the embeddings and therefore does not have this defect; the product trigger
- * needs the same one-line guard, and changing it is a catalog behaviour change
- * that belongs in its own pass rather than in this file.
+ * Product writes persist since `0073_product_embedding_invalidation.sql`, which
+ * replaced a BEFORE UPDATE trigger that nulled every vector as it was written.
  */
 async function embedTarget(
   client: Client,

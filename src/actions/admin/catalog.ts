@@ -175,27 +175,11 @@ async function refreshProductEmbedding(slug: string): Promise<void> {
   if (vector === null) return;
 
   /*
-   * ⚠ KNOWN BLOCKER — this write currently does not stick, and the fault is in
-   * the schema rather than here.
-   *
-   * `product_embedding_invalidation` (supabase/sql/0004_search.sql) is a BEFORE
-   * UPDATE trigger comparing `new.search_document` with `old.search_document`.
-   * Postgres computes STORED generated columns *after* BEFORE triggers run, so
-   * `new.search_document` is always NULL inside it — the comparison is
-   * therefore always "distinct", and every update nulls the embedding,
-   * including this one, which changes nothing the document is built from.
-   *
-   * Verified against the live database: the same statement succeeds with the
-   * trigger disabled and stores nothing with it enabled. `npm run embed` runs
-   * the identical UPDATE and is affected identically; it has simply never been
-   * observed, because the embedding provider has issued no vectors yet.
-   *
-   * The fix is one line in that trigger — guard on
-   * `tg_op = 'UPDATE' and new.embedding is not distinct from old.embedding`, or
-   * make it an AFTER trigger — and it is deliberately not made here: this pass
-   * changes no SQL. Until then this call is a no-op and the product stays on
-   * the dashboard's "awaiting an embedding" list, which is the same state as a
-   * database where the embed script has not run.
+   * Persists since `0073_product_embedding_invalidation.sql`. The invalidation
+   * trigger runs AFTER UPDATE and only when `search_document` actually changed,
+   * so this write — which changes no text — is kept, and so are the stock
+   * updates every sale makes. The 0004 BEFORE trigger it replaced nulled every
+   * vector the moment it was written.
    */
   const { error: writeError } = await supabase
     .from("Product")
