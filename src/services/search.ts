@@ -8,7 +8,7 @@
  * pgvector nearest-neighbour search, fused by Reciprocal Rank Fusion, inside
  * one query. Neither the panel nor the page changed when it moved.
  *
- * SERVER ONLY — it reaches the database and, through `semantic.ts`, the gateway
+ * SERVER ONLY — it reaches the database and, through `semantic.ts`, the embedding provider
  * credentials.
  *
  * ## Why hybrid rather than pure vector search
@@ -24,7 +24,7 @@
  *
  * The engine has three parts and degrades one at a time rather than failing:
  *
- *   no gateway credentials / provider error → `query_embedding` is null, the
+ *   no OPENAI_API_KEY / provider error → `query_embedding` is null, the
  *     semantic CTE contributes nothing, and Postgres returns the full-text
  *     ranking alone (`mode: "lexical"`).
  *   no embeddings written yet → same, from the other side: every stored vector

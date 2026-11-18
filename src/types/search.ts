@@ -17,7 +17,7 @@ import type {
 /**
  * Which passes actually contributed to a result set.
  *
- * `"lexical"` means the semantic pass contributed nothing — no gateway
+ * `"lexical"` means the semantic pass contributed nothing — no provider
  * credentials, a provider error, a timeout, or a catalog whose vectors have not
  * been written yet. It is recorded for observability and never surfaced to the
  * visitor: a search that quietly works beats one that explains why it is

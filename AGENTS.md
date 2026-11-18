@@ -172,7 +172,7 @@ Keep these layers separate:
 | **AI Experience** | OpenAI + Vercel AI SDK | Scent Recommendation Engine, Fragrance Matcher |
 | **Forms & Rules** | React Hook Form + Zod | Schema validation on Client & Server Actions |
 | **Icons** | Lucide React | Minimal weight stroke icons (`strokeWidth={1.25}`) |
-| **Hosting** | Vercel | Edge Middleware, ISR caching, Dynamic Server Functions |
+| **Hosting** | Hostinger KVM 2 VPS (Germany) | nginx → one `next start` under PM2, Let's Encrypt TLS, system crontab. Runbook: `src/docs/hostinger-vps.md`; server files: `deploy/`. **No Vercel platform features** — no `vercel.json`, no `@vercel/*`, no `x-vercel-*` headers |
 | **Vector** | pgvector similarity queries and article embedding storage
 
 
@@ -184,7 +184,7 @@ UI must display stored data only.
 ```
 khem/
 ├── .github/
-│   └── workflows/          # CI/CD pipelines (Lint, Typecheck, Test, Vercel Build)
+│   └── workflows/          # keep_alive.yml (pings Supabase)
 ├── app/                    # Next.js App Router root
 │   ├── (auth)/             # Auth group (sign-in, sign-up, sso-callback)
 │   ├── (marketing)/        # Editorial pages (heritage, journal, craftsmanship, about)
@@ -253,6 +253,11 @@ All routes must follow strict dynamic parameters, metadata definitions, and layo
 > write itself, and a new public surface that quotes stored data **must be added
 > to a list there**. A page that is only in this table is a page that can be a
 > day stale. See `prompts/vercel-usage-reduction.md`.
+>
+> The site now runs on a VPS (`src/docs/hostinger-vps.md`), where a regeneration
+> costs nothing but CPU. The windows were kept anyway: on-demand revalidation is
+> still the freshness mechanism, and it is still per-process — which is why
+> `deploy/ecosystem.config.cjs` runs exactly **one** Next process.
 
 | Route Path | Type | Caching | Purpose & UX Requirements |
 | :--- | :--- | :--- | :--- |

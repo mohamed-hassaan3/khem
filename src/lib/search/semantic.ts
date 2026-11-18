@@ -2,7 +2,7 @@
  * The semantic half of the engine — query embedding and vector similarity.
  *
  * SERVER ONLY — `import "server-only"` below is the guard. This module reads
- * `AI_GATEWAY_API_KEY` and must never reach a Client Component.
+ * `OPENAI_API_KEY` and must never reach a Client Component.
  *
  * Two rules govern everything here:
  *
@@ -31,6 +31,7 @@ import {
   EMBEDDING_VERSION,
   EMBED_TIMEOUT_MS,
 } from "./config";
+import { embeddingModel, hasEmbeddingCredentials } from "./embed";
 import { fold } from "./text";
 
 /**
@@ -41,28 +42,11 @@ import { fold } from "./text";
  * so evicting the oldest key is a `keys().next()` away.
  *
  * Per-instance and lost on redeploy, which is fine for a cache and stated here
- * so nobody mistakes it for shared state. It becomes Vercel KV if the miss rate
- * ever justifies the round trip.
+ * so nobody mistakes it for shared state. The VPS runs a single Node process
+ * (`deploy/ecosystem.config.cjs`), so there is exactly one of these.
  */
 const CACHE_LIMIT = 200;
 const cache = new Map<string, number[]>();
-
-/**
- * Whether the gateway can be reached at all.
- *
- * Two credentials are valid and the SDK picks up whichever is present: a
- * long-lived `AI_GATEWAY_API_KEY` (how local development authenticates, from
- * `.env.local`) or the short-lived OIDC token Vercel injects into a deployment,
- * which rotates on its own and is the preferred production path — run
- * `vercel env pull` to use it locally too.
- *
- * Checking for *either* matters: keying this on the API key alone would silently
- * disable semantic search on every OIDC-authenticated deployment, and the
- * fallback is quiet by design, so nobody would notice.
- */
-function hasGatewayCredentials(): boolean {
-  return Boolean(process.env.AI_GATEWAY_API_KEY ?? process.env.VERCEL_OIDC_TOKEN);
-}
 
 /** Whether the "provider unavailable" warning has already been logged. */
 let hasWarned = false;
@@ -82,8 +66,8 @@ function warnOnce(message: string, error?: unknown): void {
  * than {@link EMBED_TIMEOUT_MS} would trade a working search for a slow one.
  */
 export async function embedQuery(query: string): Promise<number[] | null> {
-  if (!hasGatewayCredentials()) {
-    warnOnce("No AI Gateway credentials (AI_GATEWAY_API_KEY or OIDC token).");
+  if (!hasEmbeddingCredentials()) {
+    warnOnce("No OPENAI_API_KEY.");
     return null;
   }
 
@@ -93,7 +77,7 @@ export async function embedQuery(query: string): Promise<number[] | null> {
 
   try {
     const { embedding } = await embed({
-      model: EMBEDDING_MODEL,
+      model: embeddingModel(),
       value: query,
       abortSignal: AbortSignal.timeout(EMBED_TIMEOUT_MS),
       // A retry storm behind a 2.5s deadline just burns the budget.

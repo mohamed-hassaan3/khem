@@ -9,8 +9,8 @@
  *
  * ## Detection is the same contract the currency already uses
  *
- * `x-vercel-ip-country`, read in `src/proxy.ts` and mapped by
- * `resolveCurrencyForCountry()`. No second geolocation source, no new
+ * The visitor-country header (`src/lib/geo.ts`, set only by nginx), read in
+ * `src/proxy.ts` and mapped by `resolveCurrencyForCountry()`. No second geolocation source, no new
  * dependency, and no client API: a browser prompt for location on a checkout
  * screen is both slower and more alarming than the header we already have.
  *
@@ -77,7 +77,7 @@ export function isEgypt(value: string): boolean {
 /**
  * Normalise the geolocation header into an alpha-2 code, or nothing.
  *
- * Nothing is a first-class answer: it means "not running behind Vercel's edge",
+ * Nothing is a first-class answer: it means "no GeoIP answer for this request",
  * and every caller must treat it as *unknown*, never as *elsewhere*.
  */
 export function detectedCountryCode(header: string | null): string | null {
@@ -147,7 +147,7 @@ export function countryOptions(locale: Locale): CountryOption[] {
 /**
  * The detected country, but only if the dropdown actually holds it.
  *
- * Vercel's header is not always an ISO country: Tor exits arrive as `T1`, and
+ * A GeoIP answer is not always an ISO country: Tor exits arrive as `T1`, and
  * unresolvable traffic as `XX`. Selecting a value no `<option>` carries leaves
  * a native `<select>` showing an empty box — the one state the field must never
  * be in, since it is pre-answered by design.

@@ -89,7 +89,7 @@ export interface CheckoutViewProps {
   /** Whether both Stripe keys are present. Decided on the server. */
   cardAvailable: boolean;
   /**
-   * ISO-3166 alpha-2 for where the request came from, or null off Vercel.
+   * ISO-3166 alpha-2 for where the request came from, or null when unknown.
    *
    * Null means *unknown*, never *elsewhere*: the country field stays editable
    * and the order goes through, exactly as it did before detection existed.

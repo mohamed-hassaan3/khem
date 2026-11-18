@@ -9,6 +9,7 @@ import {
   resolveCurrencyForCountry,
 } from "./lib/currency";
 import { signInPathWithReturn } from "./lib/auth-redirect";
+import { visitorCountry } from "./lib/geo";
 import {
   DEFAULT_LOCALE,
   LOCALES,
@@ -77,7 +78,8 @@ import { ACCOUNT_PATHS, ADMIN_PATH } from "./lib/routes";
  * ## Currency detection
  *
  * The third job, and the only one that reads the visitor's location: the
- * request's `x-vercel-ip-country` header is mapped to one of six display
+ * request's country header (`x-khem-country`, set only by nginx — see
+ * `src/lib/geo.ts`) is mapped to one of six display
  * currencies and written to a cookie the client reads after hydration.
  *
  * This does not contradict the paragraph above. Auto-redirecting on
@@ -90,8 +92,8 @@ import { ACCOUNT_PATHS, ADMIN_PATH } from "./lib/routes";
  *
  * The cookie is written **only when absent or invalid**, which is what makes
  * the footer switcher authoritative: once a visitor has chosen, geo never
- * overwrites them. When the header is missing — local dev, or any non-Vercel
- * host — nothing is written and the client falls back to its own timezone
+ * overwrites them. When the header is empty — local dev, or nginx without a
+ * GeoIP database — nothing is written and the client falls back to its own timezone
  * heuristic. A country is never fabricated.
  *
  * `middleware.ts` is deprecated in Next 16; this is the `proxy.ts` convention,
@@ -126,8 +128,8 @@ function localeRewrite(request: NextRequest): NextResponse {
  * "normal" paths, so a future fourth `return` cannot silently ship a visitor
  * without a currency.
  *
- * The country code is untrusted — a client can send that header to a non-Vercel
- * origin — so it is only ever a key into the fixed map in `currency.ts`, and an
+ * The country code is treated as untrusted — nginx overwrites it, but this file
+ * does not rely on that — so it is only ever a key into the fixed map in `currency.ts`, and an
  * unrecognised value resolves to USD. Nothing derived from the visitor's
  * location is stored beyond the three-letter code: no IP, no country.
  */
@@ -140,7 +142,7 @@ function withCurrencyCookie(
   const stored = request.cookies.get(CURRENCY_COOKIE)?.value;
   if (isCurrency(stored)) return response;
 
-  const country = request.headers.get("x-vercel-ip-country");
+  const country = visitorCountry(request.headers);
   // No header means no geolocation available. Writing USD here would be a
   // guess dressed as a decision, and it would lock out the client fallback.
   if (country === null) return response;

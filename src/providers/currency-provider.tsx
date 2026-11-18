@@ -81,8 +81,8 @@ interface CurrencyContextValue {
 /**
  * Best guess at a currency without a server-supplied country.
  *
- * Only reached when the proxy wrote no cookie, which means no
- * `x-vercel-ip-country` header: local development, or a non-Vercel host. The
+ * Only reached when the proxy wrote no cookie, which means no country header
+ * (`src/lib/geo.ts`): local development, or nginx without a GeoIP database. The
  * IANA timezone is the better of the two signals — it reflects where the device
  * is, not what language it was configured in — so it is tried first, with the
  * locale's region subtag behind it.

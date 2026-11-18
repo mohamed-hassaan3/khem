@@ -1,0 +1,18 @@
+# KHEM scheduled jobs — installed for user `khem` with:
+#   crontab /srv/khem/current/deploy/cron/khem.crontab
+#
+# Server time is UTC (provision.sh). The three daily times are exactly the
+# schedule vercel.json carried. send-campaigns runs every minute: it replaces the
+# external cron-job.org trigger as well as Vercel's daily backstop, and the run
+# lease in supabase/sql/0057_campaign_dispatch_lease.sql makes overlap safe.
+# flock -n additionally stops a slow run queueing another behind it.
+
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+CRON=/srv/khem/current/deploy/cron/khem-cron.sh
+LOG=/srv/khem/logs/cron.log
+
+*  *  * * *  flock -n /tmp/khem-send-campaigns.lock  $CRON send-campaigns      >> $LOG 2>&1
+0  3  * * *  flock -n /tmp/khem-sweep.lock           $CRON sweep-unpaid-orders >> $LOG 2>&1
+30 3  * * *  flock -n /tmp/khem-credits.lock         $CRON expire-credits      >> $LOG 2>&1
+0  9  * * *  flock -n /tmp/khem-feedback.lock        $CRON order-feedback      >> $LOG 2>&1

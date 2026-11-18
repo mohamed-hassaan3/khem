@@ -11,23 +11,34 @@
  * ⚠ No `import "server-only"` here, deliberately, and for the same reason
  * `config.ts` has no imports at all: the offline script runs under plain Node
  * via `tsx`, where that module throws on import. Nothing in this file is a
- * secret — the gateway key is read from the environment at call time — but only
+ * secret — `OPENAI_API_KEY` is read from the environment at call time — but only
  * server modules and scripts may import it, and a Client Component that reaches
  * it will fail at runtime rather than leak anything.
  */
 
+import { openai } from "@ai-sdk/openai";
 import { embed } from "ai";
 
 import { EMBEDDING_DIMENSIONS, EMBEDDING_MODEL } from "./config";
 
 /**
- * Whether the AI Gateway can be called at all.
+ * Whether the embedding provider can be called at all.
  *
- * `VERCEL_OIDC_TOKEN` is what a Vercel deployment holds when no explicit key is
- * configured; locally it is `AI_GATEWAY_API_KEY` from `.env.local`.
+ * `OPENAI_API_KEY` — from `.env.local` locally, from
+ * `/srv/khem/shared/.env.production` on the VPS. Absent, every caller degrades
+ * to lexical search rather than failing.
  */
-export function hasGatewayCredentials(): boolean {
-  return Boolean(process.env.AI_GATEWAY_API_KEY ?? process.env.VERCEL_OIDC_TOKEN);
+export function hasEmbeddingCredentials(): boolean {
+  return Boolean(process.env.OPENAI_API_KEY);
+}
+
+/**
+ * The one embedding model every path uses — the batch script, the one-row admin
+ * saves, and the query side in `semantic.ts`. Stored vectors are only
+ * comparable to query vectors from this exact model, so it is built here once.
+ */
+export function embeddingModel() {
+  return openai.embedding(EMBEDDING_MODEL);
 }
 
 /** pgvector's text input form: `[0.1,0.2,…]`. */
@@ -38,7 +49,7 @@ export function toVectorLiteral(vector: readonly number[]): string {
 /**
  * The vector for one document, or `null`.
  *
- * Returns rather than throws on every failure — no credentials, gateway error,
+ * Returns rather than throws on every failure — no credentials, provider error,
  * unexpected width — because the only caller is a write path that has already
  * saved the row. A missing vector degrades that product's search to lexical,
  * which is precisely the state of every product on a database where `npm run
@@ -53,14 +64,14 @@ export async function embedDocument(
   document: string,
 ): Promise<number[] | null> {
   if (document.trim().length === 0) return null;
-  if (!hasGatewayCredentials()) {
-    console.warn("[search] No AI Gateway credentials; embedding skipped.");
+  if (!hasEmbeddingCredentials()) {
+    console.warn("[search] No OPENAI_API_KEY; embedding skipped.");
     return null;
   }
 
   try {
     const { embedding } = await embed({
-      model: EMBEDDING_MODEL,
+      model: embeddingModel(),
       value: document,
       maxRetries: 2,
       providerOptions: { openai: { dimensions: EMBEDDING_DIMENSIONS } },

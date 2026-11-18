@@ -65,8 +65,9 @@ export function isRateLimited(
 /**
  * Best-effort client identity for a Server Action.
  *
- * `x-forwarded-for` is spoofable in general; on Vercel the platform sets it and
- * the leftmost entry is the real client. Good enough for a throttle whose worst
+ * `x-forwarded-for` is spoofable in general; on the VPS nginx *overwrites* it
+ * with `$remote_addr` (`deploy/nginx/khemperfumes.conf`), so the leftmost — and
+ * only — entry is the real client. Good enough for a throttle whose worst
  * failure is a limit applied slightly too broadly.
  */
 export async function clientKey(): Promise<string> {

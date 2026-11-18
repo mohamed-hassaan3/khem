@@ -90,11 +90,10 @@ const HOLD_MINUTES = 30;
  *
  * ## Why this is here and not only on a schedule
  *
- * `vercel.json` runs the same sweep on a cron, but the Hobby plan permits at
- * most one cron run per day — a more frequent expression makes Vercel refuse
- * the deployment outright, which is what kept the first version of this feature
- * from ever reaching production. Once a day is far too slow: a basket abandoned
- * at 09:00 would hold its bottles until the small hours.
+ * The VPS crontab (`deploy/cron/khem.crontab`) runs the same sweep once a day —
+ * the cadence it inherited from the Vercel Hobby plan, which refused anything
+ * more frequent. Once a day is far too slow on its own: a basket abandoned at
+ * 09:00 would hold its bottles until the small hours.
  *
  * So the sweep runs *here*, on the one event that both cares about the answer
  * and happens exactly as often as it needs to. A shopper reaching checkout is
@@ -251,7 +250,7 @@ export async function placeCustomerOrder(
    * a country that is not Egypt fails the `country` field with `outsideEgypt`.
    *
    * Deliberately judged from the **submitted country** rather than from
-   * `x-vercel-ip-country`. The header decides what the form's dropdown starts
+   * the visitor-country header (`src/lib/geo.ts`). The header decides what the form's dropdown starts
    * at and nothing more, because it is routinely wrong about people standing in
    * Cairo — a VPN, a corporate proxy, a carrier homed abroad — and a refusal
    * such a customer cannot correct is a lost order defending against nothing.

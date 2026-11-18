@@ -12,8 +12,13 @@
  */
 
 /**
- * Embedding model, addressed through the Vercel AI Gateway as `provider/model`
- * so no provider package has to be installed.
+ * Embedding model — an OpenAI model id, called directly through `@ai-sdk/openai`
+ * with `OPENAI_API_KEY` (see `embeddingModel()` in `embed.ts`).
+ *
+ * It was addressed as `openai/text-embedding-3-small` through the Vercel AI
+ * Gateway until the move off Vercel. The gateway only proxied OpenAI, so the
+ * model, the dimensions, and therefore every stored vector are unchanged —
+ * which is why {@link EMBEDDING_VERSION} was *not* bumped by that move.
  *
  * `text-embedding-3-small` is the cost/quality default and its 1536 dimensions
  * match every pgvector example. Its weak spot is cross-lingual retrieval — an
@@ -23,7 +28,7 @@
  * `voyage/voyage-3.5`) is this constant, {@link EMBEDDING_DIMENSIONS}, a bump of
  * {@link EMBEDDING_VERSION}, and a re-run of `npm run embed`.
  */
-export const EMBEDDING_MODEL = "openai/text-embedding-3-small";
+export const EMBEDDING_MODEL = "text-embedding-3-small";
 
 /** Vector width. Becomes the `vector(N)` column type. */
 export const EMBEDDING_DIMENSIONS = 1536;

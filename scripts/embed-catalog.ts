@@ -27,8 +27,8 @@
  * ## Cost and credentials
  *
  * Batched, and only ever over rows with no vector, so a re-run after adding one
- * article embeds one article. Needs `AI_GATEWAY_API_KEY` (or Vercel's OIDC
- * token) for the gateway and `SUPABASE_DB_URL` for the write, which is why this
+ * article embeds one article. Needs `OPENAI_API_KEY` for the embeddings and
+ * `SUPABASE_DB_URL` for the write, which is why this
  * is a script and not something a request can trigger.
  */
 
@@ -46,10 +46,14 @@ import {
  * literal format live in one place so the batch path here and the one-row paths
  * there cannot drift.
  */
-import { hasGatewayCredentials, toVectorLiteral } from "../src/lib/search/embed";
+import {
+  embeddingModel,
+  hasEmbeddingCredentials,
+  toVectorLiteral,
+} from "../src/lib/search/embed";
 import { redactUrl, connectionString, withClient } from "./db";
 
-/** Rows per gateway call. Large enough to be cheap, small enough to retry. */
+/** Rows per provider call. Large enough to be cheap, small enough to retry. */
 const BATCH_SIZE = 32;
 
 interface PendingRow {
@@ -65,7 +69,7 @@ interface EmbedTarget {
   /**
    * Which rows are *meant* to carry a vector. An archived product and an
    * unpublished draft are invisible to the functions that rank, so embedding
-   * them would spend gateway credit on rows nobody can reach — and, worse,
+   * them would spend embedding credit on rows nobody can reach — and, worse,
    * `--check` would fail forever on a draft the editor has not finished.
    */
   scope: string;
@@ -140,7 +144,7 @@ async function embedTarget(
     const batch = pending.slice(offset, offset + BATCH_SIZE);
 
     const { embeddings } = await embedMany({
-      model: EMBEDDING_MODEL,
+      model: embeddingModel(),
       values: batch.map((row) => row.document),
       maxRetries: 2,
       providerOptions: { openai: { dimensions: EMBEDDING_DIMENSIONS } },
@@ -148,7 +152,7 @@ async function embedTarget(
 
     if (embeddings.length !== batch.length) {
       throw new Error(
-        `Gateway returned ${embeddings.length} vectors for ${batch.length} documents.`,
+        `Provider returned ${embeddings.length} vectors for ${batch.length} documents.`,
       );
     }
 
@@ -215,9 +219,9 @@ async function main(): Promise<void> {
 
     if (outstanding === 0) return;
 
-    if (!hasGatewayCredentials()) {
+    if (!hasEmbeddingCredentials()) {
       throw new Error(
-        "No AI Gateway credentials. Set AI_GATEWAY_API_KEY in .env.local, or run `vercel env pull`.",
+        "No OPENAI_API_KEY. Set it in .env.local (locally) or /srv/khem/shared/.env.production (VPS).",
       );
     }
 
