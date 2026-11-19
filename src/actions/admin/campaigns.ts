@@ -310,10 +310,10 @@ export async function sendCampaignTestEmail(
 /**
  * Put a campaign in the queue for a moment in the future.
  *
- * `scheduledAt` arrives as a UTC instant; the desk's local reading was converted
- * in the browser, where the desk's zone is actually known. See
- * `src/lib/campaign-schedule.ts` for why that conversion lives in exactly one
- * place.
+ * The desk's reading arrives as Cairo wall-clock time and
+ * `scheduleCampaignSchema` converts it to the UTC instant stored here — on the
+ * server, with `src/lib/shop-time.ts`, so the device's own zone never matters
+ * (prompts/cairo-time-zone.md).
  *
  * The moment is honoured as closely as whatever triggers
  * `src/app/api/cron/send-campaigns/route.ts` allows — a cadence the deployment
@@ -337,7 +337,8 @@ export async function scheduleCampaign(input: unknown): Promise<AdminActionResul
   if (!parsed.success) {
     return {
       ok: false,
-      message: "That schedule could not be set.",
+      // The schedule field shows only this line, so say which rule refused it.
+      message: parsed.error.issues[0]?.message ?? "That schedule could not be set.",
       fieldErrors: fieldErrorsFrom(parsed.error),
     };
   }

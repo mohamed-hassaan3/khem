@@ -41,6 +41,7 @@ import type {
 } from "@/src/types/order";
 
 import { countOpenOrders, countUnopenedOrders } from "./orders";
+import { shopDayEndUtc, shopDayStartUtc, shopTodayAsCalendarDate } from "@/src/lib/shop-time";
 
 function logFailure(query: string, message: string): void {
   console.error(`[admin] ${query} failed: ${message}`);
@@ -61,7 +62,7 @@ export function parseRange(value: string | string[] | undefined): SalesRange {
     : DEFAULT_RANGE;
 }
 
-/** `YYYY-MM-DD` in UTC — the form `daily_sales()` returns and the chart reads. */
+/** A calendar-day `Date` as `YYYY-MM-DD` — the form `daily_sales()` returns and the chart reads. */
 function isoDay(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
@@ -77,8 +78,8 @@ function fillDays(rows: readonly SalesPoint[], days: number): SalesPoint[] {
   const bySlot = new Map(rows.map((row) => [row.day, row]));
   const filled: SalesPoint[] = [];
 
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  // Cairo's today, matching the Cairo days `daily_sales()` groups by (0077).
+  const today = shopTodayAsCalendarDate();
 
   for (let offset = days - 1; offset >= 0; offset -= 1) {
     const date = new Date(today);
@@ -300,9 +301,12 @@ export async function listMovements(
   if (filters.channel) query = query.eq("channel", filters.channel);
   if (filters.action) query = query.eq("action", filters.action);
   if (filters.slug) query = query.eq("productSlug", filters.slug);
-  if (filters.from) query = query.gte("createdAt", `${filters.from}T00:00:00Z`);
-  // `to` is inclusive of the whole day, which is what a date picker means by it.
-  if (filters.to) query = query.lte("createdAt", `${filters.to}T23:59:59Z`);
+  // Cairo days (prompts/cairo-time-zone.md); `to` is inclusive of the whole
+  // day, which is what a date picker means by it.
+  const fromInstant = filters.from ? shopDayStartUtc(filters.from) : null;
+  const toInstant = filters.to ? shopDayEndUtc(filters.to) : null;
+  if (fromInstant) query = query.gte("createdAt", fromInstant);
+  if (toInstant) query = query.lte("createdAt", toInstant);
 
   const { data, error } = await query
     .order("createdAt", { ascending: false })

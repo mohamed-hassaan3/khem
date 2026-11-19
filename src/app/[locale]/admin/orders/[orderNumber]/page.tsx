@@ -14,6 +14,7 @@ import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getAdminOrder } from "@/src/services/admin/orders";
 import type { OrderShippingAddress } from "@/src/types/order";
+import { SHOP_TIME_ZONE, SHOP_ZONE_LABEL } from "@/src/lib/shop-time";
 
 /**
  * One order.
@@ -42,8 +43,8 @@ function stamp(iso: string): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "UTC",
-  }).format(new Date(iso));
+    timeZone: SHOP_TIME_ZONE,
+  }).format(new Date(iso)) + ` ${SHOP_ZONE_LABEL}`;
 }
 
 /** True when there is anything to print on a parcel. A walk-in has nothing. */

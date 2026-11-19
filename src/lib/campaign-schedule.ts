@@ -2,24 +2,24 @@
  * When a campaign is due, in the two forms it has to take.
  *
  * The database holds an instant — `timestamptz`, always UTC. The desk types a
- * wall-clock reading into a `datetime-local` input, which has no zone at all and
- * is interpreted by the browser as *local*. Those are different kinds of value,
- * and the whole of the scheduling timezone bug was one line that treated them as
- * the same kind: `scheduledAt.slice(0, 16)` handed the UTC digits to a field
- * that reads them as Cairo, so a letter scheduled for 17:00 redisplayed as 14:00
- * and moved three hours earlier every time it was saved again.
+ * wall-clock reading into a `datetime-local` input, which has no zone at all.
+ * Those are different kinds of value: an earlier version sliced the UTC string
+ * straight into the field, so a letter scheduled for 17:00 redisplayed as 14:00
+ * and moved earlier every time it was saved again.
  *
  * **This module is the only place the two forms cross.** Nothing else may slice
- * an ISO string for a form field, and nothing else may hand a form field's value
- * to the server without passing it through here.
+ * an ISO string for a form field, and nothing else may turn a form field's value
+ * into an instant without passing it through here (or `src/lib/shop-time.ts`,
+ * which it delegates to).
  *
- * ## Why every function here is browser-side
+ * ## The field is read on Cairo's clock, not the device's
  *
- * "Local" is a fact about the person looking, not about the machine rendering.
- * On a server it is whatever zone the host happens to run in — UTC on most
- * platforms — so a value computed during SSR would be a different string from
- * the one the browser computes, which is both wrong and a hydration mismatch.
- * Callers seed these values in an effect after mount, never during render.
+ * It used to be read in the browser's own zone — right only while the browser
+ * happened to be in Cairo, and silently an hour or more off on a device set
+ * anywhere else. The boutique keeps one clock (prompts/cairo-time-zone.md), so
+ * the field is Cairo time on every device, the conversion gives the same answer
+ * on the server and in the browser, and the server repeats it rather than
+ * trusting the browser's.
  *
  * ## The lead time is not a hosting limit
  *
@@ -27,6 +27,8 @@
  * plan. It is a floor on what may be *asked for*, and it does not move when the
  * trigger does.
  */
+
+import { formatShopDateTime, shopWallClockToUtc, utcToShopWallClock } from "@/src/lib/shop-time";
 
 /** Nearer than this is refused: nothing can be relied on to run in the gap. */
 export const MIN_SCHEDULE_LEAD_MS = 5 * 60 * 1000;
@@ -45,16 +47,15 @@ export const MIN_SCHEDULE_LEAD_MS = 5 * 60 * 1000;
  * scheduling work was undertaken to fix: a campaign set for 10:00 that went at
  * 14:09, because the only thing looking at the queue looked once a day.
  *
- * Five, not one, because five is what was observed. Production logs on 5 Sep
- * 2026 showed authenticated dispatch requests 196 seconds apart, and one alone
- * in a five-minute window — real evidence of a several-minute cadence, against
- * an assumption of sixty seconds. If the external schedule is later confirmed
- * to run every minute, this is the one line to change.
+ * One, because one is what runs. The VPS crontab (`deploy/cron/khem.crontab`)
+ * calls the dispatcher every minute, and the server log on 2026-11-19 shows a
+ * campaign scheduled for 15:10:00 UTC dispatched at 15:10:02. The 5 it replaced
+ * was observed under the old external trigger, which no longer exists.
  */
 // Typed `number`, not the literal `5`: the cadence phrase compares against 1,
 // and a literal type would make that comparison a compile error every time this
 // value is edited — which is a change this constant exists to invite.
-export const DISPATCH_INTERVAL_MINUTES: number = 5;
+export const DISPATCH_INTERVAL_MINUTES: number = 1;
 
 /**
  * Nearer than this is allowed, but warned about.
@@ -77,78 +78,28 @@ export function dispatchCadencePhrase(): string {
     : `every ${DISPATCH_INTERVAL_MINUTES} minutes`;
 }
 
-function pad(value: number): string {
-  return String(value).padStart(2, "0");
-}
-
 /**
- * A stored instant, as the `datetime-local` input expects to read it.
- *
- * `YYYY-MM-DDTHH:mm` in the viewer's own zone. The getters used here are the
- * local ones deliberately — `getUTCHours()` and friends would reproduce exactly
- * the bug this replaces.
+ * A stored instant, as the `datetime-local` input expects to read it:
+ * `YYYY-MM-DDTHH:mm` on **Cairo's** clock, whatever zone the device is in.
  */
 export function toDateTimeLocalValue(iso: string): string {
-  const when = new Date(iso);
-  if (Number.isNaN(when.getTime())) return "";
-
-  return (
-    `${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())}` +
-    `T${pad(when.getHours())}:${pad(when.getMinutes())}`
-  );
+  return utcToShopWallClock(iso);
 }
 
 /**
- * What the input holds, as the instant to store.
- *
- * A `datetime-local` value carries no offset, so `new Date()` resolves it
- * against the browser's zone — which is the reading the person intended — and
- * `toISOString()` states that same instant in UTC for the column.
- *
- * Returns null for an empty or unparseable field rather than an Invalid Date,
- * so a caller cannot send `"Invalid Date"` to the server by accident.
+ * What the input holds — a Cairo wall-clock reading — as the UTC instant it
+ * names, or null when it is empty, malformed, or falls in the hour Cairo skips
+ * when summer time begins. The server repeats this conversion on its own; this
+ * copy exists so the field can warn before the button is pressed.
  */
 export function fromDateTimeLocalValue(value: string): string | null {
-  if (value.trim() === "") return null;
-
-  const when = new Date(value);
-  if (Number.isNaN(when.getTime())) return null;
-
-  return when.toISOString();
+  const result = shopWallClockToUtc(value);
+  return result.ok ? result.iso : null;
 }
 
-/** The zone the browser resolved to, e.g. `Africa/Cairo`. Empty on failure. */
-export function localTimeZone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
-  } catch {
-    return "";
-  }
-}
-
-/**
- * A stored instant, printed for a person.
- *
- * The zone name is not decoration: a time without one is the ambiguity that
- * caused the original bug, and the desk has to be able to check the reading
- * against the clock on their wall. `timeZone` is left undefined so the platform
- * uses the viewer's own — pass "UTC" for the pre-hydration rendering, where the
- * viewer's zone is not yet known.
- */
-export function formatScheduledAt(iso: string, timeZone?: string): string {
-  const when = new Date(iso);
-  if (Number.isNaN(when.getTime())) return "—";
-
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZoneName: "short",
-    ...(timeZone ? { timeZone } : {}),
-  }).format(when);
+/** A stored instant, printed for a person: "19 Nov 2026, 17:10 Cairo". */
+export function formatScheduledAt(iso: string): string {
+  return formatShopDateTime(iso);
 }
 
 /** How a chosen moment sits against the floor and the warning threshold. */

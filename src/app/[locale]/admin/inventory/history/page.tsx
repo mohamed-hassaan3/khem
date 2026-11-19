@@ -21,6 +21,7 @@ import {
 import { listMovements } from "@/src/services/admin/analytics";
 import { listAdminProducts } from "@/src/services/admin/catalog";
 import { listAdminOrders } from "@/src/services/admin/orders";
+import { formatShopDateTime } from "@/src/lib/shop-time";
 
 /**
  * The whole stock ledger, across every product.
@@ -202,10 +203,7 @@ export default async function InventoryHistoryIndexPage({
           {rows.map((movement) => (
             <AdminRow key={movement.id}>
               <AdminCell muted>
-                {new Date(movement.createdAt).toLocaleString("en-GB", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
+                {formatShopDateTime(movement.createdAt)}
               </AdminCell>
               <AdminCell>
                 <Link

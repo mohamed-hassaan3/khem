@@ -16,10 +16,13 @@
  * URLs of two working screens to serve a third; `parseIsoDate`, `marginPercent`
  * and `formatMargin` are imported from there rather than restated.
  *
- * UTC, for that module's reason: every other date boundary in this repository
- * is UTC, and a Finance "September" that disagreed with the Sales & Profit
- * September beside it would be worse than one that is two hours out from Cairo.
+ * Cairo days, for that module's reason: every report day runs from Cairo
+ * midnight to Cairo midnight (prompts/cairo-time-zone.md), here, on Sales &
+ * Profit, and in the finance functions (`supabase/sql/0077_cairo_report_days.sql`),
+ * so a Finance "September" and the Sales September beside it agree.
  */
+
+import { shopTodayAsCalendarDate } from "@/src/lib/shop-time";
 
 export { marginPercent, parseIsoDate, formatMargin } from "./sales";
 
@@ -65,16 +68,17 @@ export interface FinanceWindow {
   to: string | null;
 }
 
-/** `YYYY-MM-DD` in UTC — the form every finance function takes and returns. */
+/**
+ * A calendar-day `Date` (UTC midnight standing for that day) as `YYYY-MM-DD` —
+ * the form every finance function takes and returns.
+ */
 export function isoDay(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-/** Midnight UTC today, as a `Date` that can be walked backwards safely. */
-function utcToday(): Date {
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  return today;
+/** Today's Cairo calendar date, as a `Date` that can be walked backwards safely. */
+function shopToday(): Date {
+  return shopTodayAsCalendarDate();
 }
 
 /**
@@ -99,7 +103,7 @@ export function financeWindow(
 
   if (period === "all") return { from: null, to: null };
 
-  const today = utcToday();
+  const today = shopToday();
 
   if (period === "today") {
     return { from: isoDay(today), to: isoDay(today) };
@@ -193,8 +197,8 @@ export function previousWindow(window: FinanceWindow): FinanceWindow | null {
  * one, which is the only month a desk could mean by "all time".
  */
 export function targetMonthOf(window: FinanceWindow): string {
-  const anchor = window.from ? new Date(`${window.from}T00:00:00.000Z`) : new Date();
-  const safe = Number.isNaN(anchor.getTime()) ? new Date() : anchor;
+  const anchor = window.from ? new Date(`${window.from}T00:00:00.000Z`) : shopToday();
+  const safe = Number.isNaN(anchor.getTime()) ? shopToday() : anchor;
   return isoDay(new Date(Date.UTC(safe.getUTCFullYear(), safe.getUTCMonth(), 1)));
 }
 
@@ -318,8 +322,7 @@ export function monthPace(
   const month = start.getUTCMonth();
   const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
 
-  const today = new Date(asOf);
-  today.setUTCHours(0, 0, 0, 0);
+  const today = shopTodayAsCalendarDate(asOf.getTime());
 
   const isSameMonth =
     today.getUTCFullYear() === year && today.getUTCMonth() === month;

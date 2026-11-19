@@ -13,6 +13,7 @@ import {
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listCampaigns, subscriberCount } from "@/src/services/admin/campaigns";
 import { isEditable } from "@/src/types/campaign";
+import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * Marketing campaigns.
@@ -33,7 +34,7 @@ function stamp(iso: string | null): string {
     day: "numeric",
     month: "short",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: SHOP_TIME_ZONE,
   }).format(new Date(iso));
 }
 

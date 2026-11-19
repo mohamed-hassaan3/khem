@@ -11,6 +11,7 @@ import {
 } from "@/src/components/admin/AdminTable";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listOffers } from "@/src/services/admin/offers";
+import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * Offers & Bundles.
@@ -33,7 +34,7 @@ function stamp(iso: string | null): string {
     day: "numeric",
     month: "short",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: SHOP_TIME_ZONE,
   }).format(new Date(iso));
 }
 

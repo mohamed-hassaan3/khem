@@ -15,6 +15,7 @@ import {
   getTopSearches,
   getZeroResultSearches,
 } from "@/src/services/admin/search-insights";
+import { SHOP_TIME_ZONE, SHOP_ZONE_LABEL } from "@/src/lib/shop-time";
 
 /**
  * What visitors look for.
@@ -34,8 +35,8 @@ function stamp(iso: string): string {
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "UTC",
-  }).format(new Date(iso));
+    timeZone: SHOP_TIME_ZONE,
+  }).format(new Date(iso)) + ` ${SHOP_ZONE_LABEL}`;
 }
 
 function percent(share: number): string {

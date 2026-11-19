@@ -11,6 +11,7 @@ import {
   getMonthlyActuals,
   listFinancialTargets,
 } from "@/src/services/admin/finance";
+import { shopTodayAsCalendarDate } from "@/src/lib/shop-time";
 
 /**
  * Monthly targets.
@@ -44,8 +45,8 @@ export default async function AdminTargetsPage({
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  // Cairo's calendar date (prompts/cairo-time-zone.md).
+  const today = shopTodayAsCalendarDate();
 
   const firstMonth = new Date(
     Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (MONTHS_SHOWN - 1), 1),

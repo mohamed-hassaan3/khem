@@ -18,6 +18,7 @@ import {
 } from "@/src/services/admin/marketing";
 import { getAdminBenefitSettings } from "@/src/services/admin/benefits";
 import { getWelcomeOffer } from "@/src/services/marketing";
+import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * The announcement bar and the offer popup — the two pieces of house chrome.
@@ -39,7 +40,7 @@ function stamp(iso: string | null): string {
     day: "numeric",
     month: "short",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: SHOP_TIME_ZONE,
   }).format(new Date(iso));
 }
 

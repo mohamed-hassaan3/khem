@@ -12,6 +12,7 @@ import {
 import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listDiscounts } from "@/src/services/admin/discounts";
+import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * Discount codes.
@@ -32,7 +33,7 @@ function stamp(iso: string | null): string {
     day: "numeric",
     month: "short",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: SHOP_TIME_ZONE,
   }).format(new Date(iso));
 }
 

@@ -19,6 +19,7 @@ import {
 } from "@/src/services/admin/orders";
 import type { OrderStatus } from "@/src/types/account";
 import type { OrderChannel } from "@/src/types/order";
+import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * The order book.
@@ -63,13 +64,13 @@ function label(value: string): string {
   return value.charAt(0) + value.slice(1).toLowerCase();
 }
 
-/** Dates are formatted here, never stored formatted. UTC, as they are stored. */
+/** Dates are formatted here, never stored formatted — on Cairo's calendar. */
 function placedOn(iso: string): string {
   return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: SHOP_TIME_ZONE,
   }).format(new Date(iso));
 }
 

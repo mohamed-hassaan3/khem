@@ -17,6 +17,7 @@ import {
   listSubscribers,
 } from "@/src/services/admin/newsletter";
 import type { NewsletterStatus } from "@/src/types/newsletter";
+import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * The Inner Circle.
@@ -68,7 +69,7 @@ function stamp(iso: string | null): string {
     day: "numeric",
     month: "short",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: SHOP_TIME_ZONE,
   }).format(new Date(iso));
 }
 

@@ -16,6 +16,7 @@ import {
   CUSTOMERS_PER_PAGE,
   listAdminCustomers,
 } from "@/src/services/admin/customers";
+import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * The customer directory.
@@ -61,7 +62,7 @@ function joinedOn(iso: string | null): string {
     day: "numeric",
     month: "short",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: SHOP_TIME_ZONE,
   }).format(new Date(iso));
 }
 

@@ -19,6 +19,7 @@ import {
   listAdminProducts,
 } from "@/src/services/admin/catalog";
 import { getDiscount } from "@/src/services/admin/discounts";
+import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * One discount code.
@@ -36,7 +37,7 @@ function stamp(iso: string | null): string {
     day: "numeric",
     month: "short",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: SHOP_TIME_ZONE,
   }).format(new Date(iso));
 }
 

@@ -6,20 +6,22 @@
  * `?period=month` into two timestamps, and dividing one integer by another
  * without ever dividing by zero.
  *
- * ## Why the windows are calendar windows, and why they are UTC
+ * ## Why the windows are calendar windows, and why they are Cairo's
  *
  * "This month" means the month, not thirty days: a desk closing the books asks
  * for September, not for the last four and a bit weeks. `/admin/analytics` asks
  * the other question — a rolling 7/30/90 — and both are legitimate, which is
  * why the two screens are separate rather than one with an overloaded switch.
  *
- * UTC because every other date boundary in this repository is UTC:
- * `daily_sales()` casts `at time zone 'UTC'`, and a report whose "today"
- * disagreed with the chart beside it would be worse than one that is two hours
- * out from Cairo. When the boutique wants Africa/Cairo it is one constant here
- * and one cast there, changed together.
+ * Every report day runs from Cairo midnight to Cairo midnight
+ * (prompts/cairo-time-zone.md): the boutique trades in Cairo, and a UTC day
+ * started at 02:00 there, so a sale at 01:30 counted toward yesterday. The
+ * database functions cut their days the same way
+ * (`supabase/sql/0077_cairo_report_days.sql`), so this screen, Finance and the
+ * dashboard chart agree on which day a sale belongs to.
  */
 
+import { shopDayEndUtc, shopDayStartUtc, shopTodayAsCalendarDate } from "@/src/lib/shop-time";
 import type { DiscountSource, SaleStatus } from "@/src/types/sales";
 
 /** The windows the period switch offers. Anything else is not a valid URL. */
@@ -78,17 +80,17 @@ export function salesWindow(
 ): SalesWindow {
   if (from || to) {
     return {
-      from: from ? `${from}T00:00:00.000Z` : null,
-      // Inclusive of the whole closing day, which is what a date picker means
-      // by it — the alternative silently drops everything sold that afternoon.
-      to: to ? `${to}T23:59:59.999Z` : null,
+      from: from ? shopDayStartUtc(from) : null,
+      // Inclusive of the whole closing Cairo day, which is what a date picker
+      // means by it — the alternative silently drops everything sold that evening.
+      to: to ? shopDayEndUtc(to) : null,
     };
   }
 
   if (period === "all") return { from: null, to: null };
 
-  const start = new Date();
-  start.setUTCHours(0, 0, 0, 0);
+  // Cairo's calendar date today, walked as a calendar day with UTC getters.
+  const start = shopTodayAsCalendarDate();
 
   if (period === "week") {
     // Monday, because a retail week does. `getUTCDay()` is 0 on Sunday, which
@@ -101,7 +103,7 @@ export function salesWindow(
     start.setUTCMonth(0, 1);
   }
 
-  return { from: start.toISOString(), to: null };
+  return { from: shopDayStartUtc(start.toISOString().slice(0, 10)), to: null };
 }
 
 /**

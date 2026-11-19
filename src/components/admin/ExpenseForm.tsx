@@ -45,6 +45,7 @@ import { localizePath, type Locale } from "@/src/lib/i18n/config";
 import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import type { Expense, ExpenseCategory } from "@/src/types/finance";
+import { shopDate } from "@/src/lib/shop-time";
 
 const STATUS_OPTIONS = [
   { value: "PENDING", label: "Unpaid — incurred, not yet paid" },
@@ -64,9 +65,9 @@ function toPounds(cents: number | undefined): string {
   return (cents / 100).toFixed(2);
 }
 
-/** Today, UTC — the same day boundary every finance figure uses. */
+/** Today in Cairo — the same day boundary every finance figure uses. */
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return shopDate();
 }
 
 export default function ExpenseForm({

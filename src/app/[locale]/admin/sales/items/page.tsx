@@ -31,6 +31,7 @@ import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listAdminCollections } from "@/src/services/admin/catalog";
 import { listSalesLedger } from "@/src/services/admin/sales";
 import type { OrderChannel } from "@/src/types/order";
+import { formatShopDate } from "@/src/lib/shop-time";
 
 /**
  * Items Sold — one row per line the boutique has ever sold.
@@ -282,9 +283,7 @@ export default async function AdminItemsSoldPage({
             return (
               <AdminRow key={row.id}>
                 <AdminCell muted>
-                  {new Date(row.soldAt).toLocaleDateString("en-GB", {
-                    dateStyle: "medium",
-                  })}
+                  {formatShopDate(row.soldAt)}
                 </AdminCell>
 
                 <AdminCell>

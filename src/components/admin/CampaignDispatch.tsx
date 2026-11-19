@@ -18,14 +18,13 @@ import {
   AdminToggle,
 } from "@/src/components/admin/fields";
 import LocalTimestamp from "@/src/components/admin/LocalTimestamp";
-import { useIsHydrated } from "@/src/hooks/use-is-hydrated";
 import {
   dispatchCadencePhrase,
   fromDateTimeLocalValue,
-  localTimeZone,
   scheduleProximity,
   toDateTimeLocalValue,
 } from "@/src/lib/campaign-schedule";
+import { SHOP_ZONE_LABEL } from "@/src/lib/shop-time";
 import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import type { CampaignWithProgress } from "@/src/types/campaign";
@@ -66,20 +65,18 @@ import type { CampaignWithProgress } from "@/src/types/campaign";
  * before the edit, and a confirmation showing a number that is no longer true is
  * worse than no confirmation at all.
  *
- * ## Scheduling says what it can honour, in the reader's own clock
+ * ## Scheduling is in Cairo time, on every device
  *
  * The field is a `datetime-local`, which is a wall-clock reading with no zone
  * attached; the column behind it is a UTC instant. Every crossing between those
- * two goes through `src/lib/campaign-schedule.ts` and none happens here — an
- * earlier version sliced the UTC string straight into the field, which showed
- * the desk a time three hours from the one they had chosen and moved it another
- * three every time they pressed Schedule again.
+ * two goes through `src/lib/campaign-schedule.ts` and none happens here.
  *
- * The field's value is derived, not seeded, because this component renders on
- * the server too and "local" there is the host's zone rather than the reader's.
- * `useIsHydrated()` is what says the browser may now be asked. The moment is
- * then echoed back beneath the field, with its zone named, so what was stored
- * can be checked against the clock on the wall.
+ * The reading is Cairo's clock, not the device's (prompts/cairo-time-zone.md):
+ * the field sends the wall-clock value as typed and the server converts it, so
+ * a laptop still set to Berlin schedules the same moment as a phone in Cairo.
+ * Because the zone is fixed, the server render and the browser agree and the
+ * field can be derived during render. The stored moment is echoed back beneath
+ * the field with "Cairo" named, so it can be checked against the wall clock.
  *
  * What the hint does *not* say is how often the dispatch runs. That is the
  * deployment's business — a platform cron now, a server cron on another host
@@ -97,10 +94,8 @@ export default function CampaignDispatch({
   const [armed, setArmed] = useState(false);
   /*
    * What the desk has typed, or null while the field is still showing the
-   * stored moment. Deliberately not seeded from the prop: "local" is a fact
-   * about the browser, and computing it during a server render would produce
-   * the host's zone — a wrong time on screen and a hydration mismatch. The
-   * field is derived below instead, once the browser can be asked.
+   * stored moment. Not seeded from the prop, so that after an action clears
+   * it the field reads the refreshed row rather than a stale copy.
    */
   const [edited, setEdited] = useState<string | null>(null);
   const [toSubscribers, setToSubscribers] = useState(campaign.toSubscribers);
@@ -109,20 +104,15 @@ export default function CampaignDispatch({
   const [result, setResult] = useState<AdminActionResult | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const hydrated = useIsHydrated();
-  const zone = hydrated ? localTimeZone() : "";
-
   /*
-   * The stored instant, in the reader's zone — and whatever they have typed
+   * The stored instant, on Cairo's clock — and whatever they have typed
    * since, which wins until an action clears it. Derived rather than held, so
    * the field can never drift from the row: after a schedule is set or
    * withdrawn, `run()` drops the edit and this reads the refreshed prop again.
    */
   const when =
     edited ??
-    (hydrated && campaign.scheduledAt
-      ? toDateTimeLocalValue(campaign.scheduledAt)
-      : "");
+    (campaign.scheduledAt ? toDateTimeLocalValue(campaign.scheduledAt) : "");
 
   const outstanding = campaign.claimed - campaign.delivered;
   const sending = campaign.status === "SENDING";
@@ -154,7 +144,14 @@ export default function CampaignDispatch({
    * button rather than after.
    */
   const proximity = scheduleProximity(when);
-  const unreachable = proximity === "past" || proximity === "too-soon";
+  /*
+   * A reading that names no real moment: the hour Cairo skips when summer time
+   * begins (or a value the browser let through malformed). Refused here and on
+   * the server alike.
+   */
+  const notARealTime = when !== "" && fromDateTimeLocalValue(when) === null;
+  const unreachable =
+    proximity === "past" || proximity === "too-soon" || notARealTime;
 
   function run(action: () => Promise<AdminActionResult>) {
     startTransition(async () => {
@@ -384,13 +381,11 @@ export default function CampaignDispatch({
           <div className="space-y-3 border-t border-ground-border pt-5">
             <AdminInput
               id="scheduledAt"
-              label="Or schedule it"
+              label={`Or schedule it (${SHOP_ZONE_LABEL} time)`}
               type="datetime-local"
               value={when}
               onChange={setEdited}
-              hint={`Times are read in your own timezone${
-                zone ? ` (${zone})` : ""
-              } and stored in UTC. The dispatch runs ${dispatchCadencePhrase()}, so the campaign goes out on the first run at or after the moment you choose.`}
+              hint={`Enter the time in ${SHOP_ZONE_LABEL} (Africa/Cairo, summer time included), whatever timezone this device is set to. The dispatch runs ${dispatchCadencePhrase()}, so the campaign goes out on the first run at or after the moment you choose.`}
             />
 
             {/*
@@ -403,6 +398,13 @@ export default function CampaignDispatch({
                 Scheduled for{" "}
                 <LocalTimestamp iso={campaign.scheduledAt} className="tabular-nums" />
               </p>
+            ) : null}
+
+            {notARealTime ? (
+              <AdminNotice tone="error">
+                That time does not exist in Cairo — the clocks skip it when summer
+                time begins. Choose a time after the change.
+              </AdminNotice>
             ) : null}
 
             {proximity === "past" ? (
@@ -440,10 +442,12 @@ export default function CampaignDispatch({
                   isPending || when === "" || unsaved || unreachable || reachesNobody
                 }
                 onClick={() => {
-                  const scheduledAt = fromDateTimeLocalValue(when);
-                  if (!scheduledAt) return;
+                  if (fromDateTimeLocalValue(when) === null) return;
 
-                  run(() => scheduleCampaign({ id: campaign.id, scheduledAt }));
+                  // The Cairo reading as typed; the server converts it.
+                  run(() =>
+                    scheduleCampaign({ id: campaign.id, scheduledLocal: when }),
+                  );
                 }}
               >
                 Schedule

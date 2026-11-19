@@ -13,6 +13,7 @@ import { listInventoryMovements } from "@/src/services/admin/analytics";
 import { getAdminProduct } from "@/src/services/admin/catalog";
 import { INVENTORY_ACTION_LABEL } from "@/src/lib/inventory";
 import type { InventoryMovement } from "@/src/types/order";
+import { formatShopDateTime } from "@/src/lib/shop-time";
 
 /**
  * One product's stock history.
@@ -70,10 +71,7 @@ export default async function InventoryHistoryPage({
           {movements.map((movement: InventoryMovement) => (
             <AdminRow key={movement.id}>
               <AdminCell muted>
-                {new Date(movement.createdAt).toLocaleString("en-GB", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
+                {formatShopDateTime(movement.createdAt)}
               </AdminCell>
               <AdminCell muted>
                 {movement.channel === "ONLINE" ? "Online" : "Offline"}

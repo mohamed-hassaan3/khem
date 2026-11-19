@@ -28,6 +28,7 @@ seed/    a generated export of the database — written by `npm run db:dump`,
 | `sql/0063_finance.sql` | `expense_categories`, `expense_recurring_rules`, `expenses`, `financial_targets`, and the six reporting functions — the operating-expense ledger, monthly targets, and the joins that turn `0062`'s gross profit into a net one. It **reads** `"SalesLedgerRow"` and writes nothing to it: revenue and COGS still come from the sales ledger, and rent is never a cost of goods. Service-role only, like every table above it |
 | `sql/0075_arabic_search.sql` | `ar_fold()` (strips «ال», diacritics, alef/ya/ta-marbuta variants) applied to `search_vector_ar` and to Arabic queries; `hybrid_search_products` picks the Arabic index for any Arabic query; `fragrance_notes` — the bilingual glossary of every note, seeded from the products' own EN/AR pairs, embedded by `npm run embed` |
 | `sql/0076_search_match_notes.sql` | `search_match_notes()` — for a meaning-based search, each result's own notes closest to the query (floor + window), in the page language. Powers the "Matches" lines |
+| `sql/0077_cairo_report_days.sql` | Report days run from Cairo midnight: `DailySales`, `daily_sales`, `product_sales`, `channel_split`, the `finance_*` functions, `generate_recurring_expenses` and the `search_*` report functions use `Africa/Cairo` instead of UTC (prompts/cairo-time-zone.md) |
 | `sql/0074_search_events.sql` | `search_events` — one anonymous row per committed search (query, locale, result count, mode, time; no identity), the three `/admin/search` report functions and `purge_search_events()` (90-day retention, daily cron). Service-role only |
 | `sql/0070_claim_guest_orders.sql` | `claim_guest_orders()` — atomic, service-role-only claim of unowned online orders matching an explicitly verified Clerk primary email |
 
@@ -122,8 +123,10 @@ On the Frankfurt database `schema_migrations` ends at `0071`, but:
 - `0075_arabic_search.sql` (Arabic folding, script-aware search, the
   `fragrance_notes` glossary) and `0076_search_match_notes.sql` ("Matches"
   explanations) **are applied** the same way (2026-11-18). Both are idempotent.
+- `0077_cairo_report_days.sql` (Cairo report days) **is applied** the same way
+  (2026-11-19). It is idempotent.
 
-So the next `npm run db:migrate` runs `0072a`, `0072b`, `0073`–`0076` and
+So the next `npm run db:migrate` runs `0072a`, `0072b`, `0073`–`0077` and
 records them all. Run it only once `0072b` is wanted; until then, apply any new
 migration the same direct way.
 

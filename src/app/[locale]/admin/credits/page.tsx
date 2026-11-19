@@ -18,6 +18,7 @@ import {
   listCredits,
 } from "@/src/services/admin/credits";
 import type { CreditStatus } from "@/src/types/credit";
+import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * The Discovery Credit ledger.
@@ -66,7 +67,7 @@ function stamp(iso: string | null): string {
     day: "numeric",
     month: "short",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: SHOP_TIME_ZONE,
   }).format(new Date(iso));
 }
 

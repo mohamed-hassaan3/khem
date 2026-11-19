@@ -8,6 +8,7 @@ import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getCredit } from "@/src/services/admin/credits";
 import type { CreditTransactionKind } from "@/src/types/credit";
+import { SHOP_TIME_ZONE, SHOP_ZONE_LABEL } from "@/src/lib/shop-time";
 
 /**
  * One credit, and everything that has happened to it.
@@ -33,8 +34,8 @@ function stamp(iso: string | null, withTime = false): string {
     month: "long",
     year: "numeric",
     ...(withTime ? { hour: "2-digit" as const, minute: "2-digit" as const } : {}),
-    timeZone: "UTC",
-  }).format(new Date(iso));
+    timeZone: SHOP_TIME_ZONE,
+  }).format(new Date(iso)) + (withTime ? ` ${SHOP_ZONE_LABEL}` : "");
 }
 
 function Detail({ term, children }: { term: string; children: React.ReactNode }) {

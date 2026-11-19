@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { CampaignWithProgress } from "@/src/types/campaign";
+import { SHOP_TIME_ZONE, SHOP_ZONE_LABEL } from "@/src/lib/shop-time";
 
 /**
  * A campaign that has gone out, read back.
@@ -38,8 +39,8 @@ function stamp(iso: string | null): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "UTC",
-  }).format(new Date(iso));
+    timeZone: SHOP_TIME_ZONE,
+  }).format(new Date(iso)) + ` ${SHOP_ZONE_LABEL}`;
 }
 
 function Row({ label, children }: { label: string; children: ReactNode }) {

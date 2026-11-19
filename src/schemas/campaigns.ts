@@ -18,6 +18,7 @@
 import { z } from "zod";
 
 import { MIN_SCHEDULE_LEAD_MS } from "@/src/lib/campaign-schedule";
+import { shopWallClockToUtc } from "@/src/lib/shop-time";
 import { LOCALES } from "@/src/lib/i18n/config";
 
 /** A URL the house controls, or an absolute link the letter may point at. */
@@ -133,42 +134,77 @@ export const campaignIdSchema = z.object({
 /**
  * When a campaign should go.
  *
- * A UTC instant, always: the client converts the desk's local reading before it
- * arrives here — see `src/lib/campaign-schedule.ts` — and this schema never sees
- * a wall-clock string without a zone.
+ * The desk types Cairo time (prompts/cairo-time-zone.md), and the field sends
+ * that reading as typed — `scheduledLocal`, `YYYY-MM-DDTHH:mm` — for the server
+ * to convert with `src/lib/shop-time.ts`. The server does the conversion rather
+ * than trusting one done in a browser whose zone it cannot see. A UTC instant in
+ * `scheduledAt` is still accepted, for a tab left open on the previous release;
+ * either way the output is one UTC instant in `scheduledAt`.
  *
  * The past is refused: a schedule already elapsed would be sent by the very next
  * run, which is "send now" wearing a disguise — and the desk should press the
  * button that says so.
  *
- * The minute or two after *now* is refused for a different reason. Whatever
- * triggers the dispatch — a platform cron today, a server cron on another host
- * tomorrow — runs on a cadence this application does not set and cannot read,
- * so a moment a hundred seconds away is a promise nothing here is in a position
- * to keep. `MIN_SCHEDULE_LEAD_MS` is a floor on what may be asked for, not a
- * description of any host's timetable, and it must stay that way: the day this
- * number is derived from a cron expression is the day the schedule field starts
- * lying again on the next platform.
+ * The minutes just after *now* are refused too. `MIN_SCHEDULE_LEAD_MS` is a
+ * floor on what may be asked for, not a description of any host's timetable.
  */
-export const scheduleCampaignSchema = z.object({
-  id: z.string().trim().min(8, "Unknown campaign."),
-  scheduledAt: z
-    .string()
-    .trim()
-    .min(1, "Choose when it should go.")
-    .refine(
-      (value) => !Number.isNaN(Date.parse(value)),
-      "That is not a valid date and time.",
-    )
-    .refine(
-      (value) => Date.parse(value) > Date.now(),
-      "Choose a moment in the future.",
-    )
-    .refine(
-      (value) => Date.parse(value) >= Date.now() + MIN_SCHEDULE_LEAD_MS,
-      "Choose a moment at least five minutes from now, so the dispatch has time to pick it up.",
-    ),
-});
+export const scheduleCampaignSchema = z
+  .object({
+    id: z.string().trim().min(8, "Unknown campaign."),
+    scheduledLocal: z.string().trim().optional(),
+    scheduledAt: z.string().trim().optional(),
+  })
+  .transform((input, ctx) => {
+    let iso: string | null = null;
+
+    if (input.scheduledLocal) {
+      const converted = shopWallClockToUtc(input.scheduledLocal);
+      if (!converted.ok) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["scheduledAt"],
+          message:
+            converted.reason === "nonexistent"
+              ? "That time does not exist in Cairo — the clocks skip it when summer time begins."
+              : "That is not a valid date and time.",
+        });
+        return z.NEVER;
+      }
+      iso = converted.iso;
+    } else if (input.scheduledAt) {
+      if (Number.isNaN(Date.parse(input.scheduledAt))) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["scheduledAt"],
+          message: "That is not a valid date and time.",
+        });
+        return z.NEVER;
+      }
+      iso = new Date(input.scheduledAt).toISOString();
+    }
+
+    if (iso === null) {
+      ctx.addIssue({ code: "custom", path: ["scheduledAt"], message: "Choose when it should go." });
+      return z.NEVER;
+    }
+
+    const at = Date.parse(iso);
+    if (at <= Date.now()) {
+      ctx.addIssue({ code: "custom", path: ["scheduledAt"], message: "Choose a moment in the future." });
+      return z.NEVER;
+    }
+    if (at < Date.now() + MIN_SCHEDULE_LEAD_MS) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["scheduledAt"],
+        message:
+          "Choose a moment at least five minutes from now, so the dispatch has time to pick it up.",
+      });
+      return z.NEVER;
+    }
+
+    return { id: input.id, scheduledAt: iso };
+  });
 
 /**
  * Which stored audiences a campaign speaks to.

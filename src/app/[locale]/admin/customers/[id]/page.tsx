@@ -19,6 +19,7 @@ import {
   rewardBalanceForClerkUser,
 } from "@/src/services/admin/rewards";
 import type { CustomerAddress } from "@/src/types/customer";
+import { SHOP_TIME_ZONE, SHOP_ZONE_LABEL } from "@/src/lib/shop-time";
 
 /**
  * One customer.
@@ -58,8 +59,8 @@ function stamp(iso: string | null, withTime = false): string {
     month: "long",
     year: "numeric",
     ...(withTime ? { hour: "2-digit" as const, minute: "2-digit" as const } : {}),
-    timeZone: "UTC",
-  }).format(new Date(iso));
+    timeZone: SHOP_TIME_ZONE,
+  }).format(new Date(iso)) + (withTime ? ` ${SHOP_ZONE_LABEL}` : "");
 }
 
 /** The address as a courier reads it: one line per line, empties dropped. */

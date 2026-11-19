@@ -1,23 +1,16 @@
-"use client";
-
-import { useIsHydrated } from "@/src/hooks/use-is-hydrated";
-import { formatScheduledAt, localTimeZone } from "@/src/lib/campaign-schedule";
+import { formatShopDateTime } from "@/src/lib/shop-time";
 
 /**
- * A stored instant, in the reader's own clock.
+ * A stored instant on the boutique's clock: "19 Nov 2026, 17:10 Cairo".
  *
- * ## Why it renders twice
- *
- * The server does not know what zone the desk is sitting in, and guessing would
- * reproduce the bug this exists to prevent. So the first paint — server and the
- * matching hydration render — states the instant in UTC and *says* UTC; from the
- * client render after it, when `Intl` can be asked, it states the same instant
- * in the viewer's zone and says that instead. Both readings are labelled, so
- * neither can be misread as the other, and `useIsHydrated` makes the switch
- * without a mount effect or a cascading render.
+ * It used to render twice — UTC on the server, then the viewer's own zone after
+ * hydration — because "local" could only be known in the browser. The admin
+ * now keeps one clock, Africa/Cairo (`src/lib/shop-time.ts`), so the server and
+ * the browser print the same string and a single render is enough. The name is
+ * kept to avoid churn in its callers.
  *
  * The zone name is never optional. An admin screen that prints "17:00" without
- * saying whose 17:00 is how a campaign goes out three hours early.
+ * saying whose 17:00 is how a campaign goes out at the wrong hour.
  */
 export default function LocalTimestamp({
   iso,
@@ -26,12 +19,9 @@ export default function LocalTimestamp({
   iso: string;
   className?: string;
 }) {
-  const hydrated = useIsHydrated();
-  const zone = hydrated ? localTimeZone() : "UTC";
-
   return (
     <time dateTime={iso} className={className}>
-      {formatScheduledAt(iso, zone || undefined)}
+      {formatShopDateTime(iso)}
     </time>
   );
 }

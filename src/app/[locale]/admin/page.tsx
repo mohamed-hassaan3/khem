@@ -28,6 +28,7 @@ import { getCreditTotals } from "@/src/services/admin/credits";
 import { countCustomers } from "@/src/services/admin/customers";
 import { listAdminArticles } from "@/src/services/admin/journal";
 import { listAdminOrders } from "@/src/services/admin/orders";
+import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * Dashboard index — the desk's first screen.
@@ -85,7 +86,7 @@ function placedOn(iso: string): string {
   return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "short",
-    timeZone: "UTC",
+    timeZone: SHOP_TIME_ZONE,
   }).format(new Date(iso));
 }
 
