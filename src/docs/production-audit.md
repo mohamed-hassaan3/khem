@@ -309,6 +309,36 @@ immutable for 1 year (now a single header); images go through `/_next/image`
    are unaffected; the manual onyx-night receipt was kept.
 5. **Cash-only is intentional** (M1 closed). Stripe stays unconfigured until card
    payments are wanted (`STRIPE-SETUP.md`).
-6. **Approved — intro, fonts, hero video, cookie banner** (§6 items 1–3, M4).
-   Planned in `prompts/performance-intro-fonts-hero-cookie.md` per the AGENTS.md
-   workflow.
+6. **Done — intro, fonts, below-the-fold film, cookie card** (§6 items 1–3,
+   M4), built from `prompts/performance-intro-fonts-hero-cookie.md`, one commit
+   each (`3515aa7`, `f30ee1a`, `64c677a`, `70febe4`), live as `70febe4`.
+   - **Intro:** home only; on every other first page `data-intro="off"` before
+     paint. Live: the curtain starts lifting at ~2.6 s and is gone at ~3.7 s
+     (was gone at 4.4–4.9 s). The floor counts from first paint, not
+     navigation, so the entrance can never be cut short.
+   - **Fonts:** EN ~98 KB (was ~392), AR ~275 KB (was ~432). HarfBuzz-verified
+     identical; generator in `scripts/subset-fonts.py`.
+   - **New Arrival film:** `preload="none"`, plays only near the viewport. It
+     was the **411 KB** file (`Hero.mp4`), not 1.15 MB as the prompt and
+     commit `64c677a` say; it no longer loads on the mobile home. The
+     1.15 MB file is the **hero** film (`KHEM-40.mp4`, `w_828`), which
+     autoplays above the fold and is now the largest mobile cost.
+   - **Lighthouse after (live, 16 runs; before → after):** fonts EN
+     392 → 100 KB, AR 432 → 281 KB; mobile collections 61 → 78, mobile
+     search 70 → 82 (AR 74 → 78), product desktop 94 → 99, mobile product
+     FCP 4.8 → 3.2 s. **Mobile home (63) and product (62–66) miss the ≥ 75
+     target.** What's left on them: the 1.15 MB hero film (home), ~216 KB of
+     Clerk JS on every page and ~300 KB of unused JS (§6 items 6–7). Desktop
+     home/collections moved ±5–9 between runs, within Lighthouse's
+     run-to-run noise on this connection; CLS ≤ 0.004 everywhere.
+   - **Next step (needs a decision — it changes the hero asset):** serve the
+     hero film to phones as a smaller rendition (e.g. `w_640,q_auto:eco`
+     through a `<source media>` or an admin mobile URL), or show its poster
+     on phones and play the film from 768 px up.
+   - **Cookie card:** 28–30% of a 390×844 phone (was ~45%), equal-width
+     buttons; desktop `max-w-sm`. Three things go beyond the prompt's wording,
+     because narrowing alone left the card on ADD TO CART at 1280×577:
+     (a) on windows ≤ 760 px tall the desktop card uses the existing short
+     copy; (b) on product pages it sits in the start corner, over the gallery;
+     (c) on phones the "Privacy" eyebrow is hidden (the title says the same).
+     Wording, colours, focus handling and consent logic are unchanged.
