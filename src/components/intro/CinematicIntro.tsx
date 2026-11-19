@@ -76,7 +76,8 @@ export default function CinematicIntro() {
           <Image
             src={fullLogo}
             alt=""
-            priority
+            loading="eager"
+            fetchPriority="low"
             /*
              * Matches the `--khem-intro-w` clamps in `globals.css`. The
              * intrinsic 2000x1089 comes from the static import, so the box

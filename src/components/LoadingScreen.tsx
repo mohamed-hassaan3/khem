@@ -110,7 +110,8 @@ export default function LoadingScreen() {
             src="/loading.webp"
             alt=""
             fill
-            priority
+            loading="eager"
+            fetchPriority="low"
             sizes="(min-width: 768px) 208px, 160px"
             className="object-contain"
           />

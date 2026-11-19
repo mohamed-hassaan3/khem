@@ -153,7 +153,8 @@ export default function ProductGallery({
                 src={image.url}
                 alt={image.alt || productName}
                 fill
-                priority={index === 0}
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchPriority={index === 0 ? "high" : undefined}
                 sizes={SIZES}
                 className="object-cover brightness-90"
               />

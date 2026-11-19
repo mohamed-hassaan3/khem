@@ -109,7 +109,8 @@ export default async function Craftsmanship({
           src="https://res.cloudinary.com/co1xzkhf/image/upload/craftsmanship-hero-banner.png"
           alt=""
           fill
-          priority
+          loading="eager"
+          fetchPriority="high"
           sizes="100vw"
           className="object-cover"
         />

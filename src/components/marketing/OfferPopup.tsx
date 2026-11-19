@@ -403,7 +403,6 @@ export default function OfferPopup({
                   fill
                   sizes="(min-width: 768px) 32rem, 100vw"
                   className="object-cover brightness-75"
-                  priority={false}
                 />
               ) : null}
               {/* A gradient toward the copy, so the seam between the halves is

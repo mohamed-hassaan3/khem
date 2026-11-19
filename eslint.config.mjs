@@ -26,6 +26,16 @@ const eslintConfig = defineConfig([
           message:
             "Relative image src resolves against the current URL and 404s on locale-prefixed routes. Use a static import (see Nav.tsx/Footer.tsx) or a root-relative path.",
         },
+        /*
+         * `priority` on next/image is deprecated in Next 16: it still preloads
+         * the image but no longer sets `fetchpriority="high"`, so every hero
+         * quietly lost its priority (prompts/lcp-priority-and-clerk-weight.md).
+         */
+        {
+          selector: 'JSXOpeningElement[name.name="Image"] > JSXAttribute[name.name="priority"]',
+          message:
+            'next/image `priority` is deprecated in Next 16. LCP image: loading="eager" fetchPriority="high". Decorative eager image: fetchPriority="low" (stops React 19 auto-preloading it).',
+        },
       ],
     },
   },

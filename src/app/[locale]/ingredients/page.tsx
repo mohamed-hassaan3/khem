@@ -98,7 +98,8 @@ export default async function Ingredients({
           src="https://res.cloudinary.com/co1xzkhf/image/upload/ingredients-banner.webp"
           alt="ingredients-banner"
           fill
-          priority
+          loading="eager"
+          fetchPriority="high"
           sizes="100vw"
           className="object-cover"
         />

@@ -99,7 +99,8 @@ export default async function About({
           src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790357791/About-KHEM-banner.jpg"
           alt="A House of Ancient Futures"
           fill
-          priority
+          loading="eager"
+          fetchPriority="high"
           sizes="100vw"
           className="object-cover"
         />

@@ -127,7 +127,8 @@ export default function Hero({
    * A video hero's LCP is its poster. `<HeroFilm>` renders it as a plain
    * `<img fetchPriority="high">` in the server HTML (the film's first frame),
    * so the preload scanner finds it without a hint. (Image heroes need nothing
-   * either: `priority` below preloads the first slide.)
+   * either: the first slide is `loading="eager"` + `fetchPriority="high"`,
+   * which React 19 also preloads.)
    */
   const rotates = hero.mediaType === "IMAGES" && slides.length > 1;
 
@@ -231,8 +232,8 @@ export default function Hero({
              * rest wait. That is what keeps a five-image campaign costing the
              * same first paint as a one-image one.
              */
-            priority={at === 0}
-            loading={at === 0 ? undefined : "lazy"}
+            loading={at === 0 ? "eager" : "lazy"}
+            fetchPriority={at === 0 ? "high" : undefined}
             data-active={at === index}
             className="khem-hero-slide object-cover"
           />

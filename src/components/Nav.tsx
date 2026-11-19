@@ -598,6 +598,9 @@ export default function Nav({
             src={nameLogo}
             alt="KHEM Perfumes"
             loading="eager"
+            // Low, so React does not auto-preload it ahead of the page's LCP
+            // image (React 19 preloads every eager <img> it server-renders).
+            fetchPriority="low"
             sizes="(min-width: 1024px) 132px, (min-width: 640px) 113px, 94px"
             className="h-10 w-auto sm:h-12 lg:h-14"
           />

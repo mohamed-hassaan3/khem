@@ -37,7 +37,8 @@ export default async function ArticleHero({
         src={article.image.url}
         alt={article.image.alt}
         fill
-        priority
+        loading="eager"
+        fetchPriority="high"
         sizes="100vw"
         className="scale-105 object-cover"
       />

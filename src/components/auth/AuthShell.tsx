@@ -68,7 +68,8 @@ export default function AuthShell({
           src={logo}
           alt={logoAlt}
           sizes="64px"
-          priority
+          loading="eager"
+          fetchPriority="high"
           className="mx-auto mb-6 h-16 w-auto"
         />
 

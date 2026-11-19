@@ -136,7 +136,8 @@ export default async function Heritage({
           src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790154048/heritage-hero-banner.webp"
           alt=""
           fill
-          priority
+          loading="eager"
+          fetchPriority="high"
           sizes="100vw"
           className="object-cover"
         />

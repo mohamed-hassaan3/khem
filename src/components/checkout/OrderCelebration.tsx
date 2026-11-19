@@ -99,7 +99,8 @@ export default function OrderCelebration({
             alt=""
             width={128}
             height={128}
-            priority
+            loading="eager"
+            fetchPriority="high"
             className="h-28 w-28 sm:h-32 sm:w-32"
           />
         </div>

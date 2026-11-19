@@ -86,7 +86,8 @@ export default function PrelaunchCover() {
           <Image
             src={fullLogo}
             alt="KHEM — The Essence of Heritage"
-            priority
+            loading="eager"
+            fetchPriority="high"
             /*
              * A static import, never a string path. A relative `src` resolves
              * against the *directory* of the current URL — the bug documented at

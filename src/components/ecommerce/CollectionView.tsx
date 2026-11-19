@@ -193,7 +193,8 @@ export default async function CollectionView({
           src={heroImage}
           alt={heroAlt}
           fill
-          priority
+          loading="eager"
+          fetchPriority="high"
           sizes="100vw"
           /*
             A far lighter hand than the `brightness-30`/`brightness-45` this
