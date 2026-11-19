@@ -2183,15 +2183,18 @@ body[data-announcement="on"] {
   --khem-intro-lift: calc(var(--khem-intro-w) * -0.037);
 
   /* ── Choreography ── */
-  --khem-intro-rule-delay: 120ms;
-  --khem-intro-rule-dur: 520ms;
-  --khem-intro-bloom-delay: 300ms;
-  --khem-intro-bloom-dur: 1400ms;
-  --khem-intro-wipe-delay: 420ms;
-  --khem-intro-wipe-dur: 1500ms;
-  --khem-intro-settle-dur: 1800ms;
-  --khem-intro-rule-out-delay: 1500ms;
-  --khem-intro-rule-out-dur: 700ms;
+  /* Compressed ×0.73 from a 2200 ms entrance to 1600 ms (MIN_HOLD_MS in
+     IntroCurtain.tsx) — prompts/performance-intro-fonts-hero-cookie.md. The
+     settle and the rule's exit both end at 1600 ms, the floor. */
+  --khem-intro-rule-delay: 90ms;
+  --khem-intro-rule-dur: 380ms;
+  --khem-intro-bloom-delay: 220ms;
+  --khem-intro-bloom-dur: 1020ms;
+  --khem-intro-wipe-delay: 300ms;
+  --khem-intro-wipe-dur: 1100ms;
+  --khem-intro-settle-dur: 1300ms;
+  --khem-intro-rule-out-delay: 1100ms;
+  --khem-intro-rule-out-dur: 500ms;
 
   /* ── Exit. `--khem-intro-out-*` + `--khem-intro-part-*` must sum to the
        `EXIT_MS` in `IntroCurtain.tsx`. ── */

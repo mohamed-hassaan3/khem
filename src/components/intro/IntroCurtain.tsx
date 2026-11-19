@@ -37,7 +37,7 @@ import { useEffect } from "react";
 const SEEN_KEY = "khem:intro:seen";
 
 /** The choreography's own length. Must match `globals.css`. */
-const MIN_HOLD_MS = 2200;
+const MIN_HOLD_MS = 1600;
 const MIN_HOLD_REDUCED_MS = 600;
 
 /** How long readiness may be waited for beyond the floor. */
@@ -95,7 +95,21 @@ export default function IntroCurtain() {
     }
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const floorMs = reduced ? MIN_HOLD_REDUCED_MS : MIN_HOLD_MS;
+
+    /*
+     * The floor is counted from first paint — when the CSS entrance actually
+     * began — not from this effect. Counting from hydration added the whole
+     * hydration time on top of the choreography; counting from navigation
+     * could cut the entrance short when first paint was slow. Without Paint
+     * Timing (very old browsers) it falls back to the full floor from now.
+     */
+    const paint = performance.getEntriesByName("first-contentful-paint")[0]
+      ?? performance.getEntriesByName("first-paint")[0];
+    const elapsed = paint ? Math.max(0, performance.now() - paint.startTime) : 0;
+    const floorMs = Math.max(
+      0,
+      (reduced ? MIN_HOLD_REDUCED_MS : MIN_HOLD_MS) - elapsed,
+    );
     const exitMs = reduced ? EXIT_REDUCED_MS : EXIT_MS;
 
     let skippable = false;

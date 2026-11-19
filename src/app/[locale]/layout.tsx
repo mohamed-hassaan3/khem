@@ -401,7 +401,11 @@ export default async function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{if(sessionStorage.getItem('khem:intro:seen'))document.documentElement.dataset.intro='off'}catch(e){}",
+              // Home only (`/`, `/ar`): any other first page is shown at once
+              // and marks the intro as seen. `off` is set outside the `try`
+              // so a throwing sessionStorage cannot put the curtain over a
+              // product page.
+              "(function(){var d=document.documentElement,p=location.pathname.replace(/\\/+$/,''),h=p===''||p==='/ar'||p==='/en';try{if(!h)sessionStorage.setItem('khem:intro:seen','1');else if(sessionStorage.getItem('khem:intro:seen'))d.dataset.intro='off'}catch(e){}if(!h)d.dataset.intro='off'})()",
           }}
         />
 
