@@ -8,6 +8,7 @@ import Reveal from "@/src/components/animation/Reveal";
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import CollectionCard from "@/src/components/home/CollectionCard";
 import Hero from "@/src/components/home/Hero";
+import InViewVideo from "@/src/components/home/InViewVideo";
 import CollectionSlider from "@/src/components/home/CollectionSlider";
 import IngredientRail from "@/src/components/home/IngredientRail";
 import JournalCard from "@/src/components/home/JournalCard";
@@ -641,15 +642,9 @@ export default async function Home({
               bar would invite a click that pauses the composition.
             */}
             {newArrival.mediaType === "FILM" && newArrival.videoUrl ? (
-              <video
+              <InViewVideo
                 src={newArrival.videoUrl}
                 poster={newArrival.imageUrl ?? featuredImage?.url}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                aria-hidden="true"
                 className="absolute inset-0 h-full w-full object-cover opacity-70"
               />
             ) : newArrival.mediaType === "IMAGE" && newArrival.imageUrl ? (
