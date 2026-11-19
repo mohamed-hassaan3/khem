@@ -293,8 +293,12 @@ immutable for 1 year (now a single header); images go through `/_next/image`
 ## 7. Decisions (approved by the owner, 2026-11-19)
 
 1. **Done — `0078` applied to Frankfurt** in one transaction; grants unchanged.
-   `/api/search` with a cached embedding went from 650–800 ms to ~150 ms (H4,
-   DB half closed; the embedding half remains).
+   `/api/search` with a cached embedding went from 650–800 ms to ~150–330 ms
+   (H4, DB half closed). The embedding half remains: a new query still costs
+   ~1 s of Cohere time. Right after the deploy, with the cache empty and the
+   free tier's 5/min spent by audit testing, searches took 1.5–5.8 s. That is
+   the timeout path a real burst of visitors would hit too, so funding the
+   Gateway (handoff §3) is now the main search fix.
 2. **Done — stale Clerk ID repointed** (H1 closed). `"User"` 1 row, `"Order"`
    5 rows and `customer_notification_reads` 7 rows moved to the production ID;
    all 8 Clerk users are now linked to their rows.
