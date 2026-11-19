@@ -37,20 +37,21 @@ import { useEffect } from "react";
 const SEEN_KEY = "khem:intro:seen";
 
 /** The choreography's own length. Must match `globals.css`. */
-const MIN_HOLD_MS = 600;
+const MIN_HOLD_MS = 1000;
 const MIN_HOLD_REDUCED_MS = 300;
 
 /** How long readiness may be waited for beyond the floor. */
 const MAX_HOLD_MS = 1000;
 
 /** The exit's length. Must match `globals.css`. */
-const EXIT_MS = 450;
+const EXIT_MS = 600;
 const EXIT_REDUCED_MS = 300;
 
 /**
  * A press this early is the one that opened the tab, not a request to skip.
+ * After it, any tap or key ends the intro at once — nobody is held.
  */
-const SKIP_AFTER_MS = 600;
+const SKIP_AFTER_MS = 200;
 
 /**
  * Resolves once the media the visitor will see first under the curtain has

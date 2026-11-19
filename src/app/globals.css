@@ -2183,26 +2183,26 @@ body[data-announcement="on"] {
   --khem-intro-lift: calc(var(--khem-intro-w) * -0.037);
 
   /* ── Choreography ── */
-  /* The same choreography at 600 ms (MIN_HOLD_MS in IntroCurtain.tsx):
-     2200 ms originally, 1600 ms (prompts/performance-intro-fonts-hero-cookie.md),
-     now ×0.375 so the curtain is gone ~2 s after navigation
-     (prompts/mobile-video-hero-loading.md §9). The settle and the rule's exit
-     both end at 600 ms, the floor. */
-  --khem-intro-rule-delay: 35ms;
-  --khem-intro-rule-dur: 140ms;
-  --khem-intro-bloom-delay: 80ms;
-  --khem-intro-bloom-dur: 380ms;
-  --khem-intro-wipe-delay: 110ms;
-  --khem-intro-wipe-dur: 410ms;
-  --khem-intro-settle-dur: 490ms;
-  --khem-intro-rule-out-delay: 410ms;
-  --khem-intro-rule-out-dur: 190ms;
+  /* The same choreography at 1000 ms (MIN_HOLD_MS in IntroCurtain.tsx).
+     2200 ms originally; 600 ms read as a flicker — the falcon was not seen.
+     1000 ms is long enough to register the mark, short enough not to feel
+     like waiting (prompts/single-video-auto-renditions.md). The settle and
+     the rule's exit both end at 1000 ms, the floor. */
+  --khem-intro-rule-delay: 55ms;
+  --khem-intro-rule-dur: 240ms;
+  --khem-intro-bloom-delay: 140ms;
+  --khem-intro-bloom-dur: 640ms;
+  --khem-intro-wipe-delay: 190ms;
+  --khem-intro-wipe-dur: 690ms;
+  --khem-intro-settle-dur: 810ms;
+  --khem-intro-rule-out-delay: 690ms;
+  --khem-intro-rule-out-dur: 310ms;
 
   /* ── Exit. `--khem-intro-out-*` + `--khem-intro-part-*` must sum to the
        `EXIT_MS` in `IntroCurtain.tsx`. ── */
-  --khem-intro-out-dur: 250ms;
-  --khem-intro-part-delay: 80ms;
-  --khem-intro-part-dur: 370ms;
+  --khem-intro-out-dur: 330ms;
+  --khem-intro-part-delay: 110ms;
+  --khem-intro-part-dur: 490ms;
 
   /*
    * `--ease-luxury-bezier` is deliberately *not* used for the wipe.
