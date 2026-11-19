@@ -1,8 +1,8 @@
 "use client";
 
+import HeroFilm from "@/src/components/home/HeroFilm";
 import { Pause, Play } from "lucide-react";
 import Image from "next/image";
-import { preload } from "react-dom";
 import { useEffect, useState } from "react";
 
 import LocaleLink from "@/src/components/i18n/LocaleLink";
@@ -69,11 +69,10 @@ import type { Hero as HeroConfig } from "@/src/types/content";
  *
  * ## Video
  *
- * One film, muted, looping, `playsInline`, with a poster. Muted and inline is
- * what makes autoplay permissible at all; the poster is what a visitor sees when
- * it is not — on a data saver, on a browser that refuses, or before the first
- * frame arrives. `preload="metadata"` keeps the hero from spending a phone's
- * data on a video that may scroll past unwatched.
+ * One film, muted, looping, `playsInline`, rendered by `<HeroFilm>`: the
+ * film's first frame as the poster in the HTML, the film itself (phone or
+ * desktop cut, no audio) only after the page has loaded, fading in over it.
+ * Reduced motion and Data Saver keep the poster. See `HeroFilm.tsx`.
  *
  * ## Where the words sit
  *
@@ -125,15 +124,11 @@ export default function Hero({
   const slides = hero.slides;
 
   /*
-   * A video hero's LCP is its poster, and a `<video poster>` is invisible to
-   * the preload scanner until the element is parsed — so it was fetched after
-   * Clerk, fonts and every `priority` image had already queued. Hinting it
-   * here puts it at the front. (Image heroes need nothing: `priority` below
-   * already preloads the first slide at high fetch priority.)
+   * A video hero's LCP is its poster. `<HeroFilm>` renders it as a plain
+   * `<img fetchPriority="high">` in the server HTML (the film's first frame),
+   * so the preload scanner finds it without a hint. (Image heroes need nothing
+   * either: `priority` below preloads the first slide.)
    */
-  if (hero.mediaType === "VIDEO" && hero.videoUrl && hero.videoPosterUrl) {
-    preload(hero.videoPosterUrl, { as: "image", fetchPriority: "high" });
-  }
   const rotates = hero.mediaType === "IMAGES" && slides.length > 1;
 
   const [index, setIndex] = useState(0);
@@ -218,16 +213,11 @@ export default function Hero({
       }`}
     >
       {hero.mediaType === "VIDEO" && hero.videoUrl ? (
-        <video
-          className="absolute inset-0 h-full w-full object-cover"
-          src={hero.videoUrl}
-          poster={hero.videoPosterUrl ?? undefined}
-          aria-label={hero.videoAlt ?? labels.video}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
+        <HeroFilm
+          desktopUrl={hero.videoUrl}
+          mobileUrl={hero.videoMobileUrl}
+          fallbackPosterUrl={hero.videoPosterUrl}
+          alt={hero.videoAlt ?? labels.video}
         />
       ) : (
         slides.map((slide, at) => (

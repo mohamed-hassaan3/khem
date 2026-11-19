@@ -644,6 +644,7 @@ export default async function Home({
             {newArrival.mediaType === "FILM" && newArrival.videoUrl ? (
               <InViewVideo
                 src={newArrival.videoUrl}
+                mobileSrc={newArrival.videoMobileUrl}
                 poster={newArrival.imageUrl ?? featuredImage?.url}
                 className="absolute inset-0 h-full w-full object-cover opacity-70"
               />
