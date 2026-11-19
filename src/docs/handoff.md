@@ -52,11 +52,11 @@ marks sensitive. Five such lines reached the server's `.env.production`:
 The owner replaced them from `.env.local` and restarted PM2. Now 0 placeholders
 remain, and the app restarted at 22:08:32 UTC.
 
-**Not yet confirmed:**
-- An admin sign-in on khemperfumes.com showing the admin link.
-- A test email (contact form or order) actually arriving.
+**Confirmed by the owner on 2026-11-19:**
+- The admin link shows on khemperfumes.com.
+- Email is working.
 
-Check both first. Any new value pulled from Vercel must be checked for `[SENSITIVE]`.
+Any new value pulled from Vercel must still be checked for `[SENSITIVE]`.
 
 ## 2. Temporary items still on the server
 
@@ -64,13 +64,13 @@ Check both first. Any new value pulled from Vercel must be checked for `[SENSITI
 | :--- | :--- | :--- |
 | nginx RSC diagnostic log (`conf.d/khem-rscdebug.conf`, its log) | **Already removed** 2026-11-18. `conf.d/` is empty, `khem-proxy.inc` is restored, and nothing about RSC or debug is left in the nginx config or `/var/log/nginx/`. | None |
 | Watchers or `tail -f` processes | **None running** (checked 2026-11-19). | None |
-| `/srv/khem/shared/.env.production.bak` (from 2026-11-18 13:22) | **Still there.** It is the pre-fix copy: it holds the live secrets plus the `[SENSITIVE]` lines. | Delete once production admin and email are confirmed: `rm /srv/khem/shared/.env.production.bak` |
+| `/srv/khem/shared/.env.production.bak` (from 2026-11-18 13:22) | **Deleted** 2026-11-19, confirmed gone. `shared/` now holds only `.cron.env` and `.env.production`. | None |
 | Temporary `/root/fix.env`, `/root/env.new` | Not present. | None |
 
 ## 3. Owner to-dos
 
-- [ ] **Confirm the production admin.** Sign in on khemperfumes.com as the admin account; the admin link should show, and `/admin` and `/admin/search` should open.
-- [ ] **Confirm email.** Send a contact-form message and check that it arrives. Check the Resend dashboard for failures since 2026-11-18.
+- [x] **Confirm the production admin.** Done 2026-11-19: the admin link shows on khemperfumes.com.
+- [x] **Confirm email.** Done 2026-11-19: email works.
 - [ ] **cron-job.org:** switch off the old jobs. The VPS crontab now runs all five; leaving both on would run each twice.
 - [ ] **GitHub Actions secrets** for `.github/workflows/keep_alive.yml`: set `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SECRET_KEY` to the **Frankfurt** values. Otherwise it keeps pinging Tokyo, and Frankfurt can be paused for inactivity.
 - [ ] **Delete the Vercel project around 2026-11-25**, after 7 clean days on the VPS. Check first that nothing still needs a Vercel-only value. (Sensitive values cannot be pulled anyway; their source of truth is now `.env.local` plus the server file.)
@@ -79,7 +79,7 @@ Check both first. Any new value pulled from Vercel must be checked for `[SENSITI
   - (1) buy a little Gateway credit (recommended; it ends the free tier);
   - (2) use meaning-based search only on committed searches on `/search`;
   - (3) accept the fallback.
-- [ ] Optional: delete `.env.production.bak` on the server (see §2).
+- [x] Delete `.env.production.bak` on the server. Done 2026-11-19 (see §2).
 
 ## 4. Local machine notes
 
@@ -88,7 +88,7 @@ Check both first. Any new value pulled from Vercel must be checked for `[SENSITI
   - A `pk_test` key with an `sk_live` key signs the browser in but leaves the server seeing no user, so there is no admin link and `/admin` returns 404.
   - Currently the owner has the **production** pair active, so local sign-in only works on khemperfumes.com.
 - The development Clerk instance has its own users. Admin there needs `khem.official@outlook.com` with a **verified** email.
-- Uncommitted: a `.gitignore` change adding `/.clerk/`, made by Clerk tooling rather than in this session. Left for the owner to commit.
+- `.gitignore` now ignores `/.clerk/` (commit `4cacb70`), because Clerk tooling can write keys there.
 
 ## 5. Known issues (not urgent)
 
