@@ -2,6 +2,7 @@ import NavGround from "@/src/components/NavGround";
 import { redirect } from "next/navigation";
 
 import AccountIdentity from "@/src/components/account/AccountIdentity";
+import KhemClerkProvider from "@/src/components/auth/KhemClerkProvider";
 import AccountSidebar from "@/src/components/account/AccountSidebar";
 import NotificationBell from "@/src/components/account/NotificationBell";
 import SignOutButton from "@/src/components/account/SignOutButton";
@@ -97,7 +98,14 @@ export default async function AccountLayout({
     }),
   ]);
 
+  /*
+   * The full Clerk provider lives here, not in the root layout: the account
+   * pages render Clerk's `<UserProfile>` and sign-out, and everywhere else
+   * Clerk loads only for signed-in visitors
+   * (prompts/clerk-load-only-where-needed.md).
+   */
   return (
+    <KhemClerkProvider locale={activeLocale}>
     <div className="ground-ivory min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
       {/* §17: usability over drama. The portal opens on a rule, not an image. */}
       <NavGround ground="ivory" />
@@ -138,5 +146,6 @@ export default async function AccountLayout({
         </div>
       </main>
     </div>
+    </KhemClerkProvider>
   );
 }

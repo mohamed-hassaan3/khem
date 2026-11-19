@@ -1,6 +1,5 @@
 "use client";
 
-import { useClerk, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -10,6 +9,7 @@ import { localizePath } from "@/src/lib/i18n/config";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { ACCOUNT_PATHS, ADMIN_PATH } from "@/src/lib/routes";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
+import { useKhemSession } from "@/src/providers/session-provider";
 
 /**
  * The house's own account menu, in place of Clerk's `<UserButton>` popover.
@@ -55,8 +55,7 @@ import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 export default function AccountMenu() {
   const dict = useDictionary();
   const locale = useLocale();
-  const { user } = useUser();
-  const { signOut } = useClerk();
+  const { user, signOut } = useKhemSession();
 
   const [open, setOpen] = useState(false);
   /** `null` until the question has been asked and answered. */
@@ -164,7 +163,7 @@ export default function AccountMenu() {
   }
 
   const fullName = user?.fullName?.trim() || null;
-  const email = user?.primaryEmailAddress?.emailAddress ?? null;
+  const email = user?.email ?? null;
   const initial = (fullName ?? email ?? "K").charAt(0).toUpperCase();
 
   return (
@@ -281,7 +280,7 @@ export default function AccountMenu() {
             close();
             // Derived from the provider's locale, never from a prop or a query
             // string, so it cannot become an open redirect.
-            void signOut({ redirectUrl: localizePath(locale, "/") });
+            void signOut(localizePath(locale, "/"));
           }}
           className="block w-full cursor-pointer bg-transparent px-5 py-4 text-start font-heading text-[11px] tracking-[0.12em] text-ground-muted transition-colors duration-300 ease-luxury-bezier hover:bg-gold/6 hover:text-ground-accent focus-visible:bg-gold/6 focus-visible:text-ground-accent"
         >

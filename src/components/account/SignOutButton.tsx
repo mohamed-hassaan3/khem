@@ -1,9 +1,8 @@
 "use client";
 
-import { useClerk } from "@clerk/nextjs";
-
 import { localizePath } from "@/src/lib/i18n/config";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
+import { useKhemSession } from "@/src/providers/session-provider";
 
 /**
  * Ends the session.
@@ -22,14 +21,14 @@ export default function SignOutButton({
 }: {
   className?: string;
 }) {
-  const { signOut } = useClerk();
+  const { signOut } = useKhemSession();
   const dict = useDictionary();
   const locale = useLocale();
 
   return (
     <button
       type="button"
-      onClick={() => signOut({ redirectUrl: localizePath(locale, "/") })}
+      onClick={() => void signOut(localizePath(locale, "/"))}
       className={[
         "cursor-pointer bg-transparent p-0 font-heading text-[11px] tracking-[0.12em]",
         "text-ground-muted/70 transition-colors duration-300 hover:text-ground-muted",

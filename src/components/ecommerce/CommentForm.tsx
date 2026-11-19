@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useKhemSession } from "@/src/providers/session-provider";
 import { useState, useTransition, type FormEvent } from "react";
 
 import CommentImageUploader from "@/src/components/ecommerce/CommentImageUploader";
@@ -63,7 +63,7 @@ export default function CommentForm({
   const dict = useDictionary();
   const copy = dict.product.comments;
 
-  const { user } = useUser();
+  const { user } = useKhemSession();
   const [body, setBody] = useState("");
   const [rating, setRating] = useState(0);
   const [images, setImages] = useState<CommentImageUpload[]>([]);

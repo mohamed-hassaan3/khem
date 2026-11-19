@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
+import { useKhemSession } from "@/src/providers/session-provider";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -294,7 +294,8 @@ export default function Nav({
 }) {
   const dict = useDictionary();
   const locale = useLocale();
-  const { isSignedIn } = useAuth();
+  // Never loads Clerk for a signed-out visitor; see session-provider.tsx.
+  const isSignedIn = useKhemSession().status === "signed-in";
   const { open: openCartDrawer } = useCartDrawer();
 
   /*
@@ -650,11 +651,11 @@ export default function Nav({
            * in, it becomes `<AccountMenu>` — the house's own popover, which
            * replaced Clerk's `<UserButton>`; that component's header says why.
            *
-           * `useAuth()` rather than the `<Show>` control component: the root
-           * `Show` export in `@clerk/nextjs` is the App Router *server*
-           * variant (an async component), and this is a client component.
+           * `useKhemSession()` rather than Clerk's hooks: Clerk is loaded only
+           * for signed-in visitors (prompts/clerk-load-only-where-needed.md),
+           * so a signed-out page has no Clerk context to ask.
            *
-           * The link is what renders while Clerk is still resolving, so the
+           * The link is what renders while the session is still resolving, so the
            * rail never collapses to a gap mid-hydration — the icon and the
            * avatar occupy the same 26px box.
            */}

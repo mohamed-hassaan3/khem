@@ -1,6 +1,5 @@
-import { ClerkProvider } from "@clerk/nextjs";
-import { arSA } from "@clerk/localizations";
 import type { Metadata, Viewport } from "next";
+import { SessionProvider } from "@/src/providers/session-provider";
 import { notFound } from "next/navigation";
 import "../globals.css";
 // import Script from "next/script";
@@ -11,7 +10,6 @@ import CinematicIntro from "@/src/components/intro/CinematicIntro";
 import CartDrawer from "@/src/components/ecommerce/CartDrawer";
 import AnnouncementBar from "@/src/components/marketing/AnnouncementBar";
 import DeferredOverlays from "@/src/components/marketing/DeferredOverlays";
-import { khemClerkAppearance } from "@/src/lib/clerk-appearance";
 import { getFontVariables } from "@/src/lib/fonts";
 // ⚠️ TEMPORARY — delete this import with the pre-launch cover.
 import { prelaunchEnabled } from "@/src/lib/prelaunch";
@@ -427,33 +425,23 @@ export default async function RootLayout({
         />
 
         {/*
-         * `<ClerkProvider>` sits inside `<body>` — required by Clerk v7, where
-         * wrapping `<html>` (the Core 2 pattern) no longer works — and
-         * outermost of the providers, because `<UserButton>` in `Nav` and
-         * every account island need it in scope.
+         * No `<ClerkProvider>` here any more
+         * (prompts/clerk-load-only-where-needed.md). It used to wrap every
+         * page, so every visitor downloaded Clerk (~350 KB) although most are
+         * signed out. Now:
          *
-         * The `dynamic` prop is deliberately **not** set. It opts the whole
-         * subtree into reading auth state during the render, which turns every
-         * route on the site dynamic — the build output went from prerendered
-         * pages to `ƒ` on all thirty of them, an invocation per view on pages
-         * that have no session data to show. The routes that do read the
-         * session declare `force-dynamic` themselves and call `auth()` there,
-         * which is all Clerk needs.
+         * - `<SessionProvider>` tells the header, the account menu and the
+         *   comment form whether someone is signed in, from Clerk's
+         *   `__client_uat` cookie, and loads Clerk (`<ClerkSessionBridge>`) in
+         *   the background **only for signed-in visitors**. That keeps their
+         *   session token fresh for checkout, discounts, offers and comments.
+         * - `/sign-in`, `/sign-up` and `/account` carry the full provider in
+         *   their own layouts (`<KhemClerkProvider>`), because they render
+         *   Clerk's screens.
          *
-         * The auth URLs are built per-locale, which is the whole reason this
-         * provider lives in the `[locale]` layout instead of a root one. With
-         * `as-needed` prefixing an Arabic visitor must be redirected to
-         * `/ar/sign-in` and returned to `/ar/account` — a single hardcoded
-         * `/sign-in` would drop them into the English tree mid-flow.
+         * Server-side `auth()` needs no provider; it reads the request.
          */}
-        <ClerkProvider
-          appearance={khemClerkAppearance}
-          localization={locale === "ar" ? arSA : undefined}
-          signInUrl={localizePath(locale, "/sign-in")}
-          signUpUrl={localizePath(locale, "/sign-up")}
-          signInFallbackRedirectUrl={localizePath(locale, "/account")}
-          signUpFallbackRedirectUrl={localizePath(locale, "/account")}
-        >
+        <SessionProvider locale={locale}>
           {/*
            * The cart wraps the whole tree, not just the page that lists it:
            * the Nav badge, the PDP buy block, and the add-to-bag control on
@@ -566,7 +554,7 @@ export default async function RootLayout({
               </CurrencyProvider>
             </ConsentProvider>
           </I18nProvider>
-        </ClerkProvider>
+        </SessionProvider>
 
         {/*
          * The house entrance. Last in the document and outside every provider,
