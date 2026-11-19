@@ -27,6 +27,7 @@
  * refuses to save an unusable one.
  */
 
+import VideoUrlCheck from "@/src/components/admin/VideoUrlCheck";
 import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import { useState, useTransition } from "react";
 
@@ -119,6 +120,7 @@ export default function HeroForm({ hero }: { hero: AdminHero }) {
   const [rows, setRows] = useState<Row[]>(toRows(hero.slides));
 
   const [videoUrl, setVideoUrl] = useState(hero.videoUrl ?? "");
+  const [videoMobileUrl, setVideoMobileUrl] = useState(hero.videoMobileUrl ?? "");
   const [videoPosterUrl, setVideoPosterUrl] = useState(hero.videoPosterUrl ?? "");
   const [videoAlt, setVideoAlt] = useState(hero.videoAlt ?? "");
   const [videoAltAr, setVideoAltAr] = useState(hero.videoAltAr ?? "");
@@ -146,6 +148,7 @@ export default function HeroForm({ hero }: { hero: AdminHero }) {
     slideDurationMs,
     slides: rows.filter((row) => !isBlank(row)),
     videoUrl,
+    videoMobileUrl,
     videoPosterUrl,
     videoAlt,
     videoAltAr,
@@ -416,8 +419,26 @@ export default function HeroForm({ hero }: { hero: AdminHero }) {
             onChange={setVideoUrl}
             error={fieldErrors.videoUrl}
             required
-            hint="An https:// address to an MP4 the browser can play inline."
+            hint="Desktop film. An https:// address to an MP4 the browser can play inline."
           />
+          <VideoUrlCheck url={videoUrl} kind="desktop" />
+
+          <div>
+            <AdminInput
+              id="videoMobileUrl"
+              type="url"
+              label="Mobile video address"
+              value={videoMobileUrl}
+              onChange={setVideoMobileUrl}
+              error={fieldErrors.videoMobileUrl}
+              hint="Optional. Played on phones instead of the desktop film."
+            />
+            <VideoUrlCheck
+              url={videoMobileUrl}
+              kind="mobile"
+              emptyNote="Empty: phones get a lighter 720px copy of the desktop film, made by Cloudinary."
+            />
+          </div>
 
           <AdminInput
             id="videoPosterUrl"
@@ -426,7 +447,7 @@ export default function HeroForm({ hero }: { hero: AdminHero }) {
             value={videoPosterUrl}
             onChange={setVideoPosterUrl}
             error={fieldErrors.videoPosterUrl}
-            hint="Shown before the first frame, and instead of the film wherever autoplay is refused. Strongly recommended."
+            hint="For a Cloudinary film the storefront shows the film's own first frame instead; this image is used only for a film hosted elsewhere."
           />
 
           <div className="grid gap-4 md:gap-6 sm:grid-cols-2">

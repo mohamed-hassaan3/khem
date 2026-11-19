@@ -18,6 +18,7 @@
  * way back rather than a state you have to remember the old value to restore.
  */
 
+import VideoUrlCheck from "@/src/components/admin/VideoUrlCheck";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
@@ -72,6 +73,7 @@ export default function NewArrivalForm({
     settings.mediaType ?? "FEATURED",
   );
   const [videoUrl, setVideoUrl] = useState(settings.videoUrl ?? "");
+  const [videoMobileUrl, setVideoMobileUrl] = useState(settings.videoMobileUrl ?? "");
   const [imageUrl, setImageUrl] = useState(settings.imageUrl ?? "");
   const [imageAlt, setImageAlt] = useState(settings.imageAlt ?? "");
 
@@ -96,6 +98,7 @@ export default function NewArrivalForm({
         featuredProductSlug: product,
         mediaType,
         videoUrl,
+        videoMobileUrl,
         imageUrl,
         imageAlt,
         showEyebrow,
@@ -185,6 +188,29 @@ export default function NewArrivalForm({
             value={videoUrl}
             onChange={(event) => setVideoUrl(event.target.value)}
             className={`${FIELD_CLASS} px-3 py-2 text-[12px]`}
+          />
+          <VideoUrlCheck url={videoUrl} kind="desktop" />
+        </Field>
+      ) : null}
+
+      {mediaType === "FILM" ? (
+        <Field
+          label="Mobile video address"
+          hint="Optional. Played on phones instead of the desktop film."
+          error={errors.videoMobileUrl}
+        >
+          <input
+            type="url"
+            inputMode="url"
+            placeholder="https://…"
+            value={videoMobileUrl}
+            onChange={(event) => setVideoMobileUrl(event.target.value)}
+            className={`${FIELD_CLASS} px-3 py-2 text-[12px]`}
+          />
+          <VideoUrlCheck
+            url={videoMobileUrl}
+            kind="mobile"
+            emptyNote="Empty: phones get a lighter 720px copy of the desktop film, made by Cloudinary."
           />
         </Field>
       ) : null}
