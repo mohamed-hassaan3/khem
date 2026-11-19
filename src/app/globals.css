@@ -2183,24 +2183,26 @@ body[data-announcement="on"] {
   --khem-intro-lift: calc(var(--khem-intro-w) * -0.037);
 
   /* ── Choreography ── */
-  /* Compressed ×0.73 from a 2200 ms entrance to 1600 ms (MIN_HOLD_MS in
-     IntroCurtain.tsx) — prompts/performance-intro-fonts-hero-cookie.md. The
-     settle and the rule's exit both end at 1600 ms, the floor. */
-  --khem-intro-rule-delay: 90ms;
-  --khem-intro-rule-dur: 380ms;
-  --khem-intro-bloom-delay: 220ms;
-  --khem-intro-bloom-dur: 1020ms;
-  --khem-intro-wipe-delay: 300ms;
-  --khem-intro-wipe-dur: 1100ms;
-  --khem-intro-settle-dur: 1300ms;
-  --khem-intro-rule-out-delay: 1100ms;
-  --khem-intro-rule-out-dur: 500ms;
+  /* The same choreography at 600 ms (MIN_HOLD_MS in IntroCurtain.tsx):
+     2200 ms originally, 1600 ms (prompts/performance-intro-fonts-hero-cookie.md),
+     now ×0.375 so the curtain is gone ~2 s after navigation
+     (prompts/mobile-video-hero-loading.md §9). The settle and the rule's exit
+     both end at 600 ms, the floor. */
+  --khem-intro-rule-delay: 35ms;
+  --khem-intro-rule-dur: 140ms;
+  --khem-intro-bloom-delay: 80ms;
+  --khem-intro-bloom-dur: 380ms;
+  --khem-intro-wipe-delay: 110ms;
+  --khem-intro-wipe-dur: 410ms;
+  --khem-intro-settle-dur: 490ms;
+  --khem-intro-rule-out-delay: 410ms;
+  --khem-intro-rule-out-dur: 190ms;
 
   /* ── Exit. `--khem-intro-out-*` + `--khem-intro-part-*` must sum to the
        `EXIT_MS` in `IntroCurtain.tsx`. ── */
-  --khem-intro-out-dur: 600ms;
-  --khem-intro-part-delay: 200ms;
-  --khem-intro-part-dur: 900ms;
+  --khem-intro-out-dur: 250ms;
+  --khem-intro-part-delay: 80ms;
+  --khem-intro-part-dur: 370ms;
 
   /*
    * `--ease-luxury-bezier` is deliberately *not* used for the wipe.
@@ -2548,7 +2550,7 @@ html[data-intro="exit"] .khem-intro-half-bottom {
   }
 
   .khem-intro-lockup {
-    animation: khem-fade-in 400ms ease-out both;
+    animation: khem-fade-in 250ms ease-out both;
   }
 
   .khem-intro-bloom {
@@ -2557,7 +2559,7 @@ html[data-intro="exit"] .khem-intro-half-bottom {
   }
 
   html[data-intro="exit"] .khem-intro-stage {
-    animation: khem-intro-out 400ms ease-out both;
+    animation: khem-intro-out 250ms ease-out both;
   }
 
   /*
@@ -2566,7 +2568,7 @@ html[data-intro="exit"] .khem-intro-half-bottom {
    */
   html[data-intro="exit"] .khem-intro-half-top,
   html[data-intro="exit"] .khem-intro-half-bottom {
-    animation: khem-intro-veil-out 400ms ease-out 50ms both;
+    animation: khem-intro-veil-out 250ms ease-out 50ms both;
   }
 }
 

@@ -37,15 +37,15 @@ import { useEffect } from "react";
 const SEEN_KEY = "khem:intro:seen";
 
 /** The choreography's own length. Must match `globals.css`. */
-const MIN_HOLD_MS = 1600;
-const MIN_HOLD_REDUCED_MS = 600;
+const MIN_HOLD_MS = 600;
+const MIN_HOLD_REDUCED_MS = 300;
 
 /** How long readiness may be waited for beyond the floor. */
 const MAX_HOLD_MS = 1000;
 
 /** The exit's length. Must match `globals.css`. */
-const EXIT_MS = 1100;
-const EXIT_REDUCED_MS = 450;
+const EXIT_MS = 450;
+const EXIT_REDUCED_MS = 300;
 
 /**
  * A press this early is the one that opened the tab, not a request to skip.
