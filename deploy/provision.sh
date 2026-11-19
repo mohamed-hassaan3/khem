@@ -138,6 +138,7 @@ if [[ -s /root/.ssh/authorized_keys ]]; then
 PasswordAuthentication no
 KbdInteractiveAuthentication no
 PermitRootLogin prohibit-password
+X11Forwarding no
 EOF
   sshd -t
   systemctl reload ssh

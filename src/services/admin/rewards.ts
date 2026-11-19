@@ -15,6 +15,7 @@ import "server-only";
  * customer holds", and the two would disagree the first time the policy changed.
  */
 
+import { matchesTerm } from "@/src/lib/admin/filter";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
   POINTS_TRANSACTION_COLUMNS,
@@ -37,6 +38,19 @@ function logFailure(query: string, message: string): void {
 export const REWARD_CUSTOMERS_PER_PAGE = 50;
 
 const EMPTY_PAGE: AdminRewardPage = { customers: [], total: 0 };
+
+/**
+ * How many customer rows a search scans in memory. Far above today's list; past
+ * it, the answer is a parameterised search RPC like `customer_summary()`.
+ */
+const USER_SEARCH_CEILING = 5_000;
+
+interface UserSearchRow {
+  clerkId: string | null;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+}
 
 /**
  * One page of customer balances, largest first.
@@ -65,26 +79,29 @@ export async function listRewardCustomers(filter: {
    * search the balances lead. Two shapes rather than one join, because
    * PostgREST cannot join a view to a table that has no declared relationship
    * with it.
+   *
+   * The term is matched in memory, never spliced into an `.or()` filter string:
+   * PostgREST parses that string, so a comma or parenthesis in the search box
+   * became filter syntax. `src/lib/admin/filter.ts` explains the rule.
    */
   let ids: string[] | null = null;
 
   if (search.length > 0) {
     const { data, error } = await supabase
       .from("User")
-      .select("clerkId")
-      .or(
-        `email.ilike.%${search}%,firstName.ilike.%${search}%,lastName.ilike.%${search}%`,
-      )
-      .limit(200);
+      .select("clerkId, email, firstName, lastName")
+      .limit(USER_SEARCH_CEILING);
 
     if (error) {
       logFailure("listRewardCustomers/search", error.message);
       return EMPTY_PAGE;
     }
 
-    ids = (data ?? [])
-      .map((row) => (row as { clerkId?: unknown }).clerkId)
-      .filter((id): id is string => typeof id === "string");
+    ids = ((data ?? []) as UserSearchRow[])
+      .filter((row) => matchesTerm(search, [row.email, row.firstName, row.lastName]))
+      .map((row) => row.clerkId)
+      .filter((id): id is string => typeof id === "string")
+      .slice(0, 200);
 
     if (ids.length === 0) return EMPTY_PAGE;
   }

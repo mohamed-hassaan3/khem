@@ -1,0 +1,310 @@
+# KHEM — Production audit (2026-11-19)
+
+Scope: everything from `2192d53` (Sep 5) to `4ae6f6f` (live), the Hostinger VPS,
+the Frankfurt database, and the live site in English and Arabic on desktop and
+mobile. No order was placed, no email was sent, `npm run db:migrate` and `0072b`
+were not run, and no secret was printed.
+
+**Verdict: ready for production — yes, as a cash-on-delivery store.** Nothing
+critical was found: the site is up, protected, backed by a clean build, and
+selling works end to end up to "Place order". Four high items should be closed
+this week (§3); three of them are one decision each.
+
+---
+
+## 1. What I fixed
+
+| # | Sev. | Fix | Verified |
+| :-- | :-- | :-- | :-- |
+| F1 | Medium | **Admin rewards search was string-built into a PostgREST `.or()` filter** (`src/services/admin/rewards.ts`). A comma or bracket in the search box became filter syntax and broke the query. It now matches in memory with `matchesTerm()`, the rule `src/lib/admin/filter.ts` already sets for every other admin list. Admin-only, so no privilege escalation was possible. | tsc, lint, build |
+| F2 | Low | **`interest-cohort` removed from `Permissions-Policy`** (`next.config.ts`). FLoC is withdrawn; Chrome logs an error for the token. | Built header reads `camera=(), microphone=(), geolocation=()`. **Goes live on the next deploy.** |
+| F3 | Low | **Duplicate `Cache-Control` on `/_next/static/`** — nginx `add_header` appended a second copy of Next's header. `proxy_hide_header Cache-Control` added (`deploy/nginx/khemperfumes.conf`), installed on the server. | `nginx -t`, reload, one header on a live chunk |
+| F4 | Low | **SSH `X11Forwarding` was on.** Turned off in `/etc/ssh/sshd_config.d/10-khem.conf` and in `deploy/provision.sh`. | `sshd -t`, reload, `sshd -T` shows `no`, both logins still work |
+| F5 | Low | **`.tmp-v3.mts` removed from the repo.** A committed scratch script that set stock on production with the service key. The product it targeted no longer exists, so it left nothing behind. | `git rm`; nothing referenced it |
+| F6 | — | **Prepared, not applied: `supabase/sql/0078_catalog_rpc_projection.sql`** (see H4). | Rolled-back test on production: 48 calls identical, 460 → 13 ms |
+
+### Removed from the server (step 0)
+
+The RSC diagnostic log, the 404 watch, `.env.production.bak`, `/root/fix.env` and
+`/root/env.new` were **already gone** (handoff §2), and I confirmed it: `conf.d/`
+is empty, the live nginx config is byte-identical to `deploy/nginx/`, and no
+`tail`/`watch`/`tcpdump`/`inotify` process, tmux/screen session, extra crontab,
+root crontab or custom timer exists. Removed today:
+
+- `/tmp/ngt` — a saved `nginx -t` result.
+- `/root/khemperfumes.conf`, `/root/khemperfumes.bootstrap.conf`,
+  `/root/khem-{hsts,proxy,tls}.inc`, `/root/provision.sh` — upload copies from
+  provisioning, byte-identical to `deploy/`.
+- 13 npm debug logs in `/root/.npm/_logs/` and `/home/khem/.npm/_logs/`.
+
+Kept on purpose: the `flock` lock files in `/tmp` (used by the crontab),
+`/home/khem/.pm2/dump.pm2.bak` (PM2's own).
+
+---
+
+## 2. Checks
+
+| Check | Result | vs known gaps |
+| :-- | :-- | :-- |
+| `tsc --noEmit` | ✅ 0 errors | — |
+| `eslint` | ✅ clean | — |
+| Unit tests (`scripts/*.test.ts`, 9 files) | ✅ 48/48; `shop-time` also under `TZ=UTC` | — |
+| `next build` | ✅ 264 pages (before and after the fixes) | — |
+| `npm run db:verify` | 52/54 — **1 product without a primary image; non-fragrances without a format** | Same 2 pre-existing gaps |
+| `npm run db:test:sales` | 5 scenarios pass, **stops at Discovery Credit** ("the set did not issue one"). Rolled back. | Same pre-existing stop |
+
+Also noted by `db:verify`: 28/29 products have an embedding; 27/28 live products
+have no cost, so profit reporting is incomplete.
+
+---
+
+## 3. Open items
+
+### High
+
+**H1 — One customer's account is split from their history.** ✅ *Closed — see §7.2.*
+The `"User"` row for `m_***@outlook.com` still carries the Clerk ID from the old
+instance. The production Clerk user has a new ID, so the lazy sync collides on
+`user_email_live_idx` (it's the `ensureUserRowId sync failed` line repeating in
+`app.err.log`). Result: their **5 orders are invisible in /account**, and saving
+an address fails. Guest-order claiming does not help, because it only claims
+orders with no owner. The other 7 users are linked correctly.
+*Fix (needs your OK, it's data):* in one transaction, set `"User"."clerkId"` and
+`"Order"."clerkUserId"` from the old ID to the production ID (the other
+Clerk-keyed tables hold nothing for this user).
+
+**H2 — Mobile speed.** Lighthouse mobile Performance is 59–74 and LCP is 6–10 s
+(table in §5). On top of that, the intro curtain hides real content until
+**~4.4–4.9 s** on a fast desktop connection (once 9.8 s), on the **first page of
+every session, on any page**: a visitor arriving on a product page from Google or
+an ad sees it too. Ranked fixes are in §6.
+
+**H3 — Backups are not verified.** No database backup exists on the VPS, and I
+could not see the Supabase plan from here (no management token). The free plan
+has no downloadable backups and no point-in-time recovery. Secrets live only in
+`/srv/khem/shared/.env.production` and your `.env.local`.
+*To do:* confirm the plan in Supabase → Database → Backups. If it's Free, either
+upgrade or add a nightly `pg_dump` from the VPS to off-site storage. Keep a copy
+of the env file in a password manager.
+
+**H4 — Search is slow.** Server time per search is 0.65–1.5 s:
+- the Cohere embedding through the AI Gateway: **0.7–1.2 s**;
+- `hybrid_search_products`: **460 ms of pure Postgres for 29 products**.
+
+The second one is a real bug: `(jsonb_populate_record(…)).*` makes Postgres
+rebuild the whole row as JSON, embedding included, once per column (43×).
+`related_products` (the product page's related rail) has the same pattern.
+✅ *DB half closed — 0078 applied, see §7.1.* `0078_catalog_rpc_projection.sql` moves the projection into
+`LATERAL`. I tested it on production in a rolled-back transaction: 48 calls
+(EN/AR, with and without a vector, related rails) gave identical ids, order and
+rows; `costInCents` is still stripped; execution went **460 → 13 ms**. Needs your
+OK to apply with `psql --single-transaction` (same route as 0073–0077). The
+free-tier embedding limit (5/min) is still the open decision from the handoff.
+
+### Medium
+
+**M1 — Card payments are off.** ✅ *Intentional (cash-only) — see §7.5.* There are no Stripe keys on the server (or in
+`.env.local`), so checkout shows "Card payment is temporarily unavailable" and
+offers cash on delivery only. `/api/webhooks/stripe` answers 500
+`unconfigured`. If cash-only is the plan, this is fine. If Stripe still has a
+webhook endpoint pointing here, it will retry and eventually disable it.
+
+**M2 — The Clerk webhook is unverified since the move.** The nginx log has
+**no Svix delivery** since 18 Nov 13:00, while three Clerk users changed after
+that. That's harmless if those changes were sign-ins (no event), but the endpoint
+may still point at the old deployment. *To do:* Clerk dashboard → Webhooks:
+check that the URL is `https://khemperfumes.com/api/webhooks/clerk`, then send a
+test event (expect 200 in `/var/log/nginx/khem.access.log`).
+
+**M3 — Soft 404s.** Unknown URLs (`/nope`, `/perfume/does-not-exist`) answer
+**HTTP 200** with a `noindex` meta, because the root `app/[locale]/loading.tsx`
+starts streaming before `notFound()` runs. Google honours the `noindex`, but
+Search Console will report soft 404s. Also, every random product slug becomes a
+cached ISR entry on disk. Fixing it means moving that loading boundary (a UX
+change), so it is listed rather than done.
+
+**M4 — The cookie banner covers the main button.** On a 1280×577 viewport (a
+laptop with browser chrome) it sits over **ADD TO CART**. On a phone it covers
+~45% of the screen. Design decision.
+
+**M5 — Test data in production.** ✅ *Removed — see §7.4.*
+- 7 `InventoryMovement` rows by `user_verify_harness_0050/0051`. Their orders
+  (KHEM-2026-1081…1094) were already deleted, so these are orphans.
+- One manual `RECEIPT` with reason `test` (onyx-night, 3 → 4). This may be real
+  stock, so I would leave it.
+- The campaign "TEST NEW YEAR" (status SENT).
+
+**M6 — The Arabic announcement bar is in English.** All 4 active announcements
+have an empty `message_ar`. Content only: fill it in under Admin → Announcements.
+
+### Low
+
+- **L1** — F2 and F3's repo changes are not deployed yet. They take effect with
+  the next `deploy.sh`.
+- **L2** — Accessibility 91–96: no `<main>` landmark, some colour contrast and
+  touch-target sizes, one non-descriptive link.
+- **L3** — `/apple-touch-icon.png` returns 404 (iOS home-screen icon).
+- **L4** — A Clerk *keyless* dev key (`.clerk/.tmp/keyless.json`) sits in local
+  agent-checkpoint refs (`refs/agents/2b14804f…`). It was never pushed and is not
+  on `main`. *To do:* delete those refs.
+- **L5** — `/_next/static` is served by Node rather than from disk by nginx, and
+  there is no brotli (gzip only, from Next). Minor at this traffic; see §6.
+- **L6** — `app.err.log` repeats "The destination stream closed early". These are
+  client aborts during streaming. Noise, not failures.
+- **L7** — Owner to-dos from `handoff.md` are still open: switch off cron-job.org
+  (one external hit with a stale secret got a 401), point the GitHub
+  `keep_alive` secrets at Frankfurt, delete the Vercel project around 11-25, and
+  pause Tokyo after 12-02.
+- **L8** — The nginx security update (1.24.0-2ubuntu7.20) is pending.
+  Unattended-upgrades will install it on its next run.
+
+---
+
+## 4. What passed
+
+**Code (Sep 5 → now).** No Vercel coupling is left: Vercel appears only in
+comments, and the AI Gateway is a hosted API. No `edge` runtime, no
+`process.env.VERCEL*`, no `request.geo`/`ip`, no runtime filesystem writes.
+`after()` works under `next start`. All 5 cron routes use a constant-time bearer
+check. Every admin Server Action calls `requireAdmin()` (`shared.ts` holds
+helpers only), and the admin layout does too. Checkout prices, totals and stock
+are decided inside `place_order()` under row locks, and the action is rate-limited
+and Zod-validated. The search API is rate-limited, has a timeout, an LRU cache
+and a keyword fallback. Search tracking stores no user ID or IP, skips
+prefetches and bots, and writes in `after()`. JSON-LD goes through `jsonLdHtml()`.
+No other string-built PostgREST filters remain.
+
+**Live site.** Home, collections, product page (pyramid, related rail with 4
+products), add to bag, cart, and checkout (cash selected, totals correct;
+stopped before Place order) all work in EN and AR. AR is `dir="rtl"`. There is no
+horizontal overflow on an iPhone 14. AI search in both languages works ("26
+results · ranked by meaning · AI"), and so does keyword search. Signed out,
+`/account`, `/admin`, `/admin/search` and `/ar/*` all 307 to sign-in, and a
+forged Server Action POST is refused. Cron: all five jobs returned 200 today,
+including two real campaign sends (7 and 1 recipients); public calls get 401. The
+Clerk webhook rejects an unsigned POST (400). There were no console errors on the
+pages tested. `robots.txt` and the sitemap (no `vercel.app` URLs) are fine, and
+canonical and hreflang are correct. Sign-in/out, `/account` and `/admin` as a
+signed-in user, and email were confirmed by you on 11-19 and not re-tested (I
+have no credentials, and sending was off-limits).
+
+**Server.** SSH is key-only (`PasswordAuthentication no`, root by key only); the
+`khem` user has no password and no sudo. UFW allows 22/80/443 only, and Next
+listens on 127.0.0.1:3000 only. fail2ban runs (sshd jail, nftables) and sees
+little because password auth is off. Unattended security upgrades are on. The
+TLS certificate is valid to 2027-02-16, `certbot.timer` is enabled with a reload
+hook, and `certbot renew --dry-run` succeeds. `pm2-khem.service` is enabled and
+active, so PM2 restarts on reboot. Logs rotate (nginx daily ×14, pm2-logrotate
+20 MB ×10, journald 49 MB). Disk is 10% used (88 GB free), RAM 0.85/7.8 GB, swap
+idle. HSTS is set, `server_tokens` is off, `X-Powered-By` is hidden, and the CSP,
+nosniff, Referrer-Policy and X-Frame-Options are all present. **No secrets:** the
+only tracked env file is `.env.example`; history has no live keys (only test
+fixtures plus L4); no secret-shaped strings appear in app, cron, nginx or PM2
+logs; the env files are mode 600; no `[SENSITIVE]` placeholders are left.
+
+---
+
+## 5. Speed measurements
+
+**Server.** Through nginx on the box, every page answers in **~20 ms** (ISR
+hits). From Cairo-side networks, TTFB is ~350 ms, almost all of it network: RTT
+is ~103 ms, and TCP + TLS + the request take about 3 round trips. Supabase REST
+from the VPS takes 35 ms (simple select ~120 ms warm); the AI Gateway takes
+45 ms to first byte.
+
+**Search.** `/api/search` takes 0.65–1.5 s server-side. Breakdown: Cohere
+embedding 0.7–1.2 s, then `hybrid_search_products` 350–730 ms (→ ~13 ms DB with
+0078), then promotions and match notes.
+
+**Intro.** First paint is ~0.9–1.1 s; the curtain lifts at **~4.4–4.9 s**
+(desktop, fast connection). The timing is set by `MIN_HOLD_MS = 2200` counted
+*after hydration*, plus up to 1 s waiting for the hero, plus a 1.1 s exit.
+
+**Lighthouse 13.4 (live, 2026-11-19).** P = Performance, A = Accessibility,
+BP = Best Practices, SEO = SEO.
+
+| Page | Device | P | A | BP | SEO | FCP | LCP | CLS | TBT |
+| :-- | :-- | --: | --: | --: | --: | --: | --: | --: | --: |
+| `/` | mobile | 60 | 91 | 100 | 92 | 4.3 s | 7.7 s | 0.000 | 9 ms |
+| `/` | desktop | 85 | 92 | 100 | 92 | 0.7 s | 1.9 s | 0.039 | 0 |
+| `/ar` | mobile | 59 | 91 | 100 | 100 | 4.7 s | 8.0 s | 0.002 | 37 ms |
+| `/ar` | desktop | 85 | 92 | 100 | 100 | 1.0 s | 1.6 s | 0.001 | 0 |
+| `/perfume/sunlit-citrine` | mobile | 60 | 95 | 96 | 100 | 4.8 s | 8.7 s | 0.000 | 31 ms |
+| `/perfume/sunlit-citrine` | desktop | 94 | 96 | 96 | 100 | 0.7 s | 1.0 s | 0.003 | 0 |
+| `/ar/perfume/sunlit-citrine` | mobile | 59 | 95 | 96 | 100 | 4.8 s | 9.9 s | 0.000 | 41 ms |
+| `/ar/perfume/sunlit-citrine` | desktop | 94 | 95 | 96 | 100 | 1.0 s | 1.1 s | 0.001 | 0 |
+| `/collections` | mobile | 61 | 93 | 100 | 100 | 4.6 s | 6.8 s | 0.000 | 85 ms |
+| `/collections` | desktop | 93 | 95 | 100 | 100 | 0.6 s | 1.0 s | 0.008 | 0 |
+| `/ar/collections` | mobile | 62 | 93 | 100 | 100 | 4.4 s | 6.7 s | 0.000 | 46 ms |
+| `/ar/collections` | desktop | 94 | 93 | 100 | 100 | 0.6 s | 0.9 s | 0.006 | 0 |
+| `/search?q=oud` | mobile | 70 | 93 | 100 | 69* | 1.3 s | 8.4 s | 0.000 | 2 ms |
+| `/search?q=oud` | desktop | 92 | 95 | 100 | 69* | 0.6 s | 1.5 s | 0.004 | 0 |
+| `/ar/search?q=عود` | mobile | 74 | 93 | 100 | 69* | 1.4 s | 6.2 s | 0.002 | 36 ms |
+| `/ar/search?q=عود` | desktop | 91 | 93 | 100 | 69* | 0.6 s | 1.6 s | 0.001 | 0 |
+
+\* Search is `noindex` on purpose, so its SEO score is expected to be low. INP
+needs real-user data. Lab TBT is 0–85 ms, so INP risk is low.
+
+**Where the mobile bytes go (home):** 1.56 MB of hero video (**two** videos
+download, not one); the **Inter variable font is 344 KB** (all scripts and axes,
+preloaded); ~216 KB of Clerk JS on every page, even for anonymous visitors;
+~300 KB of unused JS. On `/ar`, the Amiri regular and bold fonts add 286 KB.
+
+**nginx.** HTTP/2 is on; gzip comes from Next (no brotli); static assets are
+immutable for 1 year (now a single header); images go through `/_next/image`
+(AVIF/WebP, 31-day cache); fonts use `display: swap`.
+
+---
+
+## 6. Speed fixes, ranked by impact
+
+1. **Intro curtain** *(design, needs OK)*. Play it on the home page only. Count
+   `MIN_HOLD_MS` from navigation start rather than from after hydration, and
+   shorten it (e.g. to 1.2 s). **Gain:** real content ~2–3 s sooner on every
+   first visit; landing pages lose the curtain entirely.
+2. **Subset the fonts.** Inter to Latin + Latin-1 + Latin Ext-A + punctuation and
+   currency, keeping the `wght` axis (344 KB → ~70–90 KB); Amiri and IBM Plex
+   Arabic to the Arabic block. **Gain:** ~250 KB EN / ~400 KB AR off the critical
+   path, worth ~1 s of mobile FCP/LCP on slow 4G.
+3. **Hero video.** Load only the active slide's video (`preload="none"` and a
+   poster for the rest), and ask Cloudinary for a mobile rendition (`w_640`,
+   lower bitrate). **Gain:** ~1.2 MB less on mobile home; LCP is the video.
+4. **Apply 0078.** Search DB time 460 → 13 ms per call, and the product page's
+   related rail gets the same fix. **Gain:** ~0.35–0.7 s per search.
+5. **Search pipeline.** Run the lexical query in parallel with the embedding call
+   and fill the results in as each arrives. Keep the typing overlay on keyword
+   results and embed only on Enter. Fund the Gateway (Cohere free tier is
+   5/min). **Gain:** a perceived 0.7–1.2 s per search, and no silent fallback
+   under load.
+6. **Load Clerk only where it's needed** (account, checkout, sign-in, admin) or
+   after idle. **Gain:** ~216 KB JS and main-thread time on every anonymous
+   pageview. A larger change.
+7. **Trim unused JS** (~300 KB flagged): check which client components the
+   layout pulls into every route.
+8. **nginx serves `/_next/static` from disk** (`alias
+   /srv/khem/current/.next/static/;` with a proxy fallback) and **brotli**
+   (`libnginx-mod-http-brotli-filter`). **Gain:** small for visitors, frees Node.
+9. **Optional:** a CDN or proxy (e.g. Cloudflare) for static files and images,
+   with a PoP near Cairo. **Gain:** cuts the ~100 ms RTT for repeat assets. The
+   rate limits would then have to read `CF-Connecting-IP`.
+
+---
+
+## 7. Decisions (approved by the owner, 2026-11-19)
+
+1. **Done — `0078` applied to Frankfurt** in one transaction; grants unchanged.
+   `/api/search` with a cached embedding went from 650–800 ms to ~150 ms (H4,
+   DB half closed; the embedding half remains).
+2. **Done — stale Clerk ID repointed** (H1 closed). `"User"` 1 row, `"Order"`
+   5 rows and `customer_notification_reads` 7 rows moved to the production ID;
+   all 8 Clerk users are now linked to their rows.
+3. **Done — committed and deployed** (F1, F2, F5, 0078 file, nginx/provision
+   files, this report).
+4. **Done — test data removed** (M5): the 7 orphan harness movements and the
+   "TEST NEW YEAR" campaign (with its 1 recipient and 1 send row). Stock levels
+   are unaffected; the manual onyx-night receipt was kept.
+5. **Cash-only is intentional** (M1 closed). Stripe stays unconfigured until card
+   payments are wanted (`STRIPE-SETUP.md`).
+6. **Approved — intro, fonts, hero video, cookie banner** (§6 items 1–3, M4).
+   Planned in `prompts/performance-intro-fonts-hero-cookie.md` per the AGENTS.md
+   workflow.

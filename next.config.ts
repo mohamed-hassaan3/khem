@@ -270,10 +270,11 @@ const nextConfig: NextConfig = {
           // account paths out of third-party referrer logs.
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           // The site asks for none of these. Saying so stops an embedded frame
-          // asking on its behalf.
+          // asking on its behalf. (No `interest-cohort`: FLoC was withdrawn and
+          // Chrome logs an "Unrecognized feature" error for the token.)
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+            value: "camera=(), microphone=(), geolocation=()",
           },
           // Belt to `frame-ancestors`' braces, for older browsers.
           { key: "X-Frame-Options", value: "DENY" },

@@ -125,8 +125,10 @@ On the Frankfurt database `schema_migrations` ends at `0071`, but:
   explanations) **are applied** the same way (2026-11-18). Both are idempotent.
 - `0077_cairo_report_days.sql` (Cairo report days) **is applied** the same way
   (2026-11-19). It is idempotent.
+- `0078_catalog_rpc_projection.sql` (search and related-products projection,
+  460 → 13 ms) **is applied** the same way (2026-11-19). It is idempotent.
 
-So the next `npm run db:migrate` runs `0072a`, `0072b`, `0073`–`0077` and
+So the next `npm run db:migrate` runs `0072a`, `0072b`, `0073`–`0078` and
 records them all. Run it only once `0072b` is wanted; until then, apply any new
 migration the same direct way.
 
