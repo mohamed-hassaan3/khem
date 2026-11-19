@@ -679,7 +679,7 @@ export function toHeroSlide(row: unknown, locale: Locale): HeroSlide | null {
 }
 
 export const HERO_SETTING_COLUMNS =
-  "mediaType, contentPosition, slideDurationMs, videoUrl, videoPosterUrl, videoAlt, " +
+  "mediaType, contentPosition, slideDurationMs, videoUrl, videoMobileUrl, videoPosterUrl, videoAlt, " +
   "videoAlt_ar, showHeadline, showDescription, showButton, headline, " +
   "headline_ar, description, description_ar, buttonLabel, buttonLabel_ar, " +
   "buttonHref";
@@ -689,6 +689,7 @@ const heroSettingRowSchema = z.object({
   contentPosition: heroContentPositionSchema.catch("CENTER"),
   slideDurationMs: z.coerce.number().default(6000),
   videoUrl: z.string().nullable().default(null),
+  videoMobileUrl: z.string().nullable().default(null),
   videoPosterUrl: z.string().nullable().default(null),
   videoAlt: z.string().nullable().default(null),
   videoAlt_ar: z.string().nullable().default(null),
@@ -760,6 +761,7 @@ export function toHero(
     slideDurationMs: setting.slideDurationMs,
     slides,
     videoUrl: isVideo ? setting.videoUrl : null,
+    videoMobileUrl: isVideo ? setting.videoMobileUrl : null,
     videoPosterUrl: isVideo ? setting.videoPosterUrl : null,
     videoAlt: isVideo
       ? resolveOptionalText(setting.videoAlt, setting.videoAlt_ar, locale)
@@ -814,6 +816,7 @@ export function toAdminHero(
     contentPosition: setting.contentPosition,
     slideDurationMs: setting.slideDurationMs,
     videoUrl: setting.videoUrl,
+    videoMobileUrl: setting.videoMobileUrl,
     videoPosterUrl: setting.videoPosterUrl,
     videoAlt: setting.videoAlt,
     videoAltAr: setting.videoAlt_ar,

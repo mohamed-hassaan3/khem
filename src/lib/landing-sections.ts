@@ -141,6 +141,8 @@ export interface SectionSettings {
   mediaType?: SectionMediaType;
   /** Used when `mediaType` is `FILM`. */
   videoUrl?: string | null;
+  /** Optional portrait film for phones; absent = derived from `videoUrl`. */
+  videoMobileUrl?: string | null;
   /** Used when `mediaType` is `IMAGE` — a banner belonging to this band. */
   imageUrl?: string | null;
   imageAlt?: string | null;
@@ -182,6 +184,7 @@ export interface SectionSettings {
 export interface NewArrivalPresentation {
   mediaType: SectionMediaType;
   videoUrl: string | null;
+  videoMobileUrl: string | null;
   imageUrl: string | null;
   imageAlt: string | null;
   showEyebrow: boolean;
@@ -217,6 +220,7 @@ export function resolveNewArrival(
     // An unset switch is FEATURED, which is what 0043's rows meant by IMAGES.
     mediaType: settings.mediaType ?? "FEATURED",
     videoUrl: trimmed(settings.videoUrl),
+    videoMobileUrl: trimmed(settings.videoMobileUrl),
     imageUrl: trimmed(settings.imageUrl),
     imageAlt: trimmed(settings.imageAlt),
 

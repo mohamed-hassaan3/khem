@@ -55,6 +55,7 @@ export const newArrivalSchema = z
     }),
 
     videoUrl: blankToNull,
+    videoMobileUrl: blankToNull,
     imageUrl: blankToNull,
     imageAlt: text(200, "Please shorten that description."),
 
@@ -100,6 +101,15 @@ export const newArrivalSchema = z
       value.mediaType !== "FILM" ||
       (typeof value.videoUrl === "string" && value.videoUrl.startsWith("https://")),
     { error: "A film needs an https:// address.", path: ["videoUrl"] },
+  )
+  .refine(
+    (value) =>
+      value.mediaType !== "FILM" ||
+      value.videoMobileUrl == null ||
+      (typeof value.videoMobileUrl === "string" &&
+        value.videoMobileUrl.startsWith("https://") &&
+        value.videoMobileUrl.length <= 2048),
+    { error: "The mobile film needs an https:// address.", path: ["videoMobileUrl"] },
   )
   .refine(
     (value) =>

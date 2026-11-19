@@ -473,6 +473,16 @@ const heroFields = z.object({
   ),
 
   videoUrl: mediaUrl("Use a full https:// video address."),
+  // Optional: phones get a Cloudinary-shrunk `videoUrl` without it
+  // (src/lib/video-url.ts). Same rule as the desktop film, plus 0079's cap.
+  videoMobileUrl: z.preprocess(
+    // Absent (an older form) reads as "none", never as an error.
+    (value) => value ?? "",
+    mediaUrl("Use a full https:// video address.").refine(
+      (value) => value === null || value.length <= 2048,
+      "That address is too long.",
+    ),
+  ),
   videoPosterUrl: mediaUrl("Use a full https:// image address."),
   videoAlt: optionalText(160, "That description is too long."),
   videoAltAr: optionalText(160, "That description is too long."),

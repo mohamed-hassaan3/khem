@@ -205,6 +205,8 @@ export async function updateNewArrival(input: unknown): Promise<AdminActionResul
   const settings = {
     mediaType: presentation.mediaType,
     videoUrl: presentation.mediaType === "FILM" ? presentation.videoUrl : null,
+    videoMobileUrl:
+      presentation.mediaType === "FILM" ? (presentation.videoMobileUrl ?? null) : null,
     imageUrl: presentation.mediaType === "IMAGE" ? presentation.imageUrl : null,
     imageAlt: presentation.mediaType === "IMAGE" ? presentation.imageAlt : null,
     showEyebrow: presentation.showEyebrow,

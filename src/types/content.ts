@@ -230,6 +230,8 @@ export interface Hero {
   slideDurationMs: number;
   slides: readonly HeroSlide[];
   videoUrl: string | null;
+  /** Optional portrait film for phones; `null` = derive one from `videoUrl`. */
+  videoMobileUrl: string | null;
   videoPosterUrl: string | null;
   /** Resolved. Names the video for somebody who cannot see it. */
   videoAlt: string | null;
@@ -261,6 +263,7 @@ export interface AdminHero {
   contentPosition: HeroContentPosition;
   slideDurationMs: number;
   videoUrl: string | null;
+  videoMobileUrl: string | null;
   videoPosterUrl: string | null;
   videoAlt: string | null;
   videoAltAr: string | null;
