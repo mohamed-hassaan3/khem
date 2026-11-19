@@ -453,6 +453,15 @@ export default async function RootLayout({
           signUpUrl={localizePath(locale, "/sign-up")}
           signInFallbackRedirectUrl={localizePath(locale, "/account")}
           signUpFallbackRedirectUrl={localizePath(locale, "/account")}
+          /*
+           * Don't preload `@clerk/ui` (Clerk's prebuilt screens) on every page.
+           * Public pages render none — the account menu is our own — yet its
+           * entry script was preloaded at High priority, competing with the
+           * hero. Pages that mount <SignIn>, <SignUp> or <UserProfile> still
+           * load it on demand. Public, documented prop ("for custom UIs");
+           * prompts/lcp-priority-and-clerk-weight.md.
+           */
+          prefetchUI={false}
         >
           {/*
            * The cart wraps the whole tree, not just the page that lists it:
