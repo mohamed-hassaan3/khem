@@ -388,3 +388,43 @@ it Clerk** on pages where no one is signed in. Next fixes, ranked:
    main-thread time from every anonymous pageview. The biggest remaining win,
    and a larger change.
 3. **Trim unused JS** in the shared layout (~300 KB flagged).
+
+## 9. One film link per section · 1.0 + 0.6 s intro (2026-11-19)
+
+Built from `prompts/single-video-auto-renditions.md` (owner: option 1, cap
+revised to 20 s), live as `dbf1d42` (`b500bd1` cuts · `356a856` admin ·
+`dbf1d42` intro). It supersedes §8's separate mobile-video input.
+
+- **One link per section.** Cloudinary builds both cuts, replacing whatever was
+  pasted after `/upload/`:
+  - phone `f_auto,q_auto:eco,w_720,du_20,ac_none`
+  - desktop `f_auto,q_auto,w_1920,du_20,ac_none`
+
+  Live and verified: each device requests its own cut, and New Arrival waits
+  for the scroll.
+- **Sizes today:**
+
+  | Film | Phone | Desktop |
+  | :-- | :-- | :-- |
+  | Hero (36.4 s source → cut to 20 s) | 487 KB | **3.09 MB, over the 2.5 MB recommendation** (loads after `load`, so it doesn't affect LCP) |
+  | New Arrival (5.8 s) | 300 KB | 1.50 MB |
+
+  A shorter source film (≤ 20 s, ideally a clean 10–15 s loop) brings the hero
+  under budget.
+- **Admin:** one field each. The check shows the size of each cut and warns,
+  without blocking, on a source over 20 s, narrower than 1920 px, or a cut over
+  budget. `HeroSetting."videoMobileUrl"` (0079) stays in the database, unused
+  and empty.
+- **Intro:** 1.0 s logo + 0.6 s curtain, gone at **2.38–2.59 s** live (one
+  cold-network run 4.6 s, i.e. first paint + 1.6 s), with the poster always
+  decoded when it lifts. A tap or key skips it after 0.2 s; this was **not
+  verified live**, because the probe can't start before `load`.
+- **Owner checks:** (1) the hero loop at the 20 s cut, for a visible jump;
+  (2) skipping the intro with a tap.
+
+**Mobile Lighthouse (two runs; `e39826e` → `dbf1d42`):** `/` 78/62 → 61/63;
+`/ar` 60/60 → 59/78; product 65/65 → 66/65; AR product 61/67 → 61/68. These
+are flat within run-to-run noise, as expected: this change targeted editor
+workflow, film bandwidth and the intro's feel, and §8's findings still hold.
+The remaining mobile gains are the product LCP image priority, loading Clerk
+only where it's needed, and trimming unused JS.
