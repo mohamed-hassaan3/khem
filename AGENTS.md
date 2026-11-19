@@ -548,6 +548,25 @@ export const config = {
 };
 ```
 
+### 10.2 Clerk on the client — only where it's needed
+
+There is **no `<ClerkProvider>` in the root `[locale]` layout** (since
+2026-11-19, `prompts/clerk-load-only-where-needed.md`). Signed-out visitors load
+no Clerk JavaScript at all.
+
+- **Public pages** read `useKhemSession()` (`src/providers/session-provider.tsx`),
+  never Clerk hooks. For a signed-in visitor (Clerk's `__client_uat` cookie)
+  it loads `<ClerkSessionBridge>` in the background, which keeps the session
+  token fresh for Server Actions (checkout, discounts, offers, comments).
+- **`/sign-in`, `/sign-up`, `/account`** wrap their content in
+  `<KhemClerkProvider>` (full Clerk, prebuilt UI). A new route that renders a
+  prebuilt Clerk component (`<SignIn>`, `<UserProfile>`, …) needs the same.
+- **Never set `prefetchUI={false}` on a provider that renders prebuilt Clerk
+  components.** It stops `@clerk/ui` loading entirely
+  (`prompts/lcp-priority-and-clerk-weight.md`, "Outcome").
+- Identity is decided on the server only (`auth()`, `getViewer()`,
+  `requireAdmin()`); the cookie only decides whether to load Clerk.
+
 ---
 
 ## 11. REUSABLE COMPONENT CODE STANDARDS

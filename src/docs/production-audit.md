@@ -481,3 +481,79 @@ compete with its poster). On the product pages the photo is now high priority
 (Lighthouse's "fetchpriority=high should be applied" check passes), but the
 score is within run-to-run noise: those pages are bound by JavaScript (Clerk
 included) and main-thread time.
+
+## 11. Clerk loads only where it's needed (2026-11-19)
+
+Built from `prompts/clerk-load-only-where-needed.md`; live as `d1d91f4`
+(`0488183` session context · `d1d91f4` switch-over; the plan's commits 2 and 3
+were merged so every commit runs).
+
+**What changed.**
+- The root `<ClerkProvider>` is gone. Signed-out visitors load **no Clerk
+  JavaScript**.
+- Signed-in visitors on public pages get `clerk-js` only (no `@clerk/ui`),
+  loaded in the background so their session token stays fresh.
+- `/sign-in`, `/sign-up` and `/account` keep the full provider in their own
+  layouts.
+- Nav, account menu, sign-out and comments read `useKhemSession()`. Auth on
+  the server is untouched. See `AGENTS.md` §10.2.
+
+**Verified locally against Clerk's development instance** (disposable test
+user, deleted afterwards). Scenarios 1–9 of the plan pass:
+- signed-out pages make 0 Clerk requests, and guest checkout works;
+- the sign-in and sign-up forms render in EN and AR;
+- signed in, the account menu shows on home, product, cart and account, with
+  one Clerk script and no `@clerk/ui`;
+- **the server still recognises the user after 92 s on a product page and at
+  checkout** (handshake-free request → 200; token 4–9 s old);
+- signing out from the nav works, and the next page loads no Clerk;
+- a sign-in in another tab is picked up when the tab regains focus;
+- client-side navigation from account to home keeps the session.
+
+Scenario 10 (the admin link) is owner-only.
+
+**Verified live (signed out).**
+- 8 public pages (EN/AR) make **0 Clerk requests** and show the sign-in link.
+- Guest checkout renders.
+- The sign-in and sign-up forms render in EN and AR. English sign-up missed
+  once seconds after the restart, then passed 3 of 3 times (~1 s).
+- `/account` and `/admin` still 307 to sign-in.
+- No server errors since the deploy.
+
+**Owner to check signed in (production; I have no credentials):**
+1. the nav account menu and the admin link;
+2. `/account` and `/account/profile`;
+3. wait a minute on `/checkout` and confirm your details are prefilled (a real
+   order is your call);
+4. sign out, then sign in again.
+
+Rollback if anything is off:
+`ssh khem@179.67.202.31 /srv/khem/current/deploy/rollback.sh eee60c29dcdf`.
+
+**Two things found while testing:**
+- **Test data, removed.** Opening `/account/profile` as the test user created
+  a `"User"` row in the production database. Next **prefetches** the sidebar's
+  `/account` link, and that page runs `ensureUserRowId()` (and
+  `claimGuestOrdersForIdentity()`) on render. I deleted the row (1 row, no
+  orders, addresses, points, credits or reads attached). For real customers
+  this is harmless (it's their own row), but it means **viewing any account
+  page creates the row through prefetch**, not just the overview. Worth knowing
+  when testing.
+- **The development Clerk instance's webhook points at production.** Its
+  `user.created` event reached `/api/webhooks/clerk` and was correctly
+  **rejected** (400, signature mismatch). Harmless, but noisy. Point that
+  webhook elsewhere, or remove it, in the Clerk dashboard (development
+  instance).
+
+**Mobile Lighthouse (two runs; `eee60c2` → `d1d91f4`):**
+
+| Page | Performance | LCP | JavaScript | Page weight |
+| :-- | :-- | :-- | :-- | :-- |
+| `/` | 76 / 70 → **78 / 72** | 5.1 / 5.1 → 4.0 / 5.1 s | 661 → **262 KB** | 1.42 → **0.80 MB** |
+| `/ar` | 72 / 67 → 66 / **90** | 5.6 / 5.9 → 5.9 / 2.2 s | 661 → **262 KB** | 1.65 → **1.04 MB** |
+| `/perfume/sunlit-citrine` | 65 / 73 → **95** / 76 | 8.0 / 5.1 → 1.8 / 4.8 s | 736 → **338 KB** | 1.18 → **0.77 MB** |
+| `/ar/perfume/sunlit-citrine` | 62 / 68 → 68 / 68 | 9.0 / 6.0 → 5.8 / 5.7 s | 736 → **338 KB** | 1.41 → **0.98 MB** |
+
+Clerk went from ~354 KB to **0 KB** on every page measured. Scores are noisy
+on this connection (one run each reached 90 and 95), but the floor moved up
+and total blocking time fell on most runs.
