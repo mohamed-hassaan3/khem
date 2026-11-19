@@ -47,7 +47,6 @@ const settingsSchema = z
     // a bad value cannot reach a `<video>` or `<Image>` even if a constraint is
     // ever relaxed.
     videoUrl: assetUrl,
-    videoMobileUrl: assetUrl,
     imageUrl: assetUrl,
     imageAlt: overrideText(200),
 

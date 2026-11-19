@@ -137,6 +137,18 @@ export function firstFramePoster(url: string, width: number): string | null {
 }
 
 /**
+ * The uploaded original, with every transformation removed — what the
+ * dashboard measures for width and length, since a pasted link may already be
+ * shrunk (`w_828`). Non-Cloudinary URLs are returned unchanged.
+ */
+export function originalOf(url: string): string {
+  const p = parse(url);
+  if (!p) return url;
+  p.transformations = [];
+  return build(p);
+}
+
+/**
  * The two films a page needs, from the one link the editor gave: what a phone
  * plays and what a desktop plays. Both are {@link PHONE_TRANSFORMATION} /
  * {@link DESKTOP_TRANSFORMATION} of the same source. A film hosted outside

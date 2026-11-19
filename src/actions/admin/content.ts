@@ -886,7 +886,6 @@ export async function saveHero(input: unknown): Promise<AdminActionResult> {
       contentPosition: hero.contentPosition,
       slideDurationMs: hero.slideDurationMs,
       videoUrl: hero.videoUrl,
-      videoMobileUrl: hero.mediaType === "VIDEO" ? hero.videoMobileUrl : null,
       videoPosterUrl: hero.videoPosterUrl,
       videoAlt: hero.videoAlt,
       videoAlt_ar: hero.videoAltAr,

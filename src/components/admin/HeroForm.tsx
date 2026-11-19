@@ -120,7 +120,6 @@ export default function HeroForm({ hero }: { hero: AdminHero }) {
   const [rows, setRows] = useState<Row[]>(toRows(hero.slides));
 
   const [videoUrl, setVideoUrl] = useState(hero.videoUrl ?? "");
-  const [videoMobileUrl, setVideoMobileUrl] = useState(hero.videoMobileUrl ?? "");
   const [videoPosterUrl, setVideoPosterUrl] = useState(hero.videoPosterUrl ?? "");
   const [videoAlt, setVideoAlt] = useState(hero.videoAlt ?? "");
   const [videoAltAr, setVideoAltAr] = useState(hero.videoAltAr ?? "");
@@ -148,7 +147,6 @@ export default function HeroForm({ hero }: { hero: AdminHero }) {
     slideDurationMs,
     slides: rows.filter((row) => !isBlank(row)),
     videoUrl,
-    videoMobileUrl,
     videoPosterUrl,
     videoAlt,
     videoAltAr,
@@ -419,26 +417,9 @@ export default function HeroForm({ hero }: { hero: AdminHero }) {
             onChange={setVideoUrl}
             error={fieldErrors.videoUrl}
             required
-            hint="Desktop film. An https:// address to an MP4 the browser can play inline."
+            hint="An https:// address to an MP4 (Cloudinary recommended)."
           />
-          <VideoUrlCheck url={videoUrl} kind="desktop" />
-
-          <div>
-            <AdminInput
-              id="videoMobileUrl"
-              type="url"
-              label="Mobile video address"
-              value={videoMobileUrl}
-              onChange={setVideoMobileUrl}
-              error={fieldErrors.videoMobileUrl}
-              hint="Optional. Played on phones instead of the desktop film."
-            />
-            <VideoUrlCheck
-              url={videoMobileUrl}
-              kind="mobile"
-              emptyNote="Empty: phones get a lighter 720px copy of the desktop film, made by Cloudinary."
-            />
-          </div>
+          <VideoUrlCheck url={videoUrl} />
 
           <AdminInput
             id="videoPosterUrl"

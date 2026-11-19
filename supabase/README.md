@@ -129,6 +129,11 @@ On the Frankfurt database `schema_migrations` ends at `0071`, but:
   460 → 13 ms) **is applied** the same way (2026-11-19). It is idempotent.
 - `0079_hero_mobile_video.sql` (`HeroSetting."videoMobileUrl"`) **is applied**
   the same way (2026-11-19), with the PostgREST reload. It is idempotent.
+  **The column is unused since 2026-11-19**: the owner chose one film link per
+  section, with both cuts built by Cloudinary
+  (`prompts/single-video-auto-renditions.md`). Nothing reads or writes it, and
+  it held no value when the code stopped reading it. Leave it, or drop it in a
+  later cleanup migration.
 
 So the next `npm run db:migrate` runs `0072a`, `0072b`, `0073`–`0079` and
 records them all. Run it only once `0072b` is wanted; until then, apply any new

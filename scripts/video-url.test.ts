@@ -6,6 +6,7 @@ import {
   PHONE_TRANSFORMATION,
   firstFramePoster,
   isCloudinaryVideo,
+  originalOf,
   videoSources,
   withoutAudio,
 } from "../src/lib/video-url";
@@ -76,4 +77,10 @@ test("videoSources replaces whatever the editor pasted with both cuts", () => {
     videoSources(FOLDER).mobile,
     `${C}/f_auto,q_auto:eco,w_720,du_20,ac_none/v1/home/hero_films/KHEM-40.mp4`,
   );
+});
+
+test("originalOf strips every transformation", () => {
+  assert.equal(originalOf(HERO), BARE);
+  assert.equal(originalOf(BARE), BARE);
+  assert.equal(originalOf("https://example.com/a.mp4"), "https://example.com/a.mp4");
 });
