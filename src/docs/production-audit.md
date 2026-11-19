@@ -428,3 +428,56 @@ are flat within run-to-run noise, as expected: this change targeted editor
 workflow, film bandwidth and the intro's feel, and §8's findings still hold.
 The remaining mobile gains are the product LCP image priority, loading Clerk
 only where it's needed, and trimming unused JS.
+
+## 10. LCP image priority · a Clerk incident (2026-11-19)
+
+Built from `prompts/lcp-priority-and-clerk-weight.md`; live as `eee60c2`.
+
+**Shipped: explicit image priority (`972075d`).**
+- Next 16 deprecated `priority` on `next/image`. It still preloads, but no
+  longer sets `fetchpriority="high"`.
+- React 19's server renderer also auto-preloads every eager `<img>` unless it
+  is `fetchPriority="low"`. So every page's `<head>` preloaded the intro
+  artwork, the nav logo and the route loader before its own hero; on the
+  product page the photo was 4th.
+- Now: 15 LCP images use `loading="eager" fetchPriority="high"`, and the
+  decorative ones use `fetchPriority="low"`. Each page preloads only its own
+  LCP image (home: none, its poster is in the HTML at high priority). An ESLint
+  guard forbids `<Image priority>`.
+
+**Incident: `prefetchUI={false}` (`3e7c57a`), reverted.**
+- I read Clerk's "skip prefetching the UI" as "load it on demand". It doesn't:
+  with `false`, `@clerk/react` never loads `@clerk/ui`, so the sign-in and
+  sign-up forms crashed ("This page couldn't load").
+- **Impact:** `/sign-in` and `/sign-up` (EN/AR) were down from **21:19:51 to
+  21:21:59 UTC (~2 min)**. The access log shows no visitor other than the
+  verification run on those pages. Orders, checkout and the rest of the site
+  were unaffected.
+- **Response:** found by the post-deploy check, rolled back with
+  `deploy/rollback.sh dbf1d4257d9c`, reverted (`eee60c2`), redeployed, and
+  re-verified: sign-in and sign-up render in EN and AR.
+- **Lesson:** a Clerk change must be verified on khemperfumes.com *before*
+  being called safe. The production instance doesn't run on localhost, so the
+  local build could not catch it. For any future Clerk change, check the auth
+  pages on the live site straight after the deploy (as was done), with the
+  rollback command ready.
+
+**Clerk's weight is therefore unchanged:** 84 KB core + 264 KB `@clerk/ui` on
+every page. The remaining option is the "islands" refactor described in the
+prompt (load Clerk only where it's needed, or only for signed-in visitors). It
+needs its own design and a live test plan, and is not started.
+
+**Mobile Lighthouse (two runs; `dbf1d42` → `eee60c2`):**
+
+| Page | Performance | LCP |
+| :-- | :-- | :-- |
+| `/` | 61 / 63 → **76 / 70** | 7.9 / 7.6 → **5.1 / 5.1 s** |
+| `/ar` | 59 / 78 → **72 / 67** | 8.5 / 3.4 → 5.6 / 5.9 s |
+| `/perfume/sunlit-citrine` | 66 / 65 → 65 / 73 | 7.0 / 7.9 → 8.0 / 5.1 s |
+| `/ar/perfume/sunlit-citrine` | 61 / 68 → 62 / 68 | 9.4 / 5.9 → 9.0 / 6.0 s |
+
+Home improved consistently in both runs (the decorative preloads no longer
+compete with its poster). On the product pages the photo is now high priority
+(Lighthouse's "fetchpriority=high should be applied" check passes), but the
+score is within run-to-run noise: those pages are bound by JavaScript (Clerk
+included) and main-thread time.
