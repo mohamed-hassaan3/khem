@@ -23,18 +23,16 @@ import { MOBILE_MEDIA_QUERY, videoSources } from "@/src/lib/video-url";
  */
 export default function InViewVideo({
   src,
-  mobileSrc,
   poster,
   className,
 }: {
   src: string;
-  mobileSrc?: string | null;
   poster?: string;
   className?: string;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const sources = videoSources(src, mobileSrc);
+  const sources = videoSources(src);
 
   useEffect(() => {
     const video = ref.current;

@@ -2,8 +2,8 @@
  * Cloudinary video delivery URLs, rewritten at render time.
  *
  * Editors paste a delivery URL into the dashboard and it is stored exactly as
- * pasted. Everything here derives *another* URL from it — without audio, a
- * phone-sized fallback, a first-frame poster — so the stored value never has
+ * pasted. Everything here derives *another* URL from it — the phone and
+ * desktop cuts, a copy without audio, a first-frame poster — so the stored value never has
  * to change and a rule here can be revised without a data migration
  * (prompts/mobile-video-hero-loading.md).
  *
@@ -22,8 +22,18 @@
  * name is told apart from one.
  */
 
-/** Phones get this when the editor gave no mobile film. */
-export const MOBILE_FALLBACK_TRANSFORMATION = "f_auto,q_auto:eco,w_720,ac_none";
+/**
+ * The two cuts every Cloudinary film is delivered as
+ * (prompts/single-video-auto-renditions.md). They *replace* whatever
+ * transformation the editor pasted, so what visitors download never depends on
+ * what was typed after `/upload/`. `du_20` caps the length at 20 seconds — the
+ * largest single saving (the 36 s hero: 930 KB → 487 KB on a phone).
+ */
+export const PHONE_TRANSFORMATION = "f_auto,q_auto:eco,w_720,du_20,ac_none";
+export const DESKTOP_TRANSFORMATION = "f_auto,q_auto,w_1920,du_20,ac_none";
+
+/** Films longer than this are cut (`du_20`). Shown in the dashboard. */
+export const MAX_FILM_SECONDS = 20;
 
 /** Where the phone/desktop split is made — Tailwind's `md`. */
 export const MOBILE_MEDIA_QUERY = "(max-width: 767px)";
@@ -105,15 +115,10 @@ export function withoutAudio(url: string): string {
   return build(p);
 }
 
-/**
- * A phone-sized, audio-free rendition of a desktop film, for when the editor
- * gave no mobile film. Replaces every transformation with
- * {@link MOBILE_FALLBACK_TRANSFORMATION}.
- */
-export function mobileFallback(url: string): string {
+function withTransformation(url: string, transformation: string): string {
   const p = parse(url);
   if (!p) return url;
-  p.transformations = [MOBILE_FALLBACK_TRANSFORMATION];
+  p.transformations = [transformation];
   return build(p);
 }
 
@@ -132,17 +137,14 @@ export function firstFramePoster(url: string, width: number): string | null {
 }
 
 /**
- * The two films a page needs: what a phone plays and what a desktop plays,
- * both without audio. A phone gets the editor's mobile film when there is
- * one, otherwise {@link mobileFallback} of the desktop film.
+ * The two films a page needs, from the one link the editor gave: what a phone
+ * plays and what a desktop plays. Both are {@link PHONE_TRANSFORMATION} /
+ * {@link DESKTOP_TRANSFORMATION} of the same source. A film hosted outside
+ * Cloudinary is returned unchanged for both.
  */
-export function videoSources(
-  desktopUrl: string,
-  mobileUrl: string | null | undefined,
-): { desktop: string; mobile: string } {
-  const mobile = mobileUrl && mobileUrl.trim().length > 0 ? mobileUrl.trim() : null;
+export function videoSources(url: string): { desktop: string; mobile: string } {
   return {
-    desktop: withoutAudio(desktopUrl),
-    mobile: mobile ? withoutAudio(mobile) : mobileFallback(desktopUrl),
+    desktop: withTransformation(url, DESKTOP_TRANSFORMATION),
+    mobile: withTransformation(url, PHONE_TRANSFORMATION),
   };
 }

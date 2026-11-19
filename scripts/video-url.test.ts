@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  DESKTOP_TRANSFORMATION,
+  PHONE_TRANSFORMATION,
   firstFramePoster,
   isCloudinaryVideo,
-  mobileFallback,
   videoSources,
   withoutAudio,
 } from "../src/lib/video-url";
@@ -27,7 +28,7 @@ test("only Cloudinary video delivery URLs are understood", () => {
 test("anything else passes through every helper unchanged", () => {
   const other = "https://example.com/film.mp4?x=1";
   assert.equal(withoutAudio(other), other);
-  assert.equal(mobileFallback(other), other);
+  assert.deepEqual(videoSources(other), { desktop: other, mobile: other });
   assert.equal(firstFramePoster(other, 720), null);
 });
 
@@ -50,29 +51,29 @@ test("folders are not mistaken for transformations", () => {
   assert.equal(withoutAudio(FOLDER), `${C}/ac_none/v1/home/hero_films/KHEM-40.mp4`);
 });
 
-test("mobileFallback replaces the transformation", () => {
-  assert.equal(
-    mobileFallback(HERO),
-    `${C}/f_auto,q_auto:eco,w_720,ac_none/v1792146108/KHEM-40.mp4`,
-  );
-  assert.equal(mobileFallback(BARE), `${C}/f_auto,q_auto:eco,w_720,ac_none/v1792146108/KHEM-40.mp4`);
-});
-
 test("firstFramePoster is a so_0 JPEG at the given width", () => {
   assert.equal(firstFramePoster(HERO, 720), `${C}/so_0,w_720,q_auto/v1792146108/KHEM-40.jpg`);
   assert.equal(firstFramePoster(ARRIVAL, 1920), `${C}/so_0,w_1920,q_auto/Hero.jpg`);
 });
 
-test("videoSources: the editor's mobile film wins, else the fallback", () => {
-  const mobile = `${C}/v2/KHEM-40-portrait.mp4`;
-  assert.deepEqual(videoSources(HERO, mobile), {
-    desktop: `${C}/f_auto,q_auto,w_828,ac_none/v1792146108/KHEM-40.mp4`,
-    mobile: `${C}/ac_none/v2/KHEM-40-portrait.mp4`,
-  });
-  for (const none of [null, undefined, "", "  "]) {
-    assert.equal(
-      videoSources(HERO, none).mobile,
-      `${C}/f_auto,q_auto:eco,w_720,ac_none/v1792146108/KHEM-40.mp4`,
-    );
+test("the cuts are the agreed transformations", () => {
+  assert.equal(PHONE_TRANSFORMATION, "f_auto,q_auto:eco,w_720,du_20,ac_none");
+  assert.equal(DESKTOP_TRANSFORMATION, "f_auto,q_auto,w_1920,du_20,ac_none");
+});
+
+test("videoSources replaces whatever the editor pasted with both cuts", () => {
+  for (const source of [HERO, BARE]) {
+    assert.deepEqual(videoSources(source), {
+      desktop: `${C}/f_auto,q_auto,w_1920,du_20,ac_none/v1792146108/KHEM-40.mp4`,
+      mobile: `${C}/f_auto,q_auto:eco,w_720,du_20,ac_none/v1792146108/KHEM-40.mp4`,
+    });
   }
+  assert.deepEqual(videoSources(ARRIVAL), {
+    desktop: `${C}/f_auto,q_auto,w_1920,du_20,ac_none/Hero.mp4`,
+    mobile: `${C}/f_auto,q_auto:eco,w_720,du_20,ac_none/Hero.mp4`,
+  });
+  assert.equal(
+    videoSources(FOLDER).mobile,
+    `${C}/f_auto,q_auto:eco,w_720,du_20,ac_none/v1/home/hero_films/KHEM-40.mp4`,
+  );
 });

@@ -22,25 +22,23 @@ import {
  *
  * **The film** has no `src` in the HTML. On the window `load` event (or at
  * once if it already fired) the right one is chosen — the phone film, or a
- * Cloudinary-shrunk desktop film when there is none — and played, muted and
- * without audio (`ac_none`). It sits over the poster at opacity 0 and fades in
+ * phone cut (`w_720`, `q_auto:eco`) or the desktop cut (`w_1920`), both capped
+ * at 20 s and without audio — and played muted. It sits over the poster at opacity 0 and fades in
  * over 500 ms once it is actually `playing`, so a stalled or refused autoplay
  * simply leaves the poster. Nothing changes size: no layout shift.
  *
  * Under reduced motion or Data Saver the film is never requested.
  */
 export default function HeroFilm({
-  desktopUrl,
-  mobileUrl,
+  url,
   fallbackPosterUrl,
   alt,
 }: {
-  desktopUrl: string;
-  mobileUrl: string | null;
+  url: string;
   fallbackPosterUrl: string | null;
   alt: string;
 }) {
-  const sources = videoSources(desktopUrl, mobileUrl);
+  const sources = videoSources(url);
   const desktopPoster = firstFramePoster(sources.desktop, 1920) ?? fallbackPosterUrl;
   const mobilePoster = firstFramePoster(sources.mobile, 720) ?? desktopPoster;
 

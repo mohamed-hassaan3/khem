@@ -214,8 +214,7 @@ export default function Hero({
     >
       {hero.mediaType === "VIDEO" && hero.videoUrl ? (
         <HeroFilm
-          desktopUrl={hero.videoUrl}
-          mobileUrl={hero.videoMobileUrl}
+          url={hero.videoUrl}
           fallbackPosterUrl={hero.videoPosterUrl}
           alt={hero.videoAlt ?? labels.video}
         />
