@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
 import ConsentToggle from "./ConsentToggle";
@@ -85,6 +86,10 @@ const acceptButtonClass = "btn btn-primary";
 
 export default function CookieConsent() {
   const dict = useDictionary();
+  // `/perfume/x`, `/ritual/x`, `/set/x`, with or without the `/ar` prefix.
+  const onProductPage = /^(?:\/ar)?\/(?:perfume|ritual|set)\/[^/]+\/?$/.test(
+    usePathname() ?? "",
+  );
   const locale = useLocale();
   const copy = dict.cookieConsent;
 
@@ -158,7 +163,14 @@ export default function CookieConsent() {
     <AnimatePresence>
       {visible && (
         <div
-          className="pointer-events-none fixed inset-x-0 bottom-0 z-990 flex justify-center px-4 pb-4 sm:justify-end sm:px-6 sm:pb-6"
+          /*
+            Bottom end — except on a product page, where the end column is the
+            buy column and the card sat on ADD TO CART at laptop heights. There
+            it takes the start corner, over the gallery. Logical, so RTL mirrors.
+          */
+          className={`pointer-events-none fixed inset-x-0 bottom-0 z-990 flex justify-center px-4 pb-4 sm:px-6 sm:pb-6 ${
+            onProductPage ? "sm:justify-start" : "sm:justify-end"
+          }`}
           role="region"
           aria-label={copy.regionLabel}
         >
@@ -202,7 +214,7 @@ export default function CookieConsent() {
                 rule. A phone keeps the full width — there is no corner to
                 retreat to at 390px.
               */
-              "pointer-events-auto relative w-full sm:max-w-md",
+              "pointer-events-auto relative w-full sm:max-w-sm",
               "rounded-lg border border-border-gold/40",
               /*
                 Opaque ivory. This was 92% charcoal over a `blur(24px)` — and
@@ -212,7 +224,7 @@ export default function CookieConsent() {
                 the blur was nominally there for, at no per-frame cost.
               */
               "bg-ground-bg",
-              "p-5 shadow-3 focus:outline-none sm:p-6",
+              "p-4 shadow-3 focus:outline-none sm:p-6",
             ].join(" ")}
           >
             {/* Hairline gold rule along the top edge of the card. */}
@@ -221,11 +233,13 @@ export default function CookieConsent() {
               className="absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-gold/50 to-transparent"
             />
 
-            <p className="eyebrow mb-3">{copy.eyebrow}</p>
+            {/* Desktop only: on a phone the title says the same thing, and the
+                card has to stay under a third of the screen. */}
+            <p className="eyebrow mb-3 hidden sm:block">{copy.eyebrow}</p>
 
             <h2
               id={titleId}
-              className="mb-4 font-heading text-lg tracking-[0.12em] text-ground sm:text-xl"
+              className="mb-2 font-heading text-lg tracking-[0.12em] text-ground sm:mb-4 sm:text-xl"
             >
               {copy.title}
             </h2>
@@ -234,18 +248,20 @@ export default function CookieConsent() {
               The same notice at two lengths, switched in CSS rather than in
               JS: a media query has no hydration branch and no reflow, and both
               strings are already in the bundle. The short one is for a phone,
-              where the long version filled a third of the screen.
+              where the long version filled a third of the screen — and for a
+              short desktop window (≤ 760px tall), where the long one made the
+              card two-thirds of the viewport and covered the buy column.
             */}
-            <p className="hidden text-sm leading-relaxed text-ground-muted sm:block">
+            <p className="hidden text-sm leading-relaxed text-ground-muted sm:block sm:[@media(max-height:760px)]:hidden">
               {copy.body}
             </p>
-            <p className="text-sm leading-relaxed text-ground-muted sm:hidden">
+            <p className="text-sm leading-relaxed text-ground-muted sm:hidden sm:[@media(max-height:760px)]:block">
               {copy.bodyShort}
             </p>
 
             <LocaleLink
               href="/cookie-policy"
-              className="mt-3 inline-block text-xs tracking-[0.08em] text-ground-accent/80 underline-offset-4 transition-colors duration-300 hover:text-ground-accent hover:underline"
+              className="mt-2 inline-block text-xs tracking-[0.08em] sm:mt-3 text-ground-accent/80 underline-offset-4 transition-colors duration-300 hover:text-ground-accent hover:underline"
             >
               {copy.policyLink}
             </LocaleLink>
@@ -339,10 +355,10 @@ export default function CookieConsent() {
             {/*
               The toggle keeps its own line at every width now. The row used to
               split at `sm:` — which was right across a `max-w-5xl` bar and is
-              wrong inside a `max-w-md` card, where "Manage Preferences" and two
+              wrong inside a `max-w-sm` card, where "Manage Preferences" and two
               buttons would be three controls fighting over one line.
             */}
-            <div className="mt-7 flex flex-col gap-5">
+            <div className="mt-4 flex flex-col gap-3 sm:mt-7 sm:gap-5">
               <button
                 type="button"
                 onClick={() => setExpanded((previous) => !previous)}
@@ -368,11 +384,12 @@ export default function CookieConsent() {
               </button>
 
               {/*
-               * `flex-col-reverse` on a phone puts the primary action closest to
-               * the thumb while keeping Decline first in DOM (and tab) order —
-               * the reject path must never be harder to reach than accept.
+               * Side by side and equal width on a phone too — stacked, the two
+               * buttons alone took a sixth of a 390×844 screen. Decline stays
+               * first in DOM (and tab) order and the same size as Accept: the
+               * reject path must never be harder to reach than accept.
                */}
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+              <div className="flex flex-row gap-3 *:flex-1 sm:items-center sm:justify-end sm:*:flex-none">
                 <button
                   type="button"
                   onClick={declineAll}
