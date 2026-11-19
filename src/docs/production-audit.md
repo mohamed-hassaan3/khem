@@ -342,3 +342,49 @@ immutable for 1 year (now a single header); images go through `/_next/image`
      copy; (b) on product pages it sits in the start corner, over the gallery;
      (c) on phones the "Privacy" eyebrow is hidden (the title says the same).
      Wording, colours, focus handling and consent logic are unchanged.
+
+## 8. Mobile video and the 2-second intro (2026-11-19)
+
+Built from `prompts/mobile-video-hero-loading.md`, live as `e39826e`
+(`a2e824c` data · `fc13cad` URL helper · `fd581af` admin · `093737b` hero
+loading · `e39826e` intro; the helper went before the admin so the size check
+measures what visitors receive). The cookie-card changes in §7.6 are kept, by
+the owner's decision.
+
+- **Admin:** "Mobile video address" under the Hero and New Arrival films,
+  recommended sizes as hints, warnings (never blocking) for size, resolution,
+  orientation and length. Migration `0079` adds `HeroSetting."videoMobileUrl"`;
+  New Arrival keeps it in the `featured` section's JSON.
+- **Every film** is served with `ac_none`. Phones without a mobile film get
+  `f_auto,q_auto:eco,w_720,ac_none` (hero: 931 KB instead of 1.5 MB). A real
+  ~720×1280, sub-500 KB mobile film will do better.
+- **Hero:** the film's first frame (`so_0`, 720 / 1920 px JPEG, ~3–10 KB) is in
+  the HTML and is now the LCP element. The film starts after `load` and fades in
+  over 0.5 s. The first frame of the current film is a dark shot with a gold
+  line; `so_2` or an editor-chosen offset would give a brighter poster if
+  wanted.
+- **Intro:** fully gone at **1.98–2.07 s** live (was ~3.7 s), with the hero
+  poster already decoded when it lifts.
+
+**Mobile Lighthouse (live, two runs each; the audit → after §7 → now):**
+
+| Page | Performance | LCP | Page weight |
+| :-- | :-- | :-- | :-- |
+| `/` | 60 → 63 → **78 / 62** | 7.0 → 3.5 / 7.6 s | 2.4 → **1.2 MB** |
+| `/ar` | 59 → 59 → **60 / 60** | 7.2 → 8.5 / 9.2 s | 2.9 → **1.5 MB** |
+| `/perfume/sunlit-citrine` | 60 → 66 → **65 / 65** | 7.3 → 7.5 / 7.8 s | 1.2 MB (no film) |
+| `/ar/perfume/sunlit-citrine` | 59 → 62 → **61 / 67** | 8.5 → 9.0 / 6.1 s | 1.4 MB (no film) |
+
+The film work halved the home page's weight, but the score is now limited by
+**JavaScript, not media**: "element render delay" is the largest LCP phase
+(1.0–1.7 s observed). 661–736 KB of script ships to every visitor, **347 KB of
+it Clerk** on pages where no one is signed in. Next fixes, ranked:
+
+1. **Product LCP image priority** (small, safe): the first gallery image is the
+   LCP element and is not `priority` (Lighthouse: "fetchpriority=high should
+   be applied"). A one-prop change in the gallery.
+2. **Load Clerk only where it's needed** (account, checkout, sign-in, admin, the
+   nav's account button on interaction). Removes ~347 KB of JS and its
+   main-thread time from every anonymous pageview. The biggest remaining win,
+   and a larger change.
+3. **Trim unused JS** in the shared layout (~300 KB flagged).
