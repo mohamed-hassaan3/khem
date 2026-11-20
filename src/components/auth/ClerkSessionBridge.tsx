@@ -17,11 +17,14 @@ import { localizePath, type Locale } from "@/src/lib/i18n/config";
  * the 60-second session token fresh, so the server keeps recognising the
  * customer at checkout, in the cart and in the comment form.
  *
- * `prefetchUI={false}` is safe **here and only here**: this provider renders no
- * prebuilt Clerk component. (Set on a provider that does render `<SignIn>`,
- * it stops `@clerk/ui` loading at all and the form crashes — see
- * prompts/lcp-priority-and-clerk-weight.md, "Outcome".) The sign-in, sign-up
- * and account pages have their own full provider (`<KhemClerkProvider>`).
+ * **No `prefetchUI={false}` here** (it was, in d1d91f4, and that broke the
+ * account pages). Clerk is a page-wide singleton: on a client-side navigation
+ * from a public page into `/account`, `<KhemClerkProvider>` *reuses* the
+ * instance this bridge booted. Booted without UI, `<UserProfile>` then threw
+ * "Clerk was not loaded with Ui components"
+ * (prompts/clerk-account-navigation-fix.md). So the background Clerk loads its
+ * UI like any provider. Signed-out visitors are unaffected — they never get
+ * this bridge, and load no Clerk at all.
  */
 export default function ClerkSessionBridge({ locale }: { locale: Locale }) {
   return (
@@ -32,7 +35,6 @@ export default function ClerkSessionBridge({ locale }: { locale: Locale }) {
       signUpUrl={localizePath(locale, "/sign-up")}
       signInFallbackRedirectUrl={localizePath(locale, "/account")}
       signUpFallbackRedirectUrl={localizePath(locale, "/account")}
-      prefetchUI={false}
     >
       <SessionPublisher />
     </ClerkProvider>
