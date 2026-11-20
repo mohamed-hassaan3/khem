@@ -561,9 +561,12 @@ no Clerk JavaScript at all.
 - **`/sign-in`, `/sign-up`, `/account`** wrap their content in
   `<KhemClerkProvider>` (full Clerk, prebuilt UI). A new route that renders a
   prebuilt Clerk component (`<SignIn>`, `<UserProfile>`, …) needs the same.
-- **Never set `prefetchUI={false}` on a provider that renders prebuilt Clerk
-  components.** It stops `@clerk/ui` loading entirely
-  (`prompts/lcp-priority-and-clerk-weight.md`, "Outcome").
+- **Never set `prefetchUI={false}` on any Clerk provider on this site.** It
+  stops `@clerk/ui` loading entirely, and Clerk is a page-wide singleton: a
+  client-side navigation carries an instance booted without UI into
+  `/account`, where `<UserProfile>` then crashes
+  (`prompts/lcp-priority-and-clerk-weight.md` "Outcome",
+  `prompts/clerk-account-navigation-fix.md`).
 - Identity is decided on the server only (`auth()`, `getViewer()`,
   `requireAdmin()`); the cookie only decides whether to load Clerk.
 

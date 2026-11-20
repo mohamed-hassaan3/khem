@@ -557,3 +557,30 @@ Rollback if anything is off:
 Clerk went from ~354 KB to **0 KB** on every page measured. Scores are noisy
 on this connection (one run each reached 90 and 95), but the floor moved up
 and total blocking time fell on most runs.
+
+### 11.1 Bug and fix: account pages crashed after client-side navigation (2026-11-20)
+
+- **Report (owner):** signed in, the first click to the profile page showed
+  "This page couldn't load". A reload worked.
+- **Cause:** the background Clerk on public pages was booted with
+  `prefetchUI={false}`, so it never loads `@clerk/ui`. Clerk is a page-wide
+  singleton, so on a client-side navigation into `/account` the account
+  provider *reused* that instance, and `<UserProfile>` threw "Clerk was not
+  loaded with Ui components". My local test plan covered account → public, but
+  not public → account while signed in.
+- **Response:**
+  - production was rolled back to `eee60c2` as soon as it was reported;
+  - the bug was reproduced locally (development Clerk instance) and the cause
+    confirmed from the console;
+  - fix `1fdebde` removes `prefetchUI={false}` from the bridge.
+- **Cost:** signed-in visitors on public pages download `@clerk/ui` again
+  (~264 KB), as before `d1d91f4`. Signed-out visitors still load no Clerk.
+- **Testing:** reproducing it once more created a test `"User"` row in
+  production (account prefetch). It was removed.
+  - The owner asked for a separate test database
+    (`prompts/local-test-database.md`), then deferred it.
+  - **This fix is therefore deployed without signed-in local verification**;
+    the owner tests signed in on production. Rollback target: `eee60c29dcdf`.
+- **Open:** the local test database. Until it exists, **no signed-in or
+  data-writing local test should run against `.env.local`**, because that is
+  production.
