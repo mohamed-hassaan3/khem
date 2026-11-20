@@ -40,6 +40,24 @@ function countryText(value: string, locale: Locale): string {
   return value.length === 2 ? countryLabel(value.toUpperCase(), locale) : value;
 }
 
+/**
+ * "Maadi", "Maadi, Cairo 11728": city, then governorate and postal code only
+ * when the address has them. Neither form asks for either any more, so most
+ * addresses have neither, and a fixed template would print "Maadi, ".
+ *
+ * Always ", ": the block it sits in is an LTR island (`ltrIsland`) on the
+ * Arabic tree as well, because the address is stored as it was typed.
+ */
+function cityLine(address: SavedAddress): string {
+  const region = [address.state.trim(), address.postalCode.trim()]
+    .filter(Boolean)
+    .join(" ");
+
+  return [address.city.trim(), region]
+    .filter(Boolean)
+    .join(", ");
+}
+
 export default function AddressCard({
   address,
   locale,
@@ -77,7 +95,7 @@ export default function AddressCard({
             <br />
           </>
         ) : null}
-        {`${address.city}, ${address.state} ${address.postalCode}`}
+        {cityLine(address)}
         <br />
         {countryText(address.country, locale)}
       </address>

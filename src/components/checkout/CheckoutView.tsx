@@ -46,6 +46,7 @@ import PageHeader from "@/src/components/ecommerce/PageHeader";
 import { placeCustomerOrder } from "@/src/actions/checkout";
 import { previewDiscount } from "@/src/actions/discounts";
 import { previewCartOffer } from "@/src/actions/offers";
+import { sameAddress } from "@/src/lib/address-match";
 import { cartTotalInCents, clampQuantity, parseBuyNow } from "@/src/lib/cart";
 import { useDeliveryTerms } from "@/src/providers/delivery-provider";
 import { discountRefusalMessage } from "@/src/lib/discount-message";
@@ -61,7 +62,7 @@ import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
 import { useFormatPrice } from "@/src/providers/currency-provider";
 import { useDictionary } from "@/src/providers/i18n-provider";
-import type { PaymentMethod } from "@/src/types/checkout";
+import type { CheckoutSavedAddress, PaymentMethod } from "@/src/types/checkout";
 import type { ProductCardData } from "@/src/types/catalog";
 import type { DiscountPreview } from "@/src/types/discount";
 import type { OfferPreview } from "@/src/types/offer";
@@ -88,6 +89,14 @@ export interface CheckoutViewProps {
   viewer: { fullName: string | null; primaryEmail: string | null } | null;
   /** Whether both Stripe keys are present. Decided on the server. */
   cardAvailable: boolean;
+  /**
+   * The customer's Egyptian saved addresses, default first. Empty for a guest.
+   *
+   * The first one fills the delivery fields. Editing them changes this order
+   * only. Nothing here is ever written back to the address book except
+   * through the "Save this address" checkbox, which adds a new entry.
+   */
+  savedAddresses: readonly CheckoutSavedAddress[];
   /**
    * ISO-3166 alpha-2 for where the request came from, or null when unknown.
    *
@@ -148,6 +157,7 @@ export default function CheckoutView({
   catalog,
   viewer,
   cardAvailable,
+  savedAddresses,
   detectedCountry,
   credits,
   vouchers,
@@ -207,25 +217,36 @@ export default function CheckoutView({
 
   const [checkingDiscount, startDiscountCheck] = useTransition();
 
-  const [address, setAddress] = useState<Record<DeliveryField, string>>({
-    line1: "",
-    line2: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    /*
-     * An ISO-3166 code here, not a name — this one field is a chooser rather
-     * than a text box, and a code is what a chooser has stable values for.
-     * `countryLabel()` turns it into the words that reach
-     * `"Order"."shipCountry"` at submit, in the order's own language.
-     *
-     * Starts wherever the edge says the visitor is, and at Egypt when it cannot
-     * say. Either way it is a starting point: the dropdown holds every country
-     * and choosing one is what actually decides the order.
-     */
-    country: detected.code,
-    note: "",
-  });
+  const [address, setAddress] = useState<Record<DeliveryField, string>>(() =>
+    savedAddresses[0]
+      ? // A saved address is always Egyptian (the page filters), so the country
+        // is Egypt whatever the edge detected: the customer told us where they
+        // live, which outranks a GeoIP guess.
+        { ...fieldsFrom(savedAddresses[0]), note: "" }
+      : {
+          line1: "",
+          line2: "",
+          city: "",
+          state: "",
+          postalCode: "",
+          /*
+           * An ISO-3166 code here, not a name — this one field is a chooser
+           * rather than a text box, and a code is what a chooser has stable
+           * values for. `countryLabel()` turns it into the words that reach
+           * `"Order"."shipCountry"` at submit, in the order's own language.
+           *
+           * Starts wherever the edge says the visitor is ("Another country"
+           * when that is off the short list), and at Egypt when it cannot say.
+           * Either way it is a starting point: choosing in the dropdown is what
+           * actually decides the order. See `selectableCountry`.
+           */
+          country: detected.code,
+          note: "",
+        },
+  );
+
+  /** "Save this address to my profile". Off until the customer ticks it. */
+  const [saveToProfile, setSaveToProfile] = useState(false);
 
   // Cash is the default when Stripe is not configured, and the safer default
   // generally: it is the method that always works.
@@ -518,6 +539,16 @@ export default function CheckoutView({
    */
   const shipsHere = address.country === SHIPPING_COUNTRY;
 
+  /*
+   * Whether the fields currently describe an address already in the book. The
+   * same comparison the server uses to skip a duplicate save, so the checkbox
+   * is never offered for a save that would do nothing.
+   */
+  const matchesSaved = savedAddresses.some((saved) =>
+    sameAddress({ ...saved, country: SHIPPING_COUNTRY }, address),
+  );
+  const canSave = viewer !== null && !matchesSaved;
+
   function clearFieldError(field: string) {
     setFieldErrors((current) => {
       if (!current[field]) return current;
@@ -540,6 +571,14 @@ export default function CheckoutView({
   function handleDeliveryChange(field: DeliveryField, value: string) {
     clearFieldError(field);
     setAddress((current) => ({ ...current, [field]: value }));
+  }
+
+  /** A saved-address chip: refill the address, keep the delivery note. */
+  function applySavedAddress(saved: CheckoutSavedAddress) {
+    for (const field of ["line1", "line2", "city", "state", "postalCode", "country"]) {
+      clearFieldError(field);
+    }
+    setAddress((current) => ({ ...fieldsFrom(saved), note: current.note }));
   }
 
   /** Resolve a server-sent key against the dictionary; never render the key. */
@@ -665,6 +704,9 @@ export default function CheckoutView({
         // picking slip reads "Egypt", not "EG".
         country: countryLabel(address.country, locale),
         note: address.note,
+        // Only while the box is visible: a tick left behind on an address that
+        // has since been changed back to a saved one is not a request.
+        saveAddress: canSave && saveToProfile,
         company,
         creditId,
         /*
@@ -841,8 +883,13 @@ export default function CheckoutView({
               // Detection pre-fills the field and says so underneath; it never
               // takes it away. A visitor behind a VPN, or one the edge places
               // in the wrong country, has to be able to correct it.
-              countryDetected={detected.detected}
+              countryDetected={detected.detected && savedAddresses.length === 0}
               shipsHere={shipsHere}
+              savedAddresses={savedAddresses}
+              onApplySaved={applySavedAddress}
+              canSave={canSave}
+              saveToProfile={saveToProfile}
+              onSaveToProfileChange={setSaveToProfile}
             />
           </fieldset>
 
@@ -1035,6 +1082,20 @@ export default function CheckoutView({
  * `window.location.origin` rather than an env var so a preview deployment
  * returns to itself. Only reached in the browser, where `window` exists.
  */
+/** A saved address as the delivery fields hold it, minus the note. */
+function fieldsFrom(
+  saved: CheckoutSavedAddress,
+): Omit<Record<DeliveryField, string>, "note"> {
+  return {
+    line1: saved.line1,
+    line2: saved.line2 ?? "",
+    city: saved.city,
+    state: saved.state,
+    postalCode: saved.postalCode,
+    country: SHIPPING_COUNTRY,
+  };
+}
+
 function confirmationUrl(locale: Locale, orderNumber: string): string {
   const path = localizePath(locale, "/checkout/confirmed");
   return `${window.location.origin}${path}?order=${encodeURIComponent(orderNumber)}`;

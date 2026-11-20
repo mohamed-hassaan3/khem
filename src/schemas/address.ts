@@ -23,6 +23,11 @@
 
 import { z } from "zod";
 
+import { OTHER_COUNTRY } from "@/src/constants/countries";
+
+/** An ISO-3166 alpha-2 code, as the country chooser stores it. */
+export const COUNTRY_CODE = /^[A-Z]{2}$/;
+
 /**
  * The vocabulary of a field failure.
  *
@@ -50,9 +55,32 @@ export const addressInputSchema = z.object({
     .transform((value) => (value && value.length > 0 ? value : null)),
 
   city: z.string().trim().min(1).max(80),
-  state: z.string().trim().min(1).max(80),
+  /*
+   * Governorate. Optional, like the postal code: neither form asks for it any
+   * more (`src/components/checkout/AddressFields.tsx`), and a courier works
+   * from the street, the landmark and the city. The column is `not null` with
+   * no minimum, so "" is a value it holds. An address saved with one keeps it,
+   * because the form carries it unseen.
+   */
+  state: z.string().trim().max(80).default(""),
   postalCode: z.string().trim().max(20),
-  country: z.string().trim().min(1).max(80),
+  /*
+   * A country code from the chooser. Shape, not membership: a country dropped
+   * from the featured list (`src/constants/countries.ts`) stays a valid value
+   * for the addresses already saved in it.
+   *
+   * Two things are refused. The checkout's "Another country" sentinel is a
+   * placeholder, not a place. And free text — which the form can no longer
+   * produce — is let through here only so the action can accept it on one
+   * condition: it is the value already stored on the address being edited (a
+   * row from before the field was a chooser). See `saveAddress`.
+   */
+  country: z
+    .string()
+    .trim()
+    .min(1)
+    .max(80)
+    .refine((value) => value !== OTHER_COUNTRY),
 
   isDefault: z.boolean().optional().default(false),
 });

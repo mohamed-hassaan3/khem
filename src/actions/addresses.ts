@@ -45,6 +45,7 @@
 import { getViewer } from "@/src/lib/auth";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
+  COUNTRY_CODE,
   addressFieldErrors,
   addressIdSchema,
   addressInputSchema,
@@ -118,6 +119,37 @@ export async function saveAddress(input: unknown): Promise<AddressResult> {
 
   const { supabase, userId } = ctx;
   const { id, isDefault, ...fields } = parsed.data;
+
+  /*
+   * A country that is not a code is legacy text, and is kept only where it
+   * already was: on this customer's own address, unchanged. A new address, or
+   * an edit that *changes* the country to free text, is refused — the chooser
+   * cannot produce either, so only a forged request could.
+   */
+  if (!COUNTRY_CODE.test(fields.country)) {
+    let stored: string | null = null;
+
+    if (id !== undefined) {
+      const { data, error } = await supabase
+        .from("Address")
+        .select("country")
+        .eq("id", id)
+        // The access control. Never remove it.
+        .eq("userId", userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error(`[addresses] country check failed: ${error.message}`);
+        return { ok: false, error: "failed" };
+      }
+
+      stored = typeof data?.country === "string" ? data.country : null;
+    }
+
+    if (stored === null || stored.trim() !== fields.country) {
+      return { ok: false, error: "validation", fieldErrors: { country: "invalid" } };
+    }
+  }
 
   const { count, error: countError } = await supabase
     .from("Address")

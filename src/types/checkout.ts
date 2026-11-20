@@ -64,7 +64,32 @@ export interface CheckoutFormInput {
    * server-side inside `place_order()` — see `supabase/sql/0059_rewards.sql`.
    */
   pointsToRedeem: number;
+  /**
+   * "Save this address to my profile". A wish, not an instruction: the server
+   * ignores it for a guest, skips it when the address is already in the book,
+   * and acts on it only after the order has been written. No address id or
+   * owner travels with it. Identity comes from the session.
+   */
+  saveAddress: boolean;
   items: readonly { productId: string; quantity: number }[];
+}
+
+/**
+ * A saved address as the checkout form may see it.
+ *
+ * Egyptian addresses only (the house delivers nowhere else), so there is no
+ * `country`: it is always `SHIPPING_COUNTRY`. There is also no recipient and no
+ * default flag. `id` is a React key and chip identity and is never posted
+ * back, so it cannot become a handle on somebody's address book.
+ */
+export interface CheckoutSavedAddress {
+  id: string;
+  label: string;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
 }
 
 /**

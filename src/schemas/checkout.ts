@@ -136,6 +136,14 @@ export const checkoutSchema = z.object({
   /** Delivery instructions from the customer. Distinct from the desk's `note`. */
   note: z.string().trim().max(500, "noteLong").default(""),
 
+  /*
+   * "Save this address to my profile". A boolean and nothing else: no address
+   * id, no owner. `placeCustomerOrder` acts on it only for a session, only after
+   * the order is written, and through `saveAddress()`, which takes the owner
+   * from the session again. A guest who sends `true` changes nothing.
+   */
+  saveAddress: z.boolean({ error: "saveAddress" }).default(false),
+
   items: z
     .array(checkoutItemSchema)
     .min(1, "emptyCart")

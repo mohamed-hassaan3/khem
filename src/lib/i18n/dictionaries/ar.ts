@@ -1098,11 +1098,18 @@ export const ar: Dictionary = {
       postalCodePlaceholder: "اختياري",
       country: "الدولة",
       countryDetected: "اختيرت وفق موقعك. يمكنك تغييرها إن لم تكن صحيحة.",
+      countryGroup: "دول أخرى",
+      countryOther: "دولة أخرى",
       outsideEgyptTitle: "نوصل داخل مصر",
       outsideEgyptBody:
         "الدولة المختارة أعلاه لا تشحن إليها الدار بعد، لذا لا يمكن إتمام هذا الطلب. إن كنت في مصر فاخترها من القائمة وتابع طلبك. وإن لم تكن، فاكتب إلينا وسنخبرك فور تغيّر ذلك.",
       note: "تعليمات التوصيل",
       notePlaceholder: "اختياري: كود البوابة، أو وقت مفضل",
+      savedHeading: "العناوين المحفوظة",
+      savedNotice:
+        "مُعبّأ من عناوينك المحفوظة. أي تعديل هنا يخص هذا الطلب فقط.",
+      saveToProfile: "احفظ هذا العنوان في ملفي الشخصي",
+      saveToProfileHint: "يُضاف إلى دفتر عناوينك بعد إتمام الطلب.",
     },
 
     payment: {
@@ -1444,14 +1451,6 @@ export const ar: Dictionary = {
         label: "التسمية",
         labelHint: "ما تسمّي به هذا المكان , المنزل، المكتب.",
         recipient: "المُستلِم",
-        line1: "العنوان",
-        line2: "علامة مميزة",
-        line2Placeholder: "اختياري , بجوار، خلف، أمام",
-        city: "المدينة",
-        state: "المحافظة",
-        postalCode: "الرمز البريدي",
-        postalCodePlaceholder: "اختياري",
-        country: "الدولة",
         makeDefault: "التوصيل إلى هنا افتراضيًا",
         save: "حفظ العنوان",
         saving: "جارٍ الحفظ",

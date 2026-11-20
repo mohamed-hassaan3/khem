@@ -1331,11 +1331,22 @@ export const en = {
       country: "Country",
       /** Under the country field once it has been resolved from the request. */
       countryDetected: "Chosen from your location. Change it if that is not right.",
+      /** Group label under Egypt in the country list. */
+      countryGroup: "Elsewhere",
+      /** The last option: any country not on the short list. */
+      countryOther: "Another country",
       outsideEgyptTitle: "We deliver within Egypt",
       outsideEgyptBody:
         "The house does not ship to the country above yet, so this order cannot be completed. If you are in Egypt, choose it from the list to carry on. Otherwise, write to us and we will tell you the moment that changes.",
       note: "Delivery Instructions",
       notePlaceholder: "Optional: a gate code, a preferred hour",
+      /** Above the chips, when a customer has two or more saved addresses. */
+      savedHeading: "Saved Addresses",
+      /** Under the prefilled fields. Says out loud that editing is safe. */
+      savedNotice:
+        "Filled in from your saved addresses. Changes here apply to this order only.",
+      saveToProfile: "Save this address to my profile",
+      saveToProfileHint: "Added to your address book after you place the order.",
     },
 
     payment: {
@@ -1744,14 +1755,8 @@ export const en = {
         label: "Label",
         labelHint: "What you call this place , Home, Office.",
         recipient: "Recipient",
-        line1: "Street address",
-        line2: "Landmark",
-        line2Placeholder: "Optional , beside, behind, opposite",
-        city: "City",
-        state: "Governorate",
-        postalCode: "Postal code",
-        postalCodePlaceholder: "Optional",
-        country: "Country",
+        /* Street, landmark, city and country are worded by
+           `checkout.delivery`: the form renders the checkout's own fields. */
         makeDefault: "Deliver here by default",
         save: "Save address",
         saving: "Saving",
