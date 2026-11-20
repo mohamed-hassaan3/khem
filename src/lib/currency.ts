@@ -135,22 +135,6 @@ const COUNTRY_CURRENCY: Record<string, Currency> = {
 };
 
 /**
- * The countries KHEM prices in, sorted, as a closed list.
- *
- * Derived from the map above rather than written a second time: the switcher
- * can only offer a country whose currency this file already knows, so the list
- * and the pricing cannot come to disagree. Everywhere else is
- * {@link INTERNATIONAL}.
- *
- * Sorted by *code* here and re-sorted by localised name where it is shown —
- * "Germany" and "Allemagne" do not belong in the same position, and this module
- * has no locale to sort against.
- */
-export const PRICED_COUNTRIES: readonly string[] = Object.keys(
-  COUNTRY_CURRENCY,
-).sort();
-
-/**
  * "Anywhere else" — a region rather than a country, and the honest label for
  * the fallback currency.
  *
@@ -160,34 +144,78 @@ export const PRICED_COUNTRIES: readonly string[] = Object.keys(
  */
 export const INTERNATIONAL = "INTL";
 
-/** What the region switcher may hold: a priced country, or {@link INTERNATIONAL}. */
+/**
+ * The eurozone, as one region.
+ *
+ * Twenty countries are priced in euros and choosing any of them does exactly
+ * the same thing, so the switcher offers them as one row. Not `EU`: that is an
+ * ISO-reserved code (the checkout refuses it as a country, see `NOT_COUNTRIES`
+ * in `src/lib/shipping.ts`), and the eurozone is not the EU anyway — Poland is
+ * in one and not the other.
+ */
+export const EUROPE = "EUROPE";
+
+/** What the region switcher may hold: one of {@link SWITCHER_REGIONS}. */
 export type Region = string;
 
+/**
+ * The switcher's rows, in the order they are shown — one per display currency.
+ *
+ * The switcher only sets the currency prices are drawn in (the house ships
+ * within Egypt alone, and checkout never reads this choice), so it offers the
+ * six outcomes that exist and nothing that implies more. The order is the
+ * house's — home market, the Gulf, the UK, Europe, everyone else — and is not
+ * re-sorted by name in either language.
+ *
+ * Geo detection is unaffected: it still maps real country codes through
+ * {@link resolveCurrencyForCountry}.
+ */
+export const SWITCHER_REGIONS: readonly Region[] = [
+  "EG",
+  "SA",
+  "AE",
+  "GB",
+  EUROPE,
+  INTERNATIONAL,
+];
+
 export function isRegion(value: unknown): value is Region {
-  return (
-    typeof value === "string" &&
-    (value === INTERNATIONAL || PRICED_COUNTRIES.includes(value))
-  );
+  return typeof value === "string" && SWITCHER_REGIONS.includes(value);
+}
+
+/**
+ * A stored region, read back as one the switcher offers.
+ *
+ * Before the switcher listed one row per currency it stored eurozone countries
+ * by code (`FR`, `DE`, …). Those read back as {@link EUROPE}, which is what the
+ * visitor chose in effect. The value is untrusted cookie input and is only ever
+ * used as a key into fixed tables; anything unrecognised is `null` — no choice.
+ */
+export function normalizeRegion(value: unknown): Region | null {
+  if (isRegion(value)) return value;
+  if (typeof value !== "string" || value.length !== 2) return null;
+
+  return COUNTRY_CURRENCY[value.toUpperCase()] === "EUR" ? EUROPE : null;
 }
 
 /** The currency a chosen region is priced in. */
 export function currencyForRegion(region: Region): Currency {
-  return region === INTERNATIONAL
-    ? FALLBACK_DISPLAY_CURRENCY
-    : resolveCurrencyForCountry(region);
+  if (region === INTERNATIONAL) return FALLBACK_DISPLAY_CURRENCY;
+  if (region === EUROPE) return "EUR";
+
+  return resolveCurrencyForCountry(region);
 }
 
 /**
- * The country a currency implies, when the visitor has not named one.
+ * The region a currency implies, when the visitor has not named one.
  *
- * Four of the six currencies belong to exactly one market, so a detected EGP
- * can be shown as "Egypt" without storing anything about where the request came
- * from — which is the point: `src/proxy.ts` deliberately keeps no country, and
- * this preserves that. `EUR` and `USD` have no single country behind them and
- * return `null`; the switcher labels those "Europe" and "International", which
- * is all that can be said truthfully.
+ * Every currency but the dollar belongs to exactly one switcher row, so a
+ * detected EGP can be shown as "Egypt" without storing anything about where
+ * the request came from — which is the point: `src/proxy.ts` deliberately
+ * keeps no country, and this preserves that. `USD` returns `null`; the switcher
+ * reads that as {@link INTERNATIONAL}.
  */
-export function representativeCountry(currency: Currency): string | null {
+export function representativeCountry(currency: Currency): Region | null {
   switch (currency) {
     case "EGP":
       return "EG";
@@ -197,6 +225,8 @@ export function representativeCountry(currency: Currency): string | null {
       return "AE";
     case "SAR":
       return "SA";
+    case "EUR":
+      return EUROPE;
     default:
       return null;
   }

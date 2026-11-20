@@ -1881,8 +1881,11 @@ export const ar: Dictionary = {
     shortNames: {
       AE: "الإمارات",
       GB: "بريطانيا",
+      SA: "السعودية",
     },
     europe: "أوروبا",
+    // Gender-neutral on purpose: it follows مصر and دولي alike.
+    current: "حاليًا",
     note: "تُعرض الأسعار بعملة الدولة التي تختارها.",
   },
 

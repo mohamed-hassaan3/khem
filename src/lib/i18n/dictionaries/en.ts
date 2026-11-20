@@ -2260,9 +2260,14 @@ export const en = {
     shortNames: {
       AE: "UAE",
       GB: "UK",
+      // Already short in English; listed so Arabic can shorten it to
+      // "السعودية", which CLDR leaves as the full المملكة العربية السعودية.
+      SA: "Saudi Arabia",
     },
-    /** What a euro price is shown as before a country has been named. */
+    /** The eurozone as one switcher row, see `EUROPE` in `src/lib/currency.ts`. */
     europe: "Europe",
+    /** Beside the active language and country rows. */
+    current: "Current",
     note: "Prices are shown in the currency of the country you choose.",
   },
 

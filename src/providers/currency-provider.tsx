@@ -11,7 +11,7 @@ import {
   CURRENCY_COOKIE_MAX_AGE,
   currencyForRegion,
   isCurrency,
-  isRegion,
+  normalizeRegion,
   resolveCurrencyForCountry,
   type Currency,
   type Region,
@@ -186,8 +186,14 @@ let regionLoaded = false;
 
 const regionListeners = new Set<() => void>();
 
+const isString = (value: unknown): value is string => typeof value === "string";
+
 function loadRegion(): void {
-  regionSnapshot = readCookie<Region, null>(COUNTRY_COOKIE, isRegion, null);
+  // Read any string and normalise it, rather than validating with `isRegion`:
+  // a cookie written before the switcher listed one row per currency holds a
+  // eurozone country code (`FR`, `DE`), which must read back as Europe and not
+  // be discarded as no choice at all.
+  regionSnapshot = normalizeRegion(readCookie<string, null>(COUNTRY_COOKIE, isString, null));
   regionLoaded = true;
 }
 
