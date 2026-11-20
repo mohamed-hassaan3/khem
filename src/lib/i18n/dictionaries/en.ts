@@ -2017,7 +2017,7 @@ export const en = {
       },
       language: {
         heading: "Language & Currency",
-        body: "Both are chosen from the foot of any page, and follow you across the house.",
+        body: "Both are chosen from the header of any page, and follow you across the house.",
       },
     },
   },
