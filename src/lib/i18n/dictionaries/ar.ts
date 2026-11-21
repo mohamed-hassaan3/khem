@@ -197,6 +197,7 @@ export const ar: Dictionary = {
     hero: {
       tagline: "جوهر التراث",
       exploreCollections: "استكشف المجموعات",
+      findScent: "اعثر على عطرك",
       ourStory: "قصّتنا",
       scroll: "مرّر",
       /** انظر التعليق في النسخة الإنجليزية: أدوات واجهة الحملة المصوّرة. */
@@ -212,6 +213,7 @@ export const ar: Dictionary = {
       ordinal: "المجموعة {ordinal}",
       pieces: "{count} قطع",
       piecesOne: "قطعة واحدة",
+      byScent: "تسوّق حسب العائلة العطرية",
       all: "الكل",
       sliderLabel: "مجموعاتنا",
       previous: "المجموعة السابقة",

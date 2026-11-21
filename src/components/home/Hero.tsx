@@ -117,9 +117,16 @@ export interface HeroLabels {
 export default function Hero({
   hero,
   labels,
+  secondary,
 }: {
   hero: HeroConfig;
   labels: HeroLabels;
+  /**
+   * A second, different way in beside the campaign's own button: "Find your
+   * scent" into the AI search. Set in code, not the CMS, because it is a
+   * fixed route of the site rather than part of a campaign.
+   */
+  secondary?: { href: string; label: string };
 }) {
   const slides = hero.slides;
 
@@ -307,16 +314,26 @@ export default function Hero({
             </p>
           ) : null}
 
-          {hero.buttonLabel && hero.buttonHref ? (
+          {(hero.buttonLabel && hero.buttonHref) || secondary ? (
             <div
               style={{ animationDelay: "280ms" }}
-              className={`khem-hero-reveal ${
-                hero.headline || hero.description ? "mt-5 md:mt-8" : ""
-              }`}
+              className={`khem-hero-reveal flex flex-wrap gap-2.5 ${
+                isCorner ? "" : "justify-center"
+              } ${hero.headline || hero.description ? "mt-5 md:mt-8" : ""}`}
             >
-              <LocaleLink href={hero.buttonHref} className="btn btn-primary">
-                {hero.buttonLabel}
-              </LocaleLink>
+              {hero.buttonLabel && hero.buttonHref ? (
+                <LocaleLink href={hero.buttonHref} className="btn btn-primary">
+                  {hero.buttonLabel}
+                </LocaleLink>
+              ) : null}
+              {secondary ? (
+                <LocaleLink
+                  href={secondary.href}
+                  className="btn border border-ivory/45 bg-transparent text-ivory hover:border-ivory hover:bg-ivory/10"
+                >
+                  {secondary.label}
+                </LocaleLink>
+              ) : null}
             </div>
           ) : null}
         </div>

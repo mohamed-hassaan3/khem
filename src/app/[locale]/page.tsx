@@ -22,6 +22,7 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { ltrIsland, readingArrow } from "@/src/lib/i18n/rtl";
+import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 import {
   resolveNewArrival,
   type LandingSectionKey,
@@ -192,6 +193,31 @@ export default async function Home({
    * object, it does not run the component. The cost of a disabled band is one
    * unused object, while the *queries* behind it were already skipped above.
    */
+  /*
+   * "Shop by scent": the five scent-family pages as chips under the
+   * collections. A second way in that no other band offers — by mood rather
+   * than by collection — instead of a link that repeats the hero's.
+   */
+  const scentChips = (
+    <nav aria-label={dict.home.collections.byScent}>
+      <p className="eyebrow mb-2.5 md:mb-4 md:text-center">
+        {dict.home.collections.byScent}
+      </p>
+      <ul className="flex flex-wrap gap-2 md:justify-center">
+        {SCENT_PROFILE_SLUGS.map((profile) => (
+          <li key={profile}>
+            <LocaleLink
+              href={`/collections/${profile}`}
+              className="inline-flex min-h-10 items-center rounded-full border border-ground-accent/40 px-4 text-xs text-ground no-underline transition-colors duration-300 ease-out hover:border-ground-accent hover:bg-ground-accent/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
+            >
+              {dict.collections.scentProfiles[profile].name}
+            </LocaleLink>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+
   const bands: Record<LandingSectionKey, React.ReactNode> = {
     hero: (
       <>
@@ -206,6 +232,7 @@ export default async function Home({
                 play: dict.home.hero.play,
                 video: dict.home.hero.video,
               }}
+              secondary={{ href: "/search", label: dict.home.hero.findScent }}
             />
             {/*
               The heading of last resort.
@@ -311,16 +338,16 @@ export default async function Home({
                */}
               <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
                 <LocaleLink
-                  href="/collections"
+                  href="/collections/fragrances"
                   className="btn btn-primary"
                 >
                   {dict.home.hero.exploreCollections}
                 </LocaleLink>
                 <LocaleLink
-                  href="/heritage"
+                  href="/search"
                   className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-muted no-underline transition-colors duration-300 hover:text-ground"
                 >
-                  {dict.home.hero.ourStory} {arrow}
+                  {dict.home.hero.findScent} {arrow}
                 </LocaleLink>
               </div>
             </div>
@@ -359,11 +386,10 @@ export default async function Home({
           */}
           <div className="md:hidden">
             <div className="px-4">
+              {/* No "All" link: the cards are the navigation (one job per band). */}
               <HomeBandHeader
                 eyebrow={dict.home.collections.eyebrow}
                 heading={dict.home.collections.heading}
-                linkHref="/collections"
-                linkLabel={dict.home.collections.all}
               />
             </div>
             <div className="khem-scroll-track flex snap-x snap-mandatory scroll-px-4 gap-2.5 overflow-x-auto px-4 pb-1">
@@ -376,6 +402,7 @@ export default async function Home({
                 />
               ))}
             </div>
+            <div className="mt-5 px-4">{scentChips}</div>
           </div>
 
           <div className="mx-auto hidden max-w-7xl md:block">
@@ -411,6 +438,7 @@ export default async function Home({
                 ))}
               </CollectionSlider>
             </Reveal>
+            <div className="mt-12 flex flex-col items-center">{scentChips}</div>
           </div>
         </section>
       </>
@@ -423,7 +451,7 @@ export default async function Home({
             <HomeBandHeader
               eyebrow={dict.home.essences.eyebrow}
               heading={dict.home.essences.heading}
-              linkHref="/collections"
+              linkHref="/collections/best-sellers"
               linkLabel={dict.home.essences.viewAll}
             />
             {/* Phone: the first four as a 2-up grid; `md+` keeps the rail. */}
@@ -456,7 +484,7 @@ export default async function Home({
                  * page missing half of what the visitor just looked at.
                  */}
                 <LocaleLink
-                  href="/collections"
+                  href="/collections/best-sellers"
                   className="btn btn-outline whitespace-nowrap"
                 >
                   {dict.home.essences.viewAll}

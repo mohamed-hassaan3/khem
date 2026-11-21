@@ -226,6 +226,8 @@ export const en = {
     hero: {
       tagline: "Essence of Heritage",
       exploreCollections: "Explore Collections",
+      /** The hero's second way in: the AI scent search. */
+      findScent: "Find your scent",
       ourStory: "Our Story",
       scroll: "Scroll",
       /*
@@ -254,8 +256,10 @@ export const en = {
       /** Under each collection in the phone rail. */
       pieces: "{count} pieces",
       piecesOne: "1 piece",
-      /** The phone header's link to every collection. */
+      /** Short "see all" link on the phone band headers. */
       all: "All",
+      /** The scent-family chips under the collections. */
+      byScent: "Shop by scent",
       /* Names the slider's scroll region and its two pointer controls. */
       sliderLabel: "Our collections",
       previous: "Previous collection",
