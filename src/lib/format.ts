@@ -40,6 +40,14 @@ const LOCALE = "en-US";
  * before hydration, and any call site not yet reached by the currency provider,
  * both produce the stored price rather than a wrong one.
  */
+/**
+ * The Intl locale for Arabic: Egyptian Arabic words and month names, with
+ * Latin digits ("19 أكتوبر 2026", "5.0"). The house prints every number in
+ * Western digits in both languages, so prices, ratings, dates and counts read
+ * the same everywhere. Use this instead of a bare "ar-EG".
+ */
+export const ARABIC_INTL_LOCALE = "ar-EG-u-nu-latn";
+
 export function formatPrice(
   priceInCents: number,
   currency: Currency = BASE_CURRENCY,
@@ -108,7 +116,7 @@ export function formatLegalDate(isoDate: string): string {
  * hydration — so the visitor's own zone is both correct and safe.
  */
 export function formatConsentDate(epochMs: number, locale: Locale): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : LOCALE, {
+  return new Intl.DateTimeFormat(locale === "ar" ? ARABIC_INTL_LOCALE : LOCALE, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -127,7 +135,7 @@ export function formatConsentDate(epochMs: number, locale: Locale): string {
  * what stops the same comment showing two different days across that seam.
  */
 export function formatCommentDate(isoDate: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : LOCALE, {
+  return new Intl.DateTimeFormat(locale === "ar" ? ARABIC_INTL_LOCALE : LOCALE, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -148,7 +156,7 @@ export function formatCommentDate(isoDate: string, locale: Locale): string {
  * the server and after hydration.
  */
 export function formatAccountDate(isoDate: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : LOCALE, {
+  return new Intl.DateTimeFormat(locale === "ar" ? ARABIC_INTL_LOCALE : LOCALE, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -218,14 +226,14 @@ export function formatProductType(
 }
 
 /**
- * A star average, to one decimal — "4.3", and "٤٫٣" on the Arabic tree.
+ * A star average, to one decimal — "4.3" in both languages (Latin digits).
  *
  * Locale-aware, unlike {@link formatPrice}: a rating is not a catalog record
  * written in English, it is a number the page is speaking, and it sits in the
  * same paragraph as {@link formatCommentDate}, which already switches digits.
  */
 export function formatRating(value: number, locale: Locale): string {
-  return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : LOCALE, {
+  return new Intl.NumberFormat(locale === "ar" ? ARABIC_INTL_LOCALE : LOCALE, {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   }).format(value);
@@ -233,5 +241,5 @@ export function formatRating(value: number, locale: Locale): string {
 
 /** A plain count in the visitor's digits — how many ratings, which photograph. */
 export function formatCount(value: number, locale: Locale): string {
-  return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : LOCALE).format(value);
+  return new Intl.NumberFormat(locale === "ar" ? ARABIC_INTL_LOCALE : LOCALE).format(value);
 }

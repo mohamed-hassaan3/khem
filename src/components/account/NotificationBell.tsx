@@ -28,6 +28,7 @@
  * would teach a customer to distrust the whole feed.
  */
 
+import { ARABIC_INTL_LOCALE } from "@/src/lib/format";
 import { Bell, Package, Ticket, Wallet } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -66,7 +67,7 @@ function ago(iso: string, locale: Locale, justNow: string): string {
   const seconds = Math.round((Date.parse(iso) - Date.now()) / 1000);
   if (!Number.isFinite(seconds) || Math.abs(seconds) < 60) return justNow;
 
-  const formatter = new Intl.RelativeTimeFormat(locale === "ar" ? "ar-EG" : "en", {
+  const formatter = new Intl.RelativeTimeFormat(locale === "ar" ? ARABIC_INTL_LOCALE : "en", {
     numeric: "auto",
   });
 

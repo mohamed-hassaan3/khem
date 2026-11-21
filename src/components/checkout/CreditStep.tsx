@@ -24,6 +24,7 @@
  * be used has learned something, where a silently absent option teaches nothing.
  */
 
+import { ARABIC_INTL_LOCALE } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useFormatPrice } from "@/src/providers/currency-provider";
@@ -109,7 +110,7 @@ export default function CreditStep({
                   <span className="mt-1 block text-[11px] tracking-wide text-ground-muted/70">
                     {interpolate(copy.expires, {
                       date: new Intl.DateTimeFormat(
-                        locale === "ar" ? "ar-EG" : "en-GB",
+                        locale === "ar" ? ARABIC_INTL_LOCALE : "en-GB",
                         { day: "numeric", month: "long", timeZone: "UTC" },
                       ).format(new Date(credit.expiresAt)),
                     })}

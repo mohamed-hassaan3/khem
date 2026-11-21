@@ -129,8 +129,16 @@ export default function ProductGallery({
    * column stays in view while the details scroll beside it.
    */
   return (
-    <div className="ground-stone flex w-full flex-col gap-3 lg:sticky lg:top-[calc(var(--chrome-h)+1.5rem)] lg:self-start lg:bg-transparent lg:transition-[top] lg:duration-500 lg:ease-luxury-bezier motion-reduce:transition-none">
-      <div className="relative h-[min(440px,56svh)] w-full overflow-hidden bg-ground-bg lg:aspect-5/4 lg:h-auto lg:rounded-lg">
+    <div className="ground-stone flex w-full flex-col gap-3 sm:pb-6 lg:pb-0 lg:sticky lg:top-[calc(var(--chrome-h)+1.5rem)] lg:self-start lg:bg-transparent lg:transition-[top] lg:duration-500 lg:ease-luxury-bezier motion-reduce:transition-none">
+      {/*
+        The frame. Product photographs are 4:5 portraits.
+        - Phone: full bleed, 440px at most (the mock).
+        - Tablet portrait (sm–lg): the photograph's own 4:5, centred and
+          capped at 560px wide, so nothing is cropped off the top or bottom.
+        - Tablet landscape / small laptop (lg–xl): 4:5 in the gallery column.
+        - Desktop (xl+): the 5:4 lead image from the desktop artboard.
+      */}
+      <div className="relative h-[min(440px,56svh)] w-full overflow-hidden bg-ground-bg sm:mx-auto sm:mt-6 sm:aspect-4/5 sm:h-auto sm:w-[min(100%_-_3rem,560px)] sm:rounded-lg lg:mt-0 lg:w-full xl:aspect-5/4">
         <ul
           ref={trackRef}
           tabIndex={hasMultiple ? 0 : undefined}

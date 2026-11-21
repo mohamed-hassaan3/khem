@@ -1,3 +1,4 @@
+import { ARABIC_INTL_LOCALE } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 import type { OrderEvent, OrderStatus } from "@/src/types/account";
@@ -63,9 +64,9 @@ export function buildStations(
   }));
 }
 
-/** Short station date: "18 Nov" / "١٨ نوفمبر". */
+/** Short station date: "18 Nov" / "18 نوفمبر" (Latin digits in both). */
 export function formatStamp(iso: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-GB", {
+  return new Intl.DateTimeFormat(locale === "ar" ? ARABIC_INTL_LOCALE : "en-GB", {
     day: "numeric",
     month: "short",
     timeZone: "UTC",
