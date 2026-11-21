@@ -3,8 +3,9 @@
  *
  * ## Why `localStorage` rather than a cookie
  *
- * Nothing on the server reads consent today: KHEM ships no analytics tag and no
- * marketing pixel, so there is no script to gate during SSR. A cookie would
+ * Nothing on the server reads consent today: KHEM ships no marketing pixel and
+ * no cookie-setting analytics tag (Umami is cookieless and is deliberately not
+ * gated), so there is no script to gate during SSR. A cookie would
  * therefore be sent on every request to buy nothing, while `localStorage` gets
  * the hydration-safe read, the type-guarded parse, and the cross-tab sync for
  * free from `persistent-store.ts`. If a server-gated script ever lands, this is
@@ -13,12 +14,16 @@
  *
  * ## Categories
  *
- * Exactly the three the published policy names (the `"LegalDocument"` row for
- * `cookie-policy`,
- * "cookie-policy"): Essential, Preferences, Analytics. Essential is not
+ * The published policy (the `"LegalDocument"` row for `cookie-policy`) names
+ * two cookie categories: Essential and Preferences. Essential is not
  * represented in the record at all — it is not a choice, so storing a boolean
  * for it would imply it could be `false`. KHEM runs no advertising cookies, so
  * there is deliberately no marketing category to consent to.
+ *
+ * The record also carries `analytics`, which the banner no longer offers — see
+ * `BANNER_CATEGORIES`. It was kept rather than removed so that removing a
+ * toggle did not invalidate every stored decision: dropping a category asks
+ * nothing new of anyone, so it is not a reason to re-prompt.
  *
  * ## Versioning
  *
@@ -40,6 +45,20 @@ export const CONSENT_CATEGORIES: readonly ConsentCategory[] = [
   "preferences",
   "analytics",
 ];
+
+/**
+ * The categories the banner offers a toggle for — a subset of what is stored.
+ *
+ * `analytics` is stored but no longer shown. Its only reader was the Umami
+ * tracker, which is cookieless and now counts every visit regardless of
+ * consent (`prompts/umami-count-every-visitor.md`); a switch that controls
+ * nothing would misdescribe the site. The field stays in the record, and
+ * `CONSENT_VERSION` stays put, so no stored decision is invalidated and no
+ * visitor is asked again. It is reserved for a future tool that *does* set
+ * cookies: such a tool would add `"analytics"` back here and bump the version,
+ * so every visitor is asked about it afresh.
+ */
+export const BANNER_CATEGORIES = ["preferences"] as const satisfies readonly ConsentCategory[];
 
 /** A visitor's decision on each optional category. */
 export type ConsentChoices = Record<ConsentCategory, boolean>;

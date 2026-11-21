@@ -787,7 +787,7 @@ export const en = {
     cookiePolicy: {
       title: "Cookie Policy",
       description:
-        "Every cookie KHEM uses and what it does , essential, preferences, and anonymous analytics. No advertising cookies, no ad networks.",
+        "Every cookie KHEM uses and what it does , essential and preferences , and how visits are counted without cookies. No advertising cookies, no ad networks.",
       ogTitle: "Cookie Policy | KHEM",
       ogDescription:
         "A short page, because we use few cookies. Here is every one of them and what it does.",
@@ -2393,12 +2393,17 @@ export const en = {
    * Cookie consent. The category names and descriptions deliberately echo the
    * table in the published Cookie Policy (the `"LegalDocument"` row) , the banner and
    * the policy must never describe different sets of cookies.
+   *
+   * There is no Analytics category: visits are counted by Umami, which sets no
+   * cookies and is not affected by this banner (Cookie Policy, "Visitor
+   * Statistics, Without Cookies"). The body says so, so the banner never
+   * implies a choice it does not offer.
    */
   cookieConsent: {
     regionLabel: "Cookie consent",
     eyebrow: "Privacy",
     title: "Cookies at KHEM",
-    body: "We use a small number of cookies to keep your bag intact, remember your preferences, and understand which pages are read. We run no advertising cookies and work with no ad networks. Your browsing is never sold or shared.",
+    body: "We use a small number of cookies to keep your bag intact and remember your preferences. Visits are counted anonymously, without cookies. We run no advertising cookies and work with no ad networks. Your browsing is never sold or shared.",
     /*
      * The same statement at phone width, where the card is the full width of
      * the viewport and the long version is five lines of it. Not a teaser: it
@@ -2406,7 +2411,7 @@ export const en = {
      * shortened consent notice that drops the second half is a worse notice.
      */
     bodyShort:
-      "A few cookies keep your bag intact and your preferences remembered. No advertising, no ad networks, never sold.",
+      "A few cookies keep your bag intact and your preferences remembered. Visits are counted without cookies. No advertising, never sold.",
     policyLink: "Read the Cookie Policy",
     settingsLink: "Cookie Settings",
     acceptAll: "Accept All",
@@ -2426,11 +2431,6 @@ export const en = {
         name: "Preferences",
         description:
           "Remembers your language, region, and the fragrances you have recently viewed.",
-      },
-      analytics: {
-        name: "Analytics",
-        description:
-          "Anonymous, aggregated data on which pages are read and where visitors get stuck. It tells us what to fix; it does not tell us who you are.",
       },
     },
   },

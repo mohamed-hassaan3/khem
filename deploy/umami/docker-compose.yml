@@ -1,0 +1,94 @@
+# Umami — KHEM's self-hosted visitor analytics. Runbook: src/docs/umami-analytics.md
+#
+# Installed by provision-umami.sh to /srv/umami/docker-compose.yml, next to the
+# secrets file /srv/umami/.env (600, root). Docker Compose reads that `.env`
+# for the ${…} values below, so no secret is ever written into this file.
+#
+#   cd /srv/umami && docker compose ps          # both services: healthy
+#   cd /srv/umami && docker compose logs -f umami
+#
+# ## Why 127.0.0.1:3001 and nothing else
+#
+# Docker writes its own iptables rules for a published port, and they run
+# BEFORE ufw's — `ports: "3001:3000"` would put Umami on the public internet
+# even though ufw only allows 22/80/443. Binding the host side to 127.0.0.1
+# keeps it reachable only through nginx. Postgres publishes no port at all; only
+# the `umami` container can reach it, over the compose network. Port 3000 on
+# the host is the shop (`next start`, deploy/ecosystem.config.cjs).
+#
+# ## Upgrading
+#
+# The image is pinned. To upgrade: read the release notes, change the tag, then
+# `docker compose pull && docker compose up -d`. Umami migrates its own schema
+# on start (scripts/check-db.js). Take a backup first: backup-umami.sh.
+
+name: umami
+
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:3.5.0
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3000"
+    environment:
+      # Hex secrets only, so the password needs no URL-escaping.
+      DATABASE_URL: postgresql://umami:${POSTGRES_PASSWORD:?missing in /srv/umami/.env}@db:5432/umami
+      # Signs login tokens and seeds anonymous session IDs. Changing it signs
+      # every user out — it is generated once and never rotated casually.
+      APP_SECRET: ${APP_SECRET:?missing in /srv/umami/.env}
+      # Required before anyone can enable two-factor login (64 hex chars).
+      TWO_FACTOR_ENCRYPTION_KEY: ${TWO_FACTOR_ENCRYPTION_KEY:?missing in /srv/umami/.env}
+      # The tracker posts here instead of /api/send. Applied when the container
+      # starts (scripts/update-tracker.js rewrites public/script.js), so the
+      # served script points at KHEM's first-party path. nginx maps
+      # khemperfumes.com/api/hk → this container's /api/send itself
+      # (deploy/nginx/khemperfumes.conf), so nothing depends on Umami's own
+      # build-time rewrites.
+      COLLECT_API_ENDPOINT: /api/hk
+      # nginx overwrites X-Real-IP with the connecting address on every request
+      # (deploy/nginx/khem-umami-proxy.inc). Naming it here makes Umami read
+      # that header and nothing else — `True-Client-IP`, `CF-Connecting-IP` and
+      # the rest of its built-in list are never consulted, so a visitor cannot
+      # choose their own country.
+      CLIENT_IP_HEADER: x-real-ip
+      # nginx reaches the container over the docker bridge (a private address).
+      TRUSTED_PROXIES: loopback,private
+      DISABLE_TELEMETRY: "1"
+      DISABLE_UPDATES: "1"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/api/heartbeat || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    # Headroom for `next build` of the shop on the same 8 GB box.
+    mem_limit: 768m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?missing in /srv/umami/.env}
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  umami-db-data:

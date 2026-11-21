@@ -174,6 +174,7 @@ Keep these layers separate:
 | **Icons** | Lucide React | Minimal weight stroke icons (`strokeWidth={1.25}`) |
 | **Hosting** | Hostinger KVM 2 VPS (Germany) | nginx → one `next start` under PM2, Let's Encrypt TLS, system crontab. Runbook: `src/docs/hostinger-vps.md`; server files: `deploy/`. **No Vercel platform features** — no `vercel.json`, no `@vercel/*`, no `x-vercel-*` headers |
 | **Vector** | pgvector similarity queries and article embedding storage
+| **Analytics** | Umami v3 (self-hosted, Docker on the VPS) | Cookieless, counts every visit (not consent-gated; DNT honoured), first-party `/hk.js` + `/api/hk` via nginx, CSP unchanged. Runbook: `src/docs/umami-analytics.md` |
 
 
 UI must display stored data only.

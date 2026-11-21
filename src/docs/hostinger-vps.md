@@ -22,6 +22,7 @@ each file. The migration that set this up: `prompts/hostinger-vps-migration.md`.
 | Live release | `/srv/khem/current` → `/srv/khem/releases/<sha12>` |
 | Secrets (only copy) | `/srv/khem/shared/.env.production` (600, khem). Names: `deploy/env.production.example` |
 | Cron secret | `/srv/khem/shared/.cron.env` (600, khem). Holds `CRON_SECRET=` with the **same** value |
+| Umami (analytics) | `/srv/umami/` (root): `docker-compose.yml`, `.env` secrets (600), `backups/`. Dashboard `https://analytics.khemperfumes.com`; runbook `src/docs/umami-analytics.md` |
 | App logs | `pm2 logs khem`, or `/srv/khem/logs/app.{out,err}.log` |
 | Cron log | `/srv/khem/logs/cron.log` (idle campaign ticks are not logged) |
 | nginx | `/etc/nginx/sites-available/khemperfumes.conf`, `/etc/nginx/snippets/khem-*.inc`; access log `/var/log/nginx/khem.access.log` (no query strings) |
