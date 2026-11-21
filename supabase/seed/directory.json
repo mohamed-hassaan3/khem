@@ -1099,7 +1099,7 @@
       "title_ar": "سياسة ملفات تعريف الارتباط",
       "lede": "A short page, because we use few cookies. Here is every one of them and what it does.",
       "lede_ar": "صفحة قصيرة، لأننا نستخدم ملفات قليلة. هذه كل واحدة منها وما تفعله.",
-      "updatedAt": "2026-08-09",
+      "updatedAt": "2026-11-21",
       "banner": {
         "url": "https://res.cloudinary.com/co1xzkhf/image/upload/legal-logo.png",
         "alt": "",
@@ -1123,7 +1123,7 @@
           "blocks": [
             {
               "kind": "text",
-              "text": "Three categories, and no others:"
+              "text": "Two categories, and no others:"
             },
             {
               "kind": "table",
@@ -1140,13 +1140,23 @@
                   [
                     "Preferences",
                     "Remembers your region and the fragrances you have recently viewed."
-                  ],
-                  [
-                    "Analytics",
-                    "Anonymous, aggregated data on which pages are read and where visitors get stuck. It tells us what to fix; it does not tell us who you are."
                   ]
                 ]
               }
+            }
+          ]
+        },
+        {
+          "id": "visitor-statistics",
+          "title": "Visitor Statistics, Without Cookies",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "We count visits with Umami, a cookieless, privacy-friendly analytics tool that we run on our own server in Germany. It collects anonymous visit statistics — which pages are read, which website referred you, your country, and your type of device and browser — without cookies and without personal data. It stores nothing on your device, keeps no IP address, and cannot recognise you here or on any other website."
+            },
+            {
+              "kind": "note",
+              "text": "Because it uses no cookies, Umami is not affected by your choice in the cookie banner — it counts every visit the same way. It never sees your account, your orders or anything you type, and nothing it collects is shared with anyone. If your browser sends a Do Not Track signal, your visits are not counted at all."
             }
           ]
         },
@@ -1192,7 +1202,7 @@
             },
             {
               "kind": "text",
-              "text": "Blocking preference and analytics cookies costs you nothing but a little convenience. Blocking essential cookies will break the shopping bag and prevent checkout from completing."
+              "text": "Blocking preference cookies costs you nothing but a little convenience. Blocking essential cookies will break the shopping bag and prevent checkout from completing."
             }
           ]
         },
@@ -1240,7 +1250,7 @@
           "blocks": [
             {
               "kind": "text",
-              "text": "ثلاث فئات، لا غير:"
+              "text": "فئتان، لا غير:"
             },
             {
               "kind": "table",
@@ -1257,13 +1267,23 @@
                   [
                     "التفضيلات",
                     "تتذكّر منطقتك والعطور التي اطّلعت عليها مؤخرًا."
-                  ],
-                  [
-                    "التحليلات",
-                    "بيانات مجهولة ومجمّعة عن الصفحات التي تُقرأ وأين يتعثّر الزوّار. تخبرنا بما ينبغي إصلاحه؛ ولا تخبرنا من أنت."
                   ]
                 ]
               }
+            }
+          ]
+        },
+        {
+          "id": "visitor-statistics",
+          "title": "إحصاءات الزيارات، بلا ملفات تعريف ارتباط",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "نُحصي الزيارات باستخدام Umami، وهي أداة تحليلات تحترم الخصوصية ولا تستخدم ملفات تعريف الارتباط، نشغّلها على خادمنا الخاص في ألمانيا. تجمع إحصاءات مجهولة عن الزيارات — الصفحات التي تُقرأ، والموقع الذي أحالك إلينا، وبلدك، ونوع جهازك ومتصفّحك — دون ملفات تعريف ارتباط ودون أي بيانات شخصية. لا تخزّن شيئًا على جهازك، ولا تحتفظ بعنوان IP، ولا يمكنها التعرّف عليك هنا أو على أي موقع آخر."
+            },
+            {
+              "kind": "note",
+              "text": "ولأنها لا تستخدم ملفات تعريف الارتباط، فلا يتأثّر Umami باختيارك في شريط ملفات تعريف الارتباط — إذ يُحصي كل زيارة بالطريقة نفسها. لا يطّلع على حسابك ولا على طلباتك ولا على أي شيء تكتبه، ولا يُشارَك شيء مما يجمعه مع أحد. وإن أرسل متصفّحك إشارة «عدم التتبّع»، فلن تُحصى زياراتك إطلاقًا."
             }
           ]
         },
@@ -1309,7 +1329,7 @@
             },
             {
               "kind": "text",
-              "text": "منع ملفات التفضيلات والتحليلات لا يكلّفك إلا قليلًا من الراحة. أما منع الملفات الأساسية فسيعطّل حقيبة التسوّق ويمنع إتمام الطلب."
+              "text": "منع ملفات التفضيلات لا يكلّفك إلا قليلًا من الراحة. أما منع الملفات الأساسية فسيعطّل حقيبة التسوّق ويمنع إتمام الطلب."
             }
           ]
         },

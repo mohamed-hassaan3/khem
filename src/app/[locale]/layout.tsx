@@ -10,6 +10,7 @@ import CinematicIntro from "@/src/components/intro/CinematicIntro";
 import CartDrawer from "@/src/components/ecommerce/CartDrawer";
 import AnnouncementBar from "@/src/components/marketing/AnnouncementBar";
 import DeferredOverlays from "@/src/components/marketing/DeferredOverlays";
+import UmamiAnalytics from "@/src/components/analytics/UmamiAnalytics";
 import { getFontVariables } from "@/src/lib/fonts";
 // ⚠️ TEMPORARY — delete this import with the pre-launch cover.
 import { prelaunchEnabled } from "@/src/lib/prelaunch";
@@ -459,6 +460,14 @@ export default async function RootLayout({
              * need it, and it must outlive any surface that might one day be
              * gated on a stored choice.
              */}
+            {/*
+             * Visitor analytics (Umami, self-hosted, cookieless). Outside the
+             * consent provider on purpose: it sets no cookies, so it counts
+             * every visit whatever the banner says, and must not read the
+             * stored decision. Renders no markup of its own. See
+             * `src/docs/umami-analytics.md`.
+             */}
+            <UmamiAnalytics />
             <ConsentProvider>
               {/*
                * Currency wraps the shop the way I18n wraps the site: every

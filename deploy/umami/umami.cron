@@ -1,0 +1,8 @@
+# /etc/cron.d/khem-umami-backup — installed by provision-umami.sh. UTC.
+# cron.d format: the sixth field is the user. Root, because the backup talks to
+# the Docker daemon and the khem user has no access to it (no sudo, not in the
+# docker group — deliberately).
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+30 2 * * * root /srv/umami/backup-umami.sh >> /srv/umami/backups/backup.log 2>&1
