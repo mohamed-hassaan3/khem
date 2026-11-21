@@ -33,15 +33,26 @@ import {
 
 export interface NavGroundProps {
   ground: GroundName;
+  /** The phone header's back target on a product or set page. */
+  backHref?: string;
+  backLabel?: string;
 }
 
-export default function NavGround({ ground }: NavGroundProps) {
+export default function NavGround({
+  ground,
+  backHref,
+  backLabel,
+}: NavGroundProps) {
   const { setNavGround, resetNavGround } = useSetNavGround();
 
   useEffect(() => {
-    setNavGround?.({ ground });
+    setNavGround?.({
+      ground,
+      back:
+        backHref && backLabel ? { href: backHref, label: backLabel } : undefined,
+    });
     return () => resetNavGround?.();
-  }, [ground, setNavGround, resetNavGround]);
+  }, [ground, backHref, backLabel, setNavGround, resetNavGround]);
 
   return null;
 }

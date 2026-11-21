@@ -113,6 +113,9 @@ export interface CollectionGridProps {
   description: ReactNode;
 }
 
+/** Cards per "Show more" step. Three rows of four on desktop, six of two on a phone. */
+const PAGE_SIZE = 12;
+
 export default function CollectionGrid({
   items,
   showFacets = false,
@@ -122,8 +125,19 @@ export default function CollectionGrid({
   description,
 }: CollectionGridProps) {
   const dict = useDictionary();
-  const [sort, setSort] = useState<SortKey>("featured");
+  const [sort, setSortState] = useState<SortKey>("featured");
   const [facet, setFacet] = useState<ProductFacet | null>(null);
+  /*
+   * "Show more", client-side only (Stage 2 D6): the first PAGE_SIZE of the
+   * current filter and sort, PAGE_SIZE more per press. Every card is still in
+   * the server HTML (the rest carry `hidden`), so crawlers and no-JS visitors
+   * keep every product link. A new filter or sort starts again at one page.
+   */
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const setSort = (next: SortKey) => {
+    setSortState(next);
+    setLimit(PAGE_SIZE);
+  };
 
   /**
    * Only facets with something behind them are offered — the `<MerchGrid>`
@@ -158,6 +172,7 @@ export default function CollectionGrid({
 
   const selectFacet = (next: ProductFacet | null) => {
     setFacet(next);
+    setLimit(PAGE_SIZE);
 
     const url = new URL(window.location.href);
 
@@ -204,110 +219,91 @@ export default function CollectionGrid({
     return next;
   }, [filtered, sort]);
 
+  const shown = Math.min(limit, sorted.length);
+
   return (
     <>
-      {/* ── DESCRIPTION + SORT BAR ──────────────────── */}
-      <section className="border-b border-ground-border px-4 py-10 sm:px-6 md:px-10 lg:px-12 xl:px-16">
-        <div className="mx-auto flex max-w-350 flex-col gap-4 md:gap-6 md:flex-row md:items-center md:justify-between">
-          {description}
+      {/*
+        The description, from `md` up. On a phone it is already in the compact
+        hero above (two lines), so repeating it here would push the products
+        down by the screen the redesign exists to give back.
+      */}
+      <section className="hidden border-b border-ground-border px-6 py-8 md:block md:px-10 lg:px-12 xl:px-16">
+        <div className="mx-auto max-w-350">{description}</div>
+      </section>
 
+      {/*
+        One sticky toolbar: chips (when this view offers them), then the result
+        count and the sort. It sticks under the header while the grid scrolls.
+      */}
+      <div className="sticky top-[var(--chrome-h)] z-30 border-b border-ground-border bg-ground-bg transition-[top] duration-500 ease-luxury-bezier motion-reduce:transition-none">
+        {available.length > 0 ? (
+          <nav aria-label={dict.collections.filterLabel}>
+            <div className="khem-scroll-track mx-auto flex max-w-350 items-center gap-2 overflow-x-auto px-4 pt-3 sm:px-6 md:px-10 lg:px-12 xl:px-16">
+              <FilterChip
+                label={dict.collections.tabAll}
+                isActive={facet === null}
+                onSelect={() => selectFacet(null)}
+              />
+              {available.map((option) => (
+                <FilterChip
+                  key={option}
+                  label={facetLabels[option]}
+                  isActive={facet === option}
+                  onSelect={() => selectFacet(option)}
+                />
+              ))}
+            </div>
+          </nav>
+        ) : null}
+
+        <div className="mx-auto flex min-h-12 max-w-350 items-center justify-between gap-4 px-4 py-1 text-xs text-ground-muted sm:px-6 md:px-10 lg:px-12 xl:px-16">
+          <p aria-live="polite">
+            {sorted.length === 1
+              ? dict.collections.resultCountOne
+              : interpolate(dict.collections.resultCount, {
+                  count: sorted.length,
+                })}
+          </p>
           {showSort ? (
-            <div className="flex items-center gap-5">
-              <label
-                htmlFor="collection-sort"
-                className="whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-ground-muted"
-              >
+            <div className="relative flex items-center">
+              <label htmlFor="collection-sort" className="pe-1 text-ground-muted">
                 {dict.collections.sortBy}
               </label>
-
-              <div className="relative">
-                <select
-                  id="collection-sort"
-                  value={sort}
-                  onChange={(event) => setSort(event.target.value as SortKey)}
-                  className="cursor-pointer appearance-none border border-ground-border bg-stone px-4 py-2.5 pe-9 font-heading text-[11px] tracking-[0.1em] text-ground transition-colors duration-300 ease-out hover:border-gold/50 focus-visible:border-gold focus-visible:outline-none"
-                >
-                  <option value="featured">
-                    {dict.collections.sortOptions.featured}
-                  </option>
-                  <option value="price-asc">
-                    {dict.collections.sortOptions.priceAsc}
-                  </option>
-                  <option value="price-desc">
-                    {dict.collections.sortOptions.priceDesc}
-                  </option>
-                </select>
-
-                <ChevronDown
-                  size={14}
-                  strokeWidth={1.25}
-                  aria-hidden="true"
-                  className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-ground-accent/60"
-                />
-              </div>
+              <select
+                id="collection-sort"
+                value={sort}
+                onChange={(event) => setSort(event.target.value as SortKey)}
+                className="min-h-11 cursor-pointer appearance-none bg-transparent pe-6 text-xs text-ground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
+              >
+                <option value="featured">
+                  {dict.collections.sortOptions.featured}
+                </option>
+                <option value="price-asc">
+                  {dict.collections.sortOptions.priceAsc}
+                </option>
+                <option value="price-desc">
+                  {dict.collections.sortOptions.priceDesc}
+                </option>
+              </select>
+              <ChevronDown
+                size={14}
+                strokeWidth={1.4}
+                aria-hidden="true"
+                className="pointer-events-none absolute end-0 top-1/2 -translate-y-1/2 text-ground"
+              />
             </div>
           ) : null}
         </div>
-      </section>
+      </div>
 
-      {/* ── FACET FILTER (overview) ─────────────────── */}
-      {available.length > 0 ? (
-        /*
-         * Pinned under the fixed 5rem header while the grid scrolls beneath it.
-         * The catalogue is long enough that the chips left the viewport within
-         * one flick, and a filter you have to scroll back to the top to reach is
-         * a filter that gets used once. `z-30` keeps it under every overlay the
-         * app can raise over it — the header is `z-1000`, its scrim `z-998`, the
-         * drawers `z-1001` — and the header's own blurred fill is what stops the
-         * cards from reading through it.
-         */
-        <nav
-          aria-label={dict.collections.filterLabel}
-          /*
-             A veil over the page's own ground, not a fixed obsidian one. This
-             bar sticks under the header on a shop page that is now ivory; at
-             `--color-surface` it painted a dark band across it.
-           */
-          className="sticky top-[var(--chrome-h)] z-30 border-b border-ground-border bg-ground-bg transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
-        >
-          {/* One scrolling strip at every width — never a second line. */}
-          <div className="mx-auto flex max-w-350 items-center gap-2.5 overflow-x-auto px-4 py-4 sm:px-6 md:px-10 lg:px-12 xl:px-16">
-            <FilterChip
-              label={dict.collections.tabAll}
-              isActive={facet === null}
-              onSelect={() => selectFacet(null)}
-            />
-
-            {available.map((option) => (
-              <FilterChip
-                key={option}
-                label={facetLabels[option]}
-                isActive={facet === option}
-                onSelect={() => selectFacet(option)}
-              />
-            ))}
-          </div>
-        </nav>
-      ) : null}
-
-      {/* ── PRODUCT GRID ────────────────────────────── */}
-      <section className="px-4 pb-14 pt-10 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pb-36">
+      <section className="px-4 pb-14 pt-4 sm:px-6 md:px-10 md:pb-28 md:pt-8 lg:px-12 xl:px-16">
         {/*
-         * What the visitor is looking at, in words.
-         *
-         * Both halves of this view can be *arrived* at rather than chosen — a
-         * `?facet=` URL someone shared, a sort left set from earlier in the
-         * visit — and a catalogue that is quietly two thirds shorter than it
-         * should be, in an order nobody remembers picking, is the one thing this
-         * page must not do silently. The chips say which one is pressed; this
-         * says what that means, and offers the way back.
-         *
-         * Plain type rather than a second row of controls: the chips above are
-         * the controls, and duplicating them here would be two places to press
-         * for one result.
-         */}
+          A filter from a shared `?facet=` link, or a sort left set, is never
+          applied silently: this line names it and offers to clear it.
+        */}
         {showFacets && (isFiltered || isSorted) ? (
-          <div className="mx-auto mb-6 md:mb-10 flex max-w-350 flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-wide text-ground-muted">
+          <div className="mx-auto mb-4 flex max-w-350 flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-wide text-ground-muted md:mb-8">
             {isFiltered ? (
               <span>
                 {interpolate(dict.collections.activeState.filteredBy, {
@@ -315,13 +311,11 @@ export default function CollectionGrid({
                 })}
               </span>
             ) : null}
-
             {isFiltered && isSorted ? (
               <span aria-hidden="true" className="text-ground-muted/60">
                 ·
               </span>
             ) : null}
-
             {isSorted ? (
               <span>
                 {interpolate(dict.collections.activeState.sortedBy, {
@@ -329,11 +323,10 @@ export default function CollectionGrid({
                 })}
               </span>
             ) : null}
-
             <button
               type="button"
               onClick={clearAll}
-              className="cursor-pointer border-b border-transparent pb-0.5 uppercase tracking-[0.2em] transition-colors duration-300 ease-out hover:border-gold/50 hover:text-ground-accent focus-visible:border-gold focus-visible:text-ground-accent focus-visible:outline-none"
+              className="min-h-11 cursor-pointer uppercase tracking-[0.2em] text-ground-accent underline-offset-4 transition-colors duration-300 ease-out hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
             >
               {dict.collections.activeState.clear}
             </button>
@@ -341,43 +334,49 @@ export default function CollectionGrid({
         ) : null}
 
         {sorted.length > 0 ? (
-          /*
-           * Keyed on the view, so React remounts the grid and `.khem-fade`
-           * replays on every collection, cut, or sort change.
-           *
-           * This is deliberately a fade and not a spinner. `filtered` and
-           * `sorted` above are `useMemo` over an in-memory array — they resolve
-           * in the same tick as the click, so a loading indicator here would
-           * need an invented delay to ever be seen. The fade marks the change
-           * honestly without slowing it down.
-           *
-           * It also covers the one real seam on this route: both parameters are
-           * read from the URL after mount (see the header comment on why they
-           * cannot come from `useSearchParams`), so a visit to
-           * `/collections?facet=best-sellers` paints the full catalog from the
-           * static HTML and narrows on hydration. The narrowing now animates
-           * in as a filter being applied rather than reading as a glitch.
-           */
-          <div
-            key={`${facet ?? "all"}-${sort}`}
-            className="khem-fade mx-auto grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-4 max-w-350"
-          >
-            {/*
-              The cards are their own grid items now. This used to wrap each one
-              in a `relative` div so `<AddToBagButton>` could be overlaid on top
-              — the card was a single anchor and could not contain a button. It
-              is an `<article>` with a stretched link now and carries its own
-              bag, so the wrapper, the import, and the chance of a grid
-              forgetting to add one are all gone.
-            */}
-            {sorted.map((item) => (
-              <div key={item.id} className="h-full">
-                {item.card}
+          <>
+            <div
+              key={`${facet ?? "all"}-${sort}`}
+              className="khem-fade mx-auto grid max-w-350 grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 md:gap-x-4 md:gap-y-8 lg:grid-cols-4"
+            >
+              {sorted.map((item, index) => (
+                <div key={item.id} hidden={index >= limit} className="h-full">
+                  {item.card}
+                </div>
+              ))}
+            </div>
+
+            {sorted.length > PAGE_SIZE ? (
+              <div className="mx-auto mt-8 flex max-w-350 flex-col items-center text-center">
+                <p className="text-[11px] text-ground-muted">
+                  {interpolate(dict.collections.showing, {
+                    shown,
+                    total: sorted.length,
+                  })}
+                </p>
+                <div
+                  aria-hidden="true"
+                  className="mt-2.5 h-0.5 w-40 overflow-hidden rounded-full bg-ground-border"
+                >
+                  <div
+                    className="h-full bg-ground-accent transition-[width] duration-500 ease-luxury-bezier motion-reduce:transition-none"
+                    style={{ width: `${(shown / sorted.length) * 100}%` }}
+                  />
+                </div>
+                {shown < sorted.length ? (
+                  <button
+                    type="button"
+                    onClick={() => setLimit((current) => current + PAGE_SIZE)}
+                    className="btn btn-outline mt-4 h-[46px] rounded-md px-7"
+                  >
+                    {dict.collections.showMore}
+                  </button>
+                ) : null}
               </div>
-            ))}
-          </div>
+            ) : null}
+          </>
         ) : (
-          <p className="py-10 md:py-16 text-center text-sm text-ground-muted">
+          <p className="py-10 text-center text-sm text-ground-muted md:py-16">
             {dict.collections.empty}
           </p>
         )}
@@ -386,16 +385,6 @@ export default function CollectionGrid({
   );
 }
 
-/**
- * One filter chip.
- *
- * A bordered pill rather than the underlined tab used on the single-collection
- * route: the pill reads as a control that acts on the grid in place, which is
- * exactly what it does, while an underlined tab reads as a destination.
- *
- * `dir="auto"` on the label: the labels are translated dictionary copy, so the
- * Arabic tree runs them right-to-left inside an otherwise shared row.
- */
 function FilterChip({
   label,
   isActive,
@@ -411,10 +400,10 @@ function FilterChip({
       onClick={onSelect}
       aria-pressed={isActive}
       dir="auto"
-      className={`shrink-0 cursor-pointer whitespace-nowrap border px-4 py-2 font-heading text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 ease-out focus-visible:border-gold focus-visible:outline-none ${
+      className={`h-9 shrink-0 cursor-pointer whitespace-nowrap rounded-full border px-3.5 text-xs transition-colors duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent ${
         isActive
-          ? "border-gold/70 bg-gold/10 text-ground-accent"
-          : "border-ground-border text-ground-muted hover:border-ground-accent/40 hover:text-ground-muted"
+          ? "border-ink bg-ink text-ivory"
+          : "border-ground-border text-ground-muted hover:border-ground-accent/50 hover:text-ground"
       }`}
     >
       {label}

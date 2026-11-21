@@ -23,6 +23,8 @@
 
 import "server-only";
 
+import { z } from "zod";
+
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabasePublic } from "@/src/lib/supabase";
 import { getProductPromotions } from "@/src/services/marketing";
@@ -149,9 +151,16 @@ export async function getFeaturedCollections(
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
+  /*
+   * `Product(id)` rides along in the same read: the home rail prints "9
+   * pieces" under each collection. The anon role's RLS policy already returns
+   * only purchasable products (not archived, not deleted), so the ids are the
+   * count. Not `Product(count)`: the aggregate needs a table-wide SELECT grant,
+   * and anon holds column grants only.
+   */
   const { data, error } = await supabase
     .from("Collection")
-    .select(COLLECTION_COLUMNS)
+    .select(`${COLLECTION_COLUMNS}, Product(id)`)
     .eq("isFeatured", true)
     .order("sortOrder");
 
@@ -160,8 +169,20 @@ export async function getFeaturedCollections(
     return [];
   }
 
-  return parseList(data, (row) => toCollection(row, locale));
+  return parseList(data, (row) => {
+    const collection = toCollection(row, locale);
+    if (!collection) return null;
+    const counted = productCountSchema.safeParse(row);
+    return counted.success
+      ? { ...collection, productCount: counted.data.Product.length }
+      : collection;
+  });
 }
+
+/** The `Product(id)` embed: one entry per purchasable product. */
+const productCountSchema = z.object({
+  Product: z.array(z.object({ id: z.string() })),
+});
 
 /**
  * Every category the house offers, in curated order.

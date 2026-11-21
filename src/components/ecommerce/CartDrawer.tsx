@@ -13,11 +13,17 @@ import {
 
 import CartDrawerLine from "@/src/components/ecommerce/CartDrawerLine";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
+import {
+  amountToFreeShippingInCents,
+  cartTotalInCents,
+  shippingInCents,
+} from "@/src/lib/cart";
 import { cartPricing } from "@/src/lib/pricing";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
 import { useCartDrawer } from "@/src/providers/cart-drawer-provider";
 import { useFormatPrice } from "@/src/providers/currency-provider";
+import { useDeliveryTerms } from "@/src/providers/delivery-provider";
 import { useDictionary, useLocale } from "@/src/providers/i18n-provider";
 import type { ProductCardData } from "@/src/types/catalog";
 
@@ -211,6 +217,20 @@ export default function CartDrawer() {
   const pricing = cartPricing(resolved);
   const subtotal = pricing.subtotalInCents;
 
+  /*
+   * Delivery and total, judged on the promoted subtotal exactly as the bag
+   * page (`<CartSummary>`) judges them, from the same stored terms. Display
+   * only: the checkout action reprices everything on the server.
+   */
+  const terms = useDeliveryTerms();
+  const shipping = shippingInCents(subtotal, terms);
+  const total = cartTotalInCents(subtotal, terms);
+  const remaining = amountToFreeShippingInCents(subtotal, terms);
+  const progress =
+    terms.freeThresholdInCents > 0
+      ? Math.min(1, subtotal / terms.freeThresholdInCents)
+      : 1;
+
   const itemCount = resolved.reduce((sum, line) => sum + line.quantity, 0);
 
   /*
@@ -270,7 +290,7 @@ export default function CartDrawer() {
            */
           "ground-ivory fixed inset-y-0 end-0 z-1051 flex flex-col",
           // Never full-bleed: a strip of the page stays visible at every width.
-          "w-[88vw] max-w-100 sm:w-100 lg:w-110",
+          "w-[min(92.8vw,25rem)] lg:w-110",
           "border-s border-ground-border bg-ground-bg",
           "shadow-3",
           "transition-transform duration-500 ease-luxury-bezier",
@@ -279,37 +299,65 @@ export default function CartDrawer() {
         ].join(" ")}
       >
         {/* ── HEADER ─────────────────────────────── */}
-        <div className="flex h-20 shrink-0 items-start justify-between px-7 pt-6">
-          <div>
-            <p className="eyebrow mb-1.5">{dict.cart.eyebrow}</p>
-            <h2
-              id={headingId}
-              className="font-heading text-lg font-normal tracking-wide text-ground"
-            >
-              {dict.cart.drawer.heading}
-            </h2>
+        <div className="flex shrink-0 items-center justify-between border-b border-ground-border py-2.5 ps-4.5 pe-2">
+          <h2
+            id={headingId}
+            className="font-heading text-lg font-normal tracking-wide text-ground"
+          >
+            {dict.cart.drawer.heading}
             {countLabel ? (
-              <p className="mt-1 text-[11px] tracking-[0.08em] text-ground-muted/70">
-                {countLabel}
-              </p>
+              <span className="ms-1.5 font-body text-xs tracking-normal text-ground-muted">
+                · {itemCount}
+                <span className="sr-only"> {countLabel}</span>
+              </span>
             ) : null}
-          </div>
+          </h2>
 
           <button
             ref={closeButtonRef}
             type="button"
             onClick={close}
             aria-label={dict.cart.drawer.close}
-            className="-me-2.5 grid size-11 cursor-pointer place-items-center text-ground-muted transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-none"
+            className="grid size-11 cursor-pointer place-items-center text-ground transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ground-accent"
           >
-            <X size={18} strokeWidth={1.25} aria-hidden="true" />
+            <X size={20} strokeWidth={1.25} aria-hidden="true" />
           </button>
         </div>
 
-        <div className="mx-7 mt-4 shrink-0 border-t border-ground-border" />
+        {/*
+          The free-delivery threshold is a real perk, so the drawer shows how
+          close the bag is to it. Same terms and the same promoted subtotal as
+          the bag page's nudge.
+        */}
+        {resolved.length > 0 && !isLoading && !hasFailed ? (
+          <div className="ground-stone shrink-0 border-b border-ground-border bg-ground-bg px-4.5 py-3.5">
+            <p className="text-xs text-ground">
+              {remaining > 0 ? (
+                interpolate(dict.cart.freeShippingNudge, {
+                  amount: formatPrice(remaining),
+                })
+              ) : (
+                <>
+                  {dict.cart.drawer.unlockedLead}{" "}
+                  <span className="text-ground-accent">
+                    {dict.cart.drawer.unlockedPerk}
+                  </span>
+                </>
+              )}
+            </p>
+            <div
+              aria-hidden="true"
+              className="mt-2 h-[3px] overflow-hidden rounded-full bg-ground-border"
+            >
+              <div
+                className="h-full rounded-full bg-ground-accent transition-[width] duration-500 ease-luxury-bezier motion-reduce:transition-none"
+                style={{ width: `${progress * 100}%` }}
+              />
+            </div>
+          </div>
+        ) : null}
 
-        {/* ── BODY ───────────────────────────────── */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-7">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4.5">
           {isLoading ? (
             /*
              * Skeleton rows, not a spinner: the panel already has its final
@@ -396,54 +444,65 @@ export default function CartDrawer() {
 
         {/* ── FOOTER ─────────────────────────────── */}
         {resolved.length > 0 && !isLoading && !hasFailed ? (
-          <div className="shrink-0 border-t border-ground-border px-7 py-7">
+          <div className="shrink-0 border-t border-ground-border bg-ground-bg px-4.5 pt-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))]">
             {/*
-              The campaign, when one is running. Printed above the subtotal
-              rather than folded into it, so the panel says the same thing the
-              bag page does — a drawer that quietly nets the reduction away
-              would make the two screens disagree.
+              Subtotal at list price with the campaign on its own line, the way
+              the bag page prints it, so the two screens never disagree.
             */}
-            {pricing.promotionSavingsInCents > 0 ? (
-              <div className="mb-1.5 flex items-baseline justify-between">
-                <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-muted">
-                  {dict.cart.promotion}
-                </span>
-                <span className="font-heading text-[13px] tabular-nums text-ground-accent">
-                  −{formatPrice(pricing.promotionSavingsInCents)}
-                </span>
+            <dl className="text-[13px]">
+              <div className="flex justify-between py-0.5">
+                <dt className="text-ground-muted">{dict.cart.subtotal}</dt>
+                <dd className="tabular-nums text-ground">
+                  {formatPrice(pricing.listSubtotalInCents)}
+                </dd>
               </div>
-            ) : null}
+              {pricing.promotionSavingsInCents > 0 ? (
+                <div className="flex justify-between py-0.5">
+                  <dt className="text-ground-muted">{dict.cart.promotion}</dt>
+                  <dd className="tabular-nums text-ground-accent">
+                    −{formatPrice(pricing.promotionSavingsInCents)}
+                  </dd>
+                </div>
+              ) : null}
+              <div className="flex justify-between py-0.5">
+                <dt className="text-ground-muted">{dict.cart.shipping}</dt>
+                <dd
+                  className={
+                    shipping === 0
+                      ? "text-ground-accent"
+                      : "tabular-nums text-ground"
+                  }
+                >
+                  {shipping === 0
+                    ? dict.cart.complimentary
+                    : formatPrice(shipping)}
+                </dd>
+              </div>
+              <div className="mt-1.5 flex justify-between border-t border-ground-border pt-2 font-heading text-base">
+                <dt className="text-ground">{dict.cart.total}</dt>
+                <dd className="tabular-nums text-ground-accent">
+                  {formatPrice(total)}
+                </dd>
+              </div>
+            </dl>
 
-            <div className="mb-1.5 flex items-baseline justify-between">
-              <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-muted">
-                {dict.cart.subtotal}
-              </span>
-              <span className="font-heading text-lg tabular-nums text-ground-accent">
-                {formatPrice(subtotal)}
-              </span>
-            </div>
+            <LocaleLink
+              href="/checkout"
+              onClick={close}
+              className="btn btn-primary mt-3 h-[50px] w-full justify-center rounded-md"
+            >
+              {interpolate(dict.cart.drawer.checkoutTotal, {
+                amount: formatPrice(total),
+              })}
+            </LocaleLink>
 
-            <p className="mb-6 text-[10px] tracking-[0.08em] text-ground-muted/70">
-              {dict.cart.taxNote}
-            </p>
-
-            <div className="flex flex-col gap-3">
-              <LocaleLink
-                href="/checkout"
-                onClick={close}
-                className="btn btn-primary w-full justify-center"
-              >
-                {dict.cart.checkout}
-              </LocaleLink>
-
-              <LocaleLink
-                href="/cart"
-                onClick={close}
-                className="btn btn-outline w-full justify-center"
-              >
-                {dict.cart.drawer.viewBag}
-              </LocaleLink>
-            </div>
+            <button
+              type="button"
+              onClick={close}
+              className="mt-1 min-h-11 w-full cursor-pointer text-center text-[11px] uppercase tracking-[0.14em] text-ground-muted transition-colors duration-300 ease-out hover:text-ground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
+            >
+              {dict.cart.continueShopping}
+            </button>
           </div>
         ) : null}
       </div>

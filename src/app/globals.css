@@ -1913,15 +1913,22 @@
 :root {
   --announcement-h: 0px;
   /*
-   * One height, every width.
+   * Two heights: 56px below `lg`, 80px from `lg` (Stage 2,
+   * `prompts/storefront-redesign-stage-2.md`).
    *
-   * It was 56px on a phone, on the argument that an 80px bar is 12% of a 667px
-   * viewport spent before any content. The bar now takes itself away while the
-   * visitor reads down the page (`use-header-visibility.ts`), so that space is
-   * only occupied while it is wanted — and one height means the wordmark and
-   * the icon row have one composition to be right in rather than two.
+   * It was one 80px height on the argument that the bar hides itself while the
+   * visitor reads down. That holds while scrolling, but the first screen of a
+   * phone is where the bar is always showing, and 80px of a 844px viewport is
+   * the difference between a collection page that shows products and one that
+   * does not. Every offset reads this variable, so the stack moves together.
    */
-  --nav-h: 80px;
+  --nav-h: 56px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --nav-h: 80px;
+  }
 }
 
 body {
@@ -1962,6 +1969,32 @@ body[data-announcement="on"] {
 @media (min-width: 640px) {
   body[data-announcement="on"] {
     --announcement-h: 38px;
+  }
+}
+
+/*
+ * ── Purchase-route chrome ────────────────────────────────────
+ *
+ * A product, a set and the checkout are tasks, so on a phone they drop the
+ * promo line and give its height back to the page. The pages say so with a
+ * server-rendered marker (`<ChromeMarker>`), so the value is right in the
+ * first paint: no layout shift, no client state.
+ *
+ *   data-chrome="purchase"  phones only (product, set)
+ *   data-chrome="task"      every width (checkout)
+ */
+body:has([data-chrome="task"]) {
+  --announcement-h: 0px;
+}
+body:has([data-chrome="task"]) .announcement-bar {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  body:has([data-chrome="purchase"]) {
+    --announcement-h: 0px;
+  }
+  body:has([data-chrome="purchase"]) .announcement-bar {
+    display: none;
   }
 }
 

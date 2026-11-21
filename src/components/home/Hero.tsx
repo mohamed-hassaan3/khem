@@ -207,7 +207,7 @@ export default function Hero({
        * edge. Both branches are static class strings — nothing is measured, so
        * the choice costs no layout work and cannot shift anything.
        */
-      className={`ground-obsidian relative flex h-[calc(100svh-var(--header-h))] min-h-120 overflow-hidden ${
+      className={`ground-obsidian relative flex h-[min(540px,68svh)] overflow-hidden md:h-[calc(100svh-var(--header-h))] md:min-h-120 ${
         isCorner
           ? "items-end justify-start"
           : "items-center justify-center"
@@ -282,14 +282,14 @@ export default function Hero({
         <div
           className={`relative z-10 w-full ${
             isCorner
-              ? "max-w-2xl px-6 pb-10 text-start sm:px-10 sm:pb-12 md:px-16 md:pb-16"
+              ? "max-w-2xl px-5 pb-12 text-start sm:px-10 sm:pb-14 md:px-16 md:pb-16"
               : "mx-auto max-w-3xl px-6 text-center"
           }`}
         >
           {hero.headline ? (
             <h1
               dir="auto"
-              className="khem-hero-reveal font-heading text-4xl font-normal leading-tight text-ground sm:text-5xl md:text-6xl lg:text-7xl"
+              className="khem-hero-reveal font-heading text-[34px] font-normal leading-[1.08] text-ground sm:text-5xl md:text-6xl md:leading-tight lg:text-7xl"
             >
               {hero.headline}
             </h1>
@@ -299,9 +299,9 @@ export default function Hero({
             <p
               dir="auto"
               style={{ animationDelay: "140ms" }}
-              className={`khem-hero-reveal max-w-xl text-sm leading-relaxed text-ground-muted sm:text-base ${
+              className={`khem-hero-reveal line-clamp-3 max-w-xl text-[13px] leading-relaxed text-ground-muted sm:text-base md:line-clamp-none ${
                 isCorner ? "" : "mx-auto"
-              } ${hero.headline ? "mt-5" : ""}`}
+              } ${hero.headline ? "mt-2.5 md:mt-5" : ""}`}
             >
               {hero.description}
             </p>
@@ -311,7 +311,7 @@ export default function Hero({
             <div
               style={{ animationDelay: "280ms" }}
               className={`khem-hero-reveal ${
-                hero.headline || hero.description ? "mt-8" : ""
+                hero.headline || hero.description ? "mt-5 md:mt-8" : ""
               }`}
             >
               <LocaleLink href={hero.buttonHref} className="btn btn-primary">
@@ -348,7 +348,7 @@ export default function Hero({
         of the sentence above it rather than as a description of the rotation.
       */}
       {rotates ? (
-        <div className="absolute inset-x-0 bottom-8 z-10 flex items-center justify-center gap-1 px-6 sm:bottom-10">
+        <div className="absolute inset-x-0 bottom-2 z-10 flex items-center justify-center gap-1 px-6 sm:bottom-10">
           {/*
             The pause control.
 

@@ -48,34 +48,33 @@ export function CheckoutSection({
   children,
 }: CheckoutSectionProps) {
   return (
-    <section className="border-b border-ground-border py-10 first:pt-0 last:border-b-0 lg:py-12">
-      <header className="mb-8 flex items-center gap-4">
+    <section className="border-b border-ground-border py-6 last:border-b-0 lg:py-12 lg:first:pt-0">
+      {/*
+        Stage 2: the step number in a 22px circle, filled once the section is
+        complete. The tick it replaces said the same thing in a second place.
+        `complete` is visual only; the schema decides validity on the server.
+      */}
+      <header className="mb-4 flex items-center gap-2.5 lg:mb-8">
         <span
           aria-hidden="true"
-          className="font-heading text-[11px] tabular-nums tracking-[0.2em] text-ground-accent/40"
+          className={`grid size-5.5 shrink-0 place-items-center rounded-full border text-[11px] tabular-nums transition-colors duration-500 ease-luxury-bezier ${
+            complete
+              ? "border-ground-accent bg-ground-accent text-ivory"
+              : "border-ground-border text-ground-muted"
+          }`}
         >
-          {index}
+          {complete ? (
+            <Check size={12} strokeWidth={2} aria-hidden="true" />
+          ) : (
+            Number(index)
+          )}
         </span>
-
-        <h2 className="font-heading text-sm font-normal uppercase tracking-[0.15em] text-ground">
+        <h2 className="font-heading text-base font-normal tracking-[0.04em] text-ground lg:text-sm lg:uppercase lg:tracking-[0.15em]">
           {title}
         </h2>
-
-        {/* A quiet acknowledgement, not a progress bar. It appears; nothing
-            moves when it does, because the icon sits in a fixed-width slot. */}
-        <span className="ms-auto flex h-4 w-4 items-center justify-center">
-          {complete ? (
-            <Check
-              size={14}
-              strokeWidth={1.25}
-              aria-hidden="true"
-              className="text-ground-accent"
-            />
-          ) : null}
-        </span>
       </header>
 
-      <div className="grid grid-cols-1 gap-x-4 md:gap-x-6 gap-y-4 md:gap-y-7 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2 md:gap-x-6 md:gap-y-7">
         {children}
       </div>
     </section>
@@ -110,7 +109,8 @@ export interface CheckoutFieldProps {
  * The invalid state is no longer declared here: `.field[aria-invalid="true"]`
  * covers it for every field on the site.
  */
-const FIELD_CLASS = "field field-underline hover:border-ground-accent/40";
+// Boxed, 48px, white on the ivory page: the Stage 2 checkout field (was an underline).
+const FIELD_CLASS = "field min-h-12 bg-white hover:border-ground-accent/40";
 
 export function CheckoutField({
   id,
@@ -138,7 +138,7 @@ export function CheckoutField({
     <div className={wide ? "sm:col-span-2" : undefined}>
       <label
         htmlFor={id}
-        className="mb-2 block font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/70"
+        className="mb-1.5 block text-[10px] uppercase tracking-[0.18em] text-ground-muted"
       >
         {label}
         {/* Optional fields say so in their placeholder; a sea of asterisks on
@@ -250,7 +250,7 @@ export function CheckoutSelect({
     <div className={wide ? "sm:col-span-2" : undefined}>
       <label
         htmlFor={id}
-        className="mb-2 block font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/70"
+        className="mb-1.5 block text-[10px] uppercase tracking-[0.18em] text-ground-muted"
       >
         {label}
       </label>
@@ -263,7 +263,7 @@ export function CheckoutSelect({
           autoComplete={autoComplete}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={`${FIELD_CLASS} cursor-pointer appearance-none pe-7`}
+          className={`${FIELD_CLASS} cursor-pointer appearance-none pe-9`}
         >
           {options.map((option) => (
             <option
@@ -296,7 +296,7 @@ export function CheckoutSelect({
           size={14}
           strokeWidth={1.25}
           aria-hidden="true"
-          className="pointer-events-none absolute end-0 top-1/2 -translate-y-1/2 text-ground-accent/50"
+          className="pointer-events-none absolute end-3.5 top-1/2 -translate-y-1/2 text-ground-muted"
         />
       </div>
 

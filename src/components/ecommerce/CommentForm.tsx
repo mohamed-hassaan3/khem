@@ -1,7 +1,7 @@
 "use client";
 
 import { useKhemSession } from "@/src/providers/session-provider";
-import { useState, useTransition, type FormEvent } from "react";
+import { useId, useState, useTransition, type FormEvent } from "react";
 
 import CommentImageUploader from "@/src/components/ecommerce/CommentImageUploader";
 import CommentRow from "@/src/components/ecommerce/CommentRow";
@@ -52,6 +52,12 @@ export interface CommentFormProps {
   guestLabel: string;
   /** Comment ids already rendered by the server list. */
   storedIds: string[];
+  /**
+   * The rating summary, drawn at the start of the row whose end holds the
+   * "Write a review" toggle. The form itself stays closed until asked for
+   * (Stage 2, `prompts/storefront-redesign-stage-2.md` D7).
+   */
+  summary?: React.ReactNode;
 }
 
 export default function CommentForm({
@@ -59,9 +65,12 @@ export default function CommentForm({
   locale,
   guestLabel,
   storedIds,
+  summary,
 }: CommentFormProps) {
   const dict = useDictionary();
   const copy = dict.product.comments;
+  const formId = useId();
+  const [isOpen, setIsOpen] = useState(false);
 
   const { user } = useKhemSession();
   const [body, setBody] = useState("");
@@ -165,7 +174,32 @@ export default function CommentForm({
 
   return (
     <div>
-      <form onSubmit={handleSubmit} noValidate className="relative">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        {summary ?? <span />}
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={formId}
+          onClick={() => setIsOpen((open) => !open)}
+          className="inline-flex min-h-11 cursor-pointer items-center rounded-md border border-ground-border px-4 text-[11px] uppercase tracking-[0.14em] text-ground transition-colors duration-300 ease-out hover:border-ground-accent hover:text-ground-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
+        >
+          {isOpen ? copy.closeForm : copy.writeReview}
+        </button>
+      </div>
+
+      {isSent && !error && !isOpen ? (
+        <p role="status" className="mt-4 text-[12px] tracking-wide text-ground-accent">
+          {copy.sent}
+        </p>
+      ) : null}
+
+      <form
+        id={formId}
+        hidden={!isOpen}
+        onSubmit={handleSubmit}
+        noValidate
+        className="khem-rise relative mt-6"
+      >
         {/* Stars first: the cheapest way to say something. */}
         <div className="mb-8">
           <p className={LABEL_CLASS}>
@@ -197,7 +231,7 @@ export default function CommentForm({
         <textarea
           id="comment-body"
           name="body"
-          rows={4}
+          rows={3}
           value={body}
           maxLength={COMMENT_MAX_LENGTH}
           placeholder={copy.placeholder}
@@ -280,7 +314,7 @@ export default function CommentForm({
       {/* Only what this visitor just wrote, and only until the server list
           carries it. Nothing renders here on a first visit. */}
       {pending.length > 0 ? (
-        <div className="mt-8 md:mt-14">
+        <div className="mt-4 flex flex-col gap-3">
           {pending.map((comment) => (
             <CommentRow
               key={comment.id}

@@ -188,7 +188,13 @@ export default async function CollectionView({
         open with, and it lets the photography carry its own light — which is
         the entire argument for having commissioned it.
       */}
-      <section className="ground-ivory relative flex h-[60vh] min-h-105 items-end overflow-hidden">
+      {/*
+        Stage 2 (D6): 220px on a phone, so the first row of products is on the
+        first screen; the original 60vh banner from `md` up. Breadcrumb, then
+        the title with its count on one baseline, then two lines of intro
+        (phone only; from `md` the grid's bar carries the full description).
+      */}
+      <section className="ground-ivory relative flex h-55 items-end overflow-hidden md:h-[60vh] md:min-h-105">
         <Image
           src={heroImage}
           alt={heroAlt}
@@ -196,60 +202,27 @@ export default async function CollectionView({
           loading="eager"
           fetchPriority="high"
           sizes="100vw"
-          /*
-            A far lighter hand than the `brightness-30`/`brightness-45` this
-            was. §13 is explicit that a dark overlay must not be the automatic
-            answer for every hero — crushing a photograph to a third of its
-            luminance is what turned every collection into the same dark
-            banner, and it threw away the photography the page is built on.
-
-            The image now keeps most of its own contrast; a gradient scrim
-            below carries the type instead, so only the strip under the words
-            is darkened rather than the whole picture.
-          */
-          /*
-            `brightness-105` on the collections whose photography is dark, so
-            they lift toward the rest rather than reading as the one page that
-            still dims. Everything else runs untouched.
-
-            The old values were `brightness-30`/`brightness-45` — a blanket
-            filter that crushed every banner to a third of its luminance and
-            made the photograph indistinguishable from a black rectangle. §13
-            rules that out explicitly as the automatic answer.
-          */
           className={`object-cover ${isDark ? "brightness-105" : ""}`}
         />
-        {/*
-          The house banner scrim, base anchor — the type sits on the bottom
-          edge. Opaque ivory at the very bottom makes the seam into the grid
-          below disappear: the banner ends in the colour the page starts in.
-        */}
         <div aria-hidden="true" className="banner-scrim banner-scrim-base" />
-
-        <div className="relative z-1 w-full px-4 pb-14 md:px-20 md:pb-18">
+        <div className="relative z-1 w-full px-4 pb-4 md:px-20 md:pb-18">
           <div className="mx-auto max-w-350">
-            {/*
-             * A literal "/" separator points the wrong way on the Arabic tree;
-             * the chevron mirrors with `dir` instead.
-             */}
             <nav
               aria-label={dict.collections.home}
-              className="mb-8 flex items-center gap-2"
+              className="mb-2 flex items-center gap-1.5 md:mb-8 md:gap-2"
             >
               <LocaleLink
                 href="/"
-                className="text-[11px] tracking-wide text-ground-muted no-underline transition-colors duration-300 ease-out hover:text-ground-muted"
+                className="text-[11px] tracking-wide text-ground-muted no-underline transition-colors duration-300 ease-out hover:text-ground"
               >
                 {dict.collections.home}
               </LocaleLink>
-
               <ChevronRight
                 size={12}
                 strokeWidth={1.25}
                 aria-hidden="true"
                 className="text-ground-muted rtl:rotate-180"
               />
-
               <span
                 aria-current="page"
                 className="text-[11px] tracking-wide text-ground"
@@ -259,41 +232,34 @@ export default async function CollectionView({
               </span>
             </nav>
 
-            <p className="eyebrow mb-4">
-              {interpolate(
-                /*
-                 * "Pieces" wherever the listing crosses the fragrance boundary:
-                 * it lists body oils and gift sets too, and calling those
-                 * fragrances would be wrong in both languages.
-                 */
-                countsEverything
-                  ? dict.collections.countLabelAll
-                  : dict.collections.countLabel,
-                { count: products.length },
-              )}
+            <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 md:flex-col-reverse md:items-start md:gap-4">
+              <h1
+                className="font-heading text-[30px] font-normal leading-tight text-ground sm:text-5xl md:text-7xl"
+                dir="auto"
+              >
+                {title}
+              </h1>
+              <p className="eyebrow">
+                {interpolate(
+                  countsEverything
+                    ? dict.collections.countLabelAll
+                    : dict.collections.countLabel,
+                  { count: products.length },
+                )}
+              </p>
+            </div>
+
+            <p
+              dir="auto"
+              className="mt-1.5 line-clamp-2 max-w-[330px] text-xs leading-normal text-ground-muted md:hidden"
+            >
+              {description}
             </p>
 
-            <h1
-              className="font-heading text-4xl font-normal text-ground sm:text-6xl md:text-7xl"
-              dir="auto"
-            >
-              {title}
-            </h1>
-
-            {/*
-              The campaign line.
-              
-              Printed only when **one** campaign labels everything reduced on
-              this page. Two overlapping campaigns produce no line rather than a
-              list of them: a hero is not a noticeboard, and naming one of two
-              would be arbitrary. The count is what the sentence is actually
-              about — "some of these are reduced" is worth saying, "there is a
-              sale on" is not.
-            */}
             {campaign ? (
               <p
                 dir="auto"
-                className="mt-6 inline-flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-[0.08em] text-gold-soft/70"
+                className="mt-2 inline-flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] tracking-[0.08em] text-ground-muted md:mt-6"
               >
                 <span className="border border-ground-accent/40 px-2.5 py-1 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent">
                   {campaign.label}
@@ -312,13 +278,12 @@ export default async function CollectionView({
         </div>
       </section>
 
-      {/* ── DESCRIPTION + SORT · FILTER · GRID ──────── */}
       <CollectionGrid
         items={items}
         showFacets={isOverview}
         facetOrder={facets.order}
         facetLabels={facets.labels}
-        showSort={isOverview}
+        showSort
         description={
           /*
            * A collection's own description comes from the database, which has

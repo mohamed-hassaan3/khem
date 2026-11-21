@@ -1,6 +1,6 @@
 "use client";
 
-import { ShoppingBag } from "lucide-react";
+import { Plus, ShoppingBag } from "lucide-react";
 
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCartDrawer } from "@/src/providers/cart-drawer-provider";
@@ -39,12 +39,19 @@ export interface AddToBagButtonProps {
   name: string;
   /** Stock. Caps the quantity and disables the control at zero. */
   inventory: number;
+  /**
+   * `round`: the Stage 2 card's "+" on the photograph — a 36px ivory disc
+   * whose 44px hit area extends past the disc. `square` is the original bag
+   * icon box, still used where a card has no image to sit on.
+   */
+  variant?: "square" | "round";
 }
 
 export default function AddToBagButton({
   productId,
   name,
   inventory,
+  variant = "square",
 }: AddToBagButtonProps) {
   const dict = useDictionary();
   const { addLine } = useCart();
@@ -79,16 +86,28 @@ export default function AddToBagButton({
        * without the button being told which it is on. `bg-white/10` and
        * `bg-background/70` could only ever be right on one of them.
        */
-      className={`group grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm border border-ground-border bg-ground-bg/70 transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
-        isSoldOut ? "pointer-events-none opacity-40" : ""
-      }`}
+      className={
+        variant === "round"
+          ? `group grid size-11 shrink-0 cursor-pointer place-items-center rounded-full focus-visible:outline-none ${
+              isSoldOut ? "pointer-events-none opacity-40" : ""
+            }`
+          : `group grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm border border-ground-border bg-ground-bg/70 transition-colors duration-300 ease-out hover:border-gold focus-visible:border-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
+              isSoldOut ? "pointer-events-none opacity-40" : ""
+            }`
+      }
     >
-      <ShoppingBag
-        size={16}
-        strokeWidth={1.25}
-        aria-hidden="true"
-        className="text-ground-muted transition-colors duration-300 ease-out group-hover:text-ground-accent"
-      />
+      {variant === "round" ? (
+        <span className="grid size-9 place-items-center rounded-full bg-ivory/94 text-ink shadow-[0_4px_12px_rgba(0,0,0,0.18)] transition-[transform,background-color] duration-300 ease-out group-hover:bg-ivory group-active:scale-95 group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-gold motion-reduce:transition-none">
+          <Plus size={16} strokeWidth={1.4} aria-hidden="true" />
+        </span>
+      ) : (
+        <ShoppingBag
+          size={16}
+          strokeWidth={1.25}
+          aria-hidden="true"
+          className="text-ground-muted transition-colors duration-300 ease-out group-hover:text-ground-accent"
+        />
+      )}
     </button>
   );
 }

@@ -37,6 +37,7 @@ import { useDictionary } from "@/src/providers/i18n-provider";
 import type { CheckoutSavedAddress } from "@/src/types/checkout";
 
 import AddressFields from "./AddressFields";
+import CheckoutDisclosure from "./CheckoutDisclosure";
 import { CheckoutField, CheckoutSection } from "./CheckoutField";
 
 export type DeliveryField =
@@ -69,6 +70,15 @@ export interface DeliveryStepProps {
   savedAddresses: readonly CheckoutSavedAddress[];
   /** Fill the fields from one saved address. */
   onApplySaved: (address: CheckoutSavedAddress) => void;
+  /** Clear the address fields to type a new one (client state only). */
+  onNewAddress: () => void;
+  /**
+   * The delivery line under the address, already formatted by the view:
+   * "Complimentary" or the fee. Display only; the server prices delivery.
+   */
+  deliveryLine: string;
+  /** Whether `deliveryLine` is the complimentary case (drawn in gold). */
+  deliveryIsFree: boolean;
   /** Signed in, and the fields do not match a saved address. */
   canSave: boolean;
   saveToProfile: boolean;
@@ -84,6 +94,9 @@ export default function DeliveryStep({
   shipsHere,
   savedAddresses,
   onApplySaved,
+  onNewAddress,
+  deliveryLine,
+  deliveryIsFree,
   canSave,
   saveToProfile,
   onSaveToProfileChange,
@@ -93,49 +106,62 @@ export default function DeliveryStep({
 
   return (
     <CheckoutSection index="02" title={dict.checkout.steps.delivery} complete={complete}>
+      {/*
+        Saved addresses as one-tap cards in a swipe row, then "+ New" to type
+        another. Default first, as the service returns them. A card is pressed
+        when the fields match it exactly, so editing a line releases it.
+      */}
       {savedAddresses.length > 0 ? (
         <div className="sm:col-span-2">
-          {savedAddresses.length > 1 ? (
-            <>
-              <p
-                id="checkout-saved-heading"
-                className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/70"
-              >
-                {copy.savedHeading}
-              </p>
-
-              <div
-                role="group"
-                aria-labelledby="checkout-saved-heading"
-                className="mb-4 flex flex-wrap gap-2"
-              >
-                {savedAddresses.map((address) => {
-                  const active = sameAddress(
-                    { ...address, country: SHIPPING_COUNTRY },
-                    values,
-                  );
-
-                  return (
-                    <button
-                      key={address.id}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => onApplySaved(address)}
-                      className={`min-h-11 max-w-full truncate rounded-none border px-4 py-2 font-heading text-[10px] uppercase tracking-[0.2em] transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ground-accent/50 ${
-                        active
-                          ? "border-ground-accent text-ground-accent"
-                          : "border-ground-border text-ground-muted hover:border-ground-accent/50 hover:text-ground"
-                      }`}
-                    >
-                      {address.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          ) : null}
-
-          <p className="text-[11px] leading-relaxed text-ground-muted">
+          <p id="checkout-saved-heading" className="sr-only">
+            {copy.savedHeading}
+          </p>
+          <div
+            role="group"
+            aria-labelledby="checkout-saved-heading"
+            className="khem-scroll-track -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0"
+          >
+            {savedAddresses.map((address, index) => {
+              const active = sameAddress(
+                { ...address, country: SHIPPING_COUNTRY },
+                values,
+              );
+              return (
+                <button
+                  key={address.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => onApplySaved(address)}
+                  className={`flex min-h-14 min-w-33 shrink-0 cursor-pointer flex-col items-start justify-center gap-0.5 rounded-lg border px-3 py-2.5 text-start text-xs transition-[border-color,box-shadow,background-color] duration-500 ease-luxury-bezier focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent ${
+                    active
+                      ? "border-ground-accent bg-stone shadow-[inset_0_0_0_1px_var(--color-gold-deep)]"
+                      : "border-ground-border bg-white hover:border-ground-accent/50"
+                  }`}
+                >
+                  <span
+                    className={`text-[10px] uppercase tracking-[0.16em] ${
+                      active ? "text-ground-accent" : "text-ground-muted"
+                    }`}
+                  >
+                    {index === 0
+                      ? `${address.label} · ${copy.savedDefault}`
+                      : address.label}
+                  </span>
+                  <span dir="auto" className="max-w-40 truncate text-ground">
+                    {address.city}
+                  </span>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={onNewAddress}
+              className="flex min-h-14 min-w-24 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-dashed border-ground-border bg-transparent px-3 text-xs text-ground-accent transition-colors duration-300 hover:border-ground-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
+            >
+              {copy.newAddress}
+            </button>
+          </div>
+          <p className="mt-2 text-[11px] leading-relaxed text-ground-muted">
             {copy.savedNotice}
           </p>
         </div>
@@ -180,16 +206,33 @@ export default function DeliveryStep({
         </div>
       ) : null}
 
-      <CheckoutField
-        id="checkout-note"
-        label={copy.note}
-        placeholder={copy.notePlaceholder}
-        value={values.note}
-        onChange={(value) => onChange("note", value)}
-        error={errors.note}
-        multiline
-        wide
-      />
+      {/*
+        The note is optional, so it waits behind a row; it opens by itself
+        when it already holds text or the server refused it.
+      */}
+      <CheckoutDisclosure
+        title={copy.noteToggle}
+        forceOpen={values.note.trim() !== "" || Boolean(errors.note)}
+        className="-mt-1 sm:col-span-2"
+      >
+        <CheckoutField
+          id="checkout-note"
+          label={copy.note}
+          placeholder={copy.notePlaceholder}
+          value={values.note}
+          onChange={(value) => onChange("note", value)}
+          error={errors.note}
+          multiline
+          wide
+        />
+      </CheckoutDisclosure>
+
+      <p className="ground-stone flex items-center justify-between gap-3 rounded-md bg-ground-bg px-3 py-3 text-xs sm:col-span-2">
+        <span className="text-ground-muted">{copy.deliveryRow}</span>
+        <span className={deliveryIsFree ? "text-ground-accent" : "tabular-nums text-ground"}>
+          {deliveryLine}
+        </span>
+      </p>
 
       {/*
        * The house checkbox, as on `/sign-up`: a native input painted gold with
@@ -197,7 +240,7 @@ export default function DeliveryStep({
        * are the platform's own.
        */}
       {canSave ? (
-        <label className="flex cursor-pointer items-start gap-3 border border-ground-border px-5 py-4 text-start sm:col-span-2">
+        <label className="flex cursor-pointer items-start gap-3 rounded-md border border-ground-border px-4 py-3.5 text-start sm:col-span-2">
           <input
             type="checkbox"
             checked={saveToProfile}

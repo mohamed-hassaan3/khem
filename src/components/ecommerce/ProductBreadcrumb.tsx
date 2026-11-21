@@ -30,7 +30,7 @@ export default async function ProductBreadcrumb({
   const island = ltrIsland(locale);
 
   return (
-    <div className="border-b border-ground-border px-4 py-6 md:px-20">
+    <div className="hidden border-b border-ground-border px-4 py-6 md:px-20 lg:block">
       <nav
         aria-label={dict.product.collections}
         className="mx-auto flex max-w-350 flex-wrap items-center gap-2 text-[11px] tracking-wide"

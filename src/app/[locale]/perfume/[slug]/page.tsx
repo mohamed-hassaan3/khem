@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import NavGround from "@/src/components/NavGround";
-import Reveal from "@/src/components/animation/Reveal";
+import ChromeMarker from "@/src/components/layout/ChromeMarker";
+import DeliveryReturnsNote from "@/src/components/ecommerce/DeliveryReturnsNote";
+import ProductAccordion from "@/src/components/ecommerce/ProductAccordion";
 import ProductBreadcrumb from "@/src/components/ecommerce/ProductBreadcrumb";
 import ProductComments from "@/src/components/ecommerce/ProductComments";
 import ProductGallery from "@/src/components/ecommerce/ProductGallery";
@@ -14,10 +16,12 @@ import ProductStory from "@/src/components/ecommerce/ProductStory";
 import RelatedProducts from "@/src/components/ecommerce/RelatedProducts";
 import { LOCALES, isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
+import { interpolate } from "@/src/lib/i18n/interpolate";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { jsonLdHtml } from "@/src/lib/json-ld";
 import { productGraph } from "@/src/lib/structured-data";
 import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
+import { getProductRatingSummary } from "@/src/services/comments";
 import { getIngredientsForProduct } from "@/src/services/content";
 import {
   getCollectionBySlug,
@@ -104,13 +108,16 @@ export default async function PerfumePage({
   const product = await getProductBySlug(activeLocale, slug);
   if (!product) notFound();
 
-  const [dict, collection, related, ingredients, productProfileSlugs] = await Promise.all([
-    getDictionary(activeLocale),
-    getCollectionBySlug(activeLocale, product.collectionSlug),
-    getRelatedProductCards(activeLocale, product.slug),
-    getIngredientsForProduct(product.slug, activeLocale),
-    getProductScentProfileSlugs(product.slug),
-  ]);
+  const [dict, collection, related, ingredients, productProfileSlugs, rating] =
+    await Promise.all([
+      getDictionary(activeLocale),
+      getCollectionBySlug(activeLocale, product.collectionSlug),
+      getRelatedProductCards(activeLocale, product.slug),
+      getIngredientsForProduct(product.slug, activeLocale),
+      getProductScentProfileSlugs(product.slug),
+      // Memoised: `<ProductComments>` reads the same summary in this request.
+      getProductRatingSummary(product.slug),
+    ]);
 
   const gallery = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder);
 
@@ -161,67 +168,82 @@ export default async function PerfumePage({
 
       {/* §13: the product needs room and light. The story block below keeps
           its own dark ground. */}
-      <NavGround ground="ivory" />
+      <NavGround
+        ground="ivory"
+        backHref={collection ? `/collections/${collection.slug}` : "/collections"}
+        backLabel={collection?.name ?? dict.nav.collections}
+      />
+      <ChromeMarker kind="purchase" />
+      {/*
+        Stage 2 (`prompts/storefront-redesign-stage-2.md` D7/D8). Phone: the
+        gallery runs full bleed under the 56px header (the back chevron
+        replaces the breadcrumb), then the buy block, the fragrance, and the
+        long reads folded into rows. Desktop: breadcrumb, then a two-column
+        grid in a max-width container, the gallery sticky beside the details.
+      */}
       <ProductBreadcrumb
         locale={activeLocale}
         collection={collection}
         productName={product.name}
       />
 
-      <section className="grid grid-cols-1 lg:grid-cols-2">
+      <section className="lg:mx-auto lg:grid lg:max-w-350 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14 lg:px-12 lg:pb-8 lg:pt-8 xl:gap-20">
         <ProductGallery images={gallery} productName={product.name} />
 
-        <div className="flex max-w-2xl flex-col gap-7 md:gap-16 px-4 py-14 sm:px-8 lg:px-14 lg:py-20 xl:px-20">
+        <div className="flex flex-col gap-7 px-4 pt-5 sm:px-8 lg:max-w-130 lg:px-0 lg:pt-0">
           <ProductPurchase
             product={product}
             collectionName={collection?.name ?? "KHEM"}
             locale={activeLocale}
+            rating={rating}
           />
 
-          {product.story ? (
-            <Reveal>
-              <ProductStory
-                story={product.story}
-                heading={dict.product.storyHeading}
-              />
-            </Reveal>
-          ) : null}
-
-          <Reveal>
+          <div className="flex flex-col gap-3">
             <ProductPyramid tiers={tiers} heading={dict.product.pyramidHeading} />
-          </Reveal>
-
-          {/*
-           * The pyramid names nine materials; this names the one or two words a
-           * customer would use for the whole thing, and links to the rest of the
-           * house that smells that way. It sits directly under the pyramid
-           * because it is the pyramid's summary, and it self-guards on an
-           * uncatalogued fragrance exactly as the section below does.
-           */}
-          {scentProfiles.length > 0 ? (
-            <Reveal>
+            {scentProfiles.length > 0 ? (
               <ProductScentProfile
                 profiles={scentProfiles}
                 locale={activeLocale}
               />
-            </Reveal>
-          ) : null}
+            ) : null}
+          </div>
 
-          {/* Guarded here too: an empty <Reveal> would still occupy a gap row. */}
-          {ingredients.length > 0 ? (
-            <Reveal>
-              <ProductIngredients
-                ingredients={ingredients}
-                locale={activeLocale}
-              />
-            </Reveal>
-          ) : null}
+          <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
+            {product.story ? (
+              <ProductAccordion title={dict.product.storyHeading} defaultOpen>
+                <ProductStory
+                  story={product.story}
+                  heading={dict.product.storyHeading}
+                  showHeading={false}
+                />
+              </ProductAccordion>
+            ) : null}
+
+            {ingredients.length > 0 ? (
+              <ProductAccordion
+                title={
+                  ingredients.length === 1
+                    ? interpolate(dict.product.keyIngredient, {
+                        name: ingredients[0].name,
+                      })
+                    : dict.product.ingredientsHeading
+                }
+              >
+                <ProductIngredients
+                  ingredients={ingredients}
+                  locale={activeLocale}
+                  showHeading={false}
+                />
+              </ProductAccordion>
+            ) : null}
+
+            <ProductAccordion title={dict.product.deliveryReturns}>
+              <DeliveryReturnsNote />
+            </ProductAccordion>
+          </div>
         </div>
       </section>
 
-      {/* Self-guarding, like `<ProductIngredients>`: renders nothing when the
-          database is unconfigured, and no empty panel when nobody has written
-          yet. Its own `Reveal` sits inside, after that guard. */}
       <ProductComments slug={product.slug} locale={activeLocale} />
 
       <RelatedProducts products={related} locale={activeLocale} />

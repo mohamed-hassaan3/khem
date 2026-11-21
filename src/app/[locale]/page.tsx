@@ -7,6 +7,8 @@ import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import CollectionCard from "@/src/components/home/CollectionCard";
+import CollectionRailCard from "@/src/components/home/CollectionRailCard";
+import HomeBandHeader from "@/src/components/home/HomeBandHeader";
 import Hero from "@/src/components/home/Hero";
 import InViewVideo from "@/src/components/home/InViewVideo";
 import CollectionSlider from "@/src/components/home/CollectionSlider";
@@ -249,7 +251,7 @@ export default async function Home({
             untreated, with this type moved off it — not layered under it at a
             third of its opacity.
           */}
-          <section className="ground-ivory relative flex h-svh min-h-160 items-center justify-center overflow-hidden">
+          <section className="ground-ivory relative flex h-[min(540px,68svh)] items-center justify-center overflow-hidden md:h-svh md:min-h-160">
             {/*
               The geometry, in charcoal rather than gold.
 
@@ -350,8 +352,33 @@ export default async function Home({
     collections: (
       <>
         {/* ── COLLECTIONS PREVIEW ─── sand ───────────── */}
-        <section className="ground-sand px-4 py-14 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
-          <div className="mx-auto max-w-7xl">
+        <section className="ground-sand py-8 md:px-10 md:py-36 lg:px-12 xl:px-16">
+          {/*
+            Phone (Stage 2 D4): a swipe rail of small portrait cards with their
+            piece counts, instead of a full-screen slider one collection wide.
+          */}
+          <div className="md:hidden">
+            <div className="px-4">
+              <HomeBandHeader
+                eyebrow={dict.home.collections.eyebrow}
+                heading={dict.home.collections.heading}
+                linkHref="/collections"
+                linkLabel={dict.home.collections.all}
+              />
+            </div>
+            <div className="khem-scroll-track flex snap-x snap-mandatory scroll-px-4 gap-2.5 overflow-x-auto px-4 pb-1">
+              {collections.map((collection, index) => (
+                <CollectionRailCard
+                  key={collection.id}
+                  collection={collection}
+                  locale={activeLocale}
+                  priority={index < 3}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="mx-auto hidden max-w-7xl md:block">
             <Reveal className="mb-10 md:mb-20 text-center">
               <p className="eyebrow mb-5">{dict.home.collections.eyebrow}</p>
               <h2 className="font-heading text-4xl font-normal text-ground sm:text-5xl md:text-6xl">
@@ -391,9 +418,29 @@ export default async function Home({
     essences: (
       <>
         {/* ── FEATURED FRAGRANCES ─── ivory ──────────── */}
-        <section className="ground-ivory px-4 py-14 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
+        <section className="ground-ivory px-4 py-8 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-10 md:mb-16 flex flex-col items-start justify-between gap-4 md:gap-6 md:flex-row md:items-end">
+            <HomeBandHeader
+              eyebrow={dict.home.essences.eyebrow}
+              heading={dict.home.essences.heading}
+              linkHref="/collections"
+              linkLabel={dict.home.essences.viewAll}
+            />
+            {/* Phone: the first four as a 2-up grid; `md+` keeps the rail. */}
+            {products.length > 0 ? (
+              <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:hidden">
+                {products.slice(0, 4).map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    locale={activeLocale}
+                    sizes="50vw"
+                  />
+                ))}
+              </div>
+            ) : null}
+
+            <div className="mb-10 hidden flex-col items-start justify-between gap-4 md:mb-16 md:flex md:flex-row md:items-end md:gap-6">
               <Reveal>
                 <p className="eyebrow mb-4">{dict.home.essences.eyebrow}</p>
                 <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl md:text-5xl">
@@ -429,6 +476,7 @@ export default async function Home({
                * what makes "next" mean the same thing in Arabic. Four across at
                * `lg:` because a product card is narrower than a collection card.
                */
+              <div className="hidden md:block">
               <CollectionSlider
                 label={dict.home.essences.sliderLabel}
                 previousLabel={dict.home.essences.previous}
@@ -445,6 +493,7 @@ export default async function Home({
                   </Reveal>
                 ))}
               </CollectionSlider>
+              </div>
             ) : (
               <p className="py-10 md:py-16 text-center text-sm text-ground-muted">
                 {dict.home.essences.empty}
@@ -468,7 +517,38 @@ export default async function Home({
           for, and the photograph now runs at its own luminance with the copy
           beside rather than on top of it.
         */}
-        <section className="ground-sand border-t border-ground-border">
+        {/*
+          Phone (Stage 2 D4): one compact charcoal band, image beside the copy,
+          instead of a 1,000px chapter. `md+` keeps the sand split below.
+        */}
+        <section className="ground-charcoal mt-2 grid grid-cols-[150px_1fr] bg-ground-bg md:hidden">
+          <div className="relative min-h-55">
+            <Image
+              src="https://images.unsplash.com/photo-1678287714479-adaa0cfbe6c6?w=400&h=600&fit=crop&auto=format"
+              alt={dict.home.story.imageAlt}
+              fill
+              sizes="150px"
+              className="object-cover"
+            />
+          </div>
+          <div className="px-4.5 py-5.5">
+            <p className="eyebrow">{dict.home.story.eyebrow}</p>
+            <h2 className="mt-2 font-heading text-[19px] font-normal leading-tight text-ground">
+              {dict.home.story.headingLine1} {dict.home.story.headingLine2}
+            </h2>
+            <p className="mt-2.5 line-clamp-4 text-xs leading-relaxed text-ground-muted">
+              {dict.home.story.body1}
+            </p>
+            <LocaleLink
+              href="/heritage"
+              className="mt-3 inline-flex min-h-11 items-center text-[11px] uppercase tracking-[0.14em] text-ground-accent no-underline"
+            >
+              {dict.home.story.cta}
+            </LocaleLink>
+          </div>
+        </section>
+
+        <section className="ground-sand hidden border-t border-ground-border md:block">
           <div className="grid min-h-[700px] grid-cols-1 lg:grid-cols-2">
             <div className="relative min-h-[400px] overflow-hidden">
               <Image
@@ -528,9 +608,15 @@ export default async function Home({
           cells keep their `gap-px` over a ruled background: on ivory the rules
           are visible as rules rather than as the gaps between dark boxes.
         */}
-        <section className="ground-ivory border-t border-ground-border px-4 py-14 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
+        <section className="ground-ivory border-t border-ground-border px-4 py-8 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
           <div className="mx-auto max-w-7xl">
-            <Reveal className="mb-12 md:mb-24 text-center">
+            <HomeBandHeader
+              eyebrow={dict.home.craft.eyebrow}
+              heading={dict.home.craft.heading}
+              linkHref="/craftsmanship"
+              linkLabel={dict.home.craft.cta}
+            />
+            <Reveal className="mb-12 hidden text-center md:mb-24 md:block">
               <p className="eyebrow mb-5">{dict.home.craft.eyebrow}</p>
               <h2 className="mb-6 font-heading text-4xl font-normal text-ground sm:text-5xl md:text-6xl">
                 {dict.home.craft.heading}
@@ -567,7 +653,7 @@ export default async function Home({
               {craftPillars.map((pillar, index) => (
                 <Reveal
                   key={pillar.id}
-                  className="ground-ivory w-[80%] flex-none snap-start p-6 sm:w-auto sm:p-10 md:p-12"
+                  className="ground-ivory w-[72%] flex-none snap-start p-5 sm:w-auto sm:p-10 md:p-12"
                   delay={index * STAGGER_STEP}
                 >
                   <p className="mb-8 font-heading text-xs tracking-[0.2em] text-ground-subtle">
@@ -586,7 +672,7 @@ export default async function Home({
               ))}
             </div>
 
-            <Reveal className="mt-10 md:mt-16 text-center">
+            <Reveal className="mt-10 hidden text-center md:mt-16 md:block">
               <LocaleLink
                 href="/craftsmanship"
                 className="inline-block btn btn-outline"
@@ -627,7 +713,7 @@ export default async function Home({
           `shown.has("featured")`. See `newArrivalHasContent`.
         */}
         {newArrivalHasContent ? (
-          <section className="ground-obsidian relative h-[80vh] min-h-[600px] overflow-hidden bg-ink">
+          <section className="ground-obsidian relative h-[min(520px,70svh)] overflow-hidden bg-ink md:h-[80vh] md:min-h-[600px]">
             {/*
               A film if one is configured, the product photograph otherwise.
 
@@ -667,7 +753,7 @@ export default async function Home({
               />
             ) : null}
             <div className="absolute inset-0 bg-linear-to-r from-ink/90 via-ink/45 to-transparent rtl:bg-linear-to-l" />
-            <div className="absolute inset-0 flex items-center px-4 md:px-20 lg:px-32">
+            <div className="absolute inset-0 flex items-end px-4 pb-8 md:items-center md:px-20 md:pb-0 lg:px-32">
               <Reveal className="max-w-lg">
                 {newArrival.showEyebrow ? (
                   /*
@@ -687,7 +773,7 @@ export default async function Home({
                 {newArrival.showTitle && newArrival.title ? (
                   <h2
                     {...island}
-                    className="mb-8 font-heading text-5xl font-normal leading-tight text-ground sm:text-6xl md:text-7xl"
+                    className="mb-4 font-heading text-[34px] font-normal leading-tight text-ground sm:text-6xl md:mb-8 md:text-7xl"
                   >
                     {newArrival.title}
                   </h2>
@@ -734,9 +820,15 @@ export default async function Home({
     ingredients: (
       <>
         {/* ── INGREDIENTS ─── sand ───────────────────── */}
-        <section className="ground-sand overflow-hidden border-t border-ground-border py-14 md:py-36">
-          <div className="mx-auto mb-10 md:mb-16 max-w-7xl px-4 md:px-20">
-            <Reveal className="flex flex-col items-start justify-between gap-4 md:gap-6 md:flex-row md:items-end">
+        <section className="ground-sand overflow-hidden border-t border-ground-border py-8 md:py-36">
+          <div className="mx-auto mb-0 max-w-7xl px-4 md:mb-16 md:px-20">
+            <HomeBandHeader
+              eyebrow={dict.home.ingredients.eyebrow}
+              heading={dict.home.ingredients.heading}
+              linkHref="/ingredients"
+              linkLabel={dict.home.collections.all}
+            />
+            <Reveal className="hidden flex-col items-start justify-between gap-4 md:flex md:flex-row md:items-end md:gap-6">
               <div>
                 <p className="eyebrow mb-4">{dict.home.ingredients.eyebrow}</p>
                 <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl md:text-5xl">
@@ -764,9 +856,21 @@ export default async function Home({
     journal: (
       <>
         {/* ── JOURNAL PREVIEW ─── ivory ──────────────── */}
-        <section className="ground-ivory border-t border-ground-border px-4 py-14 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
+        <section className="ground-ivory border-t border-ground-border px-4 py-8 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
           <div className="mx-auto max-w-7xl">
-            <Reveal className="mb-10 md:mb-16 flex flex-col items-start justify-between gap-4 md:gap-6 md:flex-row md:items-end">
+            <HomeBandHeader
+              eyebrow={dict.home.journal.eyebrow}
+              heading={dict.home.journal.heading}
+              linkHref="/journal"
+              linkLabel={dict.common.readMore}
+            />
+            {/* Phone: the newest story as one row; `md+` keeps the rail. */}
+            {articles[0] ? (
+              <div className="md:hidden">
+                <JournalCard article={articles[0]} locale={activeLocale} layout="row" />
+              </div>
+            ) : null}
+            <Reveal className="mb-10 hidden flex-col items-start justify-between gap-4 md:mb-16 md:flex md:flex-row md:items-end md:gap-6">
               <div>
                 <p className="eyebrow mb-4">{dict.home.journal.eyebrow}</p>
                 <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl md:text-5xl">
@@ -787,6 +891,7 @@ export default async function Home({
               cells, and a scrolling row has no cells — the last card would have
               trailed a rule into empty space.
             */}
+            <div className="hidden md:block">
             <CollectionSlider
               label={dict.home.journal.sliderLabel}
               previousLabel={dict.home.journal.previous}
@@ -798,6 +903,7 @@ export default async function Home({
                 </Reveal>
               ))}
             </CollectionSlider>
+            </div>
           </div>
         </section>
       </>
@@ -805,13 +911,13 @@ export default async function Home({
     testimonials: (
       <>
         {/* ── TESTIMONIALS ─── ivory ─────────────────── */}
-        <section className="ground-ivory border-t border-ground-border px-4 py-14 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
+        <section className="ground-ivory border-t border-ground-border px-4 py-9 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="gold-line mx-auto mb-8 md:mb-12" />
+            <div className="gold-line mx-auto mb-6 md:mb-12" />
             <div {...island}>
               <TestimonialCarousel testimonials={testimonials} />
             </div>
-            <div className="gold-line mx-auto mt-8 md:mt-12" />
+            <div className="gold-line mx-auto mt-6 md:mt-12" />
           </div>
         </section>
       </>
@@ -829,14 +935,18 @@ export default async function Home({
           near-identical near-blacks, so it cost a gradient and read as a flat
           fill; sand needs no help being distinct from the ivory above it.
         */}
-        <section className="ground-sand border-y border-ground-border px-4 py-14 sm:px-6 md:px-10 md:py-24 lg:px-12 xl:px-16">
-          <div className="mx-auto max-w-xl text-center">
+        {/*
+          Phone (Stage 2 D4): an inline card on stone with the field and the
+          button on one row. Same form, same action.
+        */}
+        <section className="ground-sand border-y border-ground-border px-4 py-8 sm:px-6 md:px-10 md:py-24 lg:px-12 xl:px-16">
+          <div className="ground-stone mx-auto max-w-xl rounded-[10px] border border-ground-border bg-ground-bg px-4.5 py-5.5 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:text-center">
             <Reveal>
-              <p className="eyebrow mb-5">{dict.home.newsletter.eyebrow}</p>
-              <h2 className="mb-4 font-heading text-3xl font-normal text-ground sm:text-4xl">
+              <p className="eyebrow mb-2 md:mb-5">{dict.home.newsletter.eyebrow}</p>
+              <h2 className="mb-2 font-heading text-[19px] font-normal text-ground sm:text-4xl md:mb-4">
                 {dict.home.newsletter.heading}
               </h2>
-              <p className="mb-8 md:mb-12 text-xs leading-relaxed text-ground-muted sm:text-sm">
+              <p className="mb-3.5 text-xs leading-relaxed text-ground-muted sm:text-sm md:mb-12">
                 {dict.home.newsletter.lede}
               </p>
               <NewsletterForm />

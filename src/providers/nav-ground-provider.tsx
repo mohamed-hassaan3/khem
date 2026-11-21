@@ -58,6 +58,12 @@ export interface NavGroundState {
    * whether the links are charcoal or ivory.
    */
   ground: GroundName;
+  /**
+   * Where the phone header's back chevron points on a product or set page.
+   * The Nav already draws the chevron from the pathname (so it is in the
+   * server HTML); this only refines its target to the product's collection.
+   */
+  back?: { href: string; label: string };
 }
 
 export const DEFAULT_NAV_GROUND: NavGroundState = {
@@ -79,7 +85,13 @@ export function NavGroundProvider({
   const [state, setState] = useState<NavGroundState>(DEFAULT_NAV_GROUND);
 
   const setNavGround = useCallback((next: NavGroundState) => {
-    setState((current) => (current.ground === next.ground ? current : next));
+    setState((current) =>
+      current.ground === next.ground &&
+      current.back?.href === next.back?.href &&
+      current.back?.label === next.back?.label
+        ? current
+        : next,
+    );
   }, []);
 
   const resetNavGround = useCallback(() => {

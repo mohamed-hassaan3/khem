@@ -9,7 +9,6 @@ import { formatVolume } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import MatchLine from "@/src/components/search/MatchLine";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
-import { interpolate } from "@/src/lib/i18n/interpolate";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { productHref } from "@/src/lib/routes";
 import type { ProductCardData } from "@/src/types/catalog";
@@ -92,238 +91,124 @@ export default async function ProductCard({
    * printing all nine would bury the card's name and price under pills. The
    * full pyramid is the product detail page's job.
    */
+  /*
+   * Stage 2 (`prompts/storefront-redesign-stage-2.md` D5): the notes as one
+   * line of text, "Frankincense · Black oud · Amber", ellipsised. The chips
+   * this replaces truncated to "Franki…" at two-up, which said less than the
+   * line now does. Products without notes fall back to their format.
+   */
   const notes = [
     product.topNotes[0],
     product.heartNotes[0],
     product.baseNotes[0],
   ].filter(Boolean);
+  const notesLine =
+    notes.length > 0 ? notes.join(" · ") : (product.format ?? null);
 
-  /*
-   * Non-fragrance goods have no pyramid, so the pill row would collapse to an
-   * empty gap in the middle of the card. Their format line — "Room Spray",
-   * "3 × 30 ML Flacons" — takes the same slot instead.
-   */
-  const pills = notes.length > 0 ? notes : product.format ? [product.format] : [];
-
-  /*
-   * Two pills and a count, on one line, always.
-   *
-   * The row used to wrap: three note pills in a 4-up column is two rows on most
-   * widths, which added ~24px to every card carrying a full pyramid and none to
-   * a card carrying a format line. That is a card growing because of its
-   * *content*, which is exactly what §8 forbids — and it was the last place the
-   * grid could still go ragged after the clamps went on the name and subtitle.
-   *
-   * The overflow becomes a `+N` rather than being dropped silently, so the card
-   * says that there is more to the pyramid than it is showing. What that more
-   * *is* belongs to the detail page, which prints all nine.
-   */
-  const shownPills = pills.slice(0, 2);
-  const hiddenPillCount = pills.length - shownPills.length;
-
-  /*
-   * One badge, resolved in the same order on all three card types: the stored
-   * free-text `badge` is a merchandiser's deliberate override and wins, then
-   * the merchandising flag `productFlag()` resolves, so a card never has to.
-   */
   const flag = productFlag(product);
-
-  /*
-   * A product that cannot be bought has no business leading with "Best Seller",
-   * so this takes the corner slot from both the stored badge and the flag —
-   * muted rather than gold, because it is a withdrawal and not a claim.
-   */
   const isSoldOut = product.inventory === 0;
+  const volume = formatVolume(product.volumeMl);
 
   return (
-    <article className="card img-zoom group relative flex h-full flex-col overflow-hidden">
-      {isSoldOut ? (
-        <ProductFlag label={dict.product.soldOut} locale={locale} tone="muted" />
-      ) : /*
-           A running campaign outranks both the stored badge and the facet flag,
-           and only when it carries a label: a promotion the house set without
-           naming is a quiet price change, and inventing "SALE" for it would be
-           the card saying something the merchandiser deliberately did not.
-         */
-      product.promotion?.label ? (
-        <ProductFlag label={product.promotion.label} locale={locale} tone="campaign" />
-      ) : product.badge ? (
-        <ProductFlag label={product.badge} locale={locale} island />
-      ) : flag ? (
-        <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
-      ) : null}
-
-      {/*
-        Sold stock is dimmed and drained the way a museum dims a piece that is
-        not currently on show. Only the image: the name, price, and pills below
-        stay at full legibility, because the card is still a link worth reading.
-      */}
+    <article className="img-zoom group relative flex h-full flex-col">
       <div
-        className={`relative aspect-4/5 overflow-hidden bg-[var(--card-bg)] ${
+        className={`relative aspect-3/4 overflow-hidden rounded-md bg-[var(--card-bg)] ${
           isSoldOut ? "opacity-55 grayscale-[0.35]" : ""
         }`}
       >
         {/*
-          The cross-fade. Both frames are `fill` inside one aspect-ratio box, so
-          the swap is opacity alone — the card's height is fixed by the box and
-          nothing in the grid can shift. Graded identically — ungraded, now — so
-          the transition reads as one continuous image rather than the lights
-          coming up. 700ms sits just inside the 800ms `img-zoom` scale both
-          frames share, so the swap settles while the zoom is still running.
+          One flag, in this order: sold out, the campaign's label, the house's
+          own badge, then the derived facet. Inside the photograph's frame so it
+          clips to the rounded corner.
         */}
+        {isSoldOut ? (
+          <ProductFlag label={dict.product.soldOut} locale={locale} tone="muted" />
+        ) : product.promotion?.label ? (
+          <ProductFlag label={product.promotion.label} locale={locale} tone="campaign" />
+        ) : product.badge ? (
+          <ProductFlag label={product.badge} locale={locale} island />
+        ) : flag ? (
+          <ProductFlag label={dict.collections.facets[flag]} locale={locale} />
+        ) : null}
+
         <Image
           src={product.primaryImage.url}
           alt={product.primaryImage.alt}
           fill
           sizes={sizes}
-          className={`object-cover transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`object-cover transition-[opacity,transform] duration-700 ease-luxury-bezier motion-reduce:transition-none ${
             product.hoverImage ? "group-hover:opacity-0" : ""
           }`}
         />
         {product.hoverImage ? (
-          /*
-            `alt=""` and aria-hidden: this is the same product from a second
-            angle, and a screen reader must not hear the flacon described twice.
-          */
           <Image
             src={product.hoverImage.url}
             alt=""
             aria-hidden="true"
             fill
             sizes={sizes}
-            className="object-cover opacity-0 transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:opacity-100"
+            className="object-cover opacity-0 transition-opacity duration-700 ease-luxury-bezier group-hover:opacity-100 motion-reduce:transition-none"
           />
         ) : null}
+
+        {/* Above the stretched link (`z-1`), so it is its own target. */}
+        <span className="absolute bottom-1 end-1 z-2">
+          <AddToBagButton
+            productId={product.id}
+            name={product.name}
+            inventory={product.inventory}
+            variant="round"
+          />
+        </span>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
-        <p className="mb-1 line-clamp-1 text-[9px] uppercase tracking-[0.2em] text-ground-accent/70 sm:mb-1.5">
-          {interpolate(dict.product.collectionLabel, {
-            name: product.collectionName,
-          })}
+      <div className="flex min-w-0 flex-1 flex-col pt-2.5">
+        <p className="line-clamp-1 text-[9px] uppercase tracking-[0.12em] text-ground-accent sm:tracking-[0.2em]">
+          {product.collectionName}
         </p>
-        {/*
-          The perfume name is a proper noun and stays Latin in both trees, so it
-          keeps a real LTR island. Subtitle and notes are translated, and take
-          `dir="auto"` instead: an untranslated row falls back to English, and
-          only the rendered text can decide which way that runs.
-
-          `line-clamp-1`: a two-line name is the most common way a card in this
-          grid grew taller than the one beside it.
-        */}
         <h3
           {...ltrIsland(locale)}
-          className="mb-1 line-clamp-1 font-heading text-[13px] font-normal tracking-wide text-ground sm:text-base sm:tracking-wider"
+          className="mt-1 line-clamp-1 font-heading text-sm font-normal tracking-[0.03em] text-ground sm:text-base"
         >
           {product.name}
         </h3>
-        {product.subtitle ? (
-          /*
-            Hidden on the two-up mobile grid: in a ~170px column the subtitle
-            wraps to three lines and pushes the price below the fold of the
-            card. The name and price are what a phone browser is scanning for.
-          */
-          <p
-            dir="auto"
-            className="mb-2.5 hidden line-clamp-2 text-xs leading-relaxed tracking-wide text-ground-muted sm:block"
-          >
-            {product.subtitle}
-          </p>
-        ) : null}
 
-        {/*
-          `flex-nowrap` with the pills allowed to shrink: at the 4-up column
-          width two full note names do not fit side by side, and the choice is
-          between truncating one and letting the row become two. Truncating
-          keeps every card in the grid the same height, which is the property
-          being protected here.
-        */}
         {matchNotes && matchNotes.length > 0 ? (
           <MatchLine
             label={dict.search.ai.matches}
             notes={matchNotes}
-            className="mb-2 line-clamp-2 sm:mb-3"
+            className="mt-1 line-clamp-2"
           />
-        ) : (
-        <div
-          dir="auto"
-          className="mb-2 flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden sm:mb-3"
-        >
-          {shownPills.map((note) => (
-            <span
-              key={note}
-              className="min-w-0 truncate border border-ground-accent/20 px-2 py-0.5 text-[9px] tracking-widest text-ground-accent/80"
-            >
-              {note}
-            </span>
-          ))}
-          {hiddenPillCount > 0 ? (
-            /*
-              `aria-hidden`: "+1" is a layout artefact, not information. A
-              screen reader hears the two notes that are rendered and, on the
-              detail page, the whole pyramid.
-            */
-            <span
-              aria-hidden="true"
-              className="shrink-0 border border-ground-accent/20 px-1.5 py-0.5 text-[9px] tracking-widest text-ground-accent/60"
-            >
-              +{hiddenPillCount}
-            </span>
-          ) : null}
-        </div>
-        )}
+        ) : notesLine ? (
+          <p
+            dir="auto"
+            className="mt-0.5 truncate text-[11px] text-ground-muted"
+          >
+            {notesLine}
+          </p>
+        ) : null}
 
-        {/*
-          The spacer that bottom-aligns the price row across a grid of cards
-          whose copy is different lengths. See the note on equal height above.
-        */}
-        <div className="mt-auto" />
-
-        <div className="flex items-end justify-between gap-2 border-t border-ground-border pt-2.5">
-          <div className="min-w-0">
-            <ProductPrice
-              priceInCents={product.priceInCents}
-              promotion={product.promotion}
-              showPercent
-              className="font-heading text-[13px] text-ground sm:text-sm"
-            />
-            {/*
-              Omitted entirely, not emptied: an object with no volume — a gift
-              box, an antique — would otherwise leave a `mt-1` gap under the
-              price that reads as a rendering fault.
-            */}
-            {formatVolume(product.volumeMl) === null ? null : (
-              <p className="mt-1 text-[9px] uppercase tracking-[0.15em] text-ground-muted sm:text-[10px]">
-                {formatVolume(product.volumeMl)}
-              </p>
-            )}
-          </div>
-
-          {/*
-            Above the stretched link (`z-2` against its `z-1`), so this region of
-            the card belongs to the button and the rest belongs to the anchor.
-          */}
-          <span className="relative z-2">
-            <AddToBagButton
-              productId={product.id}
-              name={product.name}
-              inventory={product.inventory}
-            />
-          </span>
-        </div>
+        <p className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 text-xs text-ground">
+          <ProductPrice
+            priceInCents={product.priceInCents}
+            promotion={product.promotion}
+            showPercent
+            className="text-xs text-ground sm:text-[13px]"
+          />
+          {volume === null ? null : (
+            <span className="text-ground-muted">· {volume}</span>
+          )}
+        </p>
       </div>
 
       {/*
-        The stretched link. Last in source order so it does not sit between the
-        card's content and its own overlay, and labelled explicitly: without a
-        name of its own an empty anchor covering a card is announced as a bare
-        "link" with nothing to distinguish it from the fifteen others in the
-        grid.
+        The whole card is the link; the bag button sits above it. A real
+        `<a>`, so the card is one Tab stop and opens in a new tab as expected.
       */}
       <LocaleLink
         href={productHref(product)}
         aria-label={product.name}
-        className="absolute inset-0 z-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+        className="absolute inset-0 z-1 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
       />
     </article>
   );

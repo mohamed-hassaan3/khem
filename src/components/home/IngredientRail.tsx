@@ -136,7 +136,7 @@ export default function IngredientRail({ ingredients }: IngredientRailProps) {
   return (
     <>
       {/* Horizontal scroll rail */}
-      <div className="flex gap-0.5 overflow-x-auto pb-4 ps-4 md:ps-20">
+      <div className="khem-scroll-track flex snap-x scroll-px-4 gap-2.5 overflow-x-auto px-4 pb-1 md:scroll-px-0 md:gap-0.5 md:pb-4 md:pe-0 md:ps-20">
         {ingredients.map((ingredient) => {
           const isActive = ingredient.slug === activeSlug;
 
@@ -147,27 +147,33 @@ export default function IngredientRail({ ingredients }: IngredientRailProps) {
               onClick={(event) => handleCardClick(event, ingredient.slug)}
               aria-expanded={isActive}
               aria-controls={isActive ? panelId : undefined}
-              className={`img-zoom group relative w-[260px] flex-none overflow-hidden border bg-[var(--card-bg)] no-underline transition-colors duration-500 ease-out sm:w-[300px] ${
-                isActive ? "border-gold/35 bg-gold/5" : "border-transparent"
+              // Phone (Stage 2 D4): a 104px circle with the name and origin
+              // under it; `md+` keeps the tall editorial card.
+              className={`img-zoom group relative w-26 flex-none snap-start text-center no-underline transition-colors duration-500 ease-out md:w-[300px] md:overflow-hidden md:border md:bg-[var(--card-bg)] md:text-start ${
+                isActive ? "md:border-gold/35 md:bg-gold/5" : "md:border-transparent"
               }`}
             >
-              <div className="relative h-[380px] overflow-hidden">
+              <div
+                className={`relative size-26 overflow-hidden rounded-full outline-2 outline-offset-2 transition-[outline-color] duration-500 md:h-[380px] md:w-auto md:rounded-none md:outline-0 ${
+                  isActive ? "outline-gold" : "outline-transparent"
+                }`}
+              >
                 <Image
                   src={ingredient.image.url}
                   alt={ingredient.image.alt}
                   fill
-                  sizes="(min-width: 640px) 300px, 260px"
+                  sizes="(min-width: 768px) 300px, 104px"
                   className="object-cover"
                 />
               </div>
-              <div className="border-t border-ground-border p-6">
+              <div className="pt-2 md:border-t md:border-ground-border md:p-6">
                 {/* Ingredient name and origin come from the database — English only. */}
                 <div {...island}>
-                  <h3 className="mb-1 font-heading text-base font-normal text-ground">
+                  <h3 className="font-heading text-xs font-normal text-ground md:mb-1 md:text-base">
                     {ingredient.name}
                   </h3>
                 </div>
-                <p className="text-xs tracking-wider text-ground-accent/60">
+                <p className="mt-0.5 truncate text-[11px] text-ground-muted md:mt-0 md:text-xs md:tracking-wider md:text-ground-accent">
                   {interpolate(dict.home.ingredients.from, {
                     origin: ingredient.origin,
                   })}

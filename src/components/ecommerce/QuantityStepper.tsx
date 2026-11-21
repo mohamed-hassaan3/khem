@@ -18,6 +18,10 @@ export interface QuantityStepperProps {
   onChange: (next: number) => void;
   decreaseLabel: string;
   increaseLabel: string;
+  /** The group's accessible name when no visible label sits beside it. */
+  groupLabel?: string;
+  /** Height and other sizing from the caller (the PDP uses 48/50px). */
+  className?: string;
 }
 
 export default function QuantityStepper({
@@ -27,12 +31,18 @@ export default function QuantityStepper({
   onChange,
   decreaseLabel,
   increaseLabel,
+  groupLabel,
+  className = "",
 }: QuantityStepperProps) {
   const canDecrease = value > min;
   const canIncrease = value < max;
 
   return (
-    <div className="flex w-fit items-center border border-ground-border">
+    <div
+      role={groupLabel ? "group" : undefined}
+      aria-label={groupLabel}
+      className={`flex w-fit items-stretch rounded-md border border-ground-border ${className}`}
+    >
       <StepButton
         label={decreaseLabel}
         disabled={!canDecrease}
@@ -43,7 +53,7 @@ export default function QuantityStepper({
 
       <span
         aria-live="polite"
-        className="grid size-11 place-items-center font-heading text-sm text-ground"
+        className="grid w-7 min-h-11 place-items-center font-heading text-sm text-ground"
       >
         {value}
       </span>
@@ -76,7 +86,7 @@ function StepButton({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="grid size-11 place-items-center text-ground-muted transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-none disabled:pointer-events-none disabled:opacity-30"
+      className="grid w-10 min-h-11 place-items-center text-ground-muted transition-colors duration-300 ease-out hover:text-ground-accent focus-visible:text-ground-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ground-accent disabled:pointer-events-none disabled:opacity-30"
     >
       {children}
     </button>

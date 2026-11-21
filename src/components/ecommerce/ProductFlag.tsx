@@ -48,7 +48,9 @@ import { ltrIsland } from "@/src/lib/i18n/rtl";
  * everywhere.
  */
 const TONES = {
-  gold: "bg-gold text-background",
+  // Stage 2: the mock's flag — a near-ink veil with gold type, so a "Best
+  // seller" reads as a quiet label on any photograph rather than a gold sticker.
+  gold: "bg-ink/82 text-gold-soft backdrop-blur-sm",
   muted:
     "border border-white/12 bg-background/85 text-ivory/70 backdrop-blur-sm",
   /*
@@ -87,7 +89,7 @@ export default function ProductFlag({
   return (
     <p
       {...(island ? ltrIsland(locale) : { dir: "auto" as const })}
-      className={`absolute start-0 top-4 z-2 px-3 py-1.5 font-heading text-[8px] font-semibold tracking-[0.2em] sm:start-5 sm:top-5 sm:text-[9px] ${TONES[tone]}`}
+      className={`absolute start-2 top-2 z-2 rounded-[3px] px-[7px] py-[3px] text-[8px] font-medium uppercase tracking-[0.18em] sm:start-3 sm:top-3 sm:text-[9px] ${TONES[tone]}`}
     >
       {label}
     </p>

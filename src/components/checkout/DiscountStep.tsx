@@ -55,6 +55,8 @@ export interface AppliedDiscount {
 }
 
 export interface DiscountStepProps {
+  /** Rendered inside a `<CheckoutDisclosure>` (Stage 2): no own heading or margin. */
+  embedded?: boolean;
   code: string;
   onChange: (next: string) => void;
   /** True while a Discovery Credit is selected — the two cannot combine. */
@@ -81,6 +83,7 @@ export interface DiscountStepProps {
 }
 
 export default function DiscountStep({
+  embedded = false,
   code,
   onChange,
   disabledByCredit,
@@ -113,8 +116,15 @@ export default function DiscountStep({
       : discountRefusalMessage(refusal, copy, locale, formatPrice);
 
   return (
-    <section className="mt-12">
-      <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ground">
+    <section className={embedded ? "" : "mt-12"}>
+      {/* Inside a <CheckoutDisclosure> the row's summary is the visible title. */}
+      <h2
+        className={
+          embedded
+            ? "sr-only"
+            : "font-heading text-lg font-normal tracking-[0.1em] text-ground"
+        }
+      >
         {copy.heading}
       </h2>
 

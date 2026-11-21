@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import ChromeMarker from "@/src/components/layout/ChromeMarker";
 import { headers } from "next/headers";
 
 import CheckoutView from "@/src/components/checkout/CheckoutView";
@@ -212,6 +213,8 @@ export default async function CheckoutPage({
     }));
 
   return (
+    <>
+    <ChromeMarker kind="task" />
     <CheckoutView
       locale={activeLocale}
       catalog={catalog}
@@ -253,5 +256,6 @@ export default async function CheckoutPage({
         withCredit: benefits.pointsStackWithCredit,
       }}
     />
+    </>
   );
 }

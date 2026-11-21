@@ -10,6 +10,8 @@
  * query function.
  */
 
+import { cache } from "react";
+
 import { commentImageUrl } from "@/src/lib/comment-images";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import {
@@ -150,7 +152,12 @@ export async function getCommentsForProduct(
  * Degrades exactly like the thread query: a zeroed summary, which
  * `<RatingSummary>` renders as nothing at all.
  */
-export async function getProductRatingSummary(
+/*
+ * Memoised per request: the product page reads the summary for the rating
+ * link beside the title, and `<ProductComments>` reads it again for the
+ * reviews section. `cache()` makes those one query.
+ */
+export const getProductRatingSummary = cache(async function getProductRatingSummary(
   slug: string,
 ): Promise<ProductRatingSummary> {
   const supabase = getSupabaseAdmin();
@@ -198,4 +205,4 @@ export async function getProductRatingSummary(
     );
     return emptyRatingSummary();
   }
-}
+});

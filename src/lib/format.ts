@@ -171,7 +171,14 @@ export function formatAccountDate(isoDate: string, locale: Locale): string {
  * decorative piece.
  */
 export function formatVolume(volumeMl: number | null): string | null {
-  return volumeMl === null ? null : `${volumeMl} ML`;
+  /*
+   * Wrapped in Unicode isolates (LRI … PDI). In an Arabic paragraph the bidi
+   * algorithm otherwise reorders the digit run and the Latin unit, and the
+   * label reads "ML 100". The isolate keeps "100 ML" one left-to-right unit
+   * wherever it is printed, including inside strings joined with " · ".
+   * Display-only: no caller parses, compares or stores this string.
+   */
+  return volumeMl === null ? null : `\u2066${volumeMl} ML\u2069`;
 }
 
 /**

@@ -141,6 +141,11 @@ export interface Collection {
   kind: CollectionKind;
   /** The category this collection stands under — never null since `0045`. */
   categorySlug: string;
+  /**
+   * How many purchasable products it holds. Only `getFeaturedCollections()`
+   * reads it (the home rail's "9 pieces"); absent everywhere else.
+   */
+  productCount?: number;
 }
 
 /**
