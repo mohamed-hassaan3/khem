@@ -47,6 +47,7 @@
 
 import { usePathname } from "next/navigation";
 import {
+  Activity,
   BadgePercent,
   BarChart3,
   Boxes,
@@ -84,6 +85,7 @@ import AdminLink from "@/src/components/admin/AdminLink";
 import AdminToaster from "@/src/components/admin/AdminToaster";
 import NotificationBell from "@/src/components/admin/NotificationBell";
 import UnsavedChangesDialog from "@/src/components/admin/UnsavedChangesDialog";
+import { UMAMI_DASHBOARD_URL } from "@/src/lib/analytics/umami";
 import { localizePath, type Locale } from "@/src/lib/i18n/config";
 import { AdminToastProvider } from "@/src/providers/admin-toast-provider";
 import { UnsavedChangesProvider } from "@/src/providers/unsaved-changes-provider";
@@ -509,6 +511,37 @@ export default function AdminShell({
               </div>
             </div>
           ))}
+
+          {/*
+           * The visitor dashboard, which is not a route of this app. Kept out
+           * of `GROUPS` on purpose: every entry there is a path the rail's
+           * longest-match test lights, and an external URL can never be the
+           * page you are on. Authentication stays in Umami (named account +
+           * 2FA, `src/docs/umami-analytics.md`); this is only a door.
+           */}
+          <div className="mt-7">
+            <p className="mb-2 px-4 font-heading text-[9px] uppercase tracking-[0.3em] text-ground-subtle">
+              Visitors
+            </p>
+            <a
+              href={UMAMI_DASHBOARD_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              tabIndex={resolved && !open ? -1 : undefined}
+              onClick={closeOnMobile}
+              className="flex shrink-0 items-center gap-3 border-s-2 border-transparent px-4 py-3 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground"
+            >
+              <Activity size={14} strokeWidth={1.25} />
+              Umami
+              <ExternalLink
+                size={11}
+                strokeWidth={1.25}
+                className="ms-auto opacity-60"
+                aria-hidden="true"
+              />
+              <span className="sr-only">(opens in a new tab)</span>
+            </a>
+          </div>
         </nav>
 
         <div className="mt-6 md:mt-10 border-t border-ground-border px-8 pt-6">

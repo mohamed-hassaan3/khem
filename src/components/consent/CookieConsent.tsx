@@ -8,7 +8,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import ConsentToggle from "./ConsentToggle";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import {
-  CONSENT_CATEGORIES,
+  BANNER_CATEGORIES,
   toConsentChoices,
   type ConsentChoices,
 } from "@/src/lib/consent";
@@ -308,7 +308,13 @@ export default function CookieConsent() {
                       </span>
                     </div>
 
-                    {CONSENT_CATEGORIES.map((category) => (
+                    {/*
+                     * The offered toggles only. `analytics` is still in the
+                     * draft and is written back untouched (Accept All → true,
+                     * Decline → false, Save → as stored); the banner just no
+                     * longer pretends it controls anything (`BANNER_CATEGORIES`).
+                     */}
+                    {BANNER_CATEGORIES.map((category) => (
                       <div
                         key={category}
                         className="flex items-start justify-between gap-4 md:gap-6 py-4"

@@ -38,9 +38,10 @@ import { createPersistentStore } from "@/src/lib/persistent-store";
  * - **Cross-tab.** Accepting in one tab fires `storage` in the others, which
  *   re-reads the record and dismisses their banners without a reload.
  *
- * Nothing reads `record.analytics` / `record.preferences` yet — there is no
- * analytics tag on the site. This provider is the gate that a future one must
- * pass through, rather than being wired to a script that does not exist.
+ * Nothing reads `record.analytics` / `record.preferences` yet. Umami — the
+ * site's only analytics — is cookieless and deliberately does *not* read this
+ * provider (`components/analytics/UmamiAnalytics.tsx`). This provider is the
+ * gate that a future cookie-setting script must pass through.
  */
 
 export interface ConsentContextValue {
