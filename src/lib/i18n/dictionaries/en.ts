@@ -267,11 +267,11 @@ export const en = {
     },
     essences: {
       /* Names the rail's scroll region and its two pointer controls. */
-      sliderLabel: "Signature fragrances",
+      sliderLabel: "Best sellers",
       previous: "Previous fragrance",
       next: "Next fragrance",
-      eyebrow: "The Essences",
-      heading: "Signature Fragrances",
+      eyebrow: "Most Loved",
+      heading: "Best Sellers",
       viewAll: "View All",
       empty: "New fragrances are being prepared. Please return shortly.",
     },
