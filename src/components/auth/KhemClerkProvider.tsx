@@ -1,4 +1,4 @@
-import { arSA } from "@clerk/localizations";
+import { arSA, enUS } from "@clerk/localizations";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { ReactNode } from "react";
 
@@ -34,7 +34,13 @@ export default function KhemClerkProvider({
   return (
     <ClerkProvider
       appearance={khemClerkAppearance}
-      localization={locale === "ar" ? arSA : undefined}
+      /*
+       * Always an explicit localization, never `undefined` for English. Clerk
+       * re-applies this prop when it changes, but an absent value does not
+       * replace strings already loaded — so after switching Arabic → English on
+       * the client, the profile sheet stayed Arabic until a full reload.
+       */
+      localization={locale === "ar" ? arSA : enUS}
       signInUrl={localizePath(locale, "/sign-in")}
       signUpUrl={localizePath(locale, "/sign-up")}
       signInFallbackRedirectUrl={localizePath(locale, "/account")}

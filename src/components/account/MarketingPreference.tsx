@@ -63,39 +63,40 @@ export default function MarketingPreference({
     });
   }
 
+  /*
+   * One settings row: the title and what it means on the reading side, a
+   * 44×26 switch at the end. The whole row is the control, so the target is
+   * the row, not the 26px pill. Below it, the always-mounted outcome line and
+   * the note that transactional mail is never affected.
+   */
   return (
-    <section className="border border-ground-border bg-stone px-6 py-6 sm:px-8 sm:py-7">
-      <p className="mb-1.5 font-heading text-[13px] tracking-[0.08em] text-ground-accent">
-        {copy.heading}
-      </p>
-
-      <p className="mb-6 max-w-prose text-[12px] leading-loose text-ground-muted">
-        {copy.body}
-      </p>
-
+    <section className="overflow-hidden rounded-lg border border-ground-border bg-stone">
       <button
         type="button"
         role="switch"
         aria-checked={optedIn}
         disabled={isPending}
         onClick={() => change(!optedIn)}
-        className="flex w-full items-start gap-4 border border-ground-border bg-ivory/3 px-4 py-4 text-start transition-colors duration-300 ease-luxury-bezier hover:border-ground-accent/30 focus-visible:border-ground-accent/40 focus-visible:outline-none disabled:opacity-60"
+        className="flex min-h-16 w-full cursor-pointer items-center gap-4 bg-transparent px-4 py-3.5 text-start transition-colors duration-300 ease-luxury-bezier hover:bg-ground-bg/60 disabled:opacity-60 sm:px-5"
       >
+        <span className="min-w-0 flex-1">
+          <span className="block text-[13px] text-ground">{copy.heading}</span>
+          <span className="mt-0.5 block text-[11px] leading-relaxed text-ground-muted rtl:text-[12px]">
+            {copy.body}
+          </span>
+        </span>
+
         <span
           aria-hidden="true"
-          className={`mt-0.5 flex h-4 w-8 shrink-0 items-center rounded-full border transition-colors duration-300 ease-luxury-bezier ${
-            optedIn ? "border-gold/50 bg-gold/25" : "border-ground-border bg-ivory/5"
+          className={`relative h-[26px] w-11 shrink-0 rounded-full border transition-colors duration-500 ease-luxury-bezier ${
+            optedIn ? "border-ground-accent bg-ground-accent" : "border-ground-border bg-ground-bg"
           }`}
         >
           <span
-            className={`h-2.5 w-2.5 rounded-full transition-transform duration-300 ease-luxury-bezier ${
-              optedIn ? "translate-x-4 bg-gold" : "translate-x-0.5 bg-ivory/40"
+            className={`absolute top-[3px] size-[18px] rounded-full shadow-[0_1px_2px_rgba(13,13,13,0.2)] transition-[inset-inline-start,background-color] duration-500 ease-luxury-bezier ${
+              optedIn ? "start-[21px] bg-ivory" : "start-[3px] bg-ink-subtle"
             }`}
           />
-        </span>
-
-        <span className="min-w-0 text-[12px] leading-relaxed text-ground-muted">
-          {copy.label}
         </span>
       </button>
 
@@ -103,7 +104,7 @@ export default function MarketingPreference({
           appearing at the moment it fills. */}
       <p
         aria-live="polite"
-        className={`mt-3 min-h-4 text-[11px] ${failed ? "text-danger" : "text-ground-accent/70"}`}
+        className={`px-4 text-[11px] sm:px-5 [&:not(:empty)]:pb-3 ${failed ? "text-danger" : "text-ground-accent"}`}
       >
         {isPending ? copy.saving : null}
         {!isPending && failed ? copy.failed : null}
@@ -115,7 +116,7 @@ export default function MarketingPreference({
         ) : null}
       </p>
 
-      <p className="mt-4 max-w-prose border-t border-ground-border pt-4 text-[11px] leading-loose text-ground-muted/70">
+      <p className="border-t border-ground-border px-4 py-3 text-[11px] leading-relaxed text-ground-muted sm:px-5">
         {copy.transactional}
       </p>
     </section>

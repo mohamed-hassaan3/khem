@@ -1,27 +1,36 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import MemberBenefits from "@/src/components/account/MemberBenefits";
-import OrderCard from "@/src/components/account/OrderCard";
-import PrivilegeBanner from "@/src/components/account/PrivilegeBanner";
-import StatGrid from "@/src/components/account/StatGrid";
+import AccountBell from "@/src/components/account/AccountBell";
+import AccountPageHeader from "@/src/components/account/AccountPageHeader";
+import ActivityFeed from "@/src/components/account/ActivityFeed";
+import GlanceRows from "@/src/components/account/GlanceRows";
+import MemberCard from "@/src/components/account/MemberCard";
+import { formatOrderDate, StatusChip } from "@/src/components/account/OrderCard";
+import { isActiveOrder } from "@/src/components/account/OrderRail";
+import OrderSpotlight from "@/src/components/account/OrderSpotlight";
+import Price from "@/src/components/ecommerce/Price";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { getViewer } from "@/src/lib/auth";
 import { signInPathWithReturn } from "@/src/lib/auth-redirect";
-import { isLocale, localizePath } from "@/src/lib/i18n/config";
+import { isLocale, localizePath, type Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { interpolate } from "@/src/lib/i18n/interpolate";
-import { readingArrow } from "@/src/lib/i18n/rtl";
+import { ltrIsland } from "@/src/lib/i18n/rtl";
+import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import {
   ensureUserRowId,
-  getAccountSummary,
+  getAddressesForUser,
   getOrdersForUser,
 } from "@/src/services/account";
 import { claimGuestOrdersForIdentity } from "@/src/services/order-claims";
 import { creditLedgerForUser } from "@/src/services/credits";
+import { marketingOptInForUser, notificationsForUser } from "@/src/services/notifications";
+import { rewardsForUser } from "@/src/services/rewards";
 import { vouchersForUser } from "@/src/services/vouchers";
+import type { OrderSummary } from "@/src/types/account";
 
 /**
  * Account overview.
@@ -85,23 +94,29 @@ export default async function AccountPage({
     emailVerified: viewer.primaryEmailVerified,
   });
 
-  const [dict, summary, orders, ledger, vouchers] = await Promise.all([
-    getDictionary(activeLocale),
-    getAccountSummary(viewer.id),
-    getOrdersForUser(viewer.id),
-    /*
-     * The privileges band. Read from the same two services the Vouchers &
-     * Credits panel reads, rather than from a summary of its own: a figure
-     * printed at the top of the account and a figure printed on the panel it
-     * links to must be the same figure, and the only way to guarantee that is
-     * to count the same rows.
-     *
-     * The email is the session's verified primary address — a grant may have
-     * been issued to it before this person ever had an account.
-     */
-    creditLedgerForUser(viewer.id),
-    vouchersForUser({ clerkUserId: viewer.id, email: viewer.primaryEmail }),
-  ]);
+  const [dict, orders, ledger, vouchers, rewards, notifications, addresses, marketingOptIn] =
+    await Promise.all([
+      getDictionary(activeLocale),
+      getOrdersForUser(viewer.id),
+      /*
+       * The membership card's figures. Read from the same services the Wallet
+       * reads, rather than from a summary of their own: a figure on Home and a
+       * figure on the panel it opens must be the same figure, and the only way
+       * to guarantee that is to count the same rows.
+       *
+       * The email is the session's verified primary address — a grant may have
+       * been issued to it before this person ever had an account.
+       */
+      creditLedgerForUser(viewer.id),
+      vouchersForUser({ clerkUserId: viewer.id, email: viewer.primaryEmail }),
+      rewardsForUser(viewer.id),
+      // Request-memoised: the bell in the header shares this read.
+      notificationsForUser({ clerkUserId: viewer.id, email: viewer.primaryEmail }),
+      getAddressesForUser(viewer.id),
+      marketingOptInForUser(viewer.id),
+    ]);
+
+  const hub = dict.account.hub;
 
   // Greet by first name where Clerk holds one; an email-only account gets the
   // neutral heading rather than a greeting addressed to an email address.
@@ -110,70 +125,186 @@ export default async function AccountPage({
     ? interpolate(dict.account.heading, { name: firstName })
     : dict.account.headingFallback;
 
-  const [mostRecentOrder] = orders;
+  /*
+   * The spotlight: the newest order still moving, else the newest order.
+   * `getOrdersForUser` sorts newest first.
+   */
+  const activeOrder = orders.find((order) => isActiveOrder(order.status)) ?? null;
+  const spotlight = activeOrder ?? orders[0] ?? null;
 
-  const availableVouchers = vouchers.filter(
-    (voucher) => voucher.status === "AVAILABLE",
-  );
+  const availableVouchers = vouchers.filter((voucher) => voucher.status === "AVAILABLE").length;
 
   /*
    * The soonest date a credit lapses, over the spendable ones only. A credit
    * still awaiting delivery has no expiry yet (0026 starts the clock at
    * delivery), and an expired one has nothing left to warn about.
    */
-  const nextExpiry = ledger.credits
-    .filter((credit) => credit.status === "AVAILABLE" && credit.expiresAt !== null)
-    .map((credit) => credit.expiresAt as string)
-    .sort((a, b) => a.localeCompare(b))[0] ?? null;
+  const nextExpiry =
+    ledger.credits
+      .filter((credit) => credit.status === "AVAILABLE" && credit.expiresAt !== null)
+      .map((credit) => credit.expiresAt as string)
+      .sort((a, b) => a.localeCompare(b))[0] ?? null;
+
+  const defaultAddress = addresses.find((address) => address.isDefault) ?? addresses[0] ?? null;
+
+  /** Staggered entrance: each block rises a beat after the one before it. */
+  const rise = (step: number) => ({ animationDelay: `${80 + step * 70}ms` });
 
   return (
     <div>
-      <p className="eyebrow mb-3">{dict.account.eyebrow}</p>
-
-      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ground sm:text-4xl lg:text-5xl">
-        {heading}
-      </h1>
-
-      {/* Above the figures, because it is the thing a customer can act on
-          today. Renders nothing when they hold neither instrument. */}
-      <PrivilegeBanner
-        creditInCents={ledger.availableInCents}
-        creditCount={ledger.availableCount}
-        voucherCount={availableVouchers.length}
-        expiresAt={nextExpiry}
-        locale={activeLocale}
-        dict={dict.account.privileges}
+      <AccountPageHeader
+        size="display"
+        eyebrow={dict.account.eyebrow}
+        heading={heading}
+        action={<AccountBell viewer={viewer} locale={activeLocale} dict={dict} />}
       />
 
-      <StatGrid summary={summary} />
+      <div className="grid gap-8 lg:grid-cols-12 lg:gap-6">
+        <div className="acct-rise lg:col-span-5" style={rise(0)}>
+          <MemberCard
+            name={viewer.fullName ?? viewer.primaryEmail ?? ""}
+            nameIsEmail={!viewer.fullName}
+            points={rewards.enabled ? rewards.balancePoints : null}
+            creditInCents={ledger.availableInCents}
+            vouchers={availableVouchers}
+            creditExpiresAt={nextExpiry}
+            locale={activeLocale}
+            dict={hub}
+          />
+        </div>
 
-      {mostRecentOrder ? (
-        <section className="mb-6 md:mb-10">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="font-heading text-base text-ground">
-              {dict.account.recentOrder}
+        <div className="acct-rise lg:col-span-7" style={rise(1)}>
+          {spotlight ? (
+            <OrderSpotlight
+              order={spotlight}
+              heading={activeOrder ? hub.onItsWay : hub.latestOrder}
+              locale={activeLocale}
+              dict={dict.account}
+            />
+          ) : (
+            <section className="flex h-full flex-col">
+              <h2 className="mb-3 font-heading text-[15px] font-medium tracking-[0.06em] text-ground rtl:text-[19px] rtl:tracking-normal">
+                {hub.latestOrder}
+              </h2>
+              <div className="flex flex-1 flex-col items-start justify-center gap-4 rounded-lg border border-dashed border-ground-border p-5 lg:p-7">
+                <p className="text-[13px] text-ground-muted">{hub.noOrders}</p>
+                <LocaleLink href="/collections" className="btn btn-primary">
+                  {hub.shop}
+                </LocaleLink>
+              </div>
+            </section>
+          )}
+        </div>
+
+        {/* Desktop only: the last few orders as a table. On a phone the
+            spotlight and the Orders tab already carry this. */}
+        {orders.length > 0 ? (
+          <section className="acct-rise hidden lg:col-span-8 lg:block" style={rise(2)}>
+            <div className="mb-3 flex items-baseline justify-between gap-4">
+              <h2 className="font-heading text-[15px] font-medium tracking-[0.06em] text-ground rtl:text-[19px] rtl:tracking-normal">
+                {hub.recentOrders}
+              </h2>
+              <LocaleLink
+                href={ACCOUNT_PATHS.orders}
+                className="text-[11px] uppercase tracking-[0.14em] text-ground-accent no-underline hover:text-ground rtl:text-[12px] rtl:normal-case rtl:tracking-normal"
+              >
+                {hub.allOrders}
+              </LocaleLink>
+            </div>
+            <RecentOrdersTable orders={orders.slice(0, 4)} locale={activeLocale} dict={dict.account} />
+          </section>
+        ) : null}
+
+        <section
+          className={`acct-rise ${orders.length > 0 ? "lg:col-span-4" : "lg:col-span-12"}`}
+          style={rise(3)}
+        >
+          <div className="mb-1 flex items-baseline justify-between gap-4 lg:mb-3">
+            <h2 className="font-heading text-[15px] font-medium tracking-[0.06em] text-ground rtl:text-[19px] rtl:tracking-normal">
+              {hub.activity}
             </h2>
-
             <LocaleLink
-              href={ACCOUNT_PATHS.orders}
-              className="font-heading text-[10px] tracking-[0.15em] text-ground-accent/70 no-underline transition-colors duration-300 hover:text-ground-accent"
+              href={ACCOUNT_PATHS.notifications}
+              className="text-[11px] uppercase tracking-[0.14em] text-ground-accent no-underline hover:text-ground rtl:text-[12px] rtl:normal-case rtl:tracking-normal"
             >
-              {`${dict.account.viewAllOrders} ${readingArrow(activeLocale)}`}
+              {hub.seeAll}
             </LocaleLink>
           </div>
-
-          <OrderCard
-            order={mostRecentOrder}
-            locale={activeLocale}
-            dict={dict.account.orders}
-          />
+          <div className="lg:rounded-lg lg:border lg:border-ground-border lg:bg-stone lg:px-5 lg:py-2">
+            <ActivityFeed
+              items={notifications.slice(0, 3)}
+              locale={activeLocale}
+              copy={dict.account.notifications}
+              empty={hub.noActivity}
+            />
+          </div>
         </section>
-      ) : null}
 
-      <MemberBenefits
-        heading={dict.account.benefits.heading}
-        body={dict.account.benefits.body}
-      />
+        <section className="acct-rise lg:col-span-12" style={rise(4)}>
+          <h2 className="mb-1 font-heading text-[15px] font-medium tracking-[0.06em] text-ground lg:mb-3 rtl:text-[19px] rtl:tracking-normal">
+            {hub.glance}
+          </h2>
+          <GlanceRows address={defaultAddress} marketingOptIn={marketingOptIn} dict={hub} />
+        </section>
+      </div>
+    </div>
+  );
+}
+
+/** The desktop overview's order table — four newest orders, one row each. */
+function RecentOrdersTable({
+  orders,
+  locale,
+  dict,
+}: {
+  orders: readonly OrderSummary[];
+  locale: Locale;
+  dict: Dictionary["account"];
+}) {
+  const copy = dict.hub.orders;
+  return (
+    <div className="overflow-x-auto rounded-lg border border-ground-border bg-stone px-5 py-2">
+      <table className="w-full border-collapse text-[13px]">
+        <thead>
+          <tr className="border-b border-ground-border">
+            {[copy.order, copy.date, copy.items, copy.status].map((heading) => (
+              <th key={heading} scope="col" className="py-3 text-start text-[10px] font-medium uppercase tracking-[0.18em] text-ground-muted rtl:text-[12px] rtl:normal-case rtl:tracking-normal">
+                {heading}
+              </th>
+            ))}
+            <th scope="col" className="py-3 text-end text-[10px] font-medium uppercase tracking-[0.18em] text-ground-muted rtl:text-[12px] rtl:normal-case rtl:tracking-normal">
+              {copy.total}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map((order) => (
+            <tr key={order.id} className="border-b border-ground-border last:border-b-0">
+              <td className="py-3.5 pe-4">
+                <LocaleLink
+                  href={`${ACCOUNT_PATHS.orders}#${order.orderNumber}`}
+                  {...ltrIsland(locale)}
+                  className="font-heading text-ground no-underline hover:text-ground-accent"
+                >
+                  {order.orderNumber}
+                </LocaleLink>
+              </td>
+              <td className="whitespace-nowrap py-3.5 pe-4 text-ground-muted">
+                {formatOrderDate(order.placedAt, locale)}
+              </td>
+              <td className="max-w-[16rem] truncate py-3.5 pe-4" {...ltrIsland(locale)}>
+                {order.lines.map((line) => line.productName).join(", ")}
+              </td>
+              <td className="py-3.5 pe-4">
+                <StatusChip status={order.status} label={dict.orders.status[order.status]} />
+              </td>
+              <td className="py-3.5 text-end">
+                <Price cents={order.totalInCents} className="whitespace-nowrap font-heading text-ground-accent" />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

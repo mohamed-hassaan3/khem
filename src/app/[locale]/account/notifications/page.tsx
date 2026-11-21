@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import AccountBell from "@/src/components/account/AccountBell";
+import AccountPageHeader from "@/src/components/account/AccountPageHeader";
 import { getViewer } from "@/src/lib/auth";
 import { signInPathWithReturn } from "@/src/lib/auth-redirect";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
@@ -79,11 +81,11 @@ export default async function NotificationsPage({
 
   return (
     <div>
-      <p className="eyebrow mb-3">{copy.eyebrow}</p>
-
-      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ground sm:text-4xl">
-        {copy.heading}
-      </h1>
+      <AccountPageHeader
+        eyebrow={copy.eyebrow}
+        heading={copy.heading}
+        action={<AccountBell viewer={viewer} locale={activeLocale} dict={dict} />}
+      />
 
       {notifications.length === 0 ? (
         <EmptyState
@@ -92,6 +94,7 @@ export default async function NotificationsPage({
           body={copy.emptyBody}
           cta={dict.account.orders.empty.cta}
           href="/collections"
+          compact
         />
       ) : (
         <NotificationList

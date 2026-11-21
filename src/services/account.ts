@@ -64,7 +64,8 @@ export async function getOrdersForUser(
     .from("Order")
     .select(
       "id, orderNumber, placedAt, status, totalInCents, trackingCode, " +
-        "items:OrderItem(productName, quantity), " +
+        "items:OrderItem(productSlug, productName, quantity, " +
+        "product:Product(images:ProductImage(url, isPrimary, sortOrder))), " +
         "events:OrderStatusEvent(status, occurredAt)",
     )
     .eq("clerkUserId", userId)
@@ -83,7 +84,10 @@ export async function getOrdersForUser(
     const { items, events, ...order } = parsed.data;
     return {
       ...order,
-      lines: items,
+      lines: items.map(({ product, ...line }) => ({
+        ...line,
+        imageUrl: primaryImage(product?.images ?? []),
+      })),
       events: firstVisitPerStatus(events),
     } satisfies OrderSummary;
   });
@@ -102,6 +106,20 @@ export async function getOrdersForUser(
  * guarantee for an embedded resource, and a rail that depends on one is a rail
  * that scrambles the day the planner changes its mind.
  */
+/**
+ * The photograph a product card would show: the primary image, else the first
+ * by sort order. Mirrors the catalog projection's rule so an order thumbnail and
+ * the product's own card never disagree about which picture is "the" one.
+ */
+function primaryImage(
+  images: readonly { url: string; isPrimary: boolean; sortOrder: number }[],
+): string | null {
+  if (images.length === 0) return null;
+  const primary = images.find((image) => image.isPrimary);
+  if (primary) return primary.url;
+  return [...images].sort((a, b) => a.sortOrder - b.sortOrder)[0]?.url ?? null;
+}
+
 function firstVisitPerStatus(
   events: readonly OrderEvent[],
 ): readonly OrderEvent[] {

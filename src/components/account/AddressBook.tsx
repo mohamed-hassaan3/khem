@@ -112,8 +112,13 @@ function emptyDraft(country: string): Draft {
   };
 }
 
+/*
+ * `min-h-11 inline-flex`: these were the height of their 10px label, a ~15px
+ * tap target for Edit / Delete / Make default on a phone. Now each is a 44px
+ * row, and the surrounding spacing is reduced to match.
+ */
 const GHOST_ACTION =
-  "cursor-pointer bg-transparent p-0 font-heading text-[10px] uppercase tracking-[0.16em] text-ground-muted underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline disabled:cursor-default disabled:opacity-40";
+  "inline-flex min-h-11 cursor-pointer items-center bg-transparent p-0 font-heading text-[10px] uppercase tracking-[0.16em] text-ground-muted underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline disabled:cursor-default disabled:opacity-40";
 
 export default function AddressBook({
   initial,
@@ -212,13 +217,15 @@ export default function AddressBook({
   }
 
   return (
-    <div>
+    // One settings group: the saved addresses as rows, then "add" (or the
+    // form) as the group's last row.
+    <div className="overflow-hidden rounded-lg border border-ground-border bg-stone">
       {addresses.length === 0 ? (
-        <p className="mb-6 text-[12px] leading-loose text-ground-muted">
+        <p className="px-4 py-4 text-[12px] leading-relaxed text-ground-muted sm:px-5">
           {dict.none}
         </p>
       ) : (
-        <div className="mb-6 grid grid-cols-1 gap-0.5 lg:grid-cols-2">
+        <div className="divide-y divide-ground-border">
           {addresses.map((address) => (
             <AddressCard
               key={address.id}
@@ -313,7 +320,7 @@ export default function AddressBook({
             setNotice(null);
             setDraft(emptyDraft(SHIPPING_COUNTRY));
           }}
-          className={GHOST_ACTION}
+          className={`${GHOST_ACTION} w-full border-t border-ground-border px-4 text-ground-accent sm:px-5`}
         >
           {dict.add}
         </button>
@@ -327,9 +334,9 @@ export default function AddressBook({
             event.preventDefault();
             submit();
           }}
-          className="border border-ground-border bg-stone px-6 py-7 sm:px-8 sm:py-8"
+          className="acct-details-body border-t border-ground-border px-4 py-5 sm:px-6 sm:py-6"
         >
-          <p className="mb-7 font-heading text-[13px] tracking-[0.08em] text-ground-accent">
+          <p className="mb-5 font-heading text-[13px] tracking-[0.08em] text-ground-accent">
             {draft.id === undefined ? copy.addHeading : copy.editHeading}
           </p>
 
@@ -370,7 +377,7 @@ export default function AddressBook({
             />
 
             {/* The checkout's checkbox row, so the two forms end alike. */}
-            <label className="flex cursor-pointer items-start gap-3 border border-ground-border px-5 py-4 text-start sm:col-span-2">
+            <label className="flex cursor-pointer items-start gap-3 border border-ground-border px-4 py-3 text-start sm:col-span-2 sm:px-5 sm:py-4">
               <input
                 type="checkbox"
                 checked={draft.isDefault}
@@ -386,8 +393,14 @@ export default function AddressBook({
             </label>
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center gap-6">
-            <button type="submit" disabled={isPending} className="btn btn-primary btn-sm">
+          {/* Phone: the save button is full-width at the 44px floor, Cancel
+              beneath it; from `sm` the compact pair sits on one line. */}
+          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-1 sm:mt-8">
+            <button
+              type="submit"
+              disabled={isPending}
+              className="btn btn-primary btn-sm max-sm:min-h-11 max-sm:w-full"
+            >
               {isPending ? copy.saving : copy.save}
             </button>
 
@@ -411,8 +424,8 @@ export default function AddressBook({
           appearing at the moment it fills. */}
       <p
         aria-live="polite"
-        className={`mt-4 min-h-4 text-[11px] ${
-          notice === "saved" ? "text-ground-accent/70" : "text-danger"
+        className={`px-4 text-[11px] sm:px-5 [&:not(:empty)]:border-t [&:not(:empty)]:border-ground-border [&:not(:empty)]:py-3 ${
+          notice === "saved" ? "text-ground-accent" : "text-danger"
         }`}
       >
         {notice === "saved" ? copy.saved : null}

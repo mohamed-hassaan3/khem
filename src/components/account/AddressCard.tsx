@@ -65,27 +65,25 @@ export default function AddressCard({
   actions,
 }: AddressCardProps) {
   return (
-    <article
-      className={[
-        "relative bg-stone p-9",
-        address.isDefault ? "border border-ground-accent/20" : "border border-transparent",
-      ].join(" ")}
-    >
-      {address.isDefault ? (
-        <span className="absolute end-5 top-5 border border-ground-accent/30 bg-gold/10 px-2.5 py-1 font-heading text-[9px] tracking-[0.15em] text-ground-accent">
-          {dict.default}
-        </span>
-      ) : null}
+    // A row inside Profile's "Delivery addresses" group, which draws the frame
+    // and the hairlines between rows.
+    <article className="relative px-4 pt-4 sm:px-5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="eyebrow text-[10px]">{address.label}</p>
+        {address.isDefault ? (
+          <span className="inline-flex h-[22px] items-center rounded-full border border-ground-accent/40 px-2 text-[9px] uppercase tracking-[0.16em] text-ground-accent rtl:text-[11px] rtl:normal-case rtl:tracking-normal">
+            {dict.default}
+          </span>
+        ) : null}
+      </div>
 
-      <p className="eyebrow mb-4 text-[9px]">{address.label}</p>
-
-      <p className="mb-2 font-heading text-[15px] text-ground">
+      <p className="mb-0.5 mt-2 text-[13px] text-ground">
         {address.recipient}
       </p>
 
       <address
         {...ltrIsland(locale)}
-        className="text-[13px] not-italic leading-loose text-ground-muted"
+        className="text-[12px] not-italic leading-relaxed text-ground-muted rtl:text-right"
       >
         {address.line1}
         <br />
@@ -101,7 +99,9 @@ export default function AddressCard({
       </address>
 
       {actions ? (
-        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-ground-border pt-5">
+        // The actions are 44px rows themselves (see `GHOST_ACTION`), so the
+        // rule needs less air above them than it did for 10px text links.
+        <div className="mt-1 flex flex-wrap items-center gap-x-5">
           {actions}
         </div>
       ) : null}

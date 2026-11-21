@@ -4,13 +4,11 @@ import { redirect } from "next/navigation";
 import AccountIdentity from "@/src/components/account/AccountIdentity";
 import KhemClerkProvider from "@/src/components/auth/KhemClerkProvider";
 import AccountSidebar from "@/src/components/account/AccountSidebar";
-import NotificationBell from "@/src/components/account/NotificationBell";
+import AccountTabBar from "@/src/components/account/AccountTabBar";
 import SignOutButton from "@/src/components/account/SignOutButton";
 import { getViewer } from "@/src/lib/auth";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
-import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { AUTH_PATHS } from "@/src/lib/routes";
-import { notificationsForUser } from "@/src/services/notifications";
 
 /**
  * The customer portal shell — identity block, navigation rail, panel slot.
@@ -74,78 +72,46 @@ export default async function AccountLayout({
   if (viewer === null) redirect(localizePath(activeLocale, AUTH_PATHS.signIn));
 
   /*
-   * The bell's feed, read once for the whole portal.
-   *
-   * Read here rather than in the bell because the bell is a Client Component
-   * and this is a secret-key query — and read after the gate, never beside it,
-   * so it cannot run for a request that is about to be redirected away.
-   *
-   * `notificationsForUser()` is memoised per request, so this costs nothing
-   * extra on `/account/notifications`: the panel beneath shares this very read
-   * rather than running the feed a second time. Both halves of the owner come
-   * from the session — a voucher grant may predate the account and is keyed by
-   * address.
-   *
-   * The rail used to carry a quiet numeral instead. The bell owns that number
-   * now; two surfaces counting the same unread rows is two surfaces that can
-   * come to disagree.
-   */
-  const [dict, notifications] = await Promise.all([
-    getDictionary(activeLocale),
-    notificationsForUser({
-      clerkUserId: viewer.id,
-      email: viewer.primaryEmail,
-    }),
-  ]);
-
-  /*
    * The full Clerk provider lives here, not in the root layout: the account
    * pages render Clerk's `<UserProfile>` and sign-out, and everywhere else
    * Clerk loads only for signed-in visitors
    * (prompts/clerk-load-only-where-needed.md).
+   *
+   * ## The shell (prompts/account-redesign-stage-1.md)
+   *
+   * Desktop (`lg+`): a sticky rail — identity, the four sections, sign-out —
+   * beside the panel column. Phones: no rail and no top strip; the four
+   * sections are a tab bar fixed to the bottom of the viewport, and `<main>`
+   * is padded by the bar's height plus the safe area so a panel's last row is
+   * never underneath it.
+   *
+   * The bell is no longer placed here. It belongs to each panel's title row
+   * (`<AccountBell>`), which reads the same request-memoised feed.
    */
   return (
     <KhemClerkProvider locale={activeLocale}>
-    <div className="ground-ivory min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
-      {/* §17: usability over drama. The portal opens on a rule, not an image. */}
-      <NavGround ground="ivory" />
-      {/*
-       * Below `lg` the rail is a sticky strip beneath the nav rather than a
-       * column; the original page kept a fixed 280px sidebar at every width,
-       * which left the panels unusable on a phone.
-       */}
-      <aside className="sticky top-[var(--chrome-h)] z-10 flex flex-col border-b border-ground-border bg-[var(--card-bg)] transition-[top,height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none lg:top-[var(--chrome-h)] lg:h-[calc(100svh-var(--chrome-h))] lg:overflow-y-auto lg:border-b-0 lg:border-e lg:border-ground-border lg:bg-[var(--card-bg)] lg:py-15">
-        <div className="hidden lg:mb-5 lg:block">
-          <AccountIdentity viewer={viewer} locale={activeLocale} />
-        </div>
+      <div className="ground-ivory min-h-screen lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
+        {/* §17: usability over drama. The portal opens on a rule, not an image. */}
+        <NavGround ground="ivory" />
 
-        <AccountSidebar />
-      </aside>
+        <aside className="sticky top-[var(--chrome-h)] hidden h-[calc(100svh-var(--chrome-h))] flex-col gap-6 overflow-y-auto border-e border-ground-border bg-stone px-5 py-8 transition-[top,height] duration-500 ease-luxury-bezier motion-reduce:transition-none lg:flex">
+          <div className="border-b border-ground-border px-1.5 pb-6">
+            <AccountIdentity viewer={viewer} locale={activeLocale} />
+          </div>
 
-      <main className="px-5 pb-14 pt-10 sm:px-8 lg:px-20 lg:pt-15">
-        {/*
-          * The bell, at the head of every panel and nowhere else on the site.
-          * It sits above the panel rather than inside it so that all four
-          * sections carry it identically, and none of them has to remember to.
-          */}
-        <div className="mb-6 flex justify-end md:mb-8">
-          <NotificationBell
-            notifications={notifications}
-            locale={activeLocale}
-            copy={dict.account.bell}
-            feedCopy={dict.account.notifications}
-          />
-        </div>
+          <AccountSidebar />
 
-        {children}
+          <div className="mt-auto px-3">
+            <SignOutButton />
+          </div>
+        </aside>
 
-        {/* The rail's sign-out sits in the desktop column; on mobile the
-            strip has no room for it, so it closes the panel instead. */}
-        <div className="mt-10 md:mt-16 border-t border-ground-border pt-8 lg:hidden">
-          <SignOutButton />
-        </div>
-      </main>
-    </div>
+        <main className="min-w-0 px-4 pb-12 pt-6 sm:px-8 lg:px-12 lg:pb-16 lg:pt-12 xl:px-16">
+          <div className="mx-auto max-w-[1080px]">{children}</div>
+        </main>
+
+        <AccountTabBar />
+      </div>
     </KhemClerkProvider>
   );
 }

@@ -2,18 +2,20 @@ import { Ticket } from "lucide-react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import CreditCard from "@/src/components/account/CreditCard";
-import CreditLedger from "@/src/components/account/CreditLedger";
-import CreditSummary from "@/src/components/account/CreditSummary";
-import RewardLedger from "@/src/components/account/RewardLedger";
-import RewardSummary from "@/src/components/account/RewardSummary";
-import VoucherCard from "@/src/components/account/VoucherCard";
+import AccountBell from "@/src/components/account/AccountBell";
+import AccountPageHeader from "@/src/components/account/AccountPageHeader";
+import CreditPanel from "@/src/components/account/CreditPanel";
+import VoucherTicket from "@/src/components/account/VoucherTicket";
+import WalletActivity from "@/src/components/account/WalletActivity";
+import Price from "@/src/components/ecommerce/Price";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
 import { getViewer } from "@/src/lib/auth";
 import { signInPathWithReturn } from "@/src/lib/auth-redirect";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
+import { interpolate } from "@/src/lib/i18n/interpolate";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
+import { ltrIsland } from "@/src/lib/i18n/rtl";
 import { ACCOUNT_PATHS } from "@/src/lib/routes";
 import { creditLedgerForUser } from "@/src/services/credits";
 import { rewardsForUser } from "@/src/services/rewards";
@@ -97,135 +99,162 @@ export default async function VouchersPage({
     vouchersForUser({ clerkUserId: viewer.id, email: viewer.primaryEmail }),
   ]);
 
+  const hub = dict.account.hub;
   const copy = dict.account.vouchers;
-  const hasCredits = ledger.credits.length > 0;
+
+  // One clock for the whole render, so every credit's countdown agrees.
+  // eslint-disable-next-line react-hooks/purity -- a dynamic Server Component; this runs once per request
+  const now = Date.now();
+
+  /*
+   * Available first, then the ones a customer may still be looking for (not
+   * yet open, used, expired) — each keeps its ticket so a code they were given
+   * is never simply missing.
+   */
+  const ORDER = ["AVAILABLE", "SCHEDULED", "UNAVAILABLE", "USED", "EXPIRED"] as const;
+  const sortedVouchers = [...vouchers].sort(
+    (a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status),
+  );
+  const availableVouchers = vouchers.filter((voucher) => voucher.status === "AVAILABLE").length;
+
+  const rise = (step: number) => ({ animationDelay: `${80 + step * 70}ms` });
+
+  const tiles = [
+    { key: "vouchers", label: hub.vouchers, value: <span>{availableVouchers}</span> },
+    { key: "credit", label: hub.credit, value: <Price cents={ledger.availableInCents} /> },
+    ...(rewards.enabled
+      ? [{ key: "points", label: hub.points, value: <span>{rewards.balancePoints.toLocaleString("en-US")}</span> }]
+      : []),
+  ];
 
   return (
     <div>
-      <p className="eyebrow mb-3">{copy.eyebrow}</p>
+      <AccountPageHeader
+        eyebrow={hub.wallet.eyebrow}
+        heading={hub.wallet.heading}
+        aside={hub.wallet.intro}
+        action={<AccountBell viewer={viewer} locale={activeLocale} dict={dict} />}
+      />
 
-      <h1 className="mb-8 md:mb-12 font-heading text-3xl font-normal text-ground sm:text-4xl">
-        {copy.heading}
-      </h1>
+      {/* ── Balances, one band ─────────────────────────── */}
+      <div
+        className="acct-rise mb-8 grid gap-2 lg:mb-10 lg:gap-4"
+        style={{ ...rise(0), gridTemplateColumns: `repeat(${tiles.length}, minmax(0, 1fr))` }}
+      >
+        {tiles.map((tile) => (
+          <div key={tile.key} className="min-w-0 rounded-lg border border-ground-border bg-stone p-3 lg:p-5">
+            <p {...ltrIsland(activeLocale)} className="truncate font-heading text-[17px] text-ground-accent rtl:text-right lg:text-[24px]">
+              {tile.value}
+            </p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-ground-muted rtl:text-[12px] rtl:normal-case rtl:tracking-normal">
+              {tile.label}
+            </p>
+          </div>
+        ))}
+      </div>
 
-      {/*
-        ── KHEM Rewards ────────────────────────────────
-        
-        Above the credit because it is the instrument a customer accumulates
-        continuously; a credit arrives once, with a Discovery Set. Rendered only
-        when the programme is running: a heading over an empty panel would
-        advertise something the house has switched off.
-      */}
-      {rewards.enabled ? (
-        <section className="mb-12 md:mb-16">
-          <h2 className="mb-6 font-heading text-base text-ground">
-            {copy.rewards.heading}
-          </h2>
-
-          {rewards.balancePoints > 0 || rewards.entries.length > 0 ? (
-            <>
-              <div className="mb-8">
-                <RewardSummary rewards={rewards} dict={copy.rewards} />
-              </div>
-
-              <h2 className="mb-6 font-heading text-base text-ground">
-                {copy.rewardLedger.heading}
-              </h2>
-
-              <RewardLedger
-                entries={rewards.entries}
-                locale={activeLocale}
-                dict={copy.rewardLedger}
-              />
-            </>
+      <div className="grid gap-8 lg:grid-cols-2 lg:gap-x-8 lg:gap-y-10">
+        {/* ── Vouchers ───────────────────────────────────── */}
+        <section className="acct-rise" style={rise(1)}>
+          <SectionHead
+            title={hub.wallet.vouchers}
+            aside={
+              availableVouchers > 0
+                ? availableVouchers === 1
+                  ? hub.wallet.readyOne
+                  : interpolate(hub.wallet.ready, { count: String(availableVouchers) })
+                : null
+            }
+          />
+          {sortedVouchers.length > 0 ? (
+            <div className="flex flex-col gap-2.5">
+              {sortedVouchers.map((voucher) => (
+                <VoucherTicket key={voucher.id} voucher={voucher} locale={activeLocale} dict={dict.account} />
+              ))}
+            </div>
           ) : (
-            <p className="border border-ground-border bg-stone px-6 py-8 text-[12px] leading-loose text-ground-muted">
-              {copy.rewards.empty}
+            <p className="rounded-lg border border-dashed border-ground-border px-5 py-6 text-[12px] leading-relaxed text-ground-muted">
+              {hub.wallet.noVouchers}
             </p>
           )}
         </section>
-      ) : null}
 
-      {/* ── KHEM Credit ─────────────────────────────── */}
-      <section className="mb-12 md:mb-16">
-        <h2 className="mb-6 font-heading text-base text-ground">
-          {copy.credit.heading}
-        </h2>
-
-        {hasCredits ? (
-          <>
-            <div className="mb-8">
-              <CreditSummary
-                availableInCents={ledger.availableInCents}
-                availableCount={ledger.availableCount}
-                dict={copy.credit}
+        <div className="flex flex-col gap-8 lg:gap-10">
+          {/* ── Discovery credit ─────────────────────────── */}
+          <section className="acct-rise" style={rise(2)}>
+            <SectionHead title={hub.wallet.credit} />
+            {ledger.credits.length > 0 ? (
+              <div className="flex flex-col gap-2.5">
+                {ledger.credits.map((credit) => (
+                  <CreditPanel key={credit.id} credit={credit} now={now} locale={activeLocale} dict={dict.account} />
+                ))}
+              </div>
+            ) : (
+              /*
+               * A composed empty state, not a blank panel: a customer who has
+               * never bought a Discovery Set has no idea credit exists, and
+               * this is the one place the house can tell them.
+               */
+              <EmptyState
+                icon={Ticket}
+                heading={copy.credit.emptyHeading}
+                body={copy.credit.emptyBody}
+                cta={copy.credit.emptyCta}
+                href="/collections/discovery"
+                compact
               />
-            </div>
+            )}
+          </section>
 
-            <div className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {ledger.credits.map((credit) => (
-                <CreditCard
-                  key={credit.id}
-                  credit={credit}
-                  locale={activeLocale}
-                  dict={copy.credit}
-                />
-              ))}
-            </div>
+          {/* ── Points (only while the programme runs) ───── */}
+          {rewards.enabled ? (
+            <section className="acct-rise" style={rise(3)}>
+              <SectionHead title={hub.wallet.points} />
+              <div className="acct-card rounded-lg border border-ground-border bg-stone p-4 sm:p-5">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p {...ltrIsland(activeLocale)} className="font-heading text-[22px] text-ground-accent">
+                    {rewards.balancePoints.toLocaleString("en-US")}
+                  </p>
+                  {rewards.valueInCents > 0 ? (
+                    <p className="text-[12px] text-ground-muted">
+                      {hub.wallet.worth} <Price cents={rewards.valueInCents} className="text-ground" />
+                    </p>
+                  ) : null}
+                </div>
+                <p className="mt-1.5 text-[12px] leading-relaxed text-ground-muted">
+                  {rewards.balancePoints === 0 && rewards.entries.length === 0
+                    ? copy.rewards.empty
+                    : rewards.pointsToNextReward > 0
+                      ? interpolate(copy.rewards.toNext, { points: String(rewards.pointsToNextReward) })
+                      : copy.rewards.readyToSpend}
+                </p>
+              </div>
+            </section>
+          ) : null}
+        </div>
 
-            <h2 className="mb-6 font-heading text-base text-ground">
-              {copy.ledger.heading}
-            </h2>
-
-            <CreditLedger
-              entries={ledger.entries}
-              locale={activeLocale}
-              dict={copy.ledger}
-            />
-          </>
-        ) : (
-          /*
-           * A composed empty state, not a blank panel: a customer who has never
-           * bought a Discovery Set has no idea credit exists, and this is the
-           * one place the house can tell them.
-           */
-          <EmptyState
-            icon={Ticket}
-            heading={copy.credit.emptyHeading}
-            body={copy.credit.emptyBody}
-            cta={copy.credit.emptyCta}
-            href="/collections/discovery"
+        {/* ── Activity: credit and points, one list ───────── */}
+        <section className="acct-rise lg:col-span-2" style={rise(4)}>
+          <SectionHead title={hub.wallet.activity} />
+          <WalletActivity
+            credit={ledger.entries}
+            points={rewards.enabled ? rewards.entries : []}
+            locale={activeLocale}
+            dict={dict.account}
           />
-        )}
-      </section>
+        </section>
+      </div>
+    </div>
+  );
+}
 
-      {/* ── Vouchers ────────────────────────────────── */}
-      <section>
-        <h2 className="mb-6 font-heading text-base text-ground">
-          {copy.list.heading}
-        </h2>
-
-        {vouchers.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {vouchers.map((voucher) => (
-              <VoucherCard
-                key={voucher.id}
-                voucher={voucher}
-                locale={activeLocale}
-                dict={copy.list}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={Ticket}
-            heading={copy.list.emptyHeading}
-            body={copy.list.emptyBody}
-            cta={copy.list.emptyCta}
-            href="/collections"
-          />
-        )}
-      </section>
+function SectionHead({ title, aside }: { title: string; aside?: string | null }) {
+  return (
+    <div className="mb-3 flex items-baseline justify-between gap-4">
+      <h2 className="font-heading text-[15px] font-medium tracking-[0.06em] text-ground rtl:text-[19px] rtl:tracking-normal">
+        {title}
+      </h2>
+      {aside ? <span className="text-[11px] text-ground-muted rtl:text-[12px]">{aside}</span> : null}
     </div>
   );
 }

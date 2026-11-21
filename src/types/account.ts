@@ -36,8 +36,17 @@ export interface OrderEvent {
 
 /** One line of an order, as the history list prints it. */
 export interface OrderLine {
+  /** Catalog key the line was sold under; `null` only on rows too old to say. */
+  productSlug: string | null;
+  /** The name at the moment of sale — a snapshot, never a lookup. */
   productName: string;
   quantity: number;
+  /**
+   * The product's primary photograph *today*, for the thumbnail. Unlike the
+   * name this is a live lookup: a picture is decoration, not a record, and
+   * `null` (archived product, no image) draws a placeholder bottle.
+   */
+  imageUrl: string | null;
 }
 
 /**
