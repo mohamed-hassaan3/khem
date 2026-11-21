@@ -24,6 +24,7 @@
  * be used has learned something, where a silently absent option teaches nothing.
  */
 
+import { ARABIC_INTL_LOCALE } from "@/src/lib/format";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useFormatPrice } from "@/src/providers/currency-provider";
@@ -42,8 +43,11 @@ export default function CreditStep({
   onSelect,
   subtotalInCents,
   locale,
+  embedded = false,
 }: {
   credits: readonly SpendableCredit[];
+  /** Rendered inside a `<CheckoutDisclosure>` (Stage 2): no own heading or margin. */
+  embedded?: boolean;
   selectedId: string;
   onSelect: (id: string) => void;
   subtotalInCents: number;
@@ -59,8 +63,15 @@ export default function CreditStep({
   const forfeits = selected !== null && selected.balanceInCents > subtotalInCents;
 
   return (
-    <section className="mt-12">
-      <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ground">
+    <section className={embedded ? "" : "mt-12"}>
+      {/* Inside a <CheckoutDisclosure> the row's summary is the visible title. */}
+      <h2
+        className={
+          embedded
+            ? "sr-only"
+            : "font-heading text-lg font-normal tracking-[0.1em] text-ground"
+        }
+      >
         {copy.heading}
       </h2>
       <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-ground-muted">
@@ -99,7 +110,7 @@ export default function CreditStep({
                   <span className="mt-1 block text-[11px] tracking-wide text-ground-muted/70">
                     {interpolate(copy.expires, {
                       date: new Intl.DateTimeFormat(
-                        locale === "ar" ? "ar-EG" : "en-GB",
+                        locale === "ar" ? ARABIC_INTL_LOCALE : "en-GB",
                         { day: "numeric", month: "long", timeZone: "UTC" },
                       ).format(new Date(credit.expiresAt)),
                     })}

@@ -21,11 +21,14 @@ import type { Ingredient } from "@/src/types/content";
 export interface ProductIngredientsProps {
   ingredients: Ingredient[];
   locale: Locale;
+  /** False inside a `<ProductAccordion>`, whose summary is the heading. */
+  showHeading?: boolean;
 }
 
 export default async function ProductIngredients({
   ingredients,
   locale,
+  showHeading = true,
 }: ProductIngredientsProps) {
   if (ingredients.length === 0) return null;
 
@@ -35,14 +38,16 @@ export default async function ProductIngredients({
 
   return (
     <section>
-      <h2 className="eyebrow mb-7">{dict.product.ingredientsHeading}</h2>
+      {showHeading ? (
+        <h2 className="eyebrow mb-7">{dict.product.ingredientsHeading}</h2>
+      ) : null}
 
       <div className="flex flex-col gap-px">
         {ingredients.map((ingredient) => (
           <LocaleLink
             key={ingredient.id}
             href={`/ingredients?ingredient=${ingredient.slug}`}
-            className="card flex flex-col gap-2 p-6 no-underline transition-colors duration-300 ease-out focus-visible:outline-none sm:flex-row sm:gap-6"
+            className="card flex flex-col gap-2 p-4 no-underline sm:p-6 transition-colors duration-300 ease-out focus-visible:outline-none sm:flex-row sm:gap-6"
             dir="auto"
           >
             <div className="sm:w-40 sm:shrink-0">

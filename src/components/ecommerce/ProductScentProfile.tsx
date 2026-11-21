@@ -40,9 +40,9 @@ export default async function ProductScentProfile({
 
   return (
     <section>
-      <h2 className="eyebrow mb-5">{dict.product.scentProfileHeading}</h2>
+      <h2 className="sr-only">{dict.product.scentProfileHeading}</h2>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         {profiles.map((profile) => (
           <LocaleLink
             key={profile}
@@ -53,7 +53,7 @@ export default async function ProductScentProfile({
              * visitor arriving at `/collections/woody` from here should
              * recognise the chip they pressed.
              */
-            className="border border-ground-accent/30 px-4 py-2 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/80 no-underline transition-colors duration-300 ease-out hover:border-gold/70 hover:bg-gold/10 hover:text-ground-accent focus-visible:border-gold focus-visible:text-ground-accent focus-visible:outline-none"
+            className="inline-flex min-h-9 items-center rounded-full border border-ground-accent/40 px-3.5 text-[11px] uppercase tracking-[0.12em] text-ground-accent no-underline transition-colors duration-300 ease-out hover:border-ground-accent hover:bg-gold/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
             dir="auto"
           >
             {dict.collections.scentProfiles[profile].name}

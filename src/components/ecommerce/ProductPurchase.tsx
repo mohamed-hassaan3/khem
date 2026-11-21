@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, FlaskConical, Gift, RotateCcw, Star, Truck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import BuyNowButton from "@/src/components/ecommerce/BuyNowButton";
@@ -10,7 +10,9 @@ import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import { quantityCeiling } from "@/src/lib/cart";
 import { BASE_CURRENCY } from "@/src/lib/currency";
 import {
+  formatCount,
   formatProductType,
+  formatRating,
   formatVolume,
   joinTokens,
 } from "@/src/lib/format";
@@ -61,6 +63,12 @@ export interface ProductPurchaseProps {
   product: PurchasableProduct;
   collectionName: string;
   locale: Locale;
+  /**
+   * The product's rating summary, for the link beside the eyebrow. Omitted or
+   * zero-count renders nothing (the PDP reads it through the memoised
+   * `getProductRatingSummary`, so it costs no second query).
+   */
+  rating?: { average: number; count: number };
 }
 
 const CONFIRMATION_MS = 2500;
@@ -69,6 +77,7 @@ export default function ProductPurchase({
   product,
   collectionName,
   locale,
+  rating,
 }: ProductPurchaseProps) {
   const dict = useDictionary();
   const { currency, formatPrice } = useCurrency();
@@ -84,36 +93,43 @@ export default function ProductPurchase({
 
   /** The controls row, watched so the sticky bar knows when it is needed. */
   const controlsRef = useRef<HTMLDivElement>(null);
-  const [isBarVisible, setIsBarVisible] = useState(false);
+  /*
+   * The sticky bar shows once the buy controls have scrolled up out of view,
+   * and steps aside again while the site footer is on screen, so it never
+   * covers the footer's last lines. Two observed targets, one effect.
+   */
+  const [controlsGone, setControlsGone] = useState(false);
+  const [footerInView, setFooterInView] = useState(false);
+  const isBarVisible = controlsGone && !footerInView;
 
-  // Clearing on unmount, and before each restart, keeps a fast double-click
-  // from leaving the button stuck in its confirmed state.
   useEffect(() => {
     return () => {
       if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
     };
   }, []);
 
-  /*
-   * The bar appears only when the real controls have been scrolled *past* —
-   * `isIntersecting` alone would also raise it while the visitor is still above
-   * the block, on the breadcrumb, where nothing has scrolled off anything.
-   * `boundingClientRect.top < 0` is the half that says which side they left by.
-   */
   useEffect(() => {
     const node = controlsRef.current;
     if (!node) return;
+    const footer = document.querySelector("[data-site-footer]");
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsBarVisible(
-          !entry.isIntersecting && entry.boundingClientRect.top < 0,
-        );
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.target === node) {
+            setControlsGone(
+              !entry.isIntersecting && entry.boundingClientRect.top < 0,
+            );
+          } else {
+            setFooterInView(entry.isIntersecting);
+          }
+        }
       },
       { threshold: 0 },
     );
 
     observer.observe(node);
+    if (footer) observer.observe(footer);
 
     return () => observer.disconnect();
   }, []);
@@ -138,59 +154,100 @@ export default function ProductPurchase({
       ? interpolate(dict.product.lowStock, { count: product.inventory })
       : dict.product.inStock;
 
+  const stockTone = isSoldOut
+    ? "bg-ground-muted/50"
+    : product.inventory < LOW_STOCK_THRESHOLD
+      ? "bg-warning"
+      : "bg-success";
+
+  const volumeLine = joinTokens(
+    formatVolume(product.volumeMl),
+    formatProductType(product, dict.product.concentrations),
+  );
+
+  const perks = [
+    { key: "delivery", Icon: Truck, badge: dict.product.trust.delivery },
+    { key: "packaging", Icon: Gift, badge: dict.product.trust.packaging },
+    { key: "noBlindBuy", Icon: FlaskConical, badge: dict.product.trust.noBlindBuy },
+    { key: "returns", Icon: RotateCcw, badge: dict.product.trust.returns },
+  ] as const;
+
+  const ratingText =
+    rating && rating.count > 0
+      ? `${formatRating(rating.average, locale)} (${formatCount(rating.count, locale)})`
+      : null;
+
   return (
     <section>
-      <p className="eyebrow mb-4">
-        {interpolate(dict.product.collectionLabel, { name: collectionName })}
-      </p>
-
-      <div {...island}>
-        <h1 className="mb-3 font-heading text-4xl font-normal text-ground sm:text-5xl lg:text-6xl">
-          {product.name}
-        </h1>
-        {product.subtitle ? (
-          <p className="text-[15px] italic tracking-wide text-ground-accent/70">
-            {product.subtitle}
-          </p>
+      {/*
+        Stage 2 (`prompts/storefront-redesign-stage-2.md` D7): everything a
+        visitor needs to decide, in one screen on a phone. Eyebrow and rating
+        share a row; no gold rule; price and the volume line share a baseline.
+      */}
+      <div className="flex items-center justify-between gap-4">
+        <p className="eyebrow">
+          {interpolate(dict.product.collectionLabel, { name: collectionName })}
+        </p>
+        {ratingText ? (
+          <a
+            href="#comments"
+            className="inline-flex shrink-0 items-center gap-1.5 text-[11px] text-ground-muted no-underline transition-colors duration-300 hover:text-ground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
+            aria-label={interpolate(dict.product.ratingLink, {
+              rating: formatRating(rating?.average ?? 0, locale),
+              count: formatCount(rating?.count ?? 0, locale),
+            })}
+          >
+            <Star
+              size={12}
+              strokeWidth={1.25}
+              aria-hidden="true"
+              className="fill-ground-accent text-ground-accent"
+            />
+            <span {...island}>{ratingText}</span>
+          </a>
         ) : null}
       </div>
 
-      <div className="gold-line my-9" />
+      <div {...island} className="mt-2 lg:mt-3">
+        <h1 className="font-heading text-[30px] font-normal leading-[1.1] text-ground sm:text-4xl lg:text-[44px] lg:leading-[1.05] rtl:text-right">
+          {product.name}
+        </h1>
+      </div>
+      {product.subtitle ? (
+        <p
+          dir="auto"
+          className="mt-1.5 text-sm italic tracking-wide text-ground-accent lg:mt-2 lg:text-base"
+        >
+          {product.subtitle}
+        </p>
+      ) : null}
 
-      {/* Price and bottle format. The format is a spec, not a choice. */}
-      <div className="mb-3 flex flex-wrap items-baseline gap-4">
+      <div className="mt-4 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 lg:mt-6">
         {/*
-          No percentage badge here, unlike the grid: the two figures are already
-          side by side at 30px and a third element saying the same thing in
-          smaller type is the marketplace treatment the brief rules out. The
-          campaign line below names the offer instead.
+          No percentage badge here, unlike the grid: the two figures are
+          already side by side, and a third element saying the same thing in
+          smaller type is the marketplace treatment the brief rules out.
         */}
         <ProductPrice
           priceInCents={product.priceInCents}
           promotion={product.promotion}
-          className="font-heading text-3xl text-ground-accent"
+          className="font-heading text-2xl text-ground-accent lg:text-[28px]"
         />
-        <span className="text-xs tracking-[0.1em] text-ground-muted">
-          {joinTokens(
-            formatVolume(product.volumeMl),
-            formatProductType(product, dict.product.concentrations),
-          )}
-        </span>
+        {volumeLine ? (
+          <span className="text-xs text-ground-muted lg:text-[13px]">
+            {volumeLine}
+          </span>
+        ) : null}
       </div>
 
       {/*
-        The offer, stated once and quietly.
-        
-        Only when the campaign carries a label or an end date — a promotion the
-        house set without naming is a price change, and announcing "20% off" for
-        it would put words in the merchandiser's mouth. The saving is stated in
-        the visitor's own display currency, because a figure they cannot convert
-        is not a saving they can feel.
+        The offer, stated once and quietly — only when the campaign carries a
+        label, so a promotion the house set without naming stays a price change.
       */}
       {product.promotion !== null ? (
         <p
           dir="auto"
-          className="-mt-1 mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] tracking-[0.08em] text-gold-soft/70"
+          className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] tracking-[0.08em] text-ground-muted"
         >
           {product.promotion.label ? (
             <span className="border border-ground-accent/30 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent">
@@ -209,49 +266,37 @@ export default function ProductPurchase({
         </p>
       ) : null}
 
-      {/*
-       * A converted price says what the bottle costs, not what the card is
-       * charged. The visitor is told which is which, here and in the bag.
-       *
-       * The paragraph is always in the document and only its text is
-       * conditional, because the currency is not known until after hydration:
-       * a line that appears at that moment would push the whole buy block down
-       * and put a CLS penalty on the product page (AGENTS.md §12). Reserving
-       * one line costs a few pixels of extra breathing room in USD.
-       */}
-      <p className="mb-7 min-h-3.5 text-[10px] tracking-[0.05em] text-ground-muted/70">
-        {currency === BASE_CURRENCY
-          ? null
-          : interpolate(dict.currencySwitcher.conversionNote, {
-              currency: dict.currencySwitcher.names[currency],
-            })}
-      </p>
-
-      <div className="mb-6 md:mb-10">
-        <p className="mb-4 text-[10px] uppercase tracking-[0.25em] text-ground-muted">
-          {dict.product.quantity}
+      {currency === BASE_CURRENCY ? null : (
+        <p className="mt-2 text-[10px] tracking-[0.05em] text-ground-muted">
+          {interpolate(dict.currencySwitcher.conversionNote, {
+            currency: dict.currencySwitcher.names[currency],
+          })}
         </p>
+      )}
+
+      {/*
+        Quantity inline with Add to bag, Buy now full width beneath on a phone;
+        one row of three from `lg`. The stepper's visible label became the
+        group's accessible name: the − 1 + control explains itself.
+      */}
+      <div
+        ref={controlsRef}
+        className="mt-4 grid grid-cols-[auto_1fr] gap-2.5 lg:mt-6 lg:grid-cols-[auto_1fr_1fr]"
+      >
         <QuantityStepper
           value={quantity}
           max={maxQuantity}
           onChange={setQuantity}
           decreaseLabel={dict.product.decreaseQuantity}
           increaseLabel={dict.product.increaseQuantity}
+          groupLabel={dict.product.quantity}
+          className="h-12 lg:h-[50px]"
         />
-      </div>
-
-      {/*
-        Two equal columns at *every* breakpoint, phone included: these are the
-        two ways to buy the same bottle, and stacking them on a narrow screen
-        would make one of them look like an afterthought. Add to Cart keeps the
-        filled treatment so the primary action still reads as primary.
-      */}
-      <div ref={controlsRef} className="grid grid-cols-2 gap-3">
         <button
           type="button"
           disabled={isSoldOut}
           onClick={handleAddToCart}
-          className="btn btn-primary justify-center px-4 text-[10px] tracking-[0.15em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 sm:px-8 sm:text-[11px] sm:tracking-[0.2em]"
+          className="btn btn-primary h-12 justify-center rounded-md px-4 text-[11px] tracking-[0.2em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 lg:h-[50px]"
         >
           {isSoldOut ? (
             dict.product.soldOut
@@ -264,59 +309,59 @@ export default function ProductPurchase({
             dict.product.addToCart
           )}
         </button>
-
         <BuyNowButton
           productId={product.id}
           quantity={quantity}
           inventory={product.inventory}
           locale={locale}
-          className="px-4 text-[10px] tracking-[0.15em] whitespace-nowrap sm:px-8 sm:text-[11px] sm:tracking-[0.2em]"
+          className="col-span-2 h-[46px] rounded-md px-4 text-[11px] tracking-[0.2em] whitespace-nowrap lg:col-span-1 lg:h-[50px]"
         />
       </div>
 
-      <p aria-live="polite" className="mt-4 text-[11px] text-ground-muted">
+      <p
+        aria-live="polite"
+        className="mt-2.5 flex items-center gap-2 text-xs text-ground-muted lg:mt-3"
+      >
+        <span
+          aria-hidden="true"
+          className={`size-1.5 shrink-0 rounded-full ${stockTone}`}
+        />
         {stockLabel}
       </p>
 
       {/*
-        Two-up, at every width.
-
-        The row was `grid-cols-1 sm:grid-cols-3` when there were three badges.
-        A fourth ("No Blind Buy") made three-across leave one orphan on its own
-        line, and four-across is too tight for this column: on `lg:` the page is
-        two columns, so this one is half the viewport and each badge would get
-        roughly a hundred pixels for a two-line description. Two-up divides
-        evenly, keeps the descriptions on two lines at 375px, and reads as the
-        pairing the copy is ordered in.
+        The four house promises as a 2×2 card with icons. `desc` carries
+        `{amount}` on the delivery badge only; `interpolate` leaves the others
+        exactly as it found them.
       */}
-      <div className="mt-8 md:mt-12 grid grid-cols-2 gap-4 md:gap-6 border-t border-ground-border pt-7">
-        {Object.values(dict.product.trust).map((badge) => (
-          <div key={badge.title}>
-            <p className="mb-1 font-heading text-[10px] tracking-[0.1em] text-ground-accent">
-              {badge.title}
-            </p>
-            {/*
-              `desc` carries `{amount}` on the delivery badge and nothing on the
-              other three — `interpolate` leaves a string without the token
-              exactly as it found it.
-            */}
-            <p className="text-[10px] leading-relaxed text-ground-muted">
-              {interpolate(badge.desc, {
-                amount: formatPrice(deliveryTerms.freeThresholdInCents),
-              })}
-            </p>
-          </div>
+      <ul className="ground-stone mt-5 grid grid-cols-2 gap-x-3 gap-y-3.5 rounded-lg border border-ground-border bg-ground-bg p-3.5 lg:mt-6 lg:gap-3.5 lg:p-4">
+        {perks.map(({ key, Icon, badge }) => (
+          <li key={key} className="flex items-start gap-2.5">
+            <Icon
+              size={18}
+              strokeWidth={1.25}
+              aria-hidden="true"
+              className="mt-px shrink-0 text-ground-accent"
+            />
+            <div className="min-w-0">
+              <p className="text-xs leading-snug text-ground">{badge.title}</p>
+              <p className="mt-0.5 text-[11px] leading-snug text-ground-muted">
+                {interpolate(badge.desc, {
+                  amount: formatPrice(deliveryTerms.freeThresholdInCents),
+                })}
+              </p>
+            </div>
+          </li>
         ))}
-      </div>
+      </ul>
 
       <StickyPurchaseBar
         isVisible={isBarVisible}
-        productId={product.id}
         name={product.name}
         priceInCents={product.priceInCents}
         promotion={product.promotion}
+        volumeLine={formatVolume(product.volumeMl)}
         inventory={product.inventory}
-        quantity={quantity}
         onAddToCart={handleAddToCart}
         justAdded={justAdded}
         locale={locale}

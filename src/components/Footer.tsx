@@ -99,7 +99,10 @@ export default async function Footer({
   ];
 
   return (
-    <footer className="ground-charcoal border-t border-ground-border pt-12 md:pt-20">
+    <footer
+      data-site-footer
+      className="ground-charcoal border-t border-ground-border pt-12 md:pt-20"
+    >
       {/*
         `gap-0` below `md`: the groups are accordion rows there and each draws
         its own bottom rule, so a gap would break the run of dividers into

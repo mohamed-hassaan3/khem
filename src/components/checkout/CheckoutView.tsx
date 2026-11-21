@@ -47,8 +47,14 @@ import { placeCustomerOrder } from "@/src/actions/checkout";
 import { previewDiscount } from "@/src/actions/discounts";
 import { previewCartOffer } from "@/src/actions/offers";
 import { sameAddress } from "@/src/lib/address-match";
-import { cartTotalInCents, clampQuantity, parseBuyNow } from "@/src/lib/cart";
+import {
+  cartTotalInCents,
+  clampQuantity,
+  parseBuyNow,
+  shippingInCents,
+} from "@/src/lib/cart";
 import { useDeliveryTerms } from "@/src/providers/delivery-provider";
+import { useSiteFooterInView } from "@/src/hooks/use-site-footer-in-view";
 import { discountRefusalMessage } from "@/src/lib/discount-message";
 import { cartPricing } from "@/src/lib/pricing";
 import { formatPrice } from "@/src/lib/format";
@@ -68,6 +74,10 @@ import type { DiscountPreview } from "@/src/types/discount";
 import type { OfferPreview } from "@/src/types/offer";
 
 import CardPaymentForm from "./CardPaymentForm";
+import CheckoutDisclosure from "./CheckoutDisclosure";
+import CheckoutProgress from "./CheckoutProgress";
+import CheckoutSummaryBar from "./CheckoutSummaryBar";
+import OrderTotals, { reviewTotalInCents } from "./OrderTotals";
 import ContactStep from "./ContactStep";
 import DeliveryStep, { type DeliveryField } from "./DeliveryStep";
 import CreditStep, { type SpendableCredit } from "./CreditStep";
@@ -167,6 +177,8 @@ export default function CheckoutView({
   const dict = useDictionary();
   // The house's delivery terms, read once in the layout.
   const deliveryTerms = useDeliveryTerms();
+  // The phone's sticky action bar steps aside while the footer is on screen.
+  const footerInView = useSiteFooterInView();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { lines, isHydrated, clear } = useCart();
@@ -581,6 +593,26 @@ export default function CheckoutView({
     setAddress((current) => ({ ...fieldsFrom(saved), note: current.note }));
   }
 
+  /*
+   * "+ New" on the saved-address row: blank the address fields so a different
+   * one can be typed. Client state only; the country stays Egypt and the note
+   * is kept. Nothing is saved or deleted.
+   */
+  function startNewAddress() {
+    for (const field of ["line1", "line2", "city", "state", "postalCode"]) {
+      clearFieldError(field);
+    }
+    setAddress((current) => ({
+      ...current,
+      line1: "",
+      line2: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      country: SHIPPING_COUNTRY,
+    }));
+  }
+
   /** Resolve a server-sent key against the dictionary; never render the key. */
   function messageFor(key: string): string {
     const errors = dict.checkout.errors as Record<string, string>;
@@ -846,24 +878,61 @@ export default function CheckoutView({
 
   const awaitingPayment = placedOrder !== null;
 
+  /*
+   * Display figures for the redesigned phone checkout (Stage 2,
+   * `prompts/storefront-redesign-stage-2.md` D10). The same arithmetic the
+   * review sidebar has always printed (`reviewTotalInCents`), in the visitor's
+   * display currency. Nothing here is submitted: the action reprices the order
+   * on the server, and the card button keeps its base-currency amount.
+   */
+  const adjustments = {
+    creditAppliedInCents,
+    discountInCents,
+    offerInCents,
+    offerLabel: offer?.label ?? null,
+    pointsInCents,
+  };
+  const displayTotal = formatDisplayPrice(
+    reviewTotalInCents(pricing, deliveryTerms, adjustments),
+  );
+  const shippingDisplay = shippingInCents(subtotalInCents, deliveryTerms);
+  const itemCount = resolved.reduce((sum, line) => sum + line.quantity, 0);
+
   return (
     <div className="ground-ivory min-h-screen">
-      <PageHeader
-        eyebrow={dict.checkout.eyebrow}
-        heading={dict.checkout.heading}
-      />
+      {/* The page heading stays for assistive tech; on a phone the task header and the summary bar are the top of the page. */}
+      <div className="sr-only lg:not-sr-only">
+        <PageHeader
+          eyebrow={dict.checkout.eyebrow}
+          heading={dict.checkout.heading}
+        />
+      </div>
+
+      <CheckoutSummaryBar
+        itemCount={itemCount}
+        total={displayTotal}
+        className="lg:hidden"
+      >
+        <OrderReview
+          lines={resolved}
+          pricing={pricing}
+          variant="lines"
+          {...adjustments}
+        />
+      </CheckoutSummaryBar>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px]">
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="px-4 py-10 sm:px-8 lg:px-14 lg:py-12 xl:px-20"
+          className="px-4 pb-28 pt-3 sm:px-8 lg:px-14 lg:py-12 xl:px-20"
         >
-          {/*
-           * Frozen once an order exists. A `fieldset[disabled]` rather than a
-           * per-field prop: it is one attribute, it covers anything added
-           * later, and it is what assistive technology already understands.
-           */}
+          <CheckoutProgress
+            contactComplete={contactComplete}
+            deliveryComplete={deliveryComplete}
+            className="lg:hidden"
+          />
+
           <fieldset disabled={awaitingPayment} className="contents">
             <ContactStep
               name={customerName}
@@ -880,89 +949,26 @@ export default function CheckoutView({
               onChange={handleDeliveryChange}
               errors={fieldErrors}
               complete={deliveryComplete}
-              // Detection pre-fills the field and says so underneath; it never
-              // takes it away. A visitor behind a VPN, or one the edge places
-              // in the wrong country, has to be able to correct it.
               countryDetected={detected.detected && savedAddresses.length === 0}
               shipsHere={shipsHere}
               savedAddresses={savedAddresses}
               onApplySaved={applySavedAddress}
+              onNewAddress={startNewAddress}
+              deliveryLine={
+                shippingDisplay === 0
+                  ? dict.checkout.review.complimentary
+                  : formatDisplayPrice(shippingDisplay)
+              }
+              deliveryIsFree={shippingDisplay === 0}
               canSave={canSave}
               saveToProfile={saveToProfile}
               onSaveToProfileChange={setSaveToProfile}
             />
           </fieldset>
 
-          <DiscountStep
-            code={discountCode}
-            onChange={(next) => {
-              if (awaitingPayment) return;
-              setDiscountCode(next);
-              // Editing the code retracts the refusal it earned; the customer
-              // is already acting on it.
-              setDiscountRefusal(null);
-            }}
-            disabledByCredit={creditId !== ""}
-            onApply={applyDiscount}
-            onRemove={removeDiscount}
-            pending={checkingDiscount}
-            applied={activeDiscount}
-            refusal={discountRefusal}
-            stale={discountStale}
-            vouchers={vouchers}
-            email={customerEmail}
-            locale={locale}
-          />
-
-          {rewards ? (
-            <PointsStep
-              wallet={rewards}
-              points={spentPoints}
-              onChange={(next) => {
-                // Inert once a card order exists: the row already carries the
-                // redemption it was written with, and the intent charges that
-                // row.
-                if (awaitingPayment) return;
-                setPointsToRedeem(next);
-              }}
-              remainingInCents={remainingAfterOfferAndCode}
-              disabledReason={pointsBlockedBy}
-            />
-          ) : null}
-
-          <CreditStep
-            credits={credits}
-            selectedId={creditId}
-            onSelect={(next) => {
-              // Inert once a card order exists: the row already carries the
-              // credit it was written with, and the intent charges that row.
-              if (awaitingPayment) return;
-              setCreditId(next);
-              // The two cannot combine, and the database says so. Clearing the
-              // code here means the customer is never told that after the fact.
-              // The applied estimate goes with it — its signature carries the
-              // credit selection, so it would stop counting anyway; dropping it
-              // outright is what keeps the field's state honest.
-              if (next !== "") {
-                setDiscountCode("");
-                setApplied(null);
-                setDiscountRefusal(null);
-                // Same reasoning, one instrument along: unless the house has
-                // permitted the pair, `place_order()` refuses an order carrying
-                // both. Clearing it here means the customer is never told that
-                // after the fact.
-                if (!pointsStacking.withCredit) setPointsToRedeem(0);
-              }
-            }}
-            subtotalInCents={subtotalInCents}
-            locale={locale}
-          />
-
           <PaymentStep
             method={method}
             onMethodChange={(next) => {
-              // Changing method after an order exists would mean the row says
-              // CARD while the visitor pays cash. The panels are inert then.
               if (!awaitingPayment) setMethod(next);
             }}
             cardAvailable={cardAvailable}
@@ -984,15 +990,92 @@ export default function CheckoutView({
           </PaymentStep>
 
           {/*
-           * Honeypot. Off-screen rather than `hidden`, which some bots skip.
-           *
-           * `h-0 w-0 overflow-hidden` is load-bearing, not belt-and-braces —
-           * the same combination `ContactForm` uses. Without it the box keeps
-           * its real size at `left:-9999px`, and in RTL that negative offset is
-           * on the *inline-start* side, so the browser makes it scrollable:
-           * `/ar/checkout` grew a 10,000px horizontal scroll. Collapsing the
-           * box to zero leaves nothing to scroll to.
-           */}
+            The optional reductions, each behind a quiet row under the payment
+            step. They open by themselves when something is applied, chosen,
+            refused or stale, so nothing that affects the total is ever hidden.
+            Their logic and props are exactly as before.
+          */}
+          <div className="divide-y divide-ground-border border-y border-ground-border">
+            <CheckoutDisclosure
+              title={dict.checkout.discount.heading}
+              forceOpen={
+                activeDiscount !== null ||
+                discountRefusal !== null ||
+                discountStale ||
+                discountCode !== "" ||
+                creditId !== ""
+              }
+            >
+              <DiscountStep
+                embedded
+                code={discountCode}
+                onChange={(next) => {
+                  if (awaitingPayment) return;
+                  setDiscountCode(next);
+                  setDiscountRefusal(null);
+                }}
+                disabledByCredit={creditId !== ""}
+                onApply={applyDiscount}
+                onRemove={removeDiscount}
+                pending={checkingDiscount}
+                applied={activeDiscount}
+                refusal={discountRefusal}
+                stale={discountStale}
+                vouchers={vouchers}
+                email={customerEmail}
+                locale={locale}
+              />
+            </CheckoutDisclosure>
+
+            {rewards ? (
+              <CheckoutDisclosure
+                title={dict.checkout.points.heading}
+                forceOpen={spentPoints > 0}
+              >
+                <PointsStep
+                  embedded
+                  wallet={rewards}
+                  points={spentPoints}
+                  onChange={(next) => {
+                    if (awaitingPayment) return;
+                    setPointsToRedeem(next);
+                  }}
+                  remainingInCents={remainingAfterOfferAndCode}
+                  disabledReason={pointsBlockedBy}
+                />
+              </CheckoutDisclosure>
+            ) : null}
+
+            {credits.length > 0 ? (
+              <CheckoutDisclosure
+                title={dict.checkout.credit.heading}
+                forceOpen={creditId !== ""}
+              >
+                <CreditStep
+                  embedded
+                  credits={credits}
+                  selectedId={creditId}
+                  onSelect={(next) => {
+                    if (awaitingPayment) return;
+                    setCreditId(next);
+                    if (next !== "") {
+                      setDiscountCode("");
+                      setApplied(null);
+                      setDiscountRefusal(null);
+                      if (!pointsStacking.withCredit) setPointsToRedeem(0);
+                    }
+                  }}
+                  subtotalInCents={subtotalInCents}
+                  locale={locale}
+                />
+              </CheckoutDisclosure>
+            ) : null}
+          </div>
+
+          {/*
+            Honeypot. Off-screen and out of the tab order; only a bot fills it,
+            and the action drops a submission that has.
+          */}
           <div
             aria-hidden="true"
             className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
@@ -1009,11 +1092,16 @@ export default function CheckoutView({
             />
           </div>
 
+          {/* The totals once more, at the point of decision (phones; the sidebar does this from `lg`). */}
+          <div className="mt-6 rounded-lg border border-ground-border p-4 lg:hidden">
+            <OrderTotals pricing={pricing} {...adjustments} />
+          </div>
+
           <div ref={errorRef}>
             {formError ? (
               <div
                 role="alert"
-                className="mt-8 border border-danger/40 bg-danger/5 px-5 py-4"
+                className="mt-6 rounded-md border border-danger/40 bg-danger/5 px-5 py-4 lg:mt-8"
               >
                 <p className="text-[12px] tracking-wide text-danger">{formError}</p>
                 {errorDetail ? (
@@ -1025,64 +1113,57 @@ export default function CheckoutView({
             ) : null}
           </div>
 
-          {/*
-           * The card branch grows its own submit inside the Elements form —
-           * that button has to live where `useStripe()` is reachable. So this
-           * one is for cash, and for the moment before a card order exists.
-           */}
-          {/*
-           * Says why the button below is disabled. A greyed-out button with
-           * the reason three screens up is a button that looks broken to
-           * anyone who scrolled past it.
-           */}
           {!awaitingPayment && !shipsHere ? (
             <p
               role="note"
-              className="mt-6 border border-ground-accent/30 bg-gold/5 px-5 py-3 text-[12px] leading-relaxed text-ground-muted"
+              className="mt-6 rounded-md border border-ground-accent/30 bg-gold/5 px-5 py-3 text-[12px] leading-relaxed text-ground-muted"
             >
               {dict.checkout.errors.outsideEgypt}
             </p>
           ) : null}
 
+          {/*
+            The submit. On a phone it rides in a bar fixed to the bottom of the
+            screen (still inside this <form>, still type="submit"), and steps
+            aside while the footer is on screen. From `lg` it sits in the flow
+            as before. Hidden while a card payment is being taken, where
+            Stripe's own form has the button.
+          */}
           {!awaitingPayment ? (
-            <button
-              type="submit"
-              disabled={isPending || !shipsHere}
-              className="btn btn-primary mt-6 md:mt-10 w-full justify-center disabled:cursor-not-allowed disabled:opacity-45"
+            <div
+              className={[
+                "ground-ivory z-40 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:border-t max-lg:border-ground-border max-lg:bg-ground-bg/97 max-lg:px-4 max-lg:pt-2.5 max-lg:pb-[max(0.625rem,env(safe-area-inset-bottom))] max-lg:backdrop-blur-sm",
+                "transition-transform duration-500 ease-luxury-bezier motion-reduce:transition-none lg:mt-10",
+                footerInView ? "max-lg:translate-y-full" : "translate-y-0",
+              ].join(" ")}
             >
-              {isPending
-                ? dict.checkout.submit.working
-                : method === "CASH"
-                  ? dict.checkout.submit.cash
-                  : interpolate(dict.checkout.submit.card, {
-                      amount: formatPrice(totalInCents),
-                    })}
-            </button>
+              <button
+                type="submit"
+                disabled={isPending || !shipsHere}
+                className="btn btn-primary h-13 w-full justify-center rounded-md disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                {isPending
+                  ? dict.checkout.submit.working
+                  : method === "CASH"
+                    ? interpolate(dict.checkout.submit.cashTotal, {
+                        amount: displayTotal,
+                      })
+                    : interpolate(dict.checkout.submit.card, {
+                        amount: formatPrice(totalInCents),
+                      })}
+              </button>
+            </div>
           ) : null}
         </form>
 
-        <OrderReview
-          lines={resolved}
-          pricing={pricing}
-          creditAppliedInCents={creditAppliedInCents}
-          discountInCents={discountInCents}
-          offerInCents={offerInCents}
-          offerLabel={offer?.label ?? null}
-          pointsInCents={pointsInCents}
-        />
+        <div className="hidden lg:block">
+          <OrderReview lines={resolved} pricing={pricing} {...adjustments} />
+        </div>
       </div>
     </div>
   );
 }
 
-/**
- * Absolute URL Stripe returns to after an off-site authentication step.
- *
- * Absolute because `return_url` leaves our origin and comes back; built from
- * `window.location.origin` rather than an env var so a preview deployment
- * returns to itself. Only reached in the browser, where `window` exists.
- */
-/** A saved address as the delivery fields hold it, minus the note. */
 function fieldsFrom(
   saved: CheckoutSavedAddress,
 ): Omit<Record<DeliveryField, string>, "note"> {

@@ -77,6 +77,12 @@ export const en = {
     signOut: "Sign Out",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+    /** Phone header on a product page: the chevron back to its collection. */
+    back: "Back to {name}",
+    /** The checkout's task header. */
+    checkoutLabel: "Checkout",
+    backToBag: "Back to your bag",
+    secure: "Secure",
     featuredProduct: "NOIR",
     featuredCollectionAlt: "Signature Collection",
     fromTheJournal: "From the Journal",
@@ -220,6 +226,8 @@ export const en = {
     hero: {
       tagline: "Essence of Heritage",
       exploreCollections: "Explore Collections",
+      /** The hero's second way in: the AI scent search. */
+      findScent: "Find your scent",
       ourStory: "Our Story",
       scroll: "Scroll",
       /*
@@ -245,6 +253,13 @@ export const en = {
       eyebrow: "Our Collections",
       heading: "Worlds of Scent",
       ordinal: "Collection {ordinal}",
+      /** Under each collection in the phone rail. */
+      pieces: "{count} pieces",
+      piecesOne: "1 piece",
+      /** Short "see all" link on the phone band headers. */
+      all: "All",
+      /** The scent-family chips under the collections. */
+      byScent: "Shop by scent",
       /* Names the slider's scroll region and its two pointer controls. */
       sliderLabel: "Our collections",
       previous: "Previous collection",
@@ -252,11 +267,11 @@ export const en = {
     },
     essences: {
       /* Names the rail's scroll region and its two pointer controls. */
-      sliderLabel: "Signature fragrances",
+      sliderLabel: "Best sellers",
       previous: "Previous fragrance",
       next: "Next fragrance",
-      eyebrow: "The Essences",
-      heading: "Signature Fragrances",
+      eyebrow: "Most Loved",
+      heading: "Best Sellers",
       viewAll: "View All",
       empty: "New fragrances are being prepared. Please return shortly.",
     },
@@ -499,7 +514,13 @@ export const en = {
         },
       },
     },
-    sortBy: "Sort By",
+    sortBy: "Sort:",
+    /** The toolbar's count, under the chips. */
+    resultCount: "{count} results",
+    resultCountOne: "1 result",
+    /** "Show more" progress under the grid. */
+    showing: "Showing {shown} of {total}",
+    showMore: "Show more",
     sortOptions: {
       featured: "Featured",
       priceAsc: "Price: Low to High",
@@ -834,11 +855,17 @@ export const en = {
     quantity: "Quantity",
     decreaseQuantity: "Decrease quantity",
     increaseQuantity: "Increase quantity",
-    addToCart: "Add to Cart",
+    addToCart: "Add to Bag",
     buyNow: "Buy Now",
     added: "Added to Cart",
     /* Accessible name for the bar that follows the visitor down the page. */
     stickyBar: "Purchase {name}",
+    /** The rating beside the product title, read aloud. */
+    ratingLink: "Rated {rating} out of 5 from {count} reviews. Read the reviews",
+    /** Accordion title when the product has exactly one key ingredient. */
+    keyIngredient: "Key ingredient · {name}",
+    deliveryReturns: "Delivery & returns",
+    deliveryReturnsLink: "Read the returns policy",
     soldOut: "Sold Out",
     inStock: "In stock. Ships within 48 hours",
     lowStock: "Only {count} remaining",
@@ -949,6 +976,8 @@ export const en = {
      */
     comments: {
       eyebrow: "In Their Words",
+      writeReview: "Write a review",
+      closeForm: "Close",
       heading: "Reflections",
       postingAs: "Writing as {name}",
       guest: "Guest",
@@ -1264,11 +1293,15 @@ export const en = {
      * does not.
      */
     drawer: {
-      heading: "Shopping Bag",
+      heading: "Your bag",
       close: "Close shopping bag",
       /** Leads out of the panel to the full `/cart` page. */
       viewBag: "View Bag",
       error: "We could not load your bag just now.",
+      /** The delivery strip once the threshold is met: lead + gold perk. */
+      unlockedLead: "You've unlocked",
+      unlockedPerk: "complimentary delivery",
+      checkoutTotal: "Checkout · {amount}",
     },
     empty: {
       heading: "Your Cart is Empty",
@@ -1295,6 +1328,8 @@ export const en = {
     eyebrow: "Final Step",
     heading: "Checkout",
 
+    /** The phone checkout's step trail, read aloud. */
+    progressLabel: "Checkout progress",
     steps: {
       contact: "Contact",
       delivery: "Delivery",
@@ -1342,6 +1377,11 @@ export const en = {
       notePlaceholder: "Optional: a gate code, a preferred hour",
       /** Above the chips, when a customer has two or more saved addresses. */
       savedHeading: "Saved Addresses",
+      /** Beside the first saved address, which is the default. */
+      savedDefault: "Default",
+      newAddress: "+ New",
+      noteToggle: "Landmark or delivery note (optional)",
+      deliveryRow: "Delivery",
       /** Under the prefilled fields. Says out loud that editing is safe. */
       savedNotice:
         "Filled in from your saved addresses. Changes here apply to this order only.",
@@ -1497,6 +1537,8 @@ export const en = {
 
     submit: {
       cash: "Place Order",
+      /** The phone's sticky action, which carries the total. */
+      cashTotal: "Place order · {amount}",
       card: "Pay {amount}",
       working: "Securing your order",
       /** Between placing the order and the card form appearing. */

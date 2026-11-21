@@ -1,3 +1,5 @@
+> **Superseded** by `prompts/storefront-redesign-stage-2.md` (built 2026-11-21 from the approved mock). Kept for its audit notes.
+
 # Stage 2 — Storefront: mobile density & usability
 
 Part of `prompts/mobile-ux-audit-and-plan.md` (findings S1–S11). Stage 1

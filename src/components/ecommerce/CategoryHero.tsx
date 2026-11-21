@@ -57,7 +57,7 @@ export default function CategoryHero({
    * constant across widths is what makes one banner rather than three.
    */
   return (
-    <section className="ground-ivory relative flex h-[80vh] min-h-150 items-end overflow-hidden bg-sand md:h-[70vh] md:min-h-140">
+    <section className="ground-ivory relative flex min-h-64 items-end overflow-hidden bg-sand md:h-[70vh] md:min-h-140">
       <Image
         src={imageUrl}
         alt={imageAlt}
@@ -87,29 +87,29 @@ export default function CategoryHero({
         className="banner-scrim banner-scrim-base [--scrim-mid:32%] [--scrim-end:72%] md:[--scrim-mid:46%] md:[--scrim-end:90%]"
       />
 
-      <div className="relative z-1 w-full px-4 pb-14 md:px-20 md:pb-18">
+      <div className="relative z-1 w-full px-4 pb-5 pt-20 md:px-20 md:pb-18 md:pt-0">
         <div className="mx-auto max-w-350">
           <div className="max-w-2xl">
-            <p className="eyebrow mb-5">{eyebrow}</p>
+            <p className="eyebrow mb-2 md:mb-5">{eyebrow}</p>
 
-            <h1 className="font-heading text-4xl font-normal leading-tight text-ground sm:text-6xl md:text-7xl">
+            <h1 className="font-heading text-[30px] font-normal leading-tight text-ground sm:text-5xl md:text-7xl">
               {titleLead}
               {titleAccent ? (
                 <>
-                  <br />
-                  <span className="text-ground-accent">{titleAccent}</span>
+                  <br className="hidden md:block" />
+                  <span className="text-ground-accent max-md:ms-2">{titleAccent}</span>
                 </>
               ) : null}
             </h1>
 
-            <div className="gold-line my-7" />
+            <div className="gold-line my-7 hidden md:block" />
 
-            <p className="max-w-lg text-[15px] leading-loose text-ground-muted">
+            <p className="mt-1.5 line-clamp-2 max-w-lg text-xs leading-normal text-ground-muted md:mt-0 md:line-clamp-none md:text-[15px] md:leading-loose">
               {description}
             </p>
 
             {note ? (
-              <p className="mt-9 font-heading text-[11px] tracking-[0.2em] text-ground-accent">
+              <p className="mt-2 font-heading text-[10px] tracking-[0.2em] text-ground-accent md:mt-9 md:text-[11px]">
                 {note}
               </p>
             ) : null}

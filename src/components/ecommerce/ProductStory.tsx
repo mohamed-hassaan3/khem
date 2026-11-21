@@ -12,14 +12,20 @@
 export interface ProductStoryProps {
   story: string;
   heading: string;
+  /** False inside a `<ProductAccordion>`, whose summary is the heading. */
+  showHeading?: boolean;
 }
 
-export default function ProductStory({ story, heading }: ProductStoryProps) {
+export default function ProductStory({
+  story,
+  heading,
+  showHeading = true,
+}: ProductStoryProps) {
   const paragraphs = story.split("\n\n");
 
   return (
     <section>
-      <h2 className="eyebrow mb-5">{heading}</h2>
+      {showHeading ? <h2 className="eyebrow mb-5">{heading}</h2> : null}
 
       {/* The story is translated. `dir="auto"` rather than a fixed
           direction, because an untranslated product falls back to the English
@@ -28,7 +34,7 @@ export default function ProductStory({ story, heading }: ProductStoryProps) {
         {paragraphs.map((paragraph) => (
           <p
             key={paragraph.slice(0, 48)}
-            className="mb-4 text-sm leading-loose text-ground-muted last:mb-0"
+            className="mb-3 text-sm leading-relaxed text-ground-muted last:mb-0 md:leading-loose"
           >
             {paragraph}
           </p>

@@ -62,11 +62,11 @@ export default function PaymentStep({
   return (
     <CheckoutSection index="03" title={dict.checkout.steps.payment}>
       <fieldset className="sm:col-span-2">
-        <legend className="mb-6 font-heading text-[13px] tracking-[0.08em] text-ground-muted">
+        <legend className="mb-3 text-xs text-ground-muted lg:mb-6 lg:font-heading lg:text-[13px] lg:tracking-[0.08em]">
           {copy.heading}
         </legend>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
           {cardAvailable ? (
             <MethodPanel
               id="pay-card"
@@ -81,7 +81,7 @@ export default function PaymentStep({
             // Stated rather than silently absent. A checkout that offers one
             // option with no explanation looks broken; one that says the card
             // rail is down looks maintained.
-            <p className="flex items-center border border-ground-border bg-stone px-6 py-7 text-[12px] leading-relaxed text-ground-muted/70">
+            <p className="flex items-center rounded-lg border border-ground-border px-3.5 py-3.5 text-xs leading-relaxed text-ground-muted lg:p-5">
               {copy.cardUnavailable}
             </p>
           )}
@@ -100,7 +100,7 @@ export default function PaymentStep({
 
       <div className="sm:col-span-2">
         {method === "CASH" ? (
-          <p className="border-s-2 border-ground-accent/30 ps-4 text-[12px] leading-relaxed text-gold-soft/70">
+          <p className="border-s-2 border-ground-accent/40 ps-3 text-xs leading-relaxed text-ground-muted">
             {copy.cashNotice}
           </p>
         ) : (
@@ -162,12 +162,14 @@ function MethodPanel({
     <label
       htmlFor={id}
       className={
-        "group relative flex cursor-pointer flex-col gap-3 border px-6 py-7 " +
-        "transition-[border-color,box-shadow] duration-500 ease-out " +
-        "has-[:focus-visible]:border-gold has-[:focus-visible]:shadow-[0_0_0_1px_rgba(200,169,106,0.5)] " +
+        // Stage 2: a radio card. Selected = gold-deep border with an inset
+        // ring on stone; the native radio stays in the tree for keyboards.
+        "group relative grid cursor-pointer grid-cols-[auto_1fr] items-start gap-x-3 gap-y-1 rounded-lg border p-3.5 lg:p-5 " +
+        "transition-[border-color,box-shadow,background-color] duration-500 ease-luxury-bezier " +
+        "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ground-accent " +
         (checked
-          ? "border-gold bg-ivory shadow-2"
-          : "border-ground-border bg-stone hover:border-ground-accent/40")
+          ? "border-ground-accent bg-stone shadow-[inset_0_0_0_1px_var(--color-gold-deep)]"
+          : "border-ground-border bg-white hover:border-ground-accent/40")
       }
     >
       <input
@@ -185,18 +187,18 @@ function MethodPanel({
 
       <span
         className={
-          "transition-colors duration-500 ease-out " +
-          (checked ? "text-ground-accent" : "text-ground-muted group-hover:text-ground-accent/70")
+          "row-span-2 mt-0.5 transition-colors duration-500 ease-out " +
+          (checked ? "text-ground-accent" : "text-ground-muted group-hover:text-ground-accent")
         }
       >
         {icon}
       </span>
 
-      <span className="font-heading text-[13px] tracking-[0.1em] text-ground">
+      <span className="font-heading text-sm tracking-[0.04em] text-ground">
         {title}
       </span>
 
-      <span className="text-[11px] leading-relaxed text-ground-muted">{body}</span>
+      <span className="text-xs leading-relaxed text-ground-muted">{body}</span>
     </label>
   );
 }

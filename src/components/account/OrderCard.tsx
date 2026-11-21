@@ -1,3 +1,4 @@
+import { ARABIC_INTL_LOCALE } from "@/src/lib/format";
 import { ChevronDown, Truck } from "lucide-react";
 
 import CopyButton from "@/src/components/account/CopyButton";
@@ -33,7 +34,7 @@ export interface OrderCardProps {
 }
 
 export function formatOrderDate(iso: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-GB", {
+  return new Intl.DateTimeFormat(locale === "ar" ? ARABIC_INTL_LOCALE : "en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",

@@ -91,9 +91,9 @@ export default function NewsletterForm() {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="relative flex flex-col gap-3 sm:flex-row"
+      className="relative flex flex-row gap-2 sm:gap-3"
     >
-      <div className="flex-1 text-start">
+      <div className="min-w-0 flex-1 text-start">
         <label htmlFor="newsletter-email" className="sr-only">
           {dict.forms.email}
         </label>
@@ -111,7 +111,7 @@ export default function NewsletterForm() {
           placeholder={dict.forms.newsletterPlaceholder}
           aria-invalid={error !== null}
           aria-describedby={error ? "newsletter-email-error" : undefined}
-          className="field"
+          className="field min-h-[46px] bg-white"
         />
         {error ? (
           <p
@@ -155,7 +155,7 @@ export default function NewsletterForm() {
           changes, and `h-fit` still keeps the button from stretching when the
           validation message appears under the input and grows the row.
         */
-        className="h-fit cursor-pointer border border-transparent bg-gold px-8 py-3 font-heading text-xs font-medium uppercase leading-6 tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-[46px] shrink-0 cursor-pointer rounded-md border border-transparent bg-ink px-4 font-heading text-[11px] font-medium uppercase tracking-[0.18em] text-ivory transition-colors duration-300 ease-out hover:bg-gold-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent disabled:cursor-not-allowed disabled:opacity-50 sm:px-8"
       >
         {isPending ? dict.forms.sending : dict.forms.subscribe}
       </button>

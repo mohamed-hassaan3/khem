@@ -1,4 +1,3 @@
-import Reveal from "@/src/components/animation/Reveal";
 import CommentForm from "@/src/components/ecommerce/CommentForm";
 import CommentRow from "@/src/components/ecommerce/CommentRow";
 import RatingSummary from "@/src/components/ecommerce/RatingSummary";
@@ -52,43 +51,27 @@ export default async function ProductComments({
 
   const copy = dict.product.comments;
 
+  /*
+   * `id="comments"` is a real destination: the day-after feedback email links
+   * here, and so does the rating beside the product title.
+   */
   return (
-    /*
-     * `id="comments"` is a real destination, not decoration: the day-after
-     * feedback email links one line per purchased item straight here, and the
-     * scroll margin is what keeps the fixed header from sitting over the
-     * heading when the browser jumps.
-     */
     <section
       id="comments"
-      className="scroll-mt-24 border-t border-ground-border px-4 py-14 md:scroll-mt-32 md:px-20 md:py-32"
+      className="scroll-mt-20 px-4 pt-8 md:scroll-mt-32 md:px-10 md:pt-16 lg:px-12"
     >
       <div className="mx-auto max-w-200">
-        <Reveal className="mb-8 md:mb-12">
-          <p className="eyebrow mb-4">{copy.eyebrow}</p>
-          <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl">
-            {copy.heading}
-          </h2>
-        </Reveal>
-
-        <RatingSummary summary={ratings} locale={locale} copy={copy} />
-
+        <h2 className="eyebrow mb-3">{copy.eyebrow}</h2>
         <CommentForm
           slug={slug}
           locale={locale}
           guestLabel={copy.guest}
-          /*
-           * The ids already rendered below. The action revalidates this path,
-           * so a comment the visitor just posted normally arrives in the
-           * refreshed server list — and the form drops its own copy of any id
-           * it finds here. That is what keeps "instant feedback" from becoming
-           * "the same comment twice".
-           */
           storedIds={comments.map((comment) => comment.id)}
+          summary={<RatingSummary summary={ratings} locale={locale} copy={copy} />}
         />
 
         {comments.length > 0 ? (
-          <div className="mt-8 md:mt-14">
+          <div className="mt-4 flex flex-col gap-3">
             {comments.map((comment) => (
               <CommentRow
                 key={comment.id}

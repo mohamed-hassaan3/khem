@@ -88,8 +88,11 @@ export default function PointsStep({
   onChange,
   remainingInCents,
   disabledReason,
+  embedded = false,
 }: {
   wallet: PointsWallet;
+  /** Rendered inside a `<CheckoutDisclosure>` (Stage 2): no own heading or margin. */
+  embedded?: boolean;
   /** How many points the customer has chosen to spend. */
   points: number;
   onChange: (points: number) => void;
@@ -119,8 +122,15 @@ export default function PointsStep({
   const value = pointsValueInCents(chosen, wallet);
 
   return (
-    <section className="mt-12">
-      <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ground">
+    <section className={embedded ? "" : "mt-12"}>
+      {/* Inside a <CheckoutDisclosure> the row's summary is the visible title. */}
+      <h2
+        className={
+          embedded
+            ? "sr-only"
+            : "font-heading text-lg font-normal tracking-[0.1em] text-ground"
+        }
+      >
         {copy.heading}
       </h2>
       <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-ground-muted">

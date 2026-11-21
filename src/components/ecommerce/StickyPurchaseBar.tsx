@@ -2,7 +2,6 @@
 
 import { Check } from "lucide-react";
 
-import BuyNowButton from "@/src/components/ecommerce/BuyNowButton";
 import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import type { Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
@@ -36,34 +35,38 @@ import type { ProductPromotion } from "@/src/types/marketing";
 
 export interface StickyPurchaseBarProps {
   isVisible: boolean;
-  productId: string;
   name: string;
-  /** The list price, always. */
   priceInCents: number;
-  /** The running campaign, if any — the bar prints the same pair the block does. */
   promotion: ProductPromotion | null;
+  /** `formatVolume()` output, or null for products not sold by volume. */
+  volumeLine: string | null;
   inventory: number;
-  quantity: number;
   onAddToCart: () => void;
-  /** Mirrors the buy block's transient confirmation, so both read the same. */
   justAdded: boolean;
   locale: Locale;
 }
 
+/**
+ * The buy bar that follows the visitor down a product page.
+ *
+ * Stage 2 (`prompts/storefront-redesign-stage-2.md` D7): a full-width bar on
+ * the page's own ground, name and price at the start, one action at the end.
+ * Buy now stays in the buy block; two buttons in a 390px bar crowded both.
+ * Visibility is decided by `<ProductPurchase>` (controls scrolled away, footer
+ * not on screen); the bar only animates in and out.
+ */
 export default function StickyPurchaseBar({
   isVisible,
-  productId,
   name,
   priceInCents,
   promotion,
+  volumeLine,
   inventory,
-  quantity,
   onAddToCart,
   justAdded,
   locale,
 }: StickyPurchaseBarProps) {
   const dict = useDictionary();
-
   const isSoldOut = inventory === 0;
 
   return (
@@ -72,10 +75,9 @@ export default function StickyPurchaseBar({
       inert={!isVisible}
       aria-label={interpolate(dict.product.stickyBar, { name })}
       className={[
-        "fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-4",
-        "pb-[max(1rem,env(safe-area-inset-bottom))]",
-        // Sharp corners and a dark glass panel — §3.2. No spring, no bounce:
-        // one translate and one fade on the luxury bezier.
+        "ground-ivory fixed inset-x-0 bottom-0 z-40 border-t border-ground-border bg-ground-bg/97 backdrop-blur-sm",
+        "shadow-[0_-8px_20px_rgba(13,13,13,0.06)]",
+        "pb-[max(0.625rem,env(safe-area-inset-bottom))]",
         "transition-[transform,opacity] duration-500 ease-luxury-bezier",
         "motion-reduce:transition-opacity motion-reduce:duration-300",
         isVisible
@@ -83,61 +85,40 @@ export default function StickyPurchaseBar({
           : "pointer-events-none translate-y-full opacity-0 motion-reduce:translate-y-0",
       ].join(" ")}
     >
-      <div className="mx-auto flex w-full max-w-3xl items-center gap-4 border border-border-gold/40 bg-ground-bg px-4 py-3 shadow-2 sm:gap-6 sm:px-6">
-        {/*
-          The identity half. Hidden below `sm`, where the two controls need the
-          whole width to sit side by side — the visitor is on that product's
-          page and does not need to be told which one it is.
-        */}
-        <div className="hidden min-w-0 flex-1 sm:block" {...ltrIsland(locale)}>
-          <p className="truncate font-heading text-[13px] tracking-wide text-ground">
+      <div className="mx-auto flex max-w-3xl items-center gap-3 px-3 pt-2.5 sm:gap-6 sm:px-6">
+        <div className="min-w-0 flex-1" {...ltrIsland(locale)}>
+          <p className="truncate font-heading text-[13px] tracking-wide text-ground rtl:text-right">
             {name}
           </p>
-          <ProductPrice
-            priceInCents={priceInCents}
-            promotion={promotion}
-            className="mt-0.5 text-[12px] text-ground-accent"
-          />
+          <p className="mt-0.5 flex items-baseline gap-1.5 text-xs text-ground-accent rtl:justify-end">
+            <ProductPrice
+              priceInCents={priceInCents}
+              promotion={promotion}
+              className="text-xs text-ground-accent"
+            />
+            {volumeLine ? (
+              <span className="text-ground-muted">· {volumeLine}</span>
+            ) : null}
+          </p>
         </div>
 
-        {/* Below `sm` the price stands alone, ahead of the controls. */}
-        <div className="text-[13px] text-ground-accent sm:hidden">
-          <ProductPrice
-            priceInCents={priceInCents}
-            promotion={promotion}
-            stacked
-            className="text-[13px] text-ground-accent"
-          />
-        </div>
-
-        {/* Side by side at every width, including the narrowest phone. */}
-        <div className="flex flex-1 items-stretch gap-2 sm:flex-none sm:gap-3">
-          <button
-            type="button"
-            disabled={isSoldOut}
-            onClick={onAddToCart}
-            className="btn btn-primary flex-1 justify-center gap-2 px-4 py-3 text-[10px] tracking-[0.15em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 sm:flex-none sm:px-7"
-          >
-            {isSoldOut ? (
-              dict.product.soldOut
-            ) : justAdded ? (
-              <>
-                <Check size={13} strokeWidth={1.25} aria-hidden="true" />
-                {dict.product.added}
-              </>
-            ) : (
-              dict.product.addToCart
-            )}
-          </button>
-
-          <BuyNowButton
-            productId={productId}
-            quantity={quantity}
-            inventory={inventory}
-            locale={locale}
-            className="flex-1 px-4 py-3 text-[10px] tracking-[0.15em] whitespace-nowrap sm:flex-none sm:px-7"
-          />
-        </div>
+        <button
+          type="button"
+          disabled={isSoldOut}
+          onClick={onAddToCart}
+          className="btn btn-primary h-[46px] shrink-0 justify-center gap-2 rounded-md px-5 text-[11px] tracking-[0.2em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 sm:px-8"
+        >
+          {isSoldOut ? (
+            dict.product.soldOut
+          ) : justAdded ? (
+            <>
+              <Check size={13} strokeWidth={1.25} aria-hidden="true" />
+              {dict.product.added}
+            </>
+          ) : (
+            dict.product.addToCart
+          )}
+        </button>
       </div>
     </div>
   );

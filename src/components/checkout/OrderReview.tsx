@@ -16,9 +16,8 @@
 
 import Image from "next/image";
 
+import OrderTotals from "@/src/components/checkout/OrderTotals";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import { cartTotalInCents, shippingInCents } from "@/src/lib/cart";
-import { useDeliveryTerms } from "@/src/providers/delivery-provider";
 import { unitPriceInCents, type CartPricing } from "@/src/lib/pricing";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useFormatPrice } from "@/src/providers/currency-provider";
@@ -76,6 +75,11 @@ export interface OrderReviewProps {
    * customer who loses a benefit needs to know which one it was.
    */
   pointsInCents?: number;
+  /**
+   * `aside`: the desktop sidebar (lines, totals). `lines`: the body of the
+   * phone summary bar, which already states the total in its own row.
+   */
+  variant?: "aside" | "lines";
 }
 
 export default function OrderReview({
@@ -86,189 +90,87 @@ export default function OrderReview({
   offerInCents = 0,
   offerLabel = null,
   pointsInCents = 0,
+  variant = "aside",
 }: OrderReviewProps) {
-  const subtotalInCents = pricing.subtotalInCents;
   const dict = useDictionary();
   const formatPrice = useFormatPrice();
-  const terms = useDeliveryTerms();
   const copy = dict.checkout.review;
-
-  /*
-   * Delivery is charged on the **undiscounted** subtotal, deliberately: the
-   * free-delivery minimum in `"DeliverySetting"` is a rule about what the
-   * customer bought, and `place_order()` is handed this same fee computed the
-   * same way. A discount that also bought free delivery would put two rules in
-   * charge of one number — which is the reason `0028` gives for never
-   * discounting delivery at all.
-   */
-  const shipping = shippingInCents(subtotalInCents, terms);
-  // Never below the delivery fee: neither instrument pays the courier.
-  const total = Math.max(
-    shipping,
-    cartTotalInCents(subtotalInCents, terms) -
-      offerInCents -
-      discountInCents -
-      pointsInCents -
-      creditAppliedInCents,
-  );
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
+  const list = (
+    <ul className="flex flex-col gap-3 lg:gap-5">
+      {lines.map(({ product, quantity }) => (
+        <li key={product.id} className="flex gap-3.5 lg:gap-4">
+          <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-sm bg-ivory lg:h-20 lg:w-16">
+            <Image
+              src={product.primaryImage.url}
+              alt=""
+              fill
+              sizes="64px"
+              className="object-cover"
+            />
+            <span className="absolute end-0 top-0 flex h-5 min-w-5 items-center justify-center bg-ink px-1 text-[10px] tabular-nums text-ivory">
+              {quantity}
+            </span>
+          </div>
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+            <p dir="ltr" className="truncate font-heading text-[13px] tracking-[0.04em] text-ground">
+              {product.name}
+            </p>
+            <p className="shrink-0 text-xs tabular-nums text-ground">
+              {formatPrice(unitPriceInCents(product) * quantity)}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+
+  if (variant === "lines") {
+    return (
+      <div className="px-4 pb-4">
+        {list}
+        <LocaleLink
+          href="/cart"
+          className="mt-3 inline-flex min-h-11 items-center text-[11px] uppercase tracking-[0.12em] text-ground-accent underline-offset-4 hover:underline"
+        >
+          {copy.edit}
+        </LocaleLink>
+      </div>
+    );
+  }
+
   return (
-    <aside className="border-ground-border bg-stone px-4 py-10 transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:px-8 lg:sticky lg:top-[var(--chrome-h)] lg:h-fit lg:border-s lg:px-10 lg:py-14">
+    <aside className="border-ground-border bg-stone px-4 py-10 transition-[top] duration-500 ease-luxury-bezier motion-reduce:transition-none sm:px-8 lg:sticky lg:top-[var(--chrome-h)] lg:h-fit lg:border-s lg:px-10 lg:py-14">
       <div className="mb-8 flex items-baseline justify-between gap-4">
         <h2 className="font-heading text-lg font-normal tracking-[0.1em] text-ground">
           {copy.heading}
         </h2>
-
-        {/* The one way back to the bag. Without it, correcting a quantity means
-            using the browser's back button and hoping the form survives. */}
+        {/* Back to the bag to change it: the review is a summary, not an editor. */}
         <LocaleLink
           href="/cart"
-          className="text-[11px] tracking-[0.1em] text-ground-accent/60 underline-offset-4 transition-colors duration-300 ease-out hover:text-ground-accent hover:underline focus-visible:text-ground-accent focus-visible:outline-none"
+          className="text-[11px] tracking-[0.1em] text-ground-accent underline-offset-4 transition-colors duration-300 ease-out hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
         >
           {copy.edit}
         </LocaleLink>
       </div>
 
-      <p className="mb-6 text-[11px] tracking-[0.08em] text-ground-muted/70">
+      <p className="mb-6 text-[11px] tracking-[0.08em] text-ground-muted">
         {itemCount === 1
           ? copy.itemCountOne
           : interpolate(copy.itemCount, { count: itemCount })}
       </p>
 
-      <ul className="mb-8 flex flex-col gap-5 border-b border-ground-border pb-8">
-        {lines.map(({ product, quantity }) => (
-          <li key={product.id} className="flex gap-4">
-            <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-ivory">
-              <Image
-                src={product.primaryImage.url}
-                alt=""
-                fill
-                sizes="64px"
-                className="object-cover brightness-75"
-              />
+      <div className="mb-8 border-b border-ground-border pb-8">{list}</div>
 
-              {/*
-               * The quantity badge sits on the image rather than in its own
-               * column: it keeps the line to two columns at 360px, where a
-               * third would wrap the price under the name.
-               */}
-              <span className="absolute end-0 top-0 flex h-5 min-w-5 items-center justify-center bg-gold px-1 font-heading text-[10px] tabular-nums text-background">
-                {quantity}
-              </span>
-            </div>
-
-            <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-              <p className="truncate font-heading text-[13px] tracking-[0.04em] text-ground">
-                {product.name}
-              </p>
-              <p className="text-[11px] tabular-nums text-ground-muted">
-                {formatPrice(unitPriceInCents(product) * quantity)}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ul>
-
-      <div className="flex flex-col gap-4">
-        <Row
-          label={copy.subtotal}
-          value={formatPrice(pricing.listSubtotalInCents)}
-        />
-
-        {/*
-          Five reductions can apply to one order and each gets its own line: the
-          campaign that repriced the goods, an offer the house is running, a code
-          the customer entered, KHEM Points they chose to spend, and a Discovery
-          Credit. Collapsing them into one "Discount" row would hide which is
-          doing the work — and they are governed by different rules, so a
-          customer who loses one needs to know which.
-
-          In practice most orders show at most one: `place_order()` refuses the
-          combinations the house has not explicitly permitted.
-        */}
-        {pricing.promotionSavingsInCents > 0 ? (
-          <Row
-            label={dict.cart.promotion}
-            value={
-              <span className="text-ground-accent">
-                −{formatPrice(pricing.promotionSavingsInCents)}
-              </span>
-            }
-          />
-        ) : null}
-
-        {offerInCents > 0 ? (
-          <Row
-            label={offerLabel ?? copy.offer}
-            value={
-              <span className="text-ground-accent">−{formatPrice(offerInCents)}</span>
-            }
-          />
-        ) : null}
-
-        {discountInCents > 0 ? (
-          <Row
-            label={copy.discount}
-            value={
-              <span className="text-ground-accent">−{formatPrice(discountInCents)}</span>
-            }
-          />
-        ) : null}
-        <Row
-          label={copy.delivery}
-          value={
-            shipping === 0 ? (
-              <span className="text-ground-accent">{copy.complimentary}</span>
-            ) : (
-              formatPrice(shipping)
-            )
-          }
-        />
-        {pointsInCents > 0 ? (
-          <Row
-            label={dict.checkout.points.applied}
-            value={
-              <span className="text-ground-accent">−{formatPrice(pointsInCents)}</span>
-            }
-          />
-        ) : null}
-        {creditAppliedInCents > 0 ? (
-          <Row
-            label={dict.checkout.credit.applied}
-            value={
-              <span className="text-ground-accent">
-                −{formatPrice(creditAppliedInCents)}
-              </span>
-            }
-          />
-        ) : null}
-      </div>
-
-      <div className="mt-6 border-t border-ground-border pt-6">
-        <div className="flex items-center justify-between">
-          <span className="font-heading text-sm tracking-[0.1em] text-ground">
-            {copy.total}
-          </span>
-          <span className="font-heading text-xl tabular-nums text-ground-accent">
-            {formatPrice(total)}
-          </span>
-        </div>
-        <p className="mt-2 text-[10px] tracking-[0.05em] text-ground-muted/70">
-          {copy.taxNote}
-        </p>
-      </div>
+      <OrderTotals
+        pricing={pricing}
+        creditAppliedInCents={creditAppliedInCents}
+        discountInCents={discountInCents}
+        offerInCents={offerInCents}
+        offerLabel={offerLabel}
+        pointsInCents={pointsInCents}
+      />
     </aside>
-  );
-}
-
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="text-xs tracking-[0.08em] text-ground-muted">{label}</span>
-      <span className="font-heading text-[13px] tabular-nums text-ground">
-        {value}
-      </span>
-    </div>
   );
 }

@@ -117,25 +117,30 @@ export default function ProductGallery({
     goTo(activeIndex + (forward ? 1 : -1));
   };
 
+  /*
+   * Stage 2 (`prompts/storefront-redesign-stage-2.md` D7/D8).
+   *
+   * Phone: one full-bleed swipe track, 440px at most, with a "1 / 4" counter
+   * and slide dashes instead of the thumbnail strip, which cost 80px and
+   * repeated what a swipe already offers.
+   *
+   * Desktop: the track becomes the lead image (5:4) and every photograph sits
+   * under it in a three-column grid; choosing one scrolls the track to it. The
+   * column stays in view while the details scroll beside it.
+   */
   return (
-    <div /*
-        `ground-stone`: the gallery is a stage the product stands on, one step
-        up from the ivory page around it so the bottle has a surface rather
-        than floating in the document.
-
-        It was `ground-obsidian` over `bg-card` — a charcoal well, which is how
-        you light a dark product page and exactly what §25 rules out: the
-        product environment is ivory, and the photograph is given room by
-        negative space rather than by dropping the lights around it. The caption
-        below resolves to charcoal-on-stone, which is legible without needing
-        the well.
-      */
-      className="ground-stone flex w-full flex-col overflow-hidden transition-[top,height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none lg:sticky lg:top-[var(--chrome-h)] lg:h-[calc(100svh-var(--chrome-h))]">
-      <div className="relative aspect-4/5 w-full overflow-hidden lg:aspect-auto lg:flex-1">
+    <div className="ground-stone flex w-full flex-col gap-3 sm:pb-6 lg:pb-0 lg:sticky lg:top-[calc(var(--chrome-h)+1.5rem)] lg:self-start lg:bg-transparent lg:transition-[top] lg:duration-500 lg:ease-luxury-bezier motion-reduce:transition-none">
+      {/*
+        The frame. Product photographs are 4:5 portraits.
+        - Phone: full bleed, 440px at most (the mock).
+        - Tablet portrait (sm–lg): the photograph's own 4:5, centred and
+          capped at 560px wide, so nothing is cropped off the top or bottom.
+        - Tablet landscape / small laptop (lg–xl): 4:5 in the gallery column.
+        - Desktop (xl+): the 5:4 lead image from the desktop artboard.
+      */}
+      <div className="relative h-[min(440px,56svh)] w-full overflow-hidden bg-ground-bg sm:mx-auto sm:mt-6 sm:aspect-4/5 sm:h-auto sm:w-[min(100%_-_3rem,560px)] sm:rounded-lg lg:mt-0 lg:w-full xl:aspect-5/4">
         <ul
           ref={trackRef}
-          // Focusable so the arrow keys have somewhere to land; a plain list
-          // would leave keyboard users with the thumbnails only.
           tabIndex={hasMultiple ? 0 : undefined}
           onKeyDown={hasMultiple ? handleKeyDown : undefined}
           aria-roledescription={hasMultiple ? "carousel" : undefined}
@@ -156,33 +161,58 @@ export default function ProductGallery({
                 loading={index === 0 ? "eager" : "lazy"}
                 fetchPriority={index === 0 ? "high" : undefined}
                 sizes={SIZES}
-                className="object-cover brightness-90"
+                className="object-cover"
               />
             </li>
           ))}
         </ul>
 
+        {hasMultiple ? (
+          <>
+            <span
+              dir="ltr"
+              aria-hidden="true"
+              className="absolute bottom-3 end-3 rounded-full bg-ivory/90 px-2.5 py-1 text-[11px] tabular-nums text-ink lg:hidden"
+            >
+              {activeIndex + 1} / {images.length}
+            </span>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center gap-1.5 lg:hidden"
+            >
+              {images.map((image, index) => (
+                <span
+                  key={image.url}
+                  className={`h-0.5 transition-[width,background-color] duration-500 ease-luxury-bezier motion-reduce:transition-none ${
+                    index === activeIndex ? "w-4.5 bg-gold" : "w-2 bg-ivory/45"
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
       </div>
 
       {/*
-        Rendered whenever *any* image has a line, and kept mounted as the slide
-        changes: sizing the strip per slide would jog the thumbnails up and down
-        each time the visitor stepped onto an uncaptioned photograph. `min-h`
-        holds two lines open; `aria-live` is deliberately absent, since the
-        caption follows a navigation the visitor just made rather than
-        announcing itself.
+        Captions: rendered whenever *any* image has one and kept mounted as the
+        slide changes, so the strip does not jog as the visitor moves through
+        uncaptioned photographs.
       */}
       {hasCaptions ? (
         <p
           dir="auto"
-          className="min-h-16 border-t border-ground-border bg-ground-bg px-6 py-4 text-xs leading-loose text-ground-muted"
+          className="min-h-12 px-4 pb-3 text-xs leading-relaxed text-ground-muted lg:px-0"
         >
           {images[activeIndex]?.caption ?? ""}
         </p>
       ) : null}
 
       {hasMultiple ? (
-        <div className="flex gap-px bg-ground-border p-px">
+        <div
+          className={`hidden gap-3 lg:grid ${
+            images.length % 4 === 0 ? "grid-cols-4" : "grid-cols-3"
+          }`}
+        >
           {images.map((image, index) => (
             <button
               key={image.url}
@@ -193,16 +223,18 @@ export default function ProductGallery({
                 total: images.length,
               })}
               onClick={() => goTo(index)}
-              className={`relative h-20 flex-1 overflow-hidden outline-2 -outline-offset-2 transition-[outline-color] duration-300 ease-out focus-visible:outline-gold ${
-                index === activeIndex ? "outline-gold" : "outline-transparent"
+              className={`relative aspect-square cursor-pointer overflow-hidden rounded-lg outline-2 -outline-offset-2 transition-[outline-color,opacity] duration-300 ease-out focus-visible:outline-gold ${
+                index === activeIndex
+                  ? "outline-gold"
+                  : "outline-transparent opacity-85 hover:opacity-100"
               }`}
             >
               <Image
                 src={image.url}
                 alt=""
                 fill
-                sizes="120px"
-                className="object-cover brightness-75"
+                sizes="(min-width: 1024px) 18vw, 1px"
+                className="object-cover"
               />
             </button>
           ))}

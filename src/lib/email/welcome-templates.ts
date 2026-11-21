@@ -20,6 +20,7 @@
  * §7.2's "the code shown in the email is actually valid" holds.
  */
 
+import { ARABIC_INTL_LOCALE } from "@/src/lib/format";
 import { LOCALE_DIRECTION, type Locale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
@@ -122,7 +123,7 @@ export function accountWelcomeEmail({
 
   const expiryLine = expiresAt
     ? interpolate(copy.privilegeExpiry, {
-        date: new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-GB", {
+        date: new Intl.DateTimeFormat(locale === "ar" ? ARABIC_INTL_LOCALE : "en-GB", {
           day: "numeric",
           month: "long",
           year: "numeric",

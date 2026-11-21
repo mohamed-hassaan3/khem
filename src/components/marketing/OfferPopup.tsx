@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
@@ -21,6 +22,7 @@ import {
   toOfferRecord,
   type OfferOutcome,
 } from "@/src/lib/marketing";
+import { stripLocale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { readStored, writeStored } from "@/src/lib/storage";
 import { useConsent } from "@/src/providers/consent-provider";
@@ -107,6 +109,17 @@ export default function OfferPopup({
   const { hasDecided, isHydrated: consentHydrated } = useConsent();
   const isHydrated = useIsHydrated();
   const prefersReducedMotion = useReducedMotion();
+  /*
+   * Not while the visitor is mid-purchase. A product, a set, the bag and the
+   * checkout are where a modal costs a sale rather than earning a signup, so
+   * the popup waits for an editorial or listing page (Stage 2,
+   * `prompts/storefront-redesign-stage-2.md` D13). Locale-stripped, so `/ar`
+   * is covered. Everything else about when it opens is unchanged.
+   */
+  const pathname = usePathname();
+  const onPurchasePath = /^\/(perfume|set|ritual|cart|checkout)(\/|$)/.test(
+    stripLocale(pathname).path,
+  );
 
   const [isOpen, setIsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("form");
@@ -138,6 +151,7 @@ export default function OfferPopup({
   // ── The four gates ────────────────────────────────────────
   useEffect(() => {
     if (!settings.offerPopupEnabled) return;
+    if (onPurchasePath) return;
     if (!isHydrated || !consentHydrated) return;
     if (!hasDecided) return;
     if (openedRef.current) return;
@@ -189,6 +203,7 @@ export default function OfferPopup({
     isHydrated,
     consentHydrated,
     hasDecided,
+    onPurchasePath,
   ]);
 
   // ── Escape, the focus trap, and the scroll lock ───────────

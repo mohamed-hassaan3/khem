@@ -28,16 +28,16 @@ export default async function RelatedProducts({
   const dict = await getDictionary(locale);
 
   return (
-    <section className="border-t border-ground-border px-4 py-14 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:py-32">
+    <section className="px-4 pb-14 pt-9 sm:px-6 md:px-10 md:pb-28 md:pt-20 lg:px-12 xl:px-16">
       <div className="mx-auto max-w-350">
-        <Reveal className="mb-10 md:mb-16 text-center">
-          <p className="eyebrow mb-4">{dict.product.related.eyebrow}</p>
-          <h2 className="font-heading text-3xl font-normal text-ground sm:text-4xl">
+        <Reveal className="mb-3 md:mb-10 md:text-center">
+          <p className="eyebrow md:mb-4">{dict.product.related.eyebrow}</p>
+          <h2 className="hidden font-heading text-3xl font-normal text-ground sm:text-4xl md:block">
             {dict.product.related.heading}
           </h2>
         </Reveal>
 
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard
               key={product.id}

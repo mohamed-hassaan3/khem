@@ -21,35 +21,33 @@ export default function ProductPyramid({
   tiers,
   heading,
 }: ProductPyramidProps) {
+  /*
+   * One bordered card, three rows: tier label in a fixed column, the notes as
+   * a line. It was three `p-7` cards stacked on a phone, a screen and a half
+   * for a dozen words. Tiers with no notes are skipped rather than printed
+   * empty. Stage 2, `prompts/storefront-redesign-stage-2.md` D7.
+   */
+  const filled = tiers.filter((tier) => tier.notes.length > 0);
+  if (filled.length === 0) return null;
+
   return (
     <section>
-      <h2 className="eyebrow mb-7">{heading}</h2>
-
-      <div className="grid grid-cols-1 gap-4 md:gap-6 sm:grid-cols-3">
-        {tiers.map((tier) => (
-          <div key={tier.label} className="ground-sand border border-ground-border p-7">
-            <p className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/60">
+      <h2 className="eyebrow mb-3">{heading}</h2>
+      <dl className="rounded-md border border-ground-border px-3.5 py-1 sm:px-4">
+        {filled.map((tier) => (
+          <div
+            key={tier.label}
+            className="grid grid-cols-[4.5rem_1fr] gap-2.5 border-t border-ground-border py-2.5 first:border-t-0 sm:grid-cols-[5.5rem_1fr]"
+          >
+            <dt className="pt-0.5 text-[9px] uppercase leading-relaxed tracking-[0.2em] text-ground-accent">
               {tier.label}
-            </p>
-
-            {/* Note names are perfumery vocabulary and are translated. */}
-            <ul className="flex flex-col gap-2.5" dir="auto">
-              {tier.notes.map((note) => (
-                <li
-                  key={note}
-                  className="flex items-center gap-2.5 text-xs text-ground-muted"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="size-1 shrink-0 rounded-full bg-gold"
-                  />
-                  {note}
-                </li>
-              ))}
-            </ul>
+            </dt>
+            <dd dir="auto" className="text-[13px] leading-relaxed text-ground">
+              {tier.notes.join(" · ")}
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
     </section>
   );
 }

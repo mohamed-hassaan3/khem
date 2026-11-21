@@ -10,7 +10,15 @@ import type {
   NavLinkEntry,
   NavigationTree,
 } from "@/src/types/navigation";
-import { ChevronDown, Search, ShoppingBag, UserRound, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  Lock,
+  Search,
+  ShoppingBag,
+  UserRound,
+  X,
+} from "lucide-react";
 
 /*
  * The `.webp` mark, not the `.svg`.
@@ -38,6 +46,7 @@ import LocaleLink from "./i18n/LocaleLink";
 import SearchOverlay from "./search/SearchOverlay";
 import { useHeaderVisibility } from "@/src/hooks/use-header-visibility";
 import { signInPathWithReturn } from "@/src/lib/auth-redirect";
+import { stripLocale } from "@/src/lib/i18n/config";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
 import { useCartDrawer } from "@/src/providers/cart-drawer-provider";
@@ -69,7 +78,8 @@ const BOUTIQUE_ROW =
  * still incidental rather than declared; the target has to be stated. The negative margin on the last control pulls
  * the extra box back to the bar's own padding so the row still ends flush.
  */
-const ICON_HIT = "flex h-11 w-11 items-center justify-center";
+const ICON_HIT =
+  "flex h-11 w-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent";
 
 function SearchIcon() {
   return <Search width={17} height={17} />;
@@ -333,7 +343,25 @@ export default function Nav({
    * else — there is no second state for it to switch between. Ivory on every
    * route today, which resolves to charcoal links.
    */
-  const { ground } = useNavGround();
+  const { ground, back } = useNavGround();
+
+  /*
+   * Which header this route gets (Stage 2,
+   * `prompts/storefront-redesign-stage-2.md` D3). Derived from the pathname so
+   * the server HTML is already right:
+   *
+   *   task      checkout: back to the bag, the wordmark, "Secure". Nothing to
+   *             browse to, at every width.
+   *   purchase  a product or set page: on phones the menu button becomes a
+   *             back chevron to the collection. Desktop is unchanged.
+   */
+  const routePath = stripLocale(pathname).path;
+  const variant: "task" | "purchase" | "default" =
+    routePath === "/checkout"
+      ? "task"
+      : /^\/(perfume|set|ritual)\//.test(routePath)
+        ? "purchase"
+        : "default";
 
   /*
    * The header leaves while the visitor reads down and comes back the moment
@@ -451,6 +479,59 @@ export default function Nav({
     return () => window.removeEventListener("resize", onResize);
   }, [drawerOpen]);
 
+  /*
+   * Checkout: a task header. The visitor is paying; the only ways out are back
+   * to the bag and the wordmark. No search, menu, bag or account, so nothing
+   * competes with the form. Same height and the same hide-on-scroll transform
+   * as the full bar, so the header stack and every sticky offset still agree.
+   */
+  if (variant === "task") {
+    return (
+      <nav
+        aria-label={dict.nav.checkoutLabel}
+        className={[
+          "fixed inset-x-0 top-[var(--announcement-h)] z-1000 h-[var(--nav-h)]",
+          "nav-bar",
+          `ground-${ground}`,
+          "transition-transform duration-500 ease-luxury-bezier motion-reduce:transition-none",
+          headerHidden
+            ? "-translate-y-[calc(var(--header-h)+1px)]"
+            : "translate-y-0",
+        ].join(" ")}
+      >
+        <div className="mx-auto grid h-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-1.5 sm:px-6 lg:px-12">
+          <LocaleLink
+            href="/cart"
+            aria-label={dict.nav.backToBag}
+            className={`nav-link justify-self-start ${ICON_HIT}`}
+          >
+            <ChevronLeft
+              width={22}
+              height={22}
+              strokeWidth={1.25}
+              aria-hidden="true"
+              className="rtl:-scale-x-100"
+            />
+          </LocaleLink>
+          <LocaleLink href="/" className="flex items-center no-underline">
+            <Image
+              src={nameLogo}
+              alt="KHEM Perfumes"
+              loading="eager"
+              fetchPriority="low"
+              sizes="(min-width: 1024px) 132px, 94px"
+              className="h-9 w-auto sm:h-10 lg:h-14"
+            />
+          </LocaleLink>
+          <p className="flex items-center gap-1.5 justify-self-end pe-3 text-[10px] uppercase tracking-[0.16em] text-ground-muted">
+            <Lock width={13} height={13} strokeWidth={1.25} aria-hidden="true" />
+            {dict.nav.secure}
+          </p>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <>
       <nav
@@ -484,7 +565,7 @@ export default function Nav({
            * that changes height with the breakpoint gives the wordmark and the
            * icon row two different compositions to be right in.
            */
-          "fixed inset-x-0 top-[var(--announcement-h)] z-1000 flex h-20 items-center justify-between px-5 sm:px-8 lg:px-12",
+          "fixed inset-x-0 top-[var(--announcement-h)] z-1000 flex h-[var(--nav-h)] items-center justify-between px-1.5 sm:px-6 lg:px-12",
           "nav-bar",
           /*
            * **The same ground in both states.**
@@ -527,13 +608,30 @@ export default function Nav({
         ].join(" ")}
       >
         <div className="flex min-w-0 flex-1 items-center gap-5 md:gap-9">
+          {variant === "purchase" ? (
+            <LocaleLink
+              href={back?.href ?? "/collections"}
+              aria-label={interpolate(dict.nav.back, {
+                name: back?.label ?? dict.nav.collections,
+              })}
+              className={`nav-link shrink-0 lg:hidden ${ICON_HIT}`}
+            >
+              <ChevronLeft
+                width={22}
+                height={22}
+                strokeWidth={1.25}
+                aria-hidden="true"
+                className="rtl:-scale-x-100"
+              />
+            </LocaleLink>
+          ) : null}
           <button
             type="button"
             aria-label={drawerOpen ? dict.nav.closeMenu : dict.nav.openMenu}
             aria-expanded={drawerOpen}
             aria-controls="mobile-nav-drawer"
             onClick={handleDrawerToggle}
-            className="-ms-2.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center text-ground-muted transition-colors duration-300 hover:text-ground lg:hidden"
+            className={`${variant === "purchase" ? "hidden" : "flex"} h-11 w-11 shrink-0 cursor-pointer items-center justify-center text-ground-muted transition-colors duration-300 hover:text-ground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent lg:hidden`}
           >
             <span className="relative block h-3 w-5" aria-hidden="true">
               <span
@@ -603,7 +701,7 @@ export default function Nav({
             // image (React 19 preloads every eager <img> it server-renders).
             fetchPriority="low"
             sizes="(min-width: 1024px) 132px, (min-width: 640px) 113px, 94px"
-            className="h-10 w-auto sm:h-12 lg:h-14"
+            className="h-9 w-auto sm:h-10 lg:h-14"
           />
         </LocaleLink>
 
@@ -612,7 +710,7 @@ export default function Nav({
          * the rails are `flex-1`, so on a 320px screen the row needs to tighten
          * rather than push its last icons past the edge.
          */}
-        <div className="-me-2.5 flex min-w-0 flex-1 items-center justify-end gap-0.5 sm:gap-1.5 lg:gap-3">
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-0 sm:gap-1.5 lg:-me-2.5 lg:gap-3">
           <div className="hidden sm:block">
             <LocaleRegionSwitcher />
           </div>

@@ -855,7 +855,7 @@ export default function ProductForm({
           <AdminToggle
             id="isBestseller"
             label="Bestseller"
-            description="Eligible for the home page rail and the bestseller facet."
+            description="Best sellers are chosen automatically from the last 90 days of sales. Products switched on here fill any empty places, and are the whole list while there are no recent sales."
             checked={isBestseller}
             onChange={setIsBestseller}
           />

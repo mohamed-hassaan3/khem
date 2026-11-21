@@ -45,8 +45,8 @@ export default function CommentRow({
   const authorLabel = comment.authorName ?? guestLabel;
 
   return (
-    <article className="border-t border-ground-border py-7">
-      <header className="mb-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+    <article className="rounded-lg border border-ground-border p-3.5 md:p-5">
+      <header className="mb-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">
           {authorLabel}
         </span>
@@ -72,7 +72,7 @@ export default function CommentRow({
       </header>
 
       {comment.body ? (
-        <p className="whitespace-pre-line text-[13px] leading-relaxed text-ground-muted">
+        <p dir="auto" className="whitespace-pre-line text-[13px] leading-relaxed text-ground">
           {comment.body}
         </p>
       ) : null}

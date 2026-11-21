@@ -23,8 +23,12 @@
 
 import "server-only";
 
+import { z } from "zod";
+
 import type { Locale } from "@/src/lib/i18n/config";
-import { getSupabasePublic } from "@/src/lib/supabase";
+import { cache } from "react";
+
+import { getSupabaseAdmin, getSupabasePublic } from "@/src/lib/supabase";
 import { getProductPromotions } from "@/src/services/marketing";
 import type { MerchPageSlug } from "@/src/lib/facets";
 import { isScentItem } from "@/src/lib/product-types";
@@ -149,9 +153,16 @@ export async function getFeaturedCollections(
   const supabase = getSupabasePublic();
   if (!supabase) return [];
 
+  /*
+   * `Product(id)` rides along in the same read: the home rail prints "9
+   * pieces" under each collection. The anon role's RLS policy already returns
+   * only purchasable products (not archived, not deleted), so the ids are the
+   * count. Not `Product(count)`: the aggregate needs a table-wide SELECT grant,
+   * and anon holds column grants only.
+   */
   const { data, error } = await supabase
     .from("Collection")
-    .select(COLLECTION_COLUMNS)
+    .select(`${COLLECTION_COLUMNS}, Product(id)`)
     .eq("isFeatured", true)
     .order("sortOrder");
 
@@ -160,8 +171,20 @@ export async function getFeaturedCollections(
     return [];
   }
 
-  return parseList(data, (row) => toCollection(row, locale));
+  return parseList(data, (row) => {
+    const collection = toCollection(row, locale);
+    if (!collection) return null;
+    const counted = productCountSchema.safeParse(row);
+    return counted.success
+      ? { ...collection, productCount: counted.data.Product.length }
+      : collection;
+  });
 }
+
+/** The `Product(id)` embed: one entry per purchasable product. */
+const productCountSchema = z.object({
+  Product: z.array(z.object({ id: z.string() })),
+});
 
 /**
  * Every category the house offers, in curated order.
@@ -518,10 +541,120 @@ async function toCards(
     return [];
   }
 
-  const promotions = await getProductPromotions(locale);
+  const [promotions, bestSellers] = await Promise.all([
+    getProductPromotions(locale),
+    getBestSellerSlugs(),
+  ]);
 
-  return parseList(result.data, (row) => toProductCard(row, locale, promotions));
+  /*
+   * "Best seller" is decided by sales, not by the stored switch alone (see
+   * `getBestSellerSlugs`). Overriding it here, on every card, is what keeps
+   * the card's tag, the Best Sellers page (which filters on this field) and
+   * the home band telling the same story.
+   */
+  return parseList(result.data, (row) => {
+    const card = toProductCard(row, locale, promotions);
+    return card ? { ...card, isBestseller: bestSellers.has(card.slug) } : null;
+  });
 }
+
+/* ── Best sellers ─────────────────────────────────────────────────────── */
+
+/** How far back sales count. Recent enough to follow taste, long enough to be stable. */
+const BEST_SELLER_WINDOW_DAYS = 90;
+
+/** How many products the sales ranking names. */
+const BEST_SELLER_COUNT = 8;
+
+const bestSellerRowSchema = z.object({
+  productSlug: z.string(),
+  units: z.number().int(),
+});
+
+/**
+ * The house's best sellers, decided by what actually sells.
+ *
+ * 1. Units sold per product over the last `BEST_SELLER_WINDOW_DAYS`, counted
+ *    by `sales_ledger_by_product` — the same function and the same rules as
+ *    the admin Sales dashboard (cancelled and refunded orders do not count;
+ *    online and boutique sales both do). The top `BEST_SELLER_COUNT`.
+ * 2. Topped up with the products switched on in Admin → Products → "Best
+ *    seller", in their sort order, until the list is full.
+ * 3. With no sales at all in the window (a new shop, or sales reset), the
+ *    admin switch alone decides, exactly as it did before.
+ *
+ * Read with the service client because order lines are private; only product
+ * slugs leave this function. Memoised per request, and the pages that show it
+ * are ISR, so it is computed at regeneration, not per visitor. Any failure
+ * degrades to the admin switch.
+ */
+export const getBestSellerSlugs = cache(async function getBestSellerSlugs(): Promise<
+  Set<string>
+> {
+  const flagged = await getFlaggedBestSellerSlugs();
+
+  const admin = getSupabaseAdmin();
+  if (!admin) return new Set(flagged);
+
+  try {
+    const from = new Date(
+      Date.now() - BEST_SELLER_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    const { data, error } = await admin.rpc("sales_ledger_by_product", {
+      p_from: from,
+      p_limit: 100,
+    });
+    if (error) {
+      logFailure("getBestSellerSlugs", error.message);
+      return new Set(flagged);
+    }
+
+    // The function orders by revenue; rank by units, revenue breaking ties
+    // (`sort` is stable, so the incoming order is the tie-break).
+    const ranked = parseList(data as unknown[] | null, (row) => {
+      const parsed = bestSellerRowSchema.safeParse(row);
+      return parsed.success && parsed.data.units > 0 ? parsed.data : null;
+    })
+      .sort((a, b) => b.units - a.units)
+      .map((row) => row.productSlug);
+
+    if (ranked.length === 0) return new Set(flagged);
+
+    const chosen = new Set(ranked.slice(0, BEST_SELLER_COUNT));
+    for (const slug of flagged) {
+      if (chosen.size >= BEST_SELLER_COUNT) break;
+      chosen.add(slug);
+    }
+    return chosen;
+  } catch (cause) {
+    logFailure(
+      "getBestSellerSlugs",
+      cause instanceof Error ? cause.message : "unknown error",
+    );
+    return new Set(flagged);
+  }
+});
+
+/** The admin "Best seller" switch, in sort order. Purchasable products only (RLS). */
+const getFlaggedBestSellerSlugs = cache(async function getFlaggedBestSellerSlugs(): Promise<
+  string[]
+> {
+  const supabase = getSupabasePublic();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("Product")
+    .select("slug")
+    .eq("isBestseller", true)
+    .order("sortOrder");
+  if (error) {
+    logFailure("getFlaggedBestSellerSlugs", error.message);
+    return [];
+  }
+  return parseList(data, (row) => {
+    const parsed = z.object({ slug: z.string() }).safeParse(row);
+    return parsed.success ? parsed.data.slug : null;
+  });
+});
 
 /**
  * Card projections for a collection listing. Omitting `collectionSlug` returns
@@ -607,8 +740,8 @@ export async function getNewArrivals(locale: Locale): Promise<Product[]> {
 }
 
 /**
- * Bestsellers for the "Signature Fragrances" grid — fragrances only, whatever a
- * merchandiser flags on a candle.
+ * Best sellers for the home band — fragrances only, in best-seller rank (see
+ * `getBestSellerSlugs`), whatever sells among candles and mists.
  */
 export async function getFeaturedProducts(
   locale: Locale,
@@ -617,15 +750,20 @@ export async function getFeaturedProducts(
   const query = cardQuery();
   if (!query) return [];
 
-  return toCards(
+  // Ranked by `getBestSellerSlugs()` (sales first, then the admin switch);
+  // fragrances only, in that rank.
+  const ranked = [...(await getBestSellerSlugs())];
+  if (ranked.length === 0) return [];
+
+  const cards = await toCards(
     locale,
     "getFeaturedProducts",
-    await query
-      .eq("collection.kind", "FRAGRANCE")
-      .eq("isBestseller", true)
-      .order("sortOrder")
-      .limit(limit),
+    await query.eq("collection.kind", "FRAGRANCE").in("slug", ranked),
   );
+
+  return cards
+    .sort((a, b) => ranked.indexOf(a.slug) - ranked.indexOf(b.slug))
+    .slice(0, limit);
 }
 
 /**
