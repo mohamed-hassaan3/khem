@@ -18,8 +18,9 @@
  *
  * Detection picks the country for the visitor, and where that is not Egypt the
  * checkout closes itself and says why. What it does **not** do is overrule
- * them: the field is a dropdown of every country, and choosing Egypt reopens
- * the order.
+ * them: the field offers Egypt first, a short list of the countries a
+ * misplaced visitor is likely to be placed in, and "Another country" for the
+ * rest (`src/constants/countries.ts`). Choosing Egypt reopens the order.
  *
  * That is deliberate, and it is the only workable reading of a header that is
  * routinely wrong about people who are standing in Cairo — a VPN, a corporate
@@ -34,7 +35,7 @@
  * decides what the field starts as.
  */
 
-import { COUNTRY_CODES } from "@/src/constants/countries";
+import { FEATURED_COUNTRIES, OTHER_COUNTRY } from "@/src/constants/countries";
 import type { Locale } from "@/src/lib/i18n/config";
 
 /** ISO-3166 alpha-2 for the one country the house delivers to. */
@@ -123,47 +124,130 @@ export interface CountryOption {
   name: string;
 }
 
-/**
- * Every country, named in the reader's language, in that language's order.
- *
- * Sorted with `Intl.Collator` rather than by code or by English name: an
- * Arabic-speaking visitor scanning for مصر should find it where Arabic
- * alphabetical order puts it, not where "Egypt" would have fallen.
- *
- * Called from a Client Component, and only ever in the browser — the checkout
- * form does not render until the cart has hydrated — so both the names and the
- * ordering come from one ICU implementation and cannot disagree with a server
- * render.
- */
-export function countryOptions(locale: Locale): CountryOption[] {
-  const collator = new Intl.Collator(locale);
-
-  return COUNTRY_CODES.map((code) => ({
-    code,
-    name: countryLabel(code, locale),
-  })).sort((a, b) => collator.compare(a.name, b.name));
+/** What a country field shows: Egypt on its own, then everywhere else. */
+export interface CountryChoices {
+  /** Egypt, in the house spelling for the locale. Always first, never sorted. */
+  pinned: CountryOption;
+  /**
+   * The featured countries, sorted by name in the reader's language, then
+   * "Another country" last when it was asked for. A `keep` value that is not
+   * featured sits at the top, so a saved address never shows a blank field.
+   */
+  others: CountryOption[];
 }
 
 /**
- * The detected country, but only if the dropdown actually holds it.
+ * The country field's options, named and ordered for the reader.
  *
- * A GeoIP answer is not always an ISO country: Tor exits arrive as `T1`, and
- * unresolvable traffic as `XX`. Selecting a value no `<option>` carries leaves
- * a native `<select>` showing an empty box — the one state the field must never
- * be in, since it is pre-answered by design.
+ * Sorted with `Intl.Collator` rather than by code or by English name: an
+ * Arabic reader scanning for الأردن should find it where Arabic order puts it,
+ * not where "Jordan" would have fallen.
  *
- * An unknown code therefore falls back to {@link SHIPPING_COUNTRY} and is
- * reported as *not detected*, so the field neither claims to know where the
- * visitor is nor blocks them: Egypt is selected, the checkout is open, and the
- * dropdown is right there if that is wrong.
+ * - `otherLabel`: include "Another country" ({@link OTHER_COUNTRY}) with this
+ *   label. The checkout passes it; the address book does not, because an
+ *   address it cannot deliver to is of no use to anybody.
+ * - `keep`: a value already held — a saved address in a country no longer
+ *   featured, or legacy text typed before the field was a chooser. It is
+ *   offered as it is, so editing that address does not quietly change its
+ *   country.
+ *
+ * Called from Client Components only, so the names and the ordering come from
+ * the browser's one ICU implementation and cannot disagree with a server
+ * render.
+ */
+export function countryOptions(
+  locale: Locale,
+  { otherLabel, keep }: { otherLabel?: string; keep?: string } = {},
+): CountryChoices {
+  const collator = new Intl.Collator(locale);
+
+  const others = FEATURED_COUNTRIES.map((code) => ({
+    code,
+    name: countryLabel(code, locale),
+  })).sort((a, b) => collator.compare(a.name, b.name));
+
+  const held = keep?.trim() ?? "";
+  if (
+    held !== "" &&
+    held !== SHIPPING_COUNTRY &&
+    held !== OTHER_COUNTRY &&
+    !FEATURED_COUNTRIES.includes(held)
+  ) {
+    // A two-letter value is a code and gets a name; anything else predates
+    // the chooser and is shown exactly as it was written.
+    others.unshift({
+      code: held,
+      name: /^[A-Z]{2}$/.test(held) ? countryLabel(held, locale) : held,
+    });
+  }
+
+  if (otherLabel !== undefined) {
+    others.push({ code: OTHER_COUNTRY, name: otherLabel });
+  }
+
+  return {
+    pinned: { code: SHIPPING_COUNTRY, name: SHIPPING_COUNTRY_NAME[locale] },
+    others,
+  };
+}
+
+/**
+ * Where the checkout's country field starts, from the detected country.
+ *
+ * - **Egypt or a featured country**: that country, reported as detected, so
+ *   the field says where the choice came from.
+ * - **Any other well-formed country** (Brazil, Kosovo's `XK`): "Another
+ *   country", also reported as detected. It is true that we placed them
+ *   outside Egypt, and the checkout says so and offers the way back. Nothing
+ *   pretends they are in Egypt.
+ * - **No answer**: no header, or a code that names no country — `T1` from a
+ *   Tor exit, `XX` from traffic the edge could not place. Egypt, *not*
+ *   reported as detected. Unknown means unknown, never elsewhere: the checkout
+ *   is open and the dropdown is right there if that is wrong.
+ *
+ * Every value returned is one the field has an option for, so a native
+ * `<select>` never shows an empty box.
  */
 export function selectableCountry(code: string | null): {
   code: string;
   detected: boolean;
 } {
-  if (code !== null && COUNTRY_CODES.includes(code)) {
+  if (code === null || !isRealCountry(code)) {
+    return { code: SHIPPING_COUNTRY, detected: false };
+  }
+
+  if (code === SHIPPING_COUNTRY || FEATURED_COUNTRIES.includes(code)) {
     return { code, detected: true };
   }
 
-  return { code: SHIPPING_COUNTRY, detected: false };
+  return { code: OTHER_COUNTRY, detected: true };
+}
+
+/**
+ * Whether a well-formed code names a country.
+ *
+ * Asked of `Intl.DisplayNames` with `fallback: "none"`, which answers
+ * `undefined` (or throws) for a code it cannot name: the user-assigned ranges
+ * GeoIP databases use for "not a country" (`XX`, `AP`, `A1`). `XK` is named by
+ * every current ICU, so a visitor from Kosovo is treated as detected. Should a
+ * runtime decline the API, the code counts as unknown, which fails towards an
+ * open checkout.
+ *
+ * ICU *does* name a few codes that are not countries — `ZZ` is literally
+ * "Unknown Region" — so those are refused by name first.
+ */
+const NOT_COUNTRIES = new Set(["ZZ", "EU", "EZ", "UN", "QO"]);
+
+function isRealCountry(code: string): boolean {
+  if (NOT_COUNTRIES.has(code)) return false;
+
+  try {
+    return (
+      new Intl.DisplayNames(["en"], { type: "region", fallback: "none" }).of(
+        code,
+      ) !== undefined
+    );
+  } catch {
+    return false;
+  }
 }

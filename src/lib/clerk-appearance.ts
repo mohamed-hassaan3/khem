@@ -168,3 +168,63 @@ export const khemClerkAppearance = {
     shimmer: true,
   },
 };
+
+/**
+ * `<UserProfile>` on `/account/profile`, and only there.
+ *
+ * Passed as the component's own `appearance` prop, which Clerk layers over the
+ * provider's `khemClerkAppearance` — so the palette, type, and buttons above
+ * still apply, and sign-in / sign-up are untouched.
+ *
+ * Clerk sizes this card for a modal: a fixed desktop width and a raised frame.
+ * Inside the account column that meant a card wider than a phone, scrolling
+ * sideways inside a wrapper. Here it takes the column's width, drops the outer
+ * frame (the section heading above it already frames it), and steps its inner
+ * page padding down below `sm`.
+ *
+ * It also drops the card's fixed modal height. Measured at 390px, the card was
+ * 704px tall around 371px of content — a third of a screen of empty paper.
+ *
+ * Element keys are Clerk's documented ones (`rootBox`, `cardBox`, `card`,
+ * `scrollBox`, `pageScrollBox`, `profilePageContent`), checked against the installed
+ * `@clerk/react` typings — not invented. `@media` blocks are supported because
+ * element styles are CSS-in-JS objects, the same mechanism `&:hover` uses above.
+ */
+export const khemUserProfileAppearance = {
+  elements: {
+    rootBox: {
+      width: "100%",
+      maxWidth: "100%",
+    },
+    cardBox: {
+      width: "100%",
+      maxWidth: "100%",
+      height: "auto",
+      maxHeight: "none",
+      boxShadow: "none",
+      border: `1px solid ${BORDER_LIGHT}`,
+    },
+    card: {
+      boxShadow: "none",
+    },
+    scrollBox: {
+      height: "auto",
+      boxShadow: "none",
+    },
+    /*
+     * Phone-only, through `max-width`: from `sm` Clerk keeps its own padding,
+     * so the desktop card is exactly what it was.
+     */
+    pageScrollBox: {
+      "@media (max-width: 639px)": {
+        padding: "1rem 0.75rem",
+      },
+    },
+    /* A second inner inset (32px × 20px at 390px) inside the one above. */
+    profilePageContent: {
+      "@media (max-width: 639px)": {
+        padding: "0.5rem 0.25rem",
+      },
+    },
+  },
+};

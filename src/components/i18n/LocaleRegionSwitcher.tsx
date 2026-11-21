@@ -15,8 +15,9 @@ import {
   type Locale,
 } from "@/src/lib/i18n/config";
 import {
+  EUROPE,
   INTERNATIONAL,
-  PRICED_COUNTRIES,
+  SWITCHER_REGIONS,
   currencyForRegion,
   representativeCountry,
   type Region,
@@ -42,12 +43,28 @@ import { useI18n } from "@/src/providers/i18n-provider";
  * about the prerendering guarantee changes: the server still renders the base
  * currency and this control is inert until the cookies have been read.
  *
+ * ## One row per currency
+ *
+ * The country is only ever used to pick the display currency — the house
+ * ships within Egypt alone, and checkout never reads this choice — so the list
+ * offers the six outcomes that exist (`SWITCHER_REGIONS`): Egypt, Saudi
+ * Arabia, UAE, UK, Europe, International. It once listed all twenty eurozone
+ * countries by name, twenty rows that did the same thing. The order is the
+ * house's and is not re-sorted per language.
+ *
+ * ## The current row says so
+ *
+ * The active language and the active country carry a visible "Current" /
+ * "حاليًا" beside their name, not colour alone. One country row is always
+ * current once the cookies are read: a chosen region, else the one the
+ * detected currency implies, else International.
+ *
  * ## Country names are formatted, not translated
  *
- * `Intl.DisplayNames` names the countries in the reading locale — the same
- * mechanism `src/lib/shipping.ts` uses for the checkout's country field — so
- * there is no second list of 24 names to keep in step with the dictionaries,
- * and the ordering is collated in the reading locale rather than by ISO code.
+ * `Intl.DisplayNames` names the four countries in the reading locale — the
+ * same mechanism `src/lib/shipping.ts` uses for the checkout's country field.
+ * Europe and International are regions, not countries, and come from the
+ * dictionary.
  */
 
 /**
@@ -78,6 +95,28 @@ const DIVIDER = "my-3 h-px w-full bg-ground-border";
 
 const ROW_IDLE = "text-ground-muted hover:text-ground-accent";
 const ROW_ACTIVE = "text-ground-accent";
+
+/**
+ * The "Current" marker beside an active row's name.
+ *
+ * It is chrome in the page's language, so it follows the reading locale, not
+ * the row's: on the Arabic page the English row's marker is still "حاليًا".
+ * Arabic takes no letter-spacing and no case — see `labelAttributes`.
+ */
+function CurrentMarker({ locale, label }: { locale: Locale; label: string }) {
+  return (
+    <span
+      lang={LOCALE_HTML_TAG[locale]}
+      className={[
+        "shrink-0 whitespace-nowrap text-[9px] text-ground-subtle",
+        locale === "ar" ? "tracking-normal" : "uppercase tracking-[0.15em]",
+      ].join(" ")}
+    >
+      <span aria-hidden="true">· </span>
+      {label}
+    </span>
+  );
+}
 
 export default function LocaleRegionSwitcher({
   variant = "compact",
@@ -120,7 +159,7 @@ export default function LocaleRegionSwitcher({
   const tag = LOCALE_HTML_TAG[activeLocale];
 
   /**
-   * The country rows, named and ordered in the reading locale.
+   * The country rows, in the house's fixed order, named in the reading locale.
    *
    * ## Short names
    *
@@ -134,7 +173,8 @@ export default function LocaleRegionSwitcher({
    *
    * `Intl.DisplayNames` can throw on an environment without the region data, so
    * the whole construction is guarded: a browser that cannot name countries
-   * gets the codes rather than an empty panel.
+   * gets the codes rather than an empty panel. Europe and International are
+   * never passed to `Intl` — they are not regions it knows.
    */
   const shortNames: Record<string, string> = dictionary.regionSwitcher.shortNames;
 
@@ -163,34 +203,31 @@ export default function LocaleRegionSwitcher({
       /* Codes it is. */
     }
 
-    const collator = new Intl.Collator(tag);
+    const { europe, international } = dictionary.regionSwitcher;
 
-    return PRICED_COUNTRIES.map((code) => ({
+    return SWITCHER_REGIONS.map((code) => ({
       code,
-      name: name(code),
+      name:
+        code === EUROPE ? europe : code === INTERNATIONAL ? international : name(code),
       currency: currencyForRegion(code),
-    })).sort((a, b) => collator.compare(a.name, b.name));
-  }, [tag, shortNames]);
+    }));
+  }, [tag, shortNames, dictionary.regionSwitcher]);
 
   /**
-   * What the trigger says about the country.
+   * The current row, and what the trigger says.
    *
-   * A chosen region is stated. Failing that, the country the *detected
-   * currency* implies is stated — four of the six belong to exactly one market
-   * — and the two that do not resolve to "Europe" and "International", which
-   * is the whole of what is actually known. See `representativeCountry`.
+   * A chosen region is stated. Failing that, the region the *detected
+   * currency* implies — every currency but the dollar belongs to one row — and
+   * failing that International. Never `null`, so one row is always current.
+   * See `representativeCountry`.
    */
-  const activeRegion: Region | null =
-    region ??
-    (representativeCountry(currency) ??
-      (currency === "EUR" ? null : INTERNATIONAL));
+  const activeRegion: Region =
+    region ?? representativeCountry(currency) ?? INTERNATIONAL;
 
-  const regionLabel = (() => {
-    if (activeRegion === INTERNATIONAL) return dictionary.regionSwitcher.international;
-    if (activeRegion === null) return dictionary.regionSwitcher.europe;
+  const regionLabel =
+    countries.find((entry) => entry.code === activeRegion)?.name ?? activeRegion;
 
-    return countries.find((entry) => entry.code === activeRegion)?.name ?? activeRegion;
-  })();
+  const currentLabel = dictionary.regionSwitcher.current;
 
   // Closing on outside click is `pointerdown`, not `click`: a click that lands
   // on a link elsewhere on the page should dismiss the panel before it
@@ -307,8 +344,13 @@ export default function LocaleRegionSwitcher({
                   opposite edge from English and made two peers read as two
                   different kinds of thing.
                 */}
-                <span dir={dir} lang={LOCALE_HTML_TAG[locale]} className={className}>
-                  {LOCALE_LABELS[locale]}
+                <span className="flex min-w-0 items-baseline gap-1.5">
+                  <span dir={dir} lang={LOCALE_HTML_TAG[locale]} className={className}>
+                    {LOCALE_LABELS[locale]}
+                  </span>
+                  {isActive ? (
+                    <CurrentMarker locale={activeLocale} label={currentLabel} />
+                  ) : null}
                 </span>
               </Link>
             );
@@ -319,68 +361,50 @@ export default function LocaleRegionSwitcher({
 
         <p className="eyebrow px-4 pb-2">{dictionary.regionSwitcher.country}</p>
         {/*
-          The list scrolls rather than growing the panel past the fold —
-          twenty-five rows is taller than a phone. `overscroll-contain` keeps a
-          flick inside it from scrolling the page behind once it reaches the
-          end, which on a hidden-on-scroll header would otherwise summon and
-          dismiss the bar while the visitor is choosing a country.
+          Six rows, so no scroll container: the panel fits a phone's height as
+          it is. Before hydration no row is current — the trigger shows an em
+          dash for the same reason (the server cannot know the visitor's
+          currency).
         */}
-        <div
-          className="max-h-[46vh] overflow-y-auto overscroll-contain"
-          role="group"
-          aria-label={dictionary.regionSwitcher.country}
-        >
-          {countries.map((entry) => (
-            <button
-              key={entry.code}
-              type="button"
-              disabled={!isHydrated}
-              aria-current={activeRegion === entry.code ? "true" : undefined}
-              onClick={() => {
-                setRegion(entry.code);
-                setIsOpen(false);
-              }}
-              className={`${ROW} cursor-pointer ${
-                activeRegion === entry.code ? ROW_ACTIVE : ROW_IDLE
-              } disabled:cursor-default disabled:opacity-60`}
-            >
-              <span>{entry.name}</span>
-              {/*
-                The currency the row commits to, stated on the row rather than
-                left to be discovered on the next price. Latin either way, so it
-                is an LTR island on the Arabic panel.
-              */}
-              <span
-                dir="ltr"
-                lang="en"
-                className="shrink-0 text-[10px] uppercase tracking-[0.1em] opacity-70"
-              >
-                {entry.currency}
-              </span>
-            </button>
-          ))}
+        <div role="group" aria-label={dictionary.regionSwitcher.country}>
+          {countries.map((entry) => {
+            const isActive = isHydrated && activeRegion === entry.code;
 
-          <button
-            type="button"
-            disabled={!isHydrated}
-            aria-current={activeRegion === INTERNATIONAL ? "true" : undefined}
-            onClick={() => {
-              setRegion(INTERNATIONAL);
-              setIsOpen(false);
-            }}
-            className={`${ROW} cursor-pointer ${
-              activeRegion === INTERNATIONAL ? ROW_ACTIVE : ROW_IDLE
-            } disabled:cursor-default disabled:opacity-60`}
-          >
-            <span>{dictionary.regionSwitcher.international}</span>
-            <span
-              dir="ltr"
-              lang="en"
-              className="shrink-0 text-[10px] uppercase tracking-[0.1em] opacity-70"
-            >
-              {currencyForRegion(INTERNATIONAL)}
-            </span>
-          </button>
+            return (
+              <button
+                key={entry.code}
+                type="button"
+                disabled={!isHydrated}
+                aria-current={isActive ? "true" : undefined}
+                onClick={() => {
+                  setRegion(entry.code);
+                  setIsOpen(false);
+                }}
+                className={`${ROW} cursor-pointer ${
+                  isActive ? ROW_ACTIVE : ROW_IDLE
+                } disabled:cursor-default disabled:opacity-60`}
+              >
+                <span className="flex min-w-0 items-baseline gap-1.5">
+                  <span>{entry.name}</span>
+                  {isActive ? (
+                    <CurrentMarker locale={activeLocale} label={currentLabel} />
+                  ) : null}
+                </span>
+                {/*
+                  The currency the row commits to, stated on the row rather than
+                  left to be discovered on the next price. Latin either way, so it
+                  is an LTR island on the Arabic panel.
+                */}
+                <span
+                  dir="ltr"
+                  lang="en"
+                  className="shrink-0 text-[10px] uppercase tracking-[0.1em] opacity-70"
+                >
+                  {entry.currency}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <p className="px-4 pt-3 text-[10px] leading-relaxed text-ground-subtle">

@@ -7,12 +7,15 @@ import { isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { localeMetadata } from "@/src/lib/i18n/metadata";
 import { visitorCountry } from "@/src/lib/geo";
+import { SHIPPING_COUNTRY } from "@/src/lib/shipping";
 import { isCardPaymentAvailable } from "@/src/lib/stripe/server";
+import { getAddressesForUser } from "@/src/services/account";
 import { getBenefitSettings } from "@/src/services/benefits";
 import { spendableCreditsForUser } from "@/src/services/credits";
 import { rewardBalanceForUser } from "@/src/services/rewards";
 import { vouchersForUser } from "@/src/services/vouchers";
 import { getProductCardsByCollection } from "@/src/services/products";
+import type { CheckoutSavedAddress } from "@/src/types/checkout";
 
 /**
  * Checkout.
@@ -79,6 +82,15 @@ export default async function CheckoutPage({
     getProductCardsByCollection(activeLocale),
     headers(),
   ]);
+
+  /*
+   * The customer's address book, started now and awaited at the end, so it
+   * overlaps the credit, rewards and voucher reads below rather than adding a
+   * round trip of its own. A guest reads nothing.
+   */
+  const addressesPending = viewer
+    ? getAddressesForUser(viewer.id)
+    : Promise.resolve([]);
 
   /*
    * The credits this customer could spend, read **after** the session, because
@@ -177,6 +189,28 @@ export default async function CheckoutPage({
    */
   const detectedCountry = visitorCountry(requestHeaders);
 
+  /*
+   * Saved addresses the form may fill itself from: Egyptian ones only, default
+   * first (the order `getAddressesForUser` already returns). An address
+   * elsewhere would close the checkout the moment it was filled in, because
+   * the house delivers only within Egypt, so it is left out rather than
+   * offered.
+   *
+   * Projected to what the fields and the chips need. No recipient, no default
+   * flag, no timestamps. The id is a React key and is never posted back.
+   */
+  const savedAddresses: CheckoutSavedAddress[] = (await addressesPending)
+    .filter((address) => address.country === SHIPPING_COUNTRY)
+    .map((address) => ({
+      id: address.id,
+      label: address.label,
+      line1: address.line1,
+      line2: address.line2,
+      city: address.city,
+      state: address.state,
+      postalCode: address.postalCode,
+    }));
+
   return (
     <CheckoutView
       locale={activeLocale}
@@ -193,6 +227,9 @@ export default async function CheckoutPage({
       // Decided on the server: `STRIPE_SECRET_KEY` is not visible to the
       // browser, so the client cannot answer this question for itself.
       cardAvailable={isCardPaymentAvailable()}
+      // Prefills the delivery fields. Empty for a guest and for a customer with
+      // no Egyptian address, in which case the form starts as it always has.
+      savedAddresses={savedAddresses}
       // Prefills the country and, when it is not Egypt, closes the checkout.
       // The refusal is enforced again in `placeCustomerOrder` — this prop only
       // decides what the visitor sees before they press anything.

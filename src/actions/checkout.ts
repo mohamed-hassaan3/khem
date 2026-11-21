@@ -55,19 +55,27 @@
 
 import { after } from "next/server";
 
+import { sameAddress } from "@/src/lib/address-match";
 import { getUserId } from "@/src/lib/auth";
 import { shippingInCents } from "@/src/lib/cart";
 import { clientKey, isRateLimited } from "@/src/lib/email/rate-limit";
 import { announceOrder } from "@/src/lib/email/send-order-mail";
+import { SHIPPING_COUNTRY } from "@/src/lib/shipping";
 import { isCardPaymentAvailable } from "@/src/lib/stripe/server";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { discountRefusalCodeSchema } from "@/src/schemas/db/discount-preview";
-import { checkoutFieldErrors, checkoutSchema } from "@/src/schemas/checkout";
+import {
+  checkoutFieldErrors,
+  checkoutSchema,
+  type CheckoutData,
+} from "@/src/schemas/checkout";
+import { getAddressesForUser } from "@/src/services/account";
 import { getDeliveryTerms } from "@/src/services/delivery";
 import { getOrderForMailByNumber, resolveCartToLines } from "@/src/services/orders";
 import type { CheckoutFormInput, CheckoutResult } from "@/src/types/checkout";
 import type { DiscountRefusalCode } from "@/src/types/discount";
 
+import { saveAddress } from "./addresses";
 import { revalidateProductsBySlug } from "./admin/shared";
 
 /**
@@ -220,6 +228,61 @@ function placementFailure(message: string): CheckoutResult {
   }
 
   return { ok: false, formError: "server" };
+}
+
+/**
+ * "Save this address to my profile", acted on once the order exists.
+ *
+ * Adds a new entry to the address book and never edits one, which is what lets
+ * a customer change a prefilled address at checkout without touching the saved
+ * copy. Skipped when the book already holds the same place (`sameAddress`, the
+ * comparison the form used to decide whether to offer the box at all).
+ *
+ * Goes through `saveAddress()` rather than writing `"Address"` here. That
+ * action takes the owner from the session, validates against the table's own
+ * bounds, resolves (or creates) the `"User"` row, and makes the address the
+ * default only if it is the customer's first. A second copy of any of that
+ * would be a second thing to keep in step.
+ *
+ * The address book needs one value the checkout does not ask for: a **label**.
+ * The city stands in for it — true, and theirs to rename. The governorate and
+ * postal code go through as the order carried them, usually empty: neither
+ * form asks for them (`src/components/checkout/AddressFields.tsx`).
+ *
+ * The country is the ISO code the address book stores, and it can only be
+ * Egypt: `checkoutSchema` has already refused anything else.
+ *
+ * Logs an error code at most. Never the name or the address.
+ */
+async function saveCheckoutAddress(
+  clerkUserId: string,
+  order: CheckoutData,
+): Promise<void> {
+  const place = {
+    line1: order.line1,
+    line2: order.line2,
+    city: order.city,
+    country: SHIPPING_COUNTRY,
+  };
+
+  const existing = await getAddressesForUser(clerkUserId);
+  if (existing.some((saved) => sameAddress(saved, place))) return;
+
+  const result = await saveAddress({
+    label: order.city.slice(0, 60),
+    recipient: order.customerName,
+    line1: order.line1,
+    line2: order.line2,
+    city: order.city,
+    state: order.state,
+    postalCode: order.postalCode,
+    country: SHIPPING_COUNTRY,
+    isDefault: false,
+  });
+
+  if (!result.ok) {
+    console.error(`[checkout] address save refused: ${result.error}`);
+  }
 }
 
 export async function placeCustomerOrder(
@@ -426,6 +489,30 @@ export async function placeCustomerOrder(
    * catalogue, and the customer has no reason to wait for it. The sale is
    * already recorded, so a failure here only logs.
    */
+  /*
+   * The customer asked to keep this address. Only with a session, whatever the
+   * request said, and only now that the order exists. It runs after the
+   * response and can never fail or slow the sale: the parcel is going to the
+   * address on the order either way.
+   *
+   * A card order saves here, at placement, rather than when it is paid. The
+   * customer asked for the address to be kept, not for the payment to succeed
+   * first.
+   */
+  if (parsed.data.saveAddress && clerkUserId) {
+    const order = parsed.data;
+    after(async () => {
+      try {
+        await saveCheckoutAddress(clerkUserId, order);
+      } catch (cause) {
+        console.error(
+          `[checkout] ${orderNumber} address save failed:`,
+          cause instanceof Error ? cause.message : "unknown error",
+        );
+      }
+    });
+  }
+
   const soldSlugs = resolution.lines.map((line) => line.slug);
   after(async () => {
     try {

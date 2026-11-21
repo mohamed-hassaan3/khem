@@ -1331,11 +1331,22 @@ export const en = {
       country: "Country",
       /** Under the country field once it has been resolved from the request. */
       countryDetected: "Chosen from your location. Change it if that is not right.",
+      /** Group label under Egypt in the country list. */
+      countryGroup: "Elsewhere",
+      /** The last option: any country not on the short list. */
+      countryOther: "Another country",
       outsideEgyptTitle: "We deliver within Egypt",
       outsideEgyptBody:
         "The house does not ship to the country above yet, so this order cannot be completed. If you are in Egypt, choose it from the list to carry on. Otherwise, write to us and we will tell you the moment that changes.",
       note: "Delivery Instructions",
       notePlaceholder: "Optional: a gate code, a preferred hour",
+      /** Above the chips, when a customer has two or more saved addresses. */
+      savedHeading: "Saved Addresses",
+      /** Under the prefilled fields. Says out loud that editing is safe. */
+      savedNotice:
+        "Filled in from your saved addresses. Changes here apply to this order only.",
+      saveToProfile: "Save this address to my profile",
+      saveToProfileHint: "Added to your address book after you place the order.",
     },
 
     payment: {
@@ -1618,6 +1629,100 @@ export const en = {
     /** Greets by first name; falls back to `headingFallback` when unnamed. */
     heading: "{name}",
     headingFallback: "Your Account",
+
+    /*
+     * The redesigned account ("The Private Salon", prompts/account-redesign-
+     * stage-1.md). New labels only — everything the redesign could say with an
+     * existing key still uses it.
+     */
+    hub: {
+      tabs: {
+        label: "Account sections",
+        home: "Home",
+        orders: "Orders",
+        wallet: "Wallet",
+        profile: "Profile",
+      },
+      member: "Member",
+      points: "Points",
+      credit: "Credit",
+      vouchers: "Vouchers",
+      creditExpires: "Credit expires {date}",
+      openWallet: "Wallet",
+      openWalletLabel: "Open your wallet",
+      onItsWay: "On its way",
+      latestOrder: "Latest order",
+      allOrders: "All orders",
+      placed: "Placed {date}",
+      tracking: "Tracking {code}",
+      copyTracking: "Copy tracking code {code}",
+      copied: "Copied",
+      copyFailed: "Could not copy",
+      activity: "Recent activity",
+      seeAll: "See all",
+      noActivity: "Nothing new from the house yet.",
+      glance: "At a glance",
+      defaultAddress: "Default delivery address",
+      noAddress: "No delivery address saved yet",
+      addAddress: "Add an address",
+      letters: "Letters from the house",
+      lettersOn: "On · one letter a month",
+      lettersOff: "Off",
+      region: "Language & currency",
+      regionHint: "Change them from the header",
+      help: "Questions about an order?",
+      helpCta: "Write to the house",
+      recentOrders: "Recent orders",
+      noOrders: "Your first order will appear here.",
+      shop: "Explore collections",
+      orders: {
+        summaryOne: "1 order",
+        summary: "{count} orders",
+        allTime: "all time",
+        filterLabel: "Filter orders",
+        all: "All",
+        active: "In progress",
+        completed: "Completed",
+        noneActive: "No orders are in progress.",
+        noneCompleted: "No completed orders yet.",
+        quantity: "× {count}",
+        order: "Order",
+        date: "Date",
+        items: "Items",
+        status: "Status",
+        total: "Total",
+      },
+      wallet: {
+        eyebrow: "Your privileges",
+        heading: "Wallet",
+        intro: "Everything here is applied at checkout. Nothing to remember.",
+        vouchers: "Vouchers",
+        readyOne: "1 ready",
+        ready: "{count} ready",
+        noVouchers: "No vouchers yet. Private offers from the house will appear here.",
+        credit: "Discovery credit",
+        dayLeft: "1 day left",
+        daysLeft: "{count} days left",
+        points: "KHEM Points",
+        worth: "Worth",
+        activity: "Activity",
+        tagPoints: "Points",
+        tagCredit: "Credit",
+        noActivity: "Nothing has moved in your wallet yet.",
+      },
+      profile: {
+        account: "Account",
+        details: "Name, email & phone",
+        security: "Password & sign-in",
+        connected: "{providers} connected",
+        sessionOne: "1 active session",
+        sessions: "{count} active sessions",
+        addresses: "Delivery addresses",
+        communication: "Communication",
+        region: "Region",
+        close: "Close",
+      },
+    },
     nav: {
       label: "Account sections",
       overview: "Overview",
@@ -1744,14 +1849,8 @@ export const en = {
         label: "Label",
         labelHint: "What you call this place , Home, Office.",
         recipient: "Recipient",
-        line1: "Street address",
-        line2: "Landmark",
-        line2Placeholder: "Optional , beside, behind, opposite",
-        city: "City",
-        state: "Governorate",
-        postalCode: "Postal code",
-        postalCodePlaceholder: "Optional",
-        country: "Country",
+        /* Street, landmark, city and country are worded by
+           `checkout.delivery`: the form renders the checkout's own fields. */
         makeDefault: "Deliver here by default",
         save: "Save address",
         saving: "Saving",
@@ -1794,8 +1893,8 @@ export const en = {
      */
     vouchers: {
       meta: {
-        title: "Vouchers & Credits",
-        description: "Your KHEM credits and vouchers.",
+        title: "Wallet",
+        description: "Your KHEM vouchers, credit and points.",
       },
       eyebrow: "Your Privileges",
       heading: "Vouchers & Credits",
@@ -2012,7 +2111,7 @@ export const en = {
       },
       language: {
         heading: "Language & Currency",
-        body: "Both are chosen from the foot of any page, and follow you across the house.",
+        body: "Both are chosen from the header of any page, and follow you across the house.",
       },
     },
   },
@@ -2255,9 +2354,14 @@ export const en = {
     shortNames: {
       AE: "UAE",
       GB: "UK",
+      // Already short in English; listed so Arabic can shorten it to
+      // "السعودية", which CLDR leaves as the full المملكة العربية السعودية.
+      SA: "Saudi Arabia",
     },
-    /** What a euro price is shown as before a country has been named. */
+    /** The eurozone as one switcher row, see `EUROPE` in `src/lib/currency.ts`. */
     europe: "Europe",
+    /** Beside the active language and country rows. */
+    current: "Current",
     note: "Prices are shown in the currency of the country you choose.",
   },
 

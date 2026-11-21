@@ -196,6 +196,11 @@ export interface CheckoutSelectProps {
   value: string;
   onChange: (value: string) => void;
   options: readonly CheckoutSelectOption[];
+  /**
+   * Further options under a labelled `<optgroup>`, after `options`. Phones
+   * show the label as a section header in the native picker.
+   */
+  group?: { label: string; options: readonly CheckoutSelectOption[] };
   /** Resolved error text, already translated. `undefined` when valid. */
   error?: string;
   /** A quiet line under the field — where the value came from. */
@@ -209,8 +214,8 @@ export interface CheckoutSelectProps {
  * The field treatment, as a chooser.
  *
  * A native `<select>` rather than a custom listbox, and that is a decision
- * rather than a shortcut. Two hundred and fifty options is exactly the case
- * where the platform wins: a phone renders it as its own wheel, a desktop
+ * rather than a shortcut. A list of countries is exactly the case where the
+ * platform wins: a phone renders it as its own wheel, a desktop
  * browser lets somebody type "eg" to jump, keyboard and screen-reader behaviour
  * are correct without a line of code, and none of that has to be re-earned.
  *
@@ -229,6 +234,7 @@ export function CheckoutSelect({
   value,
   onChange,
   options,
+  group,
   error,
   hint,
   wide = false,
@@ -268,6 +274,20 @@ export function CheckoutSelect({
               {option.label}
             </option>
           ))}
+
+          {group ? (
+            <optgroup label={group.label} className="bg-ivory text-ink">
+              {group.options.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                  className="bg-ivory text-ink"
+                >
+                  {option.label}
+                </option>
+              ))}
+            </optgroup>
+          ) : null}
         </select>
 
         {/* Decorative: the control it belongs to is already labelled, and a

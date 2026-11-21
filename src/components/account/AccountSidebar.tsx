@@ -2,89 +2,50 @@
 
 import { usePathname } from "next/navigation";
 
-import SignOutButton from "@/src/components/account/SignOutButton";
+import { ACCOUNT_TABS, activeTab } from "@/src/components/account/account-nav";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { stripLocale } from "@/src/lib/i18n/config";
 import { useDictionary } from "@/src/providers/i18n-provider";
-import { ACCOUNT_PATHS } from "@/src/lib/routes";
 
 /**
- * The portal's navigation rail.
+ * The account's desktop rail — the same four sections as the phone tab bar
+ * (`account-nav.ts`), drawn as a vertical list with icons.
  *
- * A client component for one reason — it needs `usePathname()` to mark the
- * active section. The identity block above it stays a Server Component, so the
+ * A client component for one reason: `usePathname()` marks the active
+ * section. The identity block above it stays a Server Component, so the
  * session's name and email are never serialized into the client bundle.
  *
- * The panels were tabs in `useState` before this change. They are routes now:
- * shareable, back-button correct, and each one free to become its own query.
- *
- * ## Four entries, not seven
- *
- * Notifications left the rail for the header bell — one place counting unread
- * rows, not two that can disagree. Addresses and Preferences left it for
- * `/account/profile`, which is where a customer looks for both: each was one
- * short section, and a rail of seven made the portal look larger than it is.
- * All three routes still exist and still answer; only their rail entries went.
+ * Shown from `lg` only. Below that the tab bar is the navigation.
  */
-
 export default function AccountSidebar() {
-  const dict = useDictionary();
-  const pathname = usePathname();
-
-  // `usePathname()` returns the *public* path (`/ar/account`, `/account`), so
-  // it is stripped back to the locale-agnostic form the link table holds.
-  const { path } = stripLocale(pathname);
-
-  /*
-   * The dashboard's sections, in the order the customer is likely to want
-   * them: where they stand, what they have bought, what the house owes them,
-   * and last the details they change rarely.
-   */
-  const links = [
-    { href: ACCOUNT_PATHS.overview, label: dict.account.nav.overview },
-    { href: ACCOUNT_PATHS.orders, label: dict.account.nav.orders },
-    { href: ACCOUNT_PATHS.vouchers, label: dict.account.nav.vouchers },
-    { href: ACCOUNT_PATHS.profile, label: dict.account.nav.profile },
-  ] as const;
+  const dict = useDictionary().account.hub.tabs;
+  const { path } = stripLocale(usePathname());
+  const current = activeTab(path);
 
   return (
-    <>
-      <nav
-        aria-label={dict.account.nav.label}
-        /*
-         * Under `lg` the rail becomes a horizontally scrolling strip. The old
-         * page pinned a 280px sidebar at every width, which left the panels
-         * roughly 95px wide on a phone.
-         */
-        className="flex gap-1 overflow-x-auto px-4 py-3 lg:flex-col lg:overflow-visible lg:px-5 lg:py-0"
-      >
-        {links.map((link) => {
-          // Exact match only: `/account` must not light up on `/account/orders`.
-          const isActive = path === link.href;
+    <nav aria-label={dict.label} className="flex flex-col gap-1">
+      {ACCOUNT_TABS.map(({ key, href, icon: Icon }) => {
+        const isActive = key === current;
 
-          return (
-            <LocaleLink
-              key={link.href}
-              href={link.href}
-              aria-current={isActive ? "page" : undefined}
-              className={[
-                "shrink-0 whitespace-nowrap px-4 py-3.5 font-heading text-xs tracking-[0.12em] no-underline",
-                "border-b-2 lg:border-b-0 lg:border-s-2",
-                "transition-colors duration-300 ease-luxury-bezier",
-                isActive
-                  ? "border-gold bg-gold/8 text-ground-accent"
-                  : "border-transparent text-ground-muted hover:text-ground",
-              ].join(" ")}
-            >
-              {link.label}
-            </LocaleLink>
-          );
-        })}
-      </nav>
-
-      <div className="mt-auto hidden border-t border-ground-border px-9 py-5 lg:block">
-        <SignOutButton />
-      </div>
-    </>
+        return (
+          <LocaleLink
+            key={key}
+            href={href}
+            aria-current={isActive ? "page" : undefined}
+            className={[
+              "flex h-11 items-center gap-3 rounded-md px-3 no-underline",
+              "font-heading text-[11px] uppercase tracking-[0.16em] rtl:text-[13px] rtl:normal-case rtl:tracking-normal",
+              "transition-[background-color,color,box-shadow] duration-300 ease-luxury-bezier",
+              isActive
+                ? "bg-ground-bg text-ground-accent shadow-[inset_2px_0_0_var(--ground-accent)] rtl:shadow-[inset_-2px_0_0_var(--ground-accent)]"
+                : "text-ground-muted hover:bg-ground-bg/60 hover:text-ground",
+            ].join(" ")}
+          >
+            <Icon size={18} strokeWidth={1.25} aria-hidden="true" />
+            {dict[key]}
+          </LocaleLink>
+        );
+      })}
+    </nav>
   );
 }

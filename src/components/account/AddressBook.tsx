@@ -14,10 +14,22 @@
  * have to reimplement the promotion in the browser and would be wrong the first
  * time the two disagreed.
  *
+ * ## The same form as the checkout
+ *
+ * Street, landmark, city and country are `<AddressFields>`, the block the
+ * checkout's delivery step renders, so the fields, their order, their wording,
+ * the city list and the country list are the checkout's own. Only the label
+ * ("Home", "Office" — what the checkout's chips are called) and the recipient
+ * are the address book's, and they are drawn with the same `<CheckoutField>`.
+ *
+ * Governorate and postal code are not asked, as they are not at checkout. An
+ * address that already holds either keeps it: the draft carries both and the
+ * form simply does not show them.
+ *
  * ## Inline, not a modal
  *
  * The form opens beneath the grid. This page is already a panel inside the
- * portal; a dialog over a panel is a second layer for a nine-field form that
+ * portal; a dialog over a panel is a second layer for a six-field form that
  * has nothing to interrupt.
  *
  * ## Removal confirms in place
@@ -31,6 +43,10 @@
 import { useId, useState, useTransition } from "react";
 
 import AddressCard from "@/src/components/account/AddressCard";
+import AddressFields, {
+  type AddressFieldName,
+} from "@/src/components/checkout/AddressFields";
+import { CheckoutField } from "@/src/components/checkout/CheckoutField";
 import type { AddressResult } from "@/src/actions/addresses";
 import {
   deleteAddress,
@@ -39,13 +55,16 @@ import {
 } from "@/src/actions/addresses";
 import type { Locale } from "@/src/lib/i18n/config";
 import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
-import { countryOptions, SHIPPING_COUNTRY } from "@/src/lib/shipping";
+import { SHIPPING_COUNTRY } from "@/src/lib/shipping";
 import type { AddressErrorCode, AddressField } from "@/src/schemas/address";
 import type { SavedAddress } from "@/src/types/account";
 
 type Copy = Dictionary["account"]["addresses"];
 
-/** The form's fields, in the order they are asked for. */
+/**
+ * The form's state. `state` and `postalCode` are not shown, but are carried so
+ * that editing an address that has them does not erase them.
+ */
 interface Draft {
   id?: string;
   label: string;
@@ -93,10 +112,13 @@ function emptyDraft(country: string): Draft {
   };
 }
 
-const FIELD_CLASS = "field field-underline hover:border-ground-accent/40";
-
+/*
+ * `min-h-11 inline-flex`: these were the height of their 10px label, a ~15px
+ * tap target for Edit / Delete / Make default on a phone. Now each is a 44px
+ * row, and the surrounding spacing is reduced to match.
+ */
 const GHOST_ACTION =
-  "cursor-pointer bg-transparent p-0 font-heading text-[10px] uppercase tracking-[0.16em] text-ground-muted underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline disabled:cursor-default disabled:opacity-40";
+  "inline-flex min-h-11 cursor-pointer items-center bg-transparent p-0 font-heading text-[10px] uppercase tracking-[0.16em] text-ground-muted underline-offset-4 transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent hover:underline disabled:cursor-default disabled:opacity-40";
 
 export default function AddressBook({
   initial,
@@ -121,9 +143,17 @@ export default function AddressBook({
   const [confirming, setConfirming] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // The country list the checkout offers, in the reader's language, so the two
-  // forms cannot come to different conclusions about where the house delivers.
-  const countries = countryOptions(locale);
+  /*
+   * The country *stored* on the address being edited, not the draft's: a saved
+   * address in a country no longer featured (the book offered every country
+   * until it did not) stays in the list for as long as the form is open, so it
+   * neither shows blank nor disappears when the customer tries another country
+   * and changes their mind.
+   */
+  const storedCountry =
+    draft?.id === undefined
+      ? undefined
+      : addresses.find((address) => address.id === draft.id)?.country;
 
   /** Every action funnels through here, so the list has one writer. */
   function run(
@@ -169,76 +199,33 @@ export default function AddressBook({
     );
   }
 
-  function field(
-    key: AddressField,
-    options: {
-      label: string;
-      placeholder?: string;
-      hint?: string;
-      wide?: boolean;
-      autoComplete?: string;
-    },
-  ) {
-    if (draft === null) return null;
+  /** A field's error code, as a sentence in the reader's language. */
+  function errorText(key: AddressField): string | undefined {
+    const code = errors[key];
+    return code === undefined ? undefined : copy.errors[code];
+  }
 
-    const id = `${formId}-${key}`;
-    const errorCode = errors[key];
-    const describedBy = errorCode
-      ? `${id}-error`
-      : options.hint
-        ? `${id}-hint`
-        : undefined;
-
-    return (
-      <div className={options.wide ? "sm:col-span-2" : undefined}>
-        <label
-          htmlFor={id}
-          className="mb-2 block font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/70"
-        >
-          {options.label}
-        </label>
-
-        <input
-          id={id}
-          type="text"
-          value={draft[key]}
-          onChange={(event) =>
-            setDraft({ ...draft, [key]: event.target.value })
-          }
-          placeholder={options.placeholder}
-          autoComplete={options.autoComplete}
-          aria-invalid={errorCode ? true : undefined}
-          aria-describedby={describedBy}
-          className={FIELD_CLASS}
-        />
-
-        {errorCode ? (
-          <p
-            id={`${id}-error`}
-            className="mt-2 text-[11px] tracking-wide text-danger"
-          >
-            {copy.errors[errorCode]}
-          </p>
-        ) : options.hint ? (
-          <p
-            id={`${id}-hint`}
-            className="mt-2 text-[11px] leading-relaxed text-ground-muted/70"
-          >
-            {options.hint}
-          </p>
-        ) : null}
-      </div>
-    );
+  /** One field changed: update the draft and retract that field's error. */
+  function change(key: AddressFieldName | "label" | "recipient", value: string) {
+    setDraft((current) => (current === null ? current : { ...current, [key]: value }));
+    setErrors((current) => {
+      if (current[key] === undefined) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
   }
 
   return (
-    <div>
+    // One settings group: the saved addresses as rows, then "add" (or the
+    // form) as the group's last row.
+    <div className="overflow-hidden rounded-lg border border-ground-border bg-stone">
       {addresses.length === 0 ? (
-        <p className="mb-6 text-[12px] leading-loose text-ground-muted">
+        <p className="px-4 py-4 text-[12px] leading-relaxed text-ground-muted sm:px-5">
           {dict.none}
         </p>
       ) : (
-        <div className="mb-6 grid grid-cols-1 gap-0.5 lg:grid-cols-2">
+        <div className="divide-y divide-ground-border">
           {addresses.map((address) => (
             <AddressCard
               key={address.id}
@@ -333,100 +320,87 @@ export default function AddressBook({
             setNotice(null);
             setDraft(emptyDraft(SHIPPING_COUNTRY));
           }}
-          className={GHOST_ACTION}
+          className={`${GHOST_ACTION} w-full border-t border-ground-border px-4 text-ground-accent sm:px-5`}
         >
           {dict.add}
         </button>
       ) : (
         <form
+          // The action is the validator, as at checkout: its codes come back
+          // as sentences under the fields, in the reader's language, rather
+          // than as the browser's own bubbles.
+          noValidate
           onSubmit={(event) => {
             event.preventDefault();
             submit();
           }}
-          className="border border-ground-border bg-stone px-6 py-7 sm:px-8 sm:py-8"
+          className="acct-details-body border-t border-ground-border px-4 py-5 sm:px-6 sm:py-6"
         >
-          <p className="mb-7 font-heading text-[13px] tracking-[0.08em] text-ground-accent">
+          <p className="mb-5 font-heading text-[13px] tracking-[0.08em] text-ground-accent">
             {draft.id === undefined ? copy.addHeading : copy.editHeading}
           </p>
 
-          <div className="grid grid-cols-1 gap-x-4 gap-y-5 sm:grid-cols-2 md:gap-x-6 md:gap-y-7">
-            {field("label", { label: copy.label, hint: copy.labelHint })}
-            {field("recipient", { label: copy.recipient, autoComplete: "name" })}
-            {field("line1", {
-              label: copy.line1,
-              wide: true,
-              autoComplete: "address-line1",
-            })}
-            {field("line2", {
-              label: copy.line2,
-              placeholder: copy.line2Placeholder,
-              wide: true,
-              autoComplete: "address-line2",
-            })}
-            {field("city", { label: copy.city, autoComplete: "address-level2" })}
-            {field("state", { label: copy.state, autoComplete: "address-level1" })}
-            {field("postalCode", {
-              label: copy.postalCode,
-              placeholder: copy.postalCodePlaceholder,
-              autoComplete: "postal-code",
-            })}
+          {/* The checkout section's grid, so the spacing matches as well. */}
+          <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 md:gap-x-6 md:gap-y-7">
+            <CheckoutField
+              id={`${formId}-label`}
+              label={copy.label}
+              value={draft.label}
+              onChange={(value) => change("label", value)}
+              error={errorText("label")}
+              hint={copy.labelHint}
+              required
+            />
 
-            {/*
-              * A native select, for the reason `<CheckoutSelect>` gives: the
-              * platform already knows how to render two hundred options on a
-              * phone, and none of that behaviour has to be re-earned.
-              */}
-            <div>
-              <label
-                htmlFor={`${formId}-country`}
-                className="mb-2 block font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/70"
-              >
-                {copy.country}
-              </label>
+            <CheckoutField
+              id={`${formId}-recipient`}
+              label={copy.recipient}
+              value={draft.recipient}
+              onChange={(value) => change("recipient", value)}
+              error={errorText("recipient")}
+              autoComplete="name"
+              required
+            />
 
-              <select
-                id={`${formId}-country`}
-                value={draft.country}
+            <AddressFields
+              idPrefix={formId}
+              values={draft}
+              onChange={change}
+              errors={{
+                line1: errorText("line1"),
+                line2: errorText("line2"),
+                city: errorText("city"),
+                country: errorText("country"),
+              }}
+              includeOtherCountry={false}
+              keepCountry={storedCountry}
+            />
+
+            {/* The checkout's checkbox row, so the two forms end alike. */}
+            <label className="flex cursor-pointer items-start gap-3 border border-ground-border px-4 py-3 text-start sm:col-span-2 sm:px-5 sm:py-4">
+              <input
+                type="checkbox"
+                checked={draft.isDefault}
                 onChange={(event) =>
-                  setDraft({ ...draft, country: event.target.value })
+                  setDraft({ ...draft, isDefault: event.target.checked })
                 }
-                autoComplete="country-name"
-                aria-invalid={errors.country ? true : undefined}
-                className={`${FIELD_CLASS} cursor-pointer appearance-none`}
-              >
-                {countries.map((option) => (
-                  <option
-                    key={option.code}
-                    value={option.code}
-                    className="bg-ivory text-ink"
-                  >
-                    {option.name}
-                  </option>
-                ))}
-              </select>
+                className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-gold"
+              />
 
-              {errors.country ? (
-                <p className="mt-2 text-[11px] tracking-wide text-danger">
-                  {copy.errors[errors.country]}
-                </p>
-              ) : null}
-            </div>
+              <span className="block text-xs leading-relaxed text-ground-muted">
+                {copy.makeDefault}
+              </span>
+            </label>
           </div>
 
-          <label className="mt-7 flex cursor-pointer items-center gap-3 text-[12px] text-ground-muted">
-            <input
-              type="checkbox"
-              checked={draft.isDefault}
-              onChange={(event) =>
-                setDraft({ ...draft, isDefault: event.target.checked })
-              }
-              className="size-3.5 accent-gold"
-            />
-            {copy.makeDefault}
-          </label>
-
-          <div className="mt-8 flex flex-wrap items-center gap-6">
-            <button type="submit" disabled={isPending} className="btn btn-primary btn-sm">
+          {/* Phone: the save button is full-width at the 44px floor, Cancel
+              beneath it; from `sm` the compact pair sits on one line. */}
+          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-1 sm:mt-8">
+            <button
+              type="submit"
+              disabled={isPending}
+              className="btn btn-primary btn-sm max-sm:min-h-11 max-sm:w-full"
+            >
               {isPending ? copy.saving : copy.save}
             </button>
 
@@ -450,8 +424,8 @@ export default function AddressBook({
           appearing at the moment it fills. */}
       <p
         aria-live="polite"
-        className={`mt-4 min-h-4 text-[11px] ${
-          notice === "saved" ? "text-ground-accent/70" : "text-danger"
+        className={`px-4 text-[11px] sm:px-5 [&:not(:empty)]:border-t [&:not(:empty)]:border-ground-border [&:not(:empty)]:py-3 ${
+          notice === "saved" ? "text-ground-accent" : "text-danger"
         }`}
       >
         {notice === "saved" ? copy.saved : null}

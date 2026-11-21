@@ -1,52 +1,52 @@
 /**
- * Every country the checkout will let somebody name.
+ * The countries the country field names, besides Egypt.
  *
- * ISO-3166-1 alpha-2, current assignments only. Deliberately a **static list of
- * codes and not of names**: the names are produced by `Intl.DisplayNames` in
- * `src/lib/shipping.ts`, so the dropdown speaks Arabic on `/ar/checkout`
- * without a second translation file to keep in step, and adding a locale later
- * costs nothing here.
+ * ## Why a short list
  *
- * ## Why the codes are written down rather than enumerated
+ * KHEM delivers within Egypt and nowhere else (`SHIPPING_COUNTRY` in
+ * `src/lib/shipping.ts`). The field is not there to choose a destination. It is
+ * there so that somebody the edge has placed in the wrong country — a VPN, a
+ * corporate proxy, a carrier homed abroad — can see where we think they are
+ * and switch back to Egypt. That needs the countries such a visitor is likely
+ * to be placed in, not all two hundred and fifty: a boutique's list rather
+ * than a form library's. Everywhere else is "Another country"
+ * ({@link OTHER_COUNTRY}).
  *
- * There is no `Intl.supportedValuesOf("region")`, and deriving the list by
- * walking AA–ZZ through `Intl.DisplayNames` would make it depend on whichever
- * ICU version is doing the walking — a different list in Node than in Safari.
- * A checkout whose country dropdown changes shape with the browser is not a
- * checkout anybody can support.
+ * Chosen for who is likely to be behind the request:
  *
- * Withdrawn and exceptional reservations are excluded on purpose — `SU`, `YU`,
- * `AN` and the rest name states that no longer exist, `EU`/`UN`/`QO` are not
- * countries, and `UK` is not the ISO code for the United Kingdom (`GB` is).
- * `XK` is kept: Kosovo has no ISO assignment, but it is what GeoIP databases
- * (MaxMind's included) return for that traffic, and a code the proxy can send
- * must be a code the form can show.
+ * - **Gulf** (AE, SA, KW, QA, BH, OM): the largest Egyptian diaspora and the
+ *   region's strongest luxury-fragrance market.
+ * - **Levant and Maghreb** (JO, LB, MA): Arabic-speaking neighbours with a
+ *   perfumery culture of their own.
+ * - **Europe** (GB, FR, DE, IT, NL, CH, ES): the fragrance capitals, and the
+ *   usual VPN exits (NL, DE, GB).
+ * - **North America** (US, CA): diaspora, and the most common VPN exit.
+ * - **TR**: a common carrier and VPN route, and a regional luxury market.
  *
- * The house delivers to exactly one of these — see `SHIPPING_COUNTRY` in
- * `src/lib/shipping.ts`. The rest are here so that somebody the edge has placed
- * in the wrong country can say where they actually are.
+ * Codes only, never names. `Intl.DisplayNames` names them in the reader's
+ * language, so Arabic costs nothing here. The order below does not matter
+ * either: the field sorts by name in the reader's language.
+ *
+ * This list is the house's to edit. Adding a country is one line; removing one
+ * leaves saved addresses in it valid (`src/schemas/address.ts` checks the
+ * shape of a code, not membership here), and the address book still shows
+ * them by name.
  */
-export const COUNTRY_CODES: readonly string[] = [
-  "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AS", "AT",
-  "AU", "AW", "AX", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI",
-  "BJ", "BL", "BM", "BN", "BO", "BQ", "BR", "BS", "BT", "BV", "BW", "BY",
-  "BZ", "CA", "CC", "CD", "CF", "CG", "CH", "CI", "CK", "CL", "CM", "CN",
-  "CO", "CR", "CU", "CV", "CW", "CX", "CY", "CZ", "DE", "DJ", "DK", "DM",
-  "DO", "DZ", "EC", "EE", "EG", "EH", "ER", "ES", "ET", "FI", "FJ", "FK",
-  "FM", "FO", "FR", "GA", "GB", "GD", "GE", "GF", "GG", "GH", "GI", "GL",
-  "GM", "GN", "GP", "GQ", "GR", "GS", "GT", "GU", "GW", "GY", "HK", "HM",
-  "HN", "HR", "HT", "HU", "ID", "IE", "IL", "IM", "IN", "IO", "IQ", "IR",
-  "IS", "IT", "JE", "JM", "JO", "JP", "KE", "KG", "KH", "KI", "KM", "KN",
-  "KP", "KR", "KW", "KY", "KZ", "LA", "LB", "LC", "LI", "LK", "LR", "LS",
-  "LT", "LU", "LV", "LY", "MA", "MC", "MD", "ME", "MF", "MG", "MH", "MK",
-  "ML", "MM", "MN", "MO", "MP", "MQ", "MR", "MS", "MT", "MU", "MV", "MW",
-  "MX", "MY", "MZ", "NA", "NC", "NE", "NF", "NG", "NI", "NL", "NO", "NP",
-  "NR", "NU", "NZ", "OM", "PA", "PE", "PF", "PG", "PH", "PK", "PL", "PM",
-  "PN", "PR", "PS", "PT", "PW", "PY", "QA", "RE", "RO", "RS", "RU", "RW",
-  "SA", "SB", "SC", "SD", "SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM",
-  "SN", "SO", "SR", "SS", "ST", "SV", "SX", "SY", "SZ", "TC", "TD", "TF",
-  "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TR", "TT", "TV", "TW",
-  "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VI",
-  "VN", "VU", "WF", "WS", "XK", "YE", "YT", "ZA", "ZM", "ZW",
+export const FEATURED_COUNTRIES: readonly string[] = [
+  "AE", "SA", "KW", "QA", "BH", "OM",
+  "JO", "LB", "MA",
+  "GB", "FR", "DE", "IT", "NL", "CH", "ES",
+  "US", "CA",
+  "TR",
 ];
 
+/**
+ * "Another country": the checkout's answer for a detected country not on the
+ * list above.
+ *
+ * A sentinel, not a country. It is not an ISO code (too long to be one), so it
+ * can never collide with a real one. It never reaches a database: the checkout
+ * cannot be submitted with anything but Egypt, and the address-book schema
+ * refuses it by name.
+ */
+export const OTHER_COUNTRY = "OTHER";

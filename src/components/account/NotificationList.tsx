@@ -87,7 +87,7 @@ export default function NotificationList({
   return (
     <div>
       {unread.length > 0 ? (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 md:mb-6">
           <p className="font-heading text-[11px] tracking-[0.14em] text-ground-accent">
             {unread.length === 1
               ? copy.unreadOne
@@ -105,14 +105,14 @@ export default function NotificationList({
         </div>
       ) : null}
 
-      <ul className="flex flex-col gap-px">
+      <ul className="acct-rise flex flex-col gap-px overflow-hidden rounded-lg border border-ground-border">
         {notifications.map((item) => {
           const Icon = KIND_ICON[item.kind];
 
           return (
             <li
               key={`${item.kind}:${item.entityId}`}
-              className={`flex items-start gap-4 border-s-2 px-5 py-5 transition-colors duration-500 ease-luxury-bezier ${
+              className={`flex items-start gap-3 border-s-2 px-4 py-4 transition-colors sm:gap-4 sm:px-5 sm:py-5 duration-500 ease-luxury-bezier ${
                 item.isRead
                   ? "border-transparent bg-stone"
                   : "border-gold bg-gold/6"

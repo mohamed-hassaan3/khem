@@ -209,7 +209,34 @@ export const customerOrderSchema = z.object({
   totalInCents: z.number(),
   trackingCode: z.string().nullable().default(null),
   items: z
-    .array(z.object({ productName: z.string(), quantity: z.number() }))
+    .array(
+      z.object({
+        productSlug: z.string().nullable().default(null),
+        productName: z.string(),
+        quantity: z.number(),
+        /*
+         * `OrderItem → Product → ProductImage`, embedded for the account's
+         * thumbnails. `.catch(null)`: a picture that fails to parse must cost
+         * the thumbnail, never the order — `safeParse` failing here would drop
+         * the whole row from the customer's history.
+         */
+        product: z
+          .object({
+            images: z
+              .array(
+                z.object({
+                  url: z.string(),
+                  isPrimary: z.boolean(),
+                  sortOrder: z.number(),
+                }),
+              )
+              .default([]),
+          })
+          .nullable()
+          .default(null)
+          .catch(null),
+      }),
+    )
     .default([]),
   /*
    * The rail. Embedded rather than fetched separately because the two are one

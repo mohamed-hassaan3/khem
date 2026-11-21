@@ -163,7 +163,7 @@ Keep these layers separate:
 | **Component Primitives**| shadcn/ui + Radix UI | Dark custom tokens applied, accessible base primitives |
 | **Animations** | Motion (Framer Motion) | High-end ease curves, parallax scroll, stagger fades |
 | **API** | thin route handlers only
-| **Auth** | Clerk | App Router middleware, JWT claims, role metadata (Admin/Customer) |
+| **Auth** | Clerk | Server-side gates (`getViewer()`, `requireAdmin()`); admin = verified email in `ADMIN_EMAILS` (§10.1) |
 | **Database & ORM** | PostgreSQL + Prisma ORM | Multi-file schema setup, strict relations, explicit transactions |
 | **Database Hosting** | Supabase | Postgres instance, Realtime subscriptions for stock/order state |
 | **Payments** | Stripe | Webhook triggers, Checkout Sessions, Payment Intents, Refunds |
@@ -276,7 +276,7 @@ All routes must follow strict dynamic parameters, metadata definitions, and layo
 | `/cart` | Client | ISR (1h) | Shopping Bag overview, GWP (Gift with Purchase) progress bar. Also reachable as a slide-in panel (`<CartDrawer>`) from the header bag and from every product card |
 | `/checkout` | Client | Force Dynamic | Embedded Stripe Elements checkout with auto address auto-complete |
 | `/account` | Protected | Dynamic | Customer Portal: Order History, Fragrance Profile, Saved Addresses |
-| `/admin/*` | Protected | Dynamic | Admin Flagship Suite (RBAC: `admin` role required) |
+| `/admin/*` | Protected | Dynamic | Admin Flagship Suite (`requireAdmin()` — verified email in `ADMIN_EMAILS`, §10.1) |
 
 ### 8.1 ⚠️ TEMPORARY — the pre-launch cover
 
@@ -514,40 +514,35 @@ model Review {
 
 ## 10. AUTHENTICATION & ACCESS CONTROL
 
-### 10.1 Middleware Setup (`middleware.ts`)
-```typescript
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+### 10.1 Admin access — the `ADMIN_EMAILS` allowlist
 
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/perfumes(.*)',
-  '/collection(.*)',
-  '/heritage',
-  '/journal(.*)',
-  '/craftsmanship',
-  '/stockists',
-  '/api/webhooks(.*)',
-  '/api/ai(.*)'
-]);
+Admin authority is an **email allowlist**, not a Clerk role. There is no
+`middleware.ts` and no `sessionClaims.metadata.role` check; do not reintroduce
+either. One module owns the rule: `src/lib/admin/auth.ts`.
 
-const isAdminRoute = createRouteMatcher(['/admin(.*)']);
-
-export default clerkMiddleware(async (auth, req) => {
-  if (isAdminRoute(req)) {
-    const session = await auth();
-    if (session.sessionClaims?.metadata?.role !== 'ADMIN') {
-      return Response.redirect(new URL('/', req.url));
-    }
-  }
-  if (!isPublicRoute(req)) {
-    await auth.protect();
-  }
-});
-
-export const config = {
-  matcher: ['/((?!_next|[^?]*\.(?:html?|css|js(?!on)|json|png|jpg|webp|svg|ttf|woff2?|ico|csv)).*)'],
-};
-```
+- **Who is an admin.** `getAdminActor()` requires all three, checked on the
+  server against Clerk's `currentUser()` (never a cookie, header or param):
+  a signed-in session, a primary email whose Clerk status is `verified`, and
+  that email (lowercased) listed in `ADMIN_EMAILS`.
+- **`ADMIN_EMAILS`** is a comma-separated env var, read per call. Unset or empty
+  falls back to the hard-coded house account in `DEFAULT_ADMIN_EMAILS` — an
+  empty value never means "no admins" or "everyone". Adding an admin is adding
+  an address and restarting the server; no Clerk dashboard setting is involved.
+- **Enforcement.** `requireAdmin()` runs at the top of
+  `app/[locale]/admin/layout.tsx` **and** as the first statement of every Server
+  Action in `src/actions/admin/` — an action is a public endpoint and does not
+  inherit its page's protection. A new admin action without it is a bug.
+- **Failure is a 404** (`notFound()`), the same for signed-out visitors,
+  customers and unknown URLs, so `/admin` is never confirmed to exist.
+  `src/proxy.ts` redirects only *anonymous* requests early; that is a cost
+  optimisation, not the boundary.
+- **Customer routes** (`/account/*`) are gated the same way, by `getViewer()` in
+  the account layout and again in each panel — not by a proxy matcher.
+- **Roles** (e.g. an editor who may publish journal entries but not change
+  prices) do not exist yet. If they are needed, they land in
+  `src/lib/admin/auth.ts`; that is when Clerk metadata would earn its place.
+- Never commit a personal address to `ADMIN_EMAILS` in `.env.example`; local
+  test admins belong in `.env.local` only.
 
 ### 10.2 Clerk on the client — only where it's needed
 

@@ -18,8 +18,15 @@ import { useKhemSession } from "@/src/providers/session-provider";
 
 export default function SignOutButton({
   className = "",
+  variant = "link",
 }: {
   className?: string;
+  /**
+   * `link` — the quiet text control at the foot of the desktop rail.
+   * `block` — the full-width, 48px button closing the Profile panel on phones,
+   * where there is no rail.
+   */
+  variant?: "link" | "block";
 }) {
   const { signOut } = useKhemSession();
   const dict = useDictionary();
@@ -30,8 +37,9 @@ export default function SignOutButton({
       type="button"
       onClick={() => void signOut(localizePath(locale, "/"))}
       className={[
-        "cursor-pointer bg-transparent p-0 font-heading text-[11px] tracking-[0.12em]",
-        "text-ground-muted/70 transition-colors duration-300 hover:text-ground-muted",
+        variant === "block"
+          ? "flex h-12 w-full cursor-pointer items-center justify-center rounded-md border border-ground-border bg-transparent font-heading text-[11px] uppercase tracking-[0.2em] text-ground transition-colors duration-300 ease-luxury-bezier hover:border-ground-accent hover:text-ground-accent"
+          : "min-h-11 cursor-pointer bg-transparent p-0 text-start font-heading text-[11px] tracking-[0.12em] text-ground-muted transition-colors duration-300 hover:text-ground",
         className,
       ].join(" ")}
     >
