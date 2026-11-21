@@ -52,6 +52,7 @@ import { embedQuery } from "@/src/lib/search/semantic";
 import { fold, isSearchable, normalizeQuery, queryTerms } from "@/src/lib/search/text";
 import { PRODUCT_CARD_COLUMNS, parseList, toProductCard } from "@/src/schemas/db/catalog";
 import { getProductPromotions } from "@/src/services/marketing";
+import { getBestSellerSlugs } from "@/src/services/products";
 import {
   getCatalogProductCards,
   getFragranceCollections,
@@ -202,7 +203,11 @@ export async function searchCatalog(
     return fallbackSearch(locale, normalized, limit);
   }
 
-  const promotions = await getProductPromotions(locale);
+  // Run together: the best-seller ranking is memoised per request.
+  const [promotions, bestSellers] = await Promise.all([
+    getProductPromotions(locale),
+    getBestSellerSlugs(),
+  ]);
 
   /*
    * Promotions are attached here as well as in `src/services/products.ts`,
@@ -211,9 +216,12 @@ export async function searchCatalog(
    * prices while the collection grid beside it quoted campaign ones would look
    * like two different catalogues.
    */
-  const products = parseList(data as unknown[] | null, (row) =>
-    toProductCard(row, locale, promotions),
-  );
+  // The best-seller tag follows sales, as on every other card (see
+  // `getBestSellerSlugs` in services/products.ts).
+  const products = parseList(data as unknown[] | null, (row) => {
+    const card = toProductCard(row, locale, promotions);
+    return card ? { ...card, isBestseller: bestSellers.has(card.slug) } : null;
+  });
 
   /*
    * An empty full-text result is not the same as no match. `websearch_to_tsquery`
