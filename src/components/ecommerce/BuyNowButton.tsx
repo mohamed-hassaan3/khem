@@ -44,8 +44,6 @@ export interface BuyNowButtonProps {
   locale: Locale;
   disabled?: boolean;
   className?: string;
-  /** `primary` (filled ink) is the product page's lead action since Stage 2. */
-  variant?: "primary" | "outline";
 }
 
 export default function BuyNowButton({
@@ -55,7 +53,6 @@ export default function BuyNowButton({
   locale,
   disabled = false,
   className = "",
-  variant = "outline",
 }: BuyNowButtonProps) {
   const dict = useDictionary();
   const router = useRouter();
@@ -85,7 +82,7 @@ export default function BuyNowButton({
           router.push(localizePath(locale, path));
         });
       }}
-      className={`btn ${variant === "primary" ? "btn-primary" : "btn-outline"} justify-center disabled:pointer-events-none disabled:opacity-40 ${className}`}
+      className={`btn btn-outline justify-center disabled:pointer-events-none disabled:opacity-40 ${className}`}
     >
       {dict.product.buyNow}
     </button>

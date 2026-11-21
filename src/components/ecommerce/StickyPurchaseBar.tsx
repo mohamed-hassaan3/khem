@@ -1,7 +1,6 @@
 "use client";
 
-import { Check, ShoppingBag } from "lucide-react";
-import BuyNowButton from "@/src/components/ecommerce/BuyNowButton";
+import { Check } from "lucide-react";
 
 import ProductPrice from "@/src/components/ecommerce/ProductPrice";
 import type { Locale } from "@/src/lib/i18n/config";
@@ -36,9 +35,6 @@ import type { ProductPromotion } from "@/src/types/marketing";
 
 export interface StickyPurchaseBarProps {
   isVisible: boolean;
-  productId: string;
-  /** The buy block's chosen quantity, so Buy now here buys the same amount. */
-  quantity: number;
   name: string;
   priceInCents: number;
   promotion: ProductPromotion | null;
@@ -61,8 +57,6 @@ export interface StickyPurchaseBarProps {
  */
 export default function StickyPurchaseBar({
   isVisible,
-  productId,
-  quantity,
   name,
   priceInCents,
   promotion,
@@ -108,37 +102,23 @@ export default function StickyPurchaseBar({
           </p>
         </div>
 
-        {/*
-          Buy now filled, as in the buy block; Add to bag as a 46px bag icon
-          beside it, so both fit beside the name on a 390px screen.
-        */}
-        <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            disabled={isSoldOut}
-            onClick={onAddToCart}
-            aria-label={
-              justAdded
-                ? dict.product.added
-                : interpolate(dict.collections.addToBag, { name })
-            }
-            className="grid size-[46px] shrink-0 cursor-pointer place-items-center rounded-md border border-ground-border text-ground transition-colors duration-300 ease-out hover:border-ground-accent hover:text-ground-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent disabled:pointer-events-none disabled:opacity-40"
-          >
-            {justAdded ? (
-              <Check size={16} strokeWidth={1.4} aria-hidden="true" />
-            ) : (
-              <ShoppingBag size={17} strokeWidth={1.25} aria-hidden="true" />
-            )}
-          </button>
-          <BuyNowButton
-            productId={productId}
-            quantity={quantity}
-            inventory={inventory}
-            locale={locale}
-            variant="primary"
-            className="h-[46px] rounded-md px-5 text-[11px] tracking-[0.2em] whitespace-nowrap sm:px-8"
-          />
-        </div>
+        <button
+          type="button"
+          disabled={isSoldOut}
+          onClick={onAddToCart}
+          className="btn btn-primary h-[46px] shrink-0 justify-center gap-2 rounded-md px-5 text-[11px] tracking-[0.2em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 sm:px-8"
+        >
+          {isSoldOut ? (
+            dict.product.soldOut
+          ) : justAdded ? (
+            <>
+              <Check size={13} strokeWidth={1.25} aria-hidden="true" />
+              {dict.product.added}
+            </>
+          ) : (
+            dict.product.addToCart
+          )}
+        </button>
       </div>
     </div>
   );

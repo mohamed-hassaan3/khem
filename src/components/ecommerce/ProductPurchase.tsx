@@ -292,24 +292,11 @@ export default function ProductPurchase({
           groupLabel={dict.product.quantity}
           className="h-12 lg:h-[50px]"
         />
-        {/*
-          Buy now leads (filled) and Add to bag follows (outline): the house
-          chose the direct path as the primary action. Same two controls,
-          same behaviour, only the emphasis swapped.
-        */}
-        <BuyNowButton
-          productId={product.id}
-          quantity={quantity}
-          inventory={product.inventory}
-          locale={locale}
-          variant="primary"
-          className="h-12 rounded-md px-4 text-[11px] tracking-[0.2em] whitespace-nowrap lg:h-[50px]"
-        />
         <button
           type="button"
           disabled={isSoldOut}
           onClick={handleAddToCart}
-          className="btn btn-outline col-span-2 h-[46px] justify-center rounded-md px-4 text-[11px] tracking-[0.2em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 lg:col-span-1 lg:h-[50px]"
+          className="btn btn-primary h-12 justify-center rounded-md px-4 text-[11px] tracking-[0.2em] whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 lg:h-[50px]"
         >
           {isSoldOut ? (
             dict.product.soldOut
@@ -322,6 +309,13 @@ export default function ProductPurchase({
             dict.product.addToCart
           )}
         </button>
+        <BuyNowButton
+          productId={product.id}
+          quantity={quantity}
+          inventory={product.inventory}
+          locale={locale}
+          className="col-span-2 h-[46px] rounded-md px-4 text-[11px] tracking-[0.2em] whitespace-nowrap lg:col-span-1 lg:h-[50px]"
+        />
       </div>
 
       <p
@@ -363,8 +357,6 @@ export default function ProductPurchase({
 
       <StickyPurchaseBar
         isVisible={isBarVisible}
-        productId={product.id}
-        quantity={quantity}
         name={product.name}
         priceInCents={product.priceInCents}
         promotion={product.promotion}
