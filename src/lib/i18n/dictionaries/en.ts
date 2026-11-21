@@ -1253,7 +1253,7 @@ export const en = {
         "Review the fragrances in your KHEM bag before checkout , complimentary delivery on qualifying orders.",
     },
     eyebrow: "Your Selection",
-    heading: "The Cart",
+    heading: "Your Bag",
     /*
      * Two forms rather than `Intl.PluralRules`: the counts on this page are
      * small, and neither locale needs the full category set to read correctly

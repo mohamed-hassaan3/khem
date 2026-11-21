@@ -68,3 +68,22 @@ export interface NavigationTree {
   quickAccess: NavLinkEntry[];
   world: NavLinkEntry[];
 }
+
+/**
+ * The two picture tiles the menus feature (Stage 3,
+ * `prompts/chrome-and-discovery-stage-3.md`): the current new arrival and the
+ * latest journal article, read from the catalogue and the journal so the menu
+ * never advertises something that is not there. Either may be `null`, and the
+ * tile is then not drawn.
+ */
+export interface NavFeatureTile {
+  href: string;
+  title: string;
+  imageUrl: string;
+  imageAlt: string;
+}
+
+export interface NavFeatures {
+  newArrival: NavFeatureTile | null;
+  article: (NavFeatureTile & { category: string }) | null;
+}

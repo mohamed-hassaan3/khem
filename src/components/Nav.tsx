@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type {
+  NavFeatures,
   NavEntry,
   NavLinkEntry,
   NavigationTree,
@@ -63,8 +64,9 @@ const DESKTOP_BREAKPOINT = 1024;
  * that opens the cart panel while its neighbours are links, and the two must
  * still be indistinguishable to the eye.
  */
-const BOUTIQUE_ROW =
-  "group flex items-center gap-3 text-xs tracking-widest text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent";
+/** A row in the phone menu's boutique card (Stage 3). */
+const DRAWER_ROW =
+  "flex min-h-11 items-center justify-between text-[13px] text-ground no-underline transition-colors duration-300 hover:text-ground-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ground-accent";
 
 /**
  * The 44px hit area every header icon carries.
@@ -174,6 +176,7 @@ function CollectionsList({
   labelClass,
   idPrefix,
   onNavigate,
+  variant = "stack",
 }: {
   /**
    * The resolved column — labels already in the reader's language and addresses
@@ -187,8 +190,83 @@ function CollectionsList({
   idPrefix: string;
   /** Closes the surface, where the surface is one that closes. */
   onNavigate?: () => void;
+  /**
+   * `stack`: the mega menu's column (names with their descriptions).
+   * `rows`: the phone menu (Stage 3) — 52px ruled rows, names only, children
+   * indented as 44px rows. Same tree, same accordion behaviour.
+   */
+  variant?: "stack" | "rows";
 }) {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  if (variant === "rows") {
+    return (
+      <ul className="border-t border-ground-border">
+        {entries.map((entry) => {
+          if (entry.kind === "link") {
+            return (
+              <li key={entry.id} className="border-b border-ground-border">
+                <LocaleLink
+                  href={entry.href}
+                  onClick={onNavigate}
+                  className="flex min-h-13 items-center font-heading text-[15px] tracking-[0.04em] text-ground no-underline transition-colors duration-300 hover:text-ground-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ground-accent"
+                >
+                  {entry.label}
+                </LocaleLink>
+              </li>
+            );
+          }
+          const isOpen = openGroup === entry.id;
+          const panelId = `${idPrefix}-${entry.id}`;
+          return (
+            <li key={entry.id} className="border-b border-ground-border">
+              <button
+                type="button"
+                onClick={() => setOpenGroup(isOpen ? null : entry.id)}
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                className={`flex min-h-13 w-full cursor-pointer items-center justify-between gap-3 text-start font-heading text-[15px] tracking-[0.04em] transition-colors duration-300 hover:text-ground-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ground-accent ${
+                  isOpen ? "text-ground-accent" : "text-ground"
+                }`}
+              >
+                {entry.label}
+                <ChevronDown
+                  aria-hidden="true"
+                  width={16}
+                  height={16}
+                  strokeWidth={1.25}
+                  className={`shrink-0 text-ground-muted transition-transform duration-400 ease-luxury-bezier motion-reduce:transition-none ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              <div
+                id={panelId}
+                inert={!isOpen}
+                className={`grid transition-[grid-template-rows,opacity] duration-400 ease-luxury-bezier motion-reduce:transition-none ${
+                  isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <ul className="overflow-hidden">
+                  {entry.children.map((child) => (
+                    <li key={child.id}>
+                      <LocaleLink
+                        href={child.href}
+                        onClick={onNavigate}
+                        className="flex min-h-11 items-center ps-4 text-[13px] text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ground-accent"
+                      >
+                        {child.label}
+                      </LocaleLink>
+                    </li>
+                  ))}
+                  <li aria-hidden="true" className="h-2" />
+                </ul>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  }
 
   const renderLink = (link: NavLinkEntry) => (
     <LocaleLink
@@ -294,10 +372,13 @@ function CollectionsList({
  */
 export default function Nav({
   tree,
+  features,
   prelaunch = false,
   semanticSearch = false,
 }: {
   tree: NavigationTree;
+  /** The menus' picture tiles: real new arrival and latest article (Stage 3). */
+  features: NavFeatures;
   prelaunch?: boolean;
   /** Meaning-based search is configured on the server; see `<SearchOverlay>`. */
   semanticSearch?: boolean;
@@ -306,7 +387,6 @@ export default function Nav({
   const locale = useLocale();
   // Never loads Clerk for a signed-out visitor; see session-provider.tsx.
   const isSignedIn = useKhemSession().status === "signed-in";
-  const { open: openCartDrawer } = useCartDrawer();
 
   /*
    * Both shop columns come from `src/constants/navigation-pages.ts`, which the
@@ -323,6 +403,13 @@ export default function Nav({
   const [searchRequested, setSearchRequested] = useState(false);
   const [searchPath, setSearchPath] = useState<string | null>(null);
   const pathname = usePathname();
+  /*
+   * Warm the mega menus' two photographs once a pointer (or focus) reaches
+   * the menu links: off-screen copies with the tiles' own `sizes` fetch the
+   * very file the tile will ask for, so the tile is painted when it opens
+   * instead of a beat later.
+   */
+  const [warmTiles, setWarmTiles] = useState(false);
 
   /**
    * The search trigger, so focus can be returned to it on close — a modal
@@ -651,7 +738,11 @@ export default function Nav({
             </span>
           </button>
 
-          <div className="hidden items-center gap-5 md:gap-9 lg:flex">
+          <div
+            className="hidden items-center gap-5 md:gap-9 lg:flex"
+            onPointerEnter={() => setWarmTiles(true)}
+            onFocus={() => setWarmTiles(true)}
+          >
             {prelaunch ? null : (
               <button
                 type="button"
@@ -781,6 +872,21 @@ export default function Nav({
         </div>
       </nav>
 
+      {warmTiles && !activeMenu ? (
+        <div aria-hidden="true" className="pointer-events-none fixed -start-[9999px] top-0 hidden lg:block">
+          {features.newArrival ? (
+            <div className="relative h-56 w-100">
+              <Image src={features.newArrival.imageUrl} alt="" fill sizes="400px" loading="eager" fetchPriority="low" />
+            </div>
+          ) : null}
+          {features.article ? (
+            <div className="relative h-56 w-200">
+              <Image src={features.article.imageUrl} alt="" fill sizes="800px" loading="eager" fetchPriority="low" />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {/* ── SEARCH PANEL ───────────────────────────── */}
       <SearchOverlay
         open={searchOpen}
@@ -830,174 +936,149 @@ export default function Nav({
             : "-translate-x-full rtl:translate-x-full",
         ].join(" ")}
       >
-        <div className="flex h-20 shrink-0 items-center justify-between px-6">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-ground-border ps-5 pe-2">
           <p className="eyebrow">{dict.nav.menu}</p>
           <button
             type="button"
             aria-label={dict.nav.closeMenu}
             onClick={closeDrawer}
-            className="-me-2.5 flex h-11 w-11 cursor-pointer items-center justify-center text-ground-muted transition-colors duration-300 hover:text-ground-accent"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center text-ground transition-colors duration-300 hover:text-ground-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ground-accent"
           >
-            <X />
+            <X width={20} height={20} strokeWidth={1.25} />
           </button>
         </div>
 
-        <div className="flex flex-col gap-5 md:gap-10 px-6 pb-14">
-          {/*
-           * ⚠️ TEMPORARY — the drawer's two shop sections, and their dividers
-           * with them. A rule left behind by a hidden section is a rule with
-           * nothing on either side of it.
-           */}
+        {/*
+          Stage 3 (`prompts/chrome-and-discovery-stage-3.md`): a picture first
+          (the real new arrival), the shop as ruled accordion rows, quick
+          access as chips, the house's pages as rows, then the boutique and
+          language. Search and the bag are not repeated here: they are in the
+          header the visitor just tapped.
+        */}
+        <div className="flex flex-col gap-6 px-5 pb-10 pt-5">
           {prelaunch ? null : (
             <>
-              <section>
-                <p className="eyebrow mb-6">{dict.nav.ourCollections}</p>
+              {features.newArrival ? (
+                <LocaleLink
+                  href={features.newArrival.href}
+                  onClick={closeDrawer}
+                  className="group relative block h-36 shrink-0 overflow-hidden rounded-lg bg-sand no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
+                >
+                  <Image
+                    src={features.newArrival.imageUrl}
+                    alt={features.newArrival.imageAlt}
+                    fill
+                    sizes="340px"
+                    className="object-cover"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-linear-to-t from-ink/75 via-ink/15 to-transparent"
+                  />
+                  <span className="absolute inset-x-4 bottom-3.5 block">
+                    <span className="block text-[10px] uppercase tracking-[0.22em] text-gold-soft">
+                      {dict.nav.newArrival}
+                    </span>
+                    <span
+                      dir="ltr"
+                      className="mt-1 block font-heading text-lg text-ivory rtl:text-right"
+                    >
+                      {features.newArrival.title}
+                    </span>
+                  </span>
+                </LocaleLink>
+              ) : null}
+
+              <section aria-label={dict.nav.ourCollections}>
+                <p className="eyebrow mb-2">{dict.nav.ourCollections}</p>
                 <CollectionsList
                   key={pathname}
                   entries={tree.collections}
                   labelClass="text-sm"
                   idPrefix="drawer-collections"
                   onNavigate={closeDrawer}
+                  variant="rows"
                 />
               </section>
 
-              <div className="gold-line" />
-
-              <section>
-                <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
-                <div className="flex flex-col gap-3.5">
+              <section aria-label={dict.nav.quickAccess}>
+                <p className="eyebrow mb-3">{dict.nav.quickAccess}</p>
+                <ul className="flex flex-wrap gap-2">
                   {tree.quickAccess.map((item) => (
-                    <LocaleLink
-                      key={item.id}
-                      href={item.href}
-                      onClick={closeDrawer}
-                      className="group flex items-center gap-3 text-xs tracking-widest text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
-                    >
-                      <span className="inline-block h-px w-5 bg-current" />
-                      {item.label}
-                    </LocaleLink>
+                    <li key={item.id}>
+                      <LocaleLink
+                        href={item.href}
+                        onClick={closeDrawer}
+                        className="inline-flex min-h-10 items-center rounded-full border border-ground-accent/40 px-4 text-xs text-ground no-underline transition-colors duration-300 hover:border-ground-accent hover:bg-ground-accent/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
+                      >
+                        {item.label}
+                      </LocaleLink>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </section>
-
-              <div className="gold-line" />
             </>
           )}
 
-          <section>
-            <p className="eyebrow mb-6">{dict.nav.discover}</p>
-            <div className="flex flex-col gap-5">
+          <section aria-label={dict.nav.discover}>
+            <p className="eyebrow mb-2">{dict.nav.discover}</p>
+            <ul className="border-t border-ground-border">
               {tree.world.map((item) => (
-                <LocaleLink
-                  key={item.id}
-                  href={item.href}
-                  onClick={closeDrawer}
-                  className="font-heading text-sm tracking-widest text-ground no-underline transition-colors duration-300 hover:text-ground-accent"
-                >
-                  {item.label}
-                </LocaleLink>
+                <li key={item.id} className="border-b border-ground-border">
+                  <LocaleLink
+                    href={item.href}
+                    onClick={closeDrawer}
+                    className="flex min-h-12 items-center font-heading text-sm tracking-[0.04em] text-ground no-underline transition-colors duration-300 hover:text-ground-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ground-accent"
+                  >
+                    {item.label}
+                  </LocaleLink>
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
 
-          <div className="gold-line" />
-
-          <section>
-            <p className="eyebrow mb-6">{dict.nav.boutique}</p>
-            <div className="flex flex-col gap-3.5">
-              {/*
-               * Search is a control, not a destination, so it sits above the
-               * links rather than inside the list — the drawer is the only
-               * place a phone can reach the panel from besides the header.
-               */}
-              {prelaunch ? null : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    closeDrawer();
-                    openSearch();
-                  }}
-                  className="group flex cursor-pointer items-center gap-3 text-start text-xs tracking-widest text-ground-muted transition-colors duration-300 hover:text-ground-accent"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="inline-block h-px w-5 bg-current"
-                  />
-                  {dict.nav.search}
-                </button>
-              )}
-
-              <LocaleLink
-                href="/stockists"
-                onClick={closeDrawer}
-                className={BOUTIQUE_ROW}
-              >
-                <span
-                  aria-hidden="true"
-                  className="inline-block h-px w-5 bg-current"
-                />
-                {dict.nav.stockists}
-              </LocaleLink>
-
-              {/*
-               * The bag is a control here too, for the same reason it is in the
-               * header: it opens the panel rather than navigating. The nav
-               * drawer stands down first — two overlays on a phone at once is
-               * one too many, and the cart panel is the one that was asked for.
-               */}
-              {prelaunch ? null : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    closeDrawer();
-                    openCartDrawer();
-                  }}
-                  aria-haspopup="dialog"
-                  aria-controls="cart-drawer"
-                  className={`${BOUTIQUE_ROW} cursor-pointer text-start`}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="inline-block h-px w-5 bg-current"
-                  />
-                  {dict.nav.cart}
-                </button>
-              )}
-
-              <LocaleLink
-                href="/account"
-                onClick={closeDrawer}
-                className={BOUTIQUE_ROW}
-              >
-                <span
-                  aria-hidden="true"
-                  className="inline-block h-px w-5 bg-current"
-                />
-                {dict.nav.account}
-              </LocaleLink>
-
-              {/*
-               * The drawer is the only account surface on a phone, so it
-               * carries sign-out directly rather than sending the visitor to
-               * `/account` to find it. Hidden entirely for a guest, for whom
-               * it would be a control with nothing to end.
-               */}
-              {isSignedIn ? (
-                <span className="flex items-center gap-3 text-ground-muted">
-                  <span
-                    aria-hidden="true"
-                    className="inline-block h-px w-5 bg-current"
-                  />
-                  <SignOutButton className="text-xs tracking-widest text-ground-muted hover:text-ground-accent" />
-                </span>
-              ) : null}
-            </div>
+          <section
+            aria-label={dict.nav.boutique}
+            className="ground-stone rounded-lg bg-ground-bg px-4 py-1"
+          >
+            <LocaleLink
+              href="/stockists"
+              onClick={closeDrawer}
+              className={DRAWER_ROW}
+            >
+              {dict.nav.stockists}
+              <ChevronDown
+                aria-hidden="true"
+                width={14}
+                height={14}
+                strokeWidth={1.25}
+                className="-rotate-90 text-ground-muted rtl:rotate-90"
+              />
+            </LocaleLink>
+            <LocaleLink
+              href="/account"
+              onClick={closeDrawer}
+              className={`${DRAWER_ROW} border-t border-ground-border`}
+            >
+              {dict.nav.account}
+              <ChevronDown
+                aria-hidden="true"
+                width={14}
+                height={14}
+                strokeWidth={1.25}
+                className="-rotate-90 text-ground-muted rtl:rotate-90"
+              />
+            </LocaleLink>
+            {/* Only a session the server confirmed can sign out. */}
+            {isSignedIn ? (
+              <div className="flex min-h-11 items-center border-t border-ground-border">
+                <SignOutButton className="text-[13px] text-ground-muted hover:text-ground-accent" />
+              </div>
+            ) : null}
           </section>
 
-          <div className="gold-line" />
-
-          <section>
-            <p className="eyebrow mb-6">{dict.regionSwitcher.label}</p>
+          <section aria-label={dict.regionSwitcher.label}>
+            <p className="eyebrow mb-3">{dict.regionSwitcher.label}</p>
             <LocaleRegionSwitcher variant="full" />
           </section>
         </div>
@@ -1044,38 +1125,37 @@ export default function Nav({
             />
           </div>
           <div>
-            <p className="eyebrow mb-6">{dict.nav.featured}</p>
-            {/* The tile is captioned "New Arrival", so it points at the
-                showroom and names the fragrance actually flagged as new. */}
-            <LocaleLink
-              href="/new-arrival"
-              className="relative block overflow-hidden rounded-sm no-underline"
-            >
-              {/*
-                No `brightness-[0.7]`. The tile sits inside an ivory panel and
-                its caption is charcoal, so dimming the photograph made the
-                words *less* readable, not more — it was tuned for the ivory
-                caption this menu carried while the panel was obsidian.
-              */}
-              <Image
-                src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790357791/About-KHEM-banner.jpg"
-                alt={dict.nav.featuredCollectionAlt}
-                width={400}
-                height={200}
-                className="block h-50 w-full object-cover"
-              />
-              {/* An ivory field under the caption, bounded to the lower third. */}
-              <div
-                aria-hidden="true"
-                className="banner-scrim banner-scrim-base"
-              />
-              <div className="absolute bottom-4 start-4">
-                <p className="eyebrow">{dict.nav.newArrival}</p>
-                <p className="mt-1 font-heading text-sm text-ground">
-                  {dict.nav.featuredProduct}
-                </p>
-              </div>
-            </LocaleLink>
+            {/* The real new arrival (Stage 3); no tile when there is none. */}
+            {features.newArrival ? (
+              <>
+                <p className="eyebrow mb-6">{dict.nav.featured}</p>
+                <LocaleLink
+                  href={features.newArrival.href}
+                  className="group relative block h-56 overflow-hidden rounded-lg bg-sand no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
+                >
+                  <Image
+                    src={features.newArrival.imageUrl}
+                    alt={features.newArrival.imageAlt}
+                    fill
+                    sizes="400px"
+                    loading="eager"
+                    className="object-cover transition-transform duration-700 ease-luxury-bezier group-hover:scale-[1.03] motion-reduce:transition-none"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-linear-to-t from-ink/70 via-ink/10 to-transparent"
+                  />
+                  <span className="absolute inset-x-5 bottom-4 block">
+                    <span className="block text-[10px] uppercase tracking-[0.22em] text-gold-soft">
+                      {dict.nav.newArrival}
+                    </span>
+                    <span dir="ltr" className="mt-1 block font-heading text-xl text-ivory rtl:text-right">
+                      {features.newArrival.title}
+                    </span>
+                  </span>
+                </LocaleLink>
+              </>
+            ) : null}
           </div>
           <div>
             <p className="eyebrow mb-6">{dict.nav.quickAccess}</p>
@@ -1119,29 +1199,37 @@ export default function Nav({
             </div>
           </div>
           <div className="col-span-2">
-            <p className="eyebrow mb-6">{dict.nav.fromTheJournal}</p>
-            <LocaleLink
-              href="/journal"
-              className="relative block overflow-hidden rounded-sm no-underline"
-            >
-              <Image
-                src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790938160/nav-heritage.jpg"
-                alt={dict.nav.featuredArticleAlt}
-                width={700}
-                height={180}
-                className="block h-45 w-full object-cover"
-              />
-              <div
-                aria-hidden="true"
-                className="banner-scrim banner-scrim-base"
-              />
-              <div className="absolute inset-0 flex flex-col justify-end px-6 py-5">
-                <p className="eyebrow">{dict.nav.journalLabel}</p>
-                <p className="mt-1.5 font-heading text-base text-ground">
-                  {dict.nav.featuredArticleTitle}
-                </p>
-              </div>
-            </LocaleLink>
+            {/* The latest article (Stage 3); no tile when the journal is empty. */}
+            {features.article ? (
+              <>
+                <p className="eyebrow mb-6">{dict.nav.fromTheJournal}</p>
+                <LocaleLink
+                  href={features.article.href}
+                  className="group relative block h-56 overflow-hidden rounded-lg bg-sand no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
+                >
+                  <Image
+                    src={features.article.imageUrl}
+                    alt={features.article.imageAlt}
+                    fill
+                    sizes="800px"
+                    loading="eager"
+                    className="object-cover transition-transform duration-700 ease-luxury-bezier group-hover:scale-[1.03] motion-reduce:transition-none"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-linear-to-t from-ink/70 via-ink/10 to-transparent"
+                  />
+                  <span dir="auto" className="absolute inset-x-6 bottom-5 block">
+                    <span className="block text-[10px] uppercase tracking-[0.22em] text-gold-soft">
+                      {features.article.category}
+                    </span>
+                    <span className="mt-1.5 block font-heading text-lg text-ivory">
+                      {features.article.title}
+                    </span>
+                  </span>
+                </LocaleLink>
+              </>
+            ) : null}
           </div>
         </div>
       </div>

@@ -25,7 +25,7 @@ import {
 } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { getDeliveryTerms } from "@/src/services/delivery";
-import { getNavigationTree } from "@/src/services/navigation";
+import { getNavFeatures, getNavigationTree } from "@/src/services/navigation";
 // One origin for the whole app. This used to be a second copy of the constant,
 // which is how the root layout and every page's canonical could have come to
 // disagree about which domain KHEM lives on.
@@ -273,6 +273,7 @@ export default async function RootLayout({
     navTree,
     deliveryTerms,
     socialProfiles,
+    navFeatures,
   ] = await Promise.all([
     getMarketingSettings(locale),
     getLiveAnnouncements(locale),
@@ -308,6 +309,8 @@ export default async function RootLayout({
      * broken one.
      */
     getSocialProfiles(),
+    // The menus' two picture tiles: the new arrival and the latest article.
+    getNavFeatures(locale),
   ]);
 
   const showAnnouncements =
@@ -510,6 +513,7 @@ export default async function RootLayout({
                     ) : null}
                     <Nav
                       tree={navTree}
+                      features={navFeatures}
                       prelaunch={prelaunch}
                       /*
                        * A boolean, read on the server: whether the AI Gateway

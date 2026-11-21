@@ -39,18 +39,18 @@ export default function PageHeader({
   metaExtra,
 }: PageHeaderProps) {
   return (
-    <header className="border-b border-ground-border px-4 pb-10 pt-14 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
-      <p className="eyebrow mb-3">{eyebrow}</p>
+    <header className="border-b border-ground-border px-4 pb-5 pt-7 sm:px-8 lg:px-14 lg:pb-12 lg:pt-16 xl:px-20">
+      <p className="eyebrow mb-2 lg:mb-3">{eyebrow}</p>
 
       <h1
         dir={headingDir}
-        className="font-heading text-3xl font-normal text-ground sm:text-4xl lg:text-5xl"
+        className="font-heading text-[30px] font-normal leading-tight text-ground sm:text-4xl lg:text-5xl"
       >
         {heading}
       </h1>
 
       {meta ? (
-        <p className="mt-3 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-xs tracking-[0.08em] text-ground-muted">
+        <p className="mt-1.5 flex flex-wrap items-center gap-x-3.5 lg:mt-3 gap-y-1 text-xs tracking-[0.08em] text-ground-muted">
           <span {...(metaLive ? { "aria-live": "polite" as const } : {})}>{meta}</span>
           {metaExtra ? (
             <>

@@ -62,7 +62,7 @@ export default function SearchForm({ defaultValue, semanticSearch = false }: Sea
           autoComplete="off"
           spellCheck={false}
           enterKeyHint="search"
-          className="w-full min-w-0 bg-transparent font-heading text-lg tracking-wide text-ground placeholder:text-ground-muted/70 focus:outline-none sm:text-xl"
+          className="w-full min-w-0 bg-transparent font-body text-base text-ground placeholder:text-ground-muted focus:outline-none sm:font-heading sm:text-xl sm:tracking-wide"
         />
 
         {value.length > 0 ? (

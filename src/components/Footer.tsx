@@ -101,7 +101,7 @@ export default async function Footer({
   return (
     <footer
       data-site-footer
-      className="ground-charcoal border-t border-ground-border pt-12 md:pt-20"
+      className="ground-charcoal border-t border-ground-border pt-8 md:pt-20"
     >
       {/*
         `gap-0` below `md`: the groups are accordion rows there and each draws
@@ -110,7 +110,15 @@ export default async function Footer({
       */}
       <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-0 px-4 pb-12 sm:px-6 md:gap-16 md:px-10 md:pb-20 lg:grid-cols-[2fr_1fr_1fr_1fr] lg:gap-16 lg:px-12 xl:px-16">
         <div>
-          <LocaleLink href="/" className="mb-7 inline-block no-underline">
+          <LocaleLink
+            href="/"
+            /*
+             * `-ms-10`: the wordmark file carries ~27% transparent padding on
+             * each side, so at 64px tall the mark sat 40px in from the text
+             * below it. Pulled back so the mark and the blurb share an edge.
+             */
+            className="-ms-10 mb-5 inline-block no-underline md:mb-7"
+          >
             {/*
              * Static import, not a string path. A relative `src` resolves
              * against the current URL, so `"logo/…"` silently became
