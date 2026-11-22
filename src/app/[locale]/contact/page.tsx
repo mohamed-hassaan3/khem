@@ -72,7 +72,7 @@ export default async function Contact({
     <div className="ground-ivory min-h-screen">
       <NavGround ground="ivory" />
       {/* ── HEADER ─────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b border-ground-border px-4 py-14 md:px-20 md:py-30">
+      <section className="relative overflow-hidden border-b border-ground-border px-4 pb-10 pt-8 md:px-20 md:py-30">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,_color-mix(in_srgb,var(--color-gold)_4%,transparent)_0%,_transparent_60%)]"
           aria-hidden="true"
@@ -100,9 +100,9 @@ export default async function Contact({
               {channels.map((channel) => (
                 <div
                   key={channel.id}
-                  className="flex flex-col gap-2 border-b border-ground-border pb-8 sm:flex-row sm:gap-7"
+                  className="flex flex-col gap-1.5 border-b border-ground-border pb-5 sm:flex-row sm:gap-7 md:pb-8"
                 >
-                  <dt className="flex-none pt-0.5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/50 sm:w-25">
+                  <dt className="flex-none pt-0.5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent sm:w-25">
                     {channel.label}
                   </dt>
                   <dd className="text-sm leading-relaxed text-ground-muted">
@@ -127,7 +127,7 @@ export default async function Contact({
       </section>
 
       {/* ── FORM + ASIDE ────────────────────────────── */}
-      <section className="px-4 py-14 md:px-20 md:py-30">
+      <section className="px-4 py-10 md:px-20 md:py-30">
         <div className="mx-auto grid max-w-350 grid-cols-1 gap-6 md:gap-12 lg:grid-cols-[1fr_500px] lg:gap-25">
           <Reveal>
             <p className="eyebrow mb-6">{dict.contact.form.eyebrow}</p>
@@ -141,7 +141,7 @@ export default async function Contact({
           </Reveal>
 
           <div className="flex flex-col gap-0.5">
-            <Reveal className="card p-10 md:p-12">
+            <Reveal className="card p-6 md:p-12">
               <p className="eyebrow mb-6">
                 {dict.contact.consultation.eyebrow}
               </p>
@@ -180,7 +180,7 @@ export default async function Contact({
                       <span className="font-heading text-xs tracking-wider text-ground">
                         {profile.platform}
                       </span>
-                      <span className="text-[11px] tracking-wide text-ground-accent/60">
+                      <span className="text-[11px] tracking-wide text-ground-accent">
                         {profile.handle}
                       </span>
                     </a>

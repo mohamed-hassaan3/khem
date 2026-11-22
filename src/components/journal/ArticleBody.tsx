@@ -66,7 +66,7 @@ export default function ArticleBody({ article }: ArticleBodyProps) {
   const firstParagraph = blocks.findIndex((block) => block.kind === "paragraph");
 
   return (
-    <section className="mx-auto max-w-3xl px-4 md:px-6 py-12 md:py-28" dir="auto">
+    <section className="mx-auto max-w-3xl px-4 md:px-6 py-8 md:py-28" dir="auto">
       {/* ── LEAD ────────────────────────────────────── */}
       <Reveal>
         <p className="font-heading text-lg italic leading-relaxed text-ground-muted md:text-xl">

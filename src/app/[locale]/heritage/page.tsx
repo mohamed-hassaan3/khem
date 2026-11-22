@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 import NavGround from "@/src/components/NavGround";
+import EditorialHero from "@/src/components/editorial/EditorialHero";
 import Reveal from "@/src/components/animation/Reveal";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { isLocale } from "@/src/lib/i18n/config";
@@ -103,59 +104,16 @@ export default async function Heritage({
     <div className="min-h-screen">
       {/* §19: dark-led, with sand for the stone and the timeline. */}
       <NavGround ground="ivory" />
-      {/* ── HERO ───────────────────────────────────── */}
-      {/*
-        The page banner, as photography rather than as a dark mode.
-
-        Every editorial page opened on the same thing: a full-viewport image
-        crushed to a fifth of its brightness under an obsidian ground. §14 is
-        blunt about it — repeating that banner is what "forces every page into
-        a dark visual mode", and it was doing so above the fold on six routes.
-
-        Three changes, the same three everywhere this pattern appears.
-
-        The height comes down from the whole viewport, so the banner introduces
-        the page rather than being the page, and the first light section is
-        visible without scrolling. The image runs at its own luminance with no
-        filter at all. And the type is charcoal on an ivory gradient rather than
-        ivory on a darkened photograph — which is what makes this one banner
-        language with the collection and category banners instead of a third.
-
-        No top padding, and no clearance maths: the page wrapper in
-        `layout.tsx` reserves `--header-h` for the whole document, so this
-        banner already starts below the nav rather than behind it. The section
-        is sized to its own composition and nothing else.
-
-        This carried a `pt-20` and an inflated `min-h` while the header floated
-        over the content — both existed only to keep the heading out from under
-        the bar, and both are dead weight now that the bar occupies its own
-        space.
-      */}
-      <section className="ground-ivory relative flex h-[72vh] min-h-175 items-center overflow-hidden bg-sand">
-        <Image
-          src="https://res.cloudinary.com/co1xzkhf/image/upload/v1790154048/heritage-hero-banner.webp"
-          alt=""
-          fill
-          loading="eager"
-          fetchPriority="high"
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div aria-hidden="true" className="banner-scrim banner-scrim-column" />
-
-        <div className="relative z-10 max-w-2xl px-4 md:px-20 lg:px-30">
-          <p className="eyebrow mb-7">{dict.heritage.hero.eyebrow}</p>
-          <h1 className="mb-8 font-heading text-5xl font-normal leading-none text-ground sm:text-6xl md:text-7xl lg:text-8xl">
-            {dict.heritage.hero.headingLine1}
-            <br />
-            <span className="text-ground-accent">{dict.heritage.hero.headingLine2}</span>
-          </h1>
-          <div className="gold-line mb-8" />
-          <p className="max-w-lg text-sm leading-loose text-ground-muted">
-            {dict.heritage.hero.lede}
-          </p>
-        </div>
-      </section>
+      <EditorialHero
+        image={{
+          src: "https://res.cloudinary.com/co1xzkhf/image/upload/v1790154048/heritage-hero-banner.webp",
+          alt: "",
+        }}
+        eyebrow={dict.heritage.hero.eyebrow}
+        lines={[dict.heritage.hero.headingLine1, dict.heritage.hero.headingLine2]}
+        lede={dict.heritage.hero.lede}
+        size="tall"
+      />
 
       {/* ── PHILOSOPHY ──────────────────────────────── */}
       <section className="ground-sand px-4 py-14 sm:px-6 md:px-10 md:py-36 lg:px-12 xl:px-16">

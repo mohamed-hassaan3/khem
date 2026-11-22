@@ -48,6 +48,16 @@ const LOCALE = "en-US";
  */
 export const ARABIC_INTL_LOCALE = "ar-EG-u-nu-latn";
 
+/**
+ * Month names in the page's language, digits Latin in both. Article and legal
+ * dates used to be `en-US` on both trees, which left "June 2026" in the middle
+ * of an Arabic page now that the articles and policies themselves are
+ * translated.
+ */
+function dateLocale(locale: Locale): string {
+  return locale === "ar" ? ARABIC_INTL_LOCALE : LOCALE;
+}
+
 export function formatPrice(
   priceInCents: number,
   currency: Currency = BASE_CURRENCY,
@@ -77,8 +87,8 @@ export function formatPrice(
  * midnight and then rendered in the local zone, which shifts the month backwards
  * for anyone west of Greenwich.
  */
-export function formatArticleDate(isoDate: string): string {
-  return new Intl.DateTimeFormat(LOCALE, {
+export function formatArticleDate(isoDate: string, locale: Locale = "en"): string {
+  return new Intl.DateTimeFormat(dateLocale(locale), {
     month: "long",
     year: "numeric",
     timeZone: "UTC",
@@ -94,8 +104,8 @@ export function formatArticleDate(isoDate: string): string {
  * previous day for anyone west of Greenwich — and would differ between the
  * server render and the client hydration.
  */
-export function formatLegalDate(isoDate: string): string {
-  return new Intl.DateTimeFormat(LOCALE, {
+export function formatLegalDate(isoDate: string, locale: Locale = "en"): string {
+  return new Intl.DateTimeFormat(dateLocale(locale), {
     day: "numeric",
     month: "long",
     year: "numeric",

@@ -1,5 +1,8 @@
+import { ChevronDown } from "lucide-react";
+
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import Reveal from "@/src/components/animation/Reveal";
+import type { Dictionary } from "@/src/lib/i18n/dictionaries/en";
 import type { LegalBlock, LegalDocument } from "@/src/types/legal";
 
 /**
@@ -74,14 +77,14 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
       // Wide content scrolls inside its own container; the page body never does.
       return (
         <div className="mb-6 overflow-x-auto">
-          <table className="w-full min-w-125 border-collapse text-left">
+          <table className="w-full min-w-125 border-collapse text-start">
             <thead>
               <tr>
                 {block.table.head.map((heading) => (
                   <th
                     key={heading}
                     scope="col"
-                    className="border-b border-ground-border pb-3 pr-6 font-body text-[10px] font-medium uppercase tracking-[0.2em] text-ground-accent/60"
+                    className="border-b border-ground-border pb-3 pe-6 font-body text-[10px] font-medium uppercase tracking-[0.2em] text-ground-accent/60"
                   >
                     {heading}
                   </th>
@@ -93,11 +96,11 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
                 <tr key={label}>
                   <th
                     scope="row"
-                    className="border-b border-ground-border py-4 pr-6 align-top text-[13px] font-normal leading-relaxed text-ground"
+                    className="border-b border-ground-border py-4 pe-6 align-top text-[13px] font-normal leading-relaxed text-ground"
                   >
                     {label}
                   </th>
-                  <td className="border-b border-ground-border py-4 pr-6 align-top text-[13px] leading-relaxed text-ground-muted">
+                  <td className="border-b border-ground-border py-4 pe-6 align-top text-[13px] leading-relaxed text-ground-muted">
                     {value}
                   </td>
                 </tr>
@@ -112,21 +115,60 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
 export type LegalDocumentBodyProps = Pick<
   LegalDocument,
   "sections" | "contactEmail"
->;
+> & {
+  /** `dict.legal.document` — the page furniture, in the page's language. */
+  labels: Dictionary["legal"]["document"];
+};
 
 export default function LegalDocumentBody({
   sections,
   contactEmail,
+  labels,
 }: LegalDocumentBodyProps) {
   return (
-    <div className="mx-auto max-w-350 px-4 py-12 md:px-20 md:py-28">
+    <div className="mx-auto max-w-350 px-4 py-10 md:px-20 md:pb-28 md:pt-16">
+      {/*
+       * Phones: the index as a disclosure above the document. The sticky
+       * index below is desktop-only, and a policy is five or six thousand
+       * pixels tall at 390px — without this there was no way to jump. Native
+       * `<details>`: anchors only, no client code.
+       */}
+      <details className="group mb-10 border-y border-ground-border lg:hidden">
+        <summary className="flex min-h-13 cursor-pointer list-none items-center justify-between gap-4 font-heading text-[11px] uppercase tracking-[0.2em] text-ground [&::-webkit-details-marker]:hidden">
+          {labels.contents}
+          <ChevronDown
+            size={16}
+            strokeWidth={1.25}
+            aria-hidden="true"
+            className="text-ground-accent transition-transform duration-300 ease-out group-open:rotate-180"
+          />
+        </summary>
+        <ol className="pb-3">
+          {sections.map((section, index) => (
+            <li key={section.id}>
+              <a
+                href={`#${section.id}`}
+                className="flex gap-4 border-t border-ground-border py-3 no-underline"
+              >
+                <span className="flex-none font-heading text-[10px] leading-5 tracking-widest text-ground-accent">
+                  {sectionNumeral(index)}
+                </span>
+                <span className="text-[13px] leading-5 text-ground-muted">
+                  {section.title}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </details>
+
       <div className="grid grid-cols-1 gap-6 md:gap-14 lg:grid-cols-[260px_1fr] lg:gap-24">
         {/* ── CONTENTS INDEX ──────────────────────── */}
         <nav
-          aria-label="Contents"
+          aria-label={labels.contents}
           className="hidden self-start lg:sticky lg:top-30 lg:block"
         >
-          <p className="eyebrow mb-7">Contents</p>
+          <p className="eyebrow mb-7">{labels.contents}</p>
           <ol className="flex flex-col">
             {sections.map((section, index) => (
               <li key={section.id}>
@@ -152,7 +194,7 @@ export default function LegalDocumentBody({
             <section
               key={section.id}
               id={section.id}
-              className="mb-8 md:mb-14 scroll-mt-30 border-t border-ground-border pt-12 first:border-t-0 first:pt-0"
+              className="mb-8 md:mb-14 scroll-mt-[calc(var(--header-h,4rem)+1rem)] border-t border-ground-border pt-12 first:border-t-0 first:pt-0"
             >
               <Reveal delay={index * SECTION_STAGGER}>
                 <p className="mb-4 font-heading text-[10px] tracking-[0.25em] text-ground-accent/40">
@@ -173,14 +215,13 @@ export default function LegalDocumentBody({
           ))}
 
           {/* ── QUESTIONS ─────────────────────────── */}
-          <Reveal className="card p-10 md:p-12">
-            <p className="eyebrow mb-6">Questions</p>
+          <Reveal className="card p-6 md:p-12">
+            <p className="eyebrow mb-6">{labels.questions}</p>
             <p className="mb-7 max-w-md text-[13px] leading-loose text-ground-muted">
-              If anything on this page is unclear, write to us. We would rather
-              explain it than have you guess.
+              {labels.questionsBody}
             </p>
             <a href={`mailto:${contactEmail}`} className="btn btn-outline inline-flex">
-              Email Us
+              {labels.emailUs}
             </a>
           </Reveal>
         </article>

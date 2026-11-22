@@ -45,7 +45,7 @@ export default async function JournalCard({
           <p className="text-[9px] uppercase tracking-[0.2em] text-ground-accent">
             {article.categoryLabel} ·{" "}
             <time dateTime={article.publishedAt}>
-              {formatArticleDate(article.publishedAt)}
+              {formatArticleDate(article.publishedAt, locale)}
             </time>
           </p>
           <h3 className="mt-1.5 line-clamp-3 font-heading text-sm font-normal leading-snug text-ground">
@@ -82,7 +82,7 @@ export default async function JournalCard({
               dateTime={article.publishedAt}
               className="text-[10px] tracking-wider text-ground-muted/70"
             >
-              {formatArticleDate(article.publishedAt)}
+              {formatArticleDate(article.publishedAt, locale)}
             </time>
           </div>
           <h3 className="mb-5 font-heading text-base font-normal leading-snug tracking-wide text-ground">

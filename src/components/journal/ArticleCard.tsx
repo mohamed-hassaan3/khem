@@ -81,7 +81,7 @@ export default function ArticleCard({
             dateTime={article.publishedAt}
             className="text-[10px] tracking-wide text-ground-muted/70"
           >
-            {formatArticleDate(article.publishedAt)}
+            {formatArticleDate(article.publishedAt, locale)}
           </time>
         </div>
       </div>

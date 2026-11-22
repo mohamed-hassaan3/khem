@@ -70,8 +70,8 @@ export default async function Journal({
     <div className="ground-ivory min-h-screen">
       <NavGround ground="ivory" />
       {/* ── HEADER ─────────────────────────────────── */}
-      <section className="px-4 pt-14 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pt-32">
-        <Reveal className="mx-auto max-w-350 pb-12">
+      <section className="px-4 pt-8 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pt-32">
+        <Reveal className="mx-auto max-w-350 pb-8 md:pb-12">
           <p className="eyebrow mb-4">{dict.journal.eyebrow}</p>
           <h1 className="font-heading text-4xl font-normal text-ground sm:text-6xl md:text-7xl">
             {dict.journal.heading}
@@ -81,13 +81,13 @@ export default async function Journal({
 
       {/* ── FEATURED ARTICLE ────────────────────────── */}
       {featured ? (
-        <section className="px-4 pb-10 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pb-16">
+        <section className="px-4 pb-6 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pb-16">
           <Reveal className="mx-auto max-w-350">
             <LocaleLink
               href={`/journal/${featured.slug}`}
               className="card img-zoom group grid grid-cols-1 overflow-hidden no-underline lg:grid-cols-2"
             >
-              <div className="relative h-75 overflow-hidden lg:h-125">
+              <div className="relative aspect-4/3 overflow-hidden sm:aspect-auto sm:h-75 lg:h-125">
                 <Image
                   src={featured.image.url}
                   alt={featured.image.alt}
@@ -99,34 +99,34 @@ export default async function Journal({
                 />
               </div>
 
-              <div className="flex flex-col justify-center p-8 md:p-15">
+              <div className="flex flex-col justify-center p-5 sm:p-8 md:p-15">
                 {/* Article metadata and copy come from the database — English only. */}
-                <div className="mb-7 flex flex-wrap items-center gap-4" dir="auto">
+                <div className="mb-5 flex flex-wrap items-center gap-3 md:mb-7 md:gap-4" dir="auto">
                   <span className="eyebrow">{featured.categoryLabel}</span>
-                  <span className="h-3 w-px bg-ivory/15" aria-hidden="true" />
+                  <span className="h-3 w-px bg-ground-border" aria-hidden="true" />
                   <span className="text-[10px] tracking-widest text-ground-muted/70">
                     {interpolate(dict.common.minRead, {
                       minutes: featured.readTimeMinutes,
                     })}
                   </span>
-                  <span className="h-3 w-px bg-ivory/15" aria-hidden="true" />
+                  <span className="h-3 w-px bg-ground-border" aria-hidden="true" />
                   <time
                     dateTime={featured.publishedAt}
                     className="text-[10px] tracking-wide text-ground-muted/70"
                   >
-                    {formatArticleDate(featured.publishedAt)}
+                    {formatArticleDate(featured.publishedAt, activeLocale)}
                   </time>
                 </div>
 
-                <span className="mb-5 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent/60">
+                <span className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent md:mb-5">
                   <span aria-hidden="true">✦</span> {dict.journal.featured}
                 </span>
 
                 <div dir="auto">
-                  <h2 className="mb-6 font-heading text-xl font-normal leading-snug text-ground sm:text-2xl md:text-3xl">
+                  <h2 className="mb-4 md:mb-6 font-heading text-xl font-normal leading-snug text-ground sm:text-2xl md:text-3xl">
                     {featured.title}
                   </h2>
-                  <p className="mb-9 text-sm leading-loose text-ground-muted">
+                  <p className="mb-6 line-clamp-3 text-sm leading-loose text-ground-muted md:mb-9 md:line-clamp-none">
                     {featured.excerpt}
                   </p>
                 </div>
