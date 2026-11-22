@@ -203,7 +203,15 @@ function contentSecurityPolicy(): string {
     // Forms post to this origin only. Clerk's flows are XHR, not form posts.
     "form-action": ["'self'"],
     "object-src": ["'none'"],
-    "upgrade-insecure-requests": [],
+    /*
+     * Production only. In `next dev` it made a phone on the Wi-Fi rewrite every
+     * http://192.168.x.x:3000 asset to https://, which the dev server does not
+     * serve, so the page arrived unstyled. `localhost` is exempt, which is why
+     * the Mac never showed it. Production is HTTPS-only, so nothing changes there.
+     */
+    ...(process.env.NODE_ENV === "production"
+      ? { "upgrade-insecure-requests": [] as string[] }
+      : {}),
   };
 
   return Object.entries(directives)
