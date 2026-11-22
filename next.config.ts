@@ -212,6 +212,14 @@ function contentSecurityPolicy(): string {
 }
 
 const nextConfig: NextConfig = {
+  /*
+   * Dev only: lets a phone on the same Wi-Fi load the dev server
+   * (`npm run dev -- -H 0.0.0.0`, then http://<mac-ip>:3000). Next blocks
+   * cross-origin requests to its dev assets by default, which leaves the page
+   * unhydrated. Any home-network address, so a new DHCP lease still works.
+   * Has no effect on `next build` / production.
+   */
+  allowedDevOrigins: ["192.168.*.*"],
   experimental: {
     /*
      * Off, because `src/proxy.ts` rewrites unprefixed English URLs into the
