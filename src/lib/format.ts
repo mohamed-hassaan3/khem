@@ -166,7 +166,10 @@ export function formatCommentDate(isoDate: string, locale: Locale): string {
  * the server and after hydration.
  */
 export function formatAccountDate(isoDate: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? ARABIC_INTL_LOCALE : LOCALE, {
+  // `en-GB`, not `LOCALE`: day first, as documented above and as the order
+  // dates beside these rows read ("21 Nov 2026"). `en-US` printed
+  // "November 21, 2026" on the same screen.
+  return new Intl.DateTimeFormat(locale === "ar" ? ARABIC_INTL_LOCALE : "en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",

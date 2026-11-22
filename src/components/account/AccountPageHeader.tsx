@@ -26,7 +26,9 @@ export default function AccountPageHeader({
   size = "default",
 }: AccountPageHeaderProps) {
   return (
-    <header className="acct-rise mb-6 flex items-end justify-between gap-4 md:mb-10">
+    // `items-start` + the action's top offset: the bell lines up with the
+    // title, not with the subtitle line a panel may add beneath it.
+    <header className="acct-rise mb-6 flex items-start justify-between gap-4 md:mb-10">
       <div className="min-w-0">
         <p className="eyebrow">{eyebrow}</p>
 
@@ -44,7 +46,18 @@ export default function AccountPageHeader({
         ) : null}
       </div>
 
-      {action ? <div className="shrink-0">{action}</div> : null}
+      {action ? (
+        <div
+          className={[
+            "shrink-0",
+            // Eyebrow (~22px incl. its gap) + half the title's line, less half
+            // the 36px bell: centred on the first line of the h1.
+            size === "display" ? "mt-[22px] lg:mt-[30px]" : "mt-[22px] lg:mt-[26px]",
+          ].join(" ")}
+        >
+          {action}
+        </div>
+      ) : null}
     </header>
   );
 }

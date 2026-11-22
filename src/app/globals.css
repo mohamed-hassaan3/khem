@@ -2758,4 +2758,10 @@ form.acct-details-body {
   body:has([data-account-tabbar]) {
     padding-bottom: calc(4rem + env(safe-area-inset-bottom));
   }
+
+  /* The cookie banner sits above the bar, not over it, so the four sections
+     stay reachable on a first visit while the banner waits for an answer. */
+  body:has([data-account-tabbar]) [data-cookie-consent] {
+    bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
 }
