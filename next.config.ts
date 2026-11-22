@@ -200,8 +200,18 @@ function contentSecurityPolicy(): string {
     // modern spelling of the X-Frame-Options header set beside it.
     "frame-ancestors": ["'none'"],
     "base-uri": ["'self'"],
-    // Forms post to this origin only. Clerk's flows are XHR, not form posts.
-    "form-action": ["'self'"],
+    /*
+     * Forms submit to this origin — plus Clerk's own Frontend API, because a
+     * full-page form submission (the `/search` and 404 search forms are plain
+     * GETs) can be answered by Clerk's middleware with a session "handshake"
+     * redirect to that host and back. `form-action` governs the redirect too,
+     * so with `'self'` alone the browser silently dropped the navigation: the
+     * search "did nothing". In development this happened on every LAN visit
+     * (dev-browser handshake); in production, for a signed-in visitor whose
+     * token had just expired. Only Clerk's hosts are added — the same ones
+     * `script-src` already trusts.
+     */
+    "form-action": ["'self'", ...clerk],
     "object-src": ["'none'"],
     /*
      * Production only. In `next dev` it made a phone on the Wi-Fi rewrite every

@@ -546,11 +546,18 @@ export default function Nav({
   useEffect(() => {
     if (!drawerOpen) return;
 
+    /*
+     * Locked on <html> as well as <body>: iOS Safari scrolls the root, so a
+     * body-only lock let a swipe inside the menu move the page behind it.
+     */
     const previousOverflow = document.body.style.overflow;
+    const previousRootOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overflow = previousRootOverflow;
     };
   }, [drawerOpen]);
 
@@ -927,7 +934,7 @@ export default function Nav({
            * because the document behind it is scroll-locked while it is open,
            * so this blur is never recomputed frame after frame.
            */
-          "ground-ivory nav-drawer fixed inset-y-0 start-0 z-1001 flex w-[85%] max-w-sm flex-col overflow-y-auto",
+          "ground-ivory nav-drawer fixed inset-y-0 start-0 z-1001 flex w-[85%] max-w-sm flex-col overflow-y-auto overscroll-contain",
           "border-e border-ground-border shadow-3",
           "transition-transform duration-500 ease-luxury-bezier lg:hidden",
           // Transforms are not mirrored by `dir`, so the RTL offset is explicit.
@@ -1088,7 +1095,7 @@ export default function Nav({
         <button
           type="button"
           aria-label={dict.nav.closeMenu}
-          className="fixed inset-0 z-1000 cursor-default bg-ink/45 lg:hidden"
+          className="fixed inset-0 z-1000 cursor-default touch-none bg-ink/45 lg:hidden"
           onClick={closeDrawer}
         />
       )}
