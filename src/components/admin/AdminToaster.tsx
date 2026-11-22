@@ -23,7 +23,7 @@ export default function AdminToaster() {
   return (
     <div
       aria-live="polite"
-      className="pointer-events-none fixed bottom-6 end-6 z-1002 flex w-[min(88vw,22rem)] flex-col gap-2"
+      className="pointer-events-none fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] end-4 z-1002 lg:bottom-6 lg:end-6 flex w-[min(88vw,22rem)] flex-col gap-2"
     >
       {toasts.map((toast) => (
         <div

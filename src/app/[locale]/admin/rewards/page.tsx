@@ -1,3 +1,4 @@
+import AdminSearch from "@/src/components/admin/AdminSearch";
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import PointsAdjuster from "@/src/components/admin/PointsAdjuster";
 import RewardSettingsForm from "@/src/components/admin/RewardSettingsForm";
@@ -124,22 +125,7 @@ export default async function AdminRewardsPage({
           </p>
         </div>
 
-        <form method="get" className="flex max-w-md gap-3">
-          <input
-            type="search"
-            name="q"
-            defaultValue={search}
-            placeholder="Name or email"
-            aria-label="Search customers"
-            className="field"
-          />
-          <button
-            type="submit"
-            className="cursor-pointer border border-ground-border px-5 font-heading text-[11px] uppercase tracking-[0.16em] text-ground-muted transition-colors duration-300 hover:border-ground-accent/40 hover:text-ground-accent"
-          >
-            Search
-          </button>
-        </form>
+        <AdminSearch placeholder="Name or email" label="Search customers by name or email" />
 
         {customers.customers.length === 0 ? (
           <p className="border border-ground-border px-5 py-6 text-[12px] text-ground-muted">

@@ -1961,6 +1961,91 @@ html[data-header-hidden="true"] body {
   --chrome-h: 0px;
 }
 
+/*
+ * The admin desk renders none of the storefront chrome (`StorefrontOnly`), so
+ * nothing above it reserves space: the page starts at the top. `--chrome-h` is
+ * the desk's own sticky header (`AdminShell`, h-14 / lg:h-15), so anything a
+ * page makes sticky settles under it rather than behind it.
+ */
+body:has([data-admin-desk]) {
+  --header-h: 0px;
+  --chrome-h: 3.5rem;
+}
+
+@media (min-width: 1024px) {
+  body:has([data-admin-desk]) {
+    --chrome-h: 3.75rem;
+  }
+}
+
+/*
+ * `AdminTable` on a phone: each row a card, each cell one "Label · value"
+ * line. The labels come from the per-table rules `AdminTable` writes; these
+ * are the shared shapes.
+ */
+@media (max-width: 767.98px) {
+  .admin-table table,
+  .admin-table tbody,
+  .admin-table tr,
+  .admin-table td {
+    display: block;
+  }
+  .admin-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .admin-table tr {
+    border: 1px solid var(--ground-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-stone);
+    padding: 0.5rem 0.875rem;
+  }
+  .admin-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2.25rem;
+    padding: 0.375rem 0 !important;
+    text-align: end;
+    overflow-wrap: anywhere;
+  }
+  .admin-table td + td {
+    border-top: 1px solid var(--ground-border);
+  }
+  .admin-table td::before {
+    flex: none;
+    max-width: 45%;
+    text-align: start;
+    font-size: 11px;
+    color: var(--ground-muted);
+  }
+  /* The first cell is the row's name: full width, left, no label. */
+  .admin-table td:first-child {
+    justify-content: flex-start;
+    text-align: start;
+    font-size: 14px;
+  }
+  .admin-table td:first-child::before {
+    display: none;
+  }
+  /* An action-only cell (hidden header) sits at the reading end. */
+  .admin-table td:empty {
+    display: none;
+  }
+}
+
+/* An admin search in flight: the list it will replace is dimmed, not hidden. */
+#admin-panel table,
+#admin-panel [data-admin-results] {
+  transition: opacity 300ms var(--ease-luxury-bezier);
+}
+#admin-panel[data-pending] table,
+#admin-panel[data-pending] [data-admin-results] {
+  opacity: 0.5;
+}
+
 body[data-announcement="on"] {
   /* One line of 10px caps with room to breathe. */
   --announcement-h: 34px;
@@ -2757,6 +2842,11 @@ form.acct-details-body {
 @media (max-width: 1023.98px) {
   body:has([data-account-tabbar]) {
     padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+
+  /* The admin desk's tab bar, the same way as the account's. */
+  body:has([data-admin-tabbar]) {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
   }
 
   /* The cookie banner sits above the bar, not over it, so the four sections
