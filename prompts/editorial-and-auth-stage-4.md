@@ -192,3 +192,12 @@ credentials entered).
 
 Checks: tsc + ESLint clean; captures at 390×844 and 1440×900, EN + AR; 360px
 overflow sweep of every Stage 4 route in EN + AR: none.
+
+## Follow-up (2026-11-22, user request)
+
+Desktop sign-in/up: the card sat at the bottom of the screen. From lg the
+shell is two columns (mark, heading, copy and guest links at the start; the
+card beside them), centred in the viewport below `--header-h`. Card at
+1440x900: 281-737px (sign-in), 190-728px (sign-up); 1280x720 fits too.
+Phones/tablets keep one column. Guest line now "Just browsing? No account
+needed." (EN + AR) so it reads on sign-up as well. Commit 4b64671.
