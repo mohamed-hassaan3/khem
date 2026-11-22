@@ -1669,7 +1669,7 @@ export const en = {
       note: "New releases, private events, and seasonal editions. You may unsubscribe at any time.",
     },
     /** Guest routes offered beneath the form , neither needs a session. */
-    guestLead: "No account yet? You can still browse.",
+    guestLead: "Just browsing? No account needed.",
     guestCart: "Your Bag",
     guestCollections: "Explore the Collections",
   },
