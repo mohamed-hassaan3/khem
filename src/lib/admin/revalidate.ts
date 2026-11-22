@@ -165,6 +165,13 @@ export function revalidateDelivery(): void {
 }
 
 /** After a product is created, edited or archived. */
+/** Every `[locale]` layout, so the Nav's data re-renders on every page. */
+function revalidateLayouts(): void {
+  for (const locale of LOCALES) {
+    revalidatePath(`/${locale}`, "layout");
+  }
+}
+
 export function revalidateProduct(input: {
   slug: string;
   collectionSlug: string;
@@ -195,6 +202,8 @@ export function revalidateProduct(input: {
 
   if (input.tags.includes("NEW_ARRIVAL")) {
     revalidateAllLocales("/new-arrival");
+    // The menus feature the new arrival, and the menus live in the layout.
+    revalidateLayouts();
   }
 
   revalidateMerchPages();
@@ -212,6 +221,8 @@ export function revalidateProduct(input: {
  */
 export function revalidateArticle(slug?: string): void {
   revalidateAllLocales(HOME);
+  // The menus feature the latest article, and the menus live in the layout.
+  revalidateLayouts();
   revalidateAllLocales("/journal");
 
   if (slug) {

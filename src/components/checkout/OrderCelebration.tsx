@@ -179,7 +179,7 @@ export default function OrderCelebration({
               ? interpolate(copy.emailSent, { email: order.maskedEmail })
               : copy.emailSentGeneric}
           </p>
-          <p className="mt-3 font-extrabold border border-ground-accent/15 bg-amber-200 px-3 py-2.5 text-[12px] leading-relaxed text-ground-accent/80">
+          <p className="mt-3 rounded-md border-s-2 border-ground-accent bg-ivory px-3.5 py-3 text-start text-xs leading-relaxed text-ground">
             {copy.junkNotice}
           </p>
         </div>

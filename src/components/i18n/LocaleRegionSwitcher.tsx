@@ -257,6 +257,81 @@ export default function LocaleRegionSwitcher({
     };
   }, [isOpen, setIsOpen]);
 
+  /*
+   * The phone menu's version (Stage 3 follow-up). Not a dropdown: the list it
+   * opened sat below the fold at the foot of the menu, and the swipe to reach
+   * it scrolled the page behind instead. Everything is visible at once now:
+   * language as a two-way toggle, country as a native <select>, which opens
+   * the phone's own picker — no hidden panel, nothing to scroll to.
+   */
+  if (variant === "full") {
+    return (
+      <div className="flex flex-col gap-3">
+        <nav
+          aria-label={dictionary.regionSwitcher.language}
+          className="grid grid-cols-2 gap-1 rounded-full border border-ground-border p-1"
+        >
+          {LOCALES.map((locale) => {
+            const isActive = locale === activeLocale;
+            const { dir } = labelAttributes(locale);
+            return (
+              <Link
+                key={locale}
+                href={localizePath(locale, path)}
+                hrefLang={LOCALE_HTML_TAG[locale]}
+                aria-current={isActive ? "true" : undefined}
+                className={`flex min-h-10 items-center justify-center rounded-full text-[13px] no-underline transition-colors duration-300 ease-luxury-bezier focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent ${
+                  isActive
+                    ? "bg-ink text-ivory"
+                    : "text-ground-muted hover:text-ground"
+                }`}
+              >
+                <span dir={dir} lang={LOCALE_HTML_TAG[locale]}>
+                  {LOCALE_LABELS[locale]}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <label className="block">
+          <span className="sr-only">{dictionary.regionSwitcher.country}</span>
+          <span className="relative block">
+            <select
+              value={isHydrated ? activeRegion : ""}
+              disabled={!isHydrated}
+              onChange={(event) => {
+                const next = countries.find(
+                  (entry) => entry.code === event.target.value,
+                );
+                if (next) setRegion(next.code);
+              }}
+              className="min-h-11 w-full cursor-pointer appearance-none rounded-full border border-ground-border bg-transparent ps-4 pe-10 text-[13px] text-ground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent disabled:opacity-60"
+            >
+              {isHydrated ? null : <option value="">—</option>}
+              {countries.map((entry) => (
+                <option key={entry.code} value={entry.code}>
+                  {entry.name} · {entry.currency}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              width={14}
+              height={14}
+              strokeWidth={1.25}
+              aria-hidden="true"
+              className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-ground-muted"
+            />
+          </span>
+        </label>
+
+        <p className="text-[11px] leading-relaxed text-ground-muted">
+          {dictionary.regionSwitcher.note}
+        </p>
+      </div>
+    );
+  }
+
   const trigger = labelAttributes(activeLocale);
 
   return (
@@ -270,7 +345,7 @@ export default function LocaleRegionSwitcher({
         onClick={() => setIsOpen(!isOpen)}
         className={[
           "flex cursor-pointer items-center gap-2 border-none bg-transparent p-0 font-body",
-          variant === "compact" ? "text-[10px]" : "text-xs",
+          "text-[10px]",
           isOpen ? "text-ground-accent" : "text-ground-muted",
           "transition-colors duration-300 ease-luxury-bezier hover:text-ground-accent",
         ].join(" ")}
@@ -311,16 +386,13 @@ export default function LocaleRegionSwitcher({
            * the trigger's trailing edge under both directions, where `right-0`
            * would hang it off the wrong side of an Arabic header.
            */
-          variant === "compact"
-            ? "ground-ivory absolute end-0 top-[calc(100%+14px)] z-1002 w-64 border border-ground-border shadow-3"
-            : "ground-ivory relative mt-4 w-full border border-ground-border",
+          "ground-ivory absolute end-0 top-[calc(100%+14px)] z-1002 w-64 border border-ground-border shadow-3",
           "py-4 transition-all duration-300 ease-luxury-bezier motion-reduce:transition-none",
           isOpen
             ? "translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-1.5 opacity-0",
           // A panel faded out is still a panel: in the drawer it would hold its
           // rows' height open below the trigger.
-          isOpen ? "" : variant === "full" ? "hidden" : "",
         ].join(" ")}
       >
         <p className="eyebrow px-4 pb-2">{dictionary.regionSwitcher.language}</p>

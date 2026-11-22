@@ -410,7 +410,7 @@ export default function OfferPopup({
               still met: the field stays above the fold on the smallest screen
               the site supports.
             */}
-            <div className="relative h-56 w-full shrink-0 overflow-hidden bg-sand sm:h-72 md:h-full md:min-h-[30rem] md:shrink">
+            <div className="relative h-40 w-full shrink-0 overflow-hidden bg-sand sm:h-72 md:h-full md:min-h-[30rem] md:shrink">
               {settings.offerPopupImageUrl ? (
                 <Image
                   src={settings.offerPopupImageUrl}
@@ -428,7 +428,7 @@ export default function OfferPopup({
               />
             </div>
 
-            <div className="flex flex-col justify-center gap-5 p-7 text-start sm:p-10 md:p-12">
+            <div className="flex flex-col justify-center gap-4 p-5 text-start sm:gap-5 sm:p-10 md:p-12">
               {phase === "form" ? (
                 <>
                   <p className="font-heading text-[10px] uppercase tracking-[0.3em] text-ground-accent/70">
@@ -543,7 +543,7 @@ export default function OfferPopup({
                       type="submit"
                       disabled={isPending}
                       aria-busy={isPending}
-                      className="w-full cursor-pointer bg-gold px-8 py-3.5 font-heading text-xs font-medium uppercase tracking-[0.2em] text-background transition-colors duration-300 ease-out hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-50"
+                      className="min-h-12 w-full cursor-pointer rounded-md bg-ink px-8 py-3.5 font-heading text-xs font-medium uppercase tracking-[0.2em] text-ivory transition-colors duration-300 ease-out hover:bg-gold-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isPending
                         ? dict.offerPopup.submitting

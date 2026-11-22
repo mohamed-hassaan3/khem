@@ -30,7 +30,9 @@ import {
   type NavTargets,
 } from "@/src/schemas/db/navigation";
 import { CATEGORY_COLUMNS, COLLECTION_COLUMNS, parseList, toCategory, toCollection } from "@/src/schemas/db/catalog";
-import type { NavigationTree } from "@/src/types/navigation";
+import type { NavFeatures, NavigationTree } from "@/src/types/navigation";
+import { getLatestArticles } from "@/src/services/content";
+import { getNewArrivals } from "@/src/services/products";
 
 function logFailure(label: string, message: string): void {
   console.error(`[navigation] ${label} failed: ${message}`);
@@ -141,5 +143,46 @@ async function readTargets(locale: Locale): Promise<NavTargets> {
       collectionRows.map((row) => [row.slug, { name: row.name, slug: row.slug }]),
     ),
     collectionsByCategory,
+  };
+}
+
+/**
+ * What the menus feature: the newest arrival and the latest article.
+ *
+ * Read in the `[locale]` layout beside the tree, through the same services the
+ * pages use. A failure in either read only removes that tile. Kept fresh by
+ * `revalidateProduct` (new-arrival branch) and `revalidateArticle`, which
+ * revalidate the layout.
+ */
+export async function getNavFeatures(locale: Locale): Promise<NavFeatures> {
+  const [arrivals, articles] = await Promise.all([
+    getNewArrivals(locale).catch(() => []),
+    getLatestArticles(locale, 1).catch(() => []),
+  ]);
+
+  const product = arrivals[0];
+  const image =
+    product?.images.find((candidate) => candidate.isPrimary) ?? product?.images[0];
+  const article = articles[0];
+
+  return {
+    newArrival:
+      product && image
+        ? {
+            href: "/new-arrival",
+            title: product.name,
+            imageUrl: image.url,
+            imageAlt: image.alt || product.name,
+          }
+        : null,
+    article: article
+      ? {
+          href: `/journal/${article.slug}`,
+          title: article.title,
+          category: article.categoryLabel,
+          imageUrl: article.image.url,
+          imageAlt: article.image.alt,
+        }
+      : null,
   };
 }

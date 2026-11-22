@@ -397,7 +397,7 @@ export default function SearchOverlay({
         ].join(" ")}
       >
         {/* Header */}
-        <div className="flex h-20 shrink-0 items-center justify-between px-4 md:px-12">
+        <div className="flex h-14 shrink-0 items-center justify-between px-4 md:h-20 md:px-12">
           <p className="eyebrow">{dict.search.eyebrow}</p>
 
           <button
@@ -418,7 +418,7 @@ export default function SearchOverlay({
 
         {/* Field */}
         <div className="shrink-0 px-4 md:px-12">
-          <div className="flex items-center gap-4 border-b border-ground-border pb-5 transition-colors duration-400 ease-luxury-bezier focus-within:border-gold">
+          <div className="flex items-center gap-3 border-b border-ground-border pb-3.5 transition-colors md:gap-4 md:pb-5 duration-400 ease-luxury-bezier focus-within:border-gold">
             <Search
               width={20}
               height={20}
@@ -449,7 +449,7 @@ export default function SearchOverlay({
               autoComplete="off"
               spellCheck={false}
               enterKeyHint="search"
-              className="w-full min-w-0 bg-transparent font-heading text-2xl tracking-wide text-ground placeholder:text-ground-muted/70 focus:outline-none sm:text-3xl"
+              className="w-full min-w-0 bg-transparent font-body text-lg text-ground placeholder:text-ground-muted focus:outline-none sm:font-heading sm:text-3xl sm:tracking-wide"
             />
 
             {query.length > 0 ? (
@@ -478,7 +478,7 @@ export default function SearchOverlay({
         </div>
 
         {/* Body */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-10 md:px-12">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-10">
           <p aria-live="polite" className="sr-only">
             {announcement}
           </p>
@@ -686,17 +686,17 @@ function IdleState({
          * language, searched as written (Arabic queries match Arabic copy since
          * 0075). Each group is a labelled set of real buttons.
          */
-        <section className="flex flex-col gap-8 lg:col-span-2">
+        <section className="flex flex-col gap-5 md:gap-8 lg:col-span-2">
           {dict.search.ai.examplesGroups.map((group) => (
             <div key={group.heading} role="group" aria-label={group.heading}>
               <p className="eyebrow mb-4">{group.heading}</p>
-              <div className="flex flex-wrap gap-2.5">
+              <div className="flex flex-wrap gap-2">
                 {group.items.map((item) => (
                   <button
                     key={item}
                     type="button"
                     onClick={() => onPick(item)}
-                    className="min-h-11 cursor-pointer border border-ground-border px-4 py-2 text-start font-body text-[13px] tracking-wide text-ground transition-all duration-400 ease-luxury-bezier hover:border-gold/50 hover:text-ground-accent"
+                    className="min-h-10 cursor-pointer rounded-full border border-ground-border px-3.5 py-1.5 text-start font-body text-xs text-ground transition-colors duration-400 ease-luxury-bezier hover:border-ground-accent hover:text-ground-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
                   >
                     {item}
                   </button>
@@ -754,13 +754,13 @@ function TermChips({
   onPick: (value: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2.5">
+    <div className="flex flex-wrap gap-2">
       {terms.map(({ label, term }) => (
         <button
           key={term}
           type="button"
           onClick={() => onPick(term)}
-          className="cursor-pointer border border-ground-border px-4 py-2 font-body text-[11px] tracking-[0.15em] text-ground-muted transition-all duration-400 ease-luxury-bezier hover:border-gold/50 hover:text-ground-accent"
+          className="min-h-10 cursor-pointer rounded-full border border-ground-border px-3.5 py-1.5 font-body text-xs text-ground-muted transition-colors duration-400 ease-luxury-bezier hover:border-ground-accent hover:text-ground-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
         >
           {label}
         </button>

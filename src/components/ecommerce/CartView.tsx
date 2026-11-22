@@ -4,7 +4,8 @@ import { ShoppingBag } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { previewCartOffer } from "@/src/actions/offers";
-import CartLine from "@/src/components/ecommerce/CartLine";
+import CartDrawerLine from "@/src/components/ecommerce/CartDrawerLine";
+import DeliveryProgress from "@/src/components/ecommerce/DeliveryProgress";
 import CartSummary from "@/src/components/ecommerce/CartSummary";
 import EmptyState from "@/src/components/ecommerce/EmptyState";
 import NavGround from "@/src/components/NavGround";
@@ -157,9 +158,17 @@ export default function CartView({ locale, catalog }: CartViewProps) {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px]">
-        <section className="border-ground-border px-4 py-10 sm:px-8 lg:border-e lg:px-14 lg:py-14 xl:px-20">
+        <section className="border-ground-border px-4 pb-6 pt-4 sm:px-8 lg:border-e lg:px-14 lg:py-14 xl:px-20">
+          {/*
+            Stage 3: the same progress strip and line layout as the bag drawer,
+            so the panel and the page are one design.
+          */}
+          <DeliveryProgress
+            subtotalInCents={subtotal}
+            className="mb-2 rounded-lg px-4 py-3.5"
+          />
           {resolved.map(({ product, quantity }) => (
-            <CartLine
+            <CartDrawerLine
               key={product.id}
               product={product}
               quantity={quantity}

@@ -1,6 +1,8 @@
 "use client";
 
-import { Check, Truck } from "lucide-react";
+import { FlaskConical, Gift, RotateCcw, Truck } from "lucide-react";
+
+import { useSiteFooterInView } from "@/src/hooks/use-site-footer-in-view";
 
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import {
@@ -58,6 +60,7 @@ export default function CartSummary({ pricing, offer = null }: CartSummaryProps)
   const { currency, formatPrice } = useCurrency();
   // The house's terms, read once in the layout — see `delivery-provider.tsx`.
   const terms = useDeliveryTerms();
+  const footerInView = useSiteFooterInView();
 
   /*
    * Delivery, the nudge and the total are all judged on what the merchandise
@@ -80,12 +83,12 @@ export default function CartSummary({ pricing, offer = null }: CartSummaryProps)
   const total = cartTotalInCents(pricing.subtotalInCents, terms) - offerInCents;
 
   return (
-    <aside className="ground-sand px-4 py-12 transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:px-8 lg:sticky lg:top-[var(--chrome-h)] lg:h-fit lg:px-10 lg:py-14">
-      <h2 className="mb-9 font-heading text-lg font-normal tracking-[0.1em] text-ground">
+    <aside className="ground-sand px-4 pb-28 pt-8 transition-[top] duration-500 ease-luxury-bezier motion-reduce:transition-none sm:px-8 lg:sticky lg:top-[var(--chrome-h)] lg:h-fit lg:px-10 lg:py-14">
+      <h2 className="mb-5 font-heading text-lg font-normal tracking-[0.1em] text-ground lg:mb-9">
         {dict.cart.summary}
       </h2>
 
-      <div className="mb-8 flex flex-col gap-4">
+      <div className="mb-5 flex flex-col gap-3 lg:mb-8 lg:gap-4">
         <Row
           label={dict.cart.subtotal}
           value={formatPrice(pricing.listSubtotalInCents)}
@@ -133,7 +136,7 @@ export default function CartSummary({ pricing, offer = null }: CartSummaryProps)
         />
 
         {remaining > 0 ? (
-          <p className="text-[11px] leading-relaxed text-ground-accent/50">
+          <p className="text-xs leading-relaxed text-ground-muted">
             {interpolate(dict.cart.freeShippingNudge, {
               amount: formatPrice(remaining),
             })}
@@ -141,7 +144,7 @@ export default function CartSummary({ pricing, offer = null }: CartSummaryProps)
         ) : null}
       </div>
 
-      <div className="mb-9 border-t border-ground-border pt-6">
+      <div className="mb-6 border-t border-ground-border pt-4 lg:mb-9 lg:pt-6">
         <div className="flex items-center justify-between">
           <span className="font-heading text-sm tracking-[0.1em] text-ground">
             {dict.cart.total}
@@ -178,42 +181,61 @@ export default function CartSummary({ pricing, offer = null }: CartSummaryProps)
        */}
       <LocaleLink
         href="/checkout"
-        className="btn btn-primary mb-6 w-full justify-center"
+        className="btn btn-primary mb-2 h-[50px] w-full justify-center rounded-md max-lg:hidden"
       >
         {dict.cart.checkout}
       </LocaleLink>
 
       <LocaleLink
         href="/collections"
-        className="block text-center font-heading text-[11px] tracking-[0.15em] text-ground-muted/70 no-underline transition-colors duration-300 ease-out hover:text-ground-muted focus-visible:text-ground-accent focus-visible:outline-none"
+        className="flex min-h-11 items-center justify-center text-[11px] uppercase tracking-[0.14em] text-ground-muted no-underline transition-colors duration-300 ease-out hover:text-ground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ground-accent"
       >
         {dict.cart.continueShopping}
       </LocaleLink>
 
-      <ul className="mt-6 md:mt-10 flex flex-col gap-3 border-t border-ground-border pt-8">
-        {Object.values(dict.product.trust).map((badge) => (
-          <li key={badge.title} className="flex items-center gap-2.5">
-            <Check
-              size={12}
-              strokeWidth={1.25}
-              aria-hidden="true"
-              className="shrink-0 text-ground-accent"
-            />
-            {/*
-              `desc` carries `{amount}` on the delivery badge and nothing on the
-              other three — `interpolate` leaves a string without the token
-              exactly as it found it, so one call serves all four and no badge
-              needs to know which one it is.
-            */}
-            <span className="text-[11px] tracking-[0.04em] text-ground-muted">
-              {badge.title} —{" "}
-              {interpolate(badge.desc, {
-                amount: formatPrice(terms.freeThresholdInCents),
-              })}
+      {/* The house's four promises, with the same icons as the product page. */}
+      <ul className="mt-5 grid grid-cols-2 gap-x-3 gap-y-3.5 border-t border-ground-border pt-5 lg:mt-8 lg:pt-7">
+        {(
+          [
+            { key: "delivery", Icon: Truck, badge: dict.product.trust.delivery },
+            { key: "packaging", Icon: Gift, badge: dict.product.trust.packaging },
+            { key: "noBlindBuy", Icon: FlaskConical, badge: dict.product.trust.noBlindBuy },
+            { key: "returns", Icon: RotateCcw, badge: dict.product.trust.returns },
+          ] as const
+        ).map(({ key, Icon, badge }) => (
+          <li key={key} className="flex items-start gap-2.5">
+            <Icon size={17} strokeWidth={1.25} aria-hidden="true" className="mt-px shrink-0 text-ground-accent" />
+            <span className="min-w-0">
+              <span className="block text-xs leading-snug text-ground">{badge.title}</span>
+              <span className="mt-0.5 block text-[11px] leading-snug text-ground-muted">
+                {interpolate(badge.desc, {
+                  amount: formatPrice(terms.freeThresholdInCents),
+                })}
+              </span>
             </span>
           </li>
         ))}
       </ul>
+
+      {/*
+        Phone: the action rides at the bottom of the screen with the total,
+        and steps aside while the footer is in view. From `lg` it is the
+        in-flow button above.
+      */}
+      <div
+        className={`ground-ivory fixed inset-x-0 bottom-0 z-40 border-t border-ground-border bg-ground-bg/97 px-4 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-sm transition-transform duration-500 ease-luxury-bezier motion-reduce:transition-none lg:hidden ${
+          footerInView ? "translate-y-full" : "translate-y-0"
+        }`}
+      >
+        <LocaleLink
+          href="/checkout"
+          className="btn btn-primary h-13 w-full justify-center rounded-md"
+        >
+          {interpolate(dict.cart.drawer.checkoutTotal, {
+            amount: formatPrice(total),
+          })}
+        </LocaleLink>
+      </div>
     </aside>
   );
 }

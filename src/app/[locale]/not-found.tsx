@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import logo from "@/public/logo/logo-transparent.webp";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
+import SearchForm from "@/src/components/search/SearchForm";
 import { useDictionary } from "@/src/providers/i18n-provider";
 
 /**
@@ -56,7 +57,7 @@ export default function NotFound() {
   const dict = useDictionary();
 
   return (
-    <div className="ground-ivory relative flex min-h-[calc(100svh-var(--header-h))] items-center justify-center overflow-hidden px-6 text-center">
+    <div className="ground-ivory relative flex min-h-[calc(100svh-var(--header-h))] items-center justify-center overflow-hidden px-4 py-10 text-center sm:px-6">
       {/* React hoists this into <head>. See the header. */}
       <meta name="robots" content="noindex, follow" />
       {/*
@@ -71,31 +72,38 @@ export default function NotFound() {
         <div className="absolute left-1/2 top-1/2 h-150 w-150 -translate-x-1/2 -translate-y-1/2 rounded-full border border-ink/5 sm:h-250 sm:w-250" />
       </div>
 
-      <div className="relative z-10">
-        <div className="mb-6 md:mb-10 flex justify-center opacity-60">
+      <div className="relative z-10 w-full max-w-md">
+        <div className="mb-4 flex justify-center opacity-60 md:mb-10">
           <Image src={logo} width={40} height={40} alt="" aria-hidden="true" />
         </div>
 
         {/* Western digits in both trees: the numeral is the universal part of
             a 404, and it is `aria-hidden` chrome rather than a sentence. */}
         <p
-          className="font-heading text-8xl font-semibold leading-none text-ink/10 sm:text-9xl lg:text-[160px]"
+          className="font-heading text-7xl font-semibold leading-none text-ink/10 sm:text-9xl lg:text-[160px]"
           aria-hidden="true"
         >
           404
         </p>
 
-        <h1 className="mb-5 font-heading text-2xl font-normal tracking-widest text-ground sm:text-3xl md:text-4xl">
+        <h1 className="mb-4 font-heading text-2xl font-normal tracking-widest text-ground sm:text-3xl md:mb-5 md:text-4xl">
           {dict.notFound.heading}
         </h1>
 
-        <div className="gold-line mx-auto mb-7" />
+        <div className="gold-line mx-auto mb-5 md:mb-7" />
 
-        <p className="mx-auto mb-8 md:mb-12 max-w-100 text-sm leading-loose text-ground-muted">
+        <p className="mx-auto mb-6 max-w-100 text-sm leading-relaxed text-ground-muted md:mb-10">
           {dict.notFound.body}
         </p>
 
-        <div className="flex flex-col justify-center gap-4 sm:flex-row">
+        {/*
+          Stage 3: a way forward from a dead end. The house's own search,
+          then home and the shop.
+        */}
+        <div className="mb-6 text-start">
+          <SearchForm defaultValue="" />
+        </div>
+        <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
           <LocaleLink href="/" className="btn btn-primary">
             {dict.notFound.primary}
           </LocaleLink>

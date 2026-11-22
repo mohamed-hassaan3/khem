@@ -12,12 +12,9 @@ import {
 } from "react";
 
 import CartDrawerLine from "@/src/components/ecommerce/CartDrawerLine";
+import DeliveryProgress from "@/src/components/ecommerce/DeliveryProgress";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
-import {
-  amountToFreeShippingInCents,
-  cartTotalInCents,
-  shippingInCents,
-} from "@/src/lib/cart";
+import { cartTotalInCents, shippingInCents } from "@/src/lib/cart";
 import { cartPricing } from "@/src/lib/pricing";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useCart } from "@/src/providers/cart-provider";
@@ -225,11 +222,6 @@ export default function CartDrawer() {
   const terms = useDeliveryTerms();
   const shipping = shippingInCents(subtotal, terms);
   const total = cartTotalInCents(subtotal, terms);
-  const remaining = amountToFreeShippingInCents(subtotal, terms);
-  const progress =
-    terms.freeThresholdInCents > 0
-      ? Math.min(1, subtotal / terms.freeThresholdInCents)
-      : 1;
 
   const itemCount = resolved.reduce((sum, line) => sum + line.quantity, 0);
 
@@ -330,31 +322,10 @@ export default function CartDrawer() {
           the bag page's nudge.
         */}
         {resolved.length > 0 && !isLoading && !hasFailed ? (
-          <div className="ground-stone shrink-0 border-b border-ground-border bg-ground-bg px-4.5 py-3.5">
-            <p className="text-xs text-ground">
-              {remaining > 0 ? (
-                interpolate(dict.cart.freeShippingNudge, {
-                  amount: formatPrice(remaining),
-                })
-              ) : (
-                <>
-                  {dict.cart.drawer.unlockedLead}{" "}
-                  <span className="text-ground-accent">
-                    {dict.cart.drawer.unlockedPerk}
-                  </span>
-                </>
-              )}
-            </p>
-            <div
-              aria-hidden="true"
-              className="mt-2 h-[3px] overflow-hidden rounded-full bg-ground-border"
-            >
-              <div
-                className="h-full rounded-full bg-ground-accent transition-[width] duration-500 ease-luxury-bezier motion-reduce:transition-none"
-                style={{ width: `${progress * 100}%` }}
-              />
-            </div>
-          </div>
+          <DeliveryProgress
+            subtotalInCents={subtotal}
+            className="shrink-0 border-b border-ground-border px-4.5 py-3.5"
+          />
         ) : null}
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4.5">

@@ -40,7 +40,8 @@ export interface CartDrawerLineProps {
   onQuantityChange: (quantity: number) => void;
   onRemove: () => void;
   /** Closes the panel — a product link inside a modal must not leave it open. */
-  onNavigate: () => void;
+  /** Closes the drawer when a link is followed; absent on the `/cart` page. */
+  onNavigate?: () => void;
 }
 
 export default function CartDrawerLine({
