@@ -47,7 +47,10 @@ export default async function TermsConditions({
 
   // The document is fetched *after* the locale, not beside it: which
   // language's sections come back now depends on it.
-  const doc = await getLegalDocument(activeLocale, "terms-conditions");
+  const [doc, dict] = await Promise.all([
+    getLegalDocument(activeLocale, "terms-conditions"),
+    getDictionary(activeLocale),
+  ]);
 
   return (
     <div className="ground-ivory min-h-screen">
@@ -60,10 +63,13 @@ export default async function TermsConditions({
           lede={doc.lede}
           updatedAt={doc.updatedAt}
           banner={doc.banner}
+          locale={activeLocale}
+          lastUpdatedLabel={dict.legal.document.lastUpdated}
         />
         <LegalDocumentBody
           sections={doc.sections}
           contactEmail={doc.contactEmail}
+          labels={dict.legal.document}
         />
       </div>
     </div>

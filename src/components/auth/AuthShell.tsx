@@ -48,10 +48,10 @@ export default function AuthShell({
      * area in light for exactly that reason. The cinematic register belongs to
      * the pages that are selling something.
      */
-    <main className="ground-ivory flex min-h-screen flex-col items-center justify-center px-5 pb-14 pt-16 sm:px-8 md:pb-24 md:pt-32">
+    <main className="ground-ivory flex min-h-screen flex-col items-center px-4 pb-14 pt-6 sm:justify-center sm:px-8 sm:pt-16 md:pb-24 md:pt-32">
       <NavGround ground="ivory" />
 
-      <header className="mb-6 md:mb-10 max-w-md text-center">
+      <header className="mb-5 max-w-md text-center md:mb-10">
         {/*
          * The house mark, above the words.
          *
@@ -67,21 +67,21 @@ export default function AuthShell({
         <Image
           src={logo}
           alt={logoAlt}
-          sizes="64px"
+          sizes="(min-width: 640px) 64px, 44px"
           loading="eager"
           fetchPriority="high"
-          className="mx-auto mb-6 h-16 w-auto"
+          className="mx-auto mb-3 h-11 w-auto sm:mb-6 sm:h-16"
         />
 
-        <p className="eyebrow mb-3">{eyebrow}</p>
+        <p className="eyebrow mb-2 sm:mb-3">{eyebrow}</p>
 
-        <h1 className="mb-5 font-heading text-3xl font-normal text-ground sm:text-4xl">
+        <h1 className="mb-3 font-heading text-[1.75rem] font-normal leading-tight text-ground sm:mb-5 sm:text-4xl">
           {heading}
         </h1>
 
-        <div className="gold-line mx-auto mb-6" />
+        <div className="gold-line mx-auto mb-3 sm:mb-6" />
 
-        <p className="text-[13px] leading-loose text-ground-muted">{body}</p>
+        <p className="text-[13px] leading-relaxed text-ground-muted sm:leading-loose">{body}</p>
       </header>
 
       {/*
@@ -92,14 +92,21 @@ export default function AuthShell({
       <div className="flex w-full justify-center">{children}</div>
 
       <footer className="mt-8 md:mt-14 text-center">
-        <p className="mb-4 text-[11px] tracking-[0.08em] text-ground-muted/70">
+        <p className="mb-4 text-[11px] tracking-[0.08em] text-ground-muted">
           {guest.guestLead}
         </p>
 
-        <div className="flex items-center justify-center">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+          <LocaleLink
+            href="/collections"
+            className="font-heading text-[11px] uppercase tracking-[0.15em] text-ground-accent no-underline transition-colors duration-300 hover:text-ground"
+          >
+            {guest.guestCollections}
+          </LocaleLink>
+          <span aria-hidden="true" className="h-3 w-px bg-ground-border" />
           <LocaleLink
             href="/cart"
-            className="font-heading text-[11px] uppercase tracking-[0.15em] text-ground-accent/70 no-underline transition-colors duration-300 hover:text-ground-accent"
+            className="font-heading text-[11px] uppercase tracking-[0.15em] text-ground-accent no-underline transition-colors duration-300 hover:text-ground"
           >
             {guest.guestCart}
           </LocaleLink>

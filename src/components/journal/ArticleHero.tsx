@@ -32,7 +32,13 @@ export default async function ArticleHero({
   const dict = await getDictionary(locale);
 
   return (
-    <header className="relative h-[70vh] min-h-125 w-full overflow-hidden">
+    <header className="relative w-full overflow-hidden md:h-[70vh] md:min-h-125">
+      {/*
+       * Phones: the photograph as a band with the title beneath it. Over a
+       * full-width photograph at 390px the floor gradient had to cover most
+       * of the picture to keep a three-line title legible.
+       */}
+      <div className="relative aspect-4/3 w-full overflow-hidden md:absolute md:inset-0 md:aspect-auto">
       <Image
         src={article.image.url}
         alt={article.image.alt}
@@ -42,23 +48,24 @@ export default async function ArticleHero({
         sizes="100vw"
         className="scale-105 object-cover"
       />
+      </div>
 
       {/* One gradient, weighted to the bottom: it dissolves the lower edge into
           the page background *and* is what makes the title legible, so the
           photograph keeps the brightness the journal index gives it rather than
           being flattened by a second flat wash. */}
       <div
-        className="banner-scrim banner-scrim-base"
+        className="banner-scrim banner-scrim-base hidden md:block"
         aria-hidden="true"
       />
 
-      <div className="absolute inset-x-0 bottom-0 px-4 pb-10 md:px-20 md:pb-24">
+      <div className="relative px-4 pb-2 pt-6 md:absolute md:inset-x-0 md:bottom-0 md:px-20 md:pb-24 md:pt-0">
         <Reveal className="mx-auto max-w-350">
           <div className="max-w-4xl">
             {/* ── BREADCRUMB ──────────────────────────── */}
             <nav
               aria-label={dict.journal.article.breadcrumbLabel}
-              className="mb-6 font-heading text-[10px] uppercase tracking-[0.25em] text-ground-muted"
+              className="mb-4 font-heading text-[10px] uppercase tracking-[0.25em] text-ground-muted md:mb-6"
             >
               <LocaleLink
                 href="/journal"
@@ -73,7 +80,7 @@ export default async function ArticleHero({
             </nav>
 
             <div dir="auto">
-              <p className="eyebrow mb-5">{article.categoryLabel}</p>
+              <p className="eyebrow mb-3 hidden md:mb-5 md:block">{article.categoryLabel}</p>
 
               <h1 className="font-heading text-3xl font-normal leading-tight text-balance text-ground sm:text-5xl md:text-6xl">
                 {article.title}
@@ -81,23 +88,23 @@ export default async function ArticleHero({
             </div>
 
             <div
-              className="mt-8 h-px w-24 bg-linear-to-r from-gold to-transparent rtl:bg-linear-to-l"
+              className="mt-5 h-px w-24 md:mt-8 bg-linear-to-r from-gold to-transparent rtl:bg-linear-to-l"
               aria-hidden="true"
             />
 
             {/* ── META ────────────────────────────────── */}
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            <div className="mt-4 flex flex-wrap items-center gap-4 md:mt-8">
               <span className="text-[10px] tracking-widest text-ground-muted">
                 {interpolate(dict.common.minRead, {
                   minutes: article.readTimeMinutes,
                 })}
               </span>
-              <span className="h-3 w-px bg-ivory/15" aria-hidden="true" />
+              <span className="h-3 w-px bg-ground-border" aria-hidden="true" />
               <time
                 dateTime={article.publishedAt}
                 className="text-[10px] tracking-wide text-ground-muted"
               >
-                {formatArticleDate(article.publishedAt)}
+                {formatArticleDate(article.publishedAt, locale)}
               </time>
             </div>
           </div>

@@ -138,7 +138,7 @@ export default function StockistDirectory({
       {/* ── MAP PANEL + DIRECTORY ───────────────────── */}
       <section className="grid grid-cols-1 lg:grid-cols-[1fr_440px]">
         {/* Map column */}
-        <div className="relative min-h-100 overflow-hidden border-b border-ground-border bg-[var(--card-bg)] lg:min-h-150 lg:border-b-0 lg:border-e">
+        <div className="relative min-h-65 overflow-hidden border-b border-ground-border bg-[var(--card-bg)] lg:min-h-150 lg:border-b-0 lg:border-e">
           <Image
             src={MAP_TEXTURE}
             alt=""
@@ -161,12 +161,16 @@ export default function StockistDirectory({
             <div className="gold-line" />
 
             <p className="font-heading text-[13px] tracking-[0.15em] text-ground-accent">
-              {interpolate(
-                openCount === 1
-                  ? dict.stockists.countOne
-                  : dict.stockists.countOther,
-                { count: openCount },
-              )}
+              {/* "0 Locations Worldwide" over a row of forthcoming cities
+                  read as an error; until one opens, say what is true. */}
+              {openCount === 0
+                ? dict.stockists.openingSoon
+                : interpolate(
+                    openCount === 1
+                      ? dict.stockists.countOne
+                      : dict.stockists.countOther,
+                    { count: openCount },
+                  )}
             </p>
 
             <div className="flex max-w-100 flex-wrap justify-center gap-2">
@@ -184,7 +188,7 @@ export default function StockistDirectory({
                   return (
                     <span
                       key={stockist.id}
-                      className={`${chipClasses} border-dashed border-ground-accent/15 text-ground-muted/70`}
+                      className={`${chipClasses} border-dashed border-ground-accent/40 text-ground-muted`}
                     >
                       {/* The island wraps the city name only — the status
                           annotation beside it is translated chrome. */}
@@ -317,7 +321,7 @@ function StockistRow({
       </span>
       <span
         className={`block text-[11px] tracking-[0.1em] ${
-          isComingSoon ? "text-gold/35" : "text-ground-accent/60"
+          isComingSoon ? "text-ground-muted" : "text-ground-accent"
         }`}
         {...island}
       >
@@ -331,7 +335,7 @@ function StockistRow({
       <div className="border-b border-s-3 border-ground-border border-s-transparent">
         <div className="flex items-start justify-between gap-4 px-4 py-7 md:px-9">
           {heading}
-          <span className="shrink-0 whitespace-nowrap border border-dashed border-ground-accent/25 px-2.5 py-1 font-heading text-[9px] tracking-[0.15em] text-ground-accent/50">
+          <span className="shrink-0 whitespace-nowrap border border-dashed border-ground-accent/50 px-2.5 py-1 font-heading text-[9px] tracking-[0.15em] text-ground-accent">
             {labels.comingSoon}
           </span>
         </div>

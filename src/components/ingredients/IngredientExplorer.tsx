@@ -70,8 +70,10 @@ export const INGREDIENT_PARAM = "ingredient";
  */
 const COLUMN_BREAKPOINTS = [
   { query: "(min-width: 1024px)", columns: 4 },
-  { query: "(min-width: 640px)", columns: 2 },
 ] as const;
+
+/** Columns below the first breakpoint: two, from the smallest phone up. */
+const BASE_COLUMNS = 2;
 
 /** Column count at and above which the detail opens beside the image, not below. */
 const SIDE_BY_SIDE_COLUMNS = 4;
@@ -91,7 +93,7 @@ export default function IngredientExplorer({
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [expandedFoundIn, setExpandedFoundIn] = useState<string | null>(null);
   /** Resolved after mount; `1` server-side, which is the narrowest layout. */
-  const [columns, setColumns] = useState(1);
+  const [columns, setColumns] = useState(BASE_COLUMNS);
 
   /** Cards by slug, so a deep link can scroll the one it opened into view. */
   const cardRefs = useRef(new Map<string, HTMLDivElement>());
@@ -144,7 +146,7 @@ export default function IngredientExplorer({
     }));
 
     const sync = () =>
-      setColumns(media.find(({ list }) => list.matches)?.columns ?? 1);
+      setColumns(media.find(({ list }) => list.matches)?.columns ?? BASE_COLUMNS);
 
     sync();
     for (const { list } of media) list.addEventListener("change", sync);
@@ -211,8 +213,8 @@ export default function IngredientExplorer({
   };
 
   return (
-    <section className="ground-ivory px-4 py-10 md:px-20 md:py-20">
-      <div className="mx-auto grid max-w-350 grid-cols-1 gap-0.5 bg-border sm:grid-cols-2 lg:grid-cols-4">
+    <section className="ground-ivory px-4 py-8 md:px-20 md:py-20">
+      <div className="mx-auto grid max-w-350 grid-cols-2 gap-0.5 bg-border lg:grid-cols-4">
         {ordered.map((ingredient) => {
           const isActive = ingredient.slug === activeSlug;
           const panelId = `ingredient-detail-${ingredient.slug}`;
@@ -228,7 +230,7 @@ export default function IngredientExplorer({
               }}
               className={`overflow-hidden border transition-colors duration-500 ease-out ${
                 isActive
-                  ? "border-gold/35 bg-gold/5 sm:col-span-2 lg:col-span-4"
+                  ? "border-gold/35 bg-gold/5 col-span-2 lg:col-span-4"
                   : "border-transparent bg-stone hover:border-ground-accent/20"
               }`}
             >
@@ -250,27 +252,27 @@ export default function IngredientExplorer({
                 >
                   <div
                     className={`relative overflow-hidden bg-stone ${
-                      isActive ? "h-65 lg:h-full lg:min-h-120" : "h-65"
+                      isActive ? "h-56 sm:h-65 lg:h-full lg:min-h-120" : "h-36 sm:h-65"
                     }`}
                   >
                     <Image
                       src={ingredient.image.url}
                       alt={ingredient.image.alt}
                       fill
-                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      sizes="(min-width: 1024px) 25vw, 50vw"
                       className="object-cover"
                     />
                   </div>
 
                   {isActive ? null : (
-                    <div className="px-6 pb-7 pt-6" {...island}>
-                      <h3 className="mb-2 font-heading text-base font-normal tracking-wide text-ground">
+                    <div className="px-3 pb-4 pt-3 sm:px-6 sm:pb-7 sm:pt-6" {...island}>
+                      <h3 className="mb-1 font-heading text-sm font-normal tracking-wide text-ground sm:mb-2 sm:text-base">
                         {ingredient.name}
                       </h3>
-                      <p className="mb-2 text-[10px] italic tracking-[0.12em] text-ground-accent/50">
+                      <p className="mb-2 hidden text-[10px] italic tracking-[0.12em] text-ground-accent sm:block">
                         {ingredient.latinName}
                       </p>
-                      <p className="mb-3 text-[11px] tracking-wide text-ground-muted">
+                      <p className="text-[10px] leading-snug tracking-wide text-ground-muted sm:mb-3 sm:text-[11px]">
                         {interpolate(dict.home.ingredients.from, {
                           origin: ingredient.origin,
                         })}
@@ -292,7 +294,7 @@ export default function IngredientExplorer({
                       transition={transition}
                       className="overflow-hidden"
                     >
-                      <div className="flex flex-col justify-center p-8 md:p-14">
+                      <div className="flex flex-col justify-center p-5 md:p-14">
                         <div className="flex items-start justify-between gap-4 md:gap-6">
                           <div>
                             <p className="eyebrow mb-2.5">
@@ -303,7 +305,7 @@ export default function IngredientExplorer({
                             </h3>
                             <p
                               {...island}
-                              className="mb-1 text-xs italic tracking-wider text-ground-accent/55"
+                              className="mb-1 text-xs italic tracking-wider text-ground-accent"
                             >
                               {ingredient.latinName}
                             </p>
@@ -321,7 +323,7 @@ export default function IngredientExplorer({
                               { name: ingredient.name },
                             )}
                             onClick={() => selectSlug(null)}
-                            className="flex h-9 w-9 flex-none items-center justify-center border border-ivory/12 text-ground-muted transition-colors duration-300 hover:border-gold hover:text-ground-accent"
+                            className="flex h-9 w-9 flex-none items-center justify-center border border-ground-border text-ground-muted transition-colors duration-300 hover:border-gold hover:text-ground-accent"
                           >
                             <X size={14} strokeWidth={1.25} aria-hidden="true" />
                           </button>

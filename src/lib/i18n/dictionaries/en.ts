@@ -757,6 +757,8 @@ export const en = {
      */
     countOne: "{count} Location Worldwide",
     countOther: "{count} Locations Worldwide",
+    /** The map panel while every listed boutique is still forthcoming. */
+    openingSoon: "Boutiques Opening Soon",
     address: "Address",
     telephone: "Telephone",
     hours: "Hours",
@@ -836,6 +838,15 @@ export const en = {
       ogTitle: "Terms & Conditions | KHEM",
       ogDescription:
         "What we owe you and what we ask in return when you order from KHEM Fragrance House, Cairo.",
+    },
+    /** The furniture shared by the four policy pages. */
+    document: {
+      lastUpdated: "Last updated {date}",
+      contents: "Contents",
+      questions: "Questions",
+      questionsBody:
+        "If anything on this page is unclear, write to us. We would rather explain it than have you guess.",
+      emailUs: "Email Us",
     },
   },
 
@@ -1637,11 +1648,11 @@ export const en = {
       meta: {
         title: "Sign In",
         description:
-          "Sign in to your KHEM account to follow your orders, saved fragrances, and addresses.",
+          "Sign in to your KHEM account to follow your orders, your addresses, and your vouchers.",
       },
       eyebrow: "The House",
       heading: "Enter the House",
-      body: "Sign in to follow your orders, your saved fragrances, and your addresses.",
+      body: "Sign in to follow your orders, your addresses, and your vouchers.",
     },
     signUp: {
       meta: {
@@ -1660,6 +1671,7 @@ export const en = {
     /** Guest routes offered beneath the form , neither needs a session. */
     guestLead: "No account yet? You can still browse.",
     guestCart: "Your Bag",
+    guestCollections: "Explore the Collections",
   },
 
   account: {

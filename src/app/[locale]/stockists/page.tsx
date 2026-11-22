@@ -90,8 +90,8 @@ export default async function Stockists({
     <div className="ground-ivory min-h-screen">
       <NavGround ground="ivory" />
       {/* ── HEADER ─────────────────────────────────── */}
-      <section className="px-4 pt-14 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pt-32">
-        <Reveal className="mx-auto max-w-350 pb-10">
+      <section className="px-4 pt-8 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:pt-32">
+        <Reveal className="mx-auto max-w-350 pb-6 md:pb-10">
           <p className="eyebrow mb-4">{dict.stockists.hero.eyebrow}</p>
           <h1 className="font-heading text-4xl font-normal text-ground sm:text-5xl md:text-7xl">
             {dict.stockists.hero.heading}
@@ -107,6 +107,9 @@ export default async function Stockists({
       />
 
       {/* ── PARTNERS ────────────────────────────────── */}
+      {/* Not rendered until a boutique opens: the heading over an empty grid
+          was the only thing on the page that looked broken. */}
+      {openStockists.length > 0 ? (
       <section className="border-t border-ground-border px-4 py-14 sm:px-6 md:px-10 lg:px-12 xl:px-16 md:py-30">
         <div className="mx-auto max-w-350">
           <Reveal className="mb-10 md:mb-16">
@@ -139,6 +142,7 @@ export default async function Stockists({
           )}
         </div>
       </section>
+      ) : null}
 
       {/* ── WHOLESALE ENQUIRIES ─────────────────────── */}
       <section className="ground-sand border-t border-ground-border px-4 py-14 text-center sm:px-6 md:px-10 lg:px-12 xl:px-16 md:py-30">
