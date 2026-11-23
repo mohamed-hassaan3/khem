@@ -187,6 +187,7 @@ export function campaignEmail({
     "",
     "—",
     "KHEM Perfumes · Essence of Heritage",
+    "Cairo, Egypt",
     SITE_URL,
   ].join("\n");
 

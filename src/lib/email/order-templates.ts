@@ -459,6 +459,7 @@ function customerOrderText(
     "",
     copy.signoff,
     "KHEM Perfumes — Essence of Heritage",
+    "Cairo, Egypt",
     SITE_URL,
   ]
     .filter((line) => line !== "")
@@ -719,6 +720,7 @@ export function customerFeedbackEmail({
     "",
     copy.signoff,
     "KHEM Perfumes — Essence of Heritage",
+    "Cairo, Egypt",
     SITE_URL,
   ]
     .filter((line) => line !== "")
