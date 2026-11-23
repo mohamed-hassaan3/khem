@@ -204,3 +204,39 @@ Audience section and Sending: every address the saved audience reaches
   cleanly; latest campaign previews 7 addresses, breakdown unchanged (7).
 - **Not yet applied** — `npm run db:migrate` targets the live database and
   waits for the user's OK. Apply it before deploying this code.
+
+## Outcome — 6b part 1: Today, Orders, Customers, Invitations (2026-11-23)
+
+- **Today** (`admin/page.tsx`) rebuilt as in the mock: date + "Today",
+  "Needs you" (new orders to open, to prepare and ship, running low — each
+  opens the filtered list, or says "nothing waiting"), the period's figures
+  two-up on phones / four on desktop with the range tabs, the curve, latest
+  orders, running out, at a glance, quick actions. Same services as before.
+- **`AdminOrderList`** (new, shared): one tappable row per order — number,
+  New marker, total, status pill, customer (`<bdi>` so Arabic names do not
+  reorder the date), date, items, in-store. Used by Today and Orders.
+- **Orders**: one pill row (All · New n · Preparing · Shipped · Delivered ·
+  Cancelled · Refunded) instead of three chip rows, plus Online / In store;
+  "Manual order". `FilterChips` restyled as pills for every list, a chip may
+  set its own param, and changing a filter resets the page.
+- **Customers**: Everyone / Registered / Walk-in filter (customer_summary
+  cannot filter and caps at 200 rows a call, so filtered views read the whole
+  set through `listAllAdminCustomers()` and page it in memory); email shown in
+  its own column; "Invite" on walk-ins that have an email; Download CSV.
+- **CSV export** `admin/customers/export/route.ts`: gates itself with
+  `getAdminActor()` (404 otherwise; a route handler is not under the admin
+  layout), no-store, UTF-8 BOM for Arabic in Excel, formula-injection guard.
+  Signed-out request: redirected by the proxy, no data.
+- **Invitations** `admin/customers/invitations` (tab beside Customers): the
+  invite form (pre-filled from a walk-in's Invite link) and every invitation
+  read from Clerk — Waiting / Joined / Expired / Withdrawn, search, Withdraw,
+  Send again (withdraw + a fresh `inviteCustomer`). Found live: a pending
+  invitation for someone who had already signed up on their own; such rows
+  now say so and offer only Withdraw.
+- **Campaign audience list** verified live on a draft: 19 addresses (7
+  subscribers + 12 customers); leaving one out moved the list and the send
+  panel to 18; restored to 19.
+
+Checks: tsc + ESLint clean; 390px overflow sweep of 36 admin routes: none.
+Still to do in 6b: Products, Collections & categories, Stock, Loyalty, order
+and customer detail pages in the new language (they fit phones already).

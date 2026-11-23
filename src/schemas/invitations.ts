@@ -27,3 +27,14 @@ export const inviteCustomerSchema = z.object({
 });
 
 export type InviteCustomerInput = z.input<typeof inviteCustomerSchema>;
+
+/** A Clerk invitation id, as `listInvitations()` returned it. */
+export const invitationIdSchema = z.object({
+  id: z.string().trim().regex(/^inv_[A-Za-z0-9]+$/, "Unknown invitation."),
+});
+
+/** Send again: the old invitation is withdrawn and a fresh one goes out. */
+export const resendInvitationSchema = invitationIdSchema.extend({
+  email: z.email("Enter a valid email address.").max(200, "That address is too long."),
+  locale: z.enum(LOCALES, { error: "Choose a language." }),
+});

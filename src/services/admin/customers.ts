@@ -98,6 +98,32 @@ export async function listAdminCustomers(
   };
 }
 
+
+/** `customer_summary` returns at most this many rows per call (0024). */
+const SUMMARY_PAGE = 200;
+
+/**
+ * Every customer matching `search`, read page by page, up to `max` — for an
+ * account-filtered view and the CSV export, which need the whole set rather
+ * than one page of it. Stops early if a page fails.
+ */
+export async function listAllAdminCustomers(
+  search = "",
+  max = 5000,
+): Promise<AdminCustomerSummary[]> {
+  const all: AdminCustomerSummary[] = [];
+  let total = Number.POSITIVE_INFINITY;
+
+  for (let offset = 0; offset < Math.min(total, max); offset += SUMMARY_PAGE) {
+    const page = await listAdminCustomers({ search, offset, limit: SUMMARY_PAGE });
+    if (page.customers.length === 0) break;
+    all.push(...page.customers);
+    total = page.total;
+  }
+
+  return all.slice(0, max);
+}
+
 /** The directory row for one customer, by the id the list linked to. */
 async function getCustomerRow(id: string): Promise<AdminCustomerSummary | null> {
   const supabase = getSupabaseAdmin();

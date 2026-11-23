@@ -98,6 +98,10 @@ export const ADMIN_NAV: readonly AdminNavGroup[] = [
         description: "Registered and walk-in, invite someone",
         href: "/admin/customers",
         icon: Users,
+        tabs: [
+          { label: "Customers", href: "/admin/customers" },
+          { label: "Invitations", href: "/admin/customers/invitations" },
+        ],
         keywords: "people clients invite invitation walk-in",
       },
       {

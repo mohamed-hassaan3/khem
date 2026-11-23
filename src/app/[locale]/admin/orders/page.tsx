@@ -1,16 +1,12 @@
-import Link from "next/link";
 import { Plus } from "lucide-react";
 
+import AdminOrderList, { orderStatusLabel } from "@/src/components/admin/AdminOrderList";
 import {
-  AdminCell,
   AdminEmpty,
   AdminLinkButton,
   AdminPageHeader,
-  AdminRow,
-  AdminTable,
 } from "@/src/components/admin/AdminTable";
 import FilterChips from "@/src/components/admin/FilterChips";
-import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import {
   countUnopenedOrders,
@@ -19,7 +15,6 @@ import {
 } from "@/src/services/admin/orders";
 import type { OrderStatus } from "@/src/types/account";
 import type { OrderChannel } from "@/src/types/order";
-import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
 /**
  * The order book.
@@ -60,19 +55,7 @@ function readParam(value: string | string[] | undefined): string {
   return typeof raw === "string" ? raw : "";
 }
 
-function label(value: string): string {
-  return value.charAt(0) + value.slice(1).toLowerCase();
-}
 
-/** Dates are formatted here, never stored formatted — on Cairo's calendar. */
-function placedOn(iso: string): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: SHOP_TIME_ZONE,
-  }).format(new Date(iso));
-}
 
 export default async function AdminOrdersPage({
   params,
@@ -104,28 +87,32 @@ export default async function AdminOrdersPage({
   ]);
 
   const basePath = localizePath(activeLocale, "/admin/orders");
+  const filtered = Boolean(status || channel || seen);
+  const activeView = seen === "new" ? "new" : seen === "opened" ? "opened" : (status ?? "");
 
   return (
     <>
       <AdminPageHeader
         title="Orders"
-        description="Every sale, however it came in. Recording one here takes its units out of the website's stock immediately; cancelling or refunding puts them back exactly once."
+        description="Every sale, online or in store. A manual order takes its units out of stock at once; cancelling or refunding puts them back exactly once."
         action={
           <AdminLinkButton href={`${basePath}/new`}>
-            <Plus size={13} strokeWidth={1.25} />
-            Record order
+            <Plus size={14} strokeWidth={1.5} />
+            Manual order
           </AdminLinkButton>
         }
       />
 
+      {/* One row for what to look at: everything, the unopened, or a status. */}
       <FilterChips
         basePath={basePath}
         param="status"
-        active={status ?? ""}
+        active={activeView}
         query={query}
         chips={[
           { value: "", label: "All" },
-          ...STATUSES.map((value) => ({ value, label: label(value) })),
+          { value: "new", label: "New", count: unopened, param: "seen" },
+          ...STATUSES.map((value) => ({ value, label: orderStatusLabel(value) })),
         ]}
       />
 
@@ -135,115 +122,34 @@ export default async function AdminOrdersPage({
         active={channel ?? ""}
         query={query}
         chips={[
-          { value: "", label: "Every channel" },
-          ...CHANNELS.map((value) => ({ value, label: label(value) })),
-        ]}
-      />
-
-      <FilterChips
-        basePath={basePath}
-        param="seen"
-        active={seen ?? ""}
-        query={query}
-        chips={[
-          { value: "", label: "Opened or not" },
-          { value: "new", label: "New", count: unopened },
-          { value: "opened", label: "Opened" },
+          { value: "", label: "Online and in store" },
+          { value: "ONLINE", label: "Online" },
+          { value: "OFFLINE", label: "In store" },
         ]}
       />
 
       {orders.length === 0 ? (
         <AdminEmpty
           message={
-            status || channel || seen
+            filtered
               ? "No orders match that filter."
-              : "No orders yet. Record the first sale and the charts on the dashboard start filling in."
+              : "No orders yet. Record the first sale and Today starts filling in."
           }
           action={
-            status || channel || seen ? undefined : (
-              <AdminLinkButton href={`${basePath}/new`}>
-                Record the first order
-              </AdminLinkButton>
+            filtered ? undefined : (
+              <AdminLinkButton href={`${basePath}/new`}>Record the first order</AdminLinkButton>
             )
           }
         />
       ) : (
-        <AdminTable
-          headers={[
-            "Order",
-            "Customer",
-            "Placed",
-            "Items",
-            "Total",
-            "Payment",
-            "Status",
-            { label: "Open", hidden: true },
-          ]}
-        >
-          {orders.map((order) => (
-            <AdminRow key={order.id}>
-              <AdminCell>
-                <span className="block font-heading text-[11px] tracking-[0.1em]">
-                  {order.orderNumber}
-                </span>
-                <span className="mt-1 block text-[10px] tracking-wide text-ground-subtle">
-                  {order.channel.toLowerCase()}
-                </span>
-                {/*
-                  Marked beside the number rather than in the Status column, so
-                  it cannot be read as a seventh status — it is a fact about the
-                  desk, not about the order.
-                */}
-                {order.firstOpenedAt === null ? (
-                  <span
-                    title="Nobody at the desk has opened this order yet"
-                    className="mt-2 inline-block border border-gold/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent"
-                  >
-                    New
-                  </span>
-                ) : null}
-              </AdminCell>
-              <AdminCell>{order.customerName}</AdminCell>
-              <AdminCell muted>{placedOn(order.placedAt)}</AdminCell>
-              <AdminCell muted>{order.itemCount}</AdminCell>
-              <AdminCell>{egp(order.totalInCents)}</AdminCell>
-              <AdminCell>
-                <span
-                  className={
-                    order.paymentStatus === "PAID"
-                      ? "text-success"
-                      : order.paymentStatus === "FAILED"
-                        ? "text-danger"
-                        : "text-ground-muted"
-                  }
-                >
-                  {label(order.paymentStatus)}
-                </span>
-              </AdminCell>
-              <AdminCell>
-                <span
-                  className={`inline-block border px-3 py-1 font-heading text-[9px] uppercase tracking-[0.2em] ${
-                    order.status === "CANCELLED" || order.status === "REFUNDED"
-                      ? "border-ground-border text-ground-muted"
-                      : order.status === "DELIVERED"
-                        ? "border-success/40 text-success"
-                        : "border-gold/40 text-ground-accent"
-                  }`}
-                >
-                  {label(order.status)}
-                </span>
-              </AdminCell>
-              <AdminCell>
-                <Link
-                  href={`${basePath}/${order.orderNumber}`}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
-                >
-                  Open
-                </Link>
-              </AdminCell>
-            </AdminRow>
-          ))}
-        </AdminTable>
+        <>
+          <p className="mb-2.5 text-[12px] text-ground-muted">
+            {orders.length} {orders.length === 1 ? "order" : "orders"}
+            {orders.length >= 200 ? " — the 200 most recent" : ""}
+            {filtered ? " matching" : ""}
+          </p>
+          <AdminOrderList orders={orders} locale={activeLocale} />
+        </>
       )}
     </>
   );

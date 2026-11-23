@@ -18,6 +18,12 @@ export interface FilterChip {
   value: string;
   label: string;
   count?: number;
+  /**
+   * The search param this chip sets, when it is not the row's `param` — so
+   * one row can mix filters (Orders: "New" sets `seen`, the statuses set
+   * `status`). Every param named by any chip in the row is cleared first.
+   */
+  param?: string;
 }
 
 export default function FilterChips({
@@ -34,39 +40,45 @@ export default function FilterChips({
   chips: readonly FilterChip[];
   query?: Record<string, string | string[] | undefined>;
 }) {
-  function hrefFor(value: string): string {
+  const owned = new Set([param, ...chips.flatMap((chip) => (chip.param ? [chip.param] : []))]);
+
+  function hrefFor(chip: FilterChip): string {
     const params = new URLSearchParams();
 
     for (const [key, existing] of Object.entries(query)) {
-      if (key === param || existing === undefined) continue;
+      // A filter change starts the list from its first page.
+      if (owned.has(key) || key === "page" || existing === undefined) continue;
       params.set(key, Array.isArray(existing) ? (existing[0] ?? "") : existing);
     }
 
-    if (value.length > 0) params.set(param, value);
+    if (chip.value.length > 0) params.set(chip.param ?? param, chip.value);
 
     const search = params.toString();
     return search.length > 0 ? `${basePath}?${search}` : basePath;
   }
 
   return (
-    <div className="mb-8 flex flex-wrap gap-2">
+    // One row that scrolls sideways on a phone rather than wrapping into a
+    // block of pills above the list it filters.
+    <div className="-mx-4 mb-5 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
       {chips.map((chip) => {
         const isActive = chip.value === active;
 
         return (
           <Link
-            key={chip.value || "all"}
-            href={hrefFor(chip.value)}
+            key={`${chip.param ?? param}:${chip.value || "all"}`}
+            href={hrefFor(chip)}
+            scroll={false}
             aria-current={isActive ? "true" : undefined}
-            className={`border px-4 py-2 font-heading text-[9px] uppercase tracking-[0.2em] transition-colors duration-300 ${
+            className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13px] no-underline transition-colors duration-300 ${
               isActive
-                ? "border-gold/50 bg-gold/10 text-ground-accent"
-                : "border-ground-border text-ground-muted hover:border-gold/30 hover:text-ground"
+                ? "border-ground bg-ground text-ground-bg"
+                : "border-ground-border text-ground-muted hover:border-gold/40 hover:text-ground"
             }`}
           >
             {chip.label}
             {typeof chip.count === "number" ? (
-              <span className="ms-2 text-ground-subtle">{chip.count}</span>
+              <span className={isActive ? "text-ground-bg/70" : "text-ground-subtle"}>{chip.count}</span>
             ) : null}
           </Link>
         );

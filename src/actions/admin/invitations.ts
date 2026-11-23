@@ -41,6 +41,7 @@
  */
 
 import { clerkClient } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/src/lib/admin/auth";
 import { sendInvitationMail } from "@/src/lib/email/send-welcome-mail";
@@ -49,7 +50,11 @@ import { DEFAULT_LOCALE, isLocale, localizePath } from "@/src/lib/i18n/config";
 import { SITE_URL } from "@/src/lib/i18n/metadata";
 import { AUTH_PATHS } from "@/src/lib/routes";
 import type { AdminActionResult } from "@/src/schemas/admin";
-import { inviteCustomerSchema } from "@/src/schemas/invitations";
+import {
+  invitationIdSchema,
+  inviteCustomerSchema,
+  resendInvitationSchema,
+} from "@/src/schemas/invitations";
 
 import { fieldErrorsFrom } from "./shared";
 
@@ -162,6 +167,7 @@ export async function inviteCustomer(input: unknown): Promise<AdminActionResult>
   }
 
   console.info(`[invitations] sent by ${actor.email}`);
+  revalidatePath(INVITATIONS_PATH, "page");
 
   return {
     ok: true,
@@ -185,4 +191,58 @@ async function revoke(
       cause instanceof Error ? cause.message : "unknown error",
     );
   }
+}
+
+const INVITATIONS_PATH = "/[locale]/admin/customers/invitations";
+
+/**
+ * Withdraw an invitation that has not been accepted. The link in the letter
+ * stops working; nothing else changes. (prompts/admin-redesign-stage-6.md, 6b)
+ */
+export async function withdrawInvitation(input: unknown): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = invitationIdSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, message: "Unknown invitation." };
+
+  const clerk = await clerkClient();
+  try {
+    await clerk.invitations.revokeInvitation(parsed.data.id);
+  } catch (cause) {
+    const code = clerkErrorCode(cause);
+    console.error(`[invitations] withdraw failed (${code ?? "unknown"}) by ${actor.email}`);
+    return {
+      ok: false,
+      message: "That invitation could not be withdrawn — it may already have been accepted.",
+    };
+  }
+
+  console.info(`[invitations] withdrawn by ${actor.email}`);
+  revalidatePath(INVITATIONS_PATH, "page");
+  return { ok: true, slug: parsed.data.id, message: "Invitation withdrawn." };
+}
+
+/**
+ * Send an invitation again: the old one is withdrawn (when it is still
+ * pending) and a fresh one goes out through `inviteCustomer`, so the letter,
+ * the 30-day window and every safeguard are the same as a first invitation.
+ */
+export async function resendInvitation(input: unknown): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = resendInvitationSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, message: "That invitation could not be sent again." };
+
+  const clerk = await clerkClient();
+  try {
+    await clerk.invitations.revokeInvitation(parsed.data.id);
+  } catch {
+    // Already revoked, expired or accepted: nothing to withdraw. An accepted
+    // one is refused below by Clerk ("already signed up").
+  }
+
+  const outcome = await inviteCustomer({ email: parsed.data.email, locale: parsed.data.locale });
+  console.info(`[invitations] resend ${outcome.ok ? "sent" : "refused"} by ${actor.email}`);
+  revalidatePath(INVITATIONS_PATH, "page");
+  return outcome.ok ? { ...outcome, message: "Invitation sent again." } : outcome;
 }
