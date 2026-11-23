@@ -64,6 +64,18 @@ export interface Campaign {
 export type CampaignRecipientKind = "SUBSCRIBER" | "CUSTOMER" | "SPECIFIC";
 
 /**
+ * One address the selected audience reaches, before sending
+ * (`campaign_audience_preview()`, 0081). `excluded` is the desk's choice to
+ * leave it out; an excluded address is not counted and not written to.
+ */
+export interface CampaignAudienceMember {
+  email: string;
+  kind: CampaignRecipientKind;
+  name: string | null;
+  excluded: boolean;
+}
+
+/**
  * Who a campaign would reach if it went now.
  *
  * `total` is **not** the sum of the other three. An address that is both a

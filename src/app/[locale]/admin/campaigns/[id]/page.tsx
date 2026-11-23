@@ -1,12 +1,17 @@
 import { notFound } from "next/navigation";
 
+import CampaignAudienceList from "@/src/components/admin/CampaignAudienceList";
 import CampaignDispatch from "@/src/components/admin/CampaignDispatch";
 import CampaignForm from "@/src/components/admin/CampaignForm";
 import CampaignRecord from "@/src/components/admin/CampaignRecord";
 import CampaignPreview from "@/src/components/admin/CampaignPreview";
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import { isLocale } from "@/src/lib/i18n/config";
-import { getCampaign, subscriberCount } from "@/src/services/admin/campaigns";
+import {
+  getCampaign,
+  listCampaignAudience,
+  subscriberCount,
+} from "@/src/services/admin/campaigns";
 import { isEditable } from "@/src/types/campaign";
 
 /**
@@ -43,6 +48,10 @@ export default async function CampaignPage({
 
   const editable = isEditable(campaign.status);
 
+  // Every address the saved audience reaches, for the desk to check and trim
+  // before sending (0081). Only while the campaign can still change.
+  const audienceMembers = editable ? await listCampaignAudience(campaign.id) : [];
+
   return (
     <>
       <AdminPageHeader
@@ -72,7 +81,12 @@ export default async function CampaignPage({
               * what the desk should read before anything else.
               */}
             <div className="max-w-3xl">
-              <CampaignDispatch campaign={campaign} />
+              <CampaignDispatch
+                campaign={campaign}
+                audienceList={
+                  <CampaignAudienceList campaignId={campaign.id} members={audienceMembers} />
+                }
+              />
             </div>
 
             <CampaignForm

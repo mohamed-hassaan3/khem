@@ -184,3 +184,23 @@ Written per sub-stage in its outcome section.
 Checked live at 390×844 and 1440×900: no horizontal scroll on Today,
 products, customers, campaigns, discounts, rewards; jump "khem-2026-1192"
 opens that order; search keeps focus and swaps results in place.
+
+## Outcome — campaign audience list (built 2026-11-23, user request)
+
+On a draft or scheduled campaign, "Who will receive it" sits between the
+Audience section and Sending: every address the saved audience reaches
+(subscribers, customers, typed), with name where known, search, filters
+(Everyone / Subscribers / Customers / Typed / Left out), a tick per address,
+"Leave out all shown" / "Include all shown", 50 at a time.
+
+- `supabase/sql/0081_campaign_exclusions.sql`: `campaign_exclusions` table
+  (service role only, frozen by trigger once a campaign is sent);
+  `campaign_audience_all()` = 0055's body; `campaign_audience()` = that minus
+  exclusions (same signature, so breakdown and the send claim follow);
+  `campaign_audience_preview()` for the list.
+- `setCampaignExclusion` action: `requireAdmin()` first, Zod, editable check,
+  upsert/delete, revalidates the page.
+- Dry run on the live database inside a rolled-back transaction: applies
+  cleanly; latest campaign previews 7 addresses, breakdown unchanged (7).
+- **Not yet applied** — `npm run db:migrate` targets the live database and
+  waits for the user's OK. Apply it before deploying this code.

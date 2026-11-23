@@ -85,8 +85,14 @@ import type { CampaignWithProgress } from "@/src/types/campaign";
  */
 export default function CampaignDispatch({
   campaign,
+  audienceList,
 }: {
   campaign: CampaignWithProgress;
+  /**
+   * The per-address list (`CampaignAudienceList`), placed between choosing the
+   * audience and sending — the order the desk works in.
+   */
+  audienceList?: React.ReactNode;
 }) {
   const router = useRouter();
   const { toast } = useAdminToast();
@@ -285,6 +291,8 @@ export default function CampaignDispatch({
           </section>
         </>
       )}
+
+      {audienceList}
 
       <section className="space-y-5 border border-ground-border bg-stone/60 px-6 py-6">
         <div>

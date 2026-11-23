@@ -41,6 +41,7 @@ import { getSupabaseAdmin } from "@/src/lib/supabase";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import {
   campaignAudienceSchema,
+  campaignExclusionSchema,
   campaignIdSchema,
   campaignRecipientsSchema,
   createCampaignSchema,
@@ -635,5 +636,82 @@ export async function sendCampaignNow(input: unknown): Promise<AdminActionResult
     ok: true,
     slug: parsed.data.id,
     message: `${result.sent} letter${result.sent === 1 ? "" : "s"} sent.${failed}${tail}`,
+  };
+}
+
+/**
+ * Leave addresses out of a campaign before it is sent, or bring them back.
+ *
+ * Writes `campaign_exclusions` (0081), which `campaign_audience()` subtracts —
+ * so the count on this screen, the preview list and the letters the send
+ * claims all change together. Refused for a campaign that is no longer a draft
+ * or scheduled, here and again by the table's trigger.
+ */
+export async function setCampaignExclusion(
+  input: unknown,
+): Promise<AdminActionResult> {
+  const actor = await requireAdmin();
+
+  const parsed = campaignExclusionSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "That change could not be saved.",
+      fieldErrors: fieldErrorsFrom(parsed.error),
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return UNCONFIGURED;
+
+  const { data: campaign, error: readError } = await supabase
+    .from("campaigns")
+    .select("status")
+    .eq("id", parsed.data.id)
+    .maybeSingle();
+
+  if (readError || !campaign) {
+    return { ok: false, message: "That campaign no longer exists." };
+  }
+
+  const status = campaignStatusSchema.safeParse(campaign.status);
+  if (!status.success || !isEditable(status.data)) {
+    return {
+      ok: false,
+      message: "A campaign that has been sent is a record and cannot be changed.",
+    };
+  }
+
+  const emails = [...new Set(parsed.data.emails)];
+  const { error } = parsed.data.excluded
+    ? await supabase.from("campaign_exclusions").upsert(
+        emails.map((email) => ({ campaignId: parsed.data.id, email })),
+        { onConflict: "campaignId,email", ignoreDuplicates: true },
+      )
+    : await supabase
+        .from("campaign_exclusions")
+        .delete()
+        .eq("campaignId", parsed.data.id)
+        .in("email", emails);
+
+  if (error) {
+    console.error(
+      `[admin] setCampaignExclusion failed (${actor.email}): ${error.message}`,
+    );
+    return { ok: false, message: "That change could not be saved." };
+  }
+
+  console.info(
+    `[admin] campaign ${parsed.data.id}: ${emails.length} address(es) ${
+      parsed.data.excluded ? "left out" : "brought back"
+    } by ${actor.email}`,
+  );
+  revalidatePath(`${CAMPAIGNS_PATH}/${parsed.data.id}`);
+
+  const count = emails.length === 1 ? "1 address" : `${emails.length} addresses`;
+  return {
+    ok: true,
+    slug: parsed.data.id,
+    message: parsed.data.excluded ? `${count} left out.` : `${count} brought back.`,
   };
 }

@@ -272,3 +272,20 @@ export const campaignRecipientsSchema = z
 
 export type CreateCampaignInput = z.input<typeof createCampaignSchema>;
 export type UpdateCampaignInput = z.input<typeof updateCampaignSchema>;
+
+/** A preview list is bounded by the audience itself; this caps one request. */
+const MAX_EXCLUSION_BATCH = 5000;
+
+/**
+ * Leave addresses out of a campaign, or bring them back
+ * (`campaign_exclusions`, 0081). `emails` is the set this one request changes —
+ * a single tick, or "every address shown" — never the whole list.
+ */
+export const campaignExclusionSchema = z.object({
+  id: z.string().trim().min(8, "Unknown campaign."),
+  emails: z
+    .array(recipientEmail)
+    .min(1, "Choose at least one address.")
+    .max(MAX_EXCLUSION_BATCH, "That is too many addresses for one change."),
+  excluded: z.boolean(),
+});
