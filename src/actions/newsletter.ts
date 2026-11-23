@@ -38,6 +38,7 @@ import {
 } from "@/src/lib/email/addresses";
 import { getEmailClient } from "@/src/lib/email/client";
 import { AUTO_REPLY_HEADERS } from "@/src/lib/email/headers";
+import { unsubscribeHeaders } from "@/src/lib/email/send-campaign-mail";
 import { clientKey, isRateLimited } from "@/src/lib/email/rate-limit";
 import {
   newsletterEmail,
@@ -67,6 +68,8 @@ async function sendWelcome(
   email: string,
   rawLocale: string,
   unsubscribeUrl: string,
+  /** The subscriber's token, for the one-click `List-Unsubscribe` header. */
+  token: string,
 ): Promise<void> {
   const locale = isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
   // The signature's links live in `"SocialProfile"`; composing the body is
@@ -87,7 +90,8 @@ async function sendWelcome(
       subject: payload.subject,
       html: payload.html,
       text: payload.text,
-      headers: AUTO_REPLY_HEADERS,
+      // Marketing mail: the inbox's own Unsubscribe button (RFC 8058).
+      headers: { ...AUTO_REPLY_HEADERS, ...unsubscribeHeaders(token) },
     });
 
     if (error) {
@@ -177,7 +181,7 @@ export async function subscribeToNewsletter(
     // was already subscribed gets nothing — re-submitting the form is not a
     // reason to be welcomed again.
     if (outcome.isNew || outcome.reactivated) {
-      await sendWelcome(resend, parsed.data.email, input.locale, unsubscribeUrl);
+      await sendWelcome(resend, parsed.data.email, input.locale, unsubscribeUrl, outcome.token);
     }
 
     return { ok: true };

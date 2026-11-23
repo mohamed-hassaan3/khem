@@ -102,6 +102,9 @@ export async function sendCampaignTest(
       subject: `[TEST] ${payload.subject}`,
       html: payload.html,
       text: payload.text,
+      // The same headers the real letter carries, so a test shows what the
+      // inbox will show.
+      headers: unsubscribeHeaders(unsubscribeToken),
     });
 
     if (error) {

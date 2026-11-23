@@ -31,6 +31,7 @@
 import { houseFromAddress, inboxAddress } from "@/src/lib/email/addresses";
 import { getEmailClient } from "@/src/lib/email/client";
 import { AUTO_REPLY_HEADERS } from "@/src/lib/email/headers";
+import { unsubscribeHeaders } from "@/src/lib/email/send-campaign-mail";
 import { clientKey, isRateLimited } from "@/src/lib/email/rate-limit";
 import { newsletterWelcomeEmail } from "@/src/lib/email/templates";
 import { DEFAULT_LOCALE, isLocale } from "@/src/lib/i18n/config";
@@ -138,7 +139,8 @@ export async function subscribeForOffer(
       subject: payload.subject,
       html: payload.html,
       text: payload.text,
-      headers: AUTO_REPLY_HEADERS,
+      // Marketing mail: the inbox's own Unsubscribe button (RFC 8058).
+      headers: { ...AUTO_REPLY_HEADERS, ...unsubscribeHeaders(outcome.token) },
     });
 
     if (error) {
