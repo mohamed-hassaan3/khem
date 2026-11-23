@@ -42,6 +42,7 @@
 
 import { clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 import { requireAdmin } from "@/src/lib/admin/auth";
 import { sendInvitationMail } from "@/src/lib/email/send-welcome-mail";
@@ -60,6 +61,25 @@ import { fieldErrorsFrom } from "./shared";
 
 /** Clerk's own default is 30; naming it here is what the letter can promise. */
 const EXPIRES_IN_DAYS = 30;
+
+/**
+ * The site an invitation sends people back to.
+ *
+ * Production: always `SITE_URL`. In development an invitation is made by the
+ * Clerk *development* instance, whose ticket the live site (production Clerk)
+ * cannot recognise — sending it to `SITE_URL` produced "This link is no longer
+ * valid or has already been used". So outside production it returns to the dev
+ * server it was created on, and only when that host is local (localhost or a
+ * LAN address); any other Host header falls back to `SITE_URL`, so a forged
+ * header can never put a foreign address into an email.
+ */
+async function invitationOrigin(): Promise<string> {
+  if (process.env.NODE_ENV === "production") return SITE_URL;
+  const host = (await headers()).get("host") ?? "";
+  return /^(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d{1,5})?$/.test(host)
+    ? `http://${host}`
+    : SITE_URL;
+}
 
 /** Clerk's error payloads carry a machine code worth branching on. */
 function clerkErrorCode(cause: unknown): string | null {
@@ -104,10 +124,10 @@ export async function inviteCustomer(input: unknown): Promise<AdminActionResult>
       emailAddress: email,
       /*
        * Where the ticket lands. Absolute, because it leaves in an email —
-       * built from `SITE_URL` and the locale-aware sign-up path, never from
-       * anything the form sent.
+       * built from `invitationOrigin()` and the locale-aware sign-up path,
+       * never from anything the form sent.
        */
-      redirectUrl: `${SITE_URL}${localizePath(locale, AUTH_PATHS.signUp)}`,
+      redirectUrl: `${await invitationOrigin()}${localizePath(locale, AUTH_PATHS.signUp)}`,
       /*
        * Lands on the user's `publicMetadata` when they accept, which is where
        * the webhook reads the language for their welcome letter. Public rather

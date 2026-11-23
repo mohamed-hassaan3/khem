@@ -42,6 +42,21 @@ export function unsubscribeUrlFor(token: string): string {
 }
 
 /**
+ * The `List-Unsubscribe` pair for one recipient (RFC 2369 + RFC 8058).
+ *
+ * Mail providers show their own "Unsubscribe" button from these and treat bulk
+ * mail without them as more likely junk. The HTTPS target is the one-click
+ * endpoint (`/api/unsubscribe`, POST only); the footer link still goes to the
+ * page that asks first.
+ */
+export function unsubscribeHeaders(token: string): Record<string, string> {
+  return {
+    "List-Unsubscribe": `<${SITE_URL}/api/unsubscribe?token=${encodeURIComponent(token)}>`,
+    "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+  };
+}
+
+/**
  * Send one campaign to one address, as a rehearsal.
  *
  * The token is a real one — the administrator's own row if they are on the list,
