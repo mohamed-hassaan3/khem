@@ -185,12 +185,12 @@ export default function OrderStatusControl({
     : "";
 
   const buttonBase =
-    "rounded-none border px-5 py-2.5 font-heading text-[9px] uppercase tracking-[0.2em] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none disabled:pointer-events-none";
+    "inline-flex h-11 items-center rounded-lg border px-4 text-[13px] transition-colors duration-300 ease-luxury-bezier focus-visible:outline-2 focus-visible:outline-gold disabled:pointer-events-none";
 
   return (
     <div className="space-y-8">
       <div>
-        <p className="mb-4 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
+        <p className="mb-3 font-heading text-[16px] font-normal text-ground">
           Fulfilment
         </p>
 
@@ -201,7 +201,7 @@ export default function OrderStatusControl({
           </p>
         ) : null}
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {orderStatusValues.map((to) => {
             const active = to === status;
             const unpaidBlock = requiresPayment(to) && !paid;
@@ -241,7 +241,7 @@ export default function OrderStatusControl({
         </div>
 
         {!paid && canTransition(status, "DELIVERED") ? (
-          <p className="mt-4 text-[11px] leading-relaxed text-ground-muted">
+          <p className="mt-3 text-[12px] leading-relaxed text-ground-muted">
             Delivery is unavailable until this order is paid.{" "}
             {paymentMethod === "CARD"
               ? "A card order is marked paid automatically once the payment clears."
@@ -251,11 +251,11 @@ export default function OrderStatusControl({
       </div>
 
       <div>
-        <p className="mb-4 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
+        <p className="mb-3 font-heading text-[16px] font-normal text-ground">
           Payment
         </p>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {paymentStatusValues.map((value) => {
             const active = value === paymentStatus;
             const reachable = canChangePayment(paymentStatus, value);
@@ -294,7 +294,7 @@ export default function OrderStatusControl({
         </div>
 
         {paymentMethod === "CARD" && paymentStatus !== "PAID" ? (
-          <p className="mt-4 text-[11px] leading-relaxed text-ground-muted">
+          <p className="mt-3 text-[12px] leading-relaxed text-ground-muted">
             This is a card order. It is marked paid automatically when the
             payment clears — record it by hand only if the money arrived some
             other way.
@@ -306,9 +306,9 @@ export default function OrderStatusControl({
         <div
           role="alertdialog"
           aria-label={heading}
-          className="khem-rise border border-gold/40 bg-ground-bg px-5 py-4"
+          className="khem-rise rounded-lg border border-gold/40 bg-ground-bg px-4 py-4"
         >
-          <p className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-accent">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-ground-accent">
             {heading}
           </p>
 
@@ -343,7 +343,7 @@ export default function OrderStatusControl({
         </div>
       ) : null}
 
-      {error ? <p className="text-[11px] text-danger">{error}</p> : null}
+      {error ? <p className="text-[12px] text-danger">{error}</p> : null}
     </div>
   );
 }

@@ -240,3 +240,25 @@ Audience section and Sending: every address the saved audience reaches
 Checks: tsc + ESLint clean; 390px overflow sweep of 36 admin routes: none.
 Still to do in 6b: Products, Collections & categories, Stock, Loyalty, order
 and customer detail pages in the new language (they fit phones already).
+
+## Outcome — 6b part 2: Stock, order controls, Loyalty, legibility (2026-11-23)
+
+- **Stock** (`admin/inventory`): one row per product (name, collection, SKU,
+  price, sold in range, online chip, in-store count) with the add / correct
+  controls folded into a native `<details>`. Phone height 11,990px → 2,382px.
+  `InventoryEditor` controls are 40px buttons with plain labels.
+- **Order page**: fulfilment / payment buttons 44px, sentence case, section
+  titles legible. Transition rules unchanged.
+- **Figure grids** on Loyalty (Points, Credits), Sales, Finance, Expenses and
+  Reports: two-up on phones, smaller padding and values.
+- **Legibility floor** in `globals.css`: inside `#admin-panel`, 9–10px text
+  renders at 11px and 0.2–0.3em tracking eases to 0.12em, until each screen is
+  redrawn. Storefront and account untouched.
+
+Logic noted, not changed (needs the user): a cash-on-delivery order cannot be
+marked Delivered until it is marked Paid ("Delivery is unavailable until this
+order is paid"), so the desk must record the courier's cash first, then the
+delivery. Intended, but worth confirming it matches how COD is handled.
+
+Checks: tsc + ESLint clean; 390px: Stock, Credits, Sales, Finance, order page
+fit with no horizontal scroll.

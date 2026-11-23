@@ -144,7 +144,7 @@ export default async function AdminExpensesPage({
         }
       />
 
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-8 grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
         <SalesFigure
           label="Total"
           value={egp(totals.totalInCents)}

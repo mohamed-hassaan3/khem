@@ -1,12 +1,8 @@
-import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 
-import {
-  AdminCell,
-  AdminEmpty,
-  AdminPageHeader,
-  AdminRow,
-  AdminTable,
-} from "@/src/components/admin/AdminTable";
+import AdminLink from "@/src/components/admin/AdminLink";
+
+import { AdminEmpty, AdminPageHeader } from "@/src/components/admin/AdminTable";
 import AdminSearch from "@/src/components/admin/AdminSearch";
 import FilterChips from "@/src/components/admin/FilterChips";
 import InventoryEditor from "@/src/components/admin/InventoryEditor";
@@ -67,37 +63,30 @@ export default async function AdminInventoryPage({
     out: all.filter((row) => stockState(row.inventoryOnline) === "out").length,
   };
 
+  const hrefFor = (path: string) => localizePath(activeLocale, path);
+
   return (
     <>
       <AdminPageHeader
-        title="Inventory"
-        description={`Two counters per product. The website sells from online only — below ${LOW_STOCK_THRESHOLD} it stops saying “in stock” and names the number, and at zero it says sold out however much is on the shelf. Offline is the counter's, and moves only when someone records a sale, a delivery or a transfer. Every change is written to the product's stock history.`}
+        title="Stock"
+        description={`Two counts per product. The website sells from Online: below ${LOW_STOCK_THRESHOLD} it shows the number left, at zero it says sold out. In store moves only when a sale, delivery or transfer is recorded. Every change is kept in the history.`}
+      />
+
+      <AdminSearch
+        placeholder="Name, SKU or collection"
+        label="Search stock by product name, slug, SKU or collection"
       />
 
       <FilterChips
-        basePath={localizePath(activeLocale, "/admin/inventory")}
+        basePath={hrefFor("/admin/inventory")}
         param="state"
         active={state}
         query={query}
         chips={[
           { value: "", label: "All", count: all.length },
-          { value: "out", label: "Out of stock", count: counts.out },
-          { value: "low", label: "Low", count: counts.low },
+          { value: "out", label: "Sold out", count: counts.out },
+          { value: "low", label: "Running low", count: counts.low },
         ]}
-      />
-
-      <p className="mb-6">
-        <Link
-          href={localizePath(activeLocale, "/admin/inventory/history")}
-          className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
-        >
-          Stock history — every movement, filterable
-        </Link>
-      </p>
-
-      <AdminSearch
-        placeholder="Search stock"
-        label="Search stock by product name, slug, SKU or collection"
       />
 
       {rows.length === 0 ? (
@@ -111,58 +100,55 @@ export default async function AdminInventoryPage({
           }
         />
       ) : (
-        <AdminTable
-          headers={[
-            "Product",
-            "SKU",
-            "Price",
-            `Sold (${range}d)`,
-            "Online",
-            "Offline",
-            "Add stock / correct",
-          ]}
-        >
+        /*
+         * One row per product, with the add / correct controls folded into a
+         * native <details>: the table put every editor on screen at once,
+         * which made this page 12,000px tall on a phone. Open only the product
+         * you are counting. (prompts/admin-redesign-stage-6.md, 6b)
+         */
+        <ul data-admin-results="" className="overflow-hidden rounded-lg border border-ground-border bg-stone">
           {rows.map((row) => (
-            <AdminRow key={row.slug}>
-              <AdminCell>
-                <Link
-                  href={localizePath(activeLocale, `/admin/products/${row.slug}`)}
-                  className="block transition-colors duration-300 hover:text-ground-accent"
-                >
-                  {row.name}
-                </Link>
-                <span className="mt-1 block text-[10px] tracking-wide text-ground-subtle">
-                  {row.collectionSlug}
-                </span>
-                <Link
-                  href={localizePath(
-                    activeLocale,
-                    `/admin/inventory/${row.slug}`,
-                  )}
-                  className="mt-1 block font-heading text-[9px] uppercase tracking-[0.15em] text-ground-subtle transition-colors duration-300 hover:text-ground-accent"
-                >
-                  Stock history
-                </Link>
-              </AdminCell>
-              <AdminCell muted>{row.sku}</AdminCell>
-              <AdminCell muted>{egp(row.priceInCents)}</AdminCell>
-              <AdminCell muted>{row.unitsSoldRecently}</AdminCell>
-              {/* The chip reads the online counter: it is the storefront's
-                  state, and this screen is where an editor comes to fix it. */}
-              <AdminCell>
-                <StockChip inventory={row.inventoryOnline} />
-              </AdminCell>
-              <AdminCell muted>{row.inventoryOffline}</AdminCell>
-              <AdminCell>
-                <InventoryEditor
-                  slug={row.slug}
-                  inventoryOnline={row.inventoryOnline}
-                  inventoryOffline={row.inventoryOffline}
-                />
-              </AdminCell>
-            </AdminRow>
+            <li key={row.slug} className="border-b border-ground-border last:border-b-0">
+              <details className="group">
+                <summary className="flex min-h-16 cursor-pointer list-none items-center gap-3 px-4 py-3 transition-colors duration-300 hover:bg-ground-bg/60 [&::-webkit-details-marker]:hidden">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[14px] text-ground">{row.name}</span>
+                    <span className="mt-0.5 block truncate text-[12px] text-ground-muted">
+                      {row.collectionSlug} · <span dir="ltr">{row.sku}</span> · {egp(row.priceInCents)} ·{" "}
+                      {row.unitsSoldRecently} sold in {range}d
+                    </span>
+                  </span>
+                  <span className="flex shrink-0 flex-col items-end gap-1">
+                    <StockChip inventory={row.inventoryOnline} />
+                    <span className="text-[11px] text-ground-muted">In store {row.inventoryOffline}</span>
+                  </span>
+                  <ChevronDown
+                    size={16}
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                    className="shrink-0 text-ground-subtle transition-transform duration-300 group-open:rotate-180"
+                  />
+                </summary>
+
+                <div className="flex flex-wrap items-start gap-x-8 gap-y-3 border-t border-ground-border bg-ground-bg/60 px-4 py-4">
+                  <InventoryEditor
+                    slug={row.slug}
+                    inventoryOnline={row.inventoryOnline}
+                    inventoryOffline={row.inventoryOffline}
+                  />
+                  <span className="flex flex-col gap-2 text-[13px]">
+                    <AdminLink href={hrefFor(`/admin/inventory/${row.slug}`)} className="text-ground-accent no-underline hover:text-ground">
+                      Stock history
+                    </AdminLink>
+                    <AdminLink href={hrefFor(`/admin/products/${row.slug}`)} className="text-ground-accent no-underline hover:text-ground">
+                      Edit product
+                    </AdminLink>
+                  </span>
+                </div>
+              </details>
+            </li>
           ))}
-        </AdminTable>
+        </ul>
       )}
     </>
   );

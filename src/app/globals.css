@@ -2036,6 +2036,23 @@ body:has([data-admin-desk]) {
   }
 }
 
+/*
+ * Legibility floor for the admin panel. Older screens set labels at 9–10px
+ * with 0.2em tracking, which is unreadable on a phone. Until each screen is
+ * redrawn (stages 6b–6d), nothing inside the panel renders below 11px, and the
+ * widest caps tracking is eased. Scoped to `#admin-panel`, so the storefront
+ * and the account are untouched.
+ */
+#admin-panel [class*="text-[9px]"],
+#admin-panel [class*="text-[10px]"] {
+  font-size: 11px;
+}
+#admin-panel [class*="tracking-[0.2em]"],
+#admin-panel [class*="tracking-[0.25em]"],
+#admin-panel [class*="tracking-[0.3em]"] {
+  letter-spacing: 0.12em;
+}
+
 /* An admin search in flight: the list it will replace is dimmed, not hidden. */
 #admin-panel table,
 #admin-panel [data-admin-results] {

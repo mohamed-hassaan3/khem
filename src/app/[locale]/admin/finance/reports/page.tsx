@@ -382,7 +382,7 @@ export default async function AdminFinanceReportsPage({
                 {window.from} → {window.to} against {previous.from} → {previous.to}.
               </p>
 
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
                 <ComparisonRow
                   label="Revenue"
                   current={summary.revenueInCents}
@@ -415,7 +415,7 @@ export default async function AdminFinanceReportsPage({
           )}
         </section>
 
-        <section className="border border-ground-border p-6 sm:p-8">
+        <section className="border border-ground-border p-3 sm:p-6 lg:p-8">
           <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
             The window in full
           </h2>

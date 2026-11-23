@@ -102,7 +102,7 @@ function Figure({
 }) {
   return (
     <div
-      className={`border p-6 sm:p-8 ${
+      className={`border p-3 sm:p-6 lg:p-8 ${
         tone === "warning"
           ? "border-warning/30 bg-warning/5"
           : "border-ground-border bg-ivory/2"
@@ -115,7 +115,7 @@ function Figure({
       >
         {label}
       </p>
-      <p className="mt-4 font-heading text-3xl tracking-[0.1em] text-ground-accent sm:text-4xl">
+      <p className="mt-2 truncate font-heading text-[22px] tracking-[0.04em] text-ground-accent sm:mt-4 sm:text-4xl">
         {value}
       </p>
       {note ? <p className="mt-3 text-[11px] text-ground-muted">{note}</p> : null}
@@ -167,7 +167,7 @@ export default async function AdminCreditsPage({
         <DiscoveryCreditToggle enabled={benefits.discoveryCreditEnabled} />
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
         <Figure
           label="Issued"
           value={totals.issuedCount}
