@@ -10,6 +10,7 @@ import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { flattenNavigation } from "@/src/schemas/db/navigation";
 import { getNavigationTree } from "@/src/services/navigation";
 import { interpolate } from "@/src/lib/i18n/interpolate";
+import type { SocialProfile } from "@/src/types/contact";
 
 /*
  * Ground-relative, even though the footer is charcoal on every page and §21
@@ -33,9 +34,6 @@ const socialLinkClass =
 const legalLinkClass =
   "text-[11px] tracking-[0.08em] text-ground-muted/70 no-underline transition-colors duration-300 hover:text-ground";
 
-/** Platform names are proper nouns — the same in both locales. */
-const socialLinks = ["Instagram", "Facebook", "Pinterest"] as const;
-
 /**
  * ⚠️ TEMPORARY — `prelaunch` exists only while the pre-launch cover does; it
  * drops the Collections column, whose every destination the cover has closed.
@@ -44,9 +42,17 @@ const socialLinks = ["Instagram", "Facebook", "Pinterest"] as const;
  */
 export default async function Footer({
   locale,
+  socials,
   prelaunch = false,
 }: {
   locale: Locale;
+  /**
+   * The house's social accounts, as Settings keeps them (`"SocialProfile"`).
+   * Read once by the `[locale]` layout, which also prints them as the
+   * structured data's `sameAs` — one answer for both, edited in one place.
+   * Platform names are proper nouns, the same in both locales.
+   */
+  socials: readonly SocialProfile[];
   prelaunch?: boolean;
 }) {
   const dict = await getDictionary(locale);
@@ -145,21 +151,23 @@ export default async function Footer({
            * would also reverse the item flow, left-aligning this row inside an
            * otherwise right-aligned Arabic column.
            */}
-          <div className="flex flex-wrap gap-5">
-            {socialLinks.map((name) => (
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                key={name}
-                href={`https://www.${name.toLowerCase()}.com/khemperfumes/`}
-                dir="ltr"
-                lang="en"
-                className={socialLinkClass}
-              >
-                {name}
-              </a>
-            ))}
-          </div>
+          {socials.length > 0 ? (
+            <div className="flex flex-wrap gap-5">
+              {socials.map((profile) => (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={profile.id}
+                  href={profile.url}
+                  dir="ltr"
+                  lang="en"
+                  className={socialLinkClass}
+                >
+                  {profile.platform}
+                </a>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         {prelaunch ? null : (

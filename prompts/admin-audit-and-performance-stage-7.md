@@ -239,3 +239,42 @@ the gate itself should become fast:
   navigation to `/admin/customers` now renders the 404 with no rows (before:
   the full list). As an admin, clicks between screens still measure
   320–640 ms — the gate adds nothing noticeable.
+
+## Outcome — part 2: flows (2026-11-24)
+
+| # | Severity | Finding | Status |
+|---|---|---|---|
+| F4 | Medium — pricing display | A promotion or offer that **starts or ends on its schedule** (`startsAt`/`endsAt`) triggers no revalidation — only an admin save does (`revalidatePromotions()`/`revalidateOffers()`). Product pages (ISR 1 h), collections and home (24 h) can keep showing an expired sale price, or miss a new one, for that long. Nobody is mis-charged: checkout is `force-dynamic` and `place_order()` prices from `active_product_promotions` at the moment of the order, so the review shows the true figure before payment — but the grid and the review then disagree. | **Proposed, not changed** (pricing) |
+| F5 | Low — content wiring | The footer's social links were hard-coded (`instagram/facebook/pinterest.com/khemperfumes`), so editing social profiles in Settings never reached them; `revalidateSettings()` also skipped the layout, where the structured data's `sameAs` lives. | **Fixed**: the footer takes the `"SocialProfile"` rows the layout already reads (no extra query; order follows Settings); `revalidateSettings()` now also revalidates the `[locale]` layouts. Today's rows equal the old constants, so nothing visibly changes. |
+
+**F4 proposal:** a `promotion-boundaries` cron (every 5 min, same pattern as
+the five existing jobs in `deploy/cron/`) that asks whether any promotion or
+offer crossed its `startsAt`/`endsAt` since the last run and, if so, calls the
+same whole-tree revalidation an admin save does. Needs: one route under
+`src/app/api/cron/`, one `khem-cron.sh` case, one crontab line on the VPS.
+
+Walked and sound (code + read-only SQL against the live database):
+
+- **Prices at checkout.** The browser sends only slugs, quantities and codes;
+  `place_order(jsonb)` (live definition checked) prices each line from
+  `active_product_promotions` — the same view the storefront displays — and
+  resolves discount codes (`resolve_discount`), credits and points inside the
+  function under locks. Delivery is re-read from `"DeliverySetting"` per order.
+- **Campaigns.** Counts (`campaign_audience_breakdown`), preview
+  (`campaign_audience_preview`) and send (`begin_campaign_dispatch` claims from
+  `campaign_audience(id)`) share one audience definition including
+  exclusions; the send re-checks subscription status and `email_suppressions`
+  per batch. One-click `List-Unsubscribe` headers and the footer link carry
+  the same per-send token to the same `POST` endpoint.
+- **Invitations.** Invite / withdraw / send again go through Clerk; a letter
+  that fails revokes its invitation; acceptance fires `user.created`, which
+  records the customer and sends the welcome letter exactly once
+  (`claim_welcome()`).
+- **Account pages.** Every `/account` page that shows data calls
+  `getViewer()` itself (the two that don't are bare redirects) — F1 does not
+  apply there.
+- **Catalogue, content, menu, stockists, settings, delivery** each call their
+  `revalidate.ts` helper on write.
+
+Not walked in this stage: finance reports reconciled against Sales & profit
+line by line (the ledger-level checks in part 1 hold).
