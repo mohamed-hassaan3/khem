@@ -16,9 +16,11 @@ import type { ProductPromotion } from "@/src/types/marketing";
  * card by hand, and it is the difference between a house making an offer and a
  * marketplace clearing stock.
  *
- * The percentage is optional and off by default. It earns its place in a grid,
- * where a shopper is comparing, and not on a detail page, where the two figures
- * are already side by side and a badge would be the third thing saying the same.
+ * The percentage is optional and off by default — a soft gold-tinted tag, not an
+ * outline. It earns its place in a grid, where a shopper is comparing, and not
+ * on a detail page, where the two figures are already side by side. The product
+ * card carries it on the photograph's campaign flag instead (`ProductFlag`'s
+ * `detail`), where it is seen first; the set and merch cards keep it here.
  *
  * ## Layout stability
  *
@@ -62,13 +64,21 @@ export default function ProductPrice({
       }
     >
       {/*
-        `line-through` on a muted ivory rather than on the gold: the struck
-        figure is history, and history is not the accent colour. `dir="ltr"` is
-        not needed — a formatted price is a number with a currency, and the
-        provider already writes it the way the active locale reads.
+        The price paid first, at full weight: it is the number the shopper is
+        looking for, and the struck figure after it explains it. Reading order,
+        not visual position, so the pair runs correctly right-to-left too.
+      */}
+      <span className={`tabular-nums ${className}`.trim()}>
+        {formatPrice(promotion.priceInCents)}
+      </span>
+
+      {/*
+        `line-through` on a muted ink rather than on the accent: the struck
+        figure is history, and history is not the accent colour. A formatted
+        price already reads the way the active locale reads.
       */}
       <span
-        className="text-[10px] tabular-nums text-ground-muted line-through decoration-ground-muted/60 decoration-[0.5px] sm:text-[11px]"
+        className="text-[11px] tabular-nums text-ground-muted line-through decoration-ground-muted/70 decoration-[0.5px] sm:text-xs"
         // Announced as what it is, so a screen reader does not read two prices
         // as a range.
         aria-label={`Was ${formatPrice(promotion.listPriceInCents)}`}
@@ -76,14 +86,11 @@ export default function ProductPrice({
         {formatPrice(promotion.listPriceInCents)}
       </span>
 
-      <span className={`tabular-nums ${className}`.trim()}>
-        {formatPrice(promotion.priceInCents)}
-      </span>
-
       {showPercent && promotion.percentOff > 0 ? (
         <span
           aria-hidden
-          className="border border-ground-accent/30 px-1.5 py-px font-heading text-[8px] uppercase tracking-[0.15em] text-ground-accent/80 sm:text-[9px]"
+          dir="ltr"
+          className="self-center rounded-[3px] bg-gold/14 px-1.5 py-[2px] text-[9px] font-medium tabular-nums tracking-[0.06em] text-ground-accent sm:text-[10px]"
         >
           −{promotion.percentOff}%
         </span>

@@ -131,6 +131,23 @@ export function revalidateCategory(slug: string): void {
 }
 
 /**
+ * Every page under `app/[locale]/` — both languages, every route.
+ *
+ * ⚠ The **route pattern**, not a concrete locale. Next tags each cached page
+ * with the layouts of its *route* (`/[locale]/layout`, `/[locale]/perfume/layout`,
+ * …) plus its literal address (`/en/perfume/amber`). `revalidatePath("/en",
+ * "layout")` produces the tag `/en/layout`, which no page carries, so it
+ * invalidated nothing: until 2026-11-24 every caller below — promotions,
+ * offers, the menu, delivery terms, settings — left the shop on its ISR window
+ * (an hour for a product, a day for collections and home). Found when a sale
+ * saved in the desk did not appear (prompts/admin-audit-and-performance-stage-7.md,
+ * F6). See `node_modules/next/dist/server/lib/implicit-tags.js`.
+ */
+function revalidateLocaleTree(): void {
+  revalidatePath("/[locale]", "layout");
+}
+
+/**
  * After the menu itself is edited.
  *
  * The Nav and the Footer are rendered by the `[locale]` layout, which every
@@ -139,9 +156,7 @@ export function revalidateCategory(slug: string): void {
  * and the editor would conclude the save failed.
  */
 export function revalidateNavigation(): void {
-  for (const locale of LOCALES) {
-    revalidatePath(`/${locale}`, "layout");
-  }
+  revalidateLocaleTree();
 }
 
 /**
@@ -159,17 +174,13 @@ export function revalidateNavigation(): void {
  * regardless of what any cache holds.
  */
 export function revalidateDelivery(): void {
-  for (const locale of LOCALES) {
-    revalidatePath(`/${locale}`, "layout");
-  }
+  revalidateLocaleTree();
 }
 
 /** After a product is created, edited or archived. */
 /** Every `[locale]` layout, so the Nav's data re-renders on every page. */
 function revalidateLayouts(): void {
-  for (const locale of LOCALES) {
-    revalidatePath(`/${locale}`, "layout");
-  }
+  revalidateLocaleTree();
 }
 
 export function revalidateProduct(input: {
@@ -383,9 +394,7 @@ export function revalidateMarketing(): void {
  * everything nested under it, so this is two calls rather than sixty.
  */
 function revalidateWholeTree(): void {
-  for (const locale of LOCALES) {
-    revalidatePath(`/${locale}`, "layout");
-  }
+  revalidateLocaleTree();
 }
 
 /**
