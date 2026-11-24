@@ -18,6 +18,7 @@ import {
   listAdminCraftStats,
   listAdminCraftSteps,
 } from "@/src/services/admin/content";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * /craftsmanship, section by section.
@@ -35,6 +36,9 @@ export default async function AdminCraftsmanshipContentPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

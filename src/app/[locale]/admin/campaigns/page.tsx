@@ -11,6 +11,7 @@ import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listCampaigns, subscriberCount } from "@/src/services/admin/campaigns";
 import { isEditable } from "@/src/types/campaign";
 import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * Marketing campaigns.
@@ -57,6 +58,9 @@ export default async function AdminCampaignsPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const [{ locale }, campaigns, en, ar] = await Promise.all([
     params,
     listCampaigns(),

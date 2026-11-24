@@ -12,6 +12,7 @@ import {
   listFinancialTargets,
 } from "@/src/services/admin/finance";
 import { shopTodayAsCalendarDate } from "@/src/lib/shop-time";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * Monthly targets.
@@ -42,6 +43,9 @@ export default async function AdminTargetsPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

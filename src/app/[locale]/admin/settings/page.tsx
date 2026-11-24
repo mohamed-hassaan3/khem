@@ -11,6 +11,7 @@ import {
   listAdminSocialProfiles,
   listDeliverySettings,
 } from "@/src/services/admin/settings";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * House settings.
@@ -43,6 +44,9 @@ export default async function AdminSettingsPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   void isLocale(locale);
 

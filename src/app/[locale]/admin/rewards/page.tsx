@@ -10,6 +10,7 @@ import {
   listRewardCustomers,
 } from "@/src/services/admin/rewards";
 import { getWelcomeOffer } from "@/src/services/marketing";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * Marketing → Rewards.
@@ -37,6 +38,9 @@ export default async function AdminRewardsPage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   void isLocale(locale);
 

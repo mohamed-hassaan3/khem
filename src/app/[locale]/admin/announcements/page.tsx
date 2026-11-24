@@ -19,6 +19,7 @@ import {
 import { getAdminBenefitSettings } from "@/src/services/admin/benefits";
 import { getWelcomeOffer } from "@/src/services/marketing";
 import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * The announcement bar and the offer popup — the two pieces of house chrome.
@@ -64,6 +65,9 @@ export default async function AdminAnnouncementsPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

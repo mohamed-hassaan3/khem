@@ -20,6 +20,7 @@ import {
 } from "@/src/services/admin/rewards";
 import type { CustomerAddress } from "@/src/types/customer";
 import { SHOP_TIME_ZONE, SHOP_ZONE_LABEL } from "@/src/lib/shop-time";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * One customer.
@@ -92,6 +93,9 @@ export default async function AdminCustomerPage({
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale, id } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

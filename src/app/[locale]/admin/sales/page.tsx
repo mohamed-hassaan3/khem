@@ -27,6 +27,7 @@ import {
   listProductPerformance,
 } from "@/src/services/admin/sales";
 import type { OrderChannel } from "@/src/types/order";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * Sales & Profitability — what came in, what was given away, and what was kept.
@@ -68,6 +69,9 @@ export default async function AdminSalesPage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   const activeLocale = isLocale(locale) ? locale : "en";
 

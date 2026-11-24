@@ -190,7 +190,7 @@ It shrinks to nothing once the gate is fast — see F1.
 
 | # | Severity | Finding | Status |
 |---|---|---|---|
-| **F1** | **High — auth** | Admin **pages** are protected only by `requireAdmin()` in `admin/layout.tsx`. Next does not re-run a layout on client navigation, and a layout does not stop its child segment from rendering (Next docs, *Authentication → Layouts and auth checks*). Verified locally: with the session demoted (server restarted with a different `ADMIN_EMAILS`), a hard load of `/admin/customers` 404s, but a client navigation to it rendered the full customer list. Any signed-in customer who sends that request (an `RSC: 1` fetch with a router-state header) can read admin pages; an admin removed from the allowlist keeps access in an open tab. Server **actions** are not affected — each calls `requireAdmin()`. | **Awaiting decision** |
+| **F1** | **High — auth** | Admin **pages** are protected only by `requireAdmin()` in `admin/layout.tsx`. Next does not re-run a layout on client navigation, and a layout does not stop its child segment from rendering (Next docs, *Authentication → Layouts and auth checks*). Verified locally: with the session demoted (server restarted with a different `ADMIN_EMAILS`), a hard load of `/admin/customers` 404s, but a client navigation to it rendered the full customer list. Any signed-in customer who sends that request (an `RSC: 1` fetch with a router-state header) can read admin pages; an admin removed from the allowlist keeps access in an open tab. Server **actions** are not affected — each calls `requireAdmin()`. | **Fixed** (approved 2026-11-24) — see below |
 | F2 | Low | 10 admin actions took unchecked arguments | Fixed (above) |
 | F3 | Info | Test-instance sign-in logs `ensureUserRowId sync failed: duplicate key … user_email_live_idx` on `/account`: the test Clerk user shares an email with a production user row. Local-setup artefact, not a production bug. | No change |
 
@@ -224,3 +224,18 @@ the gate itself should become fast:
   takes effect within 60 s. Every admin click then costs ~0 ms for the gate,
   and the full-load loader shrinks to almost nothing.
 - Alternative: no cache — correct, but every admin click pays the Clerk call.
+
+### F1 — fixed (approved by the user, 2026-11-24)
+
+- `src/lib/admin/auth.ts`: `getAdminActor()` now verifies the session with
+  `auth()` (local JWT check, no network) and fetches Clerk's user record at
+  most once per 60 s per user id (in-process, bounded at 200 entries, failures
+  never cached); `cache()`d per request so layout and page share one check.
+  The allowlist is still read per call.
+- Every one of the 70 `admin/**/page.tsx` files calls `await requireAdmin()` as
+  its first statement. (No admin page has `generateMetadata`; the export route
+  already calls `getAdminActor()`.)
+- Verified on a production build: with the session demoted, a client
+  navigation to `/admin/customers` now renders the 404 with no rows (before:
+  the full list). As an admin, clicks between screens still measure
+  320–640 ms — the gate adds nothing noticeable.

@@ -13,6 +13,7 @@ import { getAdminProduct } from "@/src/services/admin/catalog";
 import { INVENTORY_ACTION_LABEL } from "@/src/lib/inventory";
 import type { InventoryMovement } from "@/src/types/order";
 import { formatShopDateTime } from "@/src/lib/shop-time";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * One product's stock history.
@@ -35,6 +36,9 @@ export default async function InventoryHistoryPage({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale, slug } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

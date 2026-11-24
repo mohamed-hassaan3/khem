@@ -13,6 +13,7 @@ import { egp } from "@/src/lib/admin/money";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listDiscounts } from "@/src/services/admin/discounts";
 import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * Discount codes.
@@ -60,6 +61,9 @@ export default async function AdminDiscountsPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

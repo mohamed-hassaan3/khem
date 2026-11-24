@@ -13,6 +13,7 @@ import {
 import { matchesTerm, searchTerm } from "@/src/lib/admin/filter";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listAdminIngredients } from "@/src/services/admin/content";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * The raw materials.
@@ -35,6 +36,9 @@ export default async function AdminIngredientsPage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   const activeLocale = isLocale(locale) ? locale : "en";
 

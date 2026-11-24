@@ -15,6 +15,7 @@ import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getAdminOrder } from "@/src/services/admin/orders";
 import type { OrderShippingAddress } from "@/src/types/order";
 import { SHOP_TIME_ZONE, SHOP_ZONE_LABEL } from "@/src/lib/shop-time";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * One order.
@@ -80,6 +81,9 @@ export default async function AdminOrderPage({
 }: {
   params: Promise<{ locale: string; orderNumber: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale, orderNumber } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

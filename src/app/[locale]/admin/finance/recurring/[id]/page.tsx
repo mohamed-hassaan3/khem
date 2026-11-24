@@ -11,6 +11,7 @@ import {
   getExpenseRule,
   listExpenseCategories,
 } from "@/src/services/admin/finance";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * One recurring expense — the template.
@@ -26,6 +27,9 @@ export default async function EditRecurringExpensePage({
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale, id } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

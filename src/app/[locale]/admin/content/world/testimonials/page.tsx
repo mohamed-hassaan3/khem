@@ -8,6 +8,7 @@ import {
 } from "@/src/actions/admin/content";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listAdminTestimonials } from "@/src/services/admin/content";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,9 @@ export default async function AdminTestimonialsPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
   const testimonials = await listAdminTestimonials();

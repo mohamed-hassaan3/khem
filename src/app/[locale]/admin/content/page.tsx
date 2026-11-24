@@ -1,6 +1,7 @@
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import ContentHubCard from "@/src/components/admin/ContentHubCard";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * The CMS entrance.
@@ -34,6 +35,9 @@ export default async function AdminContentPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

@@ -12,6 +12,7 @@ import {
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listOffers } from "@/src/services/admin/offers";
 import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * Offers & Bundles.
@@ -66,6 +67,9 @@ export default async function AdminOffersPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

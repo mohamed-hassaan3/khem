@@ -6,6 +6,7 @@ import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import StockistForm from "@/src/components/admin/StockistForm";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getAdminStockist } from "@/src/services/admin/directory";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * One location.
@@ -21,6 +22,9 @@ export default async function EditStockistPage({
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale, id } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

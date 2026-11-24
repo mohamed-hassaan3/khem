@@ -33,6 +33,7 @@ import {
   getMonthlyActuals,
 } from "@/src/services/admin/finance";
 import type { OrderChannel } from "@/src/types/order";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * Finance — what came in, what it cost, what we spent, and what is left.
@@ -78,6 +79,9 @@ export default async function AdminFinancePage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   const activeLocale = isLocale(locale) ? locale : "en";
 

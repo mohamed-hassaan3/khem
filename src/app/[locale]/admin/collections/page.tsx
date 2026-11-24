@@ -17,6 +17,7 @@ import {
   listAdminCollections,
   listAdminMerchPages,
 } from "@/src/services/admin/catalog";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,9 @@ export default async function AdminCollectionsPage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   const activeLocale = isLocale(locale) ? locale : "en";
 
