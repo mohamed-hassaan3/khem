@@ -26,6 +26,7 @@
  * route under `/admin/finance` is `force-dynamic`.
  */
 
+import { z } from "zod";
 import { requireAdmin } from "@/src/lib/admin/auth";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import type { AdminActionResult } from "@/src/schemas/admin";
@@ -38,7 +39,14 @@ import {
   financialTargetSchema,
 } from "@/src/schemas/finance";
 
-import { UNCONFIGURED, fieldErrorsFrom, type PostgresErrorLike } from "./shared";
+import {
+  INVALID_REQUEST,
+  UNCONFIGURED,
+  fieldErrorsFrom,
+  flagSchema,
+  rowIdSchema,
+  type PostgresErrorLike,
+} from "./shared";
 
 /**
  * A provider error, as a sentence.
@@ -307,6 +315,8 @@ export async function setExpenseStatus(
 ): Promise<AdminActionResult> {
   const actor = await requireAdmin();
 
+  if (!z.object({ id: rowIdSchema, status: z.enum(["PENDING", "PAID", "VOID"]) }).safeParse({ id, status }).success) return INVALID_REQUEST;
+
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
 
@@ -350,6 +360,8 @@ export async function setExpenseStatus(
  */
 export async function deleteExpense(id: string): Promise<AdminActionResult> {
   const actor = await requireAdmin();
+
+  if (!rowIdSchema.safeParse(id).success) return INVALID_REQUEST;
 
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
@@ -456,6 +468,8 @@ export async function setExpenseRuleActive(
 ): Promise<AdminActionResult> {
   const actor = await requireAdmin();
 
+  if (!z.object({ id: rowIdSchema, isActive: flagSchema }).safeParse({ id, isActive }).success) return INVALID_REQUEST;
+
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
 
@@ -494,6 +508,8 @@ export async function setExpenseRuleActive(
  */
 export async function deleteExpenseRule(id: string): Promise<AdminActionResult> {
   const actor = await requireAdmin();
+
+  if (!rowIdSchema.safeParse(id).success) return INVALID_REQUEST;
 
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
@@ -620,6 +636,8 @@ export async function deleteFinancialTarget(
 ): Promise<AdminActionResult> {
   const actor = await requireAdmin();
 
+  if (!z.string().regex(/^\d{4}-\d{2}-01$/).safeParse(periodMonth).success) return INVALID_REQUEST;
+
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
 
@@ -734,6 +752,8 @@ export async function setExpenseCategoryArchived(
 ): Promise<AdminActionResult> {
   const actor = await requireAdmin();
 
+  if (!z.object({ id: rowIdSchema, isArchived: flagSchema }).safeParse({ id, isArchived }).success) return INVALID_REQUEST;
+
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
 
@@ -766,6 +786,8 @@ export async function setExpenseCategoryArchived(
  */
 export async function deleteExpenseCategory(id: string): Promise<AdminActionResult> {
   const actor = await requireAdmin();
+
+  if (!rowIdSchema.safeParse(id).success) return INVALID_REQUEST;
 
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;

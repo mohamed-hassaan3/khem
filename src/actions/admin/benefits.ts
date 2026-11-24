@@ -35,7 +35,13 @@ import { getSupabaseAdmin } from "@/src/lib/supabase";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import { benefitSettingsSchema } from "@/src/schemas/rewards";
 
-import { UNCONFIGURED, fieldErrorsFrom, type PostgresErrorLike } from "./shared";
+import {
+  INVALID_REQUEST,
+  UNCONFIGURED,
+  fieldErrorsFrom,
+  flagSchema,
+  type PostgresErrorLike,
+} from "./shared";
 
 /**
  * `"BenefitSetting"` refusals, in the desk's language.
@@ -103,6 +109,8 @@ export async function setDiscoveryCreditEnabled(
   enabled: boolean,
 ): Promise<AdminActionResult> {
   const actor = await requireAdmin();
+
+  if (!flagSchema.safeParse(enabled).success) return INVALID_REQUEST;
 
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;

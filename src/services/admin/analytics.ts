@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 /**
  * What the boutique sold, and what is left on the shelf.
  *
@@ -94,8 +96,17 @@ function fillDays(rows: readonly SalesPoint[], days: number): SalesPoint[] {
   return filled;
 }
 
-/** The daily series behind both charts, gap-filled. */
-export async function getSalesSeries(days: SalesRange): Promise<SalesPoint[]> {
+/**
+ * The daily series behind both charts, gap-filled.
+ *
+ * `cache()`d per request: Today asks for it directly for the curve and again
+ * through `getSalesTotals()` for the tiles, and both must read the same rows —
+ * one `daily_sales()` call answers both. Expires with the request, so nothing
+ * is shared between visitors or between loads.
+ */
+export const getSalesSeries = cache(async function getSalesSeries(
+  days: SalesRange,
+): Promise<SalesPoint[]> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return fillDays([], days);
 
@@ -107,7 +118,7 @@ export async function getSalesSeries(days: SalesRange): Promise<SalesPoint[]> {
   }
 
   return fillDays(parseList(data, toSalesPoint), days);
-}
+});
 
 /**
  * The headline tiles.

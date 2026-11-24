@@ -131,3 +131,96 @@ account; read-only SQL to confirm ledgers and totals agree.
    the skeleton shows only briefly.
 3. Read the outcome's findings table; approve or decline each money/auth/data
    item listed there.
+
+---
+
+## Outcome — part 1 (2026-11-24)
+
+### Measured (production build, `next start`, same machine, signed in)
+
+What the 5.5 s in the plan was: **dev mode**. On a production build, before any
+change, every admin screen — Today included — answered in 310–400 ms on a good
+network. With these changes, Today on the user's dev server went from 5.5 s to
+0.5–1.8 s.
+
+Where the time goes, measured server-side with temporary timers (removed):
+
+| Step | Cost | Runs on |
+|---|---|---|
+| `requireAdmin()` → Clerk `currentUser()` (a call to Clerk's API) | 310–1600 ms | every **full** load |
+| Bell reads (feed + low stock), *after* the gate | 150–360 ms | every full load (now streamed) |
+| Today's reads (`Promise.all`) | ≈ one round trip | Today |
+| Database-side execution of every admin read (`EXPLAIN ANALYZE`) | **< 3 ms** | — |
+
+So nothing is slow in the database (largest table: 141 rows); no index or
+migration is needed. The cost is round trips from the server to Supabase and to
+Clerk. Clicking between admin screens (client navigation) measured 320–575 ms
+per screen, and the layout does not re-run on a click.
+
+Occasional 4–5 s stalls were seen on single loads (≈1 in 40) and never
+reproduced in 14 paced reloads; they fit packet loss on this connection (a lost
+TCP handshake costs 1–3 s), not the app.
+
+### Changed
+
+- **Today reads only what it prints.** Collections and articles are counts;
+  products are four stock columns instead of every field; the 500-row
+  `product_sales()` call (only used for a "sold recently" figure Today never
+  shows) is gone; `getSalesSeries` is `cache()`d so the curve and the tiles
+  share one `daily_sales()` call. 13 requests / 185 KB → 10 requests / 6 KB.
+- **The bell is streamed** (`src/components/admin/AdminBell.tsx`): the layout
+  no longer waits for the feed before painting. It is still created *after*
+  `requireAdmin()`, so a refused request never runs either read. A same-size
+  placeholder holds its place, so nothing shifts.
+- **Charts load their library on first draw** (`SalesChart`, `FinanceChart`):
+  the page hydrates without waiting for ~45 kB of charting code.
+- **Ten one-click admin actions now parse their arguments with Zod**
+  (`setDiscoveryCreditEnabled`, `setExpenseStatus`, `deleteExpense`,
+  `setExpenseRuleActive`, `deleteExpenseRule`, `deleteFinancialTarget`,
+  `setExpenseCategoryArchived`, `deleteExpenseCategory`, `setOfferActive`,
+  `deleteOffer`). All were already admin-gated; their parameters were only
+  TypeScript types, unchecked at runtime.
+
+Not changed, deliberately: on a *full* load the storefront's full-screen loader
+shows while the Clerk gate answers. An admin-styled placeholder there would be
+shown to a signed-in customer too, and would confirm `/admin` exists (§10.1).
+It shrinks to nothing once the gate is fast — see F1.
+
+### Findings
+
+| # | Severity | Finding | Status |
+|---|---|---|---|
+| **F1** | **High — auth** | Admin **pages** are protected only by `requireAdmin()` in `admin/layout.tsx`. Next does not re-run a layout on client navigation, and a layout does not stop its child segment from rendering (Next docs, *Authentication → Layouts and auth checks*). Verified locally: with the session demoted (server restarted with a different `ADMIN_EMAILS`), a hard load of `/admin/customers` 404s, but a client navigation to it rendered the full customer list. Any signed-in customer who sends that request (an `RSC: 1` fetch with a router-state header) can read admin pages; an admin removed from the allowlist keeps access in an open tab. Server **actions** are not affected — each calls `requireAdmin()`. | **Awaiting decision** |
+| F2 | Low | 10 admin actions took unchecked arguments | Fixed (above) |
+| F3 | Info | Test-instance sign-in logs `ensureUserRowId sync failed: duplicate key … user_email_live_idx` on `/account`: the test Clerk user shares an email with a production user row. Local-setup artefact, not a production bug. | No change |
+
+Verified sound (read-only SQL against the live database, in a `READ ONLY`
+transaction): online + offline = total for every product; no negative stock;
+every counter equals its last movement; the movement chain never breaks; every
+cancelled/refunded order returned its stock exactly once and every live order
+took it exactly once; every order's total = subtotal + delivery − discount −
+credit − points − offer, and subtotal = Σ items; `daily_sales(90)` counts
+exactly the 27 non-cancelled orders; customer lifetime spend excludes
+cancelled/refunded orders for all 20 customers. Every admin Server Action calls
+`requireAdmin()` first; every write that a public page quotes revalidates it
+(the remainder — finance, credits, grants, payment status — have no public
+surface, by design and documented).
+
+### F1 — the fix, for the user's decision
+
+Gate every admin page itself, not only the layout — `await requireAdmin()` at
+the top of each of the 70 `page.tsx` files (and keep the layout's). The data
+layer cannot hold the check: `src/services/admin/*` is also used by storefront
+services and a cron route.
+
+Done naively, that adds Clerk's API call (310–1600 ms) to **every click**. So
+the gate itself should become fast:
+
+- **Recommended:** `getAdminActor()` reads `auth()` (the session JWT, verified
+  locally — no network), then looks the user up with `currentUser()` at most
+  once per 60 s per user id (in-process cache, wrapped in React `cache()` per
+  request). The allowlist is still read per call, so removing an address takes
+  effect at the next restart, as today; a changed or unverified primary email
+  takes effect within 60 s. Every admin click then costs ~0 ms for the gate,
+  and the full-load loader shrinks to almost nothing.
+- Alternative: no cache — correct, but every admin click pays the Clerk call.

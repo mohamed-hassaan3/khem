@@ -456,3 +456,61 @@ export async function countProductsMissingEmbedding(): Promise<number> {
 
   return count ?? 0;
 }
+
+/** How many collections exist, of every kind — the figure Today prints. */
+export async function countAdminCollections(): Promise<number> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return 0;
+
+  const { count, error } = await supabase
+    .from("Collection")
+    .select("slug", { count: "exact", head: true });
+
+  if (error) {
+    logFailure("countAdminCollections", error.message);
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
+/** One product's stock as Today reads it: enough to count and to list what is running low. */
+export interface AdminProductStock {
+  slug: string;
+  name: string;
+  isArchived: boolean;
+  inventoryOnline: number;
+}
+
+/**
+ * Every product's stock, and nothing else.
+ *
+ * Today needs the live/archived split and the online counter of each product —
+ * four columns — where `listAdminProducts()` carries every editable field of
+ * every product to the page. Same filter (`deletedAt` null), so the counts
+ * agree with the Products screen.
+ */
+export async function listAdminProductStock(): Promise<AdminProductStock[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Product")
+    .select("slug, name, isArchived, inventoryOnline")
+    .is("deletedAt", null);
+
+  if (error) {
+    logFailure("listAdminProductStock", error.message);
+    return [];
+  }
+
+  return (data ?? []).flatMap((row) => {
+    const inventoryOnline = Number(row.inventoryOnline);
+    return typeof row.slug === "string" &&
+      typeof row.name === "string" &&
+      typeof row.isArchived === "boolean" &&
+      Number.isFinite(inventoryOnline)
+      ? [{ slug: row.slug, name: row.name, isArchived: row.isArchived, inventoryOnline }]
+      : [];
+  });
+}

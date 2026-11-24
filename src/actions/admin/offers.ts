@@ -23,7 +23,7 @@
  * caps count something that never happened.
  */
 
-import type { z } from "zod";
+import { z } from "zod";
 
 import { requireAdmin } from "@/src/lib/admin/auth";
 import { revalidateOffers } from "@/src/lib/admin/revalidate";
@@ -31,7 +31,14 @@ import { getSupabaseAdmin } from "@/src/lib/supabase";
 import type { AdminActionResult } from "@/src/schemas/admin";
 import { offerSchema } from "@/src/schemas/offers";
 
-import { UNCONFIGURED, fieldErrorsFrom, type PostgresErrorLike } from "./shared";
+import {
+  INVALID_REQUEST,
+  UNCONFIGURED,
+  fieldErrorsFrom,
+  flagSchema,
+  rowIdSchema,
+  type PostgresErrorLike,
+} from "./shared";
 
 function failure(error: PostgresErrorLike): AdminActionResult {
   const message = error.message ?? "";
@@ -265,6 +272,8 @@ export async function setOfferActive(
 ): Promise<AdminActionResult> {
   const actor = await requireAdmin();
 
+  if (!z.object({ id: rowIdSchema, isActive: flagSchema }).safeParse({ id, isActive }).success) return INVALID_REQUEST;
+
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
 
@@ -295,6 +304,8 @@ export async function setOfferActive(
  */
 export async function deleteOffer(id: string): Promise<AdminActionResult> {
   const actor = await requireAdmin();
+
+  if (!rowIdSchema.safeParse(id).success) return INVALID_REQUEST;
 
   const supabase = getSupabaseAdmin();
   if (!supabase) return UNCONFIGURED;
