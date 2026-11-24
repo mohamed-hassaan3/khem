@@ -123,8 +123,13 @@ export default async function ProductCard({
         */}
         {isSoldOut ? (
           <ProductFlag label={dict.product.soldOut} locale={locale} tone="muted" />
-        ) : product.promotion?.label ? (
-          <ProductFlag label={product.promotion.label} locale={locale} tone="campaign" />
+        ) : product.promotion ? (
+          <ProductFlag
+            label={product.promotion.label ?? ""}
+            detail={product.promotion.percentOff > 0 ? `−${product.promotion.percentOff}%` : undefined}
+            locale={locale}
+            tone="campaign"
+          />
         ) : product.badge ? (
           <ProductFlag label={product.badge} locale={locale} island />
         ) : flag ? (
@@ -192,13 +197,20 @@ export default async function ProductCard({
           <ProductPrice
             priceInCents={product.priceInCents}
             promotion={product.promotion}
-            showPercent
             className="text-xs text-ground sm:text-[13px]"
           />
-          {volume === null ? null : (
+          {volume === null || product.promotion ? null : (
             <span className="text-ground-muted">· {volume}</span>
           )}
         </p>
+        {/*
+          On a reduced card the volume takes its own line: two prices and a
+          volume do not fit a phone's half-width card, and wrapping left a
+          stray "· 100 ML" under the figures.
+        */}
+        {volume !== null && product.promotion ? (
+          <p className="mt-0.5 text-[11px] text-ground-muted">{volume}</p>
+        ) : null}
       </div>
 
       {/*

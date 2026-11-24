@@ -73,8 +73,15 @@ export default function ProductFlag({
   locale,
   island = false,
   tone = "gold",
+  detail,
 }: {
   label: string;
+  /**
+   * A short figure after the label, set apart by a hairline — the campaign's
+   * "−20%". Always left-to-right, so the sign stays before the number on an
+   * Arabic card. With no label it stands alone.
+   */
+  detail?: string;
   locale: Locale;
   /**
    * `true` for a product's stored `badge`, which is English in both trees and
@@ -92,6 +99,14 @@ export default function ProductFlag({
       className={`absolute start-2 top-2 z-2 rounded-[3px] px-[7px] py-[3px] text-[8px] font-medium uppercase tracking-[0.18em] sm:start-3 sm:top-3 sm:text-[9px] ${TONES[tone]}`}
     >
       {label}
+      {detail ? (
+        <>
+          {label ? <span aria-hidden className="mx-1.5 inline-block h-[0.9em] w-px translate-y-[0.1em] bg-current opacity-40" /> : null}
+          <span dir="ltr" className="tabular-nums tracking-[0.08em]">
+            {detail}
+          </span>
+        </>
+      ) : null}
     </p>
   );
 }
