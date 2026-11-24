@@ -284,3 +284,37 @@ fit with no horizontal scroll.
   and the desk is told. Not exercised against a real order (live database).
 - **Campaign Customers audience**: user decided it stays as is (everyone who
   has bought, not only marketing opt-ins). No change.
+
+## Outcome — 6c: marketing & website (2026-11-24)
+
+- **Sent campaigns — "Who it went to"** (from the approved mock):
+  `listCampaignSends()` reads `campaign_sends` (email, list, sentAt, provider
+  error); `CampaignSendLog` lists every address with Delivered / Refused / Not
+  sent yet, search, filters, 50 at a time and a CSV built in the browser
+  (formula-injection safe). No schema change. Verified on a sent campaign.
+- **Campaigns list**: one tappable row per campaign — name, status pill
+  (Draft / Scheduled / Sending / Sent / Cancelled), subject, type, list, sent or
+  due. Was a tall label card each.
+- **Subscribers** (`/admin/newsletter`): one row per address (source,
+  language, joined/left, has an account) with a Subscribed/Left pill; the
+  three figures sit in one row on phones.
+- **Home page editor**: the four sections (band order, new arrival, hero,
+  craft pillars) fold into `<details>` panels; the first opens. Phone height
+  9,577px → 2,397px. Form state is kept while a panel is closed.
+- **Back links** (`AdminBackLink`) on the 13 detail/edit screens that had
+  none: campaigns, categories, scent families, collections, stock history,
+  journal, products, manual order. Duplicate "All scent profiles" link removed.
+- **Names match the menu**: page titles now read Discount codes, Sale prices
+  (was "Promotions"; renamed in the menu too so it is not confused with
+  "Sales & profit"), Welcome offers, Announcement bar, Home page, Menu &
+  footer, Story pages, Points, Revenue trend, Sales & profit, Site search,
+  Subscribers.
+- "No Arabic" badge on announcements no longer breaks mid-word.
+
+Seen, not changed: the campaign preview renders correctly (full-page
+screenshots do not capture iframes); the email is 600px wide, so on a phone
+the preview scrolls sideways inside its frame. Remaining forms (discount,
+offer, sale price, announcement, menu & footer, stockists, story pages)
+already fit phones and read at the 11px floor.
+
+Checks: tsc + ESLint clean; 390px: no horizontal scroll on the screens above.

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
 import CollectionForm from "@/src/components/admin/CollectionForm";
 import DeleteCollectionButton from "@/src/components/admin/DeleteCollectionButton";
 import MerchPageForm from "@/src/components/admin/MerchPageForm";
@@ -46,6 +46,7 @@ export default async function EditCollectionPage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/collections")}>Collections</AdminBackLink>
       <AdminPageHeader
         title={collection.name}
         description={`${productCount} product${productCount === 1 ? "" : "s"} in this collection.`}

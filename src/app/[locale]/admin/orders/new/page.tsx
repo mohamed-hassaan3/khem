@@ -1,6 +1,6 @@
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
 import OrderForm from "@/src/components/admin/OrderForm";
-import { isLocale } from "@/src/lib/i18n/config";
+import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listAdminProducts } from "@/src/services/admin/catalog";
 import { listDeliverySettings } from "@/src/services/admin/settings";
 
@@ -43,6 +43,7 @@ export default async function NewOrderPage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/orders")}>Orders</AdminBackLink>
       <AdminPageHeader
         title="Record order"
         description="For a sale taken at the counter or over the phone. Prices come from the catalog, not from this form, and the stock comes off the website's inventory the moment it saves."

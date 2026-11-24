@@ -189,8 +189,8 @@ export const ADMIN_NAV: readonly AdminNavGroup[] = [
       },
       {
         key: "sales",
-        label: "Sales",
-        description: "Reduced prices on products",
+        label: "Sale prices",
+        description: "Reduced prices on products (was “Promotions”)",
         href: "/admin/promotions",
         icon: BadgePercent,
         keywords: "promotions promotion sale price reduction",
@@ -198,7 +198,7 @@ export const ADMIN_NAV: readonly AdminNavGroup[] = [
       {
         key: "offers",
         label: "Welcome offers",
-        description: "The sign-up pop-up and its gift",
+        description: "The sign-up gift (was “Offers”)",
         href: "/admin/offers",
         icon: Gift,
         keywords: "offers popup signup gift",
@@ -206,7 +206,7 @@ export const ADMIN_NAV: readonly AdminNavGroup[] = [
       {
         key: "announcements",
         label: "Announcement bar",
-        description: "The line at the top of every page",
+        description: "The line at the top of every page, and the pop-up's look",
         href: "/admin/announcements",
         icon: Megaphone,
         keywords: "banner marquee announcement",

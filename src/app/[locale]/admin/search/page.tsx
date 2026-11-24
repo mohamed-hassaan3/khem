@@ -124,7 +124,7 @@ export default async function AdminSearchPage({
   return (
     <>
       <AdminPageHeader
-        title="Search"
+        title="Site search"
         description="What visitors look for. Committed searches only — the results page, not the overlay's suggestions as someone types, so a visitor who clicks a suggestion directly is not counted. No personal data is stored, and every record is deleted after 90 days."
         action={
           <RangeTabs

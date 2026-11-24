@@ -1,6 +1,6 @@
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
 import ArticleForm from "@/src/components/admin/ArticleForm";
-import { isLocale } from "@/src/lib/i18n/config";
+import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listAdminArticles } from "@/src/services/admin/journal";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +20,7 @@ export default async function NewArticlePage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/journal")}>Journal</AdminBackLink>
       <AdminPageHeader
         title="New article"
         description="Save it unpublished to keep drafting; publishing puts it on /journal and in the sitemap."

@@ -1,6 +1,6 @@
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
 import CategoryForm from "@/src/components/admin/CategoryForm";
-import { isLocale } from "@/src/lib/i18n/config";
+import { isLocale, localizePath } from "@/src/lib/i18n/config";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +14,7 @@ export default async function NewCategoryPage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/categories")}>Categories</AdminBackLink>
       <AdminPageHeader
         title="New category"
         description="The slug becomes the category's URL and its id, and cannot be changed afterwards. Its page opens at /collections/<slug> the moment it is created."

@@ -6,8 +6,7 @@ import {
   AdminLinkButton,
   AdminPageHeader,
   AdminRow,
-  AdminTable,
-} from "@/src/components/admin/AdminTable";
+  AdminTable, AdminBackLink } from "@/src/components/admin/AdminTable";
 import CategoryForm from "@/src/components/admin/CategoryForm";
 import DeleteCategoryButton from "@/src/components/admin/DeleteCategoryButton";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
@@ -49,6 +48,7 @@ export default async function EditCategoryPage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/categories")}>Categories</AdminBackLink>
       <AdminPageHeader
         title={category.name}
         description={`${collections.length} collection${collections.length === 1 ? "" : "s"} under this category.`}

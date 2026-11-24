@@ -75,7 +75,7 @@ export default async function AdminOffersPage({
   return (
     <>
       <AdminPageHeader
-        title="Offers"
+        title="Welcome offers"
         description="Buy X, get Y — applied automatically to a qualifying basket. The lowest-priced eligible item is the one given away unless you say otherwise."
         action={
           <AdminLinkButton href={`${basePath}/new`}>

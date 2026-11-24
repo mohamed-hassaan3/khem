@@ -30,7 +30,7 @@ export default async function AdminWorldPage({
       />
 
       <AdminPageHeader
-        title="World of KHEM"
+        title="Story pages"
         description="The editorial pages. Each one below is a page of the public site — open it to edit the sections it is built from."
       />
 

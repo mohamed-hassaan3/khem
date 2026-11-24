@@ -69,7 +69,7 @@ export default async function AdminDiscountsPage({
   return (
     <>
       <AdminPageHeader
-        title="Discounts"
+        title="Discount codes"
         description="Codes the house honours at checkout. What a code is worth is decided by the database when an order is placed — never by the browser."
         action={
           <AdminLinkButton href={`${basePath}/new`}>

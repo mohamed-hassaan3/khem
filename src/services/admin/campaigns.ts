@@ -31,6 +31,7 @@ import type {
   Campaign,
   CampaignAudienceMember,
   CampaignRecipientKind,
+  CampaignSendRow,
   CampaignWithProgress,
 } from "@/src/types/campaign";
 
@@ -161,6 +162,50 @@ export async function listCampaignAudience(
         ]
       : [],
   );
+}
+
+/**
+ * Who a campaign went to, one row per address it claimed (`campaign_sends`).
+ *
+ * `sentAt` set: the mail provider accepted it. `error` set: refused, with the
+ * provider's reason. Neither: claimed and not yet sent (a run still going).
+ * Read with the service role for an admin page only. (prompts/admin-redesign-
+ * stage-6.md, Campaigns)
+ */
+export async function listCampaignSends(
+  campaignId: string,
+): Promise<CampaignSendRow[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("campaign_sends")
+    .select('email, "recipientKind", "sentAt", error')
+    .eq("campaignId", campaignId)
+    .order("email")
+    .limit(10000);
+
+  if (error) {
+    logFailure("listCampaignSends", error.message);
+    return [];
+  }
+
+  return (data ?? []).flatMap((row) => {
+    const record = row as Record<string, unknown>;
+    if (typeof record.email !== "string") return [];
+    const kind =
+      typeof record.recipientKind === "string" && RECIPIENT_KINDS.has(record.recipientKind)
+        ? (record.recipientKind as CampaignRecipientKind)
+        : null;
+    return [
+      {
+        email: record.email,
+        kind,
+        sentAt: typeof record.sentAt === "string" ? record.sentAt : null,
+        error: typeof record.error === "string" && record.error.length > 0 ? record.error : null,
+      },
+    ];
+  });
 }
 
 /** The addresses typed into this campaign by hand, in the order they were added. */

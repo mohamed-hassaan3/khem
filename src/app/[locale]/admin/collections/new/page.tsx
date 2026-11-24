@@ -1,6 +1,6 @@
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
 import CollectionForm from "@/src/components/admin/CollectionForm";
-import { isLocale } from "@/src/lib/i18n/config";
+import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listAdminCategories } from "@/src/services/admin/catalog";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +17,7 @@ export default async function NewCollectionPage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/collections")}>Collections</AdminBackLink>
       <AdminPageHeader
         title="New collection"
         description="A collection stands under a category and holds products. The slug becomes its URL and its id, and cannot be changed afterwards."

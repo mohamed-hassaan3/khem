@@ -211,3 +211,19 @@ export function AdminEmpty({
     </div>
   );
 }
+
+/**
+ * "← Products" above an edit or detail screen: the way back to the list it
+ * came from, on every screen one level below a section.
+ */
+export function AdminBackLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="mb-5 inline-flex min-h-9 items-center gap-1.5 text-[13px] text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent"
+    >
+      <span aria-hidden="true" className="rtl:rotate-180">←</span>
+      {children}
+    </Link>
+  );
+}
