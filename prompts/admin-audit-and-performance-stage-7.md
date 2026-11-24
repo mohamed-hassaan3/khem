@@ -297,3 +297,19 @@ the existing `revalidatePromotions()`.
 **Deploy step:** after this reaches the VPS, run
 `crontab /srv/khem/current/deploy/cron/khem.crontab` once as `khem` — cron
 keeps its installed copy until then.
+
+### F6 — whole-shop revalidation never worked (found in production, 2026-11-24)
+
+The user started a 20 % sale ("OPENING DAY") and the shop kept list prices.
+The database was right (`active_product_promotions` priced all 10 products);
+the pages were stale `HIT`s. Cause: `revalidatePath(\`/${locale}\`, "layout")`
+tags `/en/layout`, but Next tags cached pages by **route pattern**
+(`/[locale]/layout`, from `implicit-tags.js`), so the call matched nothing.
+Every "refresh everything" helper used it — promotions, offers, menu,
+delivery, settings — and the F4 cron through `revalidatePromotions()`.
+
+Fixed: one `revalidateLocaleTree()` calling `revalidatePath("/[locale]", "layout")`.
+Verified on a production build: cached `/perfume/amber`, `/ar/collections` and
+`/` were `HIT`; after the call each answered `MISS` (re-rendered) then `HIT`.
+Literal-path revalidations (product, collection, home, contact…) were already
+correct — they match each page's pathname tag.
