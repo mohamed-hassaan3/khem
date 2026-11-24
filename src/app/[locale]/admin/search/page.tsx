@@ -163,7 +163,7 @@ export default async function AdminSearchPage({
           {top.length === 0 ? (
             <AdminEmpty message={`No searches recorded in the last ${range} days.`} />
           ) : (
-            <AdminTable
+            <AdminTable dense
               headers={["Query", "Searches", "Avg. results", "No results", "Language", "Last searched"]}
             >
               {top.map((row) => (
@@ -189,7 +189,7 @@ export default async function AdminSearchPage({
           {zero.length === 0 ? (
             <AdminEmpty message="Every search in this window found something." />
           ) : (
-            <AdminTable headers={["Query", "Searches", "Language", "Last searched"]}>
+            <AdminTable dense headers={["Query", "Searches", "Language", "Last searched"]}>
               {zero.map((row) => (
                 <AdminRow key={row.query}>
                   <AdminCell>
@@ -211,7 +211,7 @@ export default async function AdminSearchPage({
           {recent.length === 0 ? (
             <AdminEmpty message="No searches recorded yet." />
           ) : (
-            <AdminTable headers={["Time (UTC)", "Query", "Language", "Results", "Mode"]}>
+            <AdminTable dense headers={["Time (UTC)", "Query", "Language", "Results", "Mode"]}>
               {recent.map((row) => (
                 <AdminRow key={row.id}>
                   <AdminCell muted>{stamp(row.searchedAt)}</AdminCell>

@@ -89,10 +89,43 @@ function headerLabel(header: AdminHeader): string {
 export function AdminTable({
   headers,
   children,
+  dense = false,
 }: {
   headers: readonly AdminHeader[];
   children: ReactNode;
+  /**
+   * For reports (sales, items sold, searches, expenses, stock history): stays
+   * a compact table on phones, scrolling sideways with the first column held
+   * in place, instead of a tall card per row — a report is read across.
+   */
+  dense?: boolean;
 }) {
+  if (dense) {
+    return (
+      <div className="admin-table-dense overflow-x-auto rounded-lg border border-ground-border">
+        <table className="w-full min-w-[640px] border-collapse text-start">
+          <thead>
+            <tr className="border-b border-ground-border bg-stone">
+              {headers.map((header) => {
+                const label = headerLabel(header);
+                return (
+                  <th
+                    key={label}
+                    scope="col"
+                    className="whitespace-nowrap px-3 py-2.5 text-start text-[11px] font-semibold uppercase tracking-[0.08em] text-ground-muted"
+                  >
+                    <span className={typeof header === "string" ? undefined : "sr-only"}>{label}</span>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>{children}</tbody>
+        </table>
+      </div>
+    );
+  }
+
   /*
    * Phones (below `md`): every row is a card and every cell a "Label  value"
    * line, the label drawn by `::before` from the column's header. The rules

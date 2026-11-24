@@ -318,3 +318,24 @@ offer, sale price, announcement, menu & footer, stockists, story pages)
 already fit phones and read at the 11px floor.
 
 Checks: tsc + ESLint clean; 390px: no horizontal scroll on the screens above.
+
+## Outcome — 6d: money & settings (2026-11-24)
+
+- **`AdminTable dense`** for reports: stays a compact table on phones,
+  scrolling sideways with the first column held (sticky on phones only), 12px
+  cells. Used by Sales & profit, Items sold, Site search (3 tables), Expenses
+  (2) and Stock history. Lists keep the phone cards.
+- **Settings**: house, delivery, contact channels and social profiles fold
+  into `<details>` panels (same pattern as the Home page editor).
+- **Targets**: each month is one compact block — month, "Target set / No
+  target" pill and the button on one line, the three figures beneath.
+- **Stock history**: 50 movements a page (Newer / Older), from the newest 200
+  the service reads.
+- Phone heights: Sales 6,393 → 2,750 · Items sold 8,878 → 1,954 · Site search
+  9,623 → 2,576 · Settings 7,419 → 1,388 · Targets 3,930 → 2,114 · Stock
+  history 13,838 → 3,455. No horizontal page scroll at 390 or 1440.
+
+Data, not UI (for the user): no product has a cost recorded, so every cost,
+profit and margin column reads "Cost unavailable" / "—", and gross and net
+profit charts are empty. Enter each product's cost (Products → edit) and
+profit reporting starts from the next sale.

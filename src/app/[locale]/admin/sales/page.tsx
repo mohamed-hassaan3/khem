@@ -304,7 +304,7 @@ export default async function AdminSalesPage({
             {products.length === 0 ? (
               <AdminEmpty message="Nothing sold in this window, so there is nothing to rank." />
             ) : (
-              <AdminTable
+              <AdminTable dense
                 headers={[
                   "Product",
                   "Units",

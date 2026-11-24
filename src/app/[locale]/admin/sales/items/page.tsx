@@ -261,7 +261,7 @@ export default async function AdminItemsSoldPage({
           }
         />
       ) : (
-        <AdminTable
+        <AdminTable dense
           headers={[
             "Date",
             "Order",

@@ -237,7 +237,7 @@ export default async function AdminExpensesPage({
           }
         />
       ) : (
-        <AdminTable
+        <AdminTable dense
           headers={[
             "Date",
             "Expense",
@@ -326,7 +326,7 @@ export default async function AdminExpensesPage({
         {rules.length === 0 ? (
           <AdminEmpty message="Nothing recurring yet. Record an expense and set it to repeat monthly or yearly." />
         ) : (
-          <AdminTable
+          <AdminTable dense
             headers={[
               "Expense",
               "Category",
