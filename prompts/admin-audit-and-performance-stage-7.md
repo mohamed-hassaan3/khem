@@ -244,7 +244,7 @@ the gate itself should become fast:
 
 | # | Severity | Finding | Status |
 |---|---|---|---|
-| F4 | Medium — pricing display | A promotion or offer that **starts or ends on its schedule** (`startsAt`/`endsAt`) triggers no revalidation — only an admin save does (`revalidatePromotions()`/`revalidateOffers()`). Product pages (ISR 1 h), collections and home (24 h) can keep showing an expired sale price, or miss a new one, for that long. Nobody is mis-charged: checkout is `force-dynamic` and `place_order()` prices from `active_product_promotions` at the moment of the order, so the review shows the true figure before payment — but the grid and the review then disagree. | **Proposed, not changed** (pricing) |
+| F4 | Medium — pricing display | A promotion or offer that **starts or ends on its schedule** (`startsAt`/`endsAt`) triggers no revalidation — only an admin save does (`revalidatePromotions()`/`revalidateOffers()`). Product pages (ISR 1 h), collections and home (24 h) can keep showing an expired sale price, or miss a new one, for that long. Nobody is mis-charged: checkout is `force-dynamic` and `place_order()` prices from `active_product_promotions` at the moment of the order, so the review shows the true figure before payment — but the grid and the review then disagree. | **Fixed** (approved 2026-11-24) — `promotion-boundaries` cron, see below |
 | F5 | Low — content wiring | The footer's social links were hard-coded (`instagram/facebook/pinterest.com/khemperfumes`), so editing social profiles in Settings never reached them; `revalidateSettings()` also skipped the layout, where the structured data's `sameAs` lives. | **Fixed**: the footer takes the `"SocialProfile"` rows the layout already reads (no extra query; order follows Settings); `revalidateSettings()` now also revalidates the `[locale]` layouts. Today's rows equal the old constants, so nothing visibly changes. |
 
 **F4 proposal:** a `promotion-boundaries` cron (every 5 min, same pattern as
@@ -278,3 +278,22 @@ Walked and sound (code + read-only SQL against the live database):
 
 Not walked in this stage: finance reports reconciled against Sales & profit
 line by line (the ledger-level checks in part 1 hold).
+
+### F4 — fixed (approved by the user, 2026-11-24)
+
+`src/app/api/cron/promotion-boundaries/route.ts`, every 5 minutes
+(`deploy/cron/khem.crontab`, `khem-cron.sh`). Stateless: counts active
+promotions and offers whose `startsAt` or `endsAt` fell in the last 15 minutes
+(four head-only counts); if any did, calls `revalidatePromotions()` — the same
+whole-tree revalidation an admin save performs. The 15-minute window survives
+one missed run; overlap only means a harmless second revalidation. Idle ticks
+are not logged.
+
+Tested on the dev server: no token → 401, wrong token → 401, `CRON_SECRET` →
+`{"crossed":0,"revalidated":false}` 200. The crossed path was not exercised (it
+needs a promotion with a boundary minutes away — a database write); it calls
+the existing `revalidatePromotions()`.
+
+**Deploy step:** after this reaches the VPS, run
+`crontab /srv/khem/current/deploy/cron/khem.crontab` once as `khem` — cron
+keeps its installed copy until then.

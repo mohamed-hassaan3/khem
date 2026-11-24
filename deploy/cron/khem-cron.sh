@@ -2,7 +2,7 @@
 #
 # Call one KHEM cron route over loopback with the bearer token.
 #
-#   khem-cron.sh send-campaigns | sweep-unpaid-orders | order-feedback | expire-credits | purge-search-events
+#   khem-cron.sh send-campaigns | sweep-unpaid-orders | order-feedback | expire-credits | purge-search-events | promotion-boundaries
 #
 # Loopback, not https://khemperfumes.com: the secret never leaves the box, and
 # the jobs keep running even if DNS or TLS is broken.
@@ -15,8 +15,8 @@ set -euo pipefail
 
 JOB="${1:-}"
 case "${JOB}" in
-  send-campaigns|sweep-unpaid-orders|order-feedback|expire-credits|purge-search-events) ;;
-  *) echo "usage: $0 <send-campaigns|sweep-unpaid-orders|order-feedback|expire-credits|purge-search-events>" >&2; exit 2 ;;
+  send-campaigns|sweep-unpaid-orders|order-feedback|expire-credits|purge-search-events|promotion-boundaries) ;;
+  *) echo "usage: $0 <send-campaigns|sweep-unpaid-orders|order-feedback|expire-credits|purge-search-events|promotion-boundaries>" >&2; exit 2 ;;
 esac
 
 set -a
@@ -32,9 +32,13 @@ CODE="$(printf 'Authorization: Bearer %s\n' "${CRON_SECRET}" \
   | curl -sS -m 110 -o "${BODY}" -w '%{http_code}' -H @- \
       "http://127.0.0.1:3000/api/cron/${JOB}" || echo "000")"
 
-# One line per run. The idle minute-by-minute campaign tick is the common case,
-# so it is logged only when it did something or failed.
+# One line per run. The idle campaign and promotion ticks are the common case,
+# so they are logged only when they did something or failed.
 if [[ "${JOB}" == "send-campaigns" && "${CODE}" == "200" ]] && grep -q '"dispatched":0' "${BODY}"; then
+  exit 0
+fi
+# Likewise the five-minute promotion check when no sale started or ended.
+if [[ "${JOB}" == "promotion-boundaries" && "${CODE}" == "200" ]] && grep -q '"revalidated":false' "${BODY}"; then
   exit 0
 fi
 

@@ -67,7 +67,10 @@ The last five releases are kept fully built, so a rollback takes seconds.
 
 `deploy/cron/khem.crontab` (UTC): `send-campaigns` every minute,
 `sweep-unpaid-orders` 03:00, `expire-credits` 03:30, `purge-search-events` 04:00
-(the 90-day retention of search tracking), `order-feedback` 09:00.
+(the 90-day retention of search tracking), `order-feedback` 09:00, and
+`promotion-boundaries` every 5 minutes (revalidates the shop when a scheduled
+sale or offer starts or ends). **After pulling this job, re-run the `crontab`
+command below once** — the server keeps its installed copy until then.
 Install or update it with `crontab /srv/khem/current/deploy/cron/khem.crontab`.
 
 Run a job by hand with `/srv/khem/current/deploy/cron/khem-cron.sh order-feedback`.
