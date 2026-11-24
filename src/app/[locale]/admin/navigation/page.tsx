@@ -7,6 +7,7 @@ import {
   listAdminCollections,
   listAdminNavLinks,
 } from "@/src/services/admin/catalog";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,9 @@ export const dynamic = "force-dynamic";
  * business holding a Supabase client.
  */
 export default async function AdminNavigationPage() {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const [links, categories, collections, dict] = await Promise.all([
     listAdminNavLinks(),
     listAdminCategories(),

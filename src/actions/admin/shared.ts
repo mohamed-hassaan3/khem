@@ -16,7 +16,7 @@
  * the real message going to the server log where it belongs.
  */
 
-import type { z } from "zod";
+import { z } from "zod";
 
 import { revalidateProduct } from "@/src/lib/admin/revalidate";
 import type { AdminActionResult } from "@/src/schemas/admin";
@@ -58,6 +58,23 @@ export const UNCONFIGURED: AdminActionResult = {
   ok: false,
   message:
     "The database is not configured on this deployment, so nothing was saved.",
+};
+
+/**
+ * The arguments of the small one-click actions — toggle, archive, delete.
+ *
+ * Their parameters are typed, but a Server Action is a public endpoint and a
+ * TypeScript type is not checked at runtime: what arrives is whatever the
+ * request carried. These are parsed before anything is read or written, as
+ * every form action's input already is.
+ */
+export const rowIdSchema = z.string().trim().min(1).max(128);
+export const flagSchema = z.boolean();
+
+/** The answer when those arguments do not parse — the desk's UI never sends one. */
+export const INVALID_REQUEST: AdminActionResult = {
+  ok: false,
+  message: "That request was not understood. Reload the page and try again.",
 };
 
 /**

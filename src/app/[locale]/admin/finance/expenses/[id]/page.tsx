@@ -7,6 +7,7 @@ import ExpenseForm from "@/src/components/admin/ExpenseForm";
 import { dayLabel } from "@/src/lib/admin/finance";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getExpense, listExpenseCategories } from "@/src/services/admin/finance";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * One expense.
@@ -23,6 +24,9 @@ export default async function EditExpensePage({
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale, id } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

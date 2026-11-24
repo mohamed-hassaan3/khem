@@ -33,14 +33,7 @@
  * are untouched.
  */
 
-import {
-  AreaSeries,
-  ColorType,
-  HistogramSeries,
-  createChart,
-  type IChartApi,
-  type UTCTimestamp,
-} from "lightweight-charts";
+import type { IChartApi, UTCTimestamp } from "lightweight-charts";
 import { useEffect, useRef } from "react";
 
 /*
@@ -75,98 +68,115 @@ export default function SalesChart({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    /*
+     * The library is fetched here, on first draw, not imported at the top:
+     * the page hydrates and becomes usable without waiting for ~45 kB of
+     * charting code, and the canvas fills in a moment later. The container
+     * already holds the chart's height, so nothing moves when it does.
+     */
+    let disposed = false;
+    let teardown: (() => void) | null = null;
 
-    const chart = createChart(container, {
-      width: container.clientWidth,
-      height,
-      layout: {
-        // Transparent rather than the panel colour: the chart then sits on
-        // whatever surface it is dropped into without a seam.
-        background: { type: ColorType.Solid, color: "transparent" },
-        // `--color-ink-muted`, the colour every other label on the desk is set
-        // in. This is the value that puts the dates back on the axis.
-        textColor: "#625f58",
-        fontSize: 10,
-        // A literal stack, not `var(--font-body)`: a canvas font shorthand is
-        // parsed by the 2D context, which cannot resolve a custom property —
-        // the whole declaration was being dropped and the axis fell back to the
-        // browser default face.
-        fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, sans-serif",
-        attributionLogo: false,
-      },
-      grid: {
-        // Horizontal only. Vertical gridlines on a 90-day series turn the panel
-        // into a ledger, which is the opposite of the house look.
-        vertLines: { visible: false },
-        // `--color-border-light`, softened. A white hairline on paper is nothing.
-        horzLines: { color: "rgba(216, 211, 202, 0.9)" },
-      },
-      rightPriceScale: {
-        borderVisible: false,
-        scaleMargins: { top: 0.2, bottom: 0.05 },
-      },
-      timeScale: {
-        borderVisible: false,
-        fixLeftEdge: true,
-        fixRightEdge: true,
-      },
-      crosshair: {
-        vertLine: { color: "rgba(138, 106, 63, 0.4)", width: 1, style: 0, labelBackgroundColor: GOLD_DEEP },
-        horzLine: { color: "rgba(138, 106, 63, 0.4)", width: 1, style: 0, labelBackgroundColor: GOLD_DEEP },
-      },
-      localization: {
-        locale: "en-US",
-        priceFormatter: (value: number) =>
-          unit === "egp"
-            ? `EGP ${Math.round(value).toLocaleString("en-US")}`
-            : `${Math.round(value)}`,
-      },
-      // A dashboard panel is read, not explored. Scroll and zoom would let an
-      // editor drag the series out of frame with a trackpad gesture they did
-      // not mean to make, with no obvious way back.
-      handleScroll: false,
-      handleScale: false,
+    void import("lightweight-charts").then(({ AreaSeries, ColorType, HistogramSeries, createChart }) => {
+      if (disposed) return;
+
+      const chart = createChart(container, {
+        width: container.clientWidth,
+        height,
+        layout: {
+          // Transparent rather than the panel colour: the chart then sits on
+          // whatever surface it is dropped into without a seam.
+          background: { type: ColorType.Solid, color: "transparent" },
+          // `--color-ink-muted`, the colour every other label on the desk is set
+          // in. This is the value that puts the dates back on the axis.
+          textColor: "#625f58",
+          fontSize: 10,
+          // A literal stack, not `var(--font-body)`: a canvas font shorthand is
+          // parsed by the 2D context, which cannot resolve a custom property —
+          // the whole declaration was being dropped and the axis fell back to the
+          // browser default face.
+          fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, sans-serif",
+          attributionLogo: false,
+        },
+        grid: {
+          // Horizontal only. Vertical gridlines on a 90-day series turn the panel
+          // into a ledger, which is the opposite of the house look.
+          vertLines: { visible: false },
+          // `--color-border-light`, softened. A white hairline on paper is nothing.
+          horzLines: { color: "rgba(216, 211, 202, 0.9)" },
+        },
+        rightPriceScale: {
+          borderVisible: false,
+          scaleMargins: { top: 0.2, bottom: 0.05 },
+        },
+        timeScale: {
+          borderVisible: false,
+          fixLeftEdge: true,
+          fixRightEdge: true,
+        },
+        crosshair: {
+          vertLine: { color: "rgba(138, 106, 63, 0.4)", width: 1, style: 0, labelBackgroundColor: GOLD_DEEP },
+          horzLine: { color: "rgba(138, 106, 63, 0.4)", width: 1, style: 0, labelBackgroundColor: GOLD_DEEP },
+        },
+        localization: {
+          locale: "en-US",
+          priceFormatter: (value: number) =>
+            unit === "egp"
+              ? `EGP ${Math.round(value).toLocaleString("en-US")}`
+              : `${Math.round(value)}`,
+        },
+        // A dashboard panel is read, not explored. Scroll and zoom would let an
+        // editor drag the series out of frame with a trackpad gesture they did
+        // not mean to make, with no obvious way back.
+        handleScroll: false,
+        handleScale: false,
+      });
+
+      const series =
+        kind === "area"
+          ? chart.addSeries(AreaSeries, {
+              lineColor: GOLD_DEEP,
+              topColor: "rgba(176, 141, 87, 0.26)",
+              bottomColor: "rgba(176, 141, 87, 0.02)",
+              lineWidth: 2,
+              priceLineVisible: false,
+              lastValueVisible: false,
+            })
+          : chart.addSeries(HistogramSeries, {
+              // Champagne at 55% was a bar the same value as the paper behind it.
+              color: "rgba(176, 141, 87, 0.7)",
+              priceLineVisible: false,
+              lastValueVisible: false,
+            });
+
+      series.setData(
+        points.map((point) => ({
+          time: point.time as unknown as UTCTimestamp,
+          value: point.value,
+        })),
+      );
+      chart.timeScale().fitContent();
+
+      chartRef.current = chart;
+
+      // Width follows the panel; height never does, so the surrounding layout
+      // cannot shift while the chart settles.
+      const observer = new ResizeObserver((entries) => {
+        const width = entries[0]?.contentRect.width;
+        if (width && width > 0) chart.applyOptions({ width });
+      });
+      observer.observe(container);
+
+      teardown = () => {
+        observer.disconnect();
+        chart.remove();
+        chartRef.current = null;
+      };
     });
-
-    const series =
-      kind === "area"
-        ? chart.addSeries(AreaSeries, {
-            lineColor: GOLD_DEEP,
-            topColor: "rgba(176, 141, 87, 0.26)",
-            bottomColor: "rgba(176, 141, 87, 0.02)",
-            lineWidth: 2,
-            priceLineVisible: false,
-            lastValueVisible: false,
-          })
-        : chart.addSeries(HistogramSeries, {
-            // Champagne at 55% was a bar the same value as the paper behind it.
-            color: "rgba(176, 141, 87, 0.7)",
-            priceLineVisible: false,
-            lastValueVisible: false,
-          });
-
-    series.setData(
-      points.map((point) => ({
-        time: point.time as unknown as UTCTimestamp,
-        value: point.value,
-      })),
-    );
-    chart.timeScale().fitContent();
-
-    chartRef.current = chart;
-
-    // Width follows the panel; height never does, so the surrounding layout
-    // cannot shift while the chart settles.
-    const observer = new ResizeObserver((entries) => {
-      const width = entries[0]?.contentRect.width;
-      if (width && width > 0) chart.applyOptions({ width });
-    });
-    observer.observe(container);
 
     return () => {
-      observer.disconnect();
-      chart.remove();
-      chartRef.current = null;
+      disposed = true;
+      teardown?.();
     };
   }, [points, kind, unit, height]);
 

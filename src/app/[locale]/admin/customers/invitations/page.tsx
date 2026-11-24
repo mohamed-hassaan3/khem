@@ -4,6 +4,7 @@ import InvitationList from "@/src/components/admin/InvitationList";
 import InviteCustomerForm from "@/src/components/admin/InviteCustomerForm";
 import { listAllAdminCustomers } from "@/src/services/admin/customers";
 import { listInvitations } from "@/src/services/admin/invitations";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * Invitations — who the house has invited, and what became of each letter.
@@ -20,6 +21,9 @@ export default async function InvitationsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const [query, { invitations, failed }, customers] = await Promise.all([
     searchParams,
     listInvitations(),

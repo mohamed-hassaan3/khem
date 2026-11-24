@@ -2,6 +2,7 @@ import CampaignForm from "@/src/components/admin/CampaignForm";
 import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { subscriberCount } from "@/src/services/admin/campaigns";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * Composing a new campaign.
@@ -18,6 +19,9 @@ export default async function NewCampaignPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const [{ locale }, en, ar] = await Promise.all([
     params,
     subscriberCount("en"),

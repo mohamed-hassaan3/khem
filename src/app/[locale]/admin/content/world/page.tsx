@@ -2,6 +2,7 @@ import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import ContentBackLink from "@/src/components/admin/ContentBackLink";
 import ContentHubCard from "@/src/components/admin/ContentHubCard";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * The five editorial pages, as five pages.
@@ -19,6 +20,9 @@ export default async function AdminWorldPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

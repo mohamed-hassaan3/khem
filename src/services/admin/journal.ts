@@ -56,3 +56,25 @@ export async function getAdminArticle(slug: string): Promise<AdminArticle | null
 
   return toAdminArticle(data);
 }
+
+/**
+ * How many articles exist and how many are unpublished — Today's one line on
+ * the journal. One column of every row rather than every column of every row.
+ */
+export async function countAdminArticles(): Promise<{ total: number; unpublished: number }> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return { total: 0, unpublished: 0 };
+
+  const { data, error } = await supabase.from("Article").select("isPublished");
+
+  if (error) {
+    logFailure("countAdminArticles", error.message);
+    return { total: 0, unpublished: 0 };
+  }
+
+  const rows = data ?? [];
+  return {
+    total: rows.length,
+    unpublished: rows.filter((row) => row.isPublished !== true).length,
+  };
+}

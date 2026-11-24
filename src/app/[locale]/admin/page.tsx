@@ -12,19 +12,19 @@ import { LOW_STOCK_THRESHOLD, stockState } from "@/src/lib/inventory";
 import {
   getSalesSeries,
   getSalesTotals,
-  listInventoryRows,
   parseRange,
 } from "@/src/services/admin/analytics";
 import {
+  countAdminCollections,
   countProductsMissingEmbedding,
-  listAdminCollections,
-  listAdminProducts,
+  listAdminProductStock,
 } from "@/src/services/admin/catalog";
 import { getCreditTotals } from "@/src/services/admin/credits";
 import { countCustomers } from "@/src/services/admin/customers";
-import { listAdminArticles } from "@/src/services/admin/journal";
+import { countAdminArticles } from "@/src/services/admin/journal";
 import { listAdminOrders } from "@/src/services/admin/orders";
 import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * Dashboard index — the desk's first screen.
@@ -145,13 +145,23 @@ export default async function AdminDashboardPage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   const activeLocale = isLocale(locale) ? locale : "en";
 
   const range = parseRange(query.range);
 
+  /*
+   * Each read is the narrowest that prints its figure: counts where only a
+   * number is shown, four stock columns rather than every product field, and
+   * one `daily_sales()` call shared by the curve and the tiles (`cache()` in
+   * the service). Fewer, smaller round trips in one `Promise.all` — the screen
+   * waits for the slowest, so every request removed shortens the tail.
+   */
   const [
-    collections,
+    collectionCount,
     products,
     articles,
     missingEmbeddings,
@@ -159,32 +169,39 @@ export default async function AdminDashboardPage({
     creditTotals,
     totals,
     series,
-    inventory,
     recentOrders,
   ] = await Promise.all([
-    listAdminCollections(),
-    listAdminProducts(),
-    listAdminArticles(),
+    countAdminCollections(),
+    listAdminProductStock(),
+    countAdminArticles(),
     countProductsMissingEmbedding(),
     countCustomers(),
     getCreditTotals(),
     getSalesTotals(range),
     getSalesSeries(range),
-    listInventoryRows(range),
     listAdminOrders({ limit: RECENT_ORDERS }),
   ]);
 
-  const live = products.filter((product) => !product.isArchived).length;
-  const drafts = articles.filter((article) => !article.isPublished).length;
+  const liveProducts = products.filter((product) => !product.isArchived);
+  const live = liveProducts.length;
+  const drafts = articles.unpublished;
 
   /*
    * The online counter, as the Stock page and the storefront read it — not
-   * `inventory`, the online + in-store total. A bottle with 2 left online and
-   * 55 on the shelf is "running low" to every visitor, and the total (57) hid
-   * it from this screen.
+   * the online + in-store total. A bottle with 2 left online and 55 on the
+   * shelf is "running low" to every visitor, and the total (57) hid it from
+   * this screen. Ordered as the Stock page orders it: sold out first, then
+   * low, alphabetical within each.
    */
-  const needsStock = inventory.filter((row) => stockState(row.inventoryOnline) !== "in");
-  const outOfStock = needsStock.filter((row) => row.inventoryOnline === 0).length;
+  const stockRank = { out: 0, low: 1, in: 2 } as const;
+  const needsStock = liveProducts
+    .filter((row) => stockState(row.inventoryOnline) !== "in")
+    .sort(
+      (a, b) =>
+        stockRank[stockState(a.inventoryOnline)] - stockRank[stockState(b.inventoryOnline)] ||
+        a.name.localeCompare(b.name),
+    );
+  const outOfStock = needsStock.filter((row) => row.inventoryOnline <= 0).length;
 
   const revenuePoints = series.map((point) => ({
     time: point.day,
@@ -201,10 +218,10 @@ export default async function AdminDashboardPage({
       value: products.length - live > 0 ? `${live} · ${products.length - live} archived` : String(live),
       href: href("/admin/products"),
     },
-    { label: "Collections", value: String(collections.length), href: href("/admin/collections") },
+    { label: "Collections", value: String(collectionCount), href: href("/admin/collections") },
     {
       label: "Journal",
-      value: drafts > 0 ? `${articles.length} · ${drafts} unpublished` : String(articles.length),
+      value: drafts > 0 ? `${articles.total} · ${drafts} unpublished` : String(articles.total),
       href: href("/admin/journal"),
     },
     {

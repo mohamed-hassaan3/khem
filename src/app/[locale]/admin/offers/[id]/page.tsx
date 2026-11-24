@@ -10,6 +10,7 @@ import {
   listAdminProducts,
 } from "@/src/services/admin/catalog";
 import { getOffer } from "@/src/services/admin/offers";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /** One offer, with its four selections. */
 export const dynamic = "force-dynamic";
@@ -19,6 +20,9 @@ export default async function EditOfferPage({
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale, id } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

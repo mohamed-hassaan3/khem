@@ -4,10 +4,14 @@ import { AdminPageHeader, AdminTable, AdminRow, AdminCell, AdminEmpty } from "@/
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { SCENT_PROFILE_SLUGS } from "@/src/lib/scent-profiles";
 import { listAdminScentProfiles } from "@/src/services/admin/catalog";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminScentProfilesPage({ params }: { params: Promise<{ locale: string }> }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
   const profiles = await listAdminScentProfiles();

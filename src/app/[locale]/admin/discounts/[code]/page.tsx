@@ -20,6 +20,7 @@ import {
 } from "@/src/services/admin/catalog";
 import { getDiscount } from "@/src/services/admin/discounts";
 import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * One discount code.
@@ -46,6 +47,9 @@ export default async function EditDiscountPage({
 }: {
   params: Promise<{ locale: string; code: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale, code } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

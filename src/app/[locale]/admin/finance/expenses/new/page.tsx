@@ -5,6 +5,7 @@ import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import ExpenseForm from "@/src/components/admin/ExpenseForm";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listExpenseCategories } from "@/src/services/admin/finance";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * A new expense — or, if it repeats, the rule behind it.
@@ -20,6 +21,9 @@ export default async function NewExpensePage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

@@ -9,6 +9,7 @@ import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { isScentItem } from "@/src/lib/product-types";
 import { listAdminCollections, listAdminProducts } from "@/src/services/admin/catalog";
 import { getAdminIngredient } from "@/src/services/admin/content";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * One material.
@@ -24,6 +25,9 @@ export default async function EditIngredientPage({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale, slug } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

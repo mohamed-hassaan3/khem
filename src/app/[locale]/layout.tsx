@@ -549,7 +549,7 @@ export default async function RootLayout({
                      */}
                     <div className="pt-[var(--header-h)]">{children}</div>
                     <StorefrontOnly>
-                    <Footer locale={locale} prelaunch={prelaunch} />
+                    <Footer locale={locale} socials={socialProfiles} prelaunch={prelaunch} />
                     {/*
                      * Mounted once here rather than inside `<Nav>`: it is a
                      * modal dialog over the whole document, and it is opened

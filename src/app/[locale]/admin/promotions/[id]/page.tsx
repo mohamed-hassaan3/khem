@@ -10,6 +10,7 @@ import {
   listAdminProducts,
 } from "@/src/services/admin/catalog";
 import { getPromotion } from "@/src/services/admin/promotions";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /** One promotion. */
 export const dynamic = "force-dynamic";
@@ -19,6 +20,9 @@ export default async function EditPromotionPage({
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale, id } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

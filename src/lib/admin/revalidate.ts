@@ -247,13 +247,15 @@ export function revalidateStockists(): void {
 /**
  * After a house setting, contact channel or social profile is changed.
  *
- * Three surfaces, and each is on the list for a specific reason:
+ * Four surfaces, and each is on the list for a specific reason:
  *
  *  - **the home page** carries the featured fragrance, which is the one
  *    merchandising decision stored in `"BoutiqueSetting"`;
  *  - **`/contact`** renders the channels and the social profiles, and is ISR at
  *    an hour;
- *  - **`/stockists`** quotes `wholesaleEmail` for partnership enquiries.
+ *  - **`/stockists`** quotes `wholesaleEmail` for partnership enquiries;
+ *  - **every page**, through the `[locale]` layout: the footer's social links
+ *    and the structured data's `sameAs` both read `"SocialProfile"`.
  *
  * The email signatures that also read `"SocialProfile"` are composed per send,
  * so they need nothing here — they are already reading the current row.
@@ -262,6 +264,9 @@ export function revalidateSettings(): void {
   revalidateAllLocales(HOME);
   revalidateAllLocales("/contact");
   revalidateAllLocales("/stockists");
+  // The social profiles are the footer's links and the `sameAs` of every
+  // page's structured data, both rendered by the `[locale]` layout.
+  revalidateLayouts();
 }
 
 /**

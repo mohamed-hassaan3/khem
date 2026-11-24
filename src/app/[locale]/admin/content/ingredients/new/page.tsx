@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import IngredientForm from "@/src/components/admin/IngredientForm";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /**
  * A new material.
@@ -19,6 +20,9 @@ export default async function NewIngredientPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

@@ -8,6 +8,7 @@ import {
   listAdminCollections,
   listAdminProducts,
 } from "@/src/services/admin/catalog";
+import { requireAdmin } from "@/src/lib/admin/auth";
 
 /** A new promotion. Targets are pickers over the live catalog, never free text. */
 export const dynamic = "force-dynamic";
@@ -17,6 +18,9 @@ export default async function NewPromotionPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  // The layout's gate does not cover a page on client navigation — see requireAdmin().
+  await requireAdmin();
+
   const { locale } = await params;
   const activeLocale = isLocale(locale) ? locale : "en";
 

@@ -43,7 +43,6 @@ import {
 
 import AdminLink from "@/src/components/admin/AdminLink";
 import AdminToaster from "@/src/components/admin/AdminToaster";
-import NotificationBell from "@/src/components/admin/NotificationBell";
 import UnsavedChangesDialog from "@/src/components/admin/UnsavedChangesDialog";
 import {
   ADMIN_ENTRIES,
@@ -61,7 +60,6 @@ import {
   UnsavedChangesProvider,
   useUnsavedChanges,
 } from "@/src/providers/unsaved-changes-provider";
-import type { AdminNotification, LowStockItem } from "@/src/types/notification";
 
 /** Groups that start folded in the rail unless the page is inside them. */
 const FOLDED_BY_DEFAULT = new Set(["website", "money"]);
@@ -69,19 +67,18 @@ const FOLDED_BY_DEFAULT = new Set(["website", "money"]);
 export default function AdminShell({
   locale,
   actorEmail,
-  notifications,
-  lowStock,
+  bell,
   children,
 }: {
   locale: Locale;
   actorEmail: string;
   /**
-   * The bell's contents, read by the layout on every admin render. Passed down
-   * because the feed is a secret-key read that must not be reachable from a
-   * browser.
+   * The notification bell, rendered on the server by the layout and streamed
+   * (`<AdminBell>` inside `<Suspense>`). A slot rather than data props: the
+   * feed is a secret-key read that must not be reachable from a browser, and
+   * the shell should not wait for it to paint.
    */
-  notifications: readonly AdminNotification[];
-  lowStock: readonly LowStockItem[];
+  bell: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -91,12 +88,7 @@ export default function AdminShell({
           <UnsavedChangesDialog pending={pending} onClose={close} />
         )}
       >
-        <Desk
-          locale={locale}
-          actorEmail={actorEmail}
-          notifications={notifications}
-          lowStock={lowStock}
-        >
+        <Desk locale={locale} actorEmail={actorEmail} bell={bell}>
           {children}
         </Desk>
         <AdminToaster />
@@ -108,14 +100,12 @@ export default function AdminShell({
 function Desk({
   locale,
   actorEmail,
-  notifications,
-  lowStock,
+  bell,
   children,
 }: {
   locale: Locale;
   actorEmail: string;
-  notifications: readonly AdminNotification[];
-  lowStock: readonly LowStockItem[];
+  bell: ReactNode;
   children: ReactNode;
 }) {
   const { path } = stripLocale(usePathname());
@@ -178,7 +168,7 @@ function Desk({
           <ExternalLink size={12} strokeWidth={1.5} aria-hidden="true" />
         </a>
 
-        <NotificationBell notifications={notifications} lowStock={lowStock} locale={locale} />
+        {bell}
 
         <span
           title={actorEmail}

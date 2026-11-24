@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
+import AdminBell, { AdminBellPlaceholder } from "@/src/components/admin/AdminBell";
 import AdminShell from "@/src/components/admin/AdminShell";
 import { requireAdmin } from "@/src/lib/admin/auth";
 import { isLocale } from "@/src/lib/i18n/config";
-import {
-  listAdminNotifications,
-  listLowStock,
-} from "@/src/services/admin/notifications";
 
 /**
  * The dashboard shell — and the gate.
@@ -48,18 +46,12 @@ export default async function AdminLayout({
   const [{ locale }, actor] = await Promise.all([params, requireAdmin()]);
 
   /*
-   * The bell's contents, read after the gate rather than beside it: both are
-   * secret-key reads of rows that name customers, and neither may run for a
-   * request `requireAdmin()` is about to refuse.
-   *
-   * This layout is already `force-dynamic`, so nothing is opted out of caching
-   * that was not already.
+   * The bell is streamed: `<AdminBell>` reads its feed inside `<Suspense>`, so
+   * the shell and the page paint without waiting for it. It is still created
+   * here, *after* the gate: both of its reads are secret-key reads of rows
+   * that name customers, and neither may run for a request `requireAdmin()`
+   * is about to refuse.
    */
-  const [notifications, lowStock] = await Promise.all([
-    listAdminNotifications(),
-    listLowStock(),
-  ]);
-
   // The parent layout has already rejected any segment that is not a locale.
   const activeLocale = isLocale(locale) ? locale : "en";
 
@@ -67,8 +59,11 @@ export default async function AdminLayout({
     <AdminShell
       locale={activeLocale}
       actorEmail={actor.email}
-      notifications={notifications}
-      lowStock={lowStock}
+      bell={
+        <Suspense fallback={<AdminBellPlaceholder />}>
+          <AdminBell locale={activeLocale} />
+        </Suspense>
+      }
     >
       {children}
     </AdminShell>
