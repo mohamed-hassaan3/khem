@@ -29,6 +29,8 @@ import {
 import type {
   AudienceBreakdown,
   Campaign,
+  CampaignAudienceMember,
+  CampaignRecipientKind,
   CampaignWithProgress,
 } from "@/src/types/campaign";
 
@@ -122,6 +124,43 @@ export async function audienceBreakdown(
     specific: read("specific"),
     total: read("total"),
   };
+}
+
+const RECIPIENT_KINDS = new Set(["SUBSCRIBER", "CUSTOMER", "SPECIFIC"]);
+
+/**
+ * Every address the campaign's saved audience reaches, with whether the desk
+ * left it out (`campaign_audience_preview()`, 0081). The same set the send will
+ * claim, minus nothing: excluded rows are returned so they can be brought back.
+ */
+export async function listCampaignAudience(
+  campaignId: string,
+): Promise<CampaignAudienceMember[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.rpc("campaign_audience_preview", {
+    campaign_id: campaignId,
+  });
+
+  if (error) {
+    logFailure("listCampaignAudience", error.message);
+    return [];
+  }
+
+  const rows = Array.isArray(data) ? (data as Record<string, unknown>[]) : [];
+  return rows.flatMap((row) =>
+    typeof row.email === "string" && typeof row.kind === "string" && RECIPIENT_KINDS.has(row.kind)
+      ? [
+          {
+            email: row.email,
+            kind: row.kind as CampaignRecipientKind,
+            name: typeof row.name === "string" && row.name.trim().length > 0 ? row.name : null,
+            excluded: row.excluded === true,
+          },
+        ]
+      : [],
+  );
 }
 
 /** The addresses typed into this campaign by hand, in the order they were added. */

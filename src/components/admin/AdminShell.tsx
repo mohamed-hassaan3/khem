@@ -1,262 +1,70 @@
 "use client";
 
 /**
- * The dashboard chrome — rail, header, panel slot.
+ * The Desk — the admin's own shell (prompts/admin-redesign-stage-6.md).
  *
- * A client component only because the active link needs `usePathname()`. The
- * session was already resolved by the layout above; this receives the actor's
- * email as a prop and never asks who they are, because a component that could
- * answer that question is a component someone will later trust to *decide* it.
+ * The storefront's chrome is not rendered on `/admin` (`StorefrontOnly`), so
+ * this is the whole frame: a slim header with a "find anything" jump, the
+ * desktop rail, a phone tab bar, a full menu, and a tab row for entries that
+ * hold several pages (Loyalty, Collections & categories, Stock, Story pages,
+ * Sales & profit, Finance).
  *
- * Hrefs are built with `localizePath` rather than `<LocaleLink>` so the rail
- * does not depend on the i18n provider: the dashboard is English by
- * construction, and building the prefix from the locale the layout already
- * resolved keeps `/ar/admin` navigating within itself instead of throwing an
- * editor into the other tree mid-task.
+ * Everything navigational comes from `admin-nav.ts`, one table, so the rail,
+ * the menu, the tab bar, the section tabs and the jump search cannot disagree.
+ * No route moved.
  *
- * ## Grouped by job, not by table
- *
- * The rail used to be seventeen flat rows in frequency-of-use order, which asks
- * a new member of the desk "which table am I in?" instead of "what am I trying
- * to do?". It is now five named groups — Commerce, Marketing, Content,
- * Analytics, System — with Dashboard standing alone above them.
- *
- * **No route moved.** The grouping is presentation; every href here is the URL
- * it always was, so bookmarks, redirects and the 110 in-code references to
- * these paths are all still correct.
- *
- * World of KHEM's five pages are a second level, revealed only while the
- * editor is somewhere inside Content. Revealed from `pathname` rather than from
- * state: a rail that remembers which branch was open is a rail that disagrees
- * with the page beside it, and deriving it means there is nothing to hydrate.
- *
- * ## One rail, two behaviours
- *
- * The rail is on the inline-start edge at every width. Below `lg` it is an
- * off-canvas drawer over a scrim — it used to become a horizontal scrolling
- * strip, which is neither a sidebar nor dismissible. At `lg` and up it is a
- * column that the same toggle collapses, and collapsing *removes* it from the
- * grid rather than animating its width: the panel holds a chart, and a column
- * that reflows for 500ms makes the chart re-measure every frame of it.
- *
- * The open state is read from `localStorage` in an effect, never during render.
- * Until that effect runs, `open` is `null` and the rail falls back to its CSS
- * default — hidden below `lg`, shown above it — so the server's markup and the
- * first client render agree and the common case never flashes.
+ * A client component because the active state needs `usePathname()`. The
+ * session was resolved by the layout; this receives the actor's email as a
+ * prop and never asks who they are. Every link goes through `AdminLink`, so an
+ * unsaved form still holds navigation.
  */
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
-  Activity,
-  BadgePercent,
-  BarChart3,
-  Boxes,
-  Coins,
-  Compass,
+  ChevronDown,
   ExternalLink,
-  Gift,
-  Landmark,
-  LayoutList,
-  LayoutGrid,
-  Library,
-  Package,
-  PanelLeft,
-  PanelLeftClose,
-  PieChart,
-  Mail,
-  MapPin,
+  House,
+  Menu as MenuIcon,
   Megaphone,
-  Tag,
-  Target,
-  Ticket,
-  TrendingUp,
-  Wallet,
+  Package,
   Receipt,
-  ScrollText,
   Search,
-  Send,
-  Settings,
-  Sparkles,
-  Users,
+  X,
+  Activity,
 } from "lucide-react";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import AdminLink from "@/src/components/admin/AdminLink";
 import AdminToaster from "@/src/components/admin/AdminToaster";
 import NotificationBell from "@/src/components/admin/NotificationBell";
 import UnsavedChangesDialog from "@/src/components/admin/UnsavedChangesDialog";
+import {
+  ADMIN_ENTRIES,
+  ADMIN_NAV,
+  ORDER_NUMBER,
+  activeEntry,
+  activeTab,
+  groupOf,
+  type AdminNavEntry,
+} from "@/src/components/admin/admin-nav";
 import { UMAMI_DASHBOARD_URL } from "@/src/lib/analytics/umami";
-import { localizePath, type Locale } from "@/src/lib/i18n/config";
+import { localizePath, stripLocale, type Locale } from "@/src/lib/i18n/config";
 import { AdminToastProvider } from "@/src/providers/admin-toast-provider";
-import { UnsavedChangesProvider } from "@/src/providers/unsaved-changes-provider";
+import {
+  UnsavedChangesProvider,
+  useUnsavedChanges,
+} from "@/src/providers/unsaved-changes-provider";
 import type { AdminNotification, LowStockItem } from "@/src/types/notification";
 
-/**
- * The rail, as five jobs rather than seventeen tables.
- *
- * Order within a group is still how often a desk reaches for it — Orders before
- * Stockists, Promotions before Announcements — because grouping answers "where
- * do I look?" and ordering answers "what do I open every morning?".
- *
- * `children` is a second level, and only Content has one. Journal keeps its own
- * top-level route while sitting under World of KHEM here: the IA is a claim
- * about where an editor looks for it, not a claim about where it lives.
- */
-const GROUPS = [
-  {
-    heading: null,
-    items: [{ path: "/admin", label: "Dashboard", icon: LayoutGrid }],
-  },
-  {
-    heading: "Commerce",
-    items: [
-      { path: "/admin/orders", label: "Orders", icon: Receipt },
-      { path: "/admin/customers", label: "Customers", icon: Users },
-      { path: "/admin/products", label: "Products", icon: Package },
-      /*
-       * Categories above Collections, because that is the order of the
-       * hierarchy: a category is the shelf, a collection stands on it, a product
-       * sits in the collection. The sidebar reads top-down like the structure
-       * does.
-       */
-      { path: "/admin/categories", label: "Categories", icon: Library },
-      { path: "/admin/collections", label: "Collections", icon: Sparkles },
-      { path: "/admin/inventory", label: "Inventory", icon: Boxes },
-      { path: "/admin/stockists", label: "Stockists", icon: MapPin },
-    ],
-  },
-  {
-    heading: "Marketing",
-    items: [
-      /*
-       * Promotions sits beside Discounts, not inside it: one is a price the
-       * catalogue carries and the other is a string somebody types. Neighbours
-       * because a desk running a sale reaches for both in the same hour;
-       * separate rows because they are separate systems with separate records.
-       */
-      { path: "/admin/promotions", label: "Promotions", icon: BadgePercent },
-      { path: "/admin/offers", label: "Offers", icon: Gift },
-      { path: "/admin/discounts", label: "Discounts", icon: Tag },
-      { path: "/admin/rewards", label: "Rewards", icon: Sparkles },
-      { path: "/admin/credits", label: "Credits", icon: Ticket },
-      { path: "/admin/campaigns", label: "Campaigns", icon: Send },
-      { path: "/admin/newsletter", label: "Newsletter", icon: Mail },
-      { path: "/admin/announcements", label: "Announcements", icon: Megaphone },
-    ],
-  },
-  {
-    heading: "Content",
-    items: [
-      { path: "/admin/content/landing", label: "Landing Page", icon: LayoutList },
-      // The menu and the footer, which point at the rows the Commerce group
-      // creates — so it lives with the other things that shape a page.
-      { path: "/admin/navigation", label: "Navigation", icon: Compass },
-      {
-        path: "/admin/content/world",
-        label: "World of KHEM",
-        icon: Landmark,
-        children: [
-          { path: "/admin/content/heritage", label: "Heritage" },
-          { path: "/admin/content/craftsmanship", label: "Craftsmanship" },
-          { path: "/admin/content/ingredients", label: "Ingredients" },
-          { path: "/admin/journal", label: "Journal" },
-          { path: "/admin/content/about", label: "About KHEM" },
-        ],
-      },
-    ],
-  },
-  {
-    /*
-     * Three rows, and they answer three different questions.
-     *
-     * Analytics is "how are we trading" — a rolling curve of revenue and units
-     * at the prices actually charged. Sales & Profit is "are we making money" —
-     * list value, what each benefit gave away, and what is left after the goods
-     * cost. Items Sold is the line-by-line record underneath it.
-     *
-     * The last two are deliberately not folded into Orders: an order screen is
-     * for fulfilling one sale, and burying the ledger inside it would hide the
-     * only view that spans every sale ever made.
-     */
-    heading: "Sales & Analytics",
-    items: [
-      { path: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-      { path: "/admin/search", label: "Search", icon: Search },
-      { path: "/admin/sales", label: "Sales & Profit", icon: TrendingUp },
-      { path: "/admin/sales/items", label: "Items Sold", icon: ScrollText },
-    ],
-  },
-  {
-    /*
-     * A fourth question, and the reason it is not a fourth row above.
-     *
-     * Sales & Analytics answers "are the goods making money" — list value, what
-     * each benefit gave away, and what is left after the goods cost. It stops
-     * at gross profit on purpose: rent is not a cost of goods, and folding it in
-     * would make every product margin on that screen wrong.
-     *
-     * Finance takes gross profit as given and asks what the house actually
-     * made after everything it costs to trade. It reads the sales ledger and
-     * never writes to it, which is exactly the relationship the two groups have.
-     */
-    heading: "Finance",
-    items: [
-      { path: "/admin/finance", label: "Finance", icon: Wallet },
-      { path: "/admin/finance/expenses", label: "Expenses", icon: Coins },
-      { path: "/admin/finance/targets", label: "Targets", icon: Target },
-      { path: "/admin/finance/reports", label: "Reports", icon: PieChart },
-    ],
-  },
-  {
-    heading: "System",
-    items: [{ path: "/admin/settings", label: "Settings", icon: Settings }],
-  },
-] as const;
-
-/**
- * Every top-level path the rail can light, derived from `GROUPS` rather than
- * listed again — a row added above is a row the longest-match test knows about,
- * with nothing to keep in step.
- */
-const ALL_PATHS: readonly string[] = GROUPS.flatMap((group) =>
-  group.items.flatMap((item) => [
-    item.path,
-    ...("children" in item ? item.children.map((child) => child.path) : []),
-  ]),
-);
-
-/**
- * Everything the Content group owns, including the two routes that do not sit
- * under `/admin/content`. Used to decide whether the second level is showing
- * and whether the World of KHEM row is the one being edited.
- */
-const WORLD_PATHS = [
-  "/admin/content/heritage",
-  "/admin/content/craftsmanship",
-  "/admin/content/ingredients",
-  "/admin/journal",
-  "/admin/content/about",
-] as const;
-
-/** A single UI boolean. Never an identifier, never anything about an order. */
-const RAIL_KEY = "khem.admin.rail";
-
-/** The width at which the drawer becomes a column — Tailwind's `lg`. */
-const DESKTOP = "(min-width: 1024px)";
-
-const RAIL_ID = "admin-rail";
-
-function readStored(): boolean | null {
-  try {
-    const value = window.localStorage.getItem(RAIL_KEY);
-    if (value === "open") return true;
-    if (value === "closed") return false;
-    return null;
-  } catch {
-    // Private mode, or storage disabled. The default is a fine answer.
-    return null;
-  }
-}
+/** Groups that start folded in the rail unless the page is inside them. */
+const FOLDED_BY_DEFAULT = new Set(["website", "money"]);
 
 export default function AdminShell({
   locale,
@@ -268,352 +76,581 @@ export default function AdminShell({
   locale: Locale;
   actorEmail: string;
   /**
-   * The bell's contents, read by the layout on every admin render.
-   *
-   * Passed down rather than fetched here: this is a Client Component, and the
-   * feed is a secret-key read that must not be reachable from a browser.
+   * The bell's contents, read by the layout on every admin render. Passed down
+   * because the feed is a secret-key read that must not be reachable from a
+   * browser.
    */
   notifications: readonly AdminNotification[];
   lowStock: readonly LowStockItem[];
   children: ReactNode;
 }) {
-  const pathname = usePathname();
+  return (
+    <AdminToastProvider>
+      <UnsavedChangesProvider
+        renderDialog={(pending, close) => (
+          <UnsavedChangesDialog pending={pending} onClose={close} />
+        )}
+      >
+        <Desk
+          locale={locale}
+          actorEmail={actorEmail}
+          notifications={notifications}
+          lowStock={lowStock}
+        >
+          {children}
+        </Desk>
+        <AdminToaster />
+      </UnsavedChangesProvider>
+    </AdminToastProvider>
+  );
+}
 
-  /** `null` until the media query has been asked. */
-  const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
-  /** `null` until resolved — see the note at the top of this file. */
-  const [open, setOpen] = useState<boolean | null>(null);
+function Desk({
+  locale,
+  actorEmail,
+  notifications,
+  lowStock,
+  children,
+}: {
+  locale: Locale;
+  actorEmail: string;
+  notifications: readonly AdminNotification[];
+  lowStock: readonly LowStockItem[];
+  children: ReactNode;
+}) {
+  const { path } = stripLocale(usePathname());
+  const entry = activeEntry(path);
+  const group = groupOf(entry);
+  const tab = entry ? activeTab(entry, path) : null;
+
+  const href = useCallback((to: string) => localizePath(locale, to), [locale]);
+
+  /** `null` closed; "menu" from the tab bar; "find" from the search button or ⌘K. */
+  const [sheet, setSheet] = useState<"menu" | "find" | null>(null);
+  const close = useCallback(() => setSheet(null), []);
 
   useEffect(() => {
-    const query = window.matchMedia(DESKTOP);
-
-    function resolve(desktop: boolean) {
-      setIsDesktop(desktop);
-      // A collapsed rail is a desktop preference. On a phone the drawer always
-      // starts closed, or it would cover the screen the desk just opened.
-      setOpen(desktop ? (readStored() ?? true) : false);
-    }
-
-    resolve(query.matches);
-
-    function onChange(event: MediaQueryListEvent) {
-      resolve(event.matches);
-    }
-
-    query.addEventListener("change", onChange);
-    return () => query.removeEventListener("change", onChange);
-  }, []);
-
-  /**
-   * A tapped section navigates, and a drawer left open would cover the screen
-   * it just opened. Closed on the click rather than in an effect watching
-   * `pathname`: the click is the event, and reacting to the route afterwards
-   * would be a render cascade chasing something React already told us about.
-   */
-  const closeOnMobile = useCallback(() => {
-    if (isDesktop === false) setOpen(false);
-  }, [isDesktop]);
-
-  useEffect(() => {
-    if (isDesktop !== false || open !== true) return;
-
     function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSheet((current) => (current ? null : "find"));
+      }
     }
-
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isDesktop, open]);
+  }, []);
 
-  const toggle = useCallback(() => {
-    setOpen((current) => {
-      const next = !(current ?? true);
-
-      if (isDesktop) {
-        try {
-          window.localStorage.setItem(RAIL_KEY, next ? "open" : "closed");
-        } catch {
-          // Nothing to do — the rail simply reverts to its default next time.
-        }
-      }
-
-      return next;
-    });
-  }, [isDesktop]);
-
-  /** `/admin` is active only on itself; every other section owns its subtree. */
-  function matchesPath(path: string): boolean {
-    const href = localizePath(locale, path);
-    if (path === "/admin") return pathname === href;
-    return pathname === href || pathname.startsWith(`${href}/`);
-  }
-
-  /**
-   * The **most specific** row that matches, and only that one.
-   *
-   * A prefix test alone lights every ancestor: standing on
-   * `/admin/sales/items` matches `/admin/sales` too, and two siblings in the
-   * same group both reading as current tells an editor nothing about where they
-   * are. Longest match wins, so a row that owns a subtree stays lit for
-   * everything under it — `/admin/orders/KHEM-2026-1042` is still Orders —
-   * right up until a more specific row claims the page.
-   */
-  const currentPath = ALL_PATHS.filter(matchesPath).sort(
-    (a, b) => b.length - a.length,
-  )[0];
-
-  function isActive(path: string): boolean {
-    return currentPath === path;
-  }
-
-  /**
-   * World of KHEM owns five pages, two of which are not under its own path —
-   * `/admin/content/ingredients` and `/admin/journal` kept the URLs they have
-   * always had. So the row's active state is the union, not a prefix test.
-   */
-  const inWorld =
-    matchesPath("/admin/content/world") || WORLD_PATHS.some(matchesPath);
-
-  /**
-   * The second level shows while the editor is anywhere in Content — including
-   * on the `/admin/content` hub itself, which is how they got there.
-   */
-  const showWorld = inWorld || matchesPath("/admin/content");
-
-  const resolved = open !== null;
-  /** Before resolution the CSS default decides, and it matches `true` at `lg`. */
-  const shown = open ?? true;
-  const showScrim = resolved && open === true && isDesktop === false;
-
-  const railPosition = !resolved
-    ? "-translate-x-full rtl:translate-x-full lg:translate-x-0"
-    : open
-      ? "translate-x-0"
-      : "-translate-x-full rtl:translate-x-full lg:hidden";
+  const initial = (actorEmail.trim()[0] ?? "K").toUpperCase();
 
   return (
-    /*
-     * The guard wraps the whole shell, not the panel: the links it protects are
-     * in the rail, which is a sibling of the panel the editor renders into.
-     *
-     * The dialog is injected rather than imported by the provider, which knows
-     * nothing about how the house looks — see that file's header.
-     */
-    <AdminToastProvider>
-    <UnsavedChangesProvider
-      renderDialog={(pending, close) => (
-        <UnsavedChangesDialog pending={pending} onClose={close} />
-      )}
-    >
-    {/*
-      The dashboard ground.
+    <div data-admin-desk="" className="ground-ivory min-h-screen">
+      {/* ── Header ─────────────────────────────────────────── */}
+      <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-ground-border bg-ground-bg px-4 lg:h-15 lg:gap-4 lg:px-6">
+        <AdminLink
+          href={href("/admin")}
+          className="flex shrink-0 flex-col leading-none no-underline"
+          aria-label="KHEM Desk, Today"
+        >
+          <span className="font-heading text-[15px] tracking-[0.22em] text-ground-accent">KHEM</span>
+          <span className="mt-1 text-[10px] uppercase tracking-[0.16em] text-ground-muted">Desk</span>
+        </AdminLink>
 
-      `ground-ivory` rather than a bare `bg-ivory`, so the panels, fields,
-      cards and buttons inside it resolve their surface variables from a
-      declared ground instead of from whatever `body` happens to be — the same
-      contract every storefront section signs. §31: the dashboard is the same
-      visual system as the shop, held to productivity rather than to cinema.
-    */}
-    <div
-      className={`ground-ivory min-h-screen lg:grid ${
-        !resolved || open ? "lg:grid-cols-[260px_1fr]" : "lg:grid-cols-[1fr]"
-      }`}
-    >
-      {/* The scrim: mobile only, and only while the drawer is out. */}
-      <div
-        onClick={() => setOpen(false)}
-        aria-hidden="true"
-        className={`fixed inset-0 top-[var(--chrome-h)] z-30 bg-ink/45 transition-[opacity,top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none lg:hidden ${
-          showScrim ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
-      />
+        <button
+          type="button"
+          onClick={() => setSheet("find")}
+          className="ms-auto flex h-10 min-w-0 max-w-[13rem] flex-1 cursor-pointer items-center gap-2 rounded-lg border border-ground-border bg-stone px-3 text-[13px] text-ground-muted transition-colors duration-300 hover:border-gold/40 lg:ms-8 lg:max-w-[22rem]"
+        >
+          <Search size={15} strokeWidth={1.5} aria-hidden="true" className="shrink-0" />
+          <span className="truncate">
+            <span className="lg:hidden">Find anything…</span>
+            <span className="hidden lg:inline">Jump to a section or an order</span>
+          </span>
+          <kbd className="ms-auto hidden rounded border border-ground-border px-1.5 font-body text-[11px] lg:inline">
+            ⌘K
+          </kbd>
+        </button>
 
-      <aside
-        id={RAIL_ID}
-        aria-hidden={resolved && !open ? true : undefined}
-        // `start-0` rather than `left-0`: the inline offset and the transform
-        // must agree on which edge is home, or the RTL drawer parks mid-screen.
-        className={`ground-stone fixed bottom-0 start-0 top-[var(--chrome-h)] z-40 w-[280px] overflow-y-auto border-e border-ground-border py-8 transition-[transform,top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none lg:sticky lg:bottom-auto lg:h-[calc(100svh-var(--chrome-h))] lg:w-auto lg:py-12 lg:transition-[top,height] ${railPosition}`}
-      >
-        <div className="px-8">
-          <p className="font-heading text-[11px] uppercase tracking-[0.3em] text-ground-accent">
-            KHEM
-          </p>
-          <p className="mt-1 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
-            Boutique Desk
-          </p>
-        </div>
+        <a
+          href={href("/")}
+          className="ms-auto hidden items-center gap-1.5 text-[13px] text-ground-muted no-underline transition-colors duration-300 hover:text-ground-accent lg:inline-flex"
+        >
+          View the shop
+          <ExternalLink size={12} strokeWidth={1.5} aria-hidden="true" />
+        </a>
 
-        <nav className="mt-6 md:mt-10 flex flex-col px-4">
-          {GROUPS.map((group) => (
-            <div
-              key={group.heading ?? "root"}
-              className={group.heading ? "mt-7 first:mt-0" : ""}
-            >
-              {group.heading ? (
-                <p className="mb-2 px-4 font-heading text-[9px] uppercase tracking-[0.3em] text-ground-subtle">
-                  {group.heading}
-                </p>
-              ) : null}
+        <NotificationBell notifications={notifications} lowStock={lowStock} locale={locale} />
 
-              <div className="flex flex-col gap-1">
-                {group.items.map((item) => {
-                  const children =
-                    "children" in item ? item.children : undefined;
-                  // The parent of a second level is lit by its whole branch.
-                  const active = children ? inWorld : isActive(item.path);
-                  const Icon = item.icon;
+        <span
+          title={actorEmail}
+          className="hidden size-9 shrink-0 place-items-center rounded-full border border-gold/50 font-heading text-[13px] text-ground-accent lg:grid"
+        >
+          {initial}
+          <span className="sr-only">Signed in as {actorEmail}</span>
+        </span>
+      </header>
 
-                  return (
-                    <div key={item.path}>
-                      <AdminLink
-                        href={localizePath(locale, item.path)}
-                        aria-current={active ? "page" : undefined}
-                        tabIndex={resolved && !open ? -1 : undefined}
-                        onClick={closeOnMobile}
-                        className={`flex shrink-0 items-center gap-3 border-s-2 px-4 py-3 font-heading text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 ${
-                          active
-                            ? "border-ground-accent bg-ivory text-ground"
-                            : "border-transparent text-ground-muted hover:text-ground"
-                        }`}
-                      >
-                        <Icon size={14} strokeWidth={1.25} />
-                        {item.label}
-                      </AdminLink>
+      <div className="lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
+        {/* ── Desktop rail ─────────────────────────────────── */}
+        <aside className="sticky top-15 hidden h-[calc(100svh-3.75rem)] flex-col overflow-y-auto border-e border-ground-border bg-stone px-3 py-5 lg:flex">
+          <Rail locale={locale} current={entry} currentGroup={group} />
 
-                      {children && showWorld ? (
-                        <div className="mt-1 flex flex-col gap-1">
-                          {children.map((child) => {
-                            const childActive = isActive(child.path);
-
-                            return (
-                              <AdminLink
-                                key={child.path}
-                                href={localizePath(locale, child.path)}
-                                aria-current={childActive ? "page" : undefined}
-                                tabIndex={resolved && !open ? -1 : undefined}
-                                onClick={closeOnMobile}
-                                className={`flex shrink-0 items-center border-s-2 py-2.5 ps-11 pe-4 text-[11px] tracking-[0.08em] transition-colors duration-300 ${
-                                  childActive
-                                    ? "border-ground-accent bg-ivory text-ground"
-                                    : "border-transparent text-ground-muted hover:text-ground"
-                                }`}
-                              >
-                                {child.label}
-                              </AdminLink>
-                            );
-                          })}
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-
-          {/*
-           * The visitor dashboard, which is not a route of this app. Kept out
-           * of `GROUPS` on purpose: every entry there is a path the rail's
-           * longest-match test lights, and an external URL can never be the
-           * page you are on. Authentication stays in Umami (named account +
-           * 2FA, `src/docs/umami-analytics.md`); this is only a door.
-           */}
-          <div className="mt-7">
-            <p className="mb-2 px-4 font-heading text-[9px] uppercase tracking-[0.3em] text-ground-subtle">
-              Visitors
-            </p>
+          <div className="mt-auto border-t border-ground-border px-3 pt-4">
+            <p className="text-[11px] text-ground-muted">Signed in as</p>
+            <p className="mt-0.5 break-all text-[12px] text-ground">{actorEmail}</p>
             <a
               href={UMAMI_DASHBOARD_URL}
               target="_blank"
               rel="noopener noreferrer"
-              tabIndex={resolved && !open ? -1 : undefined}
-              onClick={closeOnMobile}
-              className="flex shrink-0 items-center gap-3 border-s-2 border-transparent px-4 py-3 font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground"
+              className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-ground-muted no-underline hover:text-ground-accent"
             >
-              <Activity size={14} strokeWidth={1.25} />
-              Umami
-              <ExternalLink
-                size={11}
-                strokeWidth={1.25}
-                className="ms-auto opacity-60"
-                aria-hidden="true"
-              />
+              <Activity size={13} strokeWidth={1.5} aria-hidden="true" />
+              Visitors (Umami)
+              <ExternalLink size={11} strokeWidth={1.5} aria-hidden="true" />
               <span className="sr-only">(opens in a new tab)</span>
             </a>
           </div>
-        </nav>
+        </aside>
 
-        <div className="mt-6 md:mt-10 border-t border-ground-border px-8 pt-6">
-          <p className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
-            Signed in as
-          </p>
-          <p className="mt-1 break-all text-[11px] text-ground-muted">{actorEmail}</p>
+        {/* ── Panel ────────────────────────────────────────── */}
+        <main className="min-w-0 px-4 pb-12 pt-5 sm:px-8 lg:px-12 lg:pb-16 lg:pt-8">
+          <div className="mx-auto max-w-[1180px]">
+            {entry?.tabs ? (
+              <nav
+                aria-label={`${entry.label} sections`}
+                className="-mx-4 mb-5 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0 lg:mb-7"
+              >
+                {entry.tabs.map((item) => {
+                  const on = item === tab;
+                  return (
+                    <AdminLink
+                      key={item.href}
+                      href={href(item.href)}
+                      aria-current={on ? "page" : undefined}
+                      className={[
+                        "inline-flex h-9 shrink-0 items-center rounded-full border px-4 text-[13px] no-underline",
+                        "transition-colors duration-300 ease-luxury-bezier",
+                        on
+                          ? "border-ground bg-ground text-ground-bg"
+                          : "border-ground-border text-ground-muted hover:border-gold/40 hover:text-ground",
+                      ].join(" ")}
+                    >
+                      {item.label}
+                    </AdminLink>
+                  );
+                })}
+              </nav>
+            ) : null}
 
-          <AdminLink
-            href={localizePath(locale, "/")}
-            tabIndex={resolved && !open ? -1 : undefined}
-            onClick={closeOnMobile}
-            className="mt-5 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-ground-muted transition-colors duration-300 hover:text-ground-accent"
-          >
-            <ExternalLink size={12} strokeWidth={1.25} />
-            View storefront
-          </AdminLink>
-        </div>
-      </aside>
+            <div id="admin-panel">{children}</div>
+          </div>
+        </main>
+      </div>
 
-      <main className="min-w-0 px-5 pb-14 md:pb-24 sm:px-8 lg:px-14">
-        {/*
-          The toggle lives in the panel rather than in the rail, because a
-          control that hides the rail cannot itself live inside the thing it
-          hides. Sticky beneath the storefront nav so it is reachable from the
-          bottom of a long order list.
+      {/* ── Phone tab bar ──────────────────────────────────── */}
+      <TabBar
+        locale={locale}
+        entry={entry}
+        group={group}
+        onMenu={() => setSheet("menu")}
+        menuOpen={sheet === "menu"}
+      />
 
-          `--chrome-h`, not `--header-h`: the storefront header now leaves while
-          the visitor reads down (`use-header-visibility.ts`), and a bar parked
-          at the header's *reserved* height would sit 118px down the screen with
-          nothing above it. Reading the live offset instead, this bar closes up
-          to the top edge as the header goes and settles back under it as the
-          header returns — the two move as one. The transition matches the
-          header's own duration and curve.
-        */}
-        <div className="sticky top-[var(--chrome-h)] z-20 -mx-5 mb-8 flex items-center gap-4 border-b border-ground-border bg-ground-bg px-5 py-3 transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:-mx-8 sm:px-8 lg:-mx-14 lg:px-14">
+      {sheet ? (
+        <MenuSheet
+          locale={locale}
+          mode={sheet}
+          current={entry}
+          actorEmail={actorEmail}
+          onClose={close}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+/* ───────────────────────── Rail ───────────────────────── */
+
+function Rail({
+  locale,
+  current,
+  currentGroup,
+}: {
+  locale: Locale;
+  current: AdminNavEntry | null;
+  currentGroup: string | null;
+}) {
+  const [folded, setFolded] = useState<ReadonlySet<string>>(() => {
+    const set = new Set(FOLDED_BY_DEFAULT);
+    if (currentGroup) set.delete(currentGroup);
+    return set;
+  });
+
+  // Arriving in a folded group (from the menu, the jump, a link in a page)
+  // opens it. Derived during render, not in an effect: React's documented
+  // pattern for adjusting state to a changed prop.
+  const [seenGroup, setSeenGroup] = useState(currentGroup);
+  if (seenGroup !== currentGroup) {
+    setSeenGroup(currentGroup);
+    if (currentGroup && folded.has(currentGroup)) {
+      const next = new Set(folded);
+      next.delete(currentGroup);
+      setFolded(next);
+    }
+  }
+
+  function toggle(key: string) {
+    const next = new Set(folded);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    setFolded(next);
+  }
+
+  return (
+    <nav aria-label="Desk sections" className="flex flex-col gap-0.5">
+      {ADMIN_NAV.map((group) => {
+        const isFolded = group.label !== null && folded.has(group.key);
+        const listId = `rail-${group.key}`;
+
+        return (
+          <div key={group.key} className={group.label ? "mt-4" : group.key === "system" ? "mt-4" : ""}>
+            {group.label ? (
+              <button
+                type="button"
+                onClick={() => toggle(group.key)}
+                aria-expanded={!isFolded}
+                aria-controls={listId}
+                className="flex h-8 w-full cursor-pointer items-center px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ground-muted transition-colors duration-300 hover:text-ground"
+              >
+                {group.label}
+                <ChevronDown
+                  size={13}
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                  className={`ms-auto transition-transform duration-300 ease-luxury-bezier ${isFolded ? "-rotate-90 rtl:rotate-90" : ""}`}
+                />
+              </button>
+            ) : null}
+
+            <div id={listId} hidden={isFolded} className="flex flex-col gap-0.5">
+              {group.entries.map((item) => {
+                const on = item === current;
+                const Icon = item.icon;
+                return (
+                  <AdminLink
+                    key={item.key}
+                    href={localizePath(locale, item.href)}
+                    aria-current={on ? "page" : undefined}
+                    className={[
+                      "flex h-10 items-center gap-3 rounded-lg px-3 text-[14px] no-underline",
+                      "transition-[background-color,color,box-shadow] duration-300 ease-luxury-bezier",
+                      on
+                        ? "bg-ground-bg font-medium text-ground-accent shadow-[inset_2px_0_0_var(--ground-accent)] rtl:shadow-[inset_-2px_0_0_var(--ground-accent)]"
+                        : "text-ground hover:bg-ground-bg/60",
+                    ].join(" ")}
+                  >
+                    <Icon size={17} strokeWidth={1.25} aria-hidden="true" className="shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </AdminLink>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
+
+/* ─────────────────────── Phone tab bar ─────────────────────── */
+
+function TabBar({
+  locale,
+  entry,
+  group,
+  onMenu,
+  menuOpen,
+}: {
+  locale: Locale;
+  entry: AdminNavEntry | null;
+  group: string | null;
+  onMenu: () => void;
+  menuOpen: boolean;
+}) {
+  const today = entry?.key === "today";
+  const orders = entry?.key === "orders";
+  const catalogue = group === "catalogue";
+  const marketing = group === "marketing";
+  const elsewhere = !today && !orders && !catalogue && !marketing;
+
+  const tabs = [
+    { key: "today", label: "Today", href: "/admin", icon: House, on: today },
+    { key: "orders", label: "Orders", href: "/admin/orders", icon: Receipt, on: orders },
+    { key: "catalogue", label: "Catalogue", href: "/admin/products", icon: Package, on: catalogue },
+    { key: "marketing", label: "Marketing", href: "/admin/campaigns", icon: Megaphone, on: marketing },
+  ];
+
+  const itemClass = (on: boolean) =>
+    [
+      "relative flex h-[4.25rem] flex-col items-center justify-center gap-1 text-[11px] no-underline",
+      "transition-colors duration-300 ease-luxury-bezier",
+      on ? "text-ground-accent" : "text-ground-muted hover:text-ground",
+    ].join(" ");
+
+  const mark = (on: boolean) => (
+    <span
+      aria-hidden="true"
+      className={`absolute -top-px left-1/2 h-0.5 w-10 -translate-x-1/2 bg-ground-accent transition-transform duration-500 ease-luxury-bezier motion-reduce:transition-none ${on ? "scale-x-100" : "scale-x-0"}`}
+    />
+  );
+
+  return (
+    <nav
+      data-admin-tabbar=""
+      aria-label="Desk"
+      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-ground-border bg-ground-bg/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+    >
+      {tabs.map(({ key, label, href, icon: Icon, on }) => (
+        <AdminLink
+          key={key}
+          href={localizePath(locale, href)}
+          aria-current={on ? "page" : undefined}
+          className={itemClass(on)}
+        >
+          {mark(on)}
+          <Icon size={21} strokeWidth={1.25} aria-hidden="true" />
+          {label}
+        </AdminLink>
+      ))}
+      <button
+        type="button"
+        onClick={onMenu}
+        aria-expanded={menuOpen}
+        aria-current={elsewhere ? "page" : undefined}
+        className={`cursor-pointer ${itemClass(elsewhere)}`}
+      >
+        {mark(elsewhere)}
+        <MenuIcon size={21} strokeWidth={1.25} aria-hidden="true" />
+        Menu
+      </button>
+    </nav>
+  );
+}
+
+/* ─────────────────────── Menu / jump sheet ─────────────────────── */
+
+interface JumpResult {
+  key: string;
+  label: string;
+  detail: string;
+  href: string;
+}
+
+function search(query: string): JumpResult[] {
+  const q = query.trim().toLowerCase();
+  if (q.length === 0) return [];
+
+  const results: JumpResult[] = [];
+
+  // An order number goes straight to that order.
+  if (ORDER_NUMBER.test(query.trim())) {
+    const number = query.trim().toUpperCase();
+    results.push({
+      key: `order-${number}`,
+      label: `Open order ${number}`,
+      detail: "Orders",
+      href: `/admin/orders/${number}`,
+    });
+  }
+
+  for (const entry of ADMIN_ENTRIES) {
+    const haystack = `${entry.label} ${entry.description} ${entry.keywords ?? ""}`.toLowerCase();
+    if (haystack.includes(q)) {
+      results.push({ key: entry.key, label: entry.label, detail: entry.description, href: entry.href });
+    }
+    for (const tab of entry.tabs ?? []) {
+      if (tab.href !== entry.href && tab.label.toLowerCase().includes(q)) {
+        results.push({
+          key: `${entry.key}-${tab.href}`,
+          label: tab.label,
+          detail: entry.label,
+          href: tab.href,
+        });
+      }
+    }
+  }
+
+  return results;
+}
+
+function MenuSheet({
+  locale,
+  mode,
+  current,
+  actorEmail,
+  onClose,
+}: {
+  locale: Locale;
+  mode: "menu" | "find";
+  current: AdminNavEntry | null;
+  actorEmail: string;
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const { requestNavigation } = useUnsavedChanges();
+  const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const results = useMemo(() => search(query), [query]);
+
+  useEffect(() => {
+    // Typing is the point of "find"; on a phone menu the keyboard would cover
+    // the list the visitor opened it to read.
+    if (mode === "find") inputRef.current?.focus();
+
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = overflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [mode, onClose]);
+
+  function go(to: string) {
+    const target = localizePath(locale, to);
+    onClose();
+    const held = requestNavigation(() => router.push(target));
+    if (!held) router.push(target);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex lg:items-start lg:justify-center lg:pt-[10vh]">
+      <button
+        type="button"
+        aria-label="Close"
+        onClick={onClose}
+        className="absolute inset-0 hidden cursor-default bg-ink/40 lg:block"
+      />
+
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={mode === "find" ? "Find" : "Menu"}
+        className="ground-ivory relative flex h-full w-full flex-col overflow-hidden bg-ground-bg lg:h-auto lg:max-h-[75vh] lg:max-w-xl lg:rounded-xl lg:border lg:border-ground-border lg:shadow-luxury"
+      >
+        <div className="flex h-14 shrink-0 items-center gap-3 border-b border-ground-border px-4">
+          <h2 className="font-heading text-[20px] font-normal text-ground">
+            {mode === "find" ? "Find" : "Menu"}
+          </h2>
           <button
             type="button"
-            onClick={toggle}
-            aria-expanded={shown}
-            aria-controls={RAIL_ID}
-            className="inline-flex items-center gap-3 border border-ground-border px-3 py-2 text-ground-muted transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent"
+            onClick={onClose}
+            aria-label="Close"
+            className="ms-auto grid size-11 cursor-pointer place-items-center rounded-lg border border-ground-border text-ground transition-colors duration-300 hover:border-gold/40"
           >
-            {shown ? (
-              <PanelLeftClose size={15} strokeWidth={1.25} />
-            ) : (
-              <PanelLeft size={15} strokeWidth={1.25} />
-            )}
-            <span className="sr-only">
-              {shown ? "Hide navigation" : "Show navigation"}
-            </span>
+            <X size={16} strokeWidth={1.5} aria-hidden="true" />
           </button>
+        </div>
 
-          <p className="font-heading text-[10px] uppercase tracking-[0.25em] text-ground-muted">
-            Boutique Desk
-          </p>
-
-          {/* Pushed to the trailing edge, opposite the rail toggle. */}
-          <div className="ms-auto">
-            <NotificationBell
-              notifications={notifications}
-              lowStock={lowStock}
-              locale={locale}
+        <div className="shrink-0 px-4 pt-3">
+          <label htmlFor="desk-jump" className="sr-only">
+            Jump to a section or an order
+          </label>
+          <div className="flex h-11 items-center gap-2 rounded-lg border border-gold/50 bg-ivory px-3 focus-within:border-gold">
+            <Search size={15} strokeWidth={1.5} aria-hidden="true" className="shrink-0 text-ground-muted" />
+            <input
+              ref={inputRef}
+              id="desk-jump"
+              type="search"
+              autoComplete="off"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && results[0]) {
+                  event.preventDefault();
+                  go(results[0].href);
+                }
+              }}
+              placeholder="A section, or an order number"
+              className="min-w-0 flex-1 bg-transparent text-[14px] text-ground outline-none placeholder:text-ground-subtle [&::-webkit-search-cancel-button]:hidden"
             />
           </div>
         </div>
 
-        <div className="pt-2">{children}</div>
-      </main>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8 pt-4">
+          {query.trim().length > 0 ? (
+            results.length > 0 ? (
+              <ul className="overflow-hidden rounded-xl border border-ground-border bg-stone">
+                {results.map((result, index) => (
+                  <li key={result.key} className="border-b border-ground-border last:border-b-0">
+                    <AdminLink
+                      href={localizePath(locale, result.href)}
+                      onClick={onClose}
+                      className={`flex min-h-14 flex-col justify-center px-3 py-2 no-underline hover:bg-ground-bg/60 ${index === 0 ? "bg-ground-bg/60" : ""}`}
+                    >
+                      <span className="text-[14px] text-ground">{result.label}</span>
+                      <span className="text-[12px] text-ground-muted">{result.detail}</span>
+                    </AdminLink>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="rounded-xl border border-dashed border-ground-border px-4 py-6 text-center text-[13px] text-ground-muted">
+                Nothing by that name. Try “orders”, “codes” or an order number.
+              </p>
+            )
+          ) : (
+            <nav aria-label="All desk sections" className="flex flex-col gap-4">
+              {ADMIN_NAV.map((group) => (
+                <section key={group.key}>
+                  {group.label ? (
+                    <h3 className="mb-1.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-ground-accent">
+                      {group.label}
+                    </h3>
+                  ) : null}
+                  <ul className="overflow-hidden rounded-xl border border-ground-border bg-stone">
+                    {group.entries.map((item) => {
+                      const on = item === current;
+                      return (
+                        <li key={item.key} className="border-b border-ground-border last:border-b-0">
+                          <AdminLink
+                            href={localizePath(locale, item.href)}
+                            onClick={onClose}
+                            aria-current={on ? "page" : undefined}
+                            className={`flex min-h-14 flex-col justify-center px-3 py-2 no-underline ${on ? "bg-ground-bg shadow-[inset_2px_0_0_var(--ground-accent)]" : "hover:bg-ground-bg/60"}`}
+                          >
+                            <span className={`text-[14px] ${on ? "font-medium text-ground-accent" : "text-ground"}`}>
+                              {item.label}
+                            </span>
+                            <span className="text-[12px] text-ground-muted">{item.description}</span>
+                          </AdminLink>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              ))}
+
+              <div className="mt-2 space-y-3 border-t border-ground-border px-1 pt-4 text-[12px] text-ground-muted">
+                <p>
+                  Signed in as <span className="break-all text-ground">{actorEmail}</span>
+                </p>
+                <p className="flex flex-wrap gap-x-5 gap-y-2">
+                  <a href={localizePath(locale, "/")} className="no-underline text-ground-accent">
+                    View the shop
+                  </a>
+                  <a href={UMAMI_DASHBOARD_URL} target="_blank" rel="noopener noreferrer" className="no-underline text-ground-accent">
+                    Visitors (Umami) ↗
+                  </a>
+                </p>
+              </div>
+            </nav>
+          )}
+        </div>
+      </div>
     </div>
-    <AdminToaster />
-    </UnsavedChangesProvider>
-    </AdminToastProvider>
   );
 }

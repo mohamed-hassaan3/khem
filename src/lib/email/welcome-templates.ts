@@ -183,6 +183,7 @@ export function accountWelcomeEmail({
     "",
     "—",
     "KHEM Perfumes · Essence of Heritage",
+    "Cairo, Egypt",
     SITE_URL,
   ].join("\n");
 
@@ -258,6 +259,7 @@ export function invitationEmail({
     "",
     "—",
     "KHEM Perfumes · Essence of Heritage",
+    "Cairo, Egypt",
     SITE_URL,
   ].join("\n");
 

@@ -138,7 +138,9 @@ export const SIGNATURE_COPY: Record<Locale, SignatureCopy> = {
     tagline: "Essence of Heritage",
     officialHouse: "Official House",
     logoAlt: "KHEM — Essence of Heritage",
-    rights: "New Cairo City, Cairo Governorate, Egypt",
+    // City only, by the house's choice (2026-11-23): identifies the sender
+    // without publishing an address.
+    rights: "Cairo, Egypt",
     junkNotice: `If this email reached your Junk or Spam folder, please mark it as “Not junk” and add ${HOUSE_EMAIL} to your contacts, so your order updates always reach your inbox.`,
   },
   ar: {
@@ -146,7 +148,7 @@ export const SIGNATURE_COPY: Record<Locale, SignatureCopy> = {
     tagline: "عبق التراث",
     officialHouse: "الموقع الرسمي",
     logoAlt: "كيم — عبق التراث",
-    rights: "القاهرة الجديدة، محافظة القاهرة، مصر",
+    rights: "القاهرة، مصر",
     junkNotice: `إذا وصلتك هذه الرسالة في مجلد الرسائل غير المرغوب فيها، يُرجى تحديدها كـ «ليست رسالة غير مرغوب فيها» وإضافة ${HOUSE_EMAIL} إلى جهات الاتصال حتى تصلك تحديثات طلبك دائمًا.`,
   },
 };

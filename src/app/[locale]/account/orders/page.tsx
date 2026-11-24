@@ -154,7 +154,9 @@ export default async function OrdersPage({
                   aria-current={isActive ? "page" : undefined}
                   scroll={false}
                   className={[
-                    "flex h-10 items-center justify-center gap-1.5 rounded-md px-2 text-[11px] uppercase tracking-[0.1em] no-underline",
+                    // One line per segment at 360px: "In progress · 1" wrapped
+                    // to two at 0.1em tracking and 11px.
+                    "flex h-10 items-center justify-center gap-1 whitespace-nowrap rounded-md px-1.5 text-[10px] uppercase tracking-[0.06em] no-underline sm:gap-1.5 sm:px-2 sm:text-[11px] sm:tracking-[0.1em]",
                     "transition-[background-color,color,box-shadow] duration-300 ease-luxury-bezier rtl:text-[12px] rtl:normal-case rtl:tracking-normal",
                     isActive
                       ? "bg-ground-bg text-ground shadow-[0_1px_2px_rgba(36,35,33,0.08)]"

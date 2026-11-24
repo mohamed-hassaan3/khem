@@ -36,12 +36,12 @@ export default function SalesFigure({
           : "text-ground";
 
   return (
-    <div className="border border-ground-border p-6">
+    <div className="min-w-0 border border-ground-border p-3 sm:p-6">
       <p className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
         {label}
       </p>
       <p
-        className={`mt-3 font-heading text-xl tracking-[0.08em] sm:text-2xl ${valueTone}`}
+        className={`mt-2 truncate font-heading text-[18px] tracking-[0.04em] sm:mt-3 sm:text-2xl ${valueTone}`}
       >
         {value}
       </p>

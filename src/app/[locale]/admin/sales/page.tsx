@@ -170,7 +170,7 @@ export default async function AdminSalesPage({
               The book · {windowLabel}
             </h2>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
               <SalesFigure
                 label="Orders"
                 value={String(summary.orderCount)}
@@ -204,7 +204,7 @@ export default async function AdminSalesPage({
               Revenue is not profit
             </h2>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
               <SalesFigure
                 label="Actual revenue"
                 value={egpCompact(summary.revenueInCents)}

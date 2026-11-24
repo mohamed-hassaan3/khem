@@ -34,8 +34,13 @@ const LANGUAGES = [
   { value: "ar", label: "العربية" },
 ] as const;
 
-export default function InviteCustomerForm() {
-  const [email, setEmail] = useState("");
+export default function InviteCustomerForm({
+  initialEmail = "",
+}: {
+  /** Pre-filled from a walk-in customer's "Invite" link. */
+  initialEmail?: string;
+} = {}) {
+  const [email, setEmail] = useState(initialEmail);
   const [locale, setLocale] = useState<string>("en");
   const { toast } = useAdminToast();
 
@@ -62,7 +67,7 @@ export default function InviteCustomerForm() {
         event.preventDefault();
         submit();
       }}
-      className="mb-8 max-w-xl space-y-4 border border-ground-border bg-stone/60 px-5 py-5 md:px-6 md:py-6"
+      className="mb-8 max-w-xl space-y-4 rounded-lg border border-ground-border bg-stone/60 px-4 py-5 md:px-6 md:py-6"
     >
       <div>
         <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground-accent">

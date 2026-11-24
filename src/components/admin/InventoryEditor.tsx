@@ -81,7 +81,7 @@ function ChannelField({
     <div className="min-w-48 space-y-2">
       <div className="flex items-center gap-2">
         <label
-          className="w-14 shrink-0 font-heading text-[9px] uppercase tracking-[0.15em] text-ground-subtle"
+          className="w-16 shrink-0 text-[12px] text-ground-muted"
           htmlFor={`add-stock-${channel}-${slug}`}
         >
           {dictionary.addStock}
@@ -111,7 +111,7 @@ function ChannelField({
           type="button"
           onClick={add}
           disabled={isPending}
-          className="rounded-none border border-ground-border px-2 py-2 font-heading text-[9px] uppercase tracking-[0.12em] text-ground-muted transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent disabled:opacity-40"
+          className="h-10 rounded-lg border border-ground-border px-3 text-[12px] text-ground transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent disabled:opacity-40"
         >
           {label}
         </button>
@@ -124,13 +124,13 @@ function ChannelField({
           setCorrection(String(inventory));
           setCorrecting((value) => !value);
         }}
-        className="ms-16 font-heading text-[9px] uppercase tracking-[0.15em] text-ground-subtle transition-colors duration-300 hover:text-ground-accent"
+        className="ms-18 min-h-9 text-[12px] text-ground-accent transition-colors duration-300 hover:text-ground"
       >
         {dictionary.correctStock}
       </button>
 
       {correcting ? (
-        <div className="flex items-center gap-2 ps-16">
+        <div className="flex items-center gap-2 ps-18">
           <input
             type="number"
             min={0}
@@ -148,7 +148,7 @@ function ChannelField({
             type="button"
             onClick={correct}
             disabled={isPending}
-            className="rounded-none border border-ground-border px-2 py-2 font-heading text-[9px] uppercase tracking-[0.12em] text-ground-muted transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent disabled:opacity-40"
+            className="h-10 rounded-lg border border-ground-border px-3 text-[12px] text-ground transition-colors duration-300 hover:border-gold/40 hover:text-ground-accent disabled:opacity-40"
           >
             {dictionary.saveCorrection}
           </button>
@@ -156,7 +156,7 @@ function ChannelField({
       ) : null}
 
       {error ? (
-        <p id={`stock-error-${channel}-${slug}`} className="ps-16 text-[10px] text-danger" role="alert">
+        <p id={`stock-error-${channel}-${slug}`} className="ps-18 text-[10px] text-danger" role="alert">
           {error}
         </p>
       ) : null}

@@ -173,6 +173,10 @@ export default function CookieConsent() {
           }`}
           role="region"
           aria-label={copy.regionLabel}
+          // `globals.css` lifts the banner above the account's phone tab bar
+          // through this hook, so the account sections stay reachable while
+          // the visitor decides.
+          data-cookie-consent=""
         >
           <motion.article
             ref={cardRef}

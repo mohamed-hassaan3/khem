@@ -58,7 +58,7 @@ import { randomUUID } from "node:crypto";
 import { campaignEmail } from "@/src/lib/email/campaign-template";
 import { getEmailClient } from "@/src/lib/email/client";
 import { houseFromAddress, inboxAddress } from "@/src/lib/email/addresses";
-import { unsubscribeUrlFor } from "@/src/lib/email/send-campaign-mail";
+import { unsubscribeHeaders, unsubscribeUrlFor } from "@/src/lib/email/send-campaign-mail";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
 import { CAMPAIGN_COLUMNS, toCampaign } from "@/src/schemas/db/campaigns";
@@ -340,6 +340,7 @@ async function sendClaimed(
         subject: payload.subject,
         html: payload.html,
         text: payload.text,
+        headers: unsubscribeHeaders(recipient.token),
       };
     });
 
@@ -410,6 +411,7 @@ async function sendBatch(
     subject: string;
     html: string;
     text: string;
+    headers: Record<string, string>;
   }[],
   key: string,
 ): Promise<{ errors: Map<number, string>; aborted: boolean }> {

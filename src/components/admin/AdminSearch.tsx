@@ -20,7 +20,7 @@
 
 import { Search, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 /** Long enough to finish a word, short enough not to feel laggy. */
 const DEBOUNCE_MS = 250;
@@ -59,6 +59,7 @@ export default function AdminSearch({
    * reads a mutable ref will re-run when it changes.
    */
   const [pushedTerm, setPushedTerm] = useState(urlTerm);
+  const [isPending, startTransition] = useTransition();
 
   /*
    * Follow the URL when it changes from outside this input — the back button,
@@ -100,13 +101,32 @@ export default function AdminSearch({
       setPushedTerm(term);
 
       const query = next.toString();
-      router.replace(query.length > 0 ? `${pathname}?${query}` : pathname, {
-        scroll: false,
+      // A transition: React keeps the current list on screen until the new
+      // one is ready, and `isPending` says so, instead of the page blanking.
+      startTransition(() => {
+        router.replace(query.length > 0 ? `${pathname}?${query}` : pathname, {
+          scroll: false,
+        });
       });
     }, DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
   }, [term, urlTerm, pathname, router, searchParams]);
+
+  /*
+   * While a search is in flight — debouncing or fetching — the results under
+   * the field are dimmed (`#admin-panel[data-pending]` in `globals.css`), so
+   * the old list never passes for the answer to the new term. The panel is
+   * the shell's, not this component's, hence the attribute rather than a prop.
+   */
+  const searching = isPending || term !== urlTerm;
+  useEffect(() => {
+    const panel = document.getElementById("admin-panel");
+    if (!panel) return;
+    if (searching) panel.setAttribute("data-pending", "");
+    else panel.removeAttribute("data-pending");
+    return () => panel.removeAttribute("data-pending");
+  }, [searching]);
 
   return (
     <form
@@ -139,8 +159,15 @@ export default function AdminSearch({
          * appearance overrides parts of the box model on `type="search"`, which
          * is how the padding ended up ignored on Safari in the first place.
          */
-        className="w-full appearance-none overflow-hidden text-ellipsis border border-ground-border bg-ivory/3 py-3 pe-10 ps-11 text-[13px] tracking-wide text-ground transition-colors duration-300 placeholder:text-ground-subtle focus:border-gold/40 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+        className="h-11 w-full appearance-none overflow-hidden text-ellipsis rounded-lg border border-ground-border bg-ivory py-3 pe-24 ps-11 text-[14px] text-ground transition-colors duration-300 placeholder:text-ground-subtle focus:border-gold/60 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
       />
+
+      <span
+        role="status"
+        className={`pointer-events-none absolute end-10 top-1/2 -translate-y-1/2 text-[11px] text-ground-accent transition-opacity duration-300 ${searching ? "opacity-100" : "opacity-0"}`}
+      >
+        {searching ? "Searching…" : ""}
+      </span>
 
       {term.length > 0 ? (
         <button

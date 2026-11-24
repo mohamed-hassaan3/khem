@@ -254,7 +254,7 @@ export default async function AdminFinancePage({
           {windowLabel}
         </h2>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-3">
           <SalesFigure
             label="Revenue"
             value={egp(summary.revenueInCents)}
@@ -341,7 +341,7 @@ export default async function AdminFinancePage({
             {monthName} · against target
           </h2>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-3">
             {revenueProgress ? (
               <TargetMeter label="Revenue target" progress={revenueProgress} />
             ) : null}

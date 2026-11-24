@@ -1,3 +1,4 @@
+import AdminSearch from "@/src/components/admin/AdminSearch";
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
 import PointsAdjuster from "@/src/components/admin/PointsAdjuster";
 import RewardSettingsForm from "@/src/components/admin/RewardSettingsForm";
@@ -93,7 +94,7 @@ export default async function AdminRewardsPage({
           storefront's dark ground — which produced a black slab in the middle of
           an ivory page and swallowed the labels on it.
         */}
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
           <Figure label="Holders" value={totals.holders.toLocaleString("en-US")} />
           <Figure
             label="Outstanding"
@@ -124,22 +125,7 @@ export default async function AdminRewardsPage({
           </p>
         </div>
 
-        <form method="get" className="flex max-w-md gap-3">
-          <input
-            type="search"
-            name="q"
-            defaultValue={search}
-            placeholder="Name or email"
-            aria-label="Search customers"
-            className="field"
-          />
-          <button
-            type="submit"
-            className="cursor-pointer border border-ground-border px-5 font-heading text-[11px] uppercase tracking-[0.16em] text-ground-muted transition-colors duration-300 hover:border-ground-accent/40 hover:text-ground-accent"
-          >
-            Search
-          </button>
-        </form>
+        <AdminSearch placeholder="Name or email" label="Search customers by name or email" />
 
         {customers.customers.length === 0 ? (
           <p className="border border-ground-border px-5 py-6 text-[12px] text-ground-muted">
@@ -236,11 +222,11 @@ function Figure({
   note?: string;
 }) {
   return (
-    <div className="border border-ground-border bg-ivory/2 p-6 sm:p-8">
+    <div className="min-w-0 border border-ground-border bg-ivory/2 p-3 sm:p-6 lg:p-8">
       <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
         {label}
       </p>
-      <p className="mt-4 font-heading text-3xl tabular-nums tracking-[0.1em] text-ground-accent sm:text-4xl">
+      <p className="mt-2 truncate font-heading text-[22px] tabular-nums tracking-[0.04em] text-ground-accent sm:mt-4 sm:text-4xl">
         {value}
       </p>
       {note ? <p className="mt-3 text-[11px] text-ground-muted">{note}</p> : null}

@@ -6,6 +6,7 @@ import "../globals.css";
 
 import Footer from "@/src/components/Footer";
 import Nav from "@/src/components/Nav";
+import StorefrontOnly from "@/src/components/StorefrontOnly";
 import CinematicIntro from "@/src/components/intro/CinematicIntro";
 import CartDrawer from "@/src/components/ecommerce/CartDrawer";
 import AnnouncementBar from "@/src/components/marketing/AnnouncementBar";
@@ -504,6 +505,12 @@ export default async function RootLayout({
                      * the page. See `providers/nav-ground-provider.tsx`.
                      */}
                     <NavGroundProvider>
+                    {/*
+                     * Storefront chrome only: the admin desk has its own shell
+                     * and none of the shop's header, footer, drawer or pop-ups
+                     * (`StorefrontOnly`, prompts/admin-redesign-stage-6.md).
+                     */}
+                    <StorefrontOnly>
                     {showAnnouncements ? (
                       <AnnouncementBar
                         announcements={announcements}
@@ -523,6 +530,7 @@ export default async function RootLayout({
                        */
                       semanticSearch={hasEmbeddingCredentials()}
                     />
+                    </StorefrontOnly>
                     {/*
                      * The offset for the whole fixed header stack — the
                      * announcement bar *and* the nav bar, not just the bar
@@ -540,6 +548,7 @@ export default async function RootLayout({
                      * announcement bar is rendered. See `globals.css`.
                      */}
                     <div className="pt-[var(--header-h)]">{children}</div>
+                    <StorefrontOnly>
                     <Footer locale={locale} prelaunch={prelaunch} />
                     {/*
                      * Mounted once here rather than inside `<Nav>`: it is a
@@ -560,6 +569,7 @@ export default async function RootLayout({
                           : null
                       }
                     />
+                    </StorefrontOnly>
                     </NavGroundProvider>
                   </CartDrawerProvider>
                 </CartProvider>

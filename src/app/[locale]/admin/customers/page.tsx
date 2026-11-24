@@ -1,10 +1,13 @@
-import Link from "next/link";
+import { Download, UserPlus } from "lucide-react";
+
+import AdminLink from "@/src/components/admin/AdminLink";
+import FilterChips from "@/src/components/admin/FilterChips";
 
 import AdminSearch from "@/src/components/admin/AdminSearch";
-import InviteCustomerForm from "@/src/components/admin/InviteCustomerForm";
 import {
   AdminCell,
   AdminEmpty,
+  AdminLinkButton,
   AdminPageHeader,
   AdminRow,
   AdminTable,
@@ -15,6 +18,7 @@ import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import {
   CUSTOMERS_PER_PAGE,
   listAdminCustomers,
+  listAllAdminCustomers,
 } from "@/src/services/admin/customers";
 import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
 
@@ -44,6 +48,9 @@ import { SHOP_TIME_ZONE } from "@/src/lib/shop-time";
  */
 
 export const dynamic = "force-dynamic";
+
+/** How many rows an account-filtered view reads before paging them itself. */
+const FILTER_WINDOW = 2000;
 
 function readParam(value: string | string[] | undefined): string {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -97,87 +104,130 @@ export default async function AdminCustomersPage({
 
   const term = searchTerm(query);
   const page = readPage(query.page);
+  const accountParam = readParam(query.account);
+  const account = accountParam === "registered" || accountParam === "walkin" ? accountParam : null;
 
-  const { customers, total } = await listAdminCustomers({
-    search: term,
-    offset: (page - 1) * CUSTOMERS_PER_PAGE,
-    limit: CUSTOMERS_PER_PAGE,
-  });
+  /*
+   * `customer_summary` pages and searches but cannot filter by account, and
+   * changing it is a migration. With an account filter the page reads up to
+   * FILTER_WINDOW rows and pages them here instead — exact while the house has
+   * fewer customers than that, which it does by a wide margin.
+   */
+  const source = account
+    ? { customers: await listAllAdminCustomers(term, FILTER_WINDOW), total: 0 }
+    : await listAdminCustomers({
+        search: term,
+        offset: (page - 1) * CUSTOMERS_PER_PAGE,
+        limit: CUSTOMERS_PER_PAGE,
+      });
+  const matching = account
+    ? source.customers.filter((customer) =>
+        account === "registered" ? customer.hasAccount : !customer.hasAccount,
+      )
+    : source.customers;
+  const customers = account
+    ? matching.slice((page - 1) * CUSTOMERS_PER_PAGE, page * CUSTOMERS_PER_PAGE)
+    : matching;
+  const total = account ? matching.length : source.total;
 
   const basePath = localizePath(activeLocale, "/admin/customers");
+  const invitePath = localizePath(activeLocale, "/admin/customers/invitations");
   const lastPage = Math.max(1, Math.ceil(total / CUSTOMERS_PER_PAGE));
-  const withAccounts = customers.filter((customer) => customer.hasAccount).length;
 
   return (
     <>
       <AdminPageHeader
         title="Customers"
-        description="Everybody who has bought something, whether they registered or were served at the counter. Spend excludes cancelled and refunded orders — it is what the house actually kept."
+        description="Everyone with an account, and everyone who bought in store or as a guest. Spend leaves out cancelled and refunded orders."
+        action={
+          <div className="flex flex-wrap gap-2">
+            {/* A plain link: the CSV is a download, not a page. */}
+            <a
+              href={`${basePath}/export`}
+              className="inline-flex h-11 items-center gap-2 rounded-lg border border-ground-border px-4 text-[13px] text-ground no-underline transition-colors duration-300 hover:border-gold/40"
+            >
+              <Download size={14} strokeWidth={1.5} aria-hidden="true" />
+              Download CSV
+            </a>
+            <AdminLinkButton href={invitePath}>
+              <UserPlus size={14} strokeWidth={1.5} />
+              Invite someone
+            </AdminLinkButton>
+          </div>
+        }
       />
 
-      {/*
-        * Above the directory rather than below it: inviting somebody is the one
-        * thing on this screen that adds a customer, and it belongs beside the
-        * list it will eventually appear in.
-        */}
-      <InviteCustomerForm />
+      <AdminSearch placeholder="Name, email or phone" label="Search customers by name, email or phone" />
 
-      <AdminSearch placeholder="Search by name, email or phone" />
+      <FilterChips
+        basePath={basePath}
+        param="account"
+        active={account ?? ""}
+        query={query}
+        chips={[
+          { value: "", label: "Everyone" },
+          { value: "registered", label: "Registered" },
+          { value: "walkin", label: "Walk-in" },
+        ]}
+      />
 
       {customers.length === 0 ? (
         <AdminEmpty
           message={
-            term.length > 0
-              ? `Nobody matches “${term}”.`
-              : "No customers yet. Record an order and the person who placed it appears here."
+            term.length > 0 || account
+              ? "Nobody matches."
+              : "No customers yet. Record an order or invite someone and they appear here."
           }
         />
       ) : (
         <>
-          <p className="mb-5 text-[11px] tracking-wide text-ground-muted">
-            {total} customer{total === 1 ? "" : "s"}
-            {term.length > 0 ? " matching" : ""} · {withAccounts} on this page
-            {withAccounts === 1 ? " has" : " have"} an account
+          <p className="mb-2.5 text-[12px] text-ground-muted">
+            {total} {total === 1 ? "customer" : "customers"}
+            {term.length > 0 || account ? " matching" : ""}
           </p>
 
           <AdminTable
             headers={[
               "Customer",
-              "Contact",
+              "Email",
               "Account",
               "Orders",
               "Lifetime spend",
               "Joined",
-              { label: "Open", hidden: true },
+              { label: "Actions", hidden: true },
             ]}
           >
             {customers.map((customer) => (
               <AdminRow key={customer.id}>
                 <AdminCell>
-                  <span className="block tracking-wide">
-                    {customer.name ?? "Unnamed"}
+                  <span className="block">
+                    <bdi>{customer.name ?? "Unnamed"}</bdi>
                   </span>
+                  {customer.phone ? (
+                    <span dir="ltr" className="mt-0.5 block text-[12px] text-ground-muted">
+                      {customer.phone}
+                    </span>
+                  ) : null}
                   {customer.marketingOptIn ? (
-                    <span className="mt-1 block text-[10px] uppercase tracking-[0.2em] text-ground-accent">
+                    <span className="mt-1 inline-flex h-5 items-center rounded-full border border-gold/40 px-2 text-[10px] text-ground-accent">
                       Subscribed
                     </span>
                   ) : null}
                 </AdminCell>
 
-                <AdminCell muted>
-                  <span className="block">{customer.email ?? "—"}</span>
-                  {customer.phone ? (
-                    <span className="mt-1 block text-[11px] text-ground-subtle">
-                      {customer.phone}
-                    </span>
-                  ) : null}
+                <AdminCell>
+                  {customer.email ? (
+                    <span dir="ltr" className="break-all">{customer.email}</span>
+                  ) : (
+                    <span className="text-ground-muted">No email</span>
+                  )}
                 </AdminCell>
 
                 <AdminCell>
                   <span
-                    className={`inline-block border px-3 py-1 font-heading text-[9px] uppercase tracking-[0.2em] ${
+                    className={`inline-flex h-6 items-center rounded-full border px-2.5 text-[11px] ${
                       customer.hasAccount
-                        ? "border-gold/40 text-ground-accent"
+                        ? "border-gold/50 text-ground-accent"
                         : "border-ground-border text-ground-muted"
                     }`}
                   >
@@ -190,44 +240,49 @@ export default async function AdminCustomersPage({
                 <AdminCell muted>{joinedOn(customer.joinedAt)}</AdminCell>
 
                 <AdminCell>
-                  <Link
-                    href={`${basePath}/${encodeURIComponent(customer.id)}`}
-                    className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
-                  >
-                    Open
-                  </Link>
+                  <span className="flex flex-wrap items-center gap-2">
+                    <AdminLink
+                      href={`${basePath}/${encodeURIComponent(customer.id)}`}
+                      className="inline-flex h-9 items-center rounded-lg border border-ground-border px-3 text-[12px] text-ground no-underline hover:border-gold/40"
+                    >
+                      Open
+                    </AdminLink>
+                    {!customer.hasAccount && customer.email ? (
+                      <AdminLink
+                        href={`${invitePath}?email=${encodeURIComponent(customer.email)}`}
+                        className="inline-flex h-9 items-center rounded-lg border border-ground-border px-3 text-[12px] text-ground-accent no-underline hover:border-gold/40"
+                      >
+                        Invite
+                      </AdminLink>
+                    ) : null}
+                  </span>
                 </AdminCell>
               </AdminRow>
             ))}
           </AdminTable>
 
           {lastPage > 1 ? (
-            <nav
-              aria-label="Pagination"
-              className="mt-8 flex items-center justify-between gap-4"
-            >
+            <nav aria-label="Pagination" className="mt-5 flex items-center justify-between gap-4">
               {page > 1 ? (
-                <Link
+                <AdminLink
                   href={pageHref(basePath, query, page - 1)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
+                  className="inline-flex h-10 items-center rounded-lg border border-ground-border px-4 text-[13px] text-ground no-underline hover:border-gold/40"
                 >
                   Previous
-                </Link>
+                </AdminLink>
               ) : (
                 <span />
               )}
-
-              <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+              <span className="text-[12px] text-ground-muted">
                 Page {page} of {lastPage}
               </span>
-
               {page < lastPage ? (
-                <Link
+                <AdminLink
                   href={pageHref(basePath, query, page + 1)}
-                  className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-accent transition-colors duration-300 hover:text-ground-accent"
+                  className="inline-flex h-10 items-center rounded-lg border border-ground-border px-4 text-[13px] text-ground no-underline hover:border-gold/40"
                 >
                   Next
-                </Link>
+                </AdminLink>
               ) : (
                 <span />
               )}

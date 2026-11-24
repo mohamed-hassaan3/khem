@@ -127,15 +127,20 @@ export default function OrderRail({
   const halted = stations.some((station) => station.state === "halted");
 
   if (variant === "vertical") {
-    // Newest first: the stop the parcel is at leads, history follows.
-    const reached = stations.filter((station) => station.state !== "ahead").reverse();
-    const ahead = stations.filter((station) => station.state === "ahead");
+    /*
+     * In journey order, top to bottom, like the horizontal rail: newest
+     * reached stop last, then what is still ahead. (It used to reverse only
+     * the reached stops and then append the ahead ones, which read
+     * "On its way → Being prepared → Delivered": backwards, then forwards.)
+     * The latest reached stop is the one in gold.
+     */
+    const headIndex = lastReached;
 
     return (
       <ol aria-label={dict.label} className="flex flex-col">
-        {[...reached, ...ahead].map((station, index, all) => {
+        {stations.map((station, index, all) => {
           const isLast = index === all.length - 1;
-          const isHead = index === 0 && station.state !== "ahead";
+          const isHead = index === headIndex && station.state !== "ahead";
 
           return (
             <li
@@ -149,7 +154,9 @@ export default function OrderRail({
                   <span
                     aria-hidden="true"
                     className={`my-1 w-px flex-1 ${
-                      station.state === "ahead" ? "bg-ground-border" : "bg-ground-accent/60"
+                      // Gold only where the parcel has travelled: up to the
+                      // next stop, if that stop has been reached.
+                      all[index + 1]?.state === "ahead" ? "bg-ground-border" : "bg-ground-accent/60"
                     }`}
                   />
                 )}

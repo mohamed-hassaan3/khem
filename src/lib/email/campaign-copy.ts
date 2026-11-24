@@ -38,9 +38,12 @@ export const CAMPAIGN_FRAME_COPY: Record<Locale, CampaignFrameCopy> = {
     eyebrow: "From the House",
     voucherLabel: "Your code",
     voucherHow: "Enter it at checkout, or choose it from your account.",
+    // True for both audiences a campaign can reach — the Inner Circle and
+    // customers who have bought — and the link says the plain word readers and
+    // mail filters look for.
     unsubscribe:
-      "You are receiving this because you asked the house to write to you.",
-    unsubscribeLink: "Leave the Inner Circle",
+      "You are receiving this as a member of the KHEM Inner Circle or as a KHEM customer. You can stop these letters at any time.",
+    unsubscribeLink: "Unsubscribe",
     marketingNote:
       "News and private offers. Letters about your orders are sent separately and are never affected by this choice.",
   },
@@ -48,8 +51,9 @@ export const CAMPAIGN_FRAME_COPY: Record<Locale, CampaignFrameCopy> = {
     eyebrow: "من الدار",
     voucherLabel: "رمزك",
     voucherHow: "أدخله عند إتمام الطلب، أو اختره من حسابك.",
-    unsubscribe: "تصلك هذه الرسالة لأنك طلبت من الدار أن تكتب إليك.",
-    unsubscribeLink: "مغادرة الدائرة الخاصة",
+    unsubscribe:
+      "تصلك هذه الرسالة لأنك عضو في الدائرة الخاصة لدى كيم أو من عملاء كيم. يمكنك إيقاف هذه الرسائل في أي وقت.",
+    unsubscribeLink: "إلغاء الاشتراك",
     marketingNote:
       "أخبار وعروض خاصة. أما رسائل طلباتك فتُرسل على حدة ولا يؤثر عليها هذا الاختيار.",
   },

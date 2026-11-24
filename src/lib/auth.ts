@@ -59,7 +59,10 @@ export async function getViewer(): Promise<Viewer | null> {
     fullName,
     primaryEmail,
     primaryEmailVerified,
-    imageUrl: user.imageUrl ?? null,
+    // Clerk fills `imageUrl` with a generated placeholder when no photo was
+    // uploaded. Only a real photo is passed on; otherwise the account shows
+    // the KHEM monogram, as the header's `AccountMenu` already does.
+    imageUrl: user.hasImage && user.imageUrl ? user.imageUrl : null,
     initial: initialFor(fullName, primaryEmail),
   };
 }
