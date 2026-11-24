@@ -1,6 +1,6 @@
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
 import ProductForm from "@/src/components/admin/ProductForm";
-import { isLocale } from "@/src/lib/i18n/config";
+import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
 import { listAdminCollections } from "@/src/services/admin/catalog";
 
@@ -21,6 +21,7 @@ export default async function NewProductPage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/products")}>Products</AdminBackLink>
       <AdminPageHeader
         title="New product"
         description={dictionary.adminProduct.newDescription}

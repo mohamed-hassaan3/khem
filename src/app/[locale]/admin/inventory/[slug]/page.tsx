@@ -6,8 +6,7 @@ import {
   AdminEmpty,
   AdminPageHeader,
   AdminRow,
-  AdminTable,
-} from "@/src/components/admin/AdminTable";
+  AdminTable, AdminBackLink } from "@/src/components/admin/AdminTable";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { listInventoryMovements } from "@/src/services/admin/analytics";
 import { getAdminProduct } from "@/src/services/admin/catalog";
@@ -48,6 +47,7 @@ export default async function InventoryHistoryPage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/inventory")}>Stock</AdminBackLink>
       <AdminPageHeader
         title={`${product.name} — stock history`}
         description={`Online ${product.inventoryOnline}, offline ${product.inventoryOffline}. Every movement below carries the figure before and after it, so the counters above can be read back from this list.`}

@@ -1,15 +1,17 @@
 import { notFound } from "next/navigation";
 
 import CampaignAudienceList from "@/src/components/admin/CampaignAudienceList";
+import CampaignSendLog from "@/src/components/admin/CampaignSendLog";
 import CampaignDispatch from "@/src/components/admin/CampaignDispatch";
 import CampaignForm from "@/src/components/admin/CampaignForm";
 import CampaignRecord from "@/src/components/admin/CampaignRecord";
 import CampaignPreview from "@/src/components/admin/CampaignPreview";
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
-import { isLocale } from "@/src/lib/i18n/config";
+import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
+import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import {
   getCampaign,
   listCampaignAudience,
+  listCampaignSends,
   subscriberCount,
 } from "@/src/services/admin/campaigns";
 import { isEditable } from "@/src/types/campaign";
@@ -51,9 +53,12 @@ export default async function CampaignPage({
   // Every address the saved audience reaches, for the desk to check and trim
   // before sending (0081). Only while the campaign can still change.
   const audienceMembers = editable ? await listCampaignAudience(campaign.id) : [];
+  // After sending: every address it claimed and what became of each letter.
+  const sends = editable ? [] : await listCampaignSends(campaign.id);
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/campaigns")}>Email campaigns</AdminBackLink>
       <AdminPageHeader
         title={campaign.name}
         /*
@@ -111,6 +116,8 @@ export default async function CampaignPage({
             ) : null}
 
             <CampaignRecord campaign={campaign} />
+
+            <CampaignSendLog name={campaign.name} rows={sends} />
           </>
         )}
 

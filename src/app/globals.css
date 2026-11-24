@@ -2053,6 +2053,31 @@ body:has([data-admin-desk]) {
   letter-spacing: 0.12em;
 }
 
+/*
+ * `AdminTable dense`: a report table. Tighter cells, and the first column held
+ * in place while the rest scrolls sideways on a phone.
+ */
+.admin-table-dense td {
+  padding: 0.5rem 0.75rem;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.admin-table-dense th:first-child,
+.admin-table-dense td:first-child {
+  min-width: 9rem;
+  max-width: 13rem;
+  white-space: normal;
+}
+@media (max-width: 767.98px) {
+  .admin-table-dense th:first-child,
+  .admin-table-dense td:first-child {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    background: var(--color-stone);
+  }
+}
+
 /* An admin search in flight: the list it will replace is dimmed, not hidden. */
 #admin-panel table,
 #admin-panel [data-admin-results] {

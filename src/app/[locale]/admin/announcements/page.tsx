@@ -103,7 +103,7 @@ export default async function AdminAnnouncementsPage({
   return (
     <>
       <AdminPageHeader
-        title="Announcements"
+        title="Announcement bar"
         description="The line above the header, and the offer popup. Both are house chrome — neither can change what anybody is charged."
         action={
           <AdminLinkButton href={`${basePath}/new`}>
@@ -152,7 +152,7 @@ export default async function AdminAnnouncementsPage({
                   ) : (
                     <span
                       title="The Arabic site will print the English line"
-                      className="mt-1 inline-block border border-warning/40 px-2 py-0.5 font-heading text-[9px] uppercase tracking-[0.2em] text-warning"
+                      className="mt-1 inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-full border border-warning/40 px-2.5 text-[11px] text-warning"
                     >
                       No Arabic
                     </span>

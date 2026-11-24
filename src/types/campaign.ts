@@ -109,3 +109,14 @@ export interface CampaignWithProgress extends Campaign {
 export function isEditable(status: CampaignStatus): boolean {
   return status === "DRAFT" || status === "SCHEDULED";
 }
+
+/** One address a campaign claimed, and what became of its letter. */
+export interface CampaignSendRow {
+  email: string;
+  /** Which list it came from; null for rows written before 0036. */
+  kind: CampaignRecipientKind | null;
+  /** When the mail provider accepted it. */
+  sentAt: string | null;
+  /** The provider's refusal, when there was one. */
+  error: string | null;
+}

@@ -1,4 +1,5 @@
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import { ChevronDown } from "lucide-react";
 import ContentBackLink from "@/src/components/admin/ContentBackLink";
 import ContentRowsEditor from "@/src/components/admin/ContentRowsEditor";
 import HeroForm from "@/src/components/admin/HeroForm";
@@ -85,13 +86,14 @@ export default async function AdminLandingContentPage({
       />
 
       <AdminPageHeader
-        title="Landing Page"
+        title="Home page"
         description="The home page, in the order it is read. Most bands are assembled from records kept elsewhere in the dashboard — the list below says which, so nothing is edited twice."
       />
 
-      <section className="space-y-5">
-        <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+      <details open className="group rounded-lg border border-ground-border bg-stone/60 [&+details]:mt-3">
+        <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
+          <div className="min-w-0 flex-1">
+          <h2 className="font-heading text-[17px] font-normal text-ground">
             Sections
           </h2>
           <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
@@ -103,14 +105,19 @@ export default async function AdminLandingContentPage({
             Copy marked code-owned — headings, standfirsts and page metadata —
             is not in the database yet and still needs a developer to change.
           </p>
-        </div>
+          </div>
+          <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" className="mt-1 shrink-0 text-ground-subtle transition-transform duration-300 group-open:rotate-180" />
+        </summary>
+        <div className="space-y-5 border-t border-ground-border px-4 py-5">
 
         <LandingSectionsEditor sections={sections} />
-      </section>
+        </div>
+      </details>
 
-      <section className="mt-12 space-y-5">
-        <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+      <details className="group rounded-lg border border-ground-border bg-stone/60 [&+details]:mt-3">
+        <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
+          <div className="min-w-0 flex-1">
+          <h2 className="font-heading text-[17px] font-normal text-ground">
             New Arrival
           </h2>
           <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
@@ -118,18 +125,23 @@ export default async function AdminLandingContentPage({
             what fills its backdrop, and optionally its own title, paragraph and
             button. Leave an override empty to use the product’s own.
           </p>
-        </div>
+          </div>
+          <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" className="mt-1 shrink-0 text-ground-subtle transition-transform duration-300 group-open:rotate-180" />
+        </summary>
+        <div className="space-y-5 border-t border-ground-border px-4 py-5">
 
         <NewArrivalForm
           settings={featured?.settings ?? {}}
           featuredProductSlug={settings?.featuredProductSlug ?? null}
           products={featurable}
         />
-      </section>
+        </div>
+      </details>
 
-      <section className="mt-12 space-y-5">
-        <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+      <details className="group rounded-lg border border-ground-border bg-stone/60 [&+details]:mt-3">
+        <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
+          <div className="min-w-0 flex-1">
+          <h2 className="font-heading text-[17px] font-normal text-ground">
             Hero
           </h2>
           <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
@@ -137,7 +149,10 @@ export default async function AdminLandingContentPage({
             with neither, the page opens on the typographic composition it has
             always used.
           </p>
-        </div>
+          </div>
+          <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" className="mt-1 shrink-0 text-ground-subtle transition-transform duration-300 group-open:rotate-180" />
+        </summary>
+        <div className="space-y-5 border-t border-ground-border px-4 py-5">
 
         {hero ? (
           <HeroForm hero={hero} />
@@ -147,18 +162,23 @@ export default async function AdminLandingContentPage({
             migrations (<code>npm run db:migrate</code>) and reload.
           </p>
         )}
-      </section>
+        </div>
+      </details>
 
-      <section className="mt-12 space-y-5">
-        <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+      <details className="group rounded-lg border border-ground-border bg-stone/60 [&+details]:mt-3">
+        <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
+          <div className="min-w-0 flex-1">
+          <h2 className="font-heading text-[17px] font-normal text-ground">
             Craft pillars
           </h2>
           <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
             The four-item summary on the home page. The ordinal has no Arabic
             field — &ldquo;01&rdquo; is written in Western digits in both trees.
           </p>
-        </div>
+          </div>
+          <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" className="mt-1 shrink-0 text-ground-subtle transition-transform duration-300 group-open:rotate-180" />
+        </summary>
+        <div className="space-y-5 border-t border-ground-border px-4 py-5">
 
         <ContentRowsEditor
           rows={pillars}
@@ -181,7 +201,8 @@ export default async function AdminLandingContentPage({
             },
           ]}
         />
-      </section>
+        </div>
+      </details>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
 import ArticleForm from "@/src/components/admin/ArticleForm";
 import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { getAdminArticle, listAdminArticles } from "@/src/services/admin/journal";
@@ -27,6 +27,7 @@ export default async function EditArticlePage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/journal")}>Journal</AdminBackLink>
       <AdminPageHeader
         title={article.title}
         description={article.isPublished ? undefined : "Draft — not visible to visitors."}

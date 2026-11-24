@@ -284,3 +284,58 @@ fit with no horizontal scroll.
   and the desk is told. Not exercised against a real order (live database).
 - **Campaign Customers audience**: user decided it stays as is (everyone who
   has bought, not only marketing opt-ins). No change.
+
+## Outcome — 6c: marketing & website (2026-11-24)
+
+- **Sent campaigns — "Who it went to"** (from the approved mock):
+  `listCampaignSends()` reads `campaign_sends` (email, list, sentAt, provider
+  error); `CampaignSendLog` lists every address with Delivered / Refused / Not
+  sent yet, search, filters, 50 at a time and a CSV built in the browser
+  (formula-injection safe). No schema change. Verified on a sent campaign.
+- **Campaigns list**: one tappable row per campaign — name, status pill
+  (Draft / Scheduled / Sending / Sent / Cancelled), subject, type, list, sent or
+  due. Was a tall label card each.
+- **Subscribers** (`/admin/newsletter`): one row per address (source,
+  language, joined/left, has an account) with a Subscribed/Left pill; the
+  three figures sit in one row on phones.
+- **Home page editor**: the four sections (band order, new arrival, hero,
+  craft pillars) fold into `<details>` panels; the first opens. Phone height
+  9,577px → 2,397px. Form state is kept while a panel is closed.
+- **Back links** (`AdminBackLink`) on the 13 detail/edit screens that had
+  none: campaigns, categories, scent families, collections, stock history,
+  journal, products, manual order. Duplicate "All scent profiles" link removed.
+- **Names match the menu**: page titles now read Discount codes, Sale prices
+  (was "Promotions"; renamed in the menu too so it is not confused with
+  "Sales & profit"), Welcome offers, Announcement bar, Home page, Menu &
+  footer, Story pages, Points, Revenue trend, Sales & profit, Site search,
+  Subscribers.
+- "No Arabic" badge on announcements no longer breaks mid-word.
+
+Seen, not changed: the campaign preview renders correctly (full-page
+screenshots do not capture iframes); the email is 600px wide, so on a phone
+the preview scrolls sideways inside its frame. Remaining forms (discount,
+offer, sale price, announcement, menu & footer, stockists, story pages)
+already fit phones and read at the 11px floor.
+
+Checks: tsc + ESLint clean; 390px: no horizontal scroll on the screens above.
+
+## Outcome — 6d: money & settings (2026-11-24)
+
+- **`AdminTable dense`** for reports: stays a compact table on phones,
+  scrolling sideways with the first column held (sticky on phones only), 12px
+  cells. Used by Sales & profit, Items sold, Site search (3 tables), Expenses
+  (2) and Stock history. Lists keep the phone cards.
+- **Settings**: house, delivery, contact channels and social profiles fold
+  into `<details>` panels (same pattern as the Home page editor).
+- **Targets**: each month is one compact block — month, "Target set / No
+  target" pill and the button on one line, the three figures beneath.
+- **Stock history**: 50 movements a page (Newer / Older), from the newest 200
+  the service reads.
+- Phone heights: Sales 6,393 → 2,750 · Items sold 8,878 → 1,954 · Site search
+  9,623 → 2,576 · Settings 7,419 → 1,388 · Targets 3,930 → 2,114 · Stock
+  history 13,838 → 3,455. No horizontal page scroll at 390 or 1440.
+
+Data, not UI (for the user): no product has a cost recorded, so every cost,
+profit and margin column reads "Cost unavailable" / "—", and gross and net
+profit charts are empty. Enter each product's cost (Products → edit) and
+profit reporting starts from the next sale.

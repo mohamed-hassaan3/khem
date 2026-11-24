@@ -65,7 +65,7 @@ export default async function AdminNavigationPage() {
   return (
     <>
       <AdminPageHeader
-        title="Navigation"
+        title="Menu & footer"
         description="What the header menu and the footer offer, in the order they print it. An entry pointing at a category is a heading over that shelf: every collection assigned to the category appears beneath it on its own, so a new collection needs nothing here. Add a row only to give one its own wording, its own place in the order, or a description. An entry points at a category, a collection, or a page KHEM ships — never at a typed address, so a menu link cannot lead nowhere."
       />
 

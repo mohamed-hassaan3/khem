@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
 import {
@@ -17,6 +17,7 @@ import {
   AdminStringList,
   AdminToggle,
 } from "@/src/components/admin/fields";
+import AdminLink from "@/src/components/admin/AdminLink";
 import LocalTimestamp from "@/src/components/admin/LocalTimestamp";
 import {
   dispatchCadencePhrase,
@@ -24,6 +25,7 @@ import {
   scheduleProximity,
   toDateTimeLocalValue,
 } from "@/src/lib/campaign-schedule";
+import { localizePath, stripLocale } from "@/src/lib/i18n/config";
 import { SHOP_ZONE_LABEL } from "@/src/lib/shop-time";
 import { useAdminToast } from "@/src/providers/admin-toast-provider";
 import type { AdminActionResult } from "@/src/schemas/admin";
@@ -95,6 +97,7 @@ export default function CampaignDispatch({
   audienceList?: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useAdminToast();
 
   const [armed, setArmed] = useState(false);
@@ -258,6 +261,23 @@ export default function CampaignDispatch({
                 Addresses to include by hand. They are added to whatever the
                 audience above selects — for a campaign meant only for these
                 people, switch both of those off.
+              </p>
+              {/*
+                A typed address receives a marketing letter, not an account.
+                Inviting somebody to become a customer is the Invitations
+                screen's job (a personal letter with an account link), so the
+                desk is pointed there rather than using a campaign for it.
+              */}
+              <p className="mt-2 rounded-lg border border-gold/30 bg-gold/5 px-3 py-2 text-[12px] leading-relaxed text-ground">
+                To invite someone to open an account, use{" "}
+                <AdminLink
+                  href={localizePath(stripLocale(pathname).locale, "/admin/customers/invitations")}
+                  className="text-ground-accent underline-offset-2 hover:underline"
+                >
+                  Customers → Invitations
+                </AdminLink>{" "}
+                instead. A campaign sends a marketing letter, so only add people
+                who expect to hear from the house.
               </p>
             </div>
 

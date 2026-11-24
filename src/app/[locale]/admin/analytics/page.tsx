@@ -67,7 +67,7 @@ export default async function AdminAnalyticsPage({
   return (
     <>
       <AdminPageHeader
-        title="Analytics"
+        title="Revenue trend"
         description="Merchandise revenue, excluding delivery, and excluding orders that were cancelled or refunded. Every figure is read from the orders themselves — nothing here is estimated."
         action={
           <RangeTabs

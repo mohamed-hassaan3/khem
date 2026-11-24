@@ -1,4 +1,5 @@
 import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import { ChevronDown } from "lucide-react";
 import ContactChannelsEditor from "@/src/components/admin/ContactChannelsEditor";
 import DeliverySettingsForm from "@/src/components/admin/DeliverySettingsForm";
 import HouseSettingsForm from "@/src/components/admin/HouseSettingsForm";
@@ -66,9 +67,10 @@ export default async function AdminSettingsPage({
         description="What the house says about itself. API keys and secrets are not here and never will be — they live in environment variables."
       />
 
-      <section className="space-y-5">
-        <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+      <details open className="group rounded-lg border border-ground-border bg-stone/60 [&+details]:mt-3">
+        <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
+          <div className="min-w-0 flex-1">
+          <h2 className="font-heading text-[17px] font-normal text-ground">
             The house
           </h2>
           <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
@@ -76,14 +78,19 @@ export default async function AdminSettingsPage({
             signup. A typo there is a swallowed enquiry, so it is checked as a
             real address before it is saved.
           </p>
-        </div>
+          </div>
+          <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" className="mt-1 shrink-0 text-ground-subtle transition-transform duration-300 group-open:rotate-180" />
+        </summary>
+        <div className="space-y-5 border-t border-ground-border px-4 py-5">
 
         <HouseSettingsForm settings={settings} />
-      </section>
+        </div>
+      </details>
 
-      <section className="mt-12 space-y-5">
-        <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+      <details className="group rounded-lg border border-ground-border bg-stone/60 [&+details]:mt-3">
+        <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
+          <div className="min-w-0 flex-1">
+          <h2 className="font-heading text-[17px] font-normal text-ground">
             Delivery
           </h2>
           <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
@@ -92,14 +99,19 @@ export default async function AdminSettingsPage({
             what the &ldquo;Complimentary Delivery&rdquo; badge promises on every
             product page. Both take effect on the next page load — no deploy.
           </p>
-        </div>
+          </div>
+          <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" className="mt-1 shrink-0 text-ground-subtle transition-transform duration-300 group-open:rotate-180" />
+        </summary>
+        <div className="space-y-5 border-t border-ground-border px-4 py-5">
 
         <DeliverySettingsForm settings={delivery} />
-      </section>
+        </div>
+      </details>
 
-      <section className="mt-12 space-y-5">
-        <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+      <details className="group rounded-lg border border-ground-border bg-stone/60 [&+details]:mt-3">
+        <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
+          <div className="min-w-0 flex-1">
+          <h2 className="font-heading text-[17px] font-normal text-ground">
             Contact channels
           </h2>
           <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
@@ -107,14 +119,19 @@ export default async function AdminSettingsPage({
             value are preserved; leave the link target empty for anything that
             is not a telephone number or an address to write to.
           </p>
-        </div>
+          </div>
+          <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" className="mt-1 shrink-0 text-ground-subtle transition-transform duration-300 group-open:rotate-180" />
+        </summary>
+        <div className="space-y-5 border-t border-ground-border px-4 py-5">
 
         <ContactChannelsEditor channels={channels} />
-      </section>
+        </div>
+      </details>
 
-      <section className="mt-12 space-y-5">
-        <div>
-          <h2 className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
+      <details className="group rounded-lg border border-ground-border bg-stone/60 [&+details]:mt-3">
+        <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
+          <div className="min-w-0 flex-1">
+          <h2 className="font-heading text-[17px] font-normal text-ground">
             Social profiles
           </h2>
           <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ground-muted">
@@ -122,10 +139,14 @@ export default async function AdminSettingsPage({
             house sends — a dead link here is a dead link in somebody&rsquo;s
             inbox.
           </p>
-        </div>
+          </div>
+          <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" className="mt-1 shrink-0 text-ground-subtle transition-transform duration-300 group-open:rotate-180" />
+        </summary>
+        <div className="space-y-5 border-t border-ground-border px-4 py-5">
 
         <SocialProfilesEditor profiles={profiles} />
-      </section>
+        </div>
+      </details>
     </>
   );
 }

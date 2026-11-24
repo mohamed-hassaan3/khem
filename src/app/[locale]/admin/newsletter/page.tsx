@@ -1,10 +1,7 @@
 import AdminSearch from "@/src/components/admin/AdminSearch";
 import {
-  AdminCell,
   AdminEmpty,
   AdminPageHeader,
-  AdminRow,
-  AdminTable,
 } from "@/src/components/admin/AdminTable";
 import FilterChips from "@/src/components/admin/FilterChips";
 import Link from "next/link";
@@ -59,9 +56,6 @@ function readPage(value: string | string[] | undefined): number {
   return Number.isFinite(parsed) && parsed > 1 ? parsed : 1;
 }
 
-function label(value: string): string {
-  return value.charAt(0) + value.slice(1).toLowerCase();
-}
 
 function stamp(iso: string | null): string {
   if (!iso) return "—";
@@ -93,11 +87,11 @@ function pageHref(
 
 function Figure({ label: text, value }: { label: string; value: number }) {
   return (
-    <div className="border border-ground-border bg-ivory/2 p-6 sm:p-8">
+    <div className="min-w-0 border border-ground-border bg-ivory/2 p-3 sm:p-6">
       <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
         {text}
       </p>
-      <p className="mt-4 font-heading text-3xl tracking-[0.1em] text-ground-accent sm:text-4xl">
+      <p className="mt-2 font-heading text-[22px] tracking-[0.04em] text-ground-accent sm:mt-4 sm:text-3xl">
         {value}
       </p>
     </div>
@@ -135,11 +129,11 @@ export default async function AdminNewsletterPage({
   return (
     <>
       <AdminPageHeader
-        title="Newsletter"
-        description="The Inner Circle list. Consent is given and withdrawn by the subscriber — through the link in every letter, or the box on their account — so nothing on this screen edits it."
+        title="Subscribers"
+        description="The Inner Circle list. People join and leave it themselves — through the sign-up forms, the link in every letter, or their account — so this screen shows it but does not edit it."
       />
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <Figure label="On the list" value={counts.subscribed} />
         <Figure label="Unsubscribed" value={counts.unsubscribed} />
         <Figure label="Addresses held" value={counts.total} />
@@ -171,48 +165,36 @@ export default async function AdminNewsletterPage({
         />
       ) : (
         <>
-          <AdminTable
-            headers={[
-              "Email",
-              "Status",
-              "Source",
-              "Language",
-              "Consent given",
-              "Left",
-            ]}
-          >
-            {subscribers.map((subscriber) => (
-              <AdminRow key={subscriber.id}>
-                <AdminCell>
-                  <span className="block tracking-wide">{subscriber.email}</span>
-                  {subscriber.clerkUserId ? (
-                    <span className="mt-1 block text-[10px] uppercase tracking-[0.2em] text-ground-subtle">
-                      Has an account
+          {/* One row per address (prompts/admin-redesign-stage-6.md, 6c). */}
+          <ul data-admin-results="" className="overflow-hidden rounded-lg border border-ground-border bg-stone">
+            {subscribers.map((subscriber) => {
+              const on = subscriber.status === "SUBSCRIBED";
+              return (
+                <li
+                  key={subscriber.id}
+                  className="flex min-h-16 items-center gap-3 border-b border-ground-border px-4 py-3 last:border-b-0"
+                >
+                  <span className="min-w-0 flex-1">
+                    <span dir="ltr" className="block truncate text-[14px] text-ground">
+                      {subscriber.email}
                     </span>
-                  ) : null}
-                </AdminCell>
-
-                <AdminCell>
+                    <span className="mt-0.5 block text-[12px] text-ground-muted">
+                      {SOURCE_LABELS[subscriber.source] ?? subscriber.source} · {subscriber.locale === "ar" ? "Arabic" : "English"} ·{" "}
+                      {on ? `joined ${stamp(subscriber.consentAt)}` : `left ${stamp(subscriber.unsubscribedAt)}`}
+                      {subscriber.clerkUserId ? " · has an account" : ""}
+                    </span>
+                  </span>
                   <span
-                    className={`inline-block border px-3 py-1 font-heading text-[9px] uppercase tracking-[0.2em] ${
-                      subscriber.status === "SUBSCRIBED"
-                        ? "border-success/40 text-success"
-                        : "border-ground-border text-ground-muted"
+                    className={`inline-flex h-6 shrink-0 items-center rounded-full border px-2.5 text-[11px] ${
+                      on ? "border-success/40 text-success" : "border-ground-border text-ground-muted"
                     }`}
                   >
-                    {label(subscriber.status)}
+                    {on ? "Subscribed" : "Left"}
                   </span>
-                </AdminCell>
-
-                <AdminCell muted>
-                  {SOURCE_LABELS[subscriber.source] ?? subscriber.source}
-                </AdminCell>
-                <AdminCell muted>{subscriber.locale.toUpperCase()}</AdminCell>
-                <AdminCell muted>{stamp(subscriber.consentAt)}</AdminCell>
-                <AdminCell muted>{stamp(subscriber.unsubscribedAt)}</AdminCell>
-              </AdminRow>
-            ))}
-          </AdminTable>
+                </li>
+              );
+            })}
+          </ul>
 
           {lastPage > 1 ? (
             <nav

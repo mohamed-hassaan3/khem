@@ -65,7 +65,7 @@ export default async function AdminPromotionsPage({
   return (
     <>
       <AdminPageHeader
-        title="Promotions"
+        title="Sale prices"
         description="Seasonal pricing — Black Friday, Ramadan, a mid-season cut. Nothing to type at checkout: the price on the card is the price. Codes and the welcome offer live under Discounts."
         action={
           <AdminLinkButton href={`${basePath}/new`}>

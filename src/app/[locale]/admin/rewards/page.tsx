@@ -68,7 +68,7 @@ export default async function AdminRewardsPage({
   return (
     <>
       <AdminPageHeader
-        title="Rewards"
+        title="Points"
         description="KHEM Points — what a pound earns, what a point is worth, and who holds a balance. Nothing here is a price: switching the programme off keeps every balance intact."
       />
 

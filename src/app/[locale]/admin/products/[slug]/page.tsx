@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
+import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
 import ProductForm from "@/src/components/admin/ProductForm";
 import ProductImageEditor from "@/src/components/admin/ProductImageEditor";
 import { AdminNotice } from "@/src/components/admin/fields";
@@ -48,6 +48,7 @@ export default async function EditProductPage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/products")}>Products</AdminBackLink>
       <AdminPageHeader
         title={product.name}
         description={product.isArchived ? "Archived — not visible anywhere on the storefront." : undefined}

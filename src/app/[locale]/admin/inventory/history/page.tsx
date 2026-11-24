@@ -107,6 +107,24 @@ export default async function InventoryHistoryIndexPage({
 
   const base = localizePath(activeLocale, "/admin/inventory/history");
 
+  // 50 movements a page (the service reads the newest 200): a phone list of
+  // every movement at once ran past 8,000px. (stage 6d)
+  const PAGE_SIZE = 50;
+  const pageNumber = Math.max(1, Number.parseInt(readParam(query.page), 10) || 1);
+  const lastPage = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const page = Math.min(pageNumber, lastPage);
+  const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pageHref = (target: number) => {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (key === "page" || value === undefined) continue;
+      params.set(key, Array.isArray(value) ? (value[0] ?? "") : value);
+    }
+    if (target > 1) params.set("page", String(target));
+    const search = params.toString();
+    return search.length > 0 ? `${base}?${search}` : base;
+  };
+
   // Preserved across chip rows, so channel and action narrow together rather
   // than each wiping the other.
   const carried = {
@@ -187,7 +205,7 @@ export default async function InventoryHistoryIndexPage({
           }
         />
       ) : (
-        <AdminTable
+        <AdminTable dense
           headers={[
             "When",
             "Product",
@@ -200,7 +218,7 @@ export default async function InventoryHistoryIndexPage({
             "By",
           ]}
         >
-          {rows.map((movement) => (
+          {pageRows.map((movement) => (
             <AdminRow key={movement.id}>
               <AdminCell muted>
                 {formatShopDateTime(movement.createdAt)}
@@ -245,6 +263,34 @@ export default async function InventoryHistoryIndexPage({
           ))}
         </AdminTable>
       )}
+
+      {lastPage > 1 ? (
+        <nav aria-label="Pagination" className="mt-4 flex items-center justify-between gap-4">
+          {page > 1 ? (
+            <Link
+              href={pageHref(page - 1)}
+              className="inline-flex h-10 items-center rounded-lg border border-ground-border px-4 text-[13px] text-ground no-underline hover:border-gold/40"
+            >
+              Newer
+            </Link>
+          ) : (
+            <span />
+          )}
+          <span className="text-[12px] text-ground-muted">
+            Page {page} of {lastPage} · {rows.length} movements
+          </span>
+          {page < lastPage ? (
+            <Link
+              href={pageHref(page + 1)}
+              className="inline-flex h-10 items-center rounded-lg border border-ground-border px-4 text-[13px] text-ground no-underline hover:border-gold/40"
+            >
+              Older
+            </Link>
+          ) : (
+            <span />
+          )}
+        </nav>
+      ) : null}
     </>
   );
 }

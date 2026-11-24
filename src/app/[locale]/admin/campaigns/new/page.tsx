@@ -1,6 +1,6 @@
 import CampaignForm from "@/src/components/admin/CampaignForm";
-import { AdminPageHeader } from "@/src/components/admin/AdminTable";
-import { isLocale } from "@/src/lib/i18n/config";
+import { AdminPageHeader, AdminBackLink } from "@/src/components/admin/AdminTable";
+import { isLocale, localizePath } from "@/src/lib/i18n/config";
 import { subscriberCount } from "@/src/services/admin/campaigns";
 
 /**
@@ -28,6 +28,7 @@ export default async function NewCampaignPage({
 
   return (
     <>
+      <AdminBackLink href={localizePath(isLocale(locale) ? locale : "en", "/admin/campaigns")}>Email campaigns</AdminBackLink>
       <AdminPageHeader
         title="New campaign"
         description="Write the letter, then send yourself a test before it goes anywhere near the list."

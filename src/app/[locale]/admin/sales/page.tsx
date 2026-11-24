@@ -113,7 +113,7 @@ export default async function AdminSalesPage({
   return (
     <>
       <AdminPageHeader
-        title="Sales & Profitability"
+        title="Sales & profit"
         description="What was sold, what was given away, and what was left after the goods cost. Every figure is a snapshot taken when the sale happened, so changing a price today never rewrites a closed month. Cancelled and refunded orders are excluded."
         action={
           <SalesPeriodTabs
@@ -304,7 +304,7 @@ export default async function AdminSalesPage({
             {products.length === 0 ? (
               <AdminEmpty message="Nothing sold in this window, so there is nothing to rank." />
             ) : (
-              <AdminTable
+              <AdminTable dense
                 headers={[
                   "Product",
                   "Units",

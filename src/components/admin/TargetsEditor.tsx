@@ -39,9 +39,9 @@ function Cell({
 
   if (!progress) {
     return (
-      <span className="text-[11px] tracking-wide text-ground-subtle">
+      // The month's pill already says "No target"; the figure stands alone.
+      <span className="text-[13px] text-ground">
         {actualInCents === null ? "—" : egpCompact(actualInCents)}
-        <span className="ms-2 text-ground-subtle">no target</span>
       </span>
     );
   }
@@ -49,7 +49,7 @@ function Cell({
   const met = progress.achievement !== null && progress.achievement >= 100;
 
   return (
-    <span className="text-[11px] tracking-wide text-ground">
+    <span className="block text-[13px] text-ground">
       {progress.actualInCents === null ? "—" : egpCompact(progress.actualInCents)}
       <span className="text-ground-subtle"> / {egpCompact(progress.targetInCents)}</span>
       <span
@@ -67,7 +67,7 @@ export default function TargetsEditor({ rows }: { rows: readonly TargetMonthRow[
   const [openMonth, setOpenMonth] = useState<string | null>(null);
 
   return (
-    <ul className="space-y-3">
+    <ul className="space-y-2">
       {rows.map((row) => {
         const isOpen = openMonth === row.periodMonth;
         const hasTarget =
@@ -77,45 +77,51 @@ export default function TargetsEditor({ rows }: { rows: readonly TargetMonthRow[
             row.target.netProfitTargetInCents !== null);
 
         return (
-          <li key={row.periodMonth} className="border border-ground-border">
-            <div className="flex flex-wrap items-center justify-between gap-4 p-5">
-              <div className="min-w-0">
-                <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-ground">
-                  {monthLabel(row.periodMonth)}
-                </p>
-                <p className="mt-1.5 text-[10px] uppercase tracking-[0.2em] text-ground-subtle">
+          <li key={row.periodMonth} className="rounded-lg border border-ground-border bg-stone">
+            {/* Compact on phones: month, state and the button on one line,
+                the three figures side by side beneath. (stage 6d) */}
+            <div className="px-4 py-3">
+              <div className="flex items-center gap-2">
+                <p className="font-heading text-[15px] text-ground">{monthLabel(row.periodMonth)}</p>
+                <span
+                  className={`inline-flex h-6 items-center rounded-full border px-2.5 text-[11px] ${
+                    hasTarget ? "border-gold/50 text-ground-accent" : "border-ground-border text-ground-muted"
+                  }`}
+                >
                   {hasTarget ? "Target set" : "No target"}
-                </p>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setOpenMonth(isOpen ? null : row.periodMonth)}
+                  aria-expanded={isOpen}
+                  className="ms-auto h-9 shrink-0 cursor-pointer rounded-lg border border-ground-border px-3 text-[12px] text-ground transition-colors duration-300 hover:border-gold/40"
+                >
+                  {isOpen ? "Close" : hasTarget ? "Edit" : "Set targets"}
+                </button>
               </div>
 
-              <dl className="flex flex-wrap items-center gap-x-8 gap-y-2">
-                <div>
-                  <dt className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
-                    Revenue
-                  </dt>
-                  <dd className="mt-1">
+              <dl className="mt-2 grid grid-cols-3 gap-2">
+                <div className="min-w-0">
+                  <dt className="text-[11px] text-ground-muted">Revenue</dt>
+                  <dd className="mt-0.5">
                     <Cell
                       targetInCents={row.target?.revenueTargetInCents ?? null}
                       actualInCents={row.actuals?.revenueInCents ?? 0}
                     />
                   </dd>
                 </div>
-                <div>
-                  <dt className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
-                    Gross profit
-                  </dt>
-                  <dd className="mt-1">
+                <div className="min-w-0">
+                  <dt className="text-[11px] text-ground-muted">Gross profit</dt>
+                  <dd className="mt-0.5">
                     <Cell
                       targetInCents={row.target?.grossProfitTargetInCents ?? null}
                       actualInCents={row.actuals?.grossProfitInCents ?? null}
                     />
                   </dd>
                 </div>
-                <div>
-                  <dt className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
-                    Net profit
-                  </dt>
-                  <dd className="mt-1">
+                <div className="min-w-0">
+                  <dt className="text-[11px] text-ground-muted">Net profit</dt>
+                  <dd className="mt-0.5">
                     <Cell
                       targetInCents={row.target?.netProfitTargetInCents ?? null}
                       actualInCents={row.actuals?.netProfitInCents ?? null}
@@ -123,18 +129,10 @@ export default function TargetsEditor({ rows }: { rows: readonly TargetMonthRow[
                   </dd>
                 </div>
               </dl>
-
-              <button
-                type="button"
-                onClick={() => setOpenMonth(isOpen ? null : row.periodMonth)}
-                className="rounded-none border border-ground-border px-5 py-2.5 font-heading text-[9px] uppercase tracking-[0.2em] text-ground-muted transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/40 hover:text-ground-accent focus:outline-none"
-              >
-                {isOpen ? "Close" : hasTarget ? "Edit" : "Set targets"}
-              </button>
             </div>
 
             {isOpen ? (
-              <div className="border-t border-ground-border p-5 sm:p-6">
+              <div className="border-t border-ground-border px-4 py-4 sm:p-6">
                 <TargetForm
                   target={row.target}
                   lockedMonth={row.periodMonth}
