@@ -177,8 +177,14 @@ export default async function AdminDashboardPage({
   const live = products.filter((product) => !product.isArchived).length;
   const drafts = articles.filter((article) => !article.isPublished).length;
 
-  const needsStock = inventory.filter((row) => stockState(row.inventory) !== "in");
-  const outOfStock = needsStock.filter((row) => row.inventory === 0).length;
+  /*
+   * The online counter, as the Stock page and the storefront read it — not
+   * `inventory`, the online + in-store total. A bottle with 2 left online and
+   * 55 on the shelf is "running low" to every visitor, and the total (57) hid
+   * it from this screen.
+   */
+  const needsStock = inventory.filter((row) => stockState(row.inventoryOnline) !== "in");
+  const outOfStock = needsStock.filter((row) => row.inventoryOnline === 0).length;
 
   const revenuePoints = series.map((point) => ({
     time: point.day,
@@ -369,7 +375,7 @@ export default async function AdminDashboardPage({
                       className="flex min-h-12 items-center justify-between gap-3 px-4 py-2 text-[13px] text-ground no-underline hover:bg-warning/10"
                     >
                       <span className="truncate">{row.name}</span>
-                      <StockChip inventory={row.inventory} />
+                      <StockChip inventory={row.inventoryOnline} />
                     </AdminLink>
                   </li>
                 ))}

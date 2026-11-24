@@ -4,10 +4,10 @@ import { ArrowLeft } from "lucide-react";
 
 import {
   AdminCell,
-  AdminPageHeader,
   AdminRow,
   AdminTable,
 } from "@/src/components/admin/AdminTable";
+import { AdminOrderStatus } from "@/src/components/admin/AdminOrderList";
 import MarkOrderOpened from "@/src/components/admin/MarkOrderOpened";
 import OrderStatusControl from "@/src/components/admin/OrderStatusControl";
 import { egp } from "@/src/lib/admin/money";
@@ -67,10 +67,10 @@ function addressLines(shipping: OrderShippingAddress): string[] {
 function Detail({ term, children }: { term: string; children: React.ReactNode }) {
   return (
     <div className="border-b border-ground-border py-3 last:border-b-0">
-      <dt className="font-heading text-[9px] uppercase tracking-[0.2em] text-ground-subtle">
+      <dt className="text-[12px] text-ground-muted">
         {term}
       </dt>
-      <dd className="mt-1.5 text-[12px] tracking-wide text-ground">{children}</dd>
+      <dd className="mt-1 text-[14px] text-ground">{children}</dd>
     </div>
   );
 }
@@ -107,13 +107,105 @@ export default async function AdminOrderPage({
         alreadyOpened={order.firstOpenedAt !== null}
       />
 
-      <AdminPageHeader
-        title={order.orderNumber}
-        description={`${label(order.channel)} · placed ${stamp(order.placedAt)}`}
-      />
+      <header className="mb-6 lg:mb-8">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <h1 className="font-heading text-[26px] font-normal leading-tight text-ground lg:text-[32px]">
+            {order.orderNumber}
+          </h1>
+          <AdminOrderStatus status={order.status} />
+          <span
+            className={`inline-flex h-6 items-center rounded-full border px-2.5 text-[11px] ${
+              order.paymentStatus === "PAID"
+                ? "border-success/40 text-success"
+                : order.paymentStatus === "FAILED"
+                  ? "border-danger/40 text-danger"
+                  : "border-ground-border text-ground-muted"
+            }`}
+          >
+            {order.paymentMethod === "CARD" ? "Card" : "Cash"} · {label(order.paymentStatus)}
+          </span>
+        </div>
+        <p className="mt-2 text-[13px] text-ground-muted">
+          {order.channel === "OFFLINE" ? "In store" : "Online"} · placed {stamp(order.placedAt)} ·{" "}
+          <bdi className="text-ground">{order.customerName}</bdi>
+        </p>
+      </header>
 
-      <div className="grid gap-5 md:gap-8 xl:grid-cols-[1fr_320px]">
-        <div className="space-y-8">
+      {/*
+        Actions first on a phone and in the right column on desktop, kept in
+        view while the lines scroll: changing an order's state is what this
+        screen is opened for. (prompts/admin-redesign-stage-6.md)
+      */}
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-8">
+        <aside className="space-y-5 lg:col-start-2 lg:row-start-1 lg:sticky lg:top-[calc(var(--chrome-h)+1.5rem)]">
+          <div className="rounded-lg border border-ground-border bg-stone p-5">
+            <OrderStatusControl
+              orderId={order.id}
+              status={order.status}
+              paymentStatus={order.paymentStatus}
+              paymentMethod={order.paymentMethod}
+            />
+          </div>
+
+          <div className="rounded-lg border border-ground-border bg-stone p-5">
+            <dl>
+              <Detail term="Customer"><bdi>{order.customerName}</bdi></Detail>
+              {order.customerEmail ? (
+                <Detail term="Email">{order.customerEmail}</Detail>
+              ) : null}
+              {order.customerPhone ? (
+                <Detail term="Phone">{order.customerPhone}</Detail>
+              ) : null}
+              {/*
+               * Method and state, together and in that order. They are
+               * different questions and the desk has to read both: a cash order
+               * is PROCESSING and UNPAID until the courier collects, which is
+               * healthy, while a card order in the same state means the money
+               * never arrived.
+               */}
+              <Detail term="Payment">
+                {order.paymentMethod === "CARD" ? "Card" : "Cash on delivery"} ·{" "}
+                {label(order.paymentStatus)}
+                {order.paidAt ? (
+                  <span className="block text-ground-muted">
+                    Paid {stamp(order.paidAt)}
+                  </span>
+                ) : null}
+              </Detail>
+              {order.trackingCode ? (
+                <Detail term="Tracking">{order.trackingCode}</Detail>
+              ) : null}
+              {/*
+               * Written out, not one line: this is the block somebody copies
+               * onto a parcel, and a comma-joined string is harder to read off
+               * a screen than five lines are.
+               */}
+              {hasAddress(order.shipping) ? (
+                <Detail term="Deliver to">
+                  {addressLines(order.shipping).map((line) => (
+                    <span key={line} className="block">
+                      {line}
+                    </span>
+                  ))}
+                </Detail>
+              ) : null}
+              {order.locale === "ar" ? (
+                <Detail term="Writes to them in">Arabic</Detail>
+              ) : null}
+              {order.stripePaymentIntentId ? (
+                <Detail term="Stripe intent">
+                  <span className="break-all text-ground-muted">
+                    {order.stripePaymentIntentId}
+                  </span>
+                </Detail>
+              ) : null}
+              {order.note ? <Detail term="Customer note">{order.note}</Detail> : null}
+            </dl>
+          </div>
+
+        </aside>
+
+        <div className="space-y-5 lg:col-start-1 lg:row-start-1">
           <AdminTable headers={["Product", "Unit price", "Qty", "Line total"]}>
             {order.lines.map((line) => (
               <AdminRow key={line.id}>
@@ -153,7 +245,7 @@ export default async function AdminOrderPage({
             ))}
           </AdminTable>
 
-          <dl className="max-w-sm border border-ground-border p-6 text-[12px] tracking-wide">
+          <dl className="ms-auto max-w-sm rounded-lg border border-ground-border bg-stone p-5 text-[13px]">
             <div className="flex justify-between py-1">
               <dt className="text-ground-muted">Subtotal</dt>
               <dd className="text-ground">{egp(order.subtotalInCents)}</dd>
@@ -206,10 +298,8 @@ export default async function AdminOrderPage({
               </div>
             ) : null}
             <div className="mt-3 flex justify-between border-t border-ground-border pt-3">
-              <dt className="font-heading text-[10px] uppercase tracking-[0.2em] text-ground-muted">
-                Total
-              </dt>
-              <dd className="font-heading text-[13px] tracking-[0.1em] text-ground-accent">
+              <dt className="text-[13px] font-semibold text-ground">Total</dt>
+              <dd className="font-heading text-[18px] text-ground-accent">
                 {egp(order.totalInCents)}
               </dd>
             </div>
@@ -230,73 +320,6 @@ export default async function AdminOrderPage({
           ) : null}
         </div>
 
-        <aside className="space-y-8">
-          <div className="border border-ground-border bg-ivory/2 p-6">
-            <dl>
-              <Detail term="Customer">{order.customerName}</Detail>
-              {order.customerEmail ? (
-                <Detail term="Email">{order.customerEmail}</Detail>
-              ) : null}
-              {order.customerPhone ? (
-                <Detail term="Phone">{order.customerPhone}</Detail>
-              ) : null}
-              <Detail term="Status">{label(order.status)}</Detail>
-              {/*
-               * Method and state, together and in that order. They are
-               * different questions and the desk has to read both: a cash order
-               * is PROCESSING and UNPAID until the courier collects, which is
-               * healthy, while a card order in the same state means the money
-               * never arrived.
-               */}
-              <Detail term="Payment">
-                {order.paymentMethod === "CARD" ? "Card" : "Cash on delivery"} ·{" "}
-                {label(order.paymentStatus)}
-                {order.paidAt ? (
-                  <span className="block text-ground-muted">
-                    Paid {stamp(order.paidAt)}
-                  </span>
-                ) : null}
-              </Detail>
-              {order.trackingCode ? (
-                <Detail term="Tracking">{order.trackingCode}</Detail>
-              ) : null}
-              {/*
-               * Written out, not one line: this is the block somebody copies
-               * onto a parcel, and a comma-joined string is harder to read off
-               * a screen than five lines are.
-               */}
-              {hasAddress(order.shipping) ? (
-                <Detail term="Deliver to">
-                  {addressLines(order.shipping).map((line) => (
-                    <span key={line} className="block">
-                      {line}
-                    </span>
-                  ))}
-                </Detail>
-              ) : null}
-              {order.locale === "ar" ? (
-                <Detail term="Writes to them in">Arabic</Detail>
-              ) : null}
-              {order.stripePaymentIntentId ? (
-                <Detail term="Stripe intent">
-                  <span className="break-all text-ground-muted">
-                    {order.stripePaymentIntentId}
-                  </span>
-                </Detail>
-              ) : null}
-              {order.note ? <Detail term="Customer note">{order.note}</Detail> : null}
-            </dl>
-          </div>
-
-          <div className="border border-ground-border bg-ivory/2 p-6">
-            <OrderStatusControl
-              orderId={order.id}
-              status={order.status}
-              paymentStatus={order.paymentStatus}
-              paymentMethod={order.paymentMethod}
-            />
-          </div>
-        </aside>
       </div>
     </>
   );

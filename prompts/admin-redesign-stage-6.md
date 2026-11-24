@@ -262,3 +262,25 @@ delivery. Intended, but worth confirming it matches how COD is handled.
 
 Checks: tsc + ESLint clean; 390px: Stock, Credits, Sales, Finance, order page
 fit with no horizontal scroll.
+
+## Follow-up — user review (2026-11-24)
+
+- **Today missed low stock**: it tested `inventory` (online + in-store total)
+  while Stock, the bell and the storefront test `inventoryOnline`. Kyphi (2
+  online, 55 in store) read as 57 and never showed. Today now uses the online
+  count for "Running low", the count and the chips.
+- **Order page (desktop and phone)**: header carries the status and payment
+  pills; actions come first (phone) / in a sticky right column (desktop),
+  customer details below; items and totals as one block; moves the rules
+  forbid are no longer drawn as buttons (only where the order is and where it
+  may go). Duplicate "Status" row removed.
+- **Cash on delivery (staff-engineer decision)**: the rule stays — DELIVERED
+  needs PAID, enforced in the UI, the action and `set_order_status()`. Added
+  one primary action for the ordinary case, "Delivered — cash collected",
+  on an unpaid cash order whose next step can be delivery: one confirmation
+  listing both consequences, then `updatePaymentStatus(PAID)` followed by
+  `updateOrderStatus(DELIVERED)` — the same guarded actions, emails, credit
+  rules and history. If delivery is refused after payment, the payment stands
+  and the desk is told. Not exercised against a real order (live database).
+- **Campaign Customers audience**: user decided it stays as is (everyone who
+  has bought, not only marketing opt-ins). No change.
