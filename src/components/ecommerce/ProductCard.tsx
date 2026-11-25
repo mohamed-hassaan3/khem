@@ -193,24 +193,22 @@ export default async function ProductCard({
           </p>
         ) : null}
 
-        <p className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 text-xs text-ground">
+        {/*
+          One line, never wrapped: sale price, struck list price, volume. On a
+          phone's half-width card the gaps and the struck figure tighten so the
+          three fit; wrapping used to leave a stray "· 100 ML" on its own line.
+        */}
+        <p className="mt-1.5 flex items-baseline gap-x-1 whitespace-nowrap text-xs text-ground sm:gap-x-1.5">
           <ProductPrice
             priceInCents={product.priceInCents}
             promotion={product.promotion}
+            inline
             className="text-xs text-ground sm:text-[13px]"
           />
-          {volume === null || product.promotion ? null : (
-            <span className="text-ground-muted">· {volume}</span>
+          {volume === null ? null : (
+            <span className="text-[11px] text-ground-muted sm:text-xs">· {volume}</span>
           )}
         </p>
-        {/*
-          On a reduced card the volume takes its own line: two prices and a
-          volume do not fit a phone's half-width card, and wrapping left a
-          stray "· 100 ML" under the figures.
-        */}
-        {volume !== null && product.promotion ? (
-          <p className="mt-0.5 text-[11px] text-ground-muted">{volume}</p>
-        ) : null}
       </div>
 
       {/*

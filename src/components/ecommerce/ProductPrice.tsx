@@ -30,6 +30,11 @@ import type { ProductPromotion } from "@/src/types/marketing";
  * unpromoted one by one line at most, and that difference is present in the
  * server HTML — it is not introduced after paint, so it cannot shift a grid.
  */
+/** "EGP 1,470" → "1,470"; digits and their separators only, any script. */
+function amountOnly(formatted: string): string {
+  return formatted.replace(/[^\d.,\u0660-\u0669\u066B\u066C]/g, "");
+}
+
 export default function ProductPrice({
   priceInCents,
   promotion,
@@ -37,6 +42,8 @@ export default function ProductPrice({
   showPercent = false,
   /** Stacks the two figures instead of running them inline. */
   stacked = false,
+  /** One unbroken line with tighter spacing — the product card's price row. */
+  inline = false,
 }: {
   /** The list price, always — `"Product"."priceInCents"`. */
   priceInCents: number;
@@ -44,6 +51,7 @@ export default function ProductPrice({
   className?: string;
   showPercent?: boolean;
   stacked?: boolean;
+  inline?: boolean;
 }) {
   const formatPrice = useFormatPrice();
 
@@ -60,7 +68,9 @@ export default function ProductPrice({
       className={
         stacked
           ? "flex flex-col items-start gap-0.5"
-          : "flex flex-wrap items-baseline gap-x-2 gap-y-0.5"
+          : inline
+            ? "inline-flex items-baseline gap-x-1 whitespace-nowrap sm:gap-x-1.5"
+            : "flex flex-wrap items-baseline gap-x-2 gap-y-0.5"
       }
     >
       {/*
@@ -78,12 +88,19 @@ export default function ProductPrice({
         price already reads the way the active locale reads.
       */}
       <span
-        className="text-[11px] tabular-nums text-ground-muted line-through decoration-ground-muted/70 decoration-[0.5px] sm:text-xs"
+        className={`${inline ? "text-[10px] sm:text-[11px]" : "text-[11px] sm:text-xs"} tabular-nums text-ground-muted line-through decoration-ground-muted/70 decoration-[0.5px]`}
         // Announced as what it is, so a screen reader does not read two prices
         // as a range.
         aria-label={`Was ${formatPrice(promotion.listPriceInCents)}`}
       >
-        {formatPrice(promotion.listPriceInCents)}
+        {/*
+          Inline, the struck figure drops its currency: the sale price beside
+          it already names it, and "EGP 1,176 1,470 · 100 ML" fits a phone's
+          half-width card where the repeated "EGP" did not.
+        */}
+        {inline
+          ? amountOnly(formatPrice(promotion.listPriceInCents))
+          : formatPrice(promotion.listPriceInCents)}
       </span>
 
       {showPercent && promotion.percentOff > 0 ? (
