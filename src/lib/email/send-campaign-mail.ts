@@ -27,7 +27,7 @@ import type { Locale } from "@/src/lib/i18n/config";
 import { getSocialProfiles } from "@/src/services/contact";
 import type { Campaign } from "@/src/types/campaign";
 
-import { houseFromAddress, inboxAddress } from "./addresses";
+import { campaignFromAddress, inboxAddress } from "./addresses";
 import { campaignEmail } from "./campaign-template";
 import { getEmailClient } from "./client";
 
@@ -94,7 +94,7 @@ export async function sendCampaignTest(
 
   try {
     const { error } = await resend.emails.send({
-      from: houseFromAddress(),
+      from: campaignFromAddress(),
       to,
       replyTo: await inboxAddress(),
       // Marked in the subject so a rehearsal can never be mistaken for the real
