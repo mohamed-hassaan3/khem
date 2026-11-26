@@ -5,6 +5,7 @@ import { Fragment } from "react";
 import logo from "@/public/logo/logo-transparent.webp";
 import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
+import { revealStagger } from "@/src/components/animation/stagger";
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import CollectionCard from "@/src/components/home/CollectionCard";
 import CollectionRailCard from "@/src/components/home/CollectionRailCard";
@@ -72,9 +73,6 @@ export async function generateMetadata({
 
 /** Roman ordinals for the collection cards. */
 const COLLECTION_ORDINALS = ["I", "II", "III", "IV"] as const;
-
-/** Stagger step between grid children, in seconds. */
-const STAGGER_STEP = 0.1;
 
 export default async function Home({
   params,
@@ -514,7 +512,7 @@ export default async function Home({
                 {products.map((product, index) => (
                   <Reveal
                     key={product.id}
-                    delay={index * STAGGER_STEP}
+                    delay={revealStagger(index)}
                     className="h-full"
                   >
                     <ProductCard product={product} locale={activeLocale} />
@@ -682,7 +680,7 @@ export default async function Home({
                 <Reveal
                   key={pillar.id}
                   className="ground-ivory w-[72%] flex-none snap-start p-5 sm:w-auto sm:p-10 md:p-12"
-                  delay={index * STAGGER_STEP}
+                  delay={revealStagger(index)}
                 >
                   <p className="mb-8 font-heading text-xs tracking-[0.2em] text-ground-subtle">
                     {pillar.number}
@@ -926,7 +924,7 @@ export default async function Home({
               nextLabel={dict.home.journal.next}
             >
               {articles.map((article, index) => (
-                <Reveal key={article.id} delay={index * STAGGER_STEP}>
+                <Reveal key={article.id} delay={revealStagger(index)}>
                   <JournalCard article={article} locale={activeLocale} />
                 </Reveal>
               ))}

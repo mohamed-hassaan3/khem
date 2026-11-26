@@ -39,9 +39,6 @@ import type { ReactNode } from "react";
  * JavaScript animation loop.
  */
 
-/** Matches the `.reveal` transition duration in `globals.css`. */
-const TRAVEL_PX = 40;
-
 const TAGS = {
   div: "div",
   section: "section",
@@ -51,7 +48,7 @@ const TAGS = {
 export interface RevealProps {
   children: ReactNode;
   className?: string;
-  /** Stagger delay in seconds. Pass `index * 0.1` for grid children. */
+  /** Delay in seconds. For grid children, pass `revealStagger(index)` (`./stagger`). */
   delay?: number;
   as?: keyof typeof TAGS;
 }
@@ -117,11 +114,7 @@ export function Reveal({
       className={["reveal", className, pending ? "reveal-pending" : undefined]
         .filter(Boolean)
         .join(" ")}
-      style={
-        pending
-          ? { transform: `translateY(${TRAVEL_PX}px)`, transitionDelay: `${delay}s` }
-          : { transitionDelay: `${delay}s` }
-      }
+      style={delay > 0 ? { transitionDelay: `${delay}s` } : undefined}
     >
       {children}
     </Tag>

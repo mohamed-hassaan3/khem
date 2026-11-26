@@ -4,6 +4,7 @@ import Image from "next/image";
 import NavGround from "@/src/components/NavGround";
 import EditorialHero from "@/src/components/editorial/EditorialHero";
 import Reveal from "@/src/components/animation/Reveal";
+import { revealStagger } from "@/src/components/animation/stagger";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
@@ -189,7 +190,7 @@ export default async function Heritage({
                 return (
                   <li key={event.id}>
                     <Reveal
-                      delay={(index % 3) * STAGGER_STEP}
+                      delay={revealStagger(index)}
                       className="grid grid-cols-[auto_1fr] items-start gap-4 md:grid-cols-[1fr_60px_1fr] md:gap-8"
                     >
                       {/* Before the rail — desktop only. */}
@@ -260,7 +261,7 @@ export default async function Heritage({
             {values.map((value, index) => (
               <Reveal
                 key={value.id}
-                delay={index * STAGGER_STEP}
+                delay={revealStagger(index)}
                 className="card p-10 md:p-12"
               >
                 <div className="gold-line mb-8" />

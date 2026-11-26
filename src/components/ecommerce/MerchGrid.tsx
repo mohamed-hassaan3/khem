@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import Reveal from "@/src/components/animation/Reveal";
+import { revealStagger } from "@/src/components/animation/stagger";
 import MerchCard from "@/src/components/ecommerce/MerchCard";
 import type { Locale } from "@/src/lib/i18n/config";
 import { ltrIsland } from "@/src/lib/i18n/rtl";
@@ -100,7 +101,7 @@ export default function MerchGrid({
           ) : (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
               {visible.map((product, index) => (
-                <Reveal key={product.id} delay={(index % 4) * 0.1} className="h-full">
+                <Reveal key={product.id} delay={revealStagger(index)} className="h-full">
                   <MerchCard product={product} locale={locale} />
                 </Reveal>
               ))}

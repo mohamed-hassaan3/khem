@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { SessionProvider } from "@/src/providers/session-provider";
 import { notFound } from "next/navigation";
+import { ViewTransition } from "react";
 import "../globals.css";
 // import Script from "next/script";
 
@@ -547,7 +548,25 @@ export default async function RootLayout({
                      * `--header-h` collapses to the nav's height alone when no
                      * announcement bar is rendered. See `globals.css`.
                      */}
-                    <div className="pt-[var(--header-h)]">{children}</div>
+                    {/*
+                     * The page region's cross-fade between pages. Only a
+                     * navigation that carries the `khem-page` type animates
+                     * (`<LocaleLink>` adds it to links that change page), so a
+                     * filter, a `router.refresh()` after a bag change, a
+                     * Suspense reveal or the back button swap instantly, as
+                     * they always have. The header, footer and drawers sit
+                     * outside the named region and never fade; the first load
+                     * is not a transition at all, so LCP is untouched.
+                     * `.khem-page-fade` in `globals.css`;
+                     * prompts/motion-and-first-impression-stage-8.md.
+                     */}
+                    <ViewTransition
+                      name="khem-page"
+                      default="none"
+                      update={{ "khem-page": "khem-page-fade", default: "none" }}
+                    >
+                      <div className="pt-[var(--header-h)]">{children}</div>
+                    </ViewTransition>
                     <StorefrontOnly>
                     <Footer locale={locale} socials={socialProfiles} prelaunch={prelaunch} />
                     {/*

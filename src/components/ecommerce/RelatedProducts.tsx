@@ -1,4 +1,5 @@
 import Reveal from "@/src/components/animation/Reveal";
+import { revealStagger } from "@/src/components/animation/stagger";
 import ProductCard from "@/src/components/ecommerce/ProductCard";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
@@ -38,13 +39,10 @@ export default async function RelatedProducts({
         </Reveal>
 
         <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              locale={locale}
-              sizes={CARD_SIZES}
-            />
+          {products.map((product, index) => (
+            <Reveal key={product.id} delay={revealStagger(index)} className="h-full">
+              <ProductCard product={product} locale={locale} sizes={CARD_SIZES} />
+            </Reveal>
           ))}
         </div>
       </div>
