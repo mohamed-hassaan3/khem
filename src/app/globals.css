@@ -1474,43 +1474,22 @@
   /*
    * Loading states.
    *
-   * `.khem-route-line` is the hairline under the header while a route loads
+   * `.khem-spinner` is the falcon in its turning ring while a route loads
    * (`<LoadingScreen>`); `.khem-shimmer` is the sweep across a skeleton
    * placeholder. Both are tweens — no spring, no bounce (AGENTS.md §2.2).
    *
-   * The route line sits directly under the header bar and *below* it in the
-   * stack (`z-index` 999 against the nav's 1000), so an open mega-menu (998
-   * overlay, panels inside the nav) is never crossed by it. Deep gold, not
-   * gold: on ivory the latter is 2.6:1 (see the token's note).
-   *
-   * Hidden for its first 150 ms (`both` holds the 0% keyframe through the
-   * delay): a prefetched page lands faster than that, and a line that flashes
-   * for one frame reads as a glitch rather than as progress.
+   * The spinner is hidden for its first 150 ms (`both` holds the 0% keyframe
+   * through the delay): a prefetched page lands faster than that, and a
+   * spinner that flashes for one frame reads as a glitch. The ring turns at an
+   * unhurried 1.4 s; deep gold, not gold — on ivory the latter is 2.6:1.
    */
-  .khem-route-line {
-    position: fixed;
-    inset-inline: 0;
-    top: var(--header-h);
-    z-index: 999;
-    height: 2px;
-    overflow: hidden;
-    pointer-events: none;
-    background: color-mix(in srgb, var(--color-gold-deep) 12%, transparent);
+  .khem-spinner {
     animation: khemFadeOnly 300ms ease-out 150ms both;
   }
 
-  .khem-route-line::after {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    width: 30%;
-    background: var(--color-gold-deep);
-    animation: khemSearchSweep 1.4s var(--ease-luxury-bezier) infinite;
-  }
-
-  [dir="rtl"] .khem-route-line::after {
-    animation-name: khemSearchSweepRtl;
+  .khem-spinner-arc {
+    transform-origin: center;
+    animation: khemSpin 1.4s linear infinite;
   }
 
   /*
@@ -1663,11 +1642,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Still and faint: the field is loading, nothing travels. */
-  .khem-route-line::after {
+  /* The ring stands still; a quarter arc that does not move reads as broken,
+     so it closes into a faint full circle. */
+  .khem-spinner-arc {
     animation: none;
-    width: 100%;
-    opacity: 0.35;
+    stroke-dasharray: none;
+    opacity: 0.45;
   }
 
   .khem-shimmer {
@@ -1842,7 +1822,13 @@
   }
 }
 
-/* Opacity only — the route line's delayed arrival. */
+@keyframes khemSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Opacity only — the loading spinner's delayed arrival. */
 @keyframes khemFadeOnly {
   from {
     opacity: 0;

@@ -231,3 +231,26 @@ None change. No new route, action, data read or third-party script. CSP unchange
 
   Home LCP is the hero film and varies run to run (5.4–7.9 s before, 7.7–8.0 s after). Nothing on the first load changed except CSS, and no view transition runs on a first load.
 - `tsc`, `npm run lint` and `npm run build`: clean.
+
+## Revision — the spinner stays, restyled (user, 2026-11-26)
+
+**What the user meant:** keep a spinner on the app's loading page and fix its dated look. Replacing it with a bar was a misreading, and the hairline loader has been replaced again.
+
+**Now:** the header stays visible. In the centre of the page area under it (`h-[calc(100svh-var(--header-h))]`, inside the kept `min-h-svh` spacer):
+
+- the gold falcon (`public/logo/logo-transparent.webp`, 40 px tall, already used on the home page);
+- inside a 56 px ring: a faint 1 px track, plus a deep-gold quarter arc turning at 1.4 s linear (`.khem-spinner-arc`, `khemSpin`).
+
+**Timing:** the whole spinner fades in after 150 ms (`.khem-spinner`), so fast navigations never flash it.
+
+**Reduced motion:** the arc stops and closes into a faint full circle (opacity 0.45).
+
+**Removed:** `.khem-route-line` and its RTL rule. The page cross-fade, reveals and gold rules are unchanged.
+
+**Verified** on a production build, with the markup mounted in place of the page:
+
+- **390 px EN/AR:** centred at (195, 467), the exact middle of the area under the 90 px header; no overflow.
+- **1280 px:** centred at the middle of the area under the header.
+- **Reduced motion:** `animation: none`, `stroke-dasharray: none`, opacity 0.45.
+
+`tsc`, eslint and build: clean.
