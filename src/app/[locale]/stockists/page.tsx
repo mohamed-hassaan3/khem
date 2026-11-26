@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
+import { revealStagger } from "@/src/components/animation/stagger";
 import StockistBadge from "@/src/components/stockists/StockistBadge";
 import StockistDirectory, {
   StockistDetails,
@@ -32,9 +33,6 @@ import type { Stockist } from "@/src/types/stockist";
 export const revalidate = 86400;
 
 const PATH = "/stockists";
-
-/** Stagger step between grid children, in seconds. Matches `/craftsmanship`. */
-const STAGGER_STEP = 0.1;
 
 export async function generateMetadata({
   params,
@@ -130,7 +128,7 @@ export default async function Stockists({
           ) : (
             <div className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
               {openStockists.map((stockist, index) => (
-                <Reveal key={stockist.id} delay={index * STAGGER_STEP}>
+                <Reveal key={stockist.id} delay={revealStagger(index)}>
                   <StockistCard
                     stockist={stockist}
                     island={island}

@@ -4,6 +4,7 @@ import Image from "next/image";
 import NavGround from "@/src/components/NavGround";
 import EditorialHero from "@/src/components/editorial/EditorialHero";
 import Reveal from "@/src/components/animation/Reveal";
+import { revealStagger } from "@/src/components/animation/stagger";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
@@ -46,9 +47,6 @@ export async function generateMetadata({
     ogDescription: dict.craftsmanship.meta.ogDescription,
   });
 }
-
-/** Stagger step between grid children, in seconds. */
-const STAGGER_STEP = 0.1;
 
 export default async function Craftsmanship({
   params,
@@ -98,7 +96,7 @@ export default async function Craftsmanship({
           {stats.map((stat, index) => (
             <Reveal
               key={stat.id}
-              delay={index * STAGGER_STEP}
+              delay={revealStagger(index)}
               // Dividers by index: never on the last column of the current
               // grid, so the 2-col mobile layout leaves no dangling border.
               className={`border-ground-border px-4 py-12 text-center md:px-12 md:py-14 ${

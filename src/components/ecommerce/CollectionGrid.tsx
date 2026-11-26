@@ -8,6 +8,8 @@ import {
   parseFacet,
   type ProductFacet,
 } from "@/src/lib/facets";
+import Reveal from "@/src/components/animation/Reveal";
+import { revealStagger } from "@/src/components/animation/stagger";
 import { interpolate } from "@/src/lib/i18n/interpolate";
 import { useDictionary } from "@/src/providers/i18n-provider";
 
@@ -341,7 +343,11 @@ export default function CollectionGrid({
             >
               {sorted.map((item, index) => (
                 <div key={item.id} hidden={index >= limit} className="h-full">
-                  {item.card}
+                  {/* Cards below the fold arrive a row at a time; the first
+                      screen is never hidden (see `<Reveal>`). */}
+                  <Reveal delay={revealStagger(index)} className="h-full">
+                    {item.card}
+                  </Reveal>
                 </div>
               ))}
             </div>

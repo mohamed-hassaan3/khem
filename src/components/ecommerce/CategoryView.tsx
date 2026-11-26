@@ -12,6 +12,7 @@ import {
 
 import NavGround from "@/src/components/NavGround";
 import Reveal from "@/src/components/animation/Reveal";
+import { revealStagger } from "@/src/components/animation/stagger";
 import CategoryHero from "@/src/components/ecommerce/CategoryHero";
 import DiscoveryComparison from "@/src/components/ecommerce/DiscoveryComparison";
 import DiscoverySetCard from "@/src/components/ecommerce/DiscoverySetCard";
@@ -280,7 +281,7 @@ function SetGrid({
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
             {sets.map((set, index) => (
-              <Reveal key={set.id} delay={(index % 4) * 0.1} className="h-full">
+              <Reveal key={set.id} delay={revealStagger(index)} className="h-full">
                 <DiscoverySetCard product={set} locale={locale} />
               </Reveal>
             ))}

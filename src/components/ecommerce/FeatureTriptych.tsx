@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
 import Reveal from "@/src/components/animation/Reveal";
+import { revealStagger } from "@/src/components/animation/stagger";
 
 /**
  * A three-up band of short editorial statements — Server Component.
@@ -62,7 +63,7 @@ export default function FeatureTriptych({
 
               return (
               <li key={item.title} className="bg-ivory">
-                <Reveal delay={index * 0.1} className="h-full px-4 py-12 md:px-12 md:py-14">
+                <Reveal delay={revealStagger(index)} className="h-full px-4 py-12 md:px-12 md:py-14">
                   <p className="mb-7 flex items-center gap-3 font-heading text-[10px] tracking-[0.2em] text-gold/35">
                     <Icon
                       size={16}
@@ -99,7 +100,7 @@ export default function FeatureTriptych({
           const Icon = item.icon;
 
           return (
-            <Reveal key={item.title} delay={index * 0.1} className="text-center">
+            <Reveal key={item.title} delay={revealStagger(index)} className="text-center">
               <Icon
                 size={20}
                 strokeWidth={1.25}

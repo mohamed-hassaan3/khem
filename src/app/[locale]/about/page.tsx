@@ -4,6 +4,7 @@ import Image from "next/image";
 import NavGround from "@/src/components/NavGround";
 import EditorialHero from "@/src/components/editorial/EditorialHero";
 import Reveal from "@/src/components/animation/Reveal";
+import { revealStagger } from "@/src/components/animation/stagger";
 import LocaleLink from "@/src/components/i18n/LocaleLink";
 import { isLocale } from "@/src/lib/i18n/config";
 import { getDictionary } from "@/src/lib/i18n/get-dictionary";
@@ -115,7 +116,7 @@ export default async function About({
           {missionStatements.map((item, index) => (
             <Reveal
               key={item.id}
-              delay={index * STAGGER_STEP}
+              delay={revealStagger(index)}
               className={
                 index === 0
                   ? "border-b border-ground-border p-10 md:border-b-0 md:border-e md:p-20"
