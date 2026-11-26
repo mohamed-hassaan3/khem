@@ -43,6 +43,8 @@ const TAGS = {
   div: "div",
   section: "section",
   article: "article",
+  /** For list items inside an `<ol>`/`<ul>` — a `div` there is invalid markup. */
+  li: "li",
 } as const;
 
 export interface RevealProps {

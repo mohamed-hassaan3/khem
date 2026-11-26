@@ -1094,10 +1094,10 @@
       "number": "02",
       "title": "Formulation",
       "title_ar": "التركيبة",
-      "subtitle": "Months of Refinement. Hundreds of Trials.",
-      "subtitle_ar": "أَشْهُرٌ مِنَ الصَّقْلِ. مِئَاتُ التَّجَارِبِ",
-      "body": "Each KHEM fragrance undergoes between 80 and 300 formulation trials before it is deemed worthy of production. Our head perfumer works in silence, revising, adjusting, layering and searching for the precise balance that honors both the ancient inspiration and the modern wearer.",
-      "body_ar": "تخضع كل عطور \"كِيم\" لما يتراوح بين ثمانين إلى ثلاثمائة تجربة صياغة قبل أن تُعتبر جديرة بالإنتاج. يعمل خبير العطور الرئيسي لدينا في هدوء، مُعدِّلاً ومُدققاً ومُطابقاً للطبقات، بَاحِثاً عن التوازن الدقيق الذي يُكرِم كلاً من الإلهام القديم ومُرتدي العِطر المعاصر",
+      "subtitle": "Months of Refinement. Over a Hundred Trials.",
+      "subtitle_ar": "أَشْهُرٌ مِنَ الصَّقْلِ. أَكْثَرُ مِنْ مِئَةِ تَجْرِبَةٍ",
+      "body": "Each KHEM fragrance undergoes more than a hundred formulation trials before it is deemed worthy of production. Our head perfumer works in silence, revising, adjusting, layering and searching for the precise balance that honors both the ancient inspiration and the modern wearer.",
+      "body_ar": "تخضع كل عطور \"كِيم\" لأكثر من مئة تجربة صياغة قبل أن تُعتبر جديرة بالإنتاج. يعمل خبير العطور الرئيسي لدينا في هدوء، مُعدِّلاً ومُدققاً ومُطابقاً للطبقات، بَاحِثاً عن التوازن الدقيق الذي يُكرِم كلاً من الإلهام القديم ومُرتدي العِطر المعاصر",
       "image": {
         "url": "https://res.cloudinary.com/co1xzkhf/image/upload/craftsmanship-formulation.png",
         "alt": "The perfumer's organ, ranked with trial vials mid-formulation",
@@ -1168,7 +1168,7 @@
   "craftStats": [
     {
       "id": "formulation-trials",
-      "value": "300+",
+      "value": "100+",
       "value_ar": null,
       "label": "Formulation Trials Per Fragrance",
       "label_ar": "تجارب التركيبة لكل عطر"
@@ -1178,14 +1178,14 @@
       "value": "4",
       "value_ar": null,
       "label": "Continents Sourced",
-      "label_ar": "الزجاجات التي تُستورد منها المكونات"
+      "label_ar": "قارّات نستقدم منها المكوّنات"
     },
     {
       "id": "creation-months",
-      "value": "16",
+      "value": "6",
       "value_ar": null,
       "label": "Months Average Creation Time",
-      "label_ar": "متوسط وقت الابتكار"
+      "label_ar": "أشهر في المتوسط لابتكار كل عطر"
     },
     {
       "id": "hand-assembled",

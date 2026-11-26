@@ -2998,3 +2998,248 @@ form.acct-details-body {
     animation: none !important;
   }
 }
+
+/*
+ * ── /about ────────────────────────────────────────────────────
+ *
+ * The pieces of `app/[locale]/about/page.tsx` that utilities cannot say
+ * cleanly: the Cinzel eyebrow of the About canvas (the site-wide `.eyebrow`
+ * is Inter at 10px), the drawn hero rule, the marquee, the figures strip's
+ * dividers, the timeline rule and the card hover. See
+ * `prompts/about-page-redesign.md`.
+ *
+ * Every movement here is decorative and stops under reduced motion.
+ */
+.about-eyebrow {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ground-accent, var(--color-gold-deep));
+}
+
+.about-meta-label {
+  font-family: var(--font-heading);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ground-subtle, var(--color-ink-subtle));
+}
+
+/* The hero's 96px rule, drawn from the reading edge. */
+.about-rule {
+  width: 96px;
+  height: 1px;
+  background: var(--color-gold);
+  transform-origin: left center;
+  animation: about-rule-draw 1.4s var(--ease-luxury-bezier) 0.4s both;
+}
+[dir="rtl"] .about-rule {
+  transform-origin: right center;
+}
+@keyframes about-rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Gold-underlined text link. 44px tall hit area without moving the line. */
+.about-link {
+  display: inline-flex;
+  align-items: flex-end;
+  min-height: 44px;
+  padding-bottom: 2px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ground-fg, var(--color-ink));
+  text-decoration: underline;
+  text-decoration-color: var(--color-gold);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 7px;
+  transition: color 0.24s var(--ease-luxury-bezier);
+}
+.about-link:hover {
+  color: var(--ground-accent, var(--color-gold-deep));
+}
+.about-link:focus-visible {
+  outline: 2px solid var(--color-gold-deep);
+  outline-offset: 3px;
+}
+
+/* Slow zoom on the two photographs. */
+.about-zoom img {
+  transition: transform 1.6s var(--ease-luxury-bezier);
+}
+.about-zoom:hover img {
+  transform: scale(1.04);
+}
+
+/* Marquee: two identical runs, the track moves by one run. */
+.about-marquee {
+  display: flex;
+  width: max-content;
+  animation: about-marquee 48s linear infinite;
+}
+[dir="rtl"] .about-marquee {
+  animation-name: about-marquee-rtl;
+}
+.about-marquee-run {
+  display: flex;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+}
+.about-marquee-run > span > span {
+  padding-inline-end: 56px;
+}
+@keyframes about-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes about-marquee-rtl {
+  to {
+    transform: translateX(50%);
+  }
+}
+
+/* Figures: four across with hairlines between, two across on phones. */
+.about-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.about-fact {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 0;
+  border-top: 1px solid var(--color-border-light);
+}
+.about-fact:nth-child(even) {
+  padding-inline-start: 20px;
+  border-inline-start: 1px solid var(--color-border-light);
+}
+@media (min-width: 768px) {
+  .about-facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .about-fact,
+  .about-fact:nth-child(even) {
+    padding: 40px 28px;
+    border-top: 0;
+    border-inline-start: 1px solid var(--color-border-light);
+  }
+  .about-fact:first-child {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+}
+
+/* Cards: principles and visit. */
+.about-card {
+  border: 1px solid var(--color-border-light);
+  border-radius: 2px;
+  transition:
+    border-color 0.62s var(--ease-luxury-bezier),
+    translate 0.62s var(--ease-luxury-bezier),
+    opacity var(--reveal-dur) var(--ease-luxury-bezier),
+    transform var(--reveal-dur) var(--ease-luxury-bezier);
+}
+.about-card:hover {
+  border-color: var(--color-gold);
+  translate: 0 -4px;
+}
+
+/*
+ * Timeline. Phones: a vertical rule down the reading edge, markers on it.
+ * md up: rows of four, each item carrying its own stretch of the horizontal
+ * rule so a short last row ends where its last marker is.
+ */
+.about-timeline {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 36px;
+  margin: 0;
+  padding: 0 0 0 0;
+  padding-inline-start: 36px;
+  list-style: none;
+}
+.about-timeline::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 7px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--color-gold);
+  opacity: 0.6;
+}
+.about-tl-item {
+  position: relative;
+}
+.about-tl-marker {
+  position: absolute;
+  inset-inline-start: -36px;
+  top: 2px;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--color-gold);
+  background: var(--color-sand);
+  transform: rotate(45deg);
+}
+.about-tl-item:last-child .about-tl-marker {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+}
+@media (min-width: 768px) {
+  .about-timeline {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 32px;
+    row-gap: 64px;
+    padding-inline-start: 0;
+  }
+  .about-timeline::before {
+    display: none;
+  }
+  .about-tl-item {
+    padding-top: 47px;
+  }
+  .about-tl-item::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    inset-inline: 0 -32px;
+    height: 1px;
+    background: var(--color-gold);
+    opacity: 0.6;
+  }
+  .about-tl-item:nth-child(4n)::before,
+  .about-tl-item:last-child::before {
+    inset-inline-end: 0;
+  }
+  .about-tl-marker {
+    inset-inline-start: 0;
+    top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-rule,
+  .about-marquee {
+    animation: none;
+  }
+  .about-zoom:hover img {
+    transform: none;
+  }
+  .about-card:hover {
+    translate: none;
+  }
+}

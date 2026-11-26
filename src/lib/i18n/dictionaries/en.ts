@@ -541,28 +541,92 @@ export const en = {
         "KHEM was founded in Cairo in 2025 to create extraordinary fragrances from extraordinary ingredients, inspired by the civilization that gave the world perfume.",
       ogTitle: "About KHEM | A House of Ancient Futures",
       ogDescription:
-        "The founders, the mission, and the vision behind KHEM , a luxury Egyptian fragrance house bridging five millennia of perfumery and the modern world.",
+        "The founder, the mission, and the vision behind KHEM , a luxury Egyptian fragrance house bridging five millennia of perfumery and the modern world.",
     },
     hero: {
       eyebrow: "About KHEM",
       headingLine1: "A House of",
       headingLine2: "Ancient Futures",
       lede: "KHEM was founded in Cairo in 2025 with a single mission: to create the world's most extraordinary fragrances using the most extraordinary ingredients, inspired by the most extraordinary civilization in human history.",
+      primary: "Our Story",
+      secondary: "Shop Collections",
+      foundedLabel: "Founded",
+      foundedValue: "Cairo, Egypt · 2025",
+      taglineLabel: "Tagline",
+      taglineValue: "Essence of Heritage",
+      imageAlt:
+        "A KHEM flacon of Kyphi on a black marble plinth, beneath a carved stone arch lit in gold",
+    },
+    /** Decorative ribbon under the hero. Hidden from assistive technology. */
+    marquee: [
+      "Kemet",
+      "The Black Land",
+      "Essence of Heritage",
+      "Crafted in Cairo",
+      "Modern Egyptian Luxury",
+    ],
+    name: {
+      eyebrow: "The Name",
+      word: "Kemet",
+      subtitle: "The Land of Black Earth",
+      lead: "KHEM takes its name from Kemet, the ancient Egyptian name for the Black Land — the fertile soil of the Nile that gave the world its first perfumes.",
+      body: "We draw on five thousand years of Egyptian perfumery, from the temple Kyphi to our own Noir chapter. Not as a museum piece, but as a living language, translated for the way the world wears fragrance today.",
+      link: "Discover our heritage",
+    },
+    facts: {
+      /** Visually hidden heading for the figures strip. */
+      heading: "KHEM in figures",
     },
     founders: {
       eyebrow: "The Founder",
       heading: "Mohamed Hassaan",
+      role: "Founder & Perfumer · Dubai — Cairo",
       body1:
         "Mohamed Hassaan is an award-winning perfumer and the founder of KHEM, beginning his professional journey from Dubai where he collaborated with global clients and developed extensive experience creating for the world's finest houses.",
       body2:
         "He dedicated his passion to exploring the most profound fragrance tradition in human history, reviving the legacy of ancient Egyptian perfumery to infuse it with contemporary luxury.",
       quote:
         "We are not recreating history. We are translating it into a language the present can feel.",
-      quoteAuthor: "Mohamed Hassaan, Co-Founder",
-      imageAlt: "The KHEM founders in the atelier",
+      quoteAuthor: "Mohamed Hassaan",
+      imageAlt:
+        "Mohamed Hassaan at the atelier bench, measuring a drop of oil into a crystal flacon",
+    },
+    principles: {
+      eyebrow: "What We Stand For",
+      heading: "The House Principles",
+      lede: "The convictions that guide every KHEM creation, from the first raw material to the final assessment.",
+    },
+    timeline: {
+      eyebrow: "A Timeline of Scent",
+      heading: "Five Thousand Years, One Thread",
+      link: "Discover our heritage",
+    },
+    craft: {
+      eyebrow: "Craftsmanship",
+      heading: "Mastery in Every Drop",
+      link: "Explore the process",
+    },
+    promise: {
+      eyebrow: "The KHEM Promise",
+      heading: "Modern Egyptian Luxury",
+      lede: "Fragrances worthy of history — composed in Cairo, worn around the world.",
+    },
+    visit: {
+      eyebrow: "From Cairo to the World",
+      heading: "Experience KHEM in Person",
+      boutiqueTitle: "The Boutique",
+      boutiqueLink: "Get directions",
+      consultationTitle: "Private Consultation",
+      consultationBody:
+        "Our perfumers guide you through the complete KHEM library to find your signature scent.",
+      consultationLink: "Request appointment",
+      stockistsTitle: "Stockists",
+      stockistsBody: "Discover KHEM at selected boutiques around the world.",
+      stockistsLink: "Find a stockist",
     },
     cta: {
       heading: "Experience KHEM",
+      lede: "Begin with a single scent, or explore the full library with a Discovery Set.",
       primary: "Shop Now",
       secondary: "Our Heritage",
     },
@@ -607,7 +671,7 @@ export const en = {
         "Six stages, four continents, one uncompromising standard sourcing, formulation, mouth-blown flacons, hand filling, packaging, and a final assessment by a human nose.",
       ogTitle: "Craftsmanship | Mastery in Every Drop",
       ogDescription:
-        "How a KHEM fragrance is made: sixteen months, hundreds of formulation trials, and a bottle assembled entirely by hand.",
+        "How a KHEM fragrance is made: six months, more than a hundred formulation trials, and a bottle assembled entirely by hand.",
     },
     hero: {
       eyebrow: "The Art of KHEM",
@@ -622,7 +686,7 @@ export const en = {
     cta: {
       eyebrow: "The Result",
       heading: "Fragrances Worthy of History",
-      lede: "Sixteen months of work. Hundreds of decisions. One bottle. Discover the fragrances that justify every step of this process.",
+      lede: "Six months of work. Hundreds of decisions. One bottle. Discover the fragrances that justify every step of this process.",
       primary: "Shop Collections",
       secondary: "Our Ingredients",
     },
