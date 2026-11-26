@@ -283,11 +283,13 @@ export function revalidateSettings(): void {
 /**
  * After a heritage timeline entry changes.
  *
- * `/heritage` only — the timeline appears nowhere else, and both locales are
- * separate cache entries of rows that now differ by language.
+ * `/heritage`, and `/about`, which quotes the same timeline in its
+ * "A Timeline of Scent" section. Both locales are separate cache entries of
+ * rows that differ by language.
  */
 export function revalidateHeritage(): void {
   revalidateAllLocales("/heritage");
+  revalidateAllLocales("/about");
 }
 
 /**
@@ -319,7 +321,13 @@ export function revalidateBrandValues(): void {
   revalidateAllLocales("/heritage");
 }
 
-/** After a mission statement changes. `/about` is the only page that reads them. */
+/**
+ * After a mission statement changes. `/about` is the only page that reads them.
+ *
+ * `/about` also quotes the timeline and the craft steps and figures; those
+ * tables re-render it through `revalidateHeritage()` and
+ * `revalidateCraftsmanship()`.
+ */
 export function revalidateAbout(): void {
   revalidateAllLocales("/about");
 }
@@ -327,12 +335,14 @@ export function revalidateAbout(): void {
 /**
  * After a craft step, stat or quote changes.
  *
- * `/craftsmanship` only — the craft **pillars** are the home page's summary and
- * live in `revalidateCraftPillars()`. The two are different tables and different
- * pages, which is exactly the confusion worth naming here.
+ * `/craftsmanship`, and `/about`, which shows the steps and the figures. The
+ * craft **pillars** are the home page's summary and live in
+ * `revalidateCraftPillars()` — different tables and different pages, which is
+ * exactly the confusion worth naming here.
  */
 export function revalidateCraftsmanship(): void {
   revalidateAllLocales("/craftsmanship");
+  revalidateAllLocales("/about");
 }
 
 /**

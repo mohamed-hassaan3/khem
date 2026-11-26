@@ -80,7 +80,7 @@ link or press Escape.
 | | |
 | --- | --- |
 | **URL** | `/admin/content/craftsmanship` |
-| **You should see** | Three editors: **Atelier stages** (6 rows, first `01 — Ingredient Sourcing`), **Craft figures** (4 rows, first `300+ — Formulation Trials Per Fragrance`), **Perfumer's quote** (1 row, author `Mohamed Hassaan`, Published on). |
+| **You should see** | Three editors: **Atelier stages** (6 rows, first `01 — Ingredient Sourcing`), **Craft figures** (4 rows, first `100+ — Formulation Trials Per Fragrance`), **Perfumer's quote** (1 row, author `Mohamed Hassaan`, Published on). |
 | **Action** | Confirm the quote list holds exactly one row. |
 | **Expected** | One quote. The duplicate `leila-hassan` was removed; the survivor is the only published quote, so `/craftsmanship` renders it deterministically. |
 
