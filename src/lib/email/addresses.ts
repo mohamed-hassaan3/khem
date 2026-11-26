@@ -51,6 +51,26 @@ export function houseFromAddress(): string {
 }
 
 /**
+ * Sender for **campaigns** — the bulk letters, and their test sends.
+ *
+ * Its own subdomain (`RESEND_CAMPAIGN_FROM_EMAIL`, e.g.
+ * `KHEM <news@news.khemperfumes.com>`, verified in Resend as a separate domain)
+ * so that campaign reputation is kept apart from the root domain's: a spam
+ * complaint about a campaign then weighs on campaigns alone, never on order
+ * confirmations, welcome letters or the `info@` mailbox. Replies still go to
+ * `inboxAddress()` — the campaign callers set `replyTo`.
+ *
+ * Unset or empty falls back to {@link houseFromAddress}, so nothing changes
+ * until the subdomain is configured. Signup letters (newsletter welcome, offer
+ * code) stay on the house address: each is the direct answer to a request made
+ * seconds earlier, which is how transactional mail behaves.
+ */
+export function campaignFromAddress(): string {
+  const configured = process.env.RESEND_CAMPAIGN_FROM_EMAIL?.trim();
+  return configured ? configured : houseFromAddress();
+}
+
+/**
  * The house mailbox.
  *
  * Falls through to `getConciergeEmail()`, which reads `"BoutiqueSetting"` — the

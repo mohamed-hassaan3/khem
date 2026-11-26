@@ -57,7 +57,7 @@ import { randomUUID } from "node:crypto";
 
 import { campaignEmail } from "@/src/lib/email/campaign-template";
 import { getEmailClient } from "@/src/lib/email/client";
-import { houseFromAddress, inboxAddress } from "@/src/lib/email/addresses";
+import { campaignFromAddress, inboxAddress } from "@/src/lib/email/addresses";
 import { unsubscribeHeaders, unsubscribeUrlFor } from "@/src/lib/email/send-campaign-mail";
 import type { Locale } from "@/src/lib/i18n/config";
 import { getSupabaseAdmin } from "@/src/lib/supabase";
@@ -334,7 +334,7 @@ async function sendClaimed(
       });
 
       return {
-        from: houseFromAddress(),
+        from: campaignFromAddress(),
         to: recipient.email,
         replyTo,
         subject: payload.subject,
